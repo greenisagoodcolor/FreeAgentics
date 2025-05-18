@@ -5,6 +5,7 @@ Copyright © 2025 [Andrew Blake Pashea]
 This work, "[CogniticNet]", is licensed by [Andrew Blake Pashea] under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License (CC BY-NC-SA 4.0).
 https://creativecommons.org/licenses/by-nc-sa/4.0/
 
+=======================================================================
 
 Attribution-NonCommercial-ShareAlike 4.0 International
 
