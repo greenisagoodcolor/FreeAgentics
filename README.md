@@ -1,5 +1,7 @@
 # CogniticNet
 
+Design Document: [https://zenodo.org/records/15450214](https://zenodo.org/records/15450214)
+
 CogniticNet is a multi-agent UI design grid world for creating, managing, and observing autonomous AI agent interactions. This experimental platform enables researchers and developers to explore emergent behaviors in multi-agent systems through a visual, interactive interface.
 
 ## Features
