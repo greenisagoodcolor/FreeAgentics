@@ -14,7 +14,7 @@ CogniticNet is a multi-agent UI design grid world for creating, managing, and ob
 
 ## File Structure
 
-\`\`\`
+```
 CogniticNet/
 ├── app/                    # Next.js app directory
 │   ├── api/                # API routes for secure operations
@@ -47,7 +47,7 @@ CogniticNet/
 │   ├── llm-service.ts      # LLM integration
 │   ├── llm-settings.ts     # LLM configuration
 │   └── types.ts            # TypeScript type definitions
-\`\`\`
+```
 
 ## Setup Instructions
 
