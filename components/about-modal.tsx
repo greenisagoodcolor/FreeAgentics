@@ -35,7 +35,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
           </p>
           <p>
             <a
-              href="https://zenodo.org/record/yourrecord"
+              href="https://doi.org/10.5281/zenodo.15450213"
               className="text-blue-300 hover:underline"
               target="_blank"
               rel="noopener noreferrer"

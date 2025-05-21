@@ -3,7 +3,6 @@ import type { Agent, Conversation, KnowledgeEntry } from "./types"
 import type { LLMSettings } from "./llm-settings"
 import { createLogger } from "./debug-logger"
 import { extractTagsFromMarkdown } from "./utils" // Import the tag extraction utility
-import { storeApiKey } from "./api-key-service"
 
 // Create a module-specific logger
 const logger = createLogger("knowledge-import")
@@ -143,10 +142,36 @@ export async function importAgentsAndSettingsFromZip(file: File, options: Import
           try {
             logger.info("Storing imported API key securely", { provider: settings.provider })
 
-            // Store the API key securely
-            const sessionId = await storeApiKey(settings.provider, settings.apiKey)
+            // Use the API endpoint instead of calling storeApiKey directly
+            const response = await fetch("/api/api-key/store", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                provider: settings.provider,
+                apiKey: settings.apiKey,
+              }),
+            })
+
+            if (!response.ok) {
+              logger.error(`Error storing imported API key: HTTP ${response.status}`)
+              throw new Error(`Failed to store API key: HTTP ${response.status}`)
+            }
+
+            const data = await response.json()
+
+            if (!data.success) {
+              logger.error("Failed to store imported API key:", data.message)
+              throw new Error(`Failed to store API key: ${data.message}`)
+            }
+
+            // Get the session ID from the response
+            const sessionId = data.sessionId
 
             if (sessionId) {
+              // Store the session ID in localStorage (just like manual process)
+              localStorage.setItem(`api_session_${settings.provider}`, sessionId)
+              logger.info(`Stored session ID in localStorage with key: api_session_${settings.provider}`)
+
               // Update the settings with the session ID
               settings.apiKeySessionId = sessionId
 

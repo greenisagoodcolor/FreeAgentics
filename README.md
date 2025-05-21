@@ -1,7 +1,5 @@
 # CogniticNet
 
-Design Document: [https://zenodo.org/records/15450214](https://zenodo.org/records/15450214)
-
 CogniticNet is a multi-agent UI design grid world for creating, managing, and observing autonomous AI agent interactions. This experimental platform enables researchers and developers to explore emergent behaviors in multi-agent systems through a visual, interactive interface.
 
 ## Features
@@ -16,7 +14,7 @@ CogniticNet is a multi-agent UI design grid world for creating, managing, and ob
 
 ## File Structure
 
-```
+\`\`\`
 CogniticNet/
 ├── app/                    # Next.js app directory
 │   ├── api/                # API routes for secure operations
@@ -49,7 +47,7 @@ CogniticNet/
 │   ├── llm-service.ts      # LLM integration
 │   ├── llm-settings.ts     # LLM configuration
 │   └── types.ts            # TypeScript type definitions
-```
+\`\`\`
 
 ## Setup Instructions
 
@@ -62,29 +60,29 @@ CogniticNet/
 ### Installation
 
 1. Clone the repository:
-   ```bash
+   \`\`\`bash
    git clone https://github.com/apashea/CogniticNet.git
    cd CogniticNet
-   ```
+   \`\`\`
 
 2. Install dependencies:
-   ```bash
+   \`\`\`bash
    npm install
    # or
    yarn install
-   ```
+   \`\`\`
 
 3. Create a `.env.local` file in the root directory with your encryption key:
-   ```
-   ENCRYPTION_KEY=encryption-key-here
-   ```
+   \`\`\`
+   ENCRYPTION_KEY=e09d9f6d74764569a755b2275d8a1d46bafd4c2499ca4f693c157cadfde2d9e9
+   \`\`\`
 
 4. Start the development server:
-   ```bash
+   \`\`\`bash
    npm run dev
    # or
    yarn dev
-   ```
+   \`\`\`
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
@@ -103,11 +101,6 @@ CogniticNet/
 5. **Export/Import**: Save your work using the export functionality and reload it later.
 
 ## License
-Copyright © 2025 [Andrew Blake Pashea]
-
-This work, "[CogniticNet]", is licensed by [Andrew Blake Pashea] under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License (CC BY-NC-SA 4.0).
-https://creativecommons.org/licenses/by-nc-sa/4.0/
-See the [https://github.com/apashea/CogniticNet/blob/main/LICENSE.md](LICENSE) file for details.
 
 Dual Licensed:
 

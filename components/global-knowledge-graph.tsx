@@ -1032,10 +1032,10 @@ export default function GlobalKnowledgeGraph({ agents, onSelectNode, onShowAbout
         // Use different style for links connected to selected node
         if (selectedNode && (source.id === selectedNode.id || target.id === selectedNode.id)) {
           ctx.strokeStyle = `${link.color}90` // 90% opacity
-          ctx.lineWidth = 2 / zoomLevel
+          ctx.lineWidth = 3 / zoomLevel
         } else {
           ctx.strokeStyle = `${link.color}50` // 50% opacity
-          ctx.lineWidth = 1 / zoomLevel
+          ctx.lineWidth = 2 / zoomLevel
         }
 
         ctx.stroke()
