@@ -2,6 +2,8 @@
 
 CogniticNet is a multi-agent UI design grid world for creating, managing, and observing autonomous AI agent interactions. This experimental platform enables researchers and developers to explore emergent behaviors in multi-agent systems through a visual, interactive interface.
 
+![CogniticNet Screenshot 002](https://drive.google.com/uc?id=18B1O0jUQz3cIcahUrceg7ajlxko6iWKB)
+
 ## Features
 
 - **Multi-Agent Environment**: Create and manage multiple AI agents with unique characteristics
@@ -99,6 +101,30 @@ CogniticNet/
 3. **Knowledge Management**: Add knowledge entries to agents through the memory viewer.
 4. **Observe Interactions**: Watch as agents autonomously interact based on proximity and other triggers.
 5. **Export/Import**: Save your work using the export functionality and reload it later.
+
+### Import/Export Functionality
+
+CogniticNet allows you to save and restore your entire workspace, including agents, knowledge, and settings:
+
+#### Exporting Your Work
+
+1. Click the "Export" button in the agent list panel
+2. Select which agents to export
+3. Choose export options:
+   - **Include Settings**: Exports your LLM provider and model settings
+   - **Include API Keys**: Includes your API keys in the export (recommended for personal backups)
+4. Click "Export" to download a ZIP file containing your agents and settings
+
+#### Importing Your Work
+
+1. Click the "Import" button in the agent list panel
+2. Select the ZIP file you previously exported
+3. Choose import options:
+   - **Import Settings**: Restores your LLM provider and model settings
+   - **Import API Keys**: Restores your API keys (only if they were included in the export)
+4. Click "Import" to restore your agents and settings
+
+**Note**: Imported API keys are securely stored and will persist across browser sessions, allowing you to continue your work seamlessly after importing.
 
 ## License
 
