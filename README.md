@@ -16,7 +16,7 @@ CogniticNet is a multi-agent UI design grid world for creating, managing, and ob
 
 ## File Structure
 
-\\\
+```text
 CogniticNet/
 ├── app/                    # Next.js app directory
 │   ├── api/                # API routes for secure operations
@@ -49,7 +49,7 @@ CogniticNet/
 │   ├── llm-service.ts      # LLM integration
 │   ├── llm-settings.ts     # LLM configuration
 │   └── types.ts            # TypeScript type definitions
-\\\
+```
 
 ## Setup Instructions
 
@@ -62,29 +62,29 @@ CogniticNet/
 ### Installation
 
 1. Clone the repository:
-   \`\`\`bash
+   \\\bash
    git clone https://github.com/apashea/CogniticNet.git
    cd CogniticNet
-   \`\`\`
+   \\\
 
 2. Install dependencies:
-   \`\`\`bash
+   \\\bash
    npm install
    # or
    yarn install
-   \`\`\`
+   \\\
 
 3. Create a `.env.local` file in the root directory with your encryption key:
-   \`\`\`
-   ENCRYPTION_KEY=e09d9f6d74764569a755b2275d8a1d46bafd4c2499ca4f693c157cadfde2d9e9
-   \`\`\`
+   \\\
+   ENCRYPTION_KEY=your-encryption-key-here
+   \\\
 
 4. Start the development server:
-   \`\`\`bash
+   \\\bash
    npm run dev
    # or
    yarn dev
-   \`\`\`
+   \\\
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
