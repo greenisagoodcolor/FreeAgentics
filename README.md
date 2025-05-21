@@ -1,3 +1,5 @@
+This work, "CogniticNet," by Andrew Blake Pashea, is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/
+
 # CogniticNet
 
 CogniticNet is a multi-agent UI design grid world for creating, managing, and observing autonomous AI agent interactions. This experimental platform enables researchers and developers to explore emergent behaviors in multi-agent systems through a visual, interactive interface.
@@ -62,29 +64,29 @@ CogniticNet/
 ### Installation
 
 1. Clone the repository:
-   \\\bash
+   ```bash
    git clone https://github.com/apashea/CogniticNet.git
    cd CogniticNet
-   \\\
+   ```
 
 2. Install dependencies:
-   \\\bash
+   ```bash
    npm install
    # or
    yarn install
-   \\\
+   ```
 
 3. Create a `.env.local` file in the root directory with your encryption key:
-   \\\
+   ```
    ENCRYPTION_KEY=your-encryption-key-here
-   \\\
+   ```
 
 4. Start the development server:
-   \\\bash
+   ```bash
    npm run dev
    # or
    yarn dev
-   \\\
+   ```
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
