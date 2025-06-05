@@ -8,44 +8,17 @@ import { createLogger } from "@/lib/debug-logger"
 import { debugLog } from "@/lib/debug-logger"
 import { extractTagsFromMarkdown } from "@/lib/utils"
 import { LLMError, ApiKeyError, TimeoutError, NetworkError, withTimeout } from "@/lib/llm-errors"
+import { defaultSettings, type LLMSettings } from "@/lib/llm-settings"
 
 // Types and configuration
 const logger = createLogger("LLM-SERVICE")
 
 logger.info("[SERVER] llm-service.ts module loaded")
 
-// Define the model providers
-type ModelProvider = "openai" | "openrouter"
-
-// Define the LLM settings interface
-export interface LLMSettings {
-  provider: ModelProvider
-  model: string
-  temperature: number
-  maxTokens: number
-  topP: number
-  frequencyPenalty: number
-  presencePenalty: number
-  systemFingerprint: boolean
-  apiKey?: string
-}
-
 // Add this interface for streaming response chunks
-export interface ResponseChunk {
+export interface StreamChunk {
   text: string
   isComplete: boolean
-}
-
-// Default settings
-export const defaultSettings: LLMSettings = {
-  provider: "openai",
-  model: "gpt-4o",
-  temperature: 0.7,
-  maxTokens: 1024,
-  topP: 0.9,
-  frequencyPenalty: 0,
-  presencePenalty: 0,
-  systemFingerprint: false,
 }
 
 // Log the defaultSettings object to check for server references
@@ -290,7 +263,7 @@ export async function* streamGenerateResponse(
   systemPrompt: string,
   userPrompt: string,
   settings: LLMSettings,
-): AsyncGenerator<ResponseChunk, void, unknown> {
+): AsyncGenerator<StreamChunk, void, unknown> {
   try {
     logger.info("[SERVER] streamGenerateResponse function called")
     logger.info("[SERVER] streamGenerateResponse parameters:", {
