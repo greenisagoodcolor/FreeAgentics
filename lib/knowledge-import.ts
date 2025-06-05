@@ -248,7 +248,6 @@ export async function importAgentsAndSettingsFromZip(file: File, options: Import
           knowledge.push({
             ...parsedEntry,
             id: entryId,
-            source: "import",
           })
 
           logger.debug(`Imported knowledge entry: ${parsedEntry.title}`, {

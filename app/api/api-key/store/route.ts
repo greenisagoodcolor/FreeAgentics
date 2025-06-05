@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { storeApiKey } from "@/lib/api-key-service"
+import { storeApiKey } from "@/lib/api-key-storage"
 
 export async function POST(request: NextRequest) {
   try {
@@ -46,11 +46,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Store the API key and get a session ID
-    const sessionId = await storeApiKey(provider, apiKey)
+    // Store the API key securely on the server and get a session ID
+    const sessionId = await storeApiKey(provider, apiKey.trim())
     console.log(`[API] API key stored successfully with session ID: ${sessionId}`)
 
-    // Return the session ID
+    // Return the session ID (HTTP-only cookie is set automatically)
     return NextResponse.json({ success: true, sessionId })
   } catch (error) {
     console.error("[API] Error storing API key:", error)

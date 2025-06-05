@@ -13,6 +13,10 @@ import { useToast } from "@/hooks/use-toast"
 import LLMTest from "@/components/llm-test"
 import { validateStoredSession } from "@/lib/session-management"
 import { Shield, ShieldAlert, ShieldCheck } from "lucide-react"
+import type { LLMSettings } from "@/lib/llm-settings"
+import { createLogger } from "@/lib/debug-logger"
+
+const logger = createLogger("SETTINGS")
 
 export default function SettingsPage() {
   const { settings, updateSettings, saveSettings, isProcessing, setIsProcessing, client } = useLLM()
@@ -73,7 +77,7 @@ export default function SettingsPage() {
       // Clear the API key input field - we don't display the actual API key for security
       setApiKey("")
 
-      console.log("Settings page updated with settings:", {
+      logger.info("Settings page updated with settings:", {
         provider: settings.provider,
         model: settings.model,
         temperature: settings.temperature,
@@ -102,7 +106,7 @@ export default function SettingsPage() {
       console.log("API key length after trimming:", cleanApiKey.length)
 
       // Create a new settings object with all the form values (except API key)
-      const newSettings = {
+      const newSettings: LLMSettings = {
         provider: provider as "openai" | "openrouter",
         model,
         temperature,
@@ -122,10 +126,10 @@ export default function SettingsPage() {
 
       // If a new API key was provided, store it securely
       let apiKeySuccess = true
-      let sessionId = settings.apiKeySessionId
+      let sessionId = settings?.apiKeySessionId
 
       if (cleanApiKey) {
-        console.log("Setting new API key")
+        logger.info("Setting new API key")
         try {
           // Store the API key securely
           const response = await fetch("/api/api-key/store", {
@@ -140,29 +144,31 @@ export default function SettingsPage() {
           })
 
           if (!response.ok) {
-            console.error(`Error storing API key: HTTP ${response.status}`)
+            logger.error(`Error storing API key: HTTP ${response.status}`)
             apiKeySuccess = false
           } else {
             const data = await response.json()
 
             if (!data.success) {
-              console.error("Failed to store API key:", data.message)
+              logger.error("Failed to store API key:", data.message)
               apiKeySuccess = false
             } else {
               // Get the session ID
               sessionId = data.sessionId
-              console.log("Received session ID:", sessionId)
+              logger.info("Received session ID:", sessionId)
 
-              // Store the session ID in localStorage
-              localStorage.setItem(`api_session_${newSettings.provider}`, sessionId)
-              console.log(`Stored session ID in localStorage with key: api_session_${newSettings.provider}`)
+              // Store the session ID in localStorage only if it exists
+              if (sessionId) {
+                localStorage.setItem(`api_session_${newSettings.provider}`, sessionId)
+                logger.info(`Stored session ID in localStorage with key: api_session_${newSettings.provider}`)
+              }
 
               setHasStoredApiKey(true)
               setApiKey("") // Clear the input field after successful storage
             }
           }
         } catch (error) {
-          console.error("Error setting API key:", error)
+          logger.error("Error setting API key:", error)
           apiKeySuccess = false
         }
       }
@@ -179,14 +185,16 @@ export default function SettingsPage() {
       // Add the session ID to the settings if we have one
       if (sessionId) {
         newSettings.apiKeySessionId = sessionId
-        console.log("Adding session ID to settings:", sessionId)
+        logger.info("Adding session ID to settings:", sessionId)
       }
 
       // Update settings in context
       updateSettings(newSettings)
 
       // Force update the client settings
-      client.updateSettings(newSettings)
+      if (client) {
+        client.updateSettings(newSettings)
+      }
 
       // Save settings
       const success = await saveSettings()
@@ -268,7 +276,7 @@ export default function SettingsPage() {
                     <Select
                       value={provider}
                       onValueChange={(value) => {
-                        console.log("Provider changed to:", value)
+                        logger.info("Provider changed to:", value)
                         setProvider(value)
                         // Reset model when provider changes
                         if (modelsByProvider[value]) {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,10 +13,16 @@ export default function LLMTest() {
   const [response, setResponse] = useState<string>("")
   const [debugInfo, setDebugInfo] = useState<string>("")
   const [sessionDebug, setSessionDebug] = useState<string>("")
+  const [settingsDebug, setSettingsDebug] = useState<string>("")
 
   // Add debug info on mount and when settings change
   useEffect(() => {
     const checkSessionId = async () => {
+      if (!settings) {
+        setSessionDebug("Settings not available")
+        return
+      }
+
       try {
         // Get session ID from localStorage
         const localSessionId = localStorage.getItem(`api_session_${settings.provider}`)
@@ -38,8 +44,65 @@ Settings keys: ${Object.keys(settings).join(", ")}
     checkSessionId()
   }, [settings])
 
+  const debugSession = useCallback(() => {
+    if (!settings) {
+      setSessionDebug("Settings not available")
+      return
+    }
+
+    try {
+      // Get session ID from localStorage
+      const localSessionId = localStorage.getItem(`api_session_${settings.provider}`)
+
+      // Debug session info
+      setSessionDebug(`
+Provider: ${settings.provider}
+Model: ${settings.model}
+Settings Keys: ${Object.keys(settings).join(", ")}
+Has API Key Session ID: ${!!settings.apiKeySessionId}
+API Key Session ID: ${settings.apiKeySessionId || "Not set"}
+Local Storage Session ID: ${localSessionId || "Not found"}
+Session ID Match: ${settings.apiKeySessionId === localSessionId ? "Yes" : "No"}
+      `)
+    } catch (error) {
+      setSessionDebug(`Error debugging session: ${error}`)
+    }
+  }, [settings])
+
+  const debugSettings = useCallback(() => {
+    if (!settings) {
+      setSettingsDebug("Settings not available")
+      return
+    }
+
+    try {
+      const settingsInfo = `
+Current Settings:
+Provider: ${settings.provider}
+Model: ${settings.model}
+Temperature: ${settings.temperature}
+Max Tokens: ${settings.maxTokens}
+Settings Object Keys: ${Object.keys(settings).join(", ")}
+Has API Key: ${!!settings.apiKey}
+API Key Length: ${settings.apiKey ? settings.apiKey.length : 0}
+      `
+    } catch (error) {
+      setSettingsDebug(`Error debugging settings: ${error}`)
+    }
+  }, [settings])
+
   const handleTest = async () => {
     if (!prompt.trim() || isProcessing) return
+
+    if (!settings) {
+      setResponse("Error: Settings not available")
+      return
+    }
+
+    if (!client) {
+      setResponse("Error: LLM client not available")
+      return
+    }
 
     try {
       setIsProcessing(true)

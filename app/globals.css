@@ -115,6 +115,28 @@
   visibility: visible !important;
 }
 
+/* Conversation history specific scrollbar styles */
+.conversation-history-scrollbar [data-radix-scroll-area-scrollbar] {
+  width: 12px !important;
+  padding: 0 2px !important;
+}
+
+.conversation-history-scrollbar [data-radix-scroll-area-thumb] {
+  background-color: rgba(139, 92, 246, 0.7) !important;
+  width: 8px !important;
+  border-radius: 10px !important;
+}
+
+.conversation-history-scrollbar [data-radix-scroll-area-scrollbar]:hover [data-radix-scroll-area-thumb] {
+  background-color: rgba(139, 92, 246, 0.9) !important;
+  width: 8px !important;
+}
+
+.conversation-history-scrollbar [data-radix-scroll-area-scrollbar][data-orientation="vertical"] {
+  display: block !important;
+  opacity: 1 !important;
+}
+
 /* Resize cursor */
 .resize-ns {
   cursor: ns-resize !important;

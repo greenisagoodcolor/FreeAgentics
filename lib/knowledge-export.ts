@@ -3,7 +3,7 @@ import saveAs from "file-saver" // Fixed: Changed from import { saveAs } to impo
 import type { Agent, Conversation } from "./types"
 import type { LLMSettings } from "./llm-settings"
 import { createLogger } from "./debug-logger"
-import { getApiKey } from "./api-key-service"
+import { getApiKey } from "./api-key-storage"
 
 // Create a module-specific logger
 const logger = createLogger("knowledge-export")

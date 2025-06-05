@@ -70,7 +70,7 @@ export function useConversationOrchestrator(
 
   // Helper function to create orchestrator on demand - NOT a hook
   const createOrchestratorOnDemand = () => {
-    if (!orchestratorRef.current && conversationRef.current) {
+    if (!orchestratorRef.current && conversationRef.current && llmClient) {
       console.log("[HOOK] Creating orchestrator on demand for queueing response")
       const knowledgeRetriever = new KnowledgeRetriever()
       orchestratorRef.current = new ConversationOrchestrator(
@@ -106,7 +106,7 @@ export function useConversationOrchestrator(
   // Initialize orchestrator
   useEffect(() => {
     // Create or update the orchestrator when conversation changes
-    if (conversation) {
+    if (conversation && llmClient) {
       // Create knowledge retriever if needed
       const knowledgeRetriever = new KnowledgeRetriever()
 

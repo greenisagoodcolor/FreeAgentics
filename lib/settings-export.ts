@@ -1,6 +1,6 @@
 import type { LLMSettings } from "./llm-settings"
 import { createLogger } from "./debug-logger"
-import { getApiKey } from "./api-key-service"
+import { getApiKey } from "./api-key-storage"
 
 // Create a module-specific logger
 const logger = createLogger("settings-export")

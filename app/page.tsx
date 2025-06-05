@@ -12,18 +12,19 @@ import MemoryViewer from "@/components/memory-viewer"
 import GridWorld from "@/components/grid-world"
 import ChatWindow from "@/components/chat-window"
 import AutonomousConversationManager from "@/components/autonomous-conversation-manager"
-import { useLLM } from "@/lib/use-llm"
+import { useLLM } from "@/contexts/llm-context"
 import { exportAgentsKnowledge } from "@/lib/knowledge-export"
 import { importAgentsAndSettingsFromZip, mergeImportedAgents } from "@/lib/knowledge-import"
 import { useToast } from "@/hooks/use-toast"
 import AboutModal from "@/components/about-modal"
+import { ErrorBoundary } from "@/components/error-boundary"
 
 // Create a module-specific logger
 const logger = createLogger("app/page")
 
 export default function Home() {
   // First, let's add some debugging to see if the component is rendering at all
-  console.log("Home component rendering")
+  logger.info("Home component rendering")
 
   // Add toast for notifications
   const { toast } = useToast()
@@ -270,8 +271,13 @@ export default function Home() {
 
       // Handle agents import if not in settings-only mode and agents were found
       if (options.mode !== "settings-only" && importedAgents && importedAgents.length > 0) {
+        // Create a type-narrowed version of options for mergeImportedAgents
+        const mergeOptions: { mode: "replace" | "new" | "merge" } = {
+          mode: options.mode as "replace" | "new" | "merge"
+        }
+        
         // Merge imported agents with existing agents based on the selected mode
-        const mergedAgents = mergeImportedAgents(importedAgents, agents, options)
+        const mergedAgents = mergeImportedAgents(importedAgents, agents, mergeOptions)
 
         // Update the agents state
         setAgents(mergedAgents)
@@ -335,7 +341,7 @@ export default function Home() {
   // Replace the existing sendConversationStarterMessage function with this improved version
 
   const sendConversationStarterMessage = (conversation: Conversation, firstAgent: Agent, topic?: string) => {
-    console.log(`APP: Sending conversation starter message from ${firstAgent.name}`)
+    logger.info(`APP: Sending conversation starter message from ${firstAgent.name}`)
 
     // Set the initiating flag to prevent race conditions
     isInitiatingConversationRef.current = true
@@ -610,14 +616,13 @@ export default function Home() {
     logger.debug("Checking if autonomous conversation should end", {
       conversationId: activeConversation.id,
       messageCount,
-      maxMessages: autonomousSystemRef.current.options.maxAutonomousMessages,
       isAutonomous: activeConversation.isAutonomous,
     })
 
     // Check if the conversation should end based on message count
     if (autonomousSystemRef.current.shouldEndConversation(activeConversation)) {
       logger.info(
-        `Automatically ending autonomous conversation ${activeConversation.id} after reaching ${messageCount} messages (max: ${autonomousSystemRef.current.options.maxAutonomousMessages})`,
+        `Automatically ending autonomous conversation ${activeConversation.id} after reaching ${messageCount} messages`,
       )
 
       // End the conversation using the existing function
@@ -829,14 +834,14 @@ export default function Home() {
   // that uses the functional form of setState to ensure proper state updates
 
   const addKnowledgeToAgent = (agentId: string, knowledge: KnowledgeEntry) => {
-    console.log(`Adding knowledge to agent ${agentId}:`, knowledge)
+    logger.info(`Adding knowledge to agent ${agentId}:`, knowledge)
 
     // Use the functional form of setState to ensure we're working with the latest state
     setAgents((currentAgents) => {
       // Find the agent to update
       const agentToUpdate = currentAgents.find((agent) => agent.id === agentId)
       if (!agentToUpdate) {
-        console.log(`Agent with ID ${agentId} not found`)
+        logger.info(`Agent with ID ${agentId} not found`)
         return currentAgents
       }
 
@@ -1079,12 +1084,14 @@ export default function Home() {
       <div className="flex-1 flex">
         {/* Chat Window Panel - FIRST */}
         <div className="border-r border-purple-800" style={{ width: `${panelWidths[0]}%` }}>
-          <ChatWindow
-            conversation={activeConversation}
-            agents={agents}
-            onSendMessage={sendMessage}
-            onEndConversation={endConversation}
-          />
+          <ErrorBoundary>
+            <ChatWindow
+              conversation={activeConversation}
+              agents={agents}
+              onSendMessage={sendMessage}
+              onEndConversation={endConversation}
+            />
+          </ErrorBoundary>
         </div>
 
         {/* Resizer */}
@@ -1095,22 +1102,24 @@ export default function Home() {
 
         {/* Agent List Panel - SECOND */}
         <div className="border-r border-purple-800" style={{ width: `${panelWidths[1]}%` }}>
-          <AgentList
-            agents={agents}
-            selectedAgent={selectedAgent}
-            onSelectAgent={setSelectedAgent}
-            onCreateAgent={createAgent}
-            onCreateAgentWithName={createAgentWithName}
-            onDeleteAgent={deleteAgent}
-            onAddToConversation={addAgentToConversation}
-            onRemoveFromConversation={removeAgentFromConversation}
-            onUpdateAgentColor={updateAgentColor}
-            onToggleAutonomy={toggleAgentAutonomy}
-            onExportAgents={handleExportAgents}
-            onImportAgents={handleImportAgents}
-            activeConversation={!!activeConversation}
-            llmSettings={llmClient?.getSettings()}
-          />
+          <ErrorBoundary>
+            <AgentList
+              agents={agents}
+              selectedAgent={selectedAgent}
+              onSelectAgent={setSelectedAgent}
+              onCreateAgent={createAgent}
+              onCreateAgentWithName={createAgentWithName}
+              onDeleteAgent={deleteAgent}
+              onAddToConversation={addAgentToConversation}
+              onRemoveFromConversation={removeAgentFromConversation}
+              onUpdateAgentColor={updateAgentColor}
+              onToggleAutonomy={toggleAgentAutonomy}
+              onExportAgents={handleExportAgents}
+              onImportAgents={handleImportAgents}
+              activeConversation={!!activeConversation}
+              llmSettings={llmClient?.getSettings()}
+            />
+          </ErrorBoundary>
         </div>
 
         {/* Resizer */}
@@ -1121,13 +1130,15 @@ export default function Home() {
 
         {/* Grid World Panel - THIRD */}
         <div className="border-r border-purple-800" style={{ width: `${panelWidths[2]}%` }}>
-          <GridWorld
-            agents={agents}
-            onUpdatePosition={updateAgentPosition}
-            activeConversation={activeConversation}
-            onSelectKnowledgeNode={(type, id, title) => setSelectedKnowledgeNode({ type, id, title })}
-            onShowAbout={() => setShowAboutModal(true)}
-          />
+          <ErrorBoundary>
+            <GridWorld
+              agents={agents}
+              onUpdatePosition={updateAgentPosition}
+              activeConversation={activeConversation}
+              onSelectKnowledgeNode={(type, id, title) => setSelectedKnowledgeNode({ type, id, title })}
+              onShowAbout={() => setShowAboutModal(true)}
+            />
+          </ErrorBoundary>
         </div>
 
         {/* Resizer */}
@@ -1138,18 +1149,20 @@ export default function Home() {
 
         {/* Memory Viewer Panel - FOURTH */}
         <div style={{ width: `${panelWidths[3]}%` }}>
-          <MemoryViewer
-            selectedAgent={selectedAgent}
-            conversationHistory={conversationHistory}
-            onAddKnowledge={addKnowledgeToAgent}
-            onUpdateAgent={updateAgent}
-            onDeleteKnowledge={deleteKnowledgeFromAgent}
-            onUpdateKnowledge={updateKnowledgeInAgent}
-            agents={agents}
-            selectedKnowledgeNode={selectedKnowledgeNode}
-            onClearSelectedKnowledgeNode={() => setSelectedKnowledgeNode(null)}
-            onSelectAgent={setSelectedAgent}
-          />
+          <ErrorBoundary>
+            <MemoryViewer
+              selectedAgent={selectedAgent}
+              conversationHistory={conversationHistory}
+              onAddKnowledge={addKnowledgeToAgent}
+              onUpdateAgent={updateAgent}
+              onDeleteKnowledge={deleteKnowledgeFromAgent}
+              onUpdateKnowledge={updateKnowledgeInAgent}
+              agents={agents}
+              selectedKnowledgeNode={selectedKnowledgeNode}
+              onClearSelectedKnowledgeNode={() => setSelectedKnowledgeNode(null)}
+              onSelectAgent={setSelectedAgent}
+            />
+          </ErrorBoundary>
         </div>
       </div>
 

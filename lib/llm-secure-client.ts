@@ -12,13 +12,16 @@ import type { KnowledgeEntry } from "@/lib/types"
 import { clientDefaultSettings } from "@/lib/llm-settings"
 import { getApiKeyFromSession } from "@/lib/session-management"
 import { isFeatureEnabled } from "@/lib/feature-flags"
+import { createLogger } from "@/lib/debug-logger"
+
+const logger = createLogger("LLM-SECURE-CLIENT")
 
 // Secure client-side wrapper for the LLM service
 export class LLMSecureClient {
   private settings: LLMSettings
 
   constructor(initialSettings: Partial<LLMSettings> = {}) {
-    console.log("LLMSecureClient constructor called with:", {
+    logger.log("LLMSecureClient constructor called with:", {
       initialSettingsType: typeof initialSettings,
       isObject: initialSettings && typeof initialSettings === "object",
       hasServerRef: initialSettings && typeof initialSettings === "object" && "__server_ref" in initialSettings,
@@ -33,7 +36,7 @@ export class LLMSecureClient {
       const savedSettings = localStorage.getItem("llm-settings")
       if (savedSettings) {
         const parsedSettings = JSON.parse(savedSettings)
-        console.log("Loaded settings from localStorage:", {
+        logger.log("Loaded settings from localStorage:", {
           provider: parsedSettings.provider,
           model: parsedSettings.model,
           hasApiKey: !!parsedSettings.apiKey,
@@ -64,13 +67,13 @@ export class LLMSecureClient {
         }
       }
     } catch (e) {
-      console.warn("Could not load settings from localStorage:", e)
+      logger.warn("Could not load settings from localStorage:", e)
     }
 
     // Only copy properties from initialSettings if it's a valid object without server refs
     // and if they weren't already loaded from localStorage
     if (initialSettings && typeof initialSettings === "object" && !("__server_ref" in initialSettings)) {
-      console.log("Copying properties from initialSettings to this.settings")
+      logger.log("Copying properties from initialSettings to this.settings")
       if (initialSettings.provider) this.settings.provider = initialSettings.provider
       if (initialSettings.model) this.settings.model = initialSettings.model
       if (typeof initialSettings.temperature === "number") this.settings.temperature = initialSettings.temperature
@@ -90,10 +93,10 @@ export class LLMSecureClient {
         this.settings.apiKey = initialSettings.apiKey
       }
     } else {
-      console.log("Not copying properties from initialSettings due to server ref or invalid object")
+      logger.log("Not copying properties from initialSettings due to server ref or invalid object")
     }
 
-    console.log("LLMSecureClient initialized with settings:", {
+    logger.log("LLMSecureClient initialized with settings:", {
       ...this.settings,
       apiKey: this.settings.apiKey ? `[Length: ${this.settings.apiKey.length}]` : undefined,
       apiKeySessionId: this.settings.apiKeySessionId ? "[PRESENT]" : undefined,
@@ -113,7 +116,7 @@ export class LLMSecureClient {
 
     // Check if we have an API key but no session ID
     if (this.settings.apiKey && !this.settings.apiKeySessionId) {
-      console.log("Migrating API key to secure storage")
+      logger.log("Migrating API key to secure storage")
       try {
         // Store the API key securely
         const response = await fetch("/api/api-key/store", {
@@ -129,7 +132,7 @@ export class LLMSecureClient {
 
         const data = await response.json()
         if (data.success && data.sessionId) {
-          console.log("API key migrated successfully")
+          logger.log("API key migrated successfully")
           // Store the session ID
           this.settings.apiKeySessionId = data.sessionId
           // Remove the API key from settings
@@ -137,10 +140,10 @@ export class LLMSecureClient {
           // Save the updated settings
           this.saveSettingsToLocalStorage()
         } else {
-          console.error("Failed to migrate API key:", data.message)
+          logger.error("Failed to migrate API key:", data.message)
         }
       } catch (error) {
-        console.error("Error migrating API key:", error)
+        logger.error("Error migrating API key:", error)
       }
     }
   }
@@ -149,15 +152,15 @@ export class LLMSecureClient {
   private saveSettingsToLocalStorage(): void {
     try {
       localStorage.setItem("llm-settings", JSON.stringify(this.settings))
-      console.log("Settings saved to localStorage")
+      logger.log("Settings saved to localStorage")
     } catch (e) {
-      console.warn("Could not save settings to localStorage:", e)
+      logger.warn("Could not save settings to localStorage:", e)
     }
   }
 
   // Update settings
   updateSettings(newSettings: Partial<LLMSettings>): void {
-    console.log("LLMSecureClient.updateSettings called with:", {
+    logger.log("LLMSecureClient.updateSettings called with:", {
       newSettingsType: typeof newSettings,
       isObject: newSettings && typeof newSettings === "object",
       hasServerRef: newSettings && typeof newSettings === "object" && "__server_ref" in newSettings,
@@ -174,19 +177,19 @@ export class LLMSecureClient {
 
     // Handle server references or undefined values
     if (!newSettings || typeof newSettings !== "object" || "__server_ref" in newSettings) {
-      console.warn("Invalid settings update or server reference detected, ignoring")
+      logger.warn("Invalid settings update or server reference detected, ignoring")
       return
     }
 
     // CRITICAL FIX: Ensure provider is correctly updated
     // Log the provider change explicitly
     if (newSettings.provider) {
-      console.log(`Updating provider from ${this.settings.provider} to ${newSettings.provider}`)
+      logger.log(`Updating provider from ${this.settings.provider} to ${newSettings.provider}`)
       this.settings.provider = newSettings.provider
     }
 
     // Update only the properties that are provided
-    console.log("Updating settings properties")
+    logger.log("Updating settings properties")
     if (newSettings.model) this.settings.model = newSettings.model
     if (typeof newSettings.temperature === "number") this.settings.temperature = newSettings.temperature
     if (typeof newSettings.maxTokens === "number") this.settings.maxTokens = newSettings.maxTokens
@@ -226,7 +229,7 @@ export class LLMSecureClient {
     // Save settings to localStorage
     this.saveSettingsToLocalStorage()
 
-    console.log("Settings updated to:", {
+    logger.log("Settings updated to:", {
       ...this.settings,
       apiKey: this.settings.apiKey ? `[Length: ${this.settings.apiKey.length}]` : undefined,
       apiKeySessionId: this.settings.apiKeySessionId ? "[PRESENT]" : undefined,
@@ -237,7 +240,7 @@ export class LLMSecureClient {
   // Store API key securely
   private async storeApiKeySecurely(apiKey: string): Promise<void> {
     try {
-      console.log("Storing API key securely")
+      logger.log("Storing API key securely")
       const response = await fetch("/api/api-key/store", {
         method: "POST",
         headers: {
@@ -251,18 +254,18 @@ export class LLMSecureClient {
 
       const data = await response.json()
       if (data.success && data.sessionId) {
-        console.log("API key stored securely")
+        logger.log("API key stored securely")
         // Store the session ID
         this.settings.apiKeySessionId = data.sessionId
         // Remove the API key from settings
         delete this.settings.apiKey
       } else {
-        console.error("Failed to store API key securely:", data.message)
+        logger.error("Failed to store API key securely:", data.message)
         // Fall back to storing the API key directly
         this.settings.apiKey = apiKey
       }
     } catch (error) {
-      console.error("Error storing API key securely:", error)
+      logger.error("Error storing API key securely:", error)
       // Fall back to storing the API key directly
       this.settings.apiKey = apiKey
     }
@@ -270,11 +273,11 @@ export class LLMSecureClient {
 
   // Get current settings
   getSettings(): LLMSettings {
-    console.log("LLMSecureClient.getSettings called")
+    logger.log("LLMSecureClient.getSettings called")
     try {
       // Return a copy to avoid reference issues
       const settingsCopy = { ...this.settings }
-      console.log("LLMSecureClient.getSettings returning:", {
+      logger.log("LLMSecureClient.getSettings returning:", {
         ...settingsCopy,
         apiKey: settingsCopy.apiKey ? `[Length: ${settingsCopy.apiKey.length}]` : undefined,
         apiKeySessionId: settingsCopy.apiKeySessionId ? "[PRESENT]" : undefined,
@@ -282,7 +285,7 @@ export class LLMSecureClient {
       })
       return settingsCopy
     } catch (error) {
-      console.error("Error in LLMSecureClient.getSettings:", error)
+      logger.error("Error in LLMSecureClient.getSettings:", error)
       // Return a safe default if there's an error
       return {
         provider: "openai",
@@ -314,7 +317,7 @@ export class LLMSecureClient {
   // Generate a response using a system prompt
   async generateResponse(systemPrompt: string, userPrompt: string): Promise<string> {
     try {
-      console.log("[LLM SECURE CLIENT] generateResponse called with:", {
+      logger.log("[LLM SECURE CLIENT] generateResponse called with:", {
         systemPromptLength: systemPrompt?.length,
         userPromptLength: userPrompt?.length,
         provider: this.settings.provider,
@@ -330,7 +333,7 @@ export class LLMSecureClient {
       // Get the API key
       const apiKey = await this.getApiKey()
       if (!apiKey) {
-        console.warn("[LLM SECURE CLIENT] No API key available")
+        logger.warn("[LLM SECURE CLIENT] No API key available")
         return "Error: No API key available. Please set an API key in the settings."
       }
 
@@ -339,10 +342,10 @@ export class LLMSecureClient {
 
       // Call the server-side function with the copy
       const response = await generateResponse(systemPrompt, userPrompt, settingsCopy)
-      console.log("[LLM SECURE CLIENT] Response received from server:", { responseLength: response?.length })
+      logger.log("[LLM SECURE CLIENT] Response received from server:", { responseLength: response?.length })
       return response
     } catch (error) {
-      console.error("[LLM SECURE CLIENT] Error in generateResponse:", error)
+      logger.error("[LLM SECURE CLIENT] Error in generateResponse:", error)
       return `Error: ${error instanceof Error ? error.message : "Unknown error"}`
     }
   }
@@ -350,7 +353,7 @@ export class LLMSecureClient {
   // Extract beliefs from conversation
   async extractBeliefs(conversationText: string, agentName: string, extractionPriorities: string): Promise<string> {
     try {
-      console.log("LLMSecureClient.extractBeliefs called")
+      logger.log("LLMSecureClient.extractBeliefs called")
 
       // Create a copy of settings to ensure we're not passing a reference
       const settingsCopy = { ...this.settings }
@@ -366,7 +369,7 @@ export class LLMSecureClient {
 
       return await serverExtractBeliefs(conversationText, agentName, extractionPriorities, settingsCopy)
     } catch (error) {
-      console.error("Error in client extractBeliefs:", error)
+      logger.error("Error in client extractBeliefs:", error)
       return `Error: ${error instanceof Error ? error.message : "Unknown error"}`
     }
   }
@@ -374,7 +377,7 @@ export class LLMSecureClient {
   // Generate knowledge entries from beliefs
   async generateKnowledgeEntries(beliefs: string): Promise<KnowledgeEntry[]> {
     try {
-      console.log("LLMSecureClient.generateKnowledgeEntries called")
+      logger.log("LLMSecureClient.generateKnowledgeEntries called")
 
       // Create a copy of settings to ensure we're not passing a reference
       const settingsCopy = { ...this.settings }
@@ -390,7 +393,7 @@ export class LLMSecureClient {
 
       return await serverGenerateKnowledgeEntries(beliefs, settingsCopy)
     } catch (error) {
-      console.error("Error in client generateKnowledgeEntries:", error)
+      logger.error("Error in client generateKnowledgeEntries:", error)
       return [
         {
           id: `error-${Date.now()}`,
@@ -409,7 +412,7 @@ export class LLMSecureClient {
     userPrompt: string,
     onChunk?: ((text: string, isComplete: boolean) => void) | null | undefined,
   ): Promise<string> {
-    console.log("[LLM SECURE CLIENT] streamResponse called with:", {
+    logger.log("[LLM SECURE CLIENT] streamResponse called with:", {
       systemPromptLength: systemPrompt?.length,
       userPromptLength: userPrompt?.length,
       hasOnChunkCallback: typeof onChunk === "function",
@@ -420,19 +423,19 @@ export class LLMSecureClient {
       // Create a truly safe callback that won't throw if onChunk is not a function
       const safeCallback = (text: string, isComplete: boolean): void => {
         try {
-          console.log("[LLM SECURE CLIENT] safeCallback called with:", { textLength: text?.length, isComplete })
+          logger.log("[LLM SECURE CLIENT] safeCallback called with:", { textLength: text?.length, isComplete })
           if (typeof onChunk === "function") {
-            console.log("[LLM SECURE CLIENT] Calling onChunk function")
+            logger.log("[LLM SECURE CLIENT] Calling onChunk function")
             onChunk(text, isComplete)
           } else {
-            console.log("[LLM SECURE CLIENT] Warning: onChunk is not a function", {
+            logger.log("[LLM SECURE CLIENT] Warning: onChunk is not a function", {
               onChunkType: typeof onChunk,
               text: text?.substring(0, 20) + "...",
               isComplete,
             })
           }
         } catch (callbackError) {
-          console.error("[LLM SECURE CLIENT] Error executing onChunk callback:", callbackError)
+          logger.error("[LLM SECURE CLIENT] Error executing onChunk callback:", callbackError)
         }
       }
 
@@ -442,7 +445,7 @@ export class LLMSecureClient {
 
       try {
         // First attempt with streaming
-        console.log("[LLM SECURE CLIENT] Attempting to use streaming response")
+        logger.log("[LLM SECURE CLIENT] Attempting to use streaming response")
 
         // Create a copy of settings to ensure we're not passing a reference
         const settingsCopy = { ...this.settings }
@@ -450,7 +453,7 @@ export class LLMSecureClient {
         // Get the API key
         const apiKey = await this.getApiKey()
         if (!apiKey) {
-          console.warn("[LLM SECURE CLIENT] No API key available")
+          logger.warn("[LLM SECURE CLIENT] No API key available")
           safeCallback("Error: No API key available. Please set an API key in the settings.", false)
           safeCallback("", true)
           return "Error: No API key available. Please set an API key in the settings."
@@ -460,9 +463,9 @@ export class LLMSecureClient {
         settingsCopy.apiKey = apiKey
 
         // Call the server-side function
-        console.log("[LLM SECURE CLIENT] Calling generateResponse")
+        logger.log("[LLM SECURE CLIENT] Calling generateResponse")
         const response = await generateResponse(systemPrompt, userPrompt, settingsCopy)
-        console.log("[LLM SECURE CLIENT] Response received from generateResponse:", {
+        logger.log("[LLM SECURE CLIENT] Response received from generateResponse:", {
           responseLength: response?.length,
         })
 
@@ -474,7 +477,7 @@ export class LLMSecureClient {
           fullResponse += chunk
 
           // Use the safe callback - NEVER directly call onChunk
-          console.log(
+          logger.log(
             `[LLM SECURE CLIENT] Processing chunk ${i / chunkSize + 1}/${Math.ceil(response.length / chunkSize)}`,
           )
           safeCallback(chunk, false)
@@ -484,41 +487,41 @@ export class LLMSecureClient {
         }
 
         // Signal completion
-        console.log("[LLM SECURE CLIENT] Signaling completion")
+        logger.log("[LLM SECURE CLIENT] Signaling completion")
         safeCallback("", true)
       } catch (streamError) {
-        console.error("[LLM SECURE CLIENT] Error in streaming response:", streamError)
+        logger.error("[LLM SECURE CLIENT] Error in streaming response:", streamError)
         streamingFailed = true
       }
 
       // If streaming failed, fall back to non-streaming
       if (streamingFailed) {
-        console.log("[LLM SECURE CLIENT] Streaming failed, falling back to non-streaming")
+        logger.log("[LLM SECURE CLIENT] Streaming failed, falling back to non-streaming")
         fullResponse = await this.generateResponse(systemPrompt, userPrompt)
 
         // Deliver the full response at once - using safe callback
-        console.log("[LLM SECURE CLIENT] Delivering full response at once")
+        logger.log("[LLM SECURE CLIENT] Delivering full response at once")
         safeCallback(fullResponse, false)
         safeCallback("", true)
       }
 
       return fullResponse
     } catch (error) {
-      console.error("[LLM SECURE CLIENT] Error in streamResponse:", error)
+      logger.error("[LLM SECURE CLIENT] Error in streamResponse:", error)
 
       // Try to notify through callback if possible - using safe callback
       const errorMessage = `Error: ${error instanceof Error ? error.message : String(error)}`
       try {
-        console.log("[LLM SECURE CLIENT] Attempting to notify error through callback")
+        logger.log("[LLM SECURE CLIENT] Attempting to notify error through callback")
         if (typeof onChunk === "function") {
-          console.log("[LLM SECURE CLIENT] Calling onChunk with error message")
+          logger.log("[LLM SECURE CLIENT] Calling onChunk with error message")
           onChunk(errorMessage, false)
           onChunk("", true)
         } else {
-          console.log("[LLM SECURE CLIENT] Cannot notify error: onChunk is not a function")
+          logger.log("[LLM SECURE CLIENT] Cannot notify error: onChunk is not a function")
         }
       } catch (callbackError) {
-        console.error("[LLM SECURE CLIENT] Error calling onChunk callback with error:", callbackError)
+        logger.error("[LLM SECURE CLIENT] Error calling onChunk callback with error:", callbackError)
       }
 
       // Return error message as string
@@ -532,10 +535,10 @@ export class LLMSecureClient {
     apiKey: string,
   ): Promise<{ valid: boolean; message?: string }> {
     try {
-      console.log("LLMSecureClient.validateApiKey called")
+      logger.log("LLMSecureClient.validateApiKey called")
       return await validateApiKey(provider, apiKey)
     } catch (error) {
-      console.error("Error in client validateApiKey:", error)
+      logger.error("Error in client validateApiKey:", error)
       return { valid: false, message: error instanceof Error ? error.message : "Error validating API key" }
     }
   }
@@ -543,7 +546,7 @@ export class LLMSecureClient {
   // Save settings
   async saveSettings(): Promise<boolean> {
     try {
-      console.log("LLMSecureClient.saveSettings called")
+      logger.log("LLMSecureClient.saveSettings called")
 
       // Create a copy of settings without the API key
       const settingsCopy = { ...this.settings }
@@ -553,7 +556,7 @@ export class LLMSecureClient {
         delete settingsCopy.apiKey
       }
 
-      console.log("Current settings to save:", {
+      logger.log("Current settings to save:", {
         ...settingsCopy,
         apiKey: settingsCopy.apiKey ? `[Length: ${settingsCopy.apiKey.length}]` : undefined,
         apiKeySessionId: settingsCopy.apiKeySessionId ? "[PRESENT]" : undefined,
@@ -561,13 +564,13 @@ export class LLMSecureClient {
 
       return await saveLLMSettings(settingsCopy)
     } catch (error) {
-      console.error("Error in client saveSettings:", error)
+      logger.error("Error in client saveSettings:", error)
       return false
     }
   }
 }
 
 // Create a singleton instance
-console.log("Creating llmSecureClient singleton instance")
+logger.log("Creating llmSecureClient singleton instance")
 export const llmSecureClient = new LLMSecureClient()
-console.log("llmSecureClient singleton instance created")
+logger.log("llmSecureClient singleton instance created")

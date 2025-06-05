@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { storeApiKey, deleteApiKey, validateSession } from "@/lib/api-key-service"
+import { storeApiKey, deleteApiKey, validateSession } from "@/lib/api-key-storage"
 
 /**
  * POST /api/api-key

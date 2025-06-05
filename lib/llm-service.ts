@@ -1,27 +1,18 @@
 "use server"
 
-// Add more detailed logging at the top of the file
-console.log("[SERVER] llm-service.ts module loaded")
-
-// Add this to the top of the file with other imports
-import { debugLog } from "@/lib/debug-logger"
-
-import { generateText, streamText } from "ai"
+import { streamText, generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
+import { notFound } from "next/navigation"
 import type { KnowledgeEntry } from "@/lib/types"
+import { createLogger } from "@/lib/debug-logger"
+import { debugLog } from "@/lib/debug-logger"
 import { extractTagsFromMarkdown } from "@/lib/utils"
+import { LLMError, ApiKeyError, TimeoutError, NetworkError, withTimeout } from "@/lib/llm-errors"
 
-// Add a withTimeout utility function to handle API timeouts
-// Add this function near the top of the file, after the existing imports
+// Types and configuration
+const logger = createLogger("LLM-SERVICE")
 
-// Add this utility function for handling timeouts in API calls
-export async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, errorMessage: string): Promise<T> {
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(() => reject(new Error(errorMessage)), timeoutMs)
-  })
-
-  return Promise.race([promise, timeoutPromise])
-}
+logger.info("[SERVER] llm-service.ts module loaded")
 
 // Define the model providers
 type ModelProvider = "openai" | "openrouter"
@@ -58,7 +49,7 @@ export const defaultSettings: LLMSettings = {
 }
 
 // Log the defaultSettings object to check for server references
-console.log("[SERVER] defaultSettings defined as:", {
+logger.info("[SERVER] defaultSettings defined as:", {
   ...defaultSettings,
   hasServerRef: "__server_ref" in defaultSettings,
   keys: Object.keys(defaultSettings),
@@ -100,10 +91,10 @@ async function callOpenRouterAPI(
   frequency_penalty: number = defaultSettings.frequencyPenalty,
   presence_penalty: number = defaultSettings.presencePenalty,
 ) {
-  console.log("[SERVER] Calling OpenRouter API with model:", model)
-  console.log("[SERVER] OpenRouter API key length:", apiKey.length)
-  console.log("[SERVER] OpenRouter API key first 5 chars:", apiKey.substring(0, 5))
-  console.log("[SERVER] OpenRouter parameters:", {
+  logger.info("[SERVER] Calling OpenRouter API with model:", model)
+  logger.info("[SERVER] OpenRouter API key length:", apiKey.length)
+  logger.info("[SERVER] OpenRouter API key first 5 chars:", apiKey.substring(0, 5))
+  logger.info("[SERVER] OpenRouter parameters:", {
     temperature,
     max_tokens,
     top_p,
@@ -122,7 +113,7 @@ async function callOpenRouterAPI(
       presence_penalty,
     }
 
-    console.log("[SERVER] Request body:", JSON.stringify(requestBody))
+    logger.info("[SERVER] Request body:", JSON.stringify(requestBody))
 
     // Add timeout to the fetch request (60 seconds)
     const fetchPromise = fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -136,7 +127,7 @@ async function callOpenRouterAPI(
       body: JSON.stringify(requestBody),
     })
 
-    const response = await withTimeout(fetchPromise, 60000, "OpenRouter API request timed out after 60 seconds")
+    const response = await withTimeout(fetchPromise, 60000, "openrouter")
 
     if (!response.ok) {
       const errorText = await response.text()
@@ -156,7 +147,9 @@ async function callOpenRouterAPI(
         errorData = { error: { message: errorText } }
       }
 
-      throw new Error(
+      throw new NetworkError(
+        "openrouter",
+        response.status,
         `OpenRouter API error: ${response.status} ${response.statusText}${
           errorData ? ` - ${JSON.stringify(errorData)}` : ""
         }`,
@@ -191,7 +184,7 @@ export async function generateResponse(
 
   try {
     // Log the incoming settings to check for server references
-    console.log("[SERVER] generateResponse called with settings:", {
+    logger.info("[SERVER] generateResponse called with settings:", {
       ...settings,
       apiKey: settings.apiKey ? `[Length: ${settings.apiKey.length}]` : undefined,
       hasServerRef: "__server_ref" in settings,
@@ -201,14 +194,14 @@ export async function generateResponse(
     // Ensure we have complete settings by merging with defaults
     const completeSettings = { ...defaultSettings, ...settings }
 
-    console.log("[SERVER] completeSettings after merge:", {
+    logger.info("[SERVER] completeSettings after merge:", {
       ...completeSettings,
       apiKey: completeSettings.apiKey ? `[Length: ${completeSettings.apiKey.length}]` : undefined,
       hasServerRef: "__server_ref" in completeSettings,
       keys: Object.keys(completeSettings),
     })
 
-    console.log("[SERVER] generateResponse called with settings:", {
+    logger.info("[SERVER] generateResponse called with settings:", {
       provider: completeSettings.provider,
       model: completeSettings.model,
       temperature: completeSettings.temperature,
@@ -221,13 +214,13 @@ export async function generateResponse(
 
     // Check if API key is available
     if (!completeSettings.apiKey) {
-      throw new Error(`API key is required for ${completeSettings.provider} provider`)
+      throw new ApiKeyError(completeSettings.provider)
     }
 
     // For OpenRouter, use our direct implementation
     if (completeSettings.provider === "openrouter") {
-      console.log("[SERVER] Using OpenRouter implementation")
-      const messages = []
+      logger.info("[SERVER] Using OpenRouter implementation")
+      const messages: Array<{ role: string; content: string }> = []
       if (systemPrompt) {
         messages.push({ role: "system", content: systemPrompt })
       }
@@ -250,39 +243,45 @@ export async function generateResponse(
         1000, // Initial delay of 1 second
       )
     } else if (completeSettings.provider === "openai") {
-      console.log("[SERVER] Using OpenAI implementation")
-      // For OpenAI, use the AI SDK
-      const model = openai(completeSettings.model, {
-        apiKey: completeSettings.apiKey,
-        temperature: completeSettings.temperature,
-        maxTokens: completeSettings.maxTokens,
-        topP: completeSettings.topP,
-        frequencyPenalty: completeSettings.frequencyPenalty,
-        presencePenalty: completeSettings.presencePenalty,
-        systemFingerprint: completeSettings.systemFingerprint,
-      })
+      logger.info("[SERVER] Using OpenAI implementation")
+      // For OpenAI, use the AI SDK with environment variable for API key
+      const model = openai(completeSettings.model as any)
 
       // Add timeout to the OpenAI call
       const generateTextPromise = generateText({
         model,
         system: systemPrompt,
         prompt: userPrompt,
+        temperature: completeSettings.temperature,
+        maxTokens: completeSettings.maxTokens,
+        topP: completeSettings.topP,
+        frequencyPenalty: completeSettings.frequencyPenalty,
+        presencePenalty: completeSettings.presencePenalty,
       })
 
       const result = await withTimeout(
         generateTextPromise,
         60000, // 60 second timeout
-        "OpenAI API request timed out after 60 seconds",
+        "openai",
       )
 
       return result.text
     } else {
-      throw new Error(`Unsupported provider: ${completeSettings.provider}`)
+      throw new LLMError(`Unsupported provider: ${completeSettings.provider}`, "unknown", completeSettings.provider)
     }
   } catch (error) {
     console.error("[SERVER] Error generating response:", error)
-    // Return a meaningful error message that can be displayed to the user
-    return `Error: ${error instanceof Error ? error.message : "Unknown error occurred while generating response"}`
+    
+    // Re-throw structured errors as-is
+    if (error instanceof LLMError) {
+      throw error
+    }
+    
+    // Convert unknown errors to LLMError
+    throw new LLMError(
+      error instanceof Error ? error.message : "Unknown error occurred while generating response",
+      "unknown"
+    )
   }
 }
 
@@ -293,8 +292,8 @@ export async function* streamGenerateResponse(
   settings: LLMSettings,
 ): AsyncGenerator<ResponseChunk, void, unknown> {
   try {
-    console.log("[SERVER] streamGenerateResponse function called")
-    console.log("[SERVER] streamGenerateResponse parameters:", {
+    logger.info("[SERVER] streamGenerateResponse function called")
+    logger.info("[SERVER] streamGenerateResponse parameters:", {
       systemPromptLength: systemPrompt?.length,
       userPromptLength: userPrompt?.length,
       settingsProvider: settings?.provider,
@@ -304,7 +303,7 @@ export async function* streamGenerateResponse(
     // Ensure we have complete settings by merging with defaults
     const completeSettings = { ...defaultSettings, ...settings }
 
-    console.log("[SERVER] streamGenerateResponse called with settings:", {
+    logger.info("[SERVER] streamGenerateResponse called with settings:", {
       provider: completeSettings.provider,
       model: completeSettings.model,
       temperature: completeSettings.temperature,
@@ -322,7 +321,7 @@ export async function* streamGenerateResponse(
     //     // Ensure we have complete settings by merging with defaults
     //     const completeSettings = { ...defaultSettings, ...settings }
 
-    //     console.log("[SERVER] streamGenerateResponse called with settings:", {
+    //     logger.info("[SERVER] streamGenerateResponse called with settings:", {
     //       provider: completeSettings.provider,
     //       model: completeSettings.model,
     //       temperature: completeSettings.temperature,
@@ -339,18 +338,10 @@ export async function* streamGenerateResponse(
     }
 
     if (completeSettings.provider === "openai") {
-      console.log("[SERVER] Using OpenAI streaming implementation")
+      logger.info("[SERVER] Using OpenAI streaming implementation")
 
       try {
-        const model = openai(completeSettings.model, {
-          apiKey: completeSettings.apiKey,
-          temperature: completeSettings.temperature,
-          maxTokens: completeSettings.maxTokens,
-          topP: completeSettings.topP,
-          frequencyPenalty: completeSettings.frequencyPenalty,
-          presencePenalty: completeSettings.presencePenalty,
-          systemFingerprint: completeSettings.systemFingerprint,
-        })
+        const model = openai(completeSettings.model as any)
 
         // Use a fallback mechanism in case streaming fails
         let streamFailed = false
@@ -363,10 +354,10 @@ export async function* streamGenerateResponse(
             prompt: userPrompt,
           })
 
-          for await (const chunk of stream) {
-            fullText += chunk.text
+          for await (const chunk of stream.textStream) {
+            fullText += chunk
             yield {
-              text: chunk.text,
+              text: chunk,
               isComplete: false,
             }
           }
@@ -402,7 +393,7 @@ export async function* streamGenerateResponse(
       }
     } else if (completeSettings.provider === "openrouter") {
       // For OpenRouter, implement streaming using their API
-      console.log("[SERVER] Using OpenRouter streaming implementation")
+      logger.info("[SERVER] Using OpenRouter streaming implementation")
 
       try {
         const messages = []
@@ -438,7 +429,11 @@ export async function* streamGenerateResponse(
 
           if (!response.ok) {
             const errorText = await response.text()
-            throw new Error(`OpenRouter API error: ${response.status} ${response.statusText} - ${errorText}`)
+            throw new NetworkError(
+              "openrouter",
+              response.status,
+              `OpenRouter API error: ${response.status} ${response.statusText} - ${errorText}`,
+            )
           }
 
           if (!response.body) {
@@ -539,7 +534,7 @@ export async function* streamGenerateResponse(
 }
 
 // Add response validation function
-export function validateResponse(response: string): { valid: boolean; reason?: string } {
+export async function validateResponse(response: string): Promise<{ valid: boolean; reason?: string }> {
   // Basic validation to ensure response meets quality standards
   if (!response || response.trim().length === 0) {
     return { valid: false, reason: "Empty response" }
@@ -569,7 +564,7 @@ export async function extractBeliefs(
   settings: LLMSettings,
 ): Promise<string> {
   try {
-    console.log("[SERVER] extractBeliefs called with priorities:", extractionPriorities)
+    logger.info("[SERVER] extractBeliefs called with priorities:", extractionPriorities)
 
     // Create a prompt using the belief extraction template
     const systemPrompt = `You are an AI assistant that analyzes conversations and extracts potential new knowledge or beliefs.
@@ -606,7 +601,7 @@ Example format:
 // Enhanced implementation for generating knowledge entries
 export async function generateKnowledgeEntries(beliefs: string, settings: LLMSettings): Promise<KnowledgeEntry[]> {
   try {
-    console.log("[SERVER] generateKnowledgeEntries called")
+    logger.info("[SERVER] generateKnowledgeEntries called")
 
     // Parse the beliefs string to extract individual beliefs
     const beliefLines = beliefs
@@ -649,14 +644,14 @@ export async function validateApiKey(
   provider: "openai" | "openrouter",
   apiKey: string,
 ): Promise<{ valid: boolean; message?: string }> {
-  console.log("[SERVER] validateApiKey called (mock implementation)")
+  logger.info("[SERVER] validateApiKey called (mock implementation)")
   return { valid: true, message: `API key validation successful for ${provider}. (This is a mock)` }
 }
 
 // Mock implementation for saving LLM settings
 export async function saveLLMSettings(settings: LLMSettings): Promise<boolean> {
-  console.log("[SERVER] saveLLMSettings called")
-  console.log("[SERVER] Saving settings:", {
+  logger.info("[SERVER] saveLLMSettings called")
+  logger.info("[SERVER] Saving settings:", {
     ...settings,
     apiKey: settings.apiKey ? `[Length: ${settings.apiKey.length}]` : undefined,
     provider: settings.provider,

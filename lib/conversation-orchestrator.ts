@@ -1,8 +1,11 @@
-import type { Agent, Conversation, Message } from "@/lib/types"
-import type { LLMClient } from "@/lib/llm-client"
-import type { KnowledgeRetriever } from "@/lib/knowledge-retriever"
+import type { Agent, Conversation, Message, KnowledgeEntry } from "@/lib/types"
+import { KnowledgeRetriever } from "@/lib/knowledge-retriever"
+import { LLMClient } from "@/lib/llm-client"
+import { LLMSecureClient } from "@/lib/llm-secure-client"
 import { ConversationLogger } from "@/lib/conversation-logger"
-import type { KnowledgeEntry } from "@/lib/types"
+import { debugLog } from "@/lib/debug-logger"
+
+type LLMClientType = LLMClient | LLMSecureClient
 
 export interface ResponseOptions {
   maxKnowledgeEntries?: number
@@ -34,7 +37,7 @@ interface QueuedResponse {
 export class ConversationOrchestrator {
   private conversation: Conversation
   private agents: Map<string, Agent>
-  private llmClient: LLMClient
+  private llmClient: LLMClientType
   private knowledgeRetriever: KnowledgeRetriever
   private options: OrchestratorOptions
   private responseQueue: QueuedResponse[] = []
@@ -48,7 +51,7 @@ export class ConversationOrchestrator {
   constructor(
     conversation: Conversation,
     agents: Agent[],
-    llmClient: LLMClient,
+    llmClient: LLMClientType,
     knowledgeRetriever: KnowledgeRetriever,
     options: OrchestratorOptions = {},
   ) {
@@ -380,17 +383,20 @@ export class ConversationOrchestrator {
   }
 
   /**
-   * Checks if a conversation should end based on message count
+   * Checks if a conversation should be ended based on configured rules
    */
   shouldEndConversation(conversation: Conversation): boolean {
-    // Only apply automatic ending to autonomous conversations
     if (!conversation || !conversation.isAutonomous) return false
 
     // Count non-system messages
     const messageCount = conversation.messages.filter((msg) => !msg.metadata?.isSystemMessage).length
 
+    // Get the max autonomous messages from LLM client settings
+    const settings = this.llmClient.getSettings()
+    const maxMessages = settings.maxAutonomousMessages || 10
+
     // Check if the conversation has reached the maximum message count
-    return messageCount >= this.options.maxAutonomousMessages
+    return messageCount >= maxMessages
   }
 
   /**

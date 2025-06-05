@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { deleteApiKey } from "@/lib/api-key-service"
+import { deleteApiKey } from "@/lib/api-key-storage"
 
 export async function DELETE(request: NextRequest) {
   try {

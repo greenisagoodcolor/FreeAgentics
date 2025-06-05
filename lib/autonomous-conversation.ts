@@ -465,7 +465,7 @@ export class AutonomousConversationSystem {
       return {
         ...proximityResult,
         trigger: "proximity",
-        topic,
+        topic: topic ?? undefined,
       }
     }
 

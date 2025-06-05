@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import type { Agent, Conversation } from "@/lib/types"
-import { AutonomousConversationSystem, type TriggerType } from "@/lib/autonomous-conversation"
+import { AutonomousConversationSystem, type TriggerType, type AutonomousConversationOptions } from "@/lib/autonomous-conversation"
 
 interface UseAutonomousConversationsOptions {
   checkInterval?: number
@@ -110,12 +110,14 @@ export function useAutonomousConversations(
 
     // Set a timeout to end the conversation after maxConversationDuration
     // This only applies to autonomous conversations
+    // Use default timeout of 5 minutes (300000ms) since options is private
+    const defaultMaxConversationDuration = 300000 // 5 minutes
     const timeout = setTimeout(() => {
       if (!checkMessageCount() && onConversationEnd) {
         console.log(`Ending autonomous conversation ${activeConversation.id} due to reaching maximum duration`)
         onConversationEnd(activeConversation)
       }
-    }, autonomousSystemRef.current.options.maxConversationDuration)
+    }, defaultMaxConversationDuration)
 
     return () => clearTimeout(timeout)
   }, [activeConversation, onConversationEnd])
@@ -154,7 +156,7 @@ export function useAutonomousConversations(
   }
 
   // Function to update autonomous system options
-  const updateOptions = (newOptions: Partial<typeof autonomousSystemRef.current.options>) => {
+  const updateOptions = (newOptions: Partial<AutonomousConversationOptions>) => {
     autonomousSystemRef.current.updateOptions(newOptions)
   }
 

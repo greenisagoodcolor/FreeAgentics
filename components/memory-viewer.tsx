@@ -18,30 +18,11 @@ import { useLLM } from "@/contexts/llm-context"
 import { type ExtractedBelief, type RefinedBelief, parseBeliefs, parseRefinedBeliefs } from "@/lib/belief-extraction"
 import { exportAgentKnowledge } from "@/lib/knowledge-export"
 import { debugLog } from "@/lib/debug-logger"
+import { createLogger } from "@/lib/debug-logger"
 
-// Custom styles for the conversation history scrollbar
-const conversationHistoryScrollbarStyles = `
-  .conversation-history-scrollbar [data-radix-scroll-area-scrollbar] {
-    width: 12px !important;
-    padding: 0 2px !important;
-  }
-  
-  .conversation-history-scrollbar [data-radix-scroll-area-thumb] {
-    background-color: rgba(139, 92, 246, 0.7) !important;
-    width: 8px !important;
-    border-radius: 10px !important;
-  }
-  
-  .conversation-history-scrollbar [data-radix-scroll-area-scrollbar]:hover [data-radix-scroll-area-thumb] {
-    background-color: rgba(139, 92, 246, 0.9) !important;
-    width: 8px !important;
-  }
-  
-  .conversation-history-scrollbar [data-radix-scroll-area-scrollbar][data-orientation="vertical"] {
-    display: block !important;
-    opacity: 1 !important;
-  }
-`
+const logger = createLogger("MEMORY-VIEWER")
+
+// Note: Conversation history scrollbar styles have been moved to app/globals.css
 
 // Define the AgentToolPermissions type
 export type AgentToolPermissions = {
@@ -404,6 +385,10 @@ export default function MemoryViewer({
       setExtractionProgress(30)
       try {
         // Call the client's extractBeliefs method which handles API key retrieval
+        if (!llmContext.client) {
+          throw new Error("LLM client is not available")
+        }
+
         const rawBeliefsResponse = await llmContext.client.extractBeliefs(
           conversationText,
           selectedAgent.name,
@@ -536,7 +521,7 @@ Format your response as a JSON array with one object per belief:
     if (!selectedAgent) return
 
     const selectedBeliefs = extractedBeliefs.filter((belief) => belief.selected !== false)
-    console.log(`Selected beliefs count: ${selectedBeliefs.length}`, selectedBeliefs)
+    logger.info(`Selected beliefs count: ${selectedBeliefs.length}`, selectedBeliefs)
 
     if (selectedBeliefs.length === 0) {
       toast({
@@ -558,11 +543,11 @@ Format your response as a JSON array with one object per belief:
         tags: belief.tags,
       }))
 
-      console.log(`Adding ${knowledgeEntries.length} knowledge entries to agent's knowledge`)
+      logger.info(`Adding ${knowledgeEntries.length} knowledge entries to agent's knowledge`)
 
       // Add each entry to the agent's knowledge
       for (const entry of knowledgeEntries) {
-        console.log(`Adding entry: ${entry.title}`)
+        logger.info(`Adding entry: ${entry.title}`)
         onAddKnowledge(selectedAgent.id, entry)
       }
 
@@ -796,42 +781,6 @@ Format your response as a JSON array with one object per belief:
     }
   }
 
-  // New function to extract knowledge from conversations
-  const handleExtractKnowledge = async (conversation) => {
-    try {
-      setIsProcessing(true)
-
-      // Get the latest settings to ensure we have the API key
-      const currentSettings = llmContext.client.getSettings()
-
-      // Log the settings to verify API key is present
-      console.log("Knowledge extraction settings:", {
-        provider: currentSettings.provider,
-        model: currentSettings.model,
-        hasApiKey: !!currentSettings.apiKey,
-        apiKeyLength: currentSettings.apiKey ? currentSettings.apiKey.length : 0,
-      })
-
-      // Make sure we have an API key before proceeding
-      if (!currentSettings.apiKey) {
-        throw new Error(`API key is required for ${currentSettings.provider} provider during knowledge extraction`)
-      }
-
-      // Proceed with knowledge extraction using the complete settings
-      // ...
-    } catch (error) {
-      console.error("Error extracting knowledge:", error)
-      toast({
-        title: "Knowledge Extraction Failed",
-        description: error.message || "Failed to extract knowledge from conversation",
-        variant: "destructive",
-        duration: 5000,
-      })
-    } finally {
-      setIsProcessing(false)
-    }
-  }
-
   // Add these handler functions for tool permissions
   const handleToolChange = (toolKey: keyof AgentToolPermissions, checked: boolean) => {
     setToolPermissions((prev) => {
@@ -864,19 +813,6 @@ Format your response as a JSON array with one object per belief:
       setIsSavingTools(false)
     }, 500)
   }
-
-  // Add the custom scrollbar styles for conversation history
-  useEffect(() => {
-    // Add the styles to the document head
-    const styleElement = document.createElement("style")
-    styleElement.innerHTML = conversationHistoryScrollbarStyles
-    document.head.appendChild(styleElement)
-
-    // Clean up on unmount
-    return () => {
-      document.head.removeChild(styleElement)
-    }
-  }, [])
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -1392,7 +1328,10 @@ Format your response as a JSON array with one object per belief:
                       {knowledgeTab === "inference" && (
                         <div className="flex flex-col h-full">
                           <div className="px-6 py-2 border-b">
-                            <Select value={inferenceTab} onValueChange={setInferenceTab}>
+                            <Select 
+                              value={inferenceTab} 
+                              onValueChange={(value: "prompt" | "results" | "preview") => setInferenceTab(value)}
+                            >
                               <SelectTrigger className="w-full bg-purple-950 border-purple-700 text-white">
                                 <SelectValue placeholder="Select view" />
                               </SelectTrigger>
@@ -1424,7 +1363,10 @@ Format your response as a JSON array with one object per belief:
                                   <label htmlFor="conversation-select" className="text-sm font-medium">
                                     Select Conversation
                                   </label>
-                                  <Select value={selectedConversationId} onValueChange={setSelectedConversationId}>
+                                  <Select 
+                                    value={selectedConversationId || undefined} 
+                                    onValueChange={(value: string) => setSelectedConversationId(value)}
+                                  >
                                     <SelectTrigger className="w-full bg-purple-950 border-purple-700 text-white">
                                       <SelectValue placeholder="Select a conversation" />
                                     </SelectTrigger>

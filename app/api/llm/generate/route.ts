@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getApiKey } from "@/lib/api-key-service"
+import { getApiKey } from "@/lib/api-key-storage"
 import { generateOpenAIResponse, generateOpenRouterResponse, type LLMRequestOptions } from "@/lib/llm-providers"
 
 /**

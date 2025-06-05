@@ -1,247 +1,166 @@
 "use client"
 
-import type React from "react"
-import { createContext, useContext, useState, useEffect } from "react"
-import { type LLMClient, llmClient } from "@/lib/llm-client"
-import { type LLMSecureClient, llmSecureClient } from "@/lib/llm-secure-client"
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react"
 import type { LLMSettings } from "@/lib/llm-settings"
-import { clientDefaultSettings } from "@/lib/llm-settings"
+import { llmClient } from "@/lib/llm-client"
+import { llmSecureClient } from "@/lib/llm-secure-client"
 import { isFeatureEnabled } from "@/lib/feature-flags"
+import { createLogger } from "@/lib/debug-logger"
+
+const logger = createLogger("LLM-CONTEXT")
 
 // Create the context with default values
-interface LLMContextType {
-  client: LLMClient | LLMSecureClient
-  settings: LLMSettings
+export interface LLMContextType {
+  // Client management
+  client: typeof llmClient | typeof llmSecureClient | null
+  clientType: "LLMClient" | "LLMSecureClient" | null
+
+  // Settings management
+  settings: LLMSettings | null
   updateSettings: (newSettings: Partial<LLMSettings>) => void
   saveSettings: () => Promise<boolean>
+
+  // Status
   isProcessing: boolean
-  setIsProcessing: (isProcessing: boolean) => void
+  setIsProcessing: (processing: boolean) => void
 }
 
 // Create context with default values
 const LLMContext = createContext<LLMContextType>({
   client: isFeatureEnabled("useSecureApiStorage") ? llmSecureClient : llmClient,
-  settings: clientDefaultSettings,
+  settings: null,
   updateSettings: () => {},
   saveSettings: async () => false,
   isProcessing: false,
   setIsProcessing: () => {},
+  clientType: isFeatureEnabled("useSecureApiStorage") ? "LLMSecureClient" : "LLMClient",
 })
 
 // Provider component
 export function LLMProvider({ children }: { children: React.ReactNode }) {
-  console.log("LLMProvider rendering")
-  const [settings, setSettings] = useState<LLMSettings>(clientDefaultSettings)
+  logger.info("LLMProvider rendering")
+  const [settings, setSettings] = useState<LLMSettings | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
 
   // Determine which client to use based on feature flag
   const useSecureStorage = isFeatureEnabled("useSecureApiStorage")
   const activeClient = useSecureStorage ? llmSecureClient : llmClient
 
-  console.log("LLMProvider using client:", {
+  logger.info("LLMProvider using client:", {
     useSecureStorage,
     clientType: useSecureStorage ? "LLMSecureClient" : "LLMClient",
   })
 
-  // Load initial settings from client
+  // Load initial settings from the client
   useEffect(() => {
-    console.log("LLMProvider useEffect running")
+    logger.info("Loading initial settings from client")
+    
+    if (!activeClient) {
+      logger.info("No active client available, using defaults")
+      setSettings(null)
+      return
+    }
+
     try {
-      console.log("LLM context useEffect - before getting client settings")
-      console.log("activeClient available:", !!activeClient)
-      console.log("activeClient.getSettings is function:", typeof activeClient.getSettings === "function")
+      const clientSettings = activeClient.getSettings()
+      logger.info("Retrieved settings from client:", {
+        provider: clientSettings?.provider,
+        model: clientSettings?.model,
+        hasApiKey: !!clientSettings?.apiKey,
+        hasApiKeySessionId: !!clientSettings?.apiKeySessionId,
+        hasServerRef: clientSettings && typeof clientSettings === "object" && "__server_ref" in clientSettings,
+      })
 
-      // Get settings from client
-      console.log("About to call activeClient.getSettings()")
-      let clientSettings
-      try {
-        clientSettings = activeClient.getSettings()
-        console.log("activeClient.getSettings() returned successfully")
-
-        // Log API key status
-        console.log("API key status:", {
-          hasApiKey: !!clientSettings.apiKey,
-          apiKeyLength: clientSettings.apiKey ? clientSettings.apiKey.length : 0,
-          hasApiKeySessionId: !!clientSettings.apiKeySessionId,
-          provider: clientSettings.provider,
-        })
-      } catch (getSettingsError) {
-        console.error("Error calling activeClient.getSettings():", getSettingsError)
-        throw getSettingsError
+      // Create clean merged settings with robust null/undefined handling
+      const mergedSettings: LLMSettings = {
+        provider: clientSettings?.provider || "openai",
+        model: clientSettings?.model || "gpt-4o",
+        temperature: typeof clientSettings?.temperature === "number" ? clientSettings.temperature : 0.7,
+        maxTokens: typeof clientSettings?.maxTokens === "number" ? clientSettings.maxTokens : 1024,
+        topP: typeof clientSettings?.topP === "number" ? clientSettings.topP : 0.9,
+        frequencyPenalty: typeof clientSettings?.frequencyPenalty === "number" ? clientSettings.frequencyPenalty : 0,
+        presencePenalty: typeof clientSettings?.presencePenalty === "number" ? clientSettings.presencePenalty : 0,
+        systemFingerprint: typeof clientSettings?.systemFingerprint === "boolean" ? clientSettings.systemFingerprint : false,
+        // Handle optional properties - only include if they have valid values
+        ...(clientSettings?.apiKey && { apiKey: clientSettings.apiKey }),
+        ...(clientSettings?.apiKeySessionId && { apiKeySessionId: clientSettings.apiKeySessionId }),
+        ...(typeof clientSettings?.maxAutonomousMessages === "number" && { maxAutonomousMessages: clientSettings.maxAutonomousMessages }),
+        ...(typeof clientSettings?.conversationCooldown === "number" && { conversationCooldown: clientSettings.conversationCooldown }),
       }
 
-      console.log("LLM context useEffect - client settings retrieved:", {
-        provider: clientSettings.provider,
-        model: clientSettings.model,
-        hasApiKey: !!clientSettings.apiKey,
-        apiKeyLength: clientSettings.apiKey ? clientSettings.apiKey.length : 0,
-        hasApiKeySessionId: !!clientSettings.apiKeySessionId,
-        temperature: clientSettings.temperature,
-        maxTokens: clientSettings.maxTokens,
-        hasServerRef: "__server_ref" in clientSettings,
-        keys: Object.keys(clientSettings),
-      })
+      setSettings(mergedSettings)
 
-      // Check if we received a server reference
-      if (clientSettings && typeof clientSettings === "object" && "__server_ref" in clientSettings) {
-        console.log("Detected server reference in settings, creating clean object")
-        // Create a clean settings object without server references
-        const cleanSettings = {
-          ...clientDefaultSettings,
-          provider: clientSettings.provider || clientDefaultSettings.provider,
-          model: clientSettings.model || clientDefaultSettings.model,
-          temperature:
-            typeof clientSettings.temperature === "number"
-              ? clientSettings.temperature
-              : clientDefaultSettings.temperature,
-          maxTokens:
-            typeof clientSettings.maxTokens === "number" ? clientSettings.maxTokens : clientDefaultSettings.maxTokens,
-          topP: typeof clientSettings.topP === "number" ? clientSettings.topP : clientDefaultSettings.topP,
-          frequencyPenalty:
-            typeof clientSettings.frequencyPenalty === "number"
-              ? clientSettings.frequencyPenalty
-              : clientDefaultSettings.frequencyPenalty,
-          presencePenalty:
-            typeof clientSettings.presencePenalty === "number"
-              ? clientSettings.presencePenalty
-              : clientDefaultSettings.presencePenalty,
-          systemFingerprint:
-            typeof clientSettings.systemFingerprint === "boolean"
-              ? clientSettings.systemFingerprint
-              : clientDefaultSettings.systemFingerprint,
-          apiKey: clientSettings.apiKey || undefined,
-          apiKeySessionId: clientSettings.apiKeySessionId || undefined,
-        }
-        console.log("About to call setSettings with clean settings")
-        setSettings(cleanSettings)
-
-        console.log("Created clean settings object:", {
-          ...cleanSettings,
-          apiKey: cleanSettings.apiKey ? `[Length: ${cleanSettings.apiKey.length}]` : undefined,
-          apiKeySessionId: cleanSettings.apiKeySessionId ? "[PRESENT]" : undefined,
-          hasServerRef: "__server_ref" in cleanSettings,
-        })
-        return
-      }
-
-      // Ensure all required properties exist by merging with defaults
-      console.log("Creating complete settings by merging with defaults")
-      console.log("clientDefaultSettings before merge:", {
-        ...clientDefaultSettings,
-        hasServerRef: "__server_ref" in clientDefaultSettings,
-      })
-
-      // Create a clean copy of clientDefaultSettings first
-      const cleanDefaults = { ...clientDefaultSettings }
-      console.log("cleanDefaults after copy:", {
-        ...cleanDefaults,
-        hasServerRef: "__server_ref" in cleanDefaults,
-      })
-
-      // Now merge with client settings
-      const completeSettings = {
-        ...cleanDefaults,
-        ...clientSettings,
-        // Ensure numeric values are properly initialized
-        temperature: clientSettings.temperature ?? cleanDefaults.temperature,
-        maxTokens: clientSettings.maxTokens ?? cleanDefaults.maxTokens,
-        topP: clientSettings.topP ?? cleanDefaults.topP,
-        frequencyPenalty: clientSettings.frequencyPenalty ?? cleanDefaults.frequencyPenalty,
-        presencePenalty: clientSettings.presencePenalty ?? cleanDefaults.presencePenalty,
-      }
-
-      console.log("completeSettings after merge:", {
-        ...completeSettings,
-        hasServerRef: "__server_ref" in completeSettings,
-        keys: Object.keys(completeSettings),
-      })
-
-      console.log("About to call setSettings with complete settings")
-      setSettings(completeSettings)
-
-      console.log("LLM context initialized with settings:", {
-        ...completeSettings,
-        apiKey: completeSettings.apiKey ? `[Length: ${completeSettings.apiKey.length}]` : undefined,
-        apiKeySessionId: completeSettings.apiKeySessionId ? "[PRESENT]" : undefined,
-        provider: completeSettings.provider,
-        hasServerRef: "__server_ref" in completeSettings,
+      logger.info("LLM context initialized with settings:", {
+        provider: mergedSettings.provider,
+        model: mergedSettings.model,
+        hasApiKey: !!mergedSettings.apiKey,
+        hasApiKeySessionId: !!mergedSettings.apiKeySessionId,
       })
     } catch (error) {
-      console.error("Error loading initial settings:", error)
-      console.error("Error stack:", error instanceof Error ? error.stack : "No stack available")
-      // Fall back to defaults
-      console.log("Falling back to default settings")
-      setSettings(clientDefaultSettings)
+      logger.error("Error loading initial settings:", error)
+      setSettings(null)
     }
   }, [activeClient])
 
   // Update settings in the client
   const updateSettings = (newSettings: Partial<LLMSettings>) => {
-    console.log("updateSettings called with:", {
-      ...newSettings,
-      apiKey: newSettings.apiKey ? `[Length: ${newSettings.apiKey.length}]` : undefined,
-      apiKeySessionId: newSettings.apiKeySessionId ? "[PRESENT]" : undefined,
-      hasServerRef: "__server_ref" in newSettings,
+    logger.info("updateSettings called with:", {
+      provider: newSettings.provider,
+      model: newSettings.model,
+      hasApiKey: !!newSettings.apiKey,
+      hasApiKeySessionId: !!newSettings.apiKeySessionId,
     })
+
+    if (!newSettings || typeof newSettings !== "object") {
+      logger.error("Invalid settings update")
+      return
+    }
+
     try {
-      if (!newSettings || typeof newSettings !== "object") {
-        console.error("Invalid settings update")
-        return
+      // Merge new settings with current settings, ensuring required fields are present
+      const updatedSettings: LLMSettings = {
+        // Provide defaults for required fields
+        provider: newSettings.provider || settings?.provider || "openai",
+        model: newSettings.model || settings?.model || "gpt-4o",
+        temperature: newSettings.temperature ?? settings?.temperature ?? 0.7,
+        maxTokens: newSettings.maxTokens ?? settings?.maxTokens ?? 1024,
+        topP: newSettings.topP ?? settings?.topP ?? 0.9,
+        frequencyPenalty: newSettings.frequencyPenalty ?? settings?.frequencyPenalty ?? 0,
+        presencePenalty: newSettings.presencePenalty ?? settings?.presencePenalty ?? 0,
+        systemFingerprint: newSettings.systemFingerprint ?? settings?.systemFingerprint ?? false,
+        // Handle optional properties
+        ...(newSettings.apiKey !== undefined && { apiKey: newSettings.apiKey }),
+        ...(newSettings.apiKeySessionId !== undefined && { apiKeySessionId: newSettings.apiKeySessionId }),
+        ...(newSettings.maxAutonomousMessages !== undefined && { maxAutonomousMessages: newSettings.maxAutonomousMessages }),
+        ...(newSettings.conversationCooldown !== undefined && { conversationCooldown: newSettings.conversationCooldown }),
       }
 
-      // Create a complete settings object with defaults
-      const updatedSettings = { ...settings, ...newSettings }
-      console.log("updatedSettings after merge:", {
-        ...updatedSettings,
-        apiKey: updatedSettings.apiKey ? `[Length: ${updatedSettings.apiKey.length}]` : undefined,
-        apiKeySessionId: updatedSettings.apiKeySessionId ? "[PRESENT]" : undefined,
-        hasServerRef: "__server_ref" in updatedSettings,
-      })
-
-      console.log("Updating settings in context:", {
-        ...updatedSettings,
-        apiKey: updatedSettings.apiKey ? `[Length: ${updatedSettings.apiKey.length}]` : undefined,
-        apiKeySessionId: updatedSettings.apiKeySessionId ? "[PRESENT]" : undefined,
-        provider: updatedSettings.provider,
-      })
-
       // Update local state
-      console.log("About to call setSettings")
       setSettings(updatedSettings)
 
       // Update client settings
       if (activeClient && typeof activeClient.updateSettings === "function") {
-        console.log("About to call activeClient.updateSettings")
         activeClient.updateSettings(updatedSettings)
       } else {
-        console.error("activeClient.updateSettings is not available")
+        logger.error("activeClient.updateSettings is not available")
       }
     } catch (error) {
-      console.error("Error updating settings:", error)
+      logger.error("Error updating settings:", error)
     }
   }
 
   // Save settings to the server
   const saveSettings = async (): Promise<boolean> => {
-    console.log("saveSettings called")
+    logger.info("saveSettings called")
     try {
-      console.log("Saving settings from context:", {
-        ...settings,
-        apiKey: settings.apiKey ? `[Length: ${settings.apiKey.length}]` : undefined,
-        apiKeySessionId: settings.apiKeySessionId ? "[PRESENT]" : undefined,
-        provider: settings.provider,
-        hasServerRef: "__server_ref" in settings,
-      })
-
       if (activeClient && typeof activeClient.saveSettings === "function") {
-        console.log("About to call activeClient.saveSettings")
         return await activeClient.saveSettings()
       } else {
-        console.error("activeClient.saveSettings is not available")
+        logger.error("activeClient.saveSettings is not available")
         return false
       }
     } catch (error) {
-      console.error("Error saving settings:", error)
+      logger.error("Error saving settings:", error)
       return false
     }
   }
@@ -254,15 +173,15 @@ export function LLMProvider({ children }: { children: React.ReactNode }) {
     saveSettings,
     isProcessing,
     setIsProcessing,
+    clientType: (useSecureStorage ? "LLMSecureClient" : "LLMClient") as "LLMSecureClient" | "LLMClient",
   }
 
-  console.log("LLMProvider rendering with context value:", {
+  logger.info("LLMProvider rendering with context value:", {
     clientAvailable: !!value.client,
     clientType: useSecureStorage ? "LLMSecureClient" : "LLMClient",
-    settingsProvider: value.settings.provider,
-    settingsModel: value.settings.model,
+    settingsProvider: value.settings?.provider,
+    settingsModel: value.settings?.model,
     isProcessing: value.isProcessing,
-    settingsHasServerRef: "__server_ref" in value.settings,
   })
 
   return <LLMContext.Provider value={value}>{children}</LLMContext.Provider>
@@ -270,15 +189,14 @@ export function LLMProvider({ children }: { children: React.ReactNode }) {
 
 // Hook to use the LLM context
 export function useLLM() {
-  console.log("useLLM hook called")
+  logger.info("useLLM hook called")
   const context = useContext(LLMContext)
-  console.log("useLLM returning context with:", {
+  logger.info("useLLM returning context with:", {
     clientAvailable: !!context.client,
-    clientType: isFeatureEnabled("useSecureApiStorage") ? "LLMSecureClient" : "LLMClient",
-    settingsProvider: context.settings.provider,
-    settingsModel: context.settings.model,
+    clientType: context.clientType,
+    settingsProvider: context.settings?.provider,
+    settingsModel: context.settings?.model,
     isProcessing: context.isProcessing,
-    settingsHasServerRef: "__server_ref" in context.settings,
   })
   return context
 }

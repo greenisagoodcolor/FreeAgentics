@@ -228,8 +228,8 @@ Remember to start with "${firstAgent.name}: " followed by the message.`
     if (!conversation || !conversation.isAutonomous || !hasInitializedRef.current) return
 
     // Get the minimum and maximum message counts from settings
-    const minMessages = settings.minAutonomousMessages || 4
-    const maxMessages = settings.maxAutonomousMessages || 10
+    const maxMessages = settings?.maxAutonomousMessages || 10
+    const minMessages = Math.max(2, Math.floor(maxMessages / 2)) // Set minimum to half of max, but at least 2
 
     // Count non-system messages
     const nonSystemMessages = conversation.messages.filter((msg) => !msg.metadata?.isSystemMessage).length

@@ -679,7 +679,7 @@ export default function AgentList({
             <Button onClick={handleImportConfirm} disabled={!importFile || isImporting}>
               {isImporting ? (
                 <>
-                  <Spinner size="sm" className="mr-2" />
+                  <Spinner size={16} className="mr-2" />
                   Importing...
                 </>
               ) : (

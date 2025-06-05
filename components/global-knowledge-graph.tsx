@@ -43,9 +43,11 @@ interface PhysicsNode extends Node {
   isPinned?: boolean
 }
 
-interface PhysicsLink extends Link {
+interface PhysicsLink {
   source: PhysicsNode
   target: PhysicsNode
+  strength: number
+  color: string
 }
 
 export default function GlobalKnowledgeGraph({ agents, onSelectNode, onShowAbout }: GlobalKnowledgeGraphProps) {
@@ -90,11 +92,11 @@ export default function GlobalKnowledgeGraph({ agents, onSelectNode, onShowAbout
   const coolingRef = useRef(1.0)
   const warmupPhaseRef = useRef(0.3)
   const lowMovementFramesRef = useRef(0)
-  const animationFrameRef = useRef<number>()
+  const animationFrameRef = useRef<number | undefined>(undefined)
   const initialNodesRef = useRef<Node[]>([])
   const initialLinksRef = useRef<Link[]>([])
   const needsRenderRef = useRef(false)
-  const renderIntervalRef = useRef<NodeJS.Timeout>()
+  const renderIntervalRef = useRef<NodeJS.Timeout | undefined>(undefined)
   const hasInitializedRef = useRef(false)
 
   // Initialize the graph data
@@ -562,10 +564,33 @@ export default function GlobalKnowledgeGraph({ agents, onSelectNode, onShowAbout
 
     const nodes = simulation.nodes
 
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = i + 1; j < nodes.length; j++) {
-        const nodeA = nodes[i]
-        const nodeB = nodes[j]
+    // PERFORMANCE OPTIMIZATION: Use QuadTree for collision detection instead of O(n²) algorithm
+    const container = containerRef.current
+    if (!container) return
+
+    const boundary = {
+      x: 0,
+      y: 0,
+      width: container.clientWidth,
+      height: container.clientHeight,
+    }
+
+    const quadtree = new QuadTree(boundary, 4)
+
+    // Insert all nodes into quadtree
+    nodes.forEach((node) => {
+      quadtree.insert({ x: node.x, y: node.y, node })
+    })
+
+    // Check collisions using quadtree - much more efficient for large datasets
+    nodes.forEach((nodeA) => {
+      // Only check nodes within a reasonable collision detection radius
+      const maxCollisionRadius = nodeA.radius * physicsSettings.collisionRadius * 3
+      const nearbyPoints = quadtree.query({ x: nodeA.x, y: nodeA.y, radius: maxCollisionRadius })
+
+      nearbyPoints.forEach((pointData) => {
+        const nodeB = pointData.node
+        if (nodeA === nodeB || nodeA.id === nodeB.id) return
 
         // Calculate distance
         const dx = nodeB.x - nodeA.x
@@ -594,8 +619,8 @@ export default function GlobalKnowledgeGraph({ agents, onSelectNode, onShowAbout
             nodeB.y += moveY
           }
         }
-      }
-    }
+      })
+    })
   }, [physicsSettings.collisionRadius])
 
   const runSimulation = useCallback(() => {
@@ -605,6 +630,21 @@ export default function GlobalKnowledgeGraph({ agents, onSelectNode, onShowAbout
         cancelAnimationFrame(animationFrameRef.current)
       }
       return
+    }
+
+    // PERFORMANCE OPTIMIZATION: Adaptive settings based on node count
+    const nodeCount = simulation.nodes.length
+    const isLargeDataset = nodeCount > 100
+    const isMassiveDataset = nodeCount > 200
+
+    // Skip frames for performance with large datasets
+    if (isLargeDataset) {
+      const skipModulo = isMassiveDataset ? 3 : 2 // Skip more frames for massive datasets
+      const currentFrame = (animationFrameRef.current || 0) % skipModulo
+      if (currentFrame !== 0) {
+        animationFrameRef.current = requestAnimationFrame(runSimulation)
+        return
+      }
     }
 
     // Apply forces
@@ -627,11 +667,12 @@ export default function GlobalKnowledgeGraph({ agents, onSelectNode, onShowAbout
       node.vx *= physicsSettings.friction * coolingRef.current
       node.vy *= physicsSettings.friction * coolingRef.current
 
-      // Limit velocity to prevent extreme movements
+      // PERFORMANCE OPTIMIZATION: Adaptive velocity limiting based on dataset size
+      const adaptiveVelocityLimit = physicsSettings.velocityLimit * (isLargeDataset ? 0.7 : 1.0)
       const speed = Math.sqrt(node.vx * node.vx + node.vy * node.vy)
-      if (speed > physicsSettings.velocityLimit) {
-        node.vx = (node.vx / speed) * physicsSettings.velocityLimit
-        node.vy = (node.vy / speed) * physicsSettings.velocityLimit
+      if (speed > adaptiveVelocityLimit) {
+        node.vx = (node.vx / speed) * adaptiveVelocityLimit
+        node.vy = (node.vy / speed) * adaptiveVelocityLimit
       }
 
       // Update position
@@ -648,12 +689,15 @@ export default function GlobalKnowledgeGraph({ agents, onSelectNode, onShowAbout
     // Mark that we need to render
     needsRenderRef.current = true
 
+    // PERFORMANCE OPTIMIZATION: Adaptive stopping criteria based on dataset size
+    const movementThreshold = isLargeDataset ? 0.1 : 0.05  // Higher threshold for large datasets
+    const stabilityFramesRequired = isLargeDataset ? 15 : 30  // Fewer frames needed for large datasets
+
     // Auto-stop simulation if movement is very small for a sustained period
-    if (totalMovement < 0.05) {
+    if (totalMovement < movementThreshold) {
       // Count low movement frames instead of stopping immediately
       lowMovementFramesRef.current++
-      if (lowMovementFramesRef.current > 30) {
-        // About 0.5 seconds of low movement
+      if (lowMovementFramesRef.current > stabilityFramesRequired) {
         setIsSimulationRunning(false)
         lowMovementFramesRef.current = 0
         return
@@ -680,13 +724,38 @@ export default function GlobalKnowledgeGraph({ agents, onSelectNode, onShowAbout
       // Start the simulation
       runSimulation()
 
+      // PERFORMANCE OPTIMIZATION: Adaptive render frequency based on node count
+      const nodeCount = simulationRef.current?.nodes.length || 0
+      const isLargeDataset = nodeCount > 100
+      const isMassiveDataset = nodeCount > 200
+      
+      // Reduce render frequency for large datasets to improve performance
+      const renderInterval = isMassiveDataset ? 100 : isLargeDataset ? 75 : 50 // ms
+
       // Set up an interval to update the React state less frequently
       renderIntervalRef.current = setInterval(() => {
         if (needsRenderRef.current && simulationRef.current) {
-          // Create a copy of the nodes to avoid mutating the original
-          const updatedNodes = simulationRef.current.nodes.map((node) => ({
-            ...node,
-          }))
+          // PERFORMANCE OPTIMIZATION: Only copy essential properties for large datasets
+          const updatedNodes = simulationRef.current.nodes.map((node) => {
+            if (isLargeDataset) {
+              // For large datasets, only copy essential properties to reduce memory pressure
+              return {
+                id: node.id,
+                title: node.title,
+                x: Math.round(node.x), // Round coordinates to reduce precision for better performance
+                y: Math.round(node.y),
+                radius: node.radius,
+                color: node.color,
+                type: node.type,
+                agentId: node.agentId,
+                originalId: node.originalId,
+                entryIds: node.entryIds,
+              }
+            } else {
+              // For smaller datasets, keep full precision
+              return { ...node }
+            }
+          })
 
           // Update the React state
           setNodes(updatedNodes)
@@ -694,7 +763,7 @@ export default function GlobalKnowledgeGraph({ agents, onSelectNode, onShowAbout
           // Reset the flag
           needsRenderRef.current = false
         }
-      }, 50) // Update every 50ms (20fps) instead of every frame
+      }, renderInterval) // Adaptive update frequency
 
       // Cooling effect
       coolingRef.current = 1.0
@@ -761,7 +830,7 @@ export default function GlobalKnowledgeGraph({ agents, onSelectNode, onShowAbout
     setLinks(resetLinks)
 
     // Reset the simulation with fresh physics nodes
-    const physicsNodes = resetNodes.map((node) => ({
+    const physicsNodes: PhysicsNode[] = resetNodes.map((node: Node) => ({
       ...node,
       vx: 0,
       vy: 0,
@@ -772,9 +841,9 @@ export default function GlobalKnowledgeGraph({ agents, onSelectNode, onShowAbout
 
     // Create physics links with actual node references
     const physicsLinks = resetLinks
-      .map((link) => {
-        const source = physicsNodes.find((n) => n.id === link.source)
-        const target = physicsNodes.find((n) => n.id === link.target)
+      .map((link: Link) => {
+        const source = physicsNodes.find((n: PhysicsNode) => n.id === link.source)
+        const target = physicsNodes.find((n: PhysicsNode) => n.id === link.target)
 
         if (!source || !target) {
           console.error(`Could not find nodes for link: ${link.source} -> ${link.target}`)
@@ -1096,7 +1165,7 @@ export default function GlobalKnowledgeGraph({ agents, onSelectNode, onShowAbout
       // Draw node labels
       if (node === hoveredNode || node === selectedNode || zoomLevel > 1.5) {
         ctx.fillStyle = "#ffffff"
-        ctx.font = `${Math.max(12 / zoomLevel, 8)}px Arial` // Ensure minimum font size
+        ctx.font = `${node.type === "tag" ? "bold " : ""}${Math.max(12 / zoomLevel, 8)}px Arial`
         ctx.textAlign = "center"
         ctx.textBaseline = "middle"
 
@@ -1106,8 +1175,7 @@ export default function GlobalKnowledgeGraph({ agents, onSelectNode, onShowAbout
         ctx.fillRect(node.x - textWidth / 2 - 4, node.y + radius + 4, textWidth + 8, 16 / zoomLevel)
 
         ctx.fillStyle = "#ffffff"
-        ctx.font = `${Math.max(12 / zoomLevel, 8)}px Arial`
-        ctx.fontWeight = node.type === "tag" ? "bold" : "normal"
+        ctx.font = `${node.type === "tag" ? "bold " : ""}${Math.max(12 / zoomLevel, 8)}px Arial`
         ctx.fillText(node.title, node.x, node.y + radius + 12 / zoomLevel)
       }
     }
@@ -1215,8 +1283,8 @@ export default function GlobalKnowledgeGraph({ agents, onSelectNode, onShowAbout
         <div className="text-xs text-purple-300 mt-1">
           {agents.length} agents, {totalEntries} entries ({uniqueTitles.size} unique), {uniqueTags.size} tags
           {isSimulationRunning && " • Simulation running"}
-          {simulationRef.current?.nodes.filter((n) => n.isPinned).length > 0 &&
-            ` • ${simulationRef.current.nodes.filter((n) => n.isPinned).length} pinned nodes`}
+          {simulationRef.current?.nodes && simulationRef.current.nodes.filter((n: PhysicsNode) => n.isPinned).length > 0 &&
+            ` • ${simulationRef.current.nodes.filter((n: PhysicsNode) => n.isPinned).length} pinned nodes`}
         </div>
       </CardHeader>
 

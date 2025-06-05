@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { validateSession } from "@/lib/api-key-service"
+import { validateSession } from "@/lib/api-key-storage"
 
 export async function GET(request: NextRequest) {
   try {

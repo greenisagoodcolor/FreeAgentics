@@ -18,14 +18,15 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   console.log("RootLayout rendering")
+  console.log("IsSendingProvider rendered")
+  console.log("LLMProvider rendered")
+  
   return (
     <html lang="en">
       <body className={poppins.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <IsSendingProvider>
-            {console.log("IsSendingProvider rendered")}
             <LLMProvider>
-              {console.log("LLMProvider rendered")}
               <NavBar />
               {children}
             </LLMProvider>
