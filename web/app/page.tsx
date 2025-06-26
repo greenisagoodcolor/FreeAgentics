@@ -132,10 +132,31 @@ export default function MultiAgentDashboard() {
   const [isSimulationRunning, setIsSimulationRunning] = useState(false);
   const [typingAgents, setTypingAgents] = useState<Set<string>>(new Set());
   const [autoScroll, setAutoScroll] = useState(true);
+  const [backendStatus, setBackendStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
   
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<List>(null);
+
+  // Check backend connectivity
+  useEffect(() => {
+    const checkBackend = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api/status');
+        if (response.ok) {
+          setBackendStatus('connected');
+        } else {
+          setBackendStatus('disconnected');
+        }
+      } catch (error) {
+        setBackendStatus('disconnected');
+      }
+    };
+
+    checkBackend();
+    const interval = setInterval(checkBackend, 10000); // Check every 10 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   // Real-time simulation
   useEffect(() => {
@@ -327,6 +348,16 @@ export default function MultiAgentDashboard() {
             <span className="text-zinc-400">STATUS:</span>
             <span className={isSimulationRunning ? "text-[#10B981]" : "text-[#F59E0B]"}>
               {isSimulationRunning ? 'ACTIVE' : 'STANDBY'}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Zap className="h-3 w-3 text-[#4F46E5]" />
+            <span className="text-zinc-400">BACKEND:</span>
+            <span className={
+              backendStatus === 'connected' ? "text-[#10B981]" : 
+              backendStatus === 'connecting' ? "text-[#F59E0B]" : "text-[#EF4444]"
+            }>
+              {backendStatus.toUpperCase()}
             </span>
           </div>
         </div>
