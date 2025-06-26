@@ -1,0 +1,72 @@
+[flake8]
+# Expert Committee Configuration - Robert C. Martin (Clean Code) + Kent Beck (Quality Gates)
+# Updated for CogniticNet seed-stage MVP with investor-grade quality standards
+
+# Basic configuration - User preference: 100 character line length
+max-line-length = 100
+max-complexity = 10
+
+# Error codes to ignore (Expert Committee approved suppressions)
+# E203: Whitespace before ':' (conflicts with Black formatter)
+# W503: Line break before binary operator (PEP 8 updated)
+# E501: Line too long (user preference: ignore line length errors)
+# D100,D101,D102,D103,D104,D105: Docstring requirements (handled separately)
+# E402: Module level import not at top (some cases are necessary)
+extend-ignore =
+    E203,
+    W503,
+    E501,
+    D100,D101,D102,D103,D104,D105,
+    E402
+
+# Per-file ignores (Expert Committee context-specific rules)
+per-file-ignores =
+    __init__.py:F401,F403,F405
+    test_*.py:D,S101,S106
+    **/test*.py:D,S101,S106
+    **/config/**:D
+    **/scripts/**:D
+    **/migration/**:D
+    infrastructure/scripts/development/*.py:E722
+
+# Critical error enforcement (Expert Committee: Zero tolerance)
+# N801,N802,N803,N806,N815,N816: Naming conventions
+# C901: Complex functions
+# E999: Syntax errors (CRITICAL)
+# F821: Undefined names (CRITICAL)
+# E722: Bare except clauses (HIGH PRIORITY)
+extend-select =
+    N801,N802,N803,N806,N815,N816,
+    C901,
+    E999,
+    F821,
+    E722
+
+# File patterns
+include = *.py
+exclude =
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    .mypy_cache,
+    .pytest_cache,
+    .ruff_cache,
+    node_modules,
+    build,
+    dist,
+    *.egg-info,
+    .next,
+    .taskmaster
+
+# Output formatting (Expert Committee: Maximum verbosity for debugging)
+format = %(path)s:%(row)d:%(col)d: %(code)s %(text)s
+show-source = True
+statistics = True
+count = True
+jobs = auto
+verbose = 1
+
+# Expert Committee Standards
+# Robert C. Martin: "Clean code reads like well-written prose"
+# Kent Beck: "Make it work, make it right, make it fast"

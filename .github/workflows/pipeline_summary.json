@@ -1,0 +1,102 @@
+{
+  "pipeline_id": "pipeline_1750409146",
+  "status": "failed",
+  "success": false,
+  "duration": 0.0,
+  "configuration": {
+    "mode": "fast",
+    "parallel_jobs": 2,
+    "timeout_seconds": 300,
+    "fail_fast": true,
+    "test_timeout": 600,
+    "coverage_threshold": 80.0,
+    "quality_gate_threshold": 95.0,
+    "generate_reports": true,
+    "report_formats": ["json", "markdown"],
+    "project_root": "/Users/matthewmoroney/builds/CogniticNet",
+    "output_dir": "",
+    "artifacts_dir": "",
+    "require_all_tests_pass": true,
+    "require_coverage_threshold": true,
+    "require_no_security_issues": true,
+    "require_no_linting_errors": true,
+    "notify_on_failure": true,
+    "notify_on_success": false
+  },
+  "metrics": {
+    "total_tests": 50,
+    "passed_tests": 49,
+    "failed_tests": 1,
+    "pass_rate": 98.0,
+    "test_coverage": 78.5,
+    "quality_score": 92.8,
+    "deployment_ready": false
+  },
+  "stage_summary": {
+    "discovery": {
+      "status": "success",
+      "duration": 0.0,
+      "metrics": {
+        "test_files_found": 51,
+        "total_tests": 980,
+        "frameworks_detected": 4
+      }
+    },
+    "categorization": {
+      "status": "success",
+      "duration": 0.0,
+      "metrics": {
+        "categorized_tests": 51,
+        "categories_created": 2,
+        "estimated_duration": 174420.0
+      }
+    },
+    "setup": {
+      "status": "success",
+      "duration": 0.0,
+      "metrics": {
+        "runners_configured": 3,
+        "execution_plans": 4
+      }
+    },
+    "execution": {
+      "status": "success",
+      "duration": 0.0,
+      "metrics": {
+        "total_tests": 50,
+        "passed_tests": 49,
+        "failed_tests": 1,
+        "test_duration": 0.0,
+        "coverage": 78.5
+      }
+    },
+    "reporting": {
+      "status": "success",
+      "duration": 0.0,
+      "metrics": {
+        "health_score": 92.32000000000001,
+        "quality_score": 92.8
+      }
+    },
+    "quality_gates": {
+      "status": "success",
+      "duration": 0.0,
+      "metrics": {
+        "gates_passed": 5,
+        "total_gates": 7,
+        "gate_pass_rate": 71.42857142857143
+      }
+    }
+  },
+  "quality_gates": {
+    "test_pass_rate": true,
+    "coverage_threshold": false,
+    "no_critical_security": true,
+    "linting_clean": true,
+    "performance_acceptable": true,
+    "no_flaky_tests": true,
+    "all_tests_pass": false
+  },
+  "artifacts": [],
+  "reports": []
+}

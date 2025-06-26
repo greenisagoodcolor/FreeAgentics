@@ -1,0 +1,70 @@
+{
+  "file_counts": {
+    ".md": 47,
+    ".yml": 10,
+    ".sh": 14,
+    "no_extension": 21,
+    ".txt": 18,
+    ".js": 20,
+    ".yaml": 1,
+    ".toml": 2,
+    ".ts": 56,
+    ".py": 187,
+    ".json": 29,
+    ".mdc": 4,
+    ".tag": 1,
+    ".web": 2,
+    ".api": 1,
+    ".tsx": 83,
+    ".css": 2,
+    ".svg": 2,
+    ".png": 1,
+    ".jpg": 2,
+    ".development": 1,
+    ".staging": 1,
+    ".production": 1,
+    ".test": 1,
+    ".demo": 1,
+    ".example": 1,
+    ".monitor": 1,
+    ".sql": 2,
+    ".scenarios": 1,
+    ".conf": 1,
+    ".simulator": 1,
+    ".pyc": 82,
+    ".gz": 2,
+    ".ipynb": 1,
+    ".ini": 1,
+    ".mako": 1
+  },
+  "total_size_mb": 7.361632347106934,
+  "git_history_ok": true,
+  "missing_files": [],
+  "broken_imports": [
+    {
+      "file": "./validate_migration.py",
+      "pattern": "from src.agents.basic_agent"
+    },
+    {
+      "file": "./validate_migration.py",
+      "pattern": "import src.agents.basic_agent"
+    },
+    {
+      "file": "./validate_migration.py",
+      "pattern": "from src.agents.active_inference"
+    },
+    {
+      "file": "./validate_migration.py",
+      "pattern": "from src.gnn"
+    },
+    {
+      "file": "./validate_migration.py",
+      "pattern": "from src.world"
+    },
+    {
+      "file": "./validate_migration.py",
+      "pattern": "from src.tests"
+    }
+  ],
+  "old_references_count": 3
+}

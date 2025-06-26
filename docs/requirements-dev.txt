@@ -1,0 +1,56 @@
+# Development Dependencies for CogniticNet
+# Install with: pip install -r requirements-dev.txt
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+pytest-timeout==2.2.0
+
+# Coverage
+coverage[toml]==7.3.2
+
+# Code Quality
+black==24.4.2
+flake8==7.0.0
+mypy==1.10.0
+isort==5.13.2
+pre-commit==3.7.1
+
+# Type Stubs
+types-requests==2.32.0.20240602
+types-redis==4.6.0.20240425
+types-psycopg2==2.9.21.20240417
+
+# Documentation
+sphinx==7.3.7
+sphinx-rtd-theme==2.0.0
+sphinx-autodoc-typehints==2.1.0
+
+# Development Tools
+ipython==8.24.0
+ipdb==0.13.13
+jupyter==1.0.0
+notebook==7.2.0
+
+# Performance Profiling
+memory-profiler==0.61.0
+line-profiler==4.1.2
+py-spy==0.3.14
+
+# Security
+bandit==1.7.9
+safety==3.2.0
+
+# API Testing
+httpx==0.27.0
+respx==0.21.1
+
+# Database Tools
+alembic-autogenerate-enums==0.1.2
+sqlalchemy-utils==0.41.2
+
+# Debugging
+debugpy==1.8.1
+ptvsd==4.3.2

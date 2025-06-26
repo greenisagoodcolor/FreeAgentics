@@ -1,0 +1,67 @@
+# Task ID: 8
+# Title: Implement GNN Model Generation from Natural Language
+# Status: pending
+# Dependencies: 2, 5
+# Priority: medium
+# Description: Enable agents to generate GNN models from natural language specifications.
+# Details:
+Build GNN (sometime this is known as GMN in the codebase to avoidconfusion of Graph Neural Network which is referred to as GNN as well as GraphNeuralNetwork) parser and generator (inference/gnn/parser.py, generator.py). Integrate natural language processing. Validate model consistency and map to PyMDP format.
+
+# Test Strategy:
+Test natural language → GNN model → PyMDP integration pipeline.
+
+# Subtasks:
+## 1. NLP Integration for GNN Model Generation [pending]
+### Dependencies: None
+### Description: Design and implement the natural language processing (NLP) pipeline to translate user queries and agent observations and requests into structured graph representations suitable for GNN model generation to be fed into pymdp.
+### Details:
+Committee debate: Rich Hickey advocates for immutable data structures and simplicity in NLP pipeline design, while Kent Beck emphasizes test-driven development for robust parsing. Geoffrey Hinton and Yann LeCun stress the importance of semantic representation and embedding quality. Architectural decisions include whether to use rule-based, transformer-based, or hybrid NLP approaches. Mathematical rigor is required in mapping linguistic constructs to graph structures. Production-ready considerations involve scalability and extensibility for new NLP tasks.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 2. GNN Parser Implementation [pending]
+### Dependencies: 8.1
+### Description: Develop the parser that converts NLP-derived representations into formal graph structures for GNN processing.
+### Details:
+Committee debate: Robert C. Martin insists on clean, modular code and clear interface boundaries. Martin Fowler suggests using domain-specific languages (DSLs) for graph specification. Demis Hassabis and Andy Clark highlight the need for cognitive plausibility in parsing strategies. Architectural decisions include parser modularity and extensibility. Mathematical rigor involves ensuring graph validity and correct mapping of linguistic dependencies. Production-ready considerations include error handling and support for diverse graph schemas.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 3. GNN Generator Implementation [pending]
+### Dependencies: 8.2
+### Description: Implement the GNN model generator that constructs and configures GNN architectures based on parsed graph structures.
+### Details:
+Committee debate: Yann LeCun and Geoffrey Hinton advocate for flexible, modular GNN layers (e.g., message passing, attention). Conor Heins and Alexander Tschantz emphasize the need for mathematical transparency in layer composition. Kent Beck recommends iterative prototyping and continuous integration. Architectural decisions include layer abstraction, support for various GNN types (GCN, GAT, etc.), and hyperparameter configurability. Mathematical rigor is required in defining aggregation and update functions. Production-ready considerations include model serialization and reproducibility.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 4. Model Validation and Evaluation [pending]
+### Dependencies: 8.3
+### Description: Establish rigorous validation protocols for generated GNN models, including accuracy, robustness, and interpretability assessments.
+### Details:
+Committee debate: Anil Seth, Jakob Hohwy, and Andy Clark stress the importance of interpretability and explainability in model outputs. Martin Fowler and Robert C. Martin focus on automated testing and validation pipelines. Yann LeCun and Geoffrey Hinton advocate for benchmarking against standard datasets. Architectural decisions include validation set construction and metric selection. Mathematical rigor involves statistical significance testing and error analysis. Production-ready considerations include automated reporting and continuous validation integration.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 5. PyMDP Mapping and Integration [pending]
+### Dependencies: 8.3
+### Description: Map GNN outputs to PyMDP-compatible representations for downstream probabilistic modeling and decision processes.
+### Details:
+Committee debate: Karl Friston and Thomas Parr emphasize the need for mathematically principled mappings between GNN latent spaces and MDP state/action spaces. Conor Heins and Alexander Tschantz focus on the alignment of GNN outputs with active inference frameworks. Robert C. Martin highlights interface clarity and decoupling. Architectural decisions include mapping strategies (direct, learned, or hybrid), and compatibility with PyMDP APIs. Mathematical rigor is required in defining bijective or probabilistic mappings. Production-ready considerations include versioning and backward compatibility.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 6. Pipeline Integration and Orchestration [pending]
+### Dependencies: 8.4, 8.5
+### Description: Integrate all components (NLP, parser, generator, validation, PyMDP mapping) into a cohesive, production-ready pipeline.
+### Details:
+Committee debate: Martin Fowler and Robert C. Martin advocate for clear architectural boundaries and microservices versus monolith debate. Kent Beck recommends continuous deployment and monitoring. Demis Hassabis and Yann LeCun stress the importance of end-to-end differentiability and feedback loops. Architectural decisions include orchestration frameworks, data flow, and error propagation. Mathematical rigor involves ensuring information preservation across pipeline stages. Production-ready considerations include scalability, logging, and fault tolerance.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 7. Comprehensive Testing and Complexity Analysis [pending]
+### Dependencies: 8.6
+### Description: Pass integration and end-to-end tests before completing this task and moving to the next. Reference the PRD for acceptance criteria and committee review.
+### Details:
+All code must meet PRD requirements and be reviewed by the expert committee. Ensure all tests (mypy, tsc, jest, pytest, flake8, ESLint) pass and integration/end-to-end tests are green before closing the task.
+

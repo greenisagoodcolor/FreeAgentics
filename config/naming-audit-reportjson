@@ -1,0 +1,340 @@
+{
+  "summary": {
+    "total_files_scanned": 523,
+    "total_violations": 301,
+    "violation_categories": 9
+  },
+  "violations_by_category": {
+    "prohibited_terms": {
+      "count": 6,
+      "violations": [
+        {
+          "file": "./validate_migration.py",
+          "issue": "Found prohibited term 'cogniticnet' (1 occurrences)",
+          "replacement": "freeagentics",
+          "reason": "Old project name"
+        },
+        {
+          "file": "./validate_migration.py",
+          "issue": "Found prohibited term 'CogniticNet' (3 occurrences)",
+          "replacement": "FreeAgentics",
+          "reason": "Old project name"
+        },
+        {
+          "file": "./src/simulation/engine.py",
+          "issue": "Found prohibited term 'spawn' (2 occurrences)",
+          "replacement": "initialize",
+          "reason": "Gaming terminology"
+        },
+        {
+          "file": "./src/models/simulation.py",
+          "issue": "Found prohibited term 'spawn' (1 occurrences)",
+          "replacement": "initialize",
+          "reason": "Gaming terminology"
+        },
+        {
+          "file": "./src/models/validated_models.py",
+          "issue": "Found prohibited term 'spawn' (1 occurrences)",
+          "replacement": "initialize",
+          "reason": "Gaming terminology"
+        },
+        {
+          "file": "./scripts/cogniticnet-cli.js",
+          "issue": "Found prohibited term 'spawn' (2 occurrences)",
+          "replacement": "initialize",
+          "reason": "Gaming terminology"
+        }
+      ]
+    },
+    "syntax_errors": {
+      "count": 2,
+      "violations": [
+        {
+          "file": "./agents/base/communication.py",
+          "issue": "Python syntax error - cannot parse"
+        },
+        {
+          "file": "./src/simulation/agent_manager.py",
+          "issue": "Python syntax error - cannot parse"
+        }
+      ]
+    },
+    "python_files": {
+      "count": 111,
+      "violations": [
+        {
+          "file": "./update_import_paths.py",
+          "issue": "File 'update_import_paths.py' doesn't match kebab-case pattern: ^[a-z][a-z0-9]*(-[a-z0-9]+)*\\.py$"
+        },
+        {
+          "file": "./validate_migration.py",
+          "issue": "File 'validate_migration.py' doesn't match kebab-case pattern: ^[a-z][a-z0-9]*(-[a-z0-9]+)*\\.py$"
+        },
+        {
+          "file": "./migrate_to_freeagentics.py",
+          "issue": "File 'migrate_to_freeagentics.py' doesn't match kebab-case pattern: ^[a-z][a-z0-9]*(-[a-z0-9]+)*\\.py$"
+        },
+        {
+          "file": "./freeagentics_new/agents/explorer/explorer.test.py",
+          "issue": "File 'explorer.test.py' doesn't match kebab-case pattern: ^[a-z][a-z0-9]*(-[a-z0-9]+)*\\.py$"
+        },
+        {
+          "file": "./freeagentics_new/agents/guardian/guardian.test.py",
+          "issue": "File 'guardian.test.py' doesn't match kebab-case pattern: ^[a-z][a-z0-9]*(-[a-z0-9]+)*\\.py$"
+        },
+        {
+          "file": "./freeagentics_new/agents/scholar/scholar.test.py",
+          "issue": "File 'scholar.test.py' doesn't match kebab-case pattern: ^[a-z][a-z0-9]*(-[a-z0-9]+)*\\.py$"
+        },
+        {
+          "file": "./freeagentics_new/agents/merchant/merchant.test.py",
+          "issue": "File 'merchant.test.py' doesn't match kebab-case pattern: ^[a-z][a-z0-9]*(-[a-z0-9]+)*\\.py$"
+        },
+        {
+          "file": "./environments/demo/scenario_runner.py",
+          "issue": "File 'scenario_runner.py' doesn't match kebab-case pattern: ^[a-z][a-z0-9]*(-[a-z0-9]+)*\\.py$"
+        },
+        {
+          "file": "./environments/demo/demo_simulator.py",
+          "issue": "File 'demo_simulator.py' doesn't match kebab-case pattern: ^[a-z][a-z0-9]*(-[a-z0-9]+)*\\.py$"
+        },
+        {
+          "file": "./tests/test_gnn_structure.py",
+          "issue": "File 'test_gnn_structure.py' doesn't match kebab-case pattern: ^[a-z][a-z0-9]*(-[a-z0-9]+)*\\.py$"
+        }
+      ],
+      "total": 111
+    },
+    "typescript_components": {
+      "count": 71,
+      "violations": [
+        {
+          "file": "./web/src/components/memory-viewer.tsx",
+          "issue": "Component 'memory-viewer.tsx' doesn't match PascalCase pattern"
+        },
+        {
+          "file": "./web/src/components/theme-provider.tsx",
+          "issue": "Component 'theme-provider.tsx' doesn't match PascalCase pattern"
+        },
+        {
+          "file": "./web/src/components/about-modal.tsx",
+          "issue": "Component 'about-modal.tsx' doesn't match PascalCase pattern"
+        },
+        {
+          "file": "./web/src/components/agent-dashboard.tsx",
+          "issue": "Component 'agent-dashboard.tsx' doesn't match PascalCase pattern"
+        },
+        {
+          "file": "./web/src/components/error-boundary.tsx",
+          "issue": "Component 'error-boundary.tsx' doesn't match PascalCase pattern"
+        },
+        {
+          "file": "./web/src/components/grid-world.tsx",
+          "issue": "Component 'grid-world.tsx' doesn't match PascalCase pattern"
+        },
+        {
+          "file": "./web/src/components/agent-card.tsx",
+          "issue": "Component 'agent-card.tsx' doesn't match PascalCase pattern"
+        },
+        {
+          "file": "./web/src/components/nav-bar.tsx",
+          "issue": "Component 'nav-bar.tsx' doesn't match PascalCase pattern"
+        },
+        {
+          "file": "./web/src/components/llm-test.tsx",
+          "issue": "Component 'llm-test.tsx' doesn't match PascalCase pattern"
+        },
+        {
+          "file": "./web/src/components/agent-belief-visualizer.tsx",
+          "issue": "Component 'agent-belief-visualizer.tsx' doesn't match PascalCase pattern"
+        }
+      ],
+      "total": 71
+    },
+    "python_methods": {
+      "count": 18,
+      "violations": [
+        {
+          "file": "./tests/test_gnn_structure.py",
+          "issue": "Function 'setUp' doesn't match snake_case pattern",
+          "line": 20
+        },
+        {
+          "file": "./tests/test_gnn_structure.py",
+          "issue": "Function 'setUp' doesn't match snake_case pattern",
+          "line": 188
+        },
+        {
+          "file": "./tests/test_gnn_structure.py",
+          "issue": "Function 'setUp' doesn't match snake_case pattern",
+          "line": 237
+        },
+        {
+          "file": "./tests/unit/test_performance_optimizer.py",
+          "issue": "Function 'setUp' doesn't match snake_case pattern",
+          "line": 208
+        },
+        {
+          "file": "./tests/unit/test_performance_optimizer.py",
+          "issue": "Function 'tearDown' doesn't match snake_case pattern",
+          "line": 213
+        },
+        {
+          "file": "./tests/unit/test_perception.py",
+          "issue": "Function 'setUp' doesn't match snake_case pattern",
+          "line": 142
+        },
+        {
+          "file": "./tests/unit/test_perception.py",
+          "issue": "Function 'setUp' doesn't match snake_case pattern",
+          "line": 221
+        },
+        {
+          "file": "./tests/unit/test_perception.py",
+          "issue": "Function 'setUp' doesn't match snake_case pattern",
+          "line": 289
+        },
+        {
+          "file": "./tests/unit/test_perception.py",
+          "issue": "Function 'setUp' doesn't match snake_case pattern",
+          "line": 383
+        },
+        {
+          "file": "./tests/unit/test_state_manager.py",
+          "issue": "Function 'setUp' doesn't match snake_case pattern",
+          "line": 75
+        }
+      ],
+      "total": 18
+    },
+    "config_files": {
+      "count": 10,
+      "violations": [
+        {
+          "file": "./jest.setup.js",
+          "issue": "Config file 'jest.setup.js' doesn't match kebab-case pattern"
+        },
+        {
+          "file": "./jest.config.js",
+          "issue": "Config file 'jest.config.js' doesn't match kebab-case pattern"
+        },
+        {
+          "file": "./VALIDATION_REPORT.json",
+          "issue": "Config file 'VALIDATION_REPORT.json' doesn't match kebab-case pattern"
+        },
+        {
+          "file": "./commitlint.config.js",
+          "issue": "Config file 'commitlint.config.js' doesn't match kebab-case pattern"
+        },
+        {
+          "file": "./__mocks__/fileMock.js",
+          "issue": "Config file 'fileMock.js' doesn't match kebab-case pattern"
+        },
+        {
+          "file": "./__mocks__/styleMock.js",
+          "issue": "Config file 'styleMock.js' doesn't match kebab-case pattern"
+        },
+        {
+          "file": "./tests/jest.setup.js",
+          "issue": "Config file 'jest.setup.js' doesn't match kebab-case pattern"
+        },
+        {
+          "file": "./tests/jest.config.js",
+          "issue": "Config file 'jest.config.js' doesn't match kebab-case pattern"
+        },
+        {
+          "file": "./.next/static/development/_ssgManifest.js",
+          "issue": "Config file '_ssgManifest.js' doesn't match kebab-case pattern"
+        },
+        {
+          "file": "./.next/static/development/_buildManifest.js",
+          "issue": "Config file '_buildManifest.js' doesn't match kebab-case pattern"
+        }
+      ]
+    },
+    "typescript_hooks": {
+      "count": 4,
+      "violations": [
+        {
+          "file": "./web/src/components/ui/use-toast.ts",
+          "issue": "Hook 'use-toast.ts' doesn't match useXxx pattern"
+        },
+        {
+          "file": "./web/src/hooks/use-conversation-orchestrator.ts",
+          "issue": "Hook 'use-conversation-orchestrator.ts' doesn't match useXxx pattern"
+        },
+        {
+          "file": "./web/src/hooks/use-toast.ts",
+          "issue": "Hook 'use-toast.ts' doesn't match useXxx pattern"
+        },
+        {
+          "file": "./web/src/hooks/use-autonomous-conversations.ts",
+          "issue": "Hook 'use-autonomous-conversations.ts' doesn't match useXxx pattern"
+        }
+      ]
+    },
+    "typescript_interfaces": {
+      "count": 76,
+      "violations": [
+        {
+          "file": "./web/src/contexts/llm-context.tsx",
+          "issue": "Interface 'LLMContextType' should start with 'I' prefix"
+        },
+        {
+          "file": "./web/src/components/memory-viewer.tsx",
+          "issue": "Interface 'to' should start with 'I' prefix"
+        },
+        {
+          "file": "./web/src/components/error-boundary.tsx",
+          "issue": "Interface 'State' should start with 'I' prefix"
+        },
+        {
+          "file": "./web/src/components/knowledge-graph.tsx",
+          "issue": "Interface 'Node' should start with 'I' prefix"
+        },
+        {
+          "file": "./web/src/components/knowledge-graph.tsx",
+          "issue": "Interface 'Link' should start with 'I' prefix"
+        },
+        {
+          "file": "./web/src/components/agent-relationship-network.tsx",
+          "issue": "Interface 'NetworkNode' should start with 'I' prefix"
+        },
+        {
+          "file": "./web/src/components/agent-relationship-network.tsx",
+          "issue": "Interface 'NetworkLink' should start with 'I' prefix"
+        },
+        {
+          "file": "./web/src/components/readiness-panel.tsx",
+          "issue": "Interface 'ReadinessScore' should start with 'I' prefix"
+        },
+        {
+          "file": "./web/src/components/readiness-panel.tsx",
+          "issue": "Interface 'HardwareTarget' should start with 'I' prefix"
+        },
+        {
+          "file": "./web/src/components/agent-activity-timeline.tsx",
+          "issue": "Interface 'ActivityEvent' should start with 'I' prefix"
+        }
+      ],
+      "total": 76
+    },
+    "typescript_handlers": {
+      "count": 3,
+      "violations": [
+        {
+          "file": "./web/src/components/ui/carousel.tsx",
+          "issue": "Event handler 'onSelect' should start with 'handle' not 'on'"
+        },
+        {
+          "file": "./web/src/hooks/use-mobile.tsx",
+          "issue": "Event handler 'onChange' should start with 'handle' not 'on'"
+        },
+        {
+          "file": "./web/src/hooks/use-conversation-orchestrator.ts",
+          "issue": "Event handler 'onSendMessageRef' should start with 'handle' not 'on'"
+        }
+      ]
+    }
+  }
+}

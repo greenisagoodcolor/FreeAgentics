@@ -1,0 +1,49 @@
+# Task ID: 4
+# Title: Integrate WebSocket Real-Time Communication
+# Status: pending
+# Dependencies: 2, 3
+# Priority: high
+# Description: Implement WebSocket-based real-time updates for belief states, knowledge graphs, and coalition events.
+# Details:
+Use FastAPI WebSocket endpoints for real-time data. Implement WebSocket hooks in Next.js (useConversationWebSocket, useMarkovBlanketWebSocket). Ensure robust connection management and error handling.
+
+# Test Strategy:
+Test WebSocket connections, message delivery, and reconnection logic.
+
+# Subtasks:
+## 1. Architect and Implement FastAPI WebSocket Endpoint [pending]
+### Dependencies: None
+### Description: Design and implement a robust FastAPI WebSocket endpoint, considering architectural patterns, scalability, and maintainability. Debate the merits of single-responsibility (Robert C. Martin), simplicity (Kent Beck), and extensibility (Martin Fowler). Discuss mathematical rigor in protocol state transitions (Karl Friston) and ensure production-readiness (Rich Hickey).
+### Details:
+Committee members will debate endpoint structure: Robert C. Martin advocates for clear separation of concerns, Kent Beck emphasizes testability and simplicity, Martin Fowler suggests patterns for extensibility, and Rich Hickey warns against overengineering. Karl Friston will analyze the state machine for connection lifecycle, ensuring mathematically sound transitions. The endpoint must be production-ready, supporting multiple clients and clean shutdown.
+
+## 2. Develop Frontend WebSocket Hook [pending]
+### Dependencies: 4.1
+### Description: Create a reusable frontend WebSocket hook for establishing and managing client connections. Discuss idiomatic hook design (Conor Heins, Alexander Tschantz), cognitive ergonomics (Andy Clark), and error boundary integration (Jakob Hohwy).
+### Details:
+Conor Heins and Alexander Tschantz will debate the best practices for hook abstraction and composability. Andy Clark will focus on minimizing cognitive load for developers using the hook. Jakob Hohwy will ensure robust error boundaries and fallback UI. The hook must expose connection state, message send/receive, and reconnection logic.
+
+## 3. Design Connection Management Strategy [pending]
+### Dependencies: 4.1, 4.2
+### Description: Establish a comprehensive connection management system on both backend and frontend, addressing concurrency, resource cleanup, and reconnection. Discuss event-driven models (Yann LeCun), distributed state (Geoffrey Hinton), and predictive reconnection (Demis Hassabis).
+### Details:
+Yann LeCun will advocate for event-driven, non-blocking connection handling. Geoffrey Hinton will discuss distributed state management for scaling across multiple servers. Demis Hassabis will propose predictive algorithms for reconnection and client health monitoring. The system must handle multiple concurrent clients, clean up stale connections, and support horizontal scaling.
+
+## 4. Implement Robust Error Handling [pending]
+### Dependencies: 4.1, 4.2, 4.3
+### Description: Develop a comprehensive error handling framework for both backend and frontend, covering protocol errors, network failures, and unexpected disconnects. Discuss fail-fast principles (Kent Beck), graceful degradation (Martin Fowler), and uncertainty modeling (Anil Seth, Thomas Parr).
+### Details:
+Kent Beck will push for immediate error surfacing and clear logging. Martin Fowler will ensure the system degrades gracefully under failure. Anil Seth and Thomas Parr will introduce probabilistic models to handle uncertainty in network conditions and user experience. The framework must provide actionable error messages, automatic recovery, and user notifications.
+
+## 5. Define and Document Message Protocol [pending]
+### Dependencies: 4.1, 4.2, 4.3, 4.4
+### Description: Design a clear, versioned message protocol for client-server communication, ensuring extensibility, validation, and mathematical rigor. Debate schema evolution (Rich Hickey), protocol versioning (Robert C. Martin), and formal specification (Karl Friston).
+### Details:
+Rich Hickey will argue for data-driven, extensible schemas (e.g., JSON Schema or Protobuf). Robert C. Martin will emphasize backward compatibility and clear versioning. Karl Friston will ensure the protocol is formally specified and mathematically sound, minimizing ambiguity. The protocol must support validation, extensibility, and clear documentation.
+
+## 6. Conduct End-to-End Testing and Complexity Analysis [pending]
+### Dependencies: 4.1, 4.2, 4.3, 4.4, 4.5
+### Description: Develop and execute comprehensive end-to-end tests, including load, concurrency, and failure scenarios. Analyze cyclomatic and cognitive complexity, referencing committee debates on test coverage (Kent Beck), architectural resilience (Martin Fowler), and mathematical robustness (Karl Friston, Demis Hassabis).
+### Details:
+Kent Beck will ensure high test coverage and TDD principles. Martin Fowler will assess architectural resilience under stress. Karl Friston and Demis Hassabis will analyze the system's complexity, focusing on asynchronous flows and error propagation. The testing suite must simulate real-world usage, measure performance, and validate all protocol and error handling paths.
+

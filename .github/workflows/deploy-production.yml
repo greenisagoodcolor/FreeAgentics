@@ -1,0 +1,267 @@
+name: Deploy to Production
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version tag to deploy (e.g., v1.2.3)"
+        required: true
+      reason:
+        description: "Reason for deployment"
+        required: true
+
+env:
+  ENVIRONMENT: production
+  DOCKER_REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}/freeagentics
+
+jobs:
+  prepare:
+    name: Prepare Production Deployment
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Validate version format
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          if ! [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: Invalid version format. Expected v1.2.3"
+            exit 1
+          fi
+
+  test-deployment:
+    name: Test Deployment Images
+    runs-on: ubuntu-latest
+    needs: prepare
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.prepare.outputs.version }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build test images
+        run: |
+          docker build -t test-backend:${{ needs.prepare.outputs.version }} --target backend .
+          docker build -t test-frontend:${{ needs.prepare.outputs.version }} --target frontend .
+
+      - name: Run security scans
+        run: |
+          # Install trivy for vulnerability scanning
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install trivy
+
+          # Scan images
+          trivy image test-backend:${{ needs.prepare.outputs.version }}
+          trivy image test-frontend:${{ needs.prepare.outputs.version }}
+
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [prepare, test-deployment]
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.prepare.outputs.version }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Backend image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_PREFIX }}-backend:${{ needs.prepare.outputs.version }}
+            ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_PREFIX }}-backend:latest
+            ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_PREFIX }}-backend:stable
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          target: backend
+
+      - name: Build and push Frontend image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_PREFIX }}-frontend:${{ needs.prepare.outputs.version }}
+            ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_PREFIX }}-frontend:latest
+            ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_PREFIX }}-frontend:stable
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          target: frontend
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ secrets.PROD_API_URL }}
+
+      - name: Create deployment backup
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.PROD_SERVER_HOST }}
+          username: ${{ secrets.PROD_SERVER_USER }}
+          key: ${{ secrets.PROD_SERVER_SSH_KEY }}
+          script: |
+            # Create backup of current deployment
+            cd /opt/freeagentics
+            docker-compose -f docker-compose.prod.yml ps -q | xargs docker commit -m "Backup before ${{ needs.prepare.outputs.version }}"
+
+            # Tag current images as previous
+            docker tag freeagentics-backend:stable freeagentics-backend:previous
+            docker tag freeagentics-frontend:stable freeagentics-frontend:previous
+
+      - name: Deploy to Production
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.PROD_SERVER_HOST }}
+          username: ${{ secrets.PROD_SERVER_USER }}
+          key: ${{ secrets.PROD_SERVER_SSH_KEY }}
+          script: |
+            cd /opt/freeagentics
+
+            # Update image tags in docker-compose
+            export VERSION=${{ needs.prepare.outputs.version }}
+
+            # Rolling update - Backend
+            docker-compose -f docker-compose.prod.yml pull backend
+            docker-compose -f docker-compose.prod.yml up -d --no-deps --scale backend=2 backend
+            sleep 30
+
+            # Rolling update - Frontend
+            docker-compose -f docker-compose.prod.yml pull frontend
+            docker-compose -f docker-compose.prod.yml up -d --no-deps frontend
+
+            # Clean up
+            docker system prune -f
+
+  verify:
+    name: Verify Production Deployment
+    runs-on: ubuntu-latest
+    needs: [prepare, deploy]
+
+    steps:
+      - name: Health checks
+        run: |
+          # Backend health check
+          for i in {1..10}; do
+            if curl -f ${{ secrets.PROD_API_URL }}/health; then
+              echo "Backend is healthy"
+              break
+            fi
+            echo "Waiting for backend... (attempt $i/10)"
+            sleep 10
+          done
+
+          # Frontend check
+          curl -f ${{ secrets.PROD_APP_URL }} || exit 1
+
+      - name: Run smoke tests
+        run: |
+          # Add production smoke tests here
+          echo "Running smoke tests..."
+          # Example: curl specific endpoints, check critical functionality
+
+      - name: Monitor metrics
+        run: |
+          # Check error rates, response times, etc.
+          echo "Checking production metrics..."
+
+  rollback:
+    name: Rollback if Failed
+    runs-on: ubuntu-latest
+    needs: [prepare, deploy, verify]
+    if: failure()
+
+    steps:
+      - name: Rollback to previous version
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.PROD_SERVER_HOST }}
+          username: ${{ secrets.PROD_SERVER_USER }}
+          key: ${{ secrets.PROD_SERVER_SSH_KEY }}
+          script: |
+            cd /opt/freeagentics
+
+            # Restore previous images
+            docker tag freeagentics-backend:previous freeagentics-backend:stable
+            docker tag freeagentics-frontend:previous freeagentics-frontend:stable
+
+            # Redeploy previous version
+            docker-compose -f docker-compose.prod.yml up -d
+
+            echo "Rollback completed!"
+
+      - name: Notify rollback
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              text: "🚨 Production deployment failed and was rolled back!",
+              attachments: [{
+                color: 'danger',
+                fields: [
+                  { title: 'Version', value: '${{ needs.prepare.outputs.version }}', short: true },
+                  { title: 'Actor', value: '${{ github.actor }}', short: true },
+                  { title: 'Reason', value: 'Deployment verification failed', short: false }
+                ]
+              }]
+            }
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+
+  notify:
+    name: Notify Deployment Success
+    runs-on: ubuntu-latest
+    needs: [prepare, deploy, verify]
+    if: success()
+
+    steps:
+      - name: Send success notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              text: "✅ Production deployment successful!",
+              attachments: [{
+                color: 'good',
+                fields: [
+                  { title: 'Version', value: '${{ needs.prepare.outputs.version }}', short: true },
+                  { title: 'Actor', value: '${{ github.actor }}', short: true },
+                  { title: 'Environment', value: 'Production', short: true },
+                  { title: 'URL', value: '${{ secrets.PROD_APP_URL }}', short: true }
+                ]
+              }]
+            }
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}

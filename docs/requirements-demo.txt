@@ -1,0 +1,32 @@
+# Demo-specific Python requirements
+# These are in addition to the main requirements.txt
+
+# Async support
+asyncio-redis==0.16.0
+
+# Enhanced logging
+colorlog==6.7.0
+python-json-logger==2.0.7
+
+# Performance monitoring
+psutil==5.9.8
+py-spy==0.3.14
+
+# Demo utilities
+faker==22.0.0  # For generating realistic demo data
+tqdm==4.66.1   # Progress bars for scenarios
+
+# Real-time communication
+websockets==12.0
+aioredis==2.0.1
+
+# Scheduling
+apscheduler==3.10.4
+
+# Data visualization (for monitor)
+matplotlib==3.8.2
+seaborn==0.13.0
+
+# Demo-specific ML libraries (lighter versions)
+scikit-learn==1.3.2
+torch==2.1.2+cpu  # CPU-only version for demos

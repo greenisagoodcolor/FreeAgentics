@@ -1,0 +1,146 @@
+{
+  "demo": {
+    "version": "1.0.0",
+    "name": "FreeAgentics Demo Environment",
+    "description": "Pre-configured environment for demonstrations and investor presentations",
+    "features": {
+      "accelerated_simulation": true,
+      "auto_scenarios": true,
+      "pre_populated_data": true,
+      "enhanced_visuals": true,
+      "real_time_updates": true
+    },
+    "settings": {
+      "simulation_speed": "10x",
+      "scenario_interval": 300,
+      "auto_play": true,
+      "loop_scenarios": true,
+      "show_notifications": true,
+      "highlight_achievements": true
+    },
+    "scenarios": [
+      {
+        "id": "explorer_discovery",
+        "name": "Explorer Resource Discovery",
+        "duration": 180,
+        "highlights": [
+          "Autonomous exploration",
+          "Pattern recognition",
+          "Knowledge sharing"
+        ]
+      },
+      {
+        "id": "merchant_trade",
+        "name": "Merchant Trading Network",
+        "duration": 240,
+        "highlights": [
+          "Dynamic negotiation",
+          "Market analysis",
+          "Profit optimization"
+        ]
+      },
+      {
+        "id": "scholar_research",
+        "name": "Scholar Knowledge Creation",
+        "duration": 300,
+        "highlights": [
+          "Data analysis",
+          "Theory formulation",
+          "Knowledge dissemination"
+        ]
+      },
+      {
+        "id": "guardian_patrol",
+        "name": "Guardian Security Protocol",
+        "duration": 240,
+        "highlights": [
+          "Territory protection",
+          "Threat detection",
+          "Coordinated response"
+        ]
+      },
+      {
+        "id": "multi_agent_collaboration",
+        "name": "Multi-Agent Teamwork",
+        "duration": 360,
+        "highlights": [
+          "Role specialization",
+          "Team coordination",
+          "Complex goal achievement"
+        ]
+      }
+    ],
+    "demo_agents": [
+      {
+        "name": "Nova Explorer",
+        "class": "explorer",
+        "status": "ready",
+        "readiness_score": 0.89,
+        "personality": {
+          "openness": 0.9,
+          "conscientiousness": 0.7,
+          "extraversion": 0.6,
+          "agreeableness": 0.8,
+          "neuroticism": 0.3
+        }
+      },
+      {
+        "name": "Zara Trader",
+        "class": "merchant",
+        "status": "training",
+        "readiness_score": 0.65,
+        "personality": {
+          "openness": 0.6,
+          "conscientiousness": 0.9,
+          "extraversion": 0.8,
+          "agreeableness": 0.7,
+          "neuroticism": 0.4
+        }
+      },
+      {
+        "name": "Sage Researcher",
+        "class": "scholar",
+        "status": "active",
+        "readiness_score": 0.94,
+        "personality": {
+          "openness": 0.95,
+          "conscientiousness": 0.85,
+          "extraversion": 0.4,
+          "agreeableness": 0.9,
+          "neuroticism": 0.2
+        }
+      },
+      {
+        "name": "Atlas Defender",
+        "class": "guardian",
+        "status": "ready",
+        "readiness_score": 0.87,
+        "personality": {
+          "openness": 0.5,
+          "conscientiousness": 0.95,
+          "extraversion": 0.3,
+          "agreeableness": 0.6,
+          "neuroticism": 0.2
+        }
+      }
+    ],
+    "ui_enhancements": {
+      "animations": {
+        "agent_actions": true,
+        "knowledge_flow": true,
+        "readiness_celebrations": true
+      },
+      "highlights": {
+        "new_discoveries": "#4ade80",
+        "successful_trades": "#60a5fa",
+        "knowledge_shared": "#a78bfa",
+        "threats_detected": "#f87171"
+      },
+      "notifications": {
+        "position": "top-right",
+        "duration": 5000,
+        "max_visible": 3
+      }
+    }
+  }
+}

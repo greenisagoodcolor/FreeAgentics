@@ -1,0 +1,163 @@
+#!/bin/bash
+
+# FreeAgentics Directory Structure Creation Script
+# Based on PHASE 2: FINAL ARCHITECTURE from the PRD
+# Lead: Martin Fowler
+
+echo "Creating FreeAgentics directory structure..."
+
+# Create root directory if it doesn't exist
+mkdir -p freeagentics_new
+cd freeagentics_new
+
+# .github structure
+mkdir -p .github/workflows
+mkdir -p .github/ISSUE_TEMPLATE
+touch .github/workflows/ci.yml
+touch .github/workflows/security.yml
+touch .github/workflows/release.yml
+touch .github/PULL_REQUEST_TEMPLATE.md
+
+# CORE DOMAIN - agents
+mkdir -p agents/explorer
+mkdir -p agents/merchant
+mkdir -p agents/scholar
+mkdir -p agents/guardian
+mkdir -p agents/base
+touch agents/explorer/__init__.py
+touch agents/explorer/explorer.py
+touch agents/explorer/explorer_behavior.py
+touch agents/explorer/test_explorer.py
+touch agents/explorer/README.md
+# Repeat for other agent types
+for agent in merchant scholar guardian; do
+    touch agents/$agent/__init__.py
+    touch agents/$agent/$agent.py
+    touch agents/$agent/${agent}_behavior.py
+    touch agents/$agent/test_$agent.py
+    touch agents/$agent/README.md
+done
+touch agents/base/agent.py
+touch agents/base/behaviors.py
+touch agents/base/interfaces.py
+
+# CORE DOMAIN - Active Inference
+mkdir -p inference/engine
+mkdir -p inference/gnn
+mkdir -p inference/llm/providers
+mkdir -p inference/llm/prompts
+touch inference/engine/active-inference.py
+touch inference/engine/belief-update.py
+touch inference/engine/policy-selection.py
+touch inference/gnn/__init__.py
+touch inference/llm/belief-integration.py
+
+# CORE DOMAIN - Coalition formation
+mkdir -p coalitions/formation
+mkdir -p coalitions/contracts
+mkdir -p coalitions/deployment
+touch coalitions/formation/preference-matching.py
+touch coalitions/formation/coalition-builder.py
+touch coalitions/formation/stability-analysis.py
+touch coalitions/contracts/coalition-contract.py
+touch coalitions/contracts/resource-sharing.py
+touch coalitions/deployment/edge-packager.py
+touch coalitions/deployment/deployment-manifest.py
+
+# CORE DOMAIN - Environment
+mkdir -p world/grid
+mkdir -p world/resources
+mkdir -p world/physics
+touch world/grid/hex-world.py
+touch world/grid/spatial-index.py
+
+# INTERFACE LAYER - External interfaces
+mkdir -p api/rest/agents
+mkdir -p api/rest/coalitions
+mkdir -p api/rest/simulations
+mkdir -p api/websocket
+mkdir -p api/graphql
+touch api/websocket/real-time-updates.py
+touch api/graphql/schema.py
+
+# INTERFACE LAYER - Frontend
+mkdir -p web/src/components/agent-creator
+mkdir -p web/src/components/world-viewer
+mkdir -p web/src/components/coalition-manager
+mkdir -p web/src/stores
+mkdir -p web/src/api
+mkdir -p web/public
+touch web/package.json
+
+# INFRASTRUCTURE LAYER
+mkdir -p infrastructure/docker
+mkdir -p infrastructure/kubernetes
+mkdir -p infrastructure/terraform
+touch infrastructure/docker/Dockerfile.api
+touch infrastructure/docker/Dockerfile.web
+touch infrastructure/docker/docker-compose.yml
+
+# CONFIGURATION
+mkdir -p config/environments
+mkdir -p config/database
+mkdir -p config/logging
+touch config/environments/development.yml
+touch config/environments/testing.yml
+touch config/environments/staging.yml
+touch config/environments/production.yml
+touch config/environments/demo.yml
+
+# DATA ASSETS
+mkdir -p data/schemas
+mkdir -p data/migrations
+mkdir -p data/fixtures
+mkdir -p data/examples
+
+# AUTOMATION
+mkdir -p scripts/setup
+mkdir -p scripts/development
+mkdir -p scripts/deployment
+touch scripts/setup/install-dependencies.sh
+touch scripts/setup/initialize-database.sh
+touch scripts/development/run-local.sh
+touch scripts/development/reset-database.sh
+touch scripts/deployment/build-release.sh
+touch scripts/deployment/deploy-environment.sh
+
+# TEST SUITES
+mkdir -p tests/unit
+mkdir -p tests/integration
+mkdir -p tests/behavior
+mkdir -p tests/performance
+mkdir -p tests/chaos
+
+# DOCUMENTATION
+mkdir -p docs/architecture/decisions
+mkdir -p docs/architecture/diagrams
+mkdir -p docs/api
+mkdir -p docs/guides
+mkdir -p docs/runbooks
+touch docs/architecture/domain-model.md
+touch docs/api/openapi.yml
+touch docs/guides/quickstart.md
+touch docs/guides/agent-creation.md
+touch docs/guides/coalition-formation.md
+
+# Dev container and VS Code
+mkdir -p .devcontainer
+mkdir -p .vscode
+
+# Root level files
+touch Makefile
+touch pyproject.toml
+touch package.json
+touch README.md
+touch CONTRIBUTING.md
+touch CHANGELOG.md
+touch LICENSE
+touch SECURITY.md
+touch GOVERNANCE.md
+
+echo "FreeAgentics directory structure created successfully!"
+echo "Total directories created: $(find . -type d | wc -l)"
+echo "Total files created: $(find . -type f | wc -l)"

@@ -1,0 +1,103 @@
+codecov:
+  require_ci_to_pass: true
+  bot: "codecov-bot"
+
+coverage:
+  precision: 2
+  round: down
+  range: "70...100"
+
+  status:
+    project:
+      default:
+        target: 80%
+        threshold: 2%
+        base: auto
+        flags:
+          - frontend
+          - backend
+        if_not_found: success
+        if_ci_failed: error
+        informational: false
+        only_pulls: false
+
+      frontend:
+        target: 80%
+        flags:
+          - frontend
+        paths:
+          - "app/"
+          - "src/lib/"
+          - "src/hooks/"
+          - "src/contexts/"
+
+      backend:
+        target: 75%
+        flags:
+          - backend
+        paths:
+          - "src/"
+          - "!src/lib/"
+          - "!src/hooks/"
+          - "!src/contexts/"
+
+    patch:
+      default:
+        target: 80%
+        threshold: 5%
+        base: auto
+        if_not_found: success
+        if_ci_failed: error
+        informational: false
+        only_pulls: false
+
+parsers:
+  gcov:
+    branch_detection:
+      conditional: true
+      loop: true
+      method: false
+      macro: false
+
+comment:
+  layout: "reach,diff,flags,files,footer"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
+  show_carryforward_flags: false
+  show_critical_paths: true
+
+flags:
+  frontend:
+    paths:
+      - app/
+      - src/lib/
+      - src/hooks/
+      - src/contexts/
+    carryforward: false
+
+  backend:
+    paths:
+      - src/
+    carryforward: false
+
+ignore:
+  - "**/*.test.ts"
+  - "**/*.test.tsx"
+  - "**/*.spec.ts"
+  - "**/*.spec.tsx"
+  - "**/__tests__/**"
+  - "**/__mocks__/**"
+  - "**/node_modules/**"
+  - ".next/**"
+  - "coverage/**"
+  - "dist/**"
+  - "build/**"
+  - "scripts/**"
+  - "*.config.js"
+  - "*.config.ts"
+  - "**/*.d.ts"
+
+github_checks:
+  annotations: true

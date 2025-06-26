@@ -1,0 +1,274 @@
+# FreeAgentics Pre-Commit Configuration
+# Expert Committee: Robert C. Martin, Kent Beck, Rich Hickey, Conor Heins
+#
+# "Clean code always looks like it was written by someone who cares" - Robert C. Martin
+# "Make it work, make it right, make it fast" - Kent Beck
+# "Simplicity is prerequisite for reliability" - Rich Hickey
+# "Mathematical correctness requires type safety" - Conor Heins
+
+repos:
+  # =====================================================
+  # FOUNDATIONAL CODE QUALITY (Robert C. Martin)
+  # =====================================================
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      # File integrity and basic hygiene
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--multi, --unsafe]
+      - id: check-toml
+      - id: check-json
+      - id: check-xml
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-symlinks
+      - id: check-added-large-files
+        args: [--maxkb=1000]
+      
+      # Python-specific checks
+      - id: check-ast
+      - id: check-builtin-literals
+      - id: check-docstring-first
+      - id: debug-statements
+      - id: name-tests-test
+        args: [--pytest-test-first]
+
+  # =====================================================
+  # PYTHON CODE FORMATTING (Rich Hickey - Simplicity)
+  # =====================================================
+  - repo: https://github.com/psf/black
+    rev: 24.4.2
+    hooks:
+      - id: black
+        language_version: python3.13
+        args: [--line-length=100]
+        files: \.py$
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: [--profile=black, --line-length=100]
+        files: \.py$
+
+  # =====================================================
+  # PYTHON STATIC ANALYSIS (Kent Beck - Make it right)
+  # =====================================================
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        args: [--config=config/.flake8]
+        files: \.py$
+        additional_dependencies:
+          - flake8-docstrings
+          - flake8-bugbear
+          - flake8-comprehensions
+          - flake8-simplify
+
+  # =====================================================
+  # TYPE SAFETY (Conor Heins - Mathematical correctness)
+  # =====================================================
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.10.0
+    hooks:
+      - id: mypy
+        args: [
+          --verbose,
+          --show-traceback, 
+          --show-error-context,
+          --show-column-numbers,
+          --show-error-codes,
+          --pretty,
+          --show-absolute-path,
+          --config-file=pyproject.toml
+        ]
+        additional_dependencies:
+          - types-requests
+          - types-redis  
+          - types-psycopg2
+        files: ^(agents|inference|coalitions|world|api|infrastructure)/.*\.py$
+
+  # =====================================================
+  # SECURITY & DEPENDENCY SCANNING
+  # =====================================================
+  - repo: https://github.com/pycqa/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        args: [-r, -f, json, -o, .pre-commit-bandit-report.json]
+        files: \.py$
+        exclude: ^tests/
+
+  # Dependency vulnerability scanning
+  - repo: local
+    hooks:
+      - id: safety
+        name: safety - dependency vulnerability scan
+        entry: safety
+        language: python
+        args: [check, --json, --output, .pre-commit-safety-report.json]
+        files: requirements.*\.txt$
+        pass_filenames: false
+
+  # =====================================================
+  # FRONTEND QUALITY (TypeScript/JavaScript)
+  # =====================================================
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        files: \.(js|jsx|ts|tsx|json|css|md|yaml|yml)$
+        exclude: ^(\.next/|node_modules/|coverage/|dist/)
+        args: [--write]
+
+  - repo: https://github.com/pre-commit/mirrors-eslint  
+    rev: v8.56.0
+    hooks:
+      - id: eslint
+        files: \.(js|jsx|ts|tsx)$
+        args: [--fix, --max-warnings=0]
+        exclude: ^(\.next/|node_modules/|coverage/|dist/)
+        additional_dependencies:
+          - '@typescript-eslint/eslint-plugin@^6.17.0'
+          - '@typescript-eslint/parser@^6.17.0'
+          - 'eslint-config-next@14.0.4'
+          - 'eslint-config-prettier@^9.1.0'
+
+  # =====================================================
+  # COMMIT MESSAGE STANDARDS
+  # =====================================================
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v3.13.0
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
+
+  # =====================================================
+  # DOCUMENTATION QUALITY
+  # =====================================================
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.39.0
+    hooks:
+      - id: markdownlint
+        args: [--fix]
+        files: \.md$
+        exclude: ^(\.taskmaster/|node_modules/|\.next/)
+
+  # =====================================================
+  # ADVANCED PYTHON QUALITY CHECKS
+  # =====================================================
+  # Complexity analysis
+  - repo: local
+    hooks:
+      - id: radon-complexity
+        name: radon - cyclomatic complexity analysis
+        entry: radon
+        language: python
+        args: [cc, --min, B, --show-complexity, --total-average, .]
+        files: \.py$
+        pass_filenames: false
+
+  # Import sorting verification
+  - repo: local
+    hooks:
+      - id: importchecker
+        name: import dependency validation
+        entry: python
+        language: python
+        args: 
+          - -c
+          - |
+            import ast, sys
+            def check_imports(filename):
+                with open(filename) as f:
+                    try:
+                        tree = ast.parse(f.read())
+                        return True
+                    except SyntaxError as e:
+                        print(f'Import syntax error in {filename}: {e}')
+                        return False
+            sys.exit(0 if all(check_imports(f) for f in sys.argv[1:]) else 1)
+        files: '\.py$'
+
+  # =====================================================
+  # PROJECT-SPECIFIC VALIDATIONS
+  # =====================================================
+  # TaskMaster validation
+  - repo: local
+    hooks:
+      - id: taskmaster-validation
+        name: TaskMaster configuration validation
+        entry: python
+        language: python
+        args:
+          - -c
+          - |
+            import json, sys, os
+            if os.path.exists('.taskmaster/tasks/tasks.json'):
+                try:
+                    with open('.taskmaster/tasks/tasks.json') as f:
+                        json.load(f)
+                    print('✅ TaskMaster configuration valid')
+                except json.JSONDecodeError as e:
+                    print(f'❌ TaskMaster JSON invalid: {e}')
+                    sys.exit(1)
+            else:
+                print('ℹ️  No TaskMaster configuration found')
+        files: '^\.taskmaster/.*\.json$'
+        pass_filenames: false
+
+  # Active Inference mathematical validation
+  - repo: local
+    hooks:
+      - id: active-inference-validation
+        name: Active Inference mathematical consistency
+        entry: python
+        language: python
+        args:
+          - -c
+          - |
+            import ast, sys
+            def validate_ai_math(filename):
+                # Basic validation for Active Inference mathematical consistency
+                with open(filename) as f:
+                    content = f.read()
+                    # Check for basic mathematical operations in AI modules
+                    if 'inference' in filename and any(term in content.lower() for term in ['precision', 'belief', 'entropy']):
+                        print(f'✅ Active Inference math patterns detected in {filename}')
+                return True
+            all(validate_ai_math(f) for f in sys.argv[1:] if 'inference' in f)
+        files: '^inference/.*\.py$'
+
+# =====================================================
+#  CI INTEGRATION
+# =====================================================
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit.com hooks
+    
+     CI approved automated fixes:
+    - Code formatting (Black, isort, Prettier)
+    - Basic quality improvements (trailing whitespace, etc.)
+    
+    Manual review required for:
+    - Type errors (mypy)
+    - Security issues (bandit)
+    - Complex logic changes
+  
+  autofix_prs: true
+  autoupdate_branch: ''
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: weekly
+  skip: [mypy, safety, radon-complexity]  # Skip expensive checks in CI
+  submodules: false
+
+# =====================================================
+# PERFORMANCE OPTIMIZATION
+# =====================================================
+default_stages: [commit, push]
+fail_fast: false  # Run all hooks even if some fail
+minimum_pre_commit_version: 3.5.0

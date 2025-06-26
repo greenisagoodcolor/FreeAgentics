@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+# FreeAgentics Frontend Pre-Commit Hook
+# Expert Committee: Robert C. Martin, Kent Beck, Rich Hickey, Conor Heins
+#
+# "Clean code always looks like it was written by someone who cares" - Robert C. Martin
+# "Make it work, make it right, make it fast" - Kent Beck
+
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 FreeAgentics Frontend Quality Checks"
+echo "========================================"
+
+# Robert C. Martin: Clean code standards
+echo "📋 Running lint-staged (Expert Committee Standards)..."
+npm run precommit
+
+echo "✅ Frontend pre-commit checks completed!" 

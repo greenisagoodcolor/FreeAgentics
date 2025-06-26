@@ -1,0 +1,1581 @@
+openapi: 3.1.0
+info:
+  title: FreeAgentics API
+  description: |
+    The FreeAgentics API provides programmatic access to all platform features including agent management,
+    world simulation, knowledge graphs, and conversations. This API implements Active Inference principles
+    for emergent intelligence and collaborative behavior.
+  version: 1.0.0
+  contact:
+    name: FreeAgentics Support
+    url: https://freeagentics.ai/support
+    email: support@freeagentics.ai
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8000/api
+    description: Development server
+  - url: https://api.freeagentics.ai/api
+    description: Production server
+
+security:
+  - bearerAuth: []
+  - apiKeyAuth: []
+
+tags:
+  - name: Authentication
+    description: User authentication and token management
+  - name: Agents
+    description: Agent creation, management, and operations
+  - name: World
+    description: World state, hexes, and resources
+  - name: Simulation
+    description: Simulation control and status
+  - name: Knowledge
+    description: Knowledge graphs and information sharing
+  - name: Conversations
+    description: Agent communications
+  - name: GNN
+    description: Graph Neural Network processing
+
+paths:
+  /auth/token:
+    post:
+      summary: Get authentication token
+      description: Authenticate user and receive a bearer token for API access
+      tags:
+        - Authentication
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  example: secure_password
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agents:
+    get:
+      summary: List agents
+      description: Get a paginated list of agents with optional filtering
+      tags:
+        - Agents
+      parameters:
+        - $ref: '#/components/parameters/StatusParam'
+        - $ref: '#/components/parameters/ClassParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/OffsetParam'
+      responses:
+        '200':
+          description: List of agents
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentList'
+    post:
+      summary: Create agent
+      description: Create a new agent with specified personality and capabilities
+      tags:
+        - Agents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentCreate'
+      responses:
+        '201':
+          description: Agent created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentCreated'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agents/{agentId}:
+    parameters:
+      - $ref: '#/components/parameters/AgentIdParam'
+    get:
+      summary: Get agent details
+      description: Get detailed information about a specific agent
+      tags:
+        - Agents
+      responses:
+        '200':
+          description: Agent details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentDetail'
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      summary: Update agent
+      description: Update agent properties
+      tags:
+        - Agents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentUpdate'
+      responses:
+        '200':
+          description: Agent updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentDetail'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete agent
+      description: Delete an agent and all associated data
+      tags:
+        - Agents
+      responses:
+        '200':
+          description: Agent deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agents/{agentId}/state:
+    parameters:
+      - $ref: '#/components/parameters/AgentIdParam'
+    get:
+      summary: Get agent state history
+      description: Get the state transition history for an agent
+      tags:
+        - Agents
+      parameters:
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/OffsetParam'
+      responses:
+        '200':
+          description: Agent state history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentStateHistory'
+    put:
+      summary: Update agent state
+      description: Update the agent's state with validation
+      tags:
+        - Agents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentStateUpdate'
+      responses:
+        '200':
+          description: Agent state updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentState'
+
+  /agents/{agentId}/commands:
+    parameters:
+      - $ref: '#/components/parameters/AgentIdParam'
+    get:
+      summary: Get command history
+      description: Get the command execution history for an agent
+      tags:
+        - Agents
+      parameters:
+        - name: status
+          in: query
+          description: Filter by command status
+          schema:
+            type: string
+            enum: [queued, executing, completed, failed]
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/OffsetParam'
+      responses:
+        '200':
+          description: Command history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommandHistory'
+    post:
+      summary: Execute command
+      description: Execute a command on the agent
+      tags:
+        - Agents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommandExecute'
+      responses:
+        '202':
+          description: Command accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommandResponse'
+
+  /agents/{agentId}/commands/{commandId}:
+    parameters:
+      - $ref: '#/components/parameters/AgentIdParam'
+      - name: commandId
+        in: path
+        required: true
+        description: Command ID
+        schema:
+          type: string
+    get:
+      summary: Get command status
+      description: Get the status of a specific command
+      tags:
+        - Agents
+      responses:
+        '200':
+          description: Command status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommandDetail'
+
+  /agents/{agentId}/memory:
+    parameters:
+      - $ref: '#/components/parameters/AgentIdParam'
+    get:
+      summary: Query memories
+      description: Query the agent's memory system
+      tags:
+        - Agents
+      parameters:
+        - name: type
+          in: query
+          description: Memory type
+          schema:
+            type: string
+            enum: [event, interaction, location, pattern, general]
+        - name: query
+          in: query
+          description: Search query
+          schema:
+            type: string
+        - name: min_importance
+          in: query
+          description: Minimum importance (0-1)
+          schema:
+            type: number
+            minimum: 0
+            maximum: 1
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/OffsetParam'
+      responses:
+        '200':
+          description: Memory query results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemoryList'
+    post:
+      summary: Add memory
+      description: Add a new memory to the agent
+      tags:
+        - Agents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemoryCreate'
+      responses:
+        '201':
+          description: Memory created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Memory'
+
+  /agents/{agentId}/memory/{memoryId}:
+    parameters:
+      - $ref: '#/components/parameters/AgentIdParam'
+      - name: memoryId
+        in: path
+        required: true
+        description: Memory ID
+        schema:
+          type: string
+    delete:
+      summary: Delete memory
+      description: Delete a specific memory
+      tags:
+        - Agents
+      responses:
+        '200':
+          description: Memory deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+  /agents/{agentId}/memory/consolidate:
+    parameters:
+      - $ref: '#/components/parameters/AgentIdParam'
+    post:
+      summary: Consolidate memories
+      description: Trigger memory consolidation to optimize storage
+      tags:
+        - Agents
+      responses:
+        '200':
+          description: Memory consolidation initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsolidateResponse'
+
+  /agents/{agentId}/export:
+    parameters:
+      - $ref: '#/components/parameters/AgentIdParam'
+    post:
+      summary: Export agent
+      description: Export an agent for deployment to edge devices
+      tags:
+        - Agents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                target:
+                  type: string
+                  example: raspberry_pi_4b
+      responses:
+        '200':
+          description: Agent export initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportResponse'
+
+  /agents/{agentId}/readiness:
+    parameters:
+      - $ref: '#/components/parameters/AgentIdParam'
+    get:
+      summary: Evaluate readiness
+      description: Check if an agent is ready for deployment
+      tags:
+        - Agents
+      responses:
+        '200':
+          description: Agent readiness evaluation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+
+  /agents/{agentId}/gnn:
+    parameters:
+      - $ref: '#/components/parameters/AgentIdParam'
+    get:
+      summary: Get agent GNN model
+      description: Get the GNN model for a specific agent
+      tags:
+        - Agents
+        - GNN
+      responses:
+        '200':
+          description: Agent GNN model
+          content:
+            text/markdown:
+              schema:
+                type: string
+    put:
+      summary: Update agent GNN model
+      description: Update the GNN model for a specific agent
+      tags:
+        - Agents
+        - GNN
+      requestBody:
+        required: true
+        content:
+          text/markdown:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Agent GNN model updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GNNUpdateResponse'
+
+  /agents/{agentId}/knowledge:
+    parameters:
+      - $ref: '#/components/parameters/AgentIdParam'
+    get:
+      summary: Get agent knowledge graph
+      description: Get the knowledge graph for a specific agent
+      tags:
+        - Knowledge
+      responses:
+        '200':
+          description: Agent knowledge graph
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeGraph'
+
+  /agents/{agentId}/knowledge/query:
+    parameters:
+      - $ref: '#/components/parameters/AgentIdParam'
+    post:
+      summary: Query knowledge
+      description: Query the agent's knowledge graph
+      tags:
+        - Knowledge
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KnowledgeQuery'
+      responses:
+        '200':
+          description: Knowledge query results
+
+  /agents/{agentId}/belief-state:
+    parameters:
+      - $ref: '#/components/parameters/AgentIdParam'
+    get:
+      summary: Get agent belief state
+      description: Get the current belief state for an Active Inference agent
+      tags:
+        - Agents
+        - Active Inference
+      responses:
+        '200':
+          description: Current belief state
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agentId:
+                    type: string
+                    example: "agent_456"
+                  beliefState:
+                    $ref: '#/components/schemas/BeliefState'
+                  stateLabels:
+                    type: array
+                    items:
+                      type: string
+                    example: ["idle", "exploring", "resource_gathering", "social"]
+                  freeEnergy:
+                    $ref: '#/components/schemas/FreeEnergyData'
+        '404':
+          description: Agent not found or not using Active Inference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      summary: Update agent belief state
+      description: Update the belief state based on new observations
+      tags:
+        - Agents
+        - Active Inference
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                beliefs:
+                  type: array
+                  items:
+                    type: number
+                    minimum: 0
+                    maximum: 1
+                  example: [0.05, 0.8, 0.1, 0.05]
+                observations:
+                  type: array
+                  items:
+                    type: number
+                  example: [1, 0, 0, 1, 0, 0, 1, 0]
+      responses:
+        '200':
+          description: Belief state updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeliefState'
+
+  /agents/{agentId}/free-energy:
+    parameters:
+      - $ref: '#/components/parameters/AgentIdParam'
+    get:
+      summary: Get free energy history
+      description: Get the variational free energy history for temporal analysis
+      tags:
+        - Agents
+        - Active Inference
+      parameters:
+        - name: timeWindow
+          in: query
+          description: Time window in milliseconds
+          schema:
+            type: integer
+            default: 3600000
+            example: 3600000
+        - name: granularity
+          in: query
+          description: Data point granularity in milliseconds
+          schema:
+            type: integer
+            default: 1000
+            example: 1000
+      responses:
+        '200':
+          description: Free energy time series data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agentId:
+                    type: string
+                    example: "agent_456"
+                  timeWindow:
+                    type: integer
+                    example: 3600000
+                  dataPoints:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        timestamp:
+                          type: number
+                          example: 1703875200000
+                        freeEnergy:
+                          type: number
+                          example: 2.34
+                        accuracy:
+                          type: number
+                          example: 1.89
+                        complexity:
+                          type: number
+                          example: 0.45
+                        expectedFreeEnergy:
+                          type: number
+                          example: 1.67
+
+  /agents/{agentId}/precision:
+    parameters:
+      - $ref: '#/components/parameters/AgentIdParam'
+    get:
+      summary: Get precision parameters
+      description: Get the current precision parameters for an Active Inference agent
+      tags:
+        - Agents
+        - Active Inference
+      responses:
+        '200':
+          description: Current precision parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agentId:
+                    type: string
+                    example: "agent_456"
+                  precisionParameters:
+                    $ref: '#/components/schemas/PrecisionParameters'
+                  adaptiveRates:
+                    type: object
+                    properties:
+                      sensory:
+                        type: number
+                        example: 0.1
+                      policy:
+                        type: number
+                        example: 0.05
+                      state:
+                        type: number
+                        example: 0.02
+    put:
+      summary: Update precision parameters
+      description: Update the precision parameters for fine-tuning agent behavior
+      tags:
+        - Agents
+        - Active Inference
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrecisionParameters'
+      responses:
+        '200':
+          description: Precision parameters updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrecisionParameters'
+
+  /knowledge/share:
+    post:
+      summary: Share knowledge
+      description: Share knowledge between agents
+      tags:
+        - Knowledge
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KnowledgeShare'
+      responses:
+        '200':
+          description: Knowledge shared successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeShareResult'
+
+  /world:
+    get:
+      summary: Get world state
+      description: Get the current state of the world
+      tags:
+        - World
+      responses:
+        '200':
+          description: World state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorldState'
+    patch:
+      summary: Update world
+      description: Update world properties
+      tags:
+        - World
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorldUpdate'
+      responses:
+        '200':
+          description: World updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorldUpdateResult'
+
+  /world/hex/{hexId}:
+    parameters:
+      - name: hexId
+        in: path
+        required: true
+        description: Hex ID
+        schema:
+          type: string
+    get:
+      summary: Get hex details
+      description: Get detailed information about a specific hex
+      tags:
+        - World
+      responses:
+        '200':
+          description: Hex details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HexDetail'
+
+  /world/visible:
+    get:
+      summary: Get visible hexes
+      description: Get hexes visible to the specified agent
+      tags:
+        - World
+      parameters:
+        - name: agent_id
+          in: query
+          required: true
+          description: Agent ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Visible hexes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VisibleHexes'
+
+  /simulation/start:
+    post:
+      summary: Start simulation
+      description: Start the simulation
+      tags:
+        - Simulation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulationStart'
+      responses:
+        '200':
+          description: Simulation started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationResponse'
+
+  /simulation/pause:
+    post:
+      summary: Pause simulation
+      description: Pause the simulation
+      tags:
+        - Simulation
+      responses:
+        '200':
+          description: Simulation paused
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationResponse'
+
+  /simulation/resume:
+    post:
+      summary: Resume simulation
+      description: Resume the simulation
+      tags:
+        - Simulation
+      responses:
+        '200':
+          description: Simulation resumed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationResponse'
+
+  /simulation/stop:
+    post:
+      summary: Stop simulation
+      description: Stop the simulation
+      tags:
+        - Simulation
+      responses:
+        '200':
+          description: Simulation stopped
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationResponse'
+
+  /simulation/status:
+    get:
+      summary: Get simulation status
+      description: Get the current status of the simulation
+      tags:
+        - Simulation
+      responses:
+        '200':
+          description: Simulation status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationStatus'
+
+  /simulation/step:
+    post:
+      summary: Step simulation
+      description: Step the simulation forward
+      tags:
+        - Simulation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                steps:
+                  type: integer
+                  minimum: 1
+                  default: 1
+      responses:
+        '200':
+          description: Simulation stepped
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationStepResponse'
+
+  /conversations:
+    get:
+      summary: Get conversations
+      description: Get a list of conversations
+      tags:
+        - Conversations
+      parameters:
+        - name: agent_id
+          in: query
+          description: Filter by participant
+          schema:
+            type: string
+        - name: since
+          in: query
+          description: Timestamp for recent conversations
+          schema:
+            type: string
+            format: date-time
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Conversations list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationList'
+
+  /gnn/models:
+    get:
+      summary: List available models
+      description: Get information about available GNN architectures and their parameters
+      tags:
+        - GNN
+      responses:
+        '200':
+          description: Available models
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GNNModelList'
+
+  /gnn/process:
+    post:
+      summary: Process graph
+      description: Submit a graph for processing with a specified model and task
+      tags:
+        - GNN
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GNNProcessRequest'
+      responses:
+        '200':
+          description: Graph processing initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GNNProcessResponse'
+
+  /gnn/jobs/{jobId}:
+    parameters:
+      - name: jobId
+        in: path
+        required: true
+        description: Job ID
+        schema:
+          type: string
+    get:
+      summary: Check job status
+      description: Monitor the status of a processing job
+      tags:
+        - GNN
+      responses:
+        '200':
+          description: Job status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GNNJobStatus'
+    delete:
+      summary: Cancel job
+      description: Cancel a queued or processing job
+      tags:
+        - GNN
+      responses:
+        '200':
+          description: Job cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GNNCancelResponse'
+
+  /gnn/jobs/{jobId}/results:
+    parameters:
+      - name: jobId
+        in: path
+        required: true
+        description: Job ID
+        schema:
+          type: string
+    get:
+      summary: Get job results
+      description: Retrieve the results of a completed job
+      tags:
+        - GNN
+      responses:
+        '200':
+          description: Job results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GNNJobResults'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+
+  parameters:
+    AgentIdParam:
+      name: agentId
+      in: path
+      required: true
+      description: Agent ID
+      schema:
+        type: string
+    StatusParam:
+      name: status
+      in: query
+      description: Filter by status
+      schema:
+        type: string
+        enum: [active, inactive, all]
+    ClassParam:
+      name: class
+      in: query
+      description: Filter by agent class
+      schema:
+        type: string
+        enum: [Explorer, Merchant, Scholar, Guardian]
+    LimitParam:
+      name: limit
+      in: query
+      description: Number of results per page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    OffsetParam:
+      name: offset
+      in: query
+      description: Pagination offset
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Error message"
+        details:
+          type: object
+          additionalProperties: true
+          example: {"field": "Additional error context"}
+
+    AuthToken:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: "eyJ0eXAiOiJKV1QiLCJhbGc..."
+        token_type:
+          type: string
+          example: "bearer"
+        expires_in:
+          type: integer
+          example: 3600
+
+    AgentList:
+      type: object
+      properties:
+        agents:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentSummary'
+        total:
+          type: integer
+          example: 42
+        limit:
+          type: integer
+          example: 20
+        offset:
+          type: integer
+          example: 0
+
+    AgentSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "agent_123"
+        name:
+          type: string
+          example: "CuriousExplorer"
+        class:
+          type: string
+          example: "Explorer"
+        status:
+          type: string
+          example: "active"
+        personality:
+          $ref: '#/components/schemas/Personality'
+        position:
+          $ref: '#/components/schemas/Position'
+        resources:
+          type: object
+          additionalProperties:
+            type: number
+          example: {"energy": 75, "materials": 20, "knowledge": 35}
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    AgentDetail:
+      allOf:
+        - $ref: '#/components/schemas/AgentSummary'
+        - type: object
+          properties:
+            gnn_model:
+              type: object
+              properties:
+                model_name:
+                  type: string
+                  example: "CuriousExplorer"
+                version:
+                  type: string
+                  example: "1.0"
+                beliefs:
+                  type: array
+                  items:
+                    type: object
+                preferences:
+                  type: object
+                policies:
+                  type: array
+                  items:
+                    type: object
+            knowledge_graph:
+              type: object
+              properties:
+                nodes:
+                  type: integer
+                  example: 45
+                edges:
+                  type: integer
+                  example: 67
+                patterns:
+                  type: integer
+                  example: 12
+            stats:
+              type: object
+              additionalProperties:
+                type: number
+              example: {"distance_traveled": 234, "resources_gathered": 89}
+
+    AgentCreate:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: "MathematicalExplorer"
+        personality:
+          $ref: '#/components/schemas/Personality'
+          description: "Legacy personality system for backward compatibility"
+        activeInference:
+          $ref: '#/components/schemas/ActiveInferenceConfig'
+          description: "Active Inference mathematical configuration"
+        capabilities:
+          type: array
+          items:
+          type: string
+            enum: [movement, perception, communication, planning, learning, memory, resource_management, social_interaction]
+          example: ["movement", "perception", "communication", "planning"]
+        initialPosition:
+          type: object
+          properties:
+            x:
+              type: number
+              example: 0
+            y:
+              type: number
+              example: 0
+            z:
+              type: number
+              example: 0
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["active-inference", "mathematical"]
+        metadata:
+          type: object
+          additionalProperties: true
+          example: {"templateType": "explorer"}
+
+    AgentCreated:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "agent_456"
+        name:
+          type: string
+          example: "WiseScholar"
+        status:
+          type: string
+          example: "created"
+        gnn_model_url:
+          type: string
+          example: "/api/agents/agent_456/gnn"
+
+    AgentUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "WiseScholar v2"
+        status:
+          type: string
+          enum: [active, inactive]
+          example: "inactive"
+        notes:
+          type: string
+          example: "Pausing for maintenance"
+
+    DeleteResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Agent agent_1 deleted successfully"
+        deleted_at:
+          type: string
+          format: date-time
+
+    Personality:
+      type: object
+      properties:
+        openness:
+          type: number
+          minimum: 0
+          maximum: 100
+          example: 80
+        conscientiousness:
+          type: number
+          minimum: 0
+          maximum: 100
+          example: 70
+        extraversion:
+          type: number
+          minimum: 0
+          maximum: 100
+          example: 60
+        agreeableness:
+          type: number
+          minimum: 0
+          maximum: 100
+          example: 75
+        neuroticism:
+          type: number
+          minimum: 0
+          maximum: 100
+          example: 30
+
+    Position:
+      type: object
+      properties:
+        hex:
+          type: string
+          example: "8928308280fffff"
+        x:
+          type: number
+          example: 10
+        y:
+          type: number
+          example: 15
+
+    ActiveInferenceConfig:
+      type: object
+      required:
+        - template
+        - stateLabels
+        - numStates
+        - numObservations
+        - numActions
+        - generativeModel
+        - precisionParameters
+      properties:
+        template:
+          type: string
+          enum: [explorer, guardian, merchant, scholar]
+          example: "explorer"
+        stateLabels:
+          type: array
+          items:
+            type: string
+          example: ["idle", "exploring", "resource_gathering", "social"]
+        numStates:
+          type: integer
+          minimum: 1
+          maximum: 20
+          example: 4
+        numObservations:
+          type: integer
+          minimum: 1
+          maximum: 20
+          example: 8
+        numActions:
+          type: integer
+          minimum: 1
+          maximum: 10
+          example: 6
+        generativeModel:
+          $ref: '#/components/schemas/GenerativeModel'
+        precisionParameters:
+          $ref: '#/components/schemas/PrecisionParameters'
+        beliefState:
+          $ref: '#/components/schemas/BeliefState'
+        mathematicalConstraints:
+          type: object
+          properties:
+            normalizedBeliefs:
+              type: boolean
+              default: true
+            stochasticMatrices:
+              type: boolean
+              default: true
+            precisionBounds:
+              type: boolean
+              default: true
+
+    BeliefState:
+      type: object
+      required:
+        - beliefs
+        - entropy
+        - confidence
+        - mostLikelyState
+        - timestamp
+      properties:
+        beliefs:
+          type: array
+          items:
+            type: number
+            minimum: 0
+            maximum: 1
+          description: "q(s) - belief distribution over states"
+          example: [0.25, 0.25, 0.25, 0.25]
+        entropy:
+          type: number
+          minimum: 0
+          description: "H[q(s)] - Shannon entropy of beliefs"
+          example: 1.386
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: "1 - normalized entropy"
+          example: 0.0
+        mostLikelyState:
+          type: integer
+          minimum: 0
+          description: "Index of most probable state"
+          example: 0
+        timestamp:
+          type: number
+          description: "Unix timestamp in milliseconds"
+          example: 1703875200000
+
+    GenerativeModel:
+      type: object
+      required:
+        - A
+        - B
+        - C
+        - D
+      properties:
+        A:
+          type: array
+          items:
+            type: array
+            items:
+              type: number
+          description: "Observation model matrix (numObservations x numStates)"
+          example: [[0.9, 0.1, 0.0, 0.0], [0.1, 0.8, 0.1, 0.0]]
+        B:
+          type: array
+          items:
+            type: array
+            items:
+              type: array
+              items:
+                type: number
+          description: "Transition model tensor (numActions x numStates x numStates)"
+          example: [[[0.8, 0.1, 0.05, 0.05]]]
+        C:
+          type: array
+          items:
+            type: number
+          description: "Prior preferences over observations"
+          example: [1.0, 0.5, 0.8, 0.3]
+        D:
+          type: array
+          items:
+            type: number
+          description: "Initial beliefs over states"
+          example: [0.25, 0.25, 0.25, 0.25]
+
+    PrecisionParameters:
+      type: object
+      required:
+        - sensory
+        - policy
+        - state
+      properties:
+        sensory:
+          type: number
+          minimum: 0.1
+          maximum: 100
+          description: "γ - sensory precision parameter"
+          example: 2.0
+        policy:
+          type: number
+          minimum: 0.1
+          maximum: 100
+          description: "β - policy precision parameter"
+          example: 1.5
+        state:
+          type: number
+          minimum: 0.1
+          maximum: 100
+          description: "α - state precision parameter"
+          example: 1.0
+
+    FreeEnergyData:
+      type: object
+      properties:
+        total:
+          type: number
+          description: "Total variational free energy F"
+          example: 2.34
+        accuracy:
+          type: number
+          description: "Accuracy term -E_q[ln p(o|s)]"
+          example: 1.89
+        complexity:
+          type: number
+          description: "Complexity term D_KL[q(s)||p(s)]"
+          example: 0.45
+        expectedFreeEnergy:
+          type: number
+          description: "Expected free energy G(π)"
+          example: 1.67
+
+    # Additional schemas would be defined here for all the other components
+    # For brevity, we're including just a subset of the full schema definitions
+
+    WorldState:
+      type: object
+      properties:
+        dimensions:
+          type: object
+          properties:
+            radius:
+              type: integer
+              example: 20
+            total_hexes:
+              type: integer
+              example: 1261
+        biomes:
+          type: object
+          additionalProperties:
+            type: integer
+          example: {"forest": 315, "plains": 378}
+        resources:
+          type: object
+          properties:
+            total:
+              type: integer
+              example: 450
+            by_type:
+              type: object
+              additionalProperties:
+                type: integer
+              example: {"energy": 150, "materials": 200}
+        agents:
+          type: object
+          properties:
+            active:
+              type: integer
+              example: 15
+            total:
+              type: integer
+              example: 23
+
+    GNNProcessRequest:
+      type: object
+      required:
+        - graph
+        - model
+      properties:
+        graph:
+          type: object
+          properties:
+            nodes:
+              type: array
+              items:
+                $ref: '#/components/schemas/GraphNode'
+            edges:
+              type: array
+              items:
+                $ref: '#/components/schemas/GraphEdge'
+        model:
+          type: object
+          properties:
+            architecture:
+              type: string
+              example: "gcn"
+            task:
+              type: string
+              enum: [node_classification, graph_classification, link_prediction]
+            config:
+              type: object
+              additionalProperties: true
+        options:
+          type: object
+          properties:
+            batch_size:
+              type: integer
+              example: 32
+            return_embeddings:
+              type: boolean
+              example: true
+
+    GraphNode:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          example: "node1"
+        features:
+          type: object
+          additionalProperties: true
+          example: {"degree": 3, "pagerank": 0.15}
+        position:
+          type: object
+          properties:
+            lat:
+              type: number
+              example: 40.7128
+            lon:
+              type: number
+              example: -74.006
+
+    GraphEdge:
+      type: object
+      required:
+        - source
+        - target
+      properties:
+        source:
+          type: string
+          example: "node1"
+        target:
+          type: string
+          example: "node2"
+        weight:
+          type: number
+          example: 0.8
+        type:
+          type: string
+          example: "connection"

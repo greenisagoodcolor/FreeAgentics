@@ -1,0 +1,84 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+
+# Production
+build/
+dist/
+
+# Testing
+coverage/
+
+# Environment
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Generated files
+*.generated.ts
+*.generated.js
+*.min.js
+*.min.css
+
+# Public assets
+public/
+
+# Python files
+*.py
+__pycache__/
+
+# Database
+*.db
+*.sqlite
+migrations/
+
+# Git
+.git/
+.gitignore
+
+# Documentation images
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+
+# Other binary files
+*.pdf
+*.zip
+*.tar.gz
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Build artifacts
+*.map
+
+# License files
+LICENSE*
+
+# Taskmaster
+.taskmaster/

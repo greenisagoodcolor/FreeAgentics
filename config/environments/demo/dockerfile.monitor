@@ -1,0 +1,22 @@
+# Demo Monitor Dashboard Dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json package-lock.json* ./
+RUN npm ci
+
+# Copy monitor application
+COPY scripts/demo/monitor/ ./
+
+# Install additional dependencies for monitoring
+RUN npm install --save \
+    recharts \
+    @tremor/react \
+    date-fns
+
+EXPOSE 3000
+
+# Start the monitoring dashboard
+CMD ["npm", "run", "dev"]

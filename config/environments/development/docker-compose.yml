@@ -1,0 +1,98 @@
+version: "3.8"
+
+services:
+  # Frontend Next.js application
+  frontend:
+    build:
+      context: ../..
+      dockerfile: docker/development/Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../../app:/app/app
+      - ../../components:/app/components
+      - ../../contexts:/app/contexts
+      - ../../hooks:/app/hooks
+      - ../../lib:/app/lib
+      - ../../public:/app/public
+      - ../../styles:/app/styles
+    environment:
+      - NODE_ENV=development
+    env_file:
+      - ../../environments/.env.development
+    depends_on:
+      - backend
+      - postgres
+      - redis
+
+  # Backend Python API
+  backend:
+    build:
+      context: ../..
+      dockerfile: docker/development/Dockerfile.backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../../src:/app/src
+      - ../../models:/app/models
+      - ../../tests:/app/tests
+    environment:
+      - PYTHONUNBUFFERED=1
+      - API_RELOAD=true
+    env_file:
+      - ../../environments/.env.development
+    depends_on:
+      - postgres
+      - redis
+
+  # MCP Server
+  mcp:
+    build:
+      context: ../..
+      dockerfile: docker/development/Dockerfile.mcp
+    ports:
+      - "8001:8001"
+    volumes:
+      - ../../src:/app/src
+      - ../../.taskmaster:/app/.taskmaster
+    env_file:
+      - ../../environments/.env.development
+    depends_on:
+      - backend
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=freeagentics
+      - POSTGRES_PASSWORD=dev_password
+      - POSTGRES_DB=freeagentics_dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # Development tools
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  freeagentics:
+    driver: bridge
+    name: freeagentics_dev_network

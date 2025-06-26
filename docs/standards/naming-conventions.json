@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FreeAgentics Naming Conventions",
+  "version": "1.0.0",
+  "description": "Machine-readable naming conventions for automated validation",
+
+  "fileNaming": {
+    "python": {
+      "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*\\.py$",
+      "description": "kebab-case",
+      "examples": ["agent-manager.py", "belief-update.py"],
+      "testPattern": "^test-[a-z][a-z0-9]*(-[a-z0-9]+)*\\.py$",
+      "privatePattern": "^_[a-z][a-z0-9]*(-[a-z0-9]+)*\\.py$"
+    },
+    "typescript": {
+      "components": {
+        "pattern": "^[A-Z][a-zA-Z0-9]*\\.tsx$",
+        "description": "PascalCase for React components",
+        "examples": ["AgentDashboard.tsx", "BeliefVisualizer.tsx"]
+      },
+      "utilities": {
+        "pattern": "^[a-z][a-zA-Z0-9]*\\.ts$",
+        "description": "camelCase for utilities",
+        "examples": ["apiClient.ts", "beliefUtils.ts"]
+      },
+      "hooks": {
+        "pattern": "^use[A-Z][a-zA-Z0-9]*\\.ts$",
+        "description": "camelCase with 'use' prefix",
+        "examples": ["useAgentState.ts", "useBeliefUpdate.ts"]
+      },
+      "testPattern": "^[a-zA-Z0-9]+\\.test\\.(ts|tsx)$"
+    },
+    "configuration": {
+      "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*\\.(yml|yaml|json|js|ts)$",
+      "description": "kebab-case for config files",
+      "examples": ["docker-compose.yml", "jest-config.js"]
+    }
+  },
+
+  "codeNaming": {
+    "python": {
+      "classes": {
+        "pattern": "^[A-Z][a-zA-Z0-9]*$",
+        "description": "PascalCase",
+        "examples": ["BaseAgent", "ExplorerAgent", "BeliefState"]
+      },
+      "methods": {
+        "pattern": "^[a-z_][a-z0-9_]*$",
+        "description": "snake_case, verb phrases",
+        "examples": ["update_beliefs", "calculate_free_energy"],
+        "privatePattern": "^_[a-z][a-z0-9_]*$"
+      },
+      "variables": {
+        "pattern": "^[a-z_][a-z0-9_]*$",
+        "description": "snake_case",
+        "examples": ["belief_state", "learning_rate"],
+        "privatePattern": "^_[a-z][a-z0-9_]*$"
+      },
+      "constants": {
+        "pattern": "^[A-Z][A-Z0-9_]*$",
+        "description": "UPPER_SNAKE_CASE",
+        "examples": ["MAX_BELIEF_PRECISION", "DEFAULT_LEARNING_RATE"]
+      }
+    },
+    "typescript": {
+      "interfaces": {
+        "pattern": "^I[A-Z][a-zA-Z0-9]*$",
+        "description": "PascalCase with 'I' prefix for domain interfaces",
+        "examples": ["IAgent", "IBeliefState"]
+      },
+      "types": {
+        "pattern": "^[A-Z][a-zA-Z0-9]*$",
+        "description": "PascalCase",
+        "examples": ["AgentConfig", "BeliefUpdate"]
+      },
+      "components": {
+        "pattern": "^[A-Z][a-zA-Z0-9]*$",
+        "description": "PascalCase",
+        "examples": ["AgentCreator", "BeliefVisualizer"]
+      },
+      "functions": {
+        "pattern": "^[a-z][a-zA-Z0-9]*$",
+        "description": "camelCase, verb phrases",
+        "examples": ["calculateBeliefEntropy", "updateAgentState"]
+      },
+      "eventHandlers": {
+        "pattern": "^handle[A-Z][a-zA-Z0-9]*$",
+        "description": "camelCase with 'handle' prefix",
+        "examples": ["handleCreateAgent", "handleBeliefUpdate"]
+      },
+      "hooks": {
+        "pattern": "^use[A-Z][a-zA-Z0-9]*$",
+        "description": "camelCase with 'use' prefix",
+        "examples": ["useAgentStore", "useBeliefState"]
+      },
+      "constants": {
+        "pattern": "^[A-Z][A-Z0-9_]*$",
+        "description": "UPPER_SNAKE_CASE",
+        "examples": ["MAX_AGENTS", "DEFAULT_TIMEOUT"]
+      },
+      "enums": {
+        "namePattern": "^[A-Z][a-zA-Z0-9]*$",
+        "valuePattern": "^[A-Z][a-zA-Z0-9]*$",
+        "description": "PascalCase for both enum names and values"
+      }
+    }
+  },
+
+  "database": {
+    "tables": {
+      "pattern": "^[a-z][a-z0-9_]*s$",
+      "description": "snake_case plural",
+      "examples": ["agents", "belief_states", "coalition_formations"]
+    },
+    "columns": {
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "snake_case",
+      "examples": ["agent_id", "created_at", "belief_precision"]
+    },
+    "indexes": {
+      "pattern": "^idx_[a-z0-9_]+$",
+      "description": "idx_{table}_{columns}",
+      "examples": ["idx_agents_status_created_at"]
+    },
+    "foreignKeys": {
+      "pattern": "^fk_[a-z0-9_]+_[a-z0-9_]+$",
+      "description": "fk_{table}_{referenced_table}",
+      "examples": ["fk_beliefs_agents"]
+    }
+  },
+
+  "api": {
+    "endpoints": {
+      "patterns": [
+        "^/api/v[0-9]+/[a-z][a-z0-9-]*(/[a-z][a-z0-9-]*)*$",
+        "^/api/v[0-9]+/[a-z][a-z0-9-]*/:[a-z][a-zA-Z0-9]*(/[a-z][a-z0-9-]*)*$"
+      ],
+      "description": "RESTful endpoints with kebab-case resources",
+      "examples": [
+        "/api/v1/agents",
+        "/api/v1/agents/:id",
+        "/api/v1/agents/:id/beliefs"
+      ]
+    }
+  },
+
+  "git": {
+    "branches": {
+      "feature": "^feature/[a-z][a-z0-9-]*$",
+      "bugfix": "^fix/[a-z][a-z0-9-]*$",
+      "refactor": "^refactor/[a-z][a-z0-9-]*$",
+      "docs": "^docs/[a-z][a-z0-9-]*$"
+    },
+    "commits": {
+      "pattern": "^(feat|fix|docs|refactor|test|chore)(\\([a-z][a-z0-9-]*\\))?:",
+      "description": "Conventional Commits format"
+    }
+  },
+
+  "prohibitedTerms": [
+    {
+      "term": "PlayerAgent",
+      "replacement": "ExplorerAgent",
+      "reason": "Gaming terminology"
+    },
+    {
+      "term": "NPCAgent",
+      "replacement": "AutonomousAgent",
+      "reason": "Gaming terminology"
+    },
+    {
+      "term": "EnemyAgent",
+      "replacement": "CompetitiveAgent",
+      "reason": "Gaming terminology"
+    },
+    {
+      "term": "GameWorld",
+      "replacement": "Environment",
+      "reason": "Gaming terminology"
+    },
+    {
+      "term": "spawn",
+      "replacement": "initialize",
+      "reason": "Gaming terminology"
+    },
+    {
+      "term": "respawn",
+      "replacement": "reset",
+      "reason": "Gaming terminology"
+    },
+    {
+      "term": "cogniticnet",
+      "replacement": "freeagentics",
+      "reason": "Old project name"
+    },
+    {
+      "term": "CogniticNet",
+      "replacement": "FreeAgentics",
+      "reason": "Old project name"
+    }
+  ]
+}

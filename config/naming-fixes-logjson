@@ -1,0 +1,123 @@
+{
+  "dry_run": false,
+  "fixed_count": 36,
+  "error_count": 0,
+  "changes": [
+    {
+      "type": "prohibited_term",
+      "file": "./validate_migration.py",
+      "old": "cogniticnet",
+      "new": "freeagentics"
+    },
+    {
+      "type": "prohibited_term",
+      "file": "./validate_migration.py",
+      "old": "CogniticNet",
+      "new": "FreeAgentics"
+    },
+    {
+      "type": "prohibited_term",
+      "file": "./src/simulation/engine.py",
+      "old": "spawn",
+      "new": "initialize"
+    },
+    {
+      "type": "prohibited_term",
+      "file": "./src/models/simulation.py",
+      "old": "spawn",
+      "new": "initialize"
+    },
+    {
+      "type": "prohibited_term",
+      "file": "./src/models/validated_models.py",
+      "old": "spawn",
+      "new": "initialize"
+    },
+    {
+      "type": "prohibited_term",
+      "file": "./scripts/cogniticnet-cli.js",
+      "old": "spawn",
+      "new": "initialize"
+    },
+    {
+      "type": "file_rename",
+      "old_path": "./update_import_paths.py",
+      "new_path": "./update-import-paths.py"
+    },
+    {
+      "type": "file_rename",
+      "old_path": "./validate_migration.py",
+      "new_path": "./validate-migration.py"
+    },
+    {
+      "type": "file_rename",
+      "old_path": "./migrate_to_freeagentics.py",
+      "new_path": "./migrate-to-freeagentics.py"
+    },
+    {
+      "type": "file_rename",
+      "old_path": "./environments/demo/scenario_runner.py",
+      "new_path": "./environments/demo/scenario-runner.py"
+    },
+    {
+      "type": "file_rename",
+      "old_path": "./environments/demo/demo_simulator.py",
+      "new_path": "./environments/demo/demo-simulator.py"
+    },
+    {
+      "type": "file_rename",
+      "old_path": "./tests/test_gnn_structure.py",
+      "new_path": "./tests/test-gnn-structure.py"
+    },
+    {
+      "type": "file_rename",
+      "old_path": "./web/src/components/memory-viewer.tsx",
+      "new_path": "./web/src/components/MemoryViewer.tsx"
+    },
+    {
+      "type": "file_rename",
+      "old_path": "./web/src/components/theme-provider.tsx",
+      "new_path": "./web/src/components/ThemeProvider.tsx"
+    },
+    {
+      "type": "file_rename",
+      "old_path": "./web/src/components/about-modal.tsx",
+      "new_path": "./web/src/components/AboutModal.tsx"
+    },
+    {
+      "type": "file_rename",
+      "old_path": "./web/src/components/agent-dashboard.tsx",
+      "new_path": "./web/src/components/AgentDashboard.tsx"
+    },
+    {
+      "type": "file_rename",
+      "old_path": "./web/src/components/error-boundary.tsx",
+      "new_path": "./web/src/components/ErrorBoundary.tsx"
+    },
+    {
+      "type": "file_rename",
+      "old_path": "./web/src/components/grid-world.tsx",
+      "new_path": "./web/src/components/GridWorld.tsx"
+    },
+    {
+      "type": "file_rename",
+      "old_path": "./web/src/components/agent-card.tsx",
+      "new_path": "./web/src/components/AgentCard.tsx"
+    },
+    {
+      "type": "file_rename",
+      "old_path": "./web/src/components/nav-bar.tsx",
+      "new_path": "./web/src/components/NavBar.tsx"
+    },
+    {
+      "type": "file_rename",
+      "old_path": "./web/src/components/llm-test.tsx",
+      "new_path": "./web/src/components/LlmTest.tsx"
+    },
+    {
+      "type": "file_rename",
+      "old_path": "./web/src/components/agent-belief-visualizer.tsx",
+      "new_path": "./web/src/components/AgentBeliefVisualizer.tsx"
+    }
+  ]
+}

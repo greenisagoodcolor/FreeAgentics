@@ -1,0 +1,43 @@
+# Task ID: 21
+# Title: Develop Guided Demo Mode and Progressive Disclosure
+# Status: pending
+# Dependencies: 3, 20
+# Priority: low
+# Description: Implement guided demo mode and progressive disclosure for new users.
+# Details:
+Build guided demo mode in Next.js. Add progressive disclosure for complex features. Use tooltips and walkthroughs.
+
+# Test Strategy:
+Test demo mode, progressive disclosure, and user onboarding.
+
+# Subtasks:
+## 1. Design and Implement Guided Walkthrough Architecture [pending]
+### Dependencies: None
+### Description: Develop the foundational architecture for guided walkthroughs in demo mode, ensuring modularity, scalability, and maintainability. Incorporate expert committee debate on architectural patterns (e.g., MVC vs. functional core/imperative shell), state management, and extensibility. Robert C. Martin and Martin Fowler will advocate for clean architecture and separation of concerns, while Rich Hickey will emphasize simplicity and immutability. Conor Heins and Alexander Tschantz will contribute perspectives on cognitive load and user learning pathways. Architectural decisions must balance mathematical rigor (e.g., state transition models) and production-readiness (e.g., error handling, performance).
+### Details:
+Establish a modular codebase for walkthrough steps, define state machines for user progress, and document architectural trade-offs discussed by the committee.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 2. Develop Progressive Disclosure Logic [pending]
+### Dependencies: 21.1
+### Description: Implement logic for progressive disclosure, revealing information contextually as users advance through the demo. Kent Beck and Martin Fowler will debate test-driven development and refactoring strategies, while Andy Clark, Jakob Hohwy, and Anil Seth will provide insights on predictive processing and user attention. Yann LeCun and Geoffrey Hinton will discuss the use of machine learning for adaptive disclosure. Mathematical rigor will be ensured through formal modeling of user state transitions and information entropy. Production considerations include performance, accessibility, and localization.
+### Details:
+Define rules for when and how to reveal new UI elements or information, create adaptive algorithms for user pacing, and document committee debates on user modeling and feedback loops.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 3. Integrate Contextual Tooltips and In-Product Guidance [pending]
+### Dependencies: 21.2
+### Description: Design and implement a robust tooltip system that provides contextual, actionable guidance throughout the demo. Jakob Hohwy, Anil Seth, and Thomas Parr will discuss the cognitive science of attention and salience, while Robert C. Martin and Kent Beck will focus on maintainable code and testability. Karl Friston and Demis Hassabis will debate the use of active inference and reinforcement learning for dynamic tooltip adaptation. Architectural decisions will address tooltip lifecycle, event handling, and cross-platform compatibility. Mathematical rigor will be applied in modeling user engagement and optimizing tooltip timing.
+### Details:
+Develop a tooltip engine, define triggers and content strategies, and document committee perspectives on balancing guidance with user autonomy.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 4. Conduct Onboarding Testing and Feedback Integration [pending]
+### Dependencies: 21.3
+### Description: Pass integration and end-to-end tests before completing this task and moving to the next. Reference the PRD for acceptance criteria and committee review.
+### Details:
+All code must meet PRD requirements and be reviewed by the expert committee. Ensure all tests (mypy, tsc, jest, pytest, flake8, ESLint) pass and integration/end-to-end tests are green before closing the task.
+

@@ -1,0 +1,95 @@
+name: Main CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+  pull_request:
+    branches:
+      - main
+      - master
+      - develop
+
+jobs:
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install linting dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install black isort flake8
+
+      - name: Run Linters
+        run: |
+          flake8 .
+          isort . --check-only
+          black . --check
+
+  test:
+    name: Run Tests
+    needs: lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "**/package-lock.json"
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      - name: Install Node.js Dependencies
+        run: |
+          # Run install in all directories with a package.json
+          for dir in $(find . -name 'package.json' -not -path './node_modules/*' -exec dirname {} \; | sort -u); do
+            (cd "$dir" && npm install)
+          done
+
+      - name: Run Python Tests
+        run: pytest --cov=. --cov-report=xml
+
+      - name: Run JS/TS Tests
+        run: |
+          for dir in $(find . -name 'package.json' -not -path './node_modules/*' -exec dirname {} \; | sort -u); do
+            if [ -n "$(jq .scripts.test "$dir/package.json")" ]; then
+              (cd "$dir" && npm test)
+            fi
+          done
+
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.xml
+          flags: pytest
+          name: codecov-umbrella
+          fail_ci_if_error: true
+          verbose: true

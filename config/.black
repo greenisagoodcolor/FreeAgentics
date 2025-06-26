@@ -1,0 +1,33 @@
+# Black configuration for FreeAgentics
+# Enforces consistent Python code formatting per ADR-004
+
+[tool.black]
+line-length = 88
+target-version = ['py39', 'py310', 'py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    # directories
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | venv
+  | \.env
+  | env
+  | _build
+  | buck-out
+  | build
+  | dist
+  | node_modules
+  | \.next
+  | __pycache__
+  | \.pytest_cache
+  | \.ruff_cache
+)/
+'''
+skip-string-normalization = false
+skip-magic-trailing-comma = false
+preview = false

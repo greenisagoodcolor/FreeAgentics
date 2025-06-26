@@ -1,0 +1,37 @@
+[
+  {
+    "name": "App JS Bundle",
+    "path": ".next/static/chunks/app-*.js",
+    "limit": "150 KB"
+  },
+  {
+    "name": "Framework Bundle",
+    "path": ".next/static/chunks/framework-*.js",
+    "limit": "100 KB"
+  },
+  {
+    "name": "Main Bundle",
+    "path": ".next/static/chunks/main-*.js",
+    "limit": "50 KB"
+  },
+  {
+    "name": "Webpack Runtime",
+    "path": ".next/static/chunks/webpack-*.js",
+    "limit": "5 KB"
+  },
+  {
+    "name": "Total Page JS",
+    "path": [
+      ".next/static/chunks/app-*.js",
+      ".next/static/chunks/framework-*.js",
+      ".next/static/chunks/main-*.js",
+      ".next/static/chunks/webpack-*.js"
+    ],
+    "limit": "300 KB"
+  },
+  {
+    "name": "CSS Bundle",
+    "path": ".next/static/css/*.css",
+    "limit": "50 KB"
+  }
+]

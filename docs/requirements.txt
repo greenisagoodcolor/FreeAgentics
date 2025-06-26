@@ -1,0 +1,10 @@
+# Core Dependencies
+fastapi
+uvicorn[standard]
+pydantic
+torch
+pymdp
+psycopg2-binary
+h3
+scikit-learn
+torch-geometric
