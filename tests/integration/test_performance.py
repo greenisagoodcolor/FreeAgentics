@@ -92,10 +92,12 @@ class TestPerformanceMetrics:
                     "resolution": resolution,
                     "cell_count": len(cells),
                     "generation_time": generation_time,
-                    "time_per_cell": generation_time / min(1000, len(cells)),
+                    "time_per_cell": (generation_time /
+                                      min(1000, len(cells))),
                 },
             )
-        time_per_cell = [t / min(1000, c) for t, c in zip(generation_times, cell_counts)]
+        time_per_cell = [t / min(1000, c) for t, c in
+                         zip(generation_times, cell_counts)]
         assert max(time_per_cell) < min(time_per_cell) * 3
 
     @pytest.mark.asyncio
@@ -116,11 +118,12 @@ class TestPerformanceMetrics:
                 try:
                     start = world.get_cell("start_cell")
                     end = world.get_cell("end_cell")
-                except:
+                except Exception:
                     start, end = None, None
                 start_time = time.time()
                 # Simulate pathfinding with simple calculation
-                path = [start, end] if hasattr(world, 'find_path') else None
+                path = ([start, end] if hasattr(world, 'find_path')
+                        else None)
                 path_time = time.time() - start_time
                 if path:
                     times.append(path_time)
@@ -176,7 +179,7 @@ class TestPerformanceMetrics:
                 if sender != receiver:
                     await sender.send_message(
                         receiver.agent_id,
-                        "text",  # Use string instead of enum if TEXT attribute missing
+                        "text",
                         f"Test message {messages_sent}",
                     )
                     messages_sent += 1
@@ -185,11 +188,13 @@ class TestPerformanceMetrics:
             for agent in agents:
                 # Use available message retrieval method or simulate
                 if hasattr(agent, 'get_recent_messages'):
-                    messages_received += len(agent.get_recent_messages(limit=1000))
+                    recent = agent.get_recent_messages(limit=1000)
+                    messages_received += len(recent)
                 else:
                     messages_received += 0  # Simulate for testing
             throughput = messages_received / duration
-            delivery_rate = messages_received / messages_sent if messages_sent > 0 else 0
+            delivery_rate = (messages_received / messages_sent
+                             if messages_sent > 0 else 0)
             performance_logger.log(
                 "message_throughput",
                 {
@@ -217,19 +222,20 @@ class TestPerformanceMetrics:
                 )
             insertion_time = time.time() - start_time
             edge_start_time = time.time()
-            for i in range(count // 10):
+            for _ in range(count // 10):
                 node1 = f"node_{np.random.randint(count)}"
                 node2 = f"node_{np.random.randint(count)}"
                 if node1 != node2:
                     knowledge_graph.add_edge(
-                        node1, node2, edge_type="related", weight=np.random.random()
+                        node1, node2, edge_type="related",
+                        weight=np.random.random()
                     )
             edge_time = time.time() - edge_start_time
             query_times = []
             for _ in range(100):
                 node = f"node_{np.random.randint(count)}"
                 query_start = time.time()
-                neighbors = knowledge_graph.get_neighbors(node)
+                _ = knowledge_graph.get_neighbors(node)
                 query_time = time.time() - query_start
                 query_times.append(query_time)
             avg_query_time = np.mean(query_times)
@@ -268,7 +274,7 @@ class TestPerformanceMetrics:
             memory_usage = []
             process = psutil.Process()
             for _ in range(10):
-                mem_before = process.memory_info().rss / 1024 / 1024
+                _ = process.memory_info().rss / 1024 / 1024
                 start_time = time.time()
                 await engine.step()
                 cycle_time = time.time() - start_time
@@ -388,8 +394,9 @@ class TestMemoryAndResourceUsage:
             if i % 5 == 0:
                 memory_mb = process.memory_info().rss / 1024 / 1024
                 memory_samples.append(memory_mb)
-        memory_growth_rate = np.polyfit(range(len(memory_samples)), memory_samples, 1)[0]
-        assert memory_growth_rate < 1.0
+        growth_rate = np.polyfit(range(len(memory_samples)),
+                                 memory_samples, 1)[0]
+        assert growth_rate < 1.0
         total_growth = memory_samples[-1] - memory_samples[0]
         assert total_growth < 50
 
@@ -421,6 +428,7 @@ class PerformanceLogger:
     """Logger for performance metrics."""
 
     def __init__(self) -> None:
+        """Initialize performance logger."""
         self.metrics = {}
         self.output_dir = Path("performance_results")
         self.output_dir.mkdir(exist_ok=True)
@@ -469,4 +477,5 @@ class PerformanceLogger:
 
 def run_performance_tests():
     """Run all performance tests."""
-    pytest.main([__file__, "-v", "--asyncio-mode=auto", "-k", "performance"])
+    pytest.main([__file__, "-v", "--asyncio-mode=auto", "-k",
+                 "performance"])

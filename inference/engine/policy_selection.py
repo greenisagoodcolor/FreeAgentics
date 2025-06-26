@@ -274,9 +274,9 @@ class ContinuousExpectedFreeEnergy(PolicySelector):
         G_tensor = torch.stack(G_values)
         if self.config.use_sampling:
             probs = F.softmax(-G_tensor / self.config.exploration_constant, dim=0)
-            policy_idx = torch.multinomial(probs, 1).item()
+            policy_idx = int(torch.multinomial(probs, 1).item())
         else:
-            policy_idx = torch.argmin(G_tensor).item()
+            policy_idx = int(torch.argmin(G_tensor).item())
         return (policies[policy_idx], G_tensor)
 
     def compute_expected_free_energy(
@@ -300,13 +300,15 @@ class ContinuousExpectedFreeEnergy(PolicySelector):
             for t in range(min(len(policy), self.config.planning_horizon)):
                 action = policy[t]
                 if hasattr(generative_model, "transition_model"):
+                    action_tensor = torch.tensor(action).float() if not isinstance(action, torch.Tensor) else action
                     next_mean, next_var = generative_model.transition_model(
-                        current_state.unsqueeze(0), action.unsqueeze(0)
+                        current_state.unsqueeze(0), action_tensor.unsqueeze(0)
                     )
                     next_mean = next_mean.squeeze(0)
                     next_var = next_var.squeeze(0)
                 else:
-                    next_mean = current_state + action * 0.1
+                    action_tensor = torch.tensor(action).float() if not isinstance(action, torch.Tensor) else action
+                    next_mean = current_state + action_tensor * 0.1
                     next_var = var * 1.1
                 if hasattr(generative_model, "observation_model"):
                     obs_mean, obs_var = generative_model.observation_model(next_mean.unsqueeze(0))

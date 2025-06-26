@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-FreeAgentics Demo Simulator
+FreeAgentics Demo Simulator.
 
 Runs agents at accelerated speed for compelling demonstrations.
 """
@@ -19,7 +19,8 @@ from psycopg2.extras import RealDictCursor
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -31,9 +32,11 @@ class DemoSimulator:
         """Initialize the demo simulator."""
         self.db_url = os.environ.get("DATABASE_URL")
         self.redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379")
-        self.simulation_speed = float(os.environ.get("SIMULATION_SPEED", "10").rstrip("x"))
+        speed_env = os.environ.get("SIMULATION_SPEED", "10").rstrip("x")
+        self.simulation_speed = float(speed_env)
         self.auto_play = os.environ.get("AUTO_PLAY", "true").lower() == "true"
-        self.scenario_loop = os.environ.get("SCENARIO_LOOP", "true").lower() == "true"
+        loop_env = os.environ.get("SCENARIO_LOOP", "true").lower()
+        self.scenario_loop = loop_env == "true"
 
         # Connect to database
         self.db_conn = psycopg2.connect(self.db_url)
@@ -60,7 +63,8 @@ class DemoSimulator:
             )
             return cursor.fetchall()
 
-    def simulate_agent_action(self, agent: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def simulate_agent_action(self, agent: Dict[str, Any]) -> Optional[
+            Dict[str, Any]]:
         """Simulate a single agent action."""
         agent_id = agent["id"]
         agent_class = agent["class"]
@@ -94,7 +98,8 @@ class DemoSimulator:
         }
 
         weights = action_weights.get(agent_class, {"rest": 1.0})
-        action = random.choices(list(weights.keys()), weights=list(weights.values()))[0]
+        action = random.choices(list(weights.keys()),
+                                weights=list(weights.values()))[0]
 
         # Generate action result
         result = {
@@ -109,23 +114,27 @@ class DemoSimulator:
         if action == "explore":
             result["data"] = {
                 "location": f"h3_{random.randint(1000, 9999)}",
-                "resources_found": random.choice(["food", "water", "metal", "wood", "none"]),
+                "resources_found": random.choice(
+                    ["food", "water", "metal", "wood", "none"]),
             }
         elif action == "share_discovery" or action == "share_knowledge":
             result["data"] = {
-                "knowledge_type": random.choice(["location", "pattern", "theory", "warning"]),
+                "knowledge_type": random.choice(
+                    ["location", "pattern", "theory", "warning"]),
                 "confidence": round(random.uniform(0.6, 0.95), 2),
             }
         elif action == "negotiate":
             result["data"] = {
                 "offer_type": random.choice(["buy", "sell", "trade"]),
-                "resource": random.choice(["food", "water", "metal", "wood"]),
+                "resource": random.choice(
+                    ["food", "water", "metal", "wood"]),
                 "quantity": random.randint(10, 100),
             }
 
         return result
 
-    def update_agent_stats(self, agent_id: str, action_result: Dict[str, Any]) -> None:
+    def update_agent_stats(self, agent_id: str,
+                           action_result: Dict[str, Any]) -> None:
         """Update agent statistics based on action results."""
         try:
             with self.db_conn.cursor() as cursor:
@@ -134,26 +143,36 @@ class DemoSimulator:
                     updates = []
 
                     if action_result["action"] in ["explore", "research"]:
-                        updates.append("experience_count = experience_count + 1")
+                        updates.append(
+                            "experience_count = experience_count + 1")
 
                     if action_result["action"] in [
                         "share_discovery",
                         "share_knowledge",
                     ]:
-                        updates.append("knowledge_items_shared = knowledge_items_shared + 1")
+                        updates.append(
+                            "knowledge_items_shared = "
+                            "knowledge_items_shared + 1")
 
                     if action_result["action"] == "negotiate":
-                        updates.append("successful_interactions = successful_interactions + 1")
-                        updates.append("total_interactions = total_interactions + 1")
+                        updates.append(
+                            "successful_interactions = "
+                            "successful_interactions + 1")
+                        updates.append(
+                            "total_interactions = total_interactions + 1")
 
-                    if random.random() > 0.7:  # 30% chance to complete a goal
-                        updates.append("successful_goals = successful_goals + 1")
-                        updates.append("total_goals_attempted = total_goals_attempted + 1")
+                    if random.random() > 0.7:  # 30% chance to complete goal
+                        updates.append(
+                            "successful_goals = successful_goals + 1")
+                        updates.append(
+                            "total_goals_attempted = "
+                            "total_goals_attempted + 1")
 
                     if updates:
                         query = f"""
                             UPDATE agents.agent_stats
-                            SET {', '.join(updates)}, updated_at = CURRENT_TIMESTAMP
+                            SET {', '.join(updates)},
+                            updated_at = CURRENT_TIMESTAMP
                             WHERE agent_id = %s
                         """
                         cursor.execute(query, (agent_id,))
@@ -184,8 +203,9 @@ class DemoSimulator:
             self.redis_client.publish("demo:events:all", json.dumps(event))
 
             # Store recent events
-            self.redis_client.lpush("demo:recent_events", json.dumps(event))
-            self.redis_client.ltrim("demo:recent_events", 0, 99)  # Keep last 100
+            self.redis_client.lpush("demo:recent_events",
+                                    json.dumps(event))
+            self.redis_client.ltrim("demo:recent_events", 0, 99)
 
         except Exception as e:
             logger.error(f"Failed to broadcast event: {e}")
@@ -202,10 +222,12 @@ class DemoSimulator:
             with self.db_conn.cursor() as cursor:
                 cursor.execute(
                     """
-                    INSERT INTO demo.events (event_type, agent_id, description, data)
+                    INSERT INTO demo.events
+                    (event_type, agent_id, description, data)
                     VALUES (%s, %s, %s, %s)
                 """,
-                    (event_type, agent_id, description, json.dumps(data or {})),
+                    (event_type, agent_id, description,
+                     json.dumps(data or {})),
                 )
                 self.db_conn.commit()
         except Exception as e:
@@ -217,7 +239,8 @@ class DemoSimulator:
         while self.running:
             try:
                 # Random delay between conversations
-                await asyncio.sleep(random.uniform(20, 40) / self.simulation_speed)
+                delay = random.uniform(20, 40) / self.simulation_speed
+                await asyncio.sleep(delay)
 
                 # Get two random active agents
                 agents = list(self.active_agents.values())
@@ -231,30 +254,38 @@ class DemoSimulator:
                     {
                         "type": "trade_negotiation",
                         "messages": [
-                            f"Greetings {agent2['name']}, I have resources to trade.",
+                            f"Greetings {agent2['name']}, I have resources "
+                            f"to trade.",
                             f"Welcome {agent1['name']}, what do you offer?",
                             "I can provide 50 units of food for 20 metal.",
-                            "That's acceptable. Let's proceed with the exchange.",
+                            "That's acceptable. Let's proceed with the "
+                            "exchange.",
                             "Excellent! Trade completed successfully.",
                         ],
                     },
                     {
                         "type": "knowledge_exchange",
                         "messages": [
-                            f"Hello {agent2['name']}, I've discovered something interesting.",
+                            f"Hello {agent2['name']}, I've discovered "
+                            f"something interesting.",
                             "Please share your findings!",
-                            "Resources regenerate 50% faster near water sources.",
-                            "Fascinating! I've noticed similar patterns in the eastern regions.",
+                            "Resources regenerate 50% faster near water "
+                            "sources.",
+                            "Fascinating! I've noticed similar patterns in "
+                            "the eastern regions.",
                             "We should collaborate on further research.",
                         ],
                     },
                     {
                         "type": "coordination",
                         "messages": [
-                            f"{agent2['name']}, we need to coordinate our efforts.",
+                            f"{agent2['name']}, we need to coordinate our "
+                            f"efforts.",
                             "Agreed. What do you propose?",
-                            "I'll explore the northern territories while you secure the south.",
-                            "Good plan. I'll establish a base at the southern checkpoint.",
+                            "I'll explore the northern territories while you "
+                            "secure the south.",
+                            "Good plan. I'll establish a base at the southern "
+                            "checkpoint.",
                             "Perfect. Let's reconvene in 2 cycles.",
                         ],
                     },
@@ -266,7 +297,8 @@ class DemoSimulator:
                 self.log_demo_event(
                     "conversation_start",
                     agent1["id"],
-                    f"{agent1['name']} initiates {conversation['type']} with {agent2['name']}",
+                    f"{agent1['name']} initiates {conversation['type']} "
+                    f"with {agent2['name']}",
                     {
                         "conversation_type": conversation["type"],
                         "participant_ids": [agent1["id"], agent2["id"]],
@@ -293,15 +325,18 @@ class DemoSimulator:
                     await asyncio.sleep(2 / self.simulation_speed)
 
                 # Update interaction stats
-                self.update_agent_stats(agent1["id"], {"action": "negotiate", "success": True})
-                self.update_agent_stats(agent2["id"], {"action": "negotiate", "success": True})
+                self.update_agent_stats(agent1["id"], {
+                    "action": "negotiate", "success": True})
+                self.update_agent_stats(agent2["id"], {
+                    "action": "negotiate", "success": True})
 
             except Exception as e:
                 logger.error(f"Error in conversation simulation: {e}")
 
     async def run_simulation_loop(self):
-        """Main simulation loop."""
-        logger.info(f"Starting demo simulator at {self.simulation_speed}x speed")
+        """Run main simulation loop."""
+        logger.info(f"Starting demo simulator at "
+                    f"{self.simulation_speed}x speed")
 
         # Load agents
         agents = self.load_agents()
@@ -313,14 +348,15 @@ class DemoSimulator:
         self.log_demo_event(
             "simulation_start",
             None,
-            f"Demo simulation started with {len(agents)} agents at {self.simulation_speed}x speed",
+            f"Demo simulation started with {len(agents)} agents "
+            f"at {self.simulation_speed}x speed",
         )
 
         # Start conversation simulator
         conversation_task = asyncio.create_task(self.simulate_conversations())
 
         # Main action loop
-        action_interval = 5 / self.simulation_speed  # Actions every 5 seconds (scaled)
+        action_interval = 5 / self.simulation_speed
 
         while self.running:
             try:
@@ -344,7 +380,8 @@ class DemoSimulator:
                             self.log_demo_event(
                                 "knowledge_shared",
                                 agent["id"],
-                                f"{agent['name']} shares {action_result['data']['knowledge_type']}",
+                                f"{agent['name']} shares "
+                                f"{action_result['data']['knowledge_type']}",
                                 action_result["data"],
                             )
 
@@ -371,8 +408,10 @@ class DemoSimulator:
                 # Improve random stats
                 improvements = [
                     "pattern_count = LEAST(pattern_count + 1, 100)",
-                    "avg_pattern_confidence = LEAST(avg_pattern_confidence + 0.01, 0.95)",
-                    "energy_efficiency = LEAST(energy_efficiency + 0.01, 0.95)",
+                    "avg_pattern_confidence = LEAST("
+                    "avg_pattern_confidence + 0.01, 0.95)",
+                    "energy_efficiency = LEAST("
+                    "energy_efficiency + 0.01, 0.95)",
                     "model_update_count = model_update_count + 1",
                 ]
 
@@ -414,7 +453,7 @@ class DemoSimulator:
 
 
 async def main():
-    """Main entry point."""
+    """Run main entry point."""
     simulator = DemoSimulator()
 
     try:

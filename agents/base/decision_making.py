@@ -11,7 +11,7 @@ from .perception import Percept, PerceptionSystem, StimulusType
 from .state_manager import AgentStateManager
 
 try:
-    from ...agents.active_inference import (  # type: ignore[import-untyped]
+    from ...agents.active_inference import (
         DiscreteExpectedFreeEnergy,
         DiscreteGenerativeModel,
         create_generative_model,

@@ -17,7 +17,10 @@ echo "=============================================="
 # Start backend in background
 echo -e "${GREEN}Starting Python backend...${NC}"
 source venv/bin/activate
-export $(cat config/environments/.env.development | xargs)
+# Load environment variables, filtering out comments and empty lines
+set -a
+source config/environments/.env.development
+set +a
 cd "$PROJECT_ROOT"
 python -m uvicorn api.main:app --reload --host localhost --port 8000 &
 BACKEND_PID=$!

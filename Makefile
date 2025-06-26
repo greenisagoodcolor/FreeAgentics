@@ -17,8 +17,7 @@ setup: ## Set up full development environment (dependencies, database, etc.)
 	@echo "$(BOLD)$(BLUE)Setting up FreeAgentics development environment...$(RESET)"
 	@./infrastructure/scripts/development/setup-dev-environment.sh
 	@echo "$(BOLD)$(GREEN)Installing pre-commit hooks...$(RESET)"
-	@pip install -r requirements-dev.txt
-	@pre-commit install --install-hooks
+	@source venv/bin/activate && pip install -r requirements-dev.txt && pre-commit install --install-hooks
 	@cd web && npm install && npx husky install
 	@echo "$(BOLD)$(GREEN)Pre-commit hooks installed successfully!$(RESET)"
 
@@ -68,20 +67,17 @@ quality: ## Run all quality checks (type-check + lint + test-full)
 ## Pre-commit Hooks
 install-hooks: ## Install and update pre-commit hooks
 	@echo "$(BOLD)$(GREEN)Installing pre-commit hooks...$(RESET)"
-	@pip install -r requirements-dev.txt
-	@pre-commit install --install-hooks
-	@pre-commit autoupdate
+	@source venv/bin/activate && pip install -r requirements-dev.txt && pre-commit install --install-hooks && pre-commit autoupdate
 	@cd web && npm install && npx husky install
 	@echo "$(BOLD)$(GREEN)All hooks installed and updated!$(RESET)"
 
 validate-hooks: ## Run all pre-commit hooks on all files
 	@echo "$(BOLD)$(BLUE)Running pre-commit hooks validation...$(RESET)"
-	@pre-commit run --all-files
+	@source venv/bin/activate && pre-commit run --all-files
 
 hooks-update: ## Update all pre-commit hook versions
 	@echo "$(BOLD)$(YELLOW)Updating pre-commit hooks...$(RESET)"
-	@pre-commit autoupdate
-	@pre-commit run --all-files
+	@source venv/bin/activate && pre-commit autoupdate && pre-commit run --all-files
 
 ## Database
 db-setup: ## Set up database

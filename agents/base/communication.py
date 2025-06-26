@@ -104,7 +104,7 @@ class AgentConversation:
         self.conversation_goals: Dict[str, List[str]] = {}  # agent_id -> goals
         logger.info(f"Created conversation {self.conversation_id}")
 
-    def add_participant(self, agent_id: str, goals: List[str] = None) -> None:
+    def add_participant(self, agent_id: str, goals: Optional[List[str]] = None) -> None:
         """Add an agent to the conversation with their goals."""
         if agent_id not in self.participants:
             self.participants.append(agent_id)
@@ -116,7 +116,7 @@ class AgentConversation:
         speaker_id: str,
         speaker_state: Dict[str, Any],
         conversation_context: List[ConversationMessage],
-        llm_client=None,
+        llm_client: Optional[Any] = None,
     ) -> ConversationMessage:
         """
         Generate a message based on speaker's goals and state.
@@ -255,7 +255,7 @@ class AgentConversation:
         speaker_state: Dict[str, Any],
         intent: ConversationIntent,
         conversation_context: List[ConversationMessage],
-        llm_client,
+        llm_client: Any,
     ) -> str:
         """Generate natural language using LLM."""
         # Build prompt
@@ -263,7 +263,7 @@ class AgentConversation:
         # Generate response
         try:
             response = llm_client.generate(prompt, max_tokens=100)
-            return response.strip()
+            return str(response).strip()
         except Exception as e:
             logger.error(f"LLM generation failed: {e}")
             # Fall back to template
@@ -298,7 +298,7 @@ Response:"""
         return prompt
 
     def process_turn(
-        self, agent_id: str, agent_state: Dict[str, Any], llm_client=None
+        self, agent_id: str, agent_state: Dict[str, Any], llm_client: Optional[Any] = None
     ) -> ConversationTurn:
         """
         Process a conversation turn for an agent.
@@ -387,13 +387,10 @@ Response:"""
                 contradicting_patterns=[],
             )
             # Add to knowledge graph
-            knowledge_graph.add_node(
-                belief.id,
-                {
-                    "type": "belief",
-                    "statement": belief.statement,
-                    "confidence": belief.confidence,
-                },
+            knowledge_graph.add_belief(
+                belief.statement,
+                belief.confidence,
+                metadata={"type": "belief", "sender": message.sender_id}
             )
             updated_beliefs.append(belief)
         elif message.intent == ConversationIntent.WARN_DANGER:
@@ -406,13 +403,10 @@ Response:"""
                 contradicting_patterns=[],
             )
             # Add to knowledge graph
-            knowledge_graph.add_node(
-                belief.id,
-                {
-                    "type": "belief",
-                    "statement": belief.statement,
-                    "confidence": belief.confidence,
-                },
+            knowledge_graph.add_belief(
+                belief.statement,
+                belief.confidence,
+                metadata={"type": "belief", "sender": message.sender_id}
             )
             updated_beliefs.append(belief)
         elif message.intent == ConversationIntent.PROPOSE_TRADE:
@@ -425,13 +419,10 @@ Response:"""
                 contradicting_patterns=[],
             )
             # Add to knowledge graph
-            knowledge_graph.add_node(
-                belief.id,
-                {
-                    "type": "belief",
-                    "statement": belief.statement,
-                    "confidence": belief.confidence,
-                },
+            knowledge_graph.add_belief(
+                belief.statement,
+                belief.confidence,
+                metadata={"type": "belief", "sender": message.sender_id}
             )
             updated_beliefs.append(belief)
         # Update trust/relationship beliefs
@@ -443,20 +434,20 @@ Response:"""
             contradicting_patterns=[],
         )
         # Add to knowledge graph
-        knowledge_graph.add_node(
-            trust_belief.id,
-            {
+        knowledge_graph.add_belief(
+            trust_belief.statement,
+            trust_belief.confidence,
+            metadata={
                 "type": "belief",
-                "statement": trust_belief.statement,
-                "confidence": trust_belief.confidence,
-            },
+                "sender": message.sender_id,
+            }
         )
         updated_beliefs.append(trust_belief)
         return updated_beliefs
 
     def get_conversation_summary(self) -> Dict[str, Any]:
         """Get summary of the conversation."""
-        intent_counts = {}
+        intent_counts: Dict[str, int] = {}
         for msg in self.messages:
             intent = msg.intent.value
             intent_counts[intent] = intent_counts.get(intent, 0) + 1
@@ -465,7 +456,7 @@ Response:"""
             "participants": self.participants,
             "message_count": len(self.messages),
             "turn_count": self.turn_count,
-            "duration": (self.end_time or datetime.utcnow() - self.start_time).total_seconds(),
+            "duration": ((self.end_time or datetime.utcnow()) - self.start_time).total_seconds(),
             "active": self.active,
             "intent_distribution": intent_counts,
             "start_time": self.start_time.isoformat(),
@@ -496,7 +487,7 @@ class ConversationManager:
         self.agent_conversations: Dict[str, List[str]] = {}  # agent_id -> conv_ids
 
     def create_conversation(
-        self, participants: List[str], goals: Dict[str, List[str]] = None
+        self, participants: List[str], goals: Optional[Dict[str, List[str]]] = None
     ) -> AgentConversation:
         """
         Create a new conversation.
@@ -542,7 +533,7 @@ class CommunicationCapability:
         agent_id: str,
         communication_range: float = 5.0,
         bandwidth: int = 10,
-        protocols: List[str] = None,
+        protocols: Optional[List[str]] = None,
     ) -> None:
         """
         Initialize communication capability.
@@ -572,7 +563,7 @@ class CommunicationCapability:
         recipient_id: Optional[str],
         content: str,
         intent: ConversationIntent = ConversationIntent.CASUAL_GREETING,
-        metadata: Dict[str, Any] = None,
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> bool:
         """
         Send a message to another agent or broadcast.
@@ -600,7 +591,7 @@ class CommunicationCapability:
             success = self.message_system.send_message(message)
             if success:
                 self.sent_messages_count += 1
-            return success
+            return bool(success)
         else:
             # Fallback: add to queue
             self.message_queue.append(message)
@@ -631,7 +622,7 @@ class CommunicationCapability:
         return True
 
     def start_conversation(
-        self, target_agent_id: str, goals: List[str] = None
+        self, target_agent_id: str, goals: Optional[List[str]] = None
     ) -> Optional[AgentConversation]:
         """
         Start a new conversation with another agent.
@@ -738,178 +729,3 @@ if __name__ == "__main__":
     # Get summary
     summary = conversation.get_conversation_summary()
     print(f"\nConversation summary: {json.dumps(summary, indent=2)}")
-
-
-class CommunicationCapability:
-    """
-    Communication capability for agents.
-    This class provides agents with the ability to send and receive messages,
-    participate in conversations, and manage communication settings.
-    """
-
-    def __init__(
-        self,
-        message_system,
-        agent_id: str,
-        communication_range: float = 5.0,
-        bandwidth: int = 10,
-        protocols: List[str] = None,
-    ) -> None:
-        """
-        Initialize communication capability.
-        Args:
-            message_system: The message system instance for sending/receiving
-            agent_id: ID of the agent this capability belongs to
-            communication_range: Maximum distance for communication
-            bandwidth: Maximum messages per cycle
-            protocols: Supported communication protocols
-        """
-        self.message_system = message_system
-        self.agent_id = agent_id
-        self.communication_range = communication_range
-        self.bandwidth = bandwidth
-        self.protocols = protocols or ["direct", "broadcast"]
-        # Communication state
-        self.active_conversations: Dict[str, AgentConversation] = {}
-        self.message_queue: List[ConversationMessage] = []
-        self.sent_messages_count = 0
-        self.received_messages_count = 0
-        # Register with message system
-        if hasattr(message_system, "register_agent"):
-            message_system.register_agent(agent_id, self)
-
-    def send_message(
-        self,
-        recipient_id: Optional[str],
-        content: str,
-        intent: ConversationIntent = ConversationIntent.CASUAL_GREETING,
-        metadata: Dict[str, Any] = None,
-    ) -> bool:
-        """
-        Send a message to another agent or broadcast.
-        Args:
-            recipient_id: ID of recipient (None for broadcast)
-            content: Message content
-            intent: Communication intent
-            metadata: Optional message metadata
-        Returns:
-            True if message was sent successfully
-        """
-        if self.sent_messages_count >= self.bandwidth:
-            logger.warning(f"Agent {self.agent_id} exceeded bandwidth limit")
-            return False
-        message = ConversationMessage(
-            id=str(uuid.uuid4()),
-            sender_id=self.agent_id,
-            recipient_id=recipient_id,
-            content=content,
-            intent=intent,
-            metadata=metadata or {},
-        )
-        # Send through message system
-        if hasattr(self.message_system, "send_message"):
-            success = self.message_system.send_message(message)
-            if success:
-                self.sent_messages_count += 1
-            return success
-        else:
-            # Fallback: add to queue
-            self.message_queue.append(message)
-            self.sent_messages_count += 1
-            return True
-
-    def receive_message(self, message: ConversationMessage) -> bool:
-        """
-        Receive a message from another agent.
-        Args:
-            message: Received message
-        Returns:
-            True if message was processed successfully
-        """
-        # Check if within communication range (simplified)
-        # In full implementation, would check actual positions
-        self.message_queue.append(message)
-        self.received_messages_count += 1
-        # Find or create conversation
-        conversation_id = self._get_conversation_id(message.sender_id)
-        if conversation_id not in self.active_conversations:
-            conversation = AgentConversation()
-            conversation.add_participant(self.agent_id)
-            conversation.add_participant(message.sender_id)
-            self.active_conversations[conversation_id] = conversation
-        # Add message to conversation
-        self.active_conversations[conversation_id].add_message(message)
-        return True
-
-    def start_conversation(
-        self, target_agent_id: str, goals: List[str] = None
-    ) -> Optional[AgentConversation]:
-        """
-        Start a new conversation with another agent.
-        Args:
-            target_agent_id: ID of the target agent
-            goals: Optional conversation goals
-        Returns:
-            Created conversation or None if failed
-        """
-        conversation_id = self._get_conversation_id(target_agent_id)
-        if conversation_id in self.active_conversations:
-            return self.active_conversations[conversation_id]
-        conversation = AgentConversation()
-        conversation.add_participant(self.agent_id, goals or [])
-        conversation.add_participant(target_agent_id)
-        self.active_conversations[conversation_id] = conversation
-        return conversation
-
-    def get_pending_messages(self) -> List[ConversationMessage]:
-        """Get all pending messages in the queue."""
-        messages = self.message_queue.copy()
-        self.message_queue.clear()
-        return messages
-
-    def get_active_conversations(self) -> List[AgentConversation]:
-        """Get all active conversations."""
-        return list(self.active_conversations.values())
-
-    def end_conversation(self, conversation_id: str) -> bool:
-        """
-        End a conversation.
-        Args:
-            conversation_id: ID of conversation to end
-        Returns:
-            True if conversation was ended successfully
-        """
-        if conversation_id in self.active_conversations:
-            self.active_conversations[conversation_id].end_conversation()
-            del self.active_conversations[conversation_id]
-            return True
-        return False
-
-    def reset_cycle(self) -> None:
-        """Reset per-cycle counters (called at start of each simulation cycle)."""
-        self.sent_messages_count = 0
-        self.received_messages_count = 0
-
-    def get_stats(self) -> Dict[str, Any]:
-        """Get communication statistics."""
-        return {
-            "agent_id": self.agent_id,
-            "communication_range": self.communication_range,
-            "bandwidth": self.bandwidth,
-            "active_conversations": len(self.active_conversations),
-            "messages_sent": self.sent_messages_count,
-            "messages_received": self.received_messages_count,
-            "pending_messages": len(self.message_queue),
-        }
-
-    def _get_conversation_id(self, other_agent_id: str) -> str:
-        """Generate a consistent conversation ID for two agents."""
-        agents = sorted([self.agent_id, other_agent_id])
-        return f"conv_{agents[0]}_{agents[1]}"
-
-    def __repr__(self) -> str:
-        return (
-            f"CommunicationCapability(agent={self.agent_id}, "
-            f"range={self.communication_range}, "
-            f"conversations={len(self.active_conversations)})"
-        )

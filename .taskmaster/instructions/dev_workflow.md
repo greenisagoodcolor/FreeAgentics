@@ -196,7 +196,8 @@ Taskmaster offers two primary ways to interact:
     - For AI agents and integrated development environments (like VS Code), interacting via the **MCP server is the preferred method**.
     - The MCP server exposes Taskmaster functionality through a set of tools (e.g., `get_tasks`, `add_subtask`).
     - This method offers better performance, structured data exchange, and richer error handling compared to CLI parsing.
-    - Refer to @`mcp.md` for details on the MCP architecture and available tools.
+    - Refer to @`mcp.md` for details o
+    n the MCP architecture and available tools.
     - A comprehensive list and description of MCP tools and their corresponding CLI commands can be found in @`taskmaster.md`.
     - **Restart the MCP server** if core logic in `scripts/modules` or MCP tool/direct function definitions change.
     - **Note**: MCP tools fully support tagged task lists with complete tag management capabilities.
