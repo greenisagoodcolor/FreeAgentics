@@ -133,10 +133,25 @@ export default function MultiAgentDashboard() {
   const [typingAgents, setTypingAgents] = useState<Set<string>>(new Set());
   const [autoScroll, setAutoScroll] = useState(true);
   const [backendStatus, setBackendStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting');
+  const [currentTime, setCurrentTime] = useState<string>('');
+  const [isClient, setIsClient] = useState(false);
   
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<List>(null);
+
+  // Initialize client-side only state
+  useEffect(() => {
+    setIsClient(true);
+    setCurrentTime(new Date().toLocaleTimeString());
+    
+    // Update time every second
+    const timeInterval = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString());
+    }, 1000);
+    
+    return () => clearInterval(timeInterval);
+  }, []);
 
   // Check backend connectivity
   useEffect(() => {
@@ -264,7 +279,7 @@ export default function MultiAgentDashboard() {
                 {agent?.name || 'Unknown Agent'}
               </span>
               <span className="text-xs text-muted-foreground font-mono">
-                {new Date(message.timestamp).toLocaleTimeString()}
+                {isClient ? new Date(message.timestamp).toLocaleTimeString() : '--:--:--'}
               </span>
               {message.metadata?.confidence && (
                 <Badge variant="outline" className="text-xs">
@@ -301,7 +316,7 @@ export default function MultiAgentDashboard() {
           
           <div className="flex items-center gap-3">
             <div className="text-xs text-zinc-400 font-mono">
-              {new Date().toLocaleTimeString()} EST
+              {isClient ? `${currentTime} EST` : '-- EST'}
             </div>
             <Button
               onClick={() => setIsSimulationRunning(!isSimulationRunning)}
