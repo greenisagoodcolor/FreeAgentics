@@ -3,57 +3,59 @@
 
 :root {
   /* Primary - Bloomberg-inspired with modern twist */
-  --primary-amber: #FB8B1E;        /* Bloomberg signature amber */
-  --primary-amber-dark: #E67A00;   /* Hover state */
-  --primary-amber-light: #FFB366;  /* Light variant */
-  
+  --primary-amber: #fb8b1e; /* Bloomberg signature amber */
+  --primary-amber-dark: #e67a00; /* Hover state */
+  --primary-amber-light: #ffb366; /* Light variant */
+
   /* Background layers */
-  --bg-primary: #0A0A0B;           /* Main background */
-  --bg-secondary: #121214;         /* Card/panel background */
-  --bg-tertiary: #1A1A1D;          /* Elevated elements */
-  --bg-quaternary: #232328;        /* Hover states */
-  
+  --bg-primary: #0a0a0b; /* Main background */
+  --bg-secondary: #121214; /* Card/panel background */
+  --bg-tertiary: #1a1a1d; /* Elevated elements */
+  --bg-quaternary: #232328; /* Hover states */
+
   /* Text hierarchy */
-  --text-primary: #FFFFFF;         /* Primary text */
-  --text-secondary: #B3B3B3;       /* Secondary text */
-  --text-tertiary: #8E8E93;        /* Muted text */
-  --text-disabled: #6C6C70;        /* Disabled state */
-  
+  --text-primary: #ffffff; /* Primary text */
+  --text-secondary: #b3b3b3; /* Secondary text */
+  --text-tertiary: #8e8e93; /* Muted text */
+  --text-disabled: #6c6c70; /* Disabled state */
+
   /* Semantic colors */
-  --success: #22C55E;              /* Positive metrics/growth */
-  --danger: #EF4444;               /* Errors/losses */
-  --warning: #F59E0B;              /* Warnings/cautions */
-  --info: #3B82F6;                 /* Information/links */
-  
+  --success: #22c55e; /* Positive metrics/growth */
+  --danger: #ef4444; /* Errors/losses */
+  --warning: #f59e0b; /* Warnings/cautions */
+  --info: #3b82f6; /* Information/links */
+
   /* Agent status colors */
-  --agent-active: #00D4FF;         /* Active agent */
-  --agent-thinking: #FF6B3D;       /* Processing state */
-  --agent-idle: #6B7280;           /* Idle state */
-  --agent-error: #DC2626;          /* Error state */
-  
+  --agent-active: #00d4ff; /* Active agent */
+  --agent-thinking: #ff6b3d; /* Processing state */
+  --agent-idle: #6b7280; /* Idle state */
+  --agent-error: #dc2626; /* Error state */
+
   /* Graph visualization */
-  --graph-node-default: #4A5568;   /* Default node */
-  --graph-node-active: #00D4FF;    /* Active node */
-  --graph-edge-default: #2D3748;   /* Default edge */
-  --graph-edge-active: #FB8B1E;    /* Active edge */
+  --graph-node-default: #4a5568; /* Default node */
+  --graph-node-active: #00d4ff; /* Active node */
+  --graph-edge-default: #2d3748; /* Default edge */
+  --graph-edge-active: #fb8b1e; /* Active edge */
 
   /* Font Stack */
-  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono: 'Roboto Mono', 'SF Mono', 'Consolas', monospace;
-  --font-data: 'Tabular', 'Roboto Mono', monospace; /* Custom for financial data */
+  --font-primary:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "Roboto Mono", "SF Mono", "Consolas", monospace;
+  --font-data:
+    "Tabular", "Roboto Mono", monospace; /* Custom for financial data */
 
   /* Type Scale */
-  --text-xs: 10px;    /* Min size for dense tables */
-  --text-sm: 12px;    /* Table data, captions */
-  --text-base: 14px;  /* Body text */
-  --text-lg: 16px;    /* Subheadings */
-  --text-xl: 20px;    /* Section headers */
-  --text-2xl: 24px;   /* Page titles */
-  --text-3xl: 32px;   /* Dashboard metrics */
+  --text-xs: 10px; /* Min size for dense tables */
+  --text-sm: 12px; /* Table data, captions */
+  --text-base: 14px; /* Body text */
+  --text-lg: 16px; /* Subheadings */
+  --text-xl: 20px; /* Section headers */
+  --text-2xl: 24px; /* Page titles */
+  --text-3xl: 32px; /* Dashboard metrics */
 
   /* Line Heights */
-  --line-height-tight: 1.2;   /* Data tables */
-  --line-height-normal: 1.5;  /* Body text */
+  --line-height-tight: 1.2; /* Data tables */
+  --line-height-normal: 1.5; /* Body text */
   --line-height-relaxed: 1.75; /* Reading text */
 
   /* Letter Spacing */
@@ -84,7 +86,7 @@
 
   /* Easing Functions */
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-out: cubic-bezier(0.0, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ease-elastic: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
@@ -99,7 +101,7 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.4);
   --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.5);
-  
+
   /* Bloomberg-specific shadows */
   --shadow-amber: 0 0 20px rgba(251, 139, 30, 0.3);
   --shadow-amber-lg: 0 8px 24px rgba(251, 139, 30, 0.4);
@@ -147,7 +149,7 @@ body {
 }
 
 .button::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -156,7 +158,9 @@ body {
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
   transform: translate(-50%, -50%);
-  transition: width 400ms, height 400ms;
+  transition:
+    width 400ms,
+    height 400ms;
   z-index: 0;
 }
 
@@ -210,7 +214,7 @@ body {
 }
 
 .button-danger:hover {
-  background: #DC2626;
+  background: #dc2626;
   box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
 }
 
@@ -250,7 +254,7 @@ body {
 
 .card:hover {
   border-color: var(--primary-amber);
-  box-shadow: 
+  box-shadow:
     0 0 0 1px rgba(251, 139, 30, 0.2),
     var(--shadow-lg);
   transform: translateY(-2px);
@@ -290,13 +294,17 @@ body {
 }
 
 .agent-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--primary-amber), var(--primary-amber-light));
+  background: linear-gradient(
+    90deg,
+    var(--primary-amber),
+    var(--primary-amber-light)
+  );
   opacity: 0;
   transition: opacity var(--duration-fast);
 }
@@ -319,40 +327,42 @@ body {
   animation: pulse 2s infinite;
 }
 
-.status-dot.active { 
-  background: var(--agent-active); 
+.status-dot.active {
+  background: var(--agent-active);
 }
 
-.status-dot.thinking { 
+.status-dot.thinking {
   background: var(--agent-thinking);
   animation: thinking-pulse 1s infinite;
 }
 
-.status-dot.idle { 
-  background: var(--agent-idle); 
+.status-dot.idle {
+  background: var(--agent-idle);
 }
 
-.status-dot.error { 
-  background: var(--agent-error); 
+.status-dot.error {
+  background: var(--agent-error);
 }
 
 @keyframes thinking-pulse {
-  0%, 100% { 
-    opacity: 0.3; 
-    transform: scale(1); 
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
   }
-  50% { 
-    opacity: 1; 
-    transform: scale(1.2); 
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
   }
 }
 
 @keyframes pulse {
-  0%, 100% { 
-    opacity: 1; 
+  0%,
+  100% {
+    opacity: 1;
   }
-  50% { 
-    opacity: 0.5; 
+  50% {
+    opacity: 0.5;
   }
 }
 
@@ -444,7 +454,7 @@ body {
 }
 
 .message-bubble.streaming::after {
-  content: '●●●';
+  content: "●●●";
   display: inline-block;
   animation: streaming 1.5s infinite;
   margin-left: var(--space-1);
@@ -453,8 +463,14 @@ body {
 }
 
 @keyframes streaming {
-  0%, 60%, 100% { opacity: 0.3; }
-  30% { opacity: 1; }
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+  }
+  30% {
+    opacity: 1;
+  }
 }
 
 @keyframes slideIn {
@@ -486,8 +502,9 @@ body {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, 
-    var(--primary-amber) 0%, 
+  background: linear-gradient(
+    90deg,
+    var(--primary-amber) 0%,
     var(--primary-amber-light) 100%
   );
   transition: width var(--duration-normal) var(--ease-out);
@@ -538,33 +555,75 @@ body {
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 /* Utility Classes */
-.text-xs { font-size: var(--text-xs); }
-.text-sm { font-size: var(--text-sm); }
-.text-base { font-size: var(--text-base); }
-.text-lg { font-size: var(--text-lg); }
-.text-xl { font-size: var(--text-xl); }
-.text-2xl { font-size: var(--text-2xl); }
-.text-3xl { font-size: var(--text-3xl); }
+.text-xs {
+  font-size: var(--text-xs);
+}
+.text-sm {
+  font-size: var(--text-sm);
+}
+.text-base {
+  font-size: var(--text-base);
+}
+.text-lg {
+  font-size: var(--text-lg);
+}
+.text-xl {
+  font-size: var(--text-xl);
+}
+.text-2xl {
+  font-size: var(--text-2xl);
+}
+.text-3xl {
+  font-size: var(--text-3xl);
+}
 
-.text-primary { color: var(--text-primary); }
-.text-secondary { color: var(--text-secondary); }
-.text-tertiary { color: var(--text-tertiary); }
-.text-success { color: var(--success); }
-.text-danger { color: var(--danger); }
-.text-warning { color: var(--warning); }
-.text-info { color: var(--info); }
+.text-primary {
+  color: var(--text-primary);
+}
+.text-secondary {
+  color: var(--text-secondary);
+}
+.text-tertiary {
+  color: var(--text-tertiary);
+}
+.text-success {
+  color: var(--success);
+}
+.text-danger {
+  color: var(--danger);
+}
+.text-warning {
+  color: var(--warning);
+}
+.text-info {
+  color: var(--info);
+}
 
-.font-mono { font-family: var(--font-mono); }
-.font-data { font-family: var(--font-data); }
+.font-mono {
+  font-family: var(--font-mono);
+}
+.font-data {
+  font-family: var(--font-data);
+}
 
-.bg-primary { background: var(--bg-primary); }
-.bg-secondary { background: var(--bg-secondary); }
-.bg-tertiary { background: var(--bg-tertiary); }
+.bg-primary {
+  background: var(--bg-primary);
+}
+.bg-secondary {
+  background: var(--bg-secondary);
+}
+.bg-tertiary {
+  background: var(--bg-tertiary);
+}
 
 /* Responsive Design */
 @media (max-width: 767px) {
@@ -572,15 +631,15 @@ body {
     min-height: 44px; /* iOS touch target */
     font-size: 16px; /* Prevent zoom on iOS */
   }
-  
+
   .data-table {
     font-size: var(--text-xs);
   }
-  
+
   .agent-card {
     padding: var(--space-3);
   }
-  
+
   .message-bubble {
     max-width: 85%;
     margin-left: 0;
@@ -614,7 +673,7 @@ body {
     --text-primary: black;
     --text-secondary: #666;
   }
-  
+
   .button,
   .agent-card,
   .card {

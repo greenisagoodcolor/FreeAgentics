@@ -10,13 +10,14 @@ Key compliance areas:
 - Migration patterns (ADR-001)
 """
 
-import os
 import ast
 import json
-import pytest
-from pathlib import Path
-from typing import List, Dict, Set, Tuple
+import os
 import re
+from pathlib import Path
+from typing import Dict, List, Set, Tuple
+
+import pytest
 
 
 class TestProjectStructureCompliance:
@@ -121,10 +122,7 @@ class TestDependencyCompliance:
         for file_path in infrastructure_files:
             imports = self._get_imports(file_path)
             for imp in imports:
-                if any(
-                    layer in imp
-                    for layer in ["agents.", "coalitions.", "inference.engine"]
-                ):
+                if any(layer in imp for layer in ["agents.", "coalitions.", "inference.engine"]):
                     violations.append(f"{file_path} imports {imp}")
 
         # Core agents should not depend on specific agent types
@@ -259,7 +257,9 @@ class TestDependencyCompliance:
             with open(file_path, "r") as f:
                 lines = f.readlines()
                 # Basic validation - should have actual packages
-                package_lines = [line for line in lines if line.strip() and not line.startswith("#")]
+                package_lines = [
+                    line for line in lines if line.strip() and not line.startswith("#")
+                ]
                 assert len(package_lines) > 0, f"Requirements file {file_path} appears empty"
 
 
@@ -369,44 +369,67 @@ class TestNamingConventionCompliance:
     def test_python_naming_conventions(self):
         """Test Python files follow PEP 8 naming conventions."""
         violations = []
-        
+
         for root, dirs, files in os.walk("."):
-            if any(exclude in root for exclude in [".git", "__pycache__", ".venv", "venv", "node_modules"]):
+            if any(
+                exclude in root
+                for exclude in [".git", "__pycache__", ".venv", "venv", "node_modules"]
+            ):
                 continue
-                
+
             for file in files:
                 if file.endswith(".py"):
                     file_path = os.path.join(root, file)
-                    
+
                     # Check file naming (snake_case)
                     if not re.match(r"^[a-z_][a-z0-9_]*\.py$", file) and file != "__init__.py":
                         violations.append(f"File naming violation: {file_path}")
-                    
+
                     # Check for proper __init__.py files in packages
                     if os.path.isdir(os.path.dirname(file_path)):
                         init_file = os.path.join(os.path.dirname(file_path), "__init__.py")
                         if not os.path.exists(init_file) and any(
                             f.endswith(".py") for f in os.listdir(os.path.dirname(file_path))
                         ):
-                            violations.append(f"Missing __init__.py in package: {os.path.dirname(file_path)}")
+                            violations.append(
+                                f"Missing __init__.py in package: {os.path.dirname(file_path)}"
+                            )
 
-        assert len(violations) == 0, f"Naming convention violations: {violations[:10]}"  # Show first 10
+        assert (
+            len(violations) == 0
+        ), f"Naming convention violations: {violations[:10]}"  # Show first 10
 
     def test_directory_naming_conventions(self):
         """Test directories follow naming conventions."""
         violations = []
-        
+
         for root, dirs, files in os.walk("."):
-            if any(exclude in root for exclude in [".git", "__pycache__", ".venv", "venv", "node_modules"]):
+            if any(
+                exclude in root
+                for exclude in [".git", "__pycache__", ".venv", "venv", "node_modules"]
+            ):
                 continue
-                
+
             for dir_name in dirs:
                 # Check directory naming (snake_case for Python modules)
-                if not re.match(r"^[a-z_][a-z0-9_]*$", dir_name) and not re.match(r"^[A-Z][a-zA-Z0-9]*$", dir_name):
+                if not re.match(r"^[a-z_][a-z0-9_]*$", dir_name) and not re.match(
+                    r"^[A-Z][a-zA-Z0-9]*$", dir_name
+                ):
                     # Allow some exceptions
-                    exceptions = [".git", "__pycache__", ".venv", "venv", "node_modules", ".next", ".pytest_cache", ".mypy_cache"]
+                    exceptions = [
+                        ".git",
+                        "__pycache__",
+                        ".venv",
+                        "venv",
+                        "node_modules",
+                        ".next",
+                        ".pytest_cache",
+                        ".mypy_cache",
+                    ]
                     if dir_name not in exceptions:
-                        violations.append(f"Directory naming violation: {os.path.join(root, dir_name)}")
+                        violations.append(
+                            f"Directory naming violation: {os.path.join(root, dir_name)}"
+                        )
 
         assert len(violations) == 0, f"Directory naming violations: {violations[:10]}"
 
@@ -452,7 +475,7 @@ class TestConfigurationCompliance:
 
         required_targets = [
             "test-property",
-            "test-behavior", 
+            "test-behavior",
             "test-security",
             "test-chaos",
             "test-contract",
@@ -465,4 +488,4 @@ class TestConfigurationCompliance:
 
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-v"]) 
+    pytest.main([__file__, "-v"])

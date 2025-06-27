@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { DashboardView } from '../../../page';
-import { MessageSquare } from 'lucide-react';
+import React from "react";
+import { DashboardView } from "../../../page";
+import { MessageSquare } from "lucide-react";
 
 interface ConversationPanelProps {
   view: DashboardView;
@@ -22,4 +22,4 @@ export default function ConversationPanel({ view }: ConversationPanelProps) {
       </div>
     </div>
   );
-} 
+}

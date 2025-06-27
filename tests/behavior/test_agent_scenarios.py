@@ -5,7 +5,7 @@ Following ADR-007 mandate for behavior-driven testing.
 """
 
 import pytest
-from pytest_bdd import scenarios, given, when, then, parsers
+from pytest_bdd import given, parsers, scenarios, then, when
 
 # Load scenarios from feature files
 scenarios("../features/agent_exploration.feature")

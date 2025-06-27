@@ -1,6 +1,6 @@
 {
   "errors": [],
-  "generated_at": "2025-06-27T07:56:26Z",
+  "generated_at": "2025-06-27T08:05:34Z",
   "metrics": {
     "_totals": {
       "CONFIDENCE.HIGH": 17,
@@ -683,10 +683,9 @@
       "test_name": "subprocess_without_shell_equals_true"
     }
   ]
-}unication_style\": choice([\"formal\", \"casual\", \"technical\"]),\n48                     \"risk_tolerance\": uniform(0.1, 0.9),\n49                 },\n",
-      "col_offset": 38,
-      "end_col_offset": 55,
-      "filename": "infrastructure/database/seed.py",
+}set": 59,
+      "end_col_offset": 84,
+      "filename": "agents/merchant/merchant.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
         "id": 330,
@@ -694,19 +693,19 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 48,
+      "line_number": 228,
       "line_range": [
-        48
+        228
       ],
       "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_calls.html#b311-random",
       "test_id": "B311",
       "test_name": "blacklist"
     },
     {
-      "code": "51             state={\n52                 \"current_task\": choice([\"exploring\", \"trading\", \"patrolling\", \"researching\", None]),\n53                 \"mood\": choice([\"happy\", \"neutral\", \"focused\", \"tired\"]),\n",
-      "col_offset": 32,
-      "end_col_offset": 99,
-      "filename": "infrastructure/database/seed.py",
+      "code": "245         for resource_type, surplus_amount in surpluses.items():\n246             offer_amount = surplus_amount * random.uniform(0.5, 0.9)  # Don't offer everything\n247             offered_resources[resource_type] = offer_amount\n",
+      "col_offset": 44,
+      "end_col_offset": 68,
+      "filename": "agents/merchant/merchant.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
         "id": 330,
@@ -714,136 +713,138 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 52,
+      "line_number": 246,
       "line_range": [
-        52
+        246
       ],
       "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_calls.html#b311-random",
       "test_id": "B311",
       "test_name": "blacklist"
     },
     {
-      "code": "52                 \"current_task\": choice([\"exploring\", \"trading\", \"patrolling\", \"researching\", None]),\n53                 \"mood\": choice([\"happy\", \"neutral\", \"focused\", \"tired\"]),\n54             },\n",
-      "col_offset": 24,
-      "end_col_offset": 72,
-      "filename": "infrastructure/database/seed.py",
+      "code": "99             A = A.detach().cpu().numpy()\n100         assert A.shape == (\n101             self.dims.num_observations,\n102             self.dims.num_states,\n103         ), f\"A matrix shape {A.shape} doesn't match expected {(\n104             self.dims.num_observations,\n105             self.dims.num_states\n106         )}\"\n107         # Ensure proper normalization\n",
+      "col_offset": 8,
+      "end_col_offset": 11,
+      "filename": "inference/engine/pymdp_generative_model.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
-        "id": 330,
-        "link": "https://cwe.mitre.org/data/definitions/330.html"
+        "id": 703,
+        "link": "https://cwe.mitre.org/data/definitions/703.html"
       },
       "issue_severity": "LOW",
-      "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 53,
+      "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "line_number": 100,
       "line_range": [
-        53
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106
       ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_calls.html#b311-random",
-      "test_id": "B311",
-      "test_name": "blacklist"
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b101_assert_used.html",
+      "test_id": "B101",
+      "test_name": "assert_used"
     },
     {
-      "code": "56                 \"world_model\": {\n57                     \"safety_level\": uniform(0.5, 1.0),\n58                     \"resource_availability\": uniform(0.3, 0.8),\n",
-      "col_offset": 36,
-      "end_col_offset": 53,
-      "filename": "infrastructure/database/seed.py",
+      "code": "113             B = B.detach().cpu().numpy()\n114         assert B.shape == (\n115             self.dims.num_states,\n116             self.dims.num_states,\n117             self.dims.num_actions,\n118         ), f\"B matrix shape {B.shape} doesn't match expected {(\n119             self.dims.num_states,\n120             self.dims.num_states,\n121             self.dims.num_actions\n122         )}\"\n123         # Ensure proper normalization for each action\n",
+      "col_offset": 8,
+      "end_col_offset": 11,
+      "filename": "inference/engine/pymdp_generative_model.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
-        "id": 330,
-        "link": "https://cwe.mitre.org/data/definitions/330.html"
+        "id": 703,
+        "link": "https://cwe.mitre.org/data/definitions/703.html"
       },
       "issue_severity": "LOW",
-      "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 57,
+      "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "line_number": 114,
       "line_range": [
-        57
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122
       ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_calls.html#b311-random",
-      "test_id": "B311",
-      "test_name": "blacklist"
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b101_assert_used.html",
+      "test_id": "B101",
+      "test_name": "assert_used"
     },
     {
-      "code": "57                     \"safety_level\": uniform(0.5, 1.0),\n58                     \"resource_availability\": uniform(0.3, 0.8),\n59                 },\n",
-      "col_offset": 45,
-      "end_col_offset": 62,
-      "filename": "infrastructure/database/seed.py",
+      "code": "133             C = np.tile(C.reshape(-1, 1), (1, self.dims.time_horizon))\n134         assert C.shape == (\n135             self.dims.num_observations,\n136             self.dims.time_horizon,\n137         ), f\"C matrix shape {C.shape} doesn't match expected {(\n138             self.dims.num_observations,\n139             self.dims.time_horizon\n140         )}\"\n141         self.C = C\n",
+      "col_offset": 8,
+      "end_col_offset": 11,
+      "filename": "inference/engine/pymdp_generative_model.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
-        "id": 330,
-        "link": "https://cwe.mitre.org/data/definitions/330.html"
+        "id": 703,
+        "link": "https://cwe.mitre.org/data/definitions/703.html"
       },
       "issue_severity": "LOW",
-      "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 58,
+      "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "line_number": 134,
       "line_range": [
-        58
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140
       ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_calls.html#b311-random",
-      "test_id": "B311",
-      "test_name": "blacklist"
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b101_assert_used.html",
+      "test_id": "B101",
+      "test_name": "assert_used"
     },
     {
-      "code": "62             location=f\"8{fake.hexify(text='^^^^^^')}\",\n63             energy_level=uniform(0.3, 1.0),\n64             experience_points=randint(0, 1000),\n",
-      "col_offset": 25,
+      "code": "147             D = D.detach().cpu().numpy()\n148         assert D.shape == (\n149             self.dims.num_states,\n150         ), f\"D matrix shape {D.shape} doesn't match expected {(self.dims.num_states, )}\"\n151         # Ensure normalization\n",
+      "col_offset": 8,
+      "end_col_offset": 88,
+      "filename": "inference/engine/pymdp_generative_model.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 703,
+        "link": "https://cwe.mitre.org/data/definitions/703.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "line_number": 148,
+      "line_range": [
+        148,
+        149,
+        150
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b101_assert_used.html",
+      "test_id": "B101",
+      "test_name": "assert_used"
+    },
+    {
+      "code": "199     logger.info(\"\ud83d\udd27 Starting development server...\")\n200     uvicorn.run(\"main:app\", host=\"0.0.0.0\", port=8000, reload=True, log_level=\"info\")\n",
+      "col_offset": 33,
       "end_col_offset": 42,
-      "filename": "infrastructure/database/seed.py",
-      "issue_confidence": "HIGH",
+      "filename": "main.py",
+      "issue_confidence": "MEDIUM",
       "issue_cwe": {
-        "id": 330,
-        "link": "https://cwe.mitre.org/data/definitions/330.html"
+        "id": 605,
+        "link": "https://cwe.mitre.org/data/definitions/605.html"
       },
-      "issue_severity": "LOW",
-      "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 63,
+      "issue_severity": "MEDIUM",
+      "issue_text": "Possible binding to all interfaces.",
+      "line_number": 200,
       "line_range": [
-        63
+        200
       ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_calls.html#b311-random",
-      "test_id": "B311",
-      "test_name": "blacklist"
-    },
-    {
-      "code": "63             energy_level=uniform(0.3, 1.0),\n64             experience_points=randint(0, 1000),\n65             last_active_at=datetime.utcnow() - timedelta(minutes=randint(0, 60)),\n",
-      "col_offset": 30,
-      "end_col_offset": 46,
-      "filename": "infrastructure/database/seed.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 330,
-        "link": "https://cwe.mitre.org/data/definitions/330.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 64,
-      "line_range": [
-        64
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_calls.html#b311-random",
-      "test_id": "B311",
-      "test_name": "blacklist"
-    },
-    {
-      "code": "64             experience_points=randint(0, 1000),\n65             last_active_at=datetime.utcnow() - timedelta(minutes=randint(0, 60)),\n66         )\n",
-      "col_offset": 65,
-      "end_col_offset": 79,
-      "filename": "infrastructure/database/seed.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 330,
-        "link": "https://cwe.mitre.org/data/definitions/330.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 65,
-      "line_range": [
-        65
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_calls.html#b311-random",
-      "test_id": "B311",
-      "test_name": "blacklist"
-    },
-    {
-      "code": "81             meta_data={\n82                 \"topic\": choice([\"resources\", \"exploration\", \"strategy\", \"cooperation\"]),\n83                 \"priority\": choice([\"high\", \"medium\", \"low\"]),\n",
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b104_hardcoded_bind_all_interfaces.html",
+      "test_id": "B104",
+      "test_name": "hardcoded_bind_all_interfaces"
+    }
+  ]
+}          \"topic\": choice([\"resources\", \"exploration\", \"strategy\", \"cooperation\"]),\n83                 \"priority\": choice([\"high\", \"medium\", \"low\"]),\n",
       "col_offset": 25,
       "end_col_offset": 88,
       "filename": "infrastructure/database/seed.py",

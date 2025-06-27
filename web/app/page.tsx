@@ -3,21 +3,39 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-export default function Home() {
+export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect to unified dashboard with executive view
+    // Redirect to executive dashboard view
     router.replace("/dashboard?view=executive");
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center">
+    <div
+      className="min-h-screen flex items-center justify-center"
+      style={{ background: "var(--bg-primary)" }}
+    >
       <div className="text-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[var(--accent-primary)] mx-auto mb-4"></div>
-        <h2 className="text-xl font-semibold mb-2">Redirecting to Dashboard</h2>
-        <p className="text-[var(--text-secondary)]">
-          Loading unified FreeAgentics interface...
+        <div
+          className="w-16 h-16 mx-auto mb-4 rounded-lg flex items-center justify-center"
+          style={{ background: "var(--primary-amber)" }}
+        >
+          <span
+            className="text-2xl font-bold"
+            style={{ color: "var(--bg-primary)" }}
+          >
+            CN
+          </span>
+        </div>
+        <h1
+          className="text-xl font-semibold mb-2"
+          style={{ color: "var(--text-primary)" }}
+        >
+          CogniticNet
+        </h1>
+        <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+          Redirecting to dashboard...
         </p>
       </div>
     </div>

@@ -4,12 +4,13 @@ Expert Committee: Kent Beck (TDD), Demis Hassabis (AI robustness)
 Following ADR-007 mandate for chaos testing and failure injection.
 """
 
-import pytest
 import asyncio
 import random
 import time
-from unittest.mock import patch, MagicMock
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 
 class TestNetworkFailureResilience:
@@ -48,8 +49,9 @@ class TestNetworkFailureResilience:
     @pytest.mark.asyncio
     async def test_api_timeout_handling(self):
         """Test API resilience to timeout conditions."""
-        from api.main import app
         import httpx
+
+        from api.main import app
 
         # Simulate slow responses
         with patch("httpx.AsyncClient.request") as mock_request:
@@ -137,8 +139,9 @@ class TestLoadStressResilience:
     async def test_memory_pressure_handling(self):
         """Test system behavior under memory pressure."""
         import gc
-        import psutil
         import os
+
+        import psutil
 
         process = psutil.Process(os.getpid())
         initial_memory = process.memory_info().rss / 1024 / 1024  # MB

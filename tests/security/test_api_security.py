@@ -4,11 +4,12 @@ Expert Committee: Robert C. Martin (security), Martin Fowler (API design)
 Following security best practices and OWASP guidelines.
 """
 
-import pytest
-import httpx
-from typing import Dict, Any
-import json
 import base64
+import json
+from typing import Any, Dict
+
+import httpx
+import pytest
 
 
 class TestAPISecurityBasics:

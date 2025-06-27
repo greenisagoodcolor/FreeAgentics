@@ -8,9 +8,11 @@ in the Active Inference system as mandated by ADR-007.
 
 import numpy as np
 import torch
-from hypothesis import given, strategies as st, settings, assume
+from hypothesis import assume, given, settings
+from hypothesis import strategies as st
 from hypothesis.extra.numpy import arrays
 
+from agents.base.agent import BaseAgent
 from inference.engine.active_inference import ActiveInferenceAgent, InferenceConfig
 from inference.engine.belief_state import BeliefState
 from inference.engine.generative_model import (
@@ -18,7 +20,6 @@ from inference.engine.generative_model import (
     ModelDimensions,
     ModelParameters,
 )
-from agents.base.agent import BaseAgent
 
 
 class TestActiveInferenceMathematicalInvariants:

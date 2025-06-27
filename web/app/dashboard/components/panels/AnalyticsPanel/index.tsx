@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { DashboardView } from '../../../page';
-import { BarChart3 } from 'lucide-react';
-import AnalyticsWidgetSystem from '@/components/dashboard/AnalyticsWidgetSystem';
+import React from "react";
+import { DashboardView } from "../../../page";
+import { BarChart3 } from "lucide-react";
+import AnalyticsWidgetSystem from "@/components/dashboard/AnalyticsWidgetSystem";
 
 interface AnalyticsPanelProps {
   view: DashboardView;
@@ -28,4 +28,4 @@ export default function AnalyticsPanel({ view }: AnalyticsPanelProps) {
       </div>
     </div>
   );
-} 
+}

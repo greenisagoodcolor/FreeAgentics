@@ -1,36 +1,36 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { MessageSquare, Clock } from 'lucide-react';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { MessageSquare, Clock } from "lucide-react";
 
 interface Conversation {
   id: string;
   agents: string[];
   topic: string;
-  status: 'active' | 'completed' | 'pending';
+  status: "active" | "completed" | "pending";
   timestamp: string;
   messageCount: number;
 }
 
 const mockConversations: Conversation[] = [
   {
-    id: '1',
-    agents: ['Explorer-Alpha', 'Scholar-Delta'],
-    topic: 'Market Analysis Collaboration',
-    status: 'active',
-    timestamp: '2 min ago',
-    messageCount: 23
+    id: "1",
+    agents: ["Explorer-Alpha", "Scholar-Delta"],
+    topic: "Market Analysis Collaboration",
+    status: "active",
+    timestamp: "2 min ago",
+    messageCount: 23,
   },
   {
-    id: '2',
-    agents: ['Guardian-Beta', 'Merchant-Gamma'],
-    topic: 'Risk Assessment Protocol',
-    status: 'completed',
-    timestamp: '15 min ago', 
-    messageCount: 45
-  }
+    id: "2",
+    agents: ["Guardian-Beta", "Merchant-Gamma"],
+    topic: "Risk Assessment Protocol",
+    status: "completed",
+    timestamp: "15 min ago",
+    messageCount: 45,
+  },
 ];
 
 export function ConversationFeed() {
@@ -48,12 +48,14 @@ export function ConversationFeed() {
             <div key={conv.id} className="p-3 border rounded-lg">
               <div className="flex items-center justify-between mb-2">
                 <div className="font-medium">{conv.topic}</div>
-                <Badge variant={conv.status === 'active' ? 'default' : 'secondary'}>
+                <Badge
+                  variant={conv.status === "active" ? "default" : "secondary"}
+                >
                   {conv.status}
                 </Badge>
               </div>
               <div className="text-sm text-muted-foreground mb-2">
-                {conv.agents.join(' ↔ ')}
+                {conv.agents.join(" ↔ ")}
               </div>
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>{conv.messageCount} messages</span>
@@ -68,4 +70,4 @@ export function ConversationFeed() {
       </CardContent>
     </Card>
   );
-} 
+}

@@ -24,4 +24,4 @@ Feature: Agent Exploration Behavior
     Given 3 Explorer agents in the same world
     When agents explore independently for 20 timesteps
     Then agents should cover different territories
-    And total area coverage should be maximized 
+    And total area coverage should be maximized

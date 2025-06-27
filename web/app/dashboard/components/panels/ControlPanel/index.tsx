@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { DashboardView } from '../../../page';
-import { Settings } from 'lucide-react';
+import React from "react";
+import { DashboardView } from "../../../page";
+import { Settings } from "lucide-react";
 
 interface ControlPanelProps {
   view: DashboardView;
@@ -22,4 +22,4 @@ export default function ControlPanel({ view }: ControlPanelProps) {
       </div>
     </div>
   );
-} 
+}

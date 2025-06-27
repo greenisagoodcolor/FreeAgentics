@@ -1,38 +1,38 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart3, TrendingUp, Activity, Zap } from 'lucide-react';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BarChart3, TrendingUp, Activity, Zap } from "lucide-react";
 
 const metrics = [
   {
-    title: 'Active Agents',
-    value: '4',
-    change: '+2',
+    title: "Active Agents",
+    value: "4",
+    change: "+2",
     icon: Activity,
-    color: 'text-green-600'
+    color: "text-green-600",
   },
   {
-    title: 'Conversations',
-    value: '23',
-    change: '+5',
+    title: "Conversations",
+    value: "23",
+    change: "+5",
     icon: BarChart3,
-    color: 'text-blue-600'
+    color: "text-blue-600",
   },
   {
-    title: 'Performance',
-    value: '94%',
-    change: '+3%',
+    title: "Performance",
+    value: "94%",
+    change: "+3%",
     icon: TrendingUp,
-    color: 'text-purple-600'
+    color: "text-purple-600",
   },
   {
-    title: 'Inference Rate',
-    value: '1.2k/s',
-    change: '+12%',
+    title: "Inference Rate",
+    value: "1.2k/s",
+    change: "+12%",
     icon: Zap,
-    color: 'text-orange-600'
-  }
+    color: "text-orange-600",
+  },
 ];
 
 export function AnalyticsWidgetGrid() {
@@ -54,4 +54,4 @@ export function AnalyticsWidgetGrid() {
       ))}
     </div>
   );
-} 
+}

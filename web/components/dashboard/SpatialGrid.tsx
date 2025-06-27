@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 
 export function SpatialGrid() {
   return (
@@ -9,4 +9,4 @@ export function SpatialGrid() {
       <p className="text-muted-foreground">Agent spatial positioning system</p>
     </div>
   );
-} 
+}

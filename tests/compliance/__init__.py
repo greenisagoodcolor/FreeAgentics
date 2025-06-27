@@ -1,1 +1,1 @@
-"""Compliance testing module for architectural validation.""" 
+"""Compliance testing module for architectural validation."""

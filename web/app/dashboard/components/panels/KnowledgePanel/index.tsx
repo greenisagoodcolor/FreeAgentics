@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { DashboardView } from '../../../page';
-import { Network } from 'lucide-react';
-import KnowledgeGraphVisualization from '@/components/dashboard/KnowledgeGraphVisualization';
+import React from "react";
+import { DashboardView } from "../../../page";
+import { Network } from "lucide-react";
+import KnowledgeGraphVisualization from "@/components/dashboard/KnowledgeGraphVisualization";
 
 interface KnowledgePanelProps {
   view: DashboardView;
@@ -28,4 +28,4 @@ export default function KnowledgePanel({ view }: KnowledgePanelProps) {
       </div>
     </div>
   );
-} 
+}
