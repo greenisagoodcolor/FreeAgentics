@@ -28,6 +28,31 @@ const ControlPanel = React.lazy(() => import('./components/panels/ControlPanel')
 const MetricsPanel = React.lazy(() => import('./components/panels/MetricsPanel'));
 
 // Dashboard view configurations
+export type DashboardView = 'executive' | 'technical' | 'research' | 'minimal';
+
+const DASHBOARD_VIEWS: Record<string, DashboardView> = {
+  executive: 'executive',
+  technical: 'technical',
+  research: 'research',
+  minimal: 'minimal'
+};
+
+// Panel component mapping
+const PANEL_COMPONENTS = {
+  agents: AgentPanel,
+  conversation: ConversationPanel,
+  analytics: AnalyticsPanel,
+  knowledge: KnowledgePanel,
+  controls: ControlPanel,
+  metrics: MetricsPanel,
+};
+
+// Layout component mapping
+const LAYOUT_COMPONENTS = {
+  bloomberg: BloombergLayout,
+  resizable: ResizableLayout,
+  knowledge: KnowledgeLayout,
+  compact: ResizableLayout, // Use resizable for compact
 export interface DashboardView {
   id: string;
   name: string;

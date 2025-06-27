@@ -106,7 +106,7 @@ class TestDiscreteGenerativeModel:
         """Test transition model computation"""
         # Single state and action
         state = torch.tensor([0.2, 0.3, 0.1, 0.3, 0.1])
-        next_state = self.model.transition_model(state, action=0)
+        next_state = self.model.transition_model(state, torch.tensor([0]))
         assert next_state.shape == (5,)
         assert torch.allclose(next_state.sum(), torch.tensor(1.0), atol=1e-6)
         # Batch processing
