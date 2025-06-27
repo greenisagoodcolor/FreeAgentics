@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import sys
 import unittest
 from pathlib import Path
@@ -99,7 +103,8 @@ class TestGNNStructure(unittest.TestCase):
             "fix_docstrings.py",
             "fix_triple_quotes.py",
         ]
-        unexpected_files = [f for f in root_files if f.name not in allowed_root_files]
+        unexpected_files = (
+            [f for f in root_files if f.name not in allowed_root_files])
         self.assertEqual(
             len(unexpected_files),
             0,

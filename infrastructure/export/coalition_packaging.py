@@ -1,4 +1,4 @@
-"""
+."""
 Coalition Packaging System
 
 Handles serialization, compression, and packaging of coalition states for deployment.
@@ -75,7 +75,8 @@ class StateSnapshot:
         """Add a state component with automatic checksum."""
         self.components[component_type] = data
         # Calculate checksum
-        data_str = json.dumps(data, sort_keys=True) if not isinstance(data, bytes) else data
+        data_str = (
+            json.dumps(data, sort_keys=True) if not isinstance(data, bytes) else data)
         checksum = hashlib.sha256(
             data_str.encode() if isinstance(data_str, str) else data_str
         ).hexdigest()
@@ -84,7 +85,8 @@ class StateSnapshot:
     def verify_integrity(self) -> bool:
         """Verify integrity of all components using checksums."""
         for component_type, data in self.components.items():
-            data_str = json.dumps(data, sort_keys=True) if not isinstance(data, bytes) else data
+            data_str = (
+                json.dumps(data, sort_keys=True) if not isinstance(data, bytes) else data)
             checksum = hashlib.sha256(
                 data_str.encode() if isinstance(data_str, str) else data_str
             ).hexdigest()
@@ -119,7 +121,8 @@ class SerializationRequirementsManager:
             ),
             StateComponent.SHARED_KNOWLEDGE: SerializationRequirement(
                 component_type=StateComponent.SHARED_KNOWLEDGE,
-                data_format="mixed",  # Can be JSON or binary (e.g., embeddings)
+                data_format= (
+                    "mixed",  # Can be JSON or binary (e.g., embeddings))
                 compression_enabled=True,
                 encryption_required=False,
                 versioning_enabled=True,
@@ -205,7 +208,8 @@ class SerializationRequirementsManager:
         return self.requirements.get(component_type)
 
     def get_serialization_order(self) -> List[StateComponent]:
-        """Get the order in which components should be serialized based on dependencies."""
+        """Get the order in which components should be serialized based on
+        dependencies."""
         # Topological sort based on dependencies
         visited = set()
         order = []
@@ -228,7 +232,8 @@ class SerializationRequirementsManager:
 
         return order
 
-    def validate_component_data(self, component_type: StateComponent, data: Any) -> bool:
+    def validate_component_data(self, component_type: StateComponent,
+        data: Any) -> bool:
         """Validate component data against its requirements."""
         requirement = self.get_requirement(component_type)
         if not requirement:
@@ -280,15 +285,18 @@ class StateDataCatalog:
                 name="agent_profile",
                 type_info="Dict[str, Any]",
                 relationships=["agent_state", "capabilities", "personality"],
-                constraints=["agent_id must be unique", "readiness_score between 0-1"],
-                serialization_notes="Include full agent configuration and learned parameters",
+                constraints= (
+                    ["agent_id must be unique", "readiness_score between 0-1"],)
+                serialization_notes= (
+                    "Include full agent configuration and learned parameters",)
             ),
             "agent_memory": DataStructureInfo(
                 name="agent_memory",
                 type_info="Dict[str, List[Memory]]",
                 relationships=["experiences", "beliefs", "patterns"],
                 constraints=["timestamp ordering", "memory size limits"],
-                serialization_notes="Can be compressed using semantic deduplication",
+                serialization_notes= (
+                    "Can be compressed using semantic deduplication",)
             ),
             # Knowledge structures
             "knowledge_graph": DataStructureInfo(
@@ -296,7 +304,8 @@ class StateDataCatalog:
                 type_info="NetworkX.DiGraph",
                 relationships=["nodes", "edges", "metadata"],
                 constraints=["DAG structure for certain subgraphs"],
-                serialization_notes="Use GraphML or custom format for full preservation",
+                serialization_notes= (
+                    "Use GraphML or custom format for full preservation",)
             ),
             "belief_state": DataStructureInfo(
                 name="belief_state",
@@ -310,14 +319,16 @@ class StateDataCatalog:
                 name="message_history",
                 type_info="List[ConversationMessage]",
                 relationships=["sender", "recipient", "thread_id"],
-                constraints=["chronological ordering", "referential integrity"],
+                constraints= (
+                    ["chronological ordering", "referential integrity"],)
                 serialization_notes="Can be truncated based on recency",
             ),
             "active_conversations": DataStructureInfo(
                 name="active_conversations",
                 type_info="Dict[str, ConversationState]",
                 relationships=["participants", "context", "goals"],
-                constraints=["participant availability", "context consistency"],
+                constraints= (
+                    ["participant availability", "context consistency"],)
                 serialization_notes="Include full conversation context",
             ),
             # Coalition structures
@@ -326,7 +337,8 @@ class StateDataCatalog:
                 type_info="Coalition",
                 relationships=["members", "goals", "resources", "contracts"],
                 constraints=["member consensus", "resource availability"],
-                serialization_notes="Include all binding agreements and commitments",
+                serialization_notes= (
+                    "Include all binding agreements and commitments",)
             ),
             "shared_goals": DataStructureInfo(
                 name="shared_goals",
@@ -341,7 +353,8 @@ class StateDataCatalog:
                 type_info="Dict[str, ResourceAllocation]",
                 relationships=["owner", "allocated_to", "constraints"],
                 constraints=["non-negative quantities", "allocation limits"],
-                serialization_notes="Track both committed and available resources",
+                serialization_notes= (
+                    "Track both committed and available resources",)
             ),
             # Environmental structures
             "spatial_state": DataStructureInfo(
@@ -356,7 +369,8 @@ class StateDataCatalog:
                 type_info="WorldState",
                 relationships=["spatial_state", "resources", "entities"],
                 constraints=["consistency rules", "physics constraints"],
-                serialization_notes="Large structure - consider differential updates",
+                serialization_notes= (
+                    "Large structure - consider differential updates",)
             ),
         }
 
@@ -385,7 +399,8 @@ class StateDataCatalog:
 
         return list(related)
 
-    def generate_serialization_plan(self, components: List[StateComponent]) -> Dict[str, Any]:
+    def generate_serialization_plan(self, components: List[StateComponent]) -> Dict[str,
+        Any]:
         """Generate a detailed serialization plan for given components."""
         plan = {
             "components": {},
@@ -397,14 +412,17 @@ class StateDataCatalog:
         # Map components to data structures
         component_structures = {
             StateComponent.AGENT_STATE: ["agent_profile", "agent_memory"],
-            StateComponent.SHARED_KNOWLEDGE: ["knowledge_graph", "belief_state"],
+            StateComponent.SHARED_KNOWLEDGE: ["knowledge_graph",
+                "belief_state"],
             StateComponent.COMMUNICATION_CHANNELS: [
                 "message_history",
                 "active_conversations",
             ],
-            StateComponent.COALITION_METADATA: ["coalition_state", "shared_goals"],
+            StateComponent.COALITION_METADATA: ["coalition_state",
+                "shared_goals"],
             StateComponent.RESOURCE_ALLOCATIONS: ["resource_pool"],
-            StateComponent.ENVIRONMENTAL_CONTEXT: ["spatial_state", "world_state"],
+            StateComponent.ENVIRONMENTAL_CONTEXT: ["spatial_state",
+                "world_state"],
         }
 
         for component in components:
@@ -421,7 +439,8 @@ class StateDataCatalog:
                     plan["relationships"][struct_name] = related
 
                     # Estimate size (placeholder - would need actual implementation)
-                    plan["estimated_size"][struct_name] = self._estimate_structure_size(struct_name)
+                    plan["estimated_size"][struct_name] = (
+                        self._estimate_structure_size(struct_name))
 
         return plan
 
@@ -431,15 +450,20 @@ class StateDataCatalog:
         size_estimates = {
             "agent_profile": {"min": 1024, "max": 10240, "typical": 5120},
             "agent_memory": {"min": 10240, "max": 1048576, "typical": 102400},
-            "knowledge_graph": {"min": 5120, "max": 10485760, "typical": 1048576},
+            "knowledge_graph": {"min": 5120, "max": 10485760,
+                "typical": 1048576},
             "belief_state": {"min": 2048, "max": 20480, "typical": 10240},
             "message_history": {"min": 1024, "max": 1048576, "typical": 51200},
-            "active_conversations": {"min": 512, "max": 10240, "typical": 2048},
+            "active_conversations": {"min": 512, "max": 10240,
+                "typical": 2048},
             "coalition_state": {"min": 2048, "max": 20480, "typical": 5120},
             "shared_goals": {"min": 1024, "max": 10240, "typical": 5120},
             "resource_pool": {"min": 512, "max": 5120, "typical": 2048},
-            "spatial_state": {"min": 10240, "max": 104857600, "typical": 1048576},
-            "world_state": {"min": 102400, "max": 1073741824, "typical": 10485760},
+            "spatial_state": {"min": 10240, "max": 104857600,
+                "typical": 1048576},
+            "world_state": {"min": 102400, "max": 1073741824,
+                "typical": 10485760},
         }
 
-        return size_estimates.get(structure_name, {"min": 1024, "max": 10240, "typical": 5120})
+        return size_estimates.get(structure_name, {"min": 1024, "max": 10240,
+            "typical": 5120})

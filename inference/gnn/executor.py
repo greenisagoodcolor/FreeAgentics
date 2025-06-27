@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import logging
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
@@ -281,7 +285,8 @@ class GMNExecutor:
         confidence = 1.0 - np.exp(-difference)
         return float(np.clip(confidence, 0.0, 1.0))
 
-    def _initialize_distribution(self, dist_type: str, observation: Dict[str, Any]) -> List[float]:
+    def _initialize_distribution(self, dist_type: str, observation: Dict[str,
+        Any]) -> List[float]:
         """Initialize a distribution based on type and observation."""
         return [0.25, 0.25, 0.25, 0.25]
 

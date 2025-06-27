@@ -1,4 +1,4 @@
-"""
+."""
 FreeAgentics API Main Entry Point
 
 This module serves as the main FastAPI application entry point for the FreeAgentics
@@ -9,7 +9,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
-import os
 
 # Create the FastAPI application
 app = FastAPI(
@@ -31,7 +30,7 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-    """Root endpoint providing API status"""
+    ."""Root endpoint providing API status."""
     return {
         "name": "FreeAgentics API",
         "version": "2.1.0",
@@ -46,7 +45,7 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint"""
+    ."""Health check endpoint."""
     return {
         "status": "healthy",
         "service": "FreeAgentics API",
@@ -55,7 +54,7 @@ async def health_check():
 
 @app.get("/api/status")
 async def api_status():
-    """API status endpoint for frontend integration"""
+    ."""API status endpoint for frontend integration."""
     return {
         "api_status": "online",
         "agents": {
@@ -77,4 +76,4 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=8000,
         reload=True
-    ) 
+    )

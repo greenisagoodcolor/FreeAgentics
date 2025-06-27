@@ -1,4 +1,4 @@
-"""
+."""
 Hardware Compatibility Testing
 
 Tests deployment packages on different hardware platforms to ensure
@@ -102,7 +102,8 @@ class HardwareDetector:
         python_version = sys.version.split()[0]
 
         # Determine profile name
-        profile_name = self._determine_profile_name(arch, ram_gb, gpu_available)
+        profile_name = (
+            self._determine_profile_name(arch, ram_gb, gpu_available))
 
         return HardwareProfile(
             name=profile_name,
@@ -138,7 +139,8 @@ class HardwareDetector:
             elif platform.system() == "Windows":
                 # Windows
                 result = subprocess.run(
-                    ["wmic", "cpu", "get", "name"], capture_output=True, text=True
+                    ["wmic", "cpu", "get", "name"], capture_output=True,
+                        text=True
                 )
                 lines = result.stdout.strip().split("\n")
                 if len(lines) > 1:
@@ -178,7 +180,8 @@ class HardwareDetector:
 
         return False, None
 
-    def _determine_profile_name(self, arch: str, ram_gb: float, gpu_available: bool) -> str:
+    def _determine_profile_name(self, arch: str, ram_gb: float,
+        gpu_available: bool) -> str:
         """Determine profile name based on hardware."""
         if arch == "arm64" or arch == "aarch64":
             if ram_gb <= 2:
@@ -298,7 +301,8 @@ class CompatibilityTester:
                             test_name=test.name,
                             status=TestStatus.SKIPPED,
                             duration=0,
-                            message=f"Skipped: requires {', '.join(test.required_features)}",
+                            message= (
+                                f"Skipped: requires {', '.join(test.required_features)}",)
                         )
                     )
                     continue
@@ -339,7 +343,8 @@ class CompatibilityTester:
         def test_wrapper() -> None:
             try:
                 start_time = time.time()
-                success, message, details = test.test_function(package_dir, hardware_profile)
+                success, message, details = (
+                    test.test_function(package_dir, hardware_profile))
                 duration = time.time() - start_time
 
                 status = TestStatus.PASSED if success else TestStatus.FAILED
@@ -408,7 +413,8 @@ class CompatibilityTester:
             result = np.sum(c)
 
         duration = time.time() - start_time
-        ops_per_second = (iterations * size * size * size * 2) / duration / 1e9  # GFLOPS
+        ops_per_second = (
+            (iterations * size * size * size * 2) / duration / 1e9  # GFLOPS)
 
         # Determine if performance is acceptable
         min_gflops = {
@@ -515,7 +521,8 @@ class CompatibilityTester:
             min_write_speed = 10  # MB/s
             min_read_speed = 20  # MB/s
 
-            passed = write_speed >= min_write_speed and read_speed >= min_read_speed
+            passed = (
+                write_speed >= min_write_speed and read_speed >= min_read_speed)
 
             return (
                 passed,
@@ -528,7 +535,8 @@ class CompatibilityTester:
             )
 
         except Exception as e:
-            return (False, f"Disk I/O test failed: {str(e)}", {"error": str(e)})
+            return (False, f"Disk I/O test failed: {str(e)}",
+                {"error": str(e)})
         finally:
             if test_file.exists():
                 test_file.unlink()
@@ -553,7 +561,8 @@ class CompatibilityTester:
             for req in requirements:
                 if req and not req.startswith("#"):
                     # Extract package name
-                    package_name = req.split("==")[0].split(">=")[0].split("[")[0]
+                    package_name = (
+                        req.split("==")[0].split(">=")[0].split("[")[0])
 
                     # Try to import
                     try:
@@ -605,7 +614,8 @@ class CompatibilityTester:
             if result == 0:
                 return (
                     True,
-                    f"Network OK (DNS: {dns_time*1000:.0f}ms, Connect: {connect_time*1000:.0f}ms)",
+                    f"Network OK (DNS: {dns_time*1000:.0f}ms,
+                        Connect: {connect_time*1000:.0f}ms)",
                     {
                         "dns_time_ms": dns_time * 1000,
                         "connect_time_ms": connect_time * 1000,
@@ -633,7 +643,8 @@ class CompatibilityTester:
                 import torch
 
                 cuda_available = torch.cuda.is_available()
-                device_count = torch.cuda.device_count() if cuda_available else 0
+                device_count = (
+                    torch.cuda.device_count() if cuda_available else 0)
                 gpu_tests.append(
                     {
                         "framework": "pytorch",
@@ -752,7 +763,8 @@ class CompatibilityTester:
 
                 return (
                     True,
-                    f"Agent started successfully in {time.time() - start_time:.1f}s",
+                    f"Agent started successfully in {time.time() -
+                        start_time:.1f}s",
                     {"startup_time": time.time() - start_time},
                 )
             else:
@@ -763,7 +775,8 @@ class CompatibilityTester:
                 return (False, "Agent startup timeout", {"timeout": startup_timeout})
 
         except Exception as e:
-            return (False, f"Agent startup test failed: {str(e)}", {"error": str(e)})
+            return (False, f"Agent startup test failed: {str(e)}",
+                {"error": str(e)})
 
     def _test_resource_limits(
         self, package_dir: Path, hardware_profile: HardwareProfile
@@ -809,7 +822,8 @@ class CompatibilityTester:
                 {"platform": platform.system()},
             )
         except Exception as e:
-            return (False, f"Resource limit test failed: {str(e)}", {"error": str(e)})
+            return (False, f"Resource limit test failed: {str(e)}",
+                {"error": str(e)})
 
 
 def test_hardware_compatibility(package_path: str) -> bool:
@@ -843,7 +857,8 @@ def test_hardware_compatibility(package_path: str) -> bool:
 
     # Print test results
     for test_result in results["test_results"]:
-        icon = {"passed": "✓", "failed": "✗", "skipped": "○", "timeout": "⏱"}.get(
+        icon = (
+            {"passed": "✓", "failed": "✗", "skipped": "○", "timeout": "⏱"}.get()
             test_result["status"], "?"
         )
 

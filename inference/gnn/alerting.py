@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import smtplib
 import threading
 import time
@@ -17,7 +21,7 @@ from .monitoring import get_logger
 Alerting System for GNN Processing
 This module provides alerting mechanisms for monitoring thresholds,
 error conditions, and performance degradation.
-"""
+."""
 logger = get_logger().logger
 
 
@@ -99,15 +103,15 @@ class AlertRule:
 
 
 class AlertChannel:
-    """Base class for alert channels"""
+    ."""Base class for alert channels."""
 
     def send_alert(self, alert: Alert) -> bool:
-        """Send alert through this channel"""
+        ."""Send alert through this channel."""
         raise NotImplementedError
 
 
 class LoggerChannel(AlertChannel):
-    """Logger-based alert channel"""
+    ."""Logger-based alert channel."""
 
     def send_alert(self, alert: Alert) -> bool:
         """Log the alert"""
@@ -196,7 +200,7 @@ class WebhookChannel(AlertChannel):
         Args:
             webhook_url: Webhook URL
             headers: Optional headers
-        """
+        ."""
         self.webhook_url = webhook_url
         self.headers = headers or {}
 
@@ -316,7 +320,7 @@ class AlertManager:
             self.add_rule(rule)
 
     def add_rule(self, rule: AlertRule) -> None:
-        """Add alert rule"""
+        ."""Add alert rule."""
         with self._lock:
             self.rules.append(rule)
             self.rule_state[rule.name] = {"breach_count": 0, "last_alert_time": None}

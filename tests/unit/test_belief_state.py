@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import tempfile
 from pathlib import Path
 
@@ -390,7 +394,8 @@ class TestBeliefStateIntegration:
         inference = VariationalMessagePassing(inference_config)
         # Test inference with belief state
         observation = torch.tensor(0)
-        updated_beliefs = inference.infer_states(observation, model, belief_state.get_beliefs())
+        updated_beliefs = (
+            inference.infer_states(observation, model, belief_state.get_beliefs()))
         # Update belief state with results
         belief_state.set_beliefs(updated_beliefs)
         assert belief_state.beliefs.shape == (4,)

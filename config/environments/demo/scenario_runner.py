@@ -128,7 +128,8 @@ class ScenarioRunner:
             # Simulate resource discovery
             if random.random() > 0.3:
                 resources = random.choice(
-                    ["abundant food", "fresh water", "rare metals", "ancient artifacts"]
+                    ["abundant food", "fresh water", "rare metals",
+                        "ancient artifacts"]
                 )
                 self.broadcast_scenario_event(
                     {
@@ -190,7 +191,8 @@ class ScenarioRunner:
                 "scenario": "merchant_trade",
                 "phase": "start",
                 "agents": [merchant1["name"], merchant2["name"]],
-                "message": f"Trading session begins between {merchant1['name']} and {merchant2['name']}",
+                "message": f"Trading session begins between {merchant1['name']} and
+                    {merchant2['name']}",
             }
         )
 
@@ -367,7 +369,8 @@ class ScenarioRunner:
 
         # Phase 1: Perimeter establishment
         await asyncio.sleep(2)
-        checkpoints = ["North Gate", "East Tower", "South Bridge", "West Outpost"]
+        checkpoints = (
+            ["North Gate", "East Tower", "South Bridge", "West Outpost"])
 
         for checkpoint in checkpoints:
             self.broadcast_scenario_event(
@@ -404,7 +407,8 @@ class ScenarioRunner:
                     "scenario": "guardian_patrol",
                     "phase": "response",
                     "agent": guardian["name"],
-                    "message": f"{guardian['name']} investigates and neutralizes the threat",
+                    "message": f"{guardian['name']} investigates and
+                        neutralizes the threat",
                     "outcome": "success",
                 }
             )
@@ -450,7 +454,8 @@ class ScenarioRunner:
                 "scenario": "multi_agent_collaboration",
                 "phase": "start",
                 "team": team_names,
-                "message": f"Team forms for complex mission: {', '.join(team_names)}",
+                "message": f"Team forms for complex mission: {',
+                    '.join(team_names)}",
             }
         )
 
@@ -535,7 +540,8 @@ class ScenarioRunner:
 
             # Store in recent scenarios
             self.redis_client.lpush("demo:recent_scenarios", json.dumps(event))
-            self.redis_client.ltrim("demo:recent_scenarios", 0, 49)  # Keep last 50
+            self.redis_client.ltrim("demo:recent_scenarios", 0,
+                49)  # Keep last 50
 
             logger.info(f"Scenario event: {event.get('message', 'Unknown')}")
 
@@ -552,20 +558,24 @@ class ScenarioRunner:
                         "pattern_count = LEAST(pattern_count + 1, 100)",
                     ],
                     "trade": [
-                        "successful_interactions = successful_interactions + 1",
+                        "successful_interactions = successful_interactions +
+                            1",
                         "total_interactions = total_interactions + 1",
                     ],
                     "research": [
                         "knowledge_items_shared = knowledge_items_shared + 3",
-                        "avg_pattern_confidence = LEAST(avg_pattern_confidence + 0.02, 0.95)",
+                        "avg_pattern_confidence = (
+                            LEAST(avg_pattern_confidence + 0.02, 0.95)",)
                     ],
                     "patrol": [
                         "successful_goals = successful_goals + 1",
                         "total_goals_attempted = total_goals_attempted + 1",
                     ],
                     "collaboration": [
-                        "unique_collaborators = LEAST(unique_collaborators + 1, 10)",
-                        "successful_interactions = successful_interactions + 2",
+                        "unique_collaborators = LEAST(unique_collaborators + 1,
+                            10)",
+                        "successful_interactions = successful_interactions +
+                            2",
                     ],
                 }
 
@@ -601,7 +611,8 @@ class ScenarioRunner:
                 # Log event
                 cursor.execute(
                     """
-                    INSERT INTO demo.events (scenario_id, event_type, agent_id, description)
+                    INSERT INTO demo.events (scenario_id, event_type, agent_id,
+                        description)
                     VALUES (%s, 'scenario_complete', %s, 'Scenario completed successfully')
                 """,
                     (scenario_id, agent_id),

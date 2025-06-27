@@ -1,4 +1,4 @@
-"""
+."""
 Coalition Business Model Exporter
 
 Integrates with existing export infrastructure to provide investor-ready
@@ -6,7 +6,6 @@ coalition business model exports with comprehensive business intelligence.
 """
 
 import csv
-import io
 import json
 import logging
 from datetime import datetime
@@ -146,13 +145,15 @@ class CoalitionBusinessModelExporter:
                     "synergy_score": f"{business_metrics.synergy_score:.1%}",
                     "value_creation": self._calculate_value_creation(business_metrics),
                     "capability_complementarity": self._analyze_capability_synergy(agent_profiles),
-                    "methodology": business_metrics.methodology_notes.get("synergy", ""),
+                    "methodology": business_metrics.methodology_notes.get("synergy",
+                        ""),
                 },
                 "risk_management": {
                     "risk_reduction_score": f"{business_metrics.risk_reduction:.1%}",
                     "diversification_analysis": self._analyze_diversification(agent_profiles),
                     "risk_mitigation_strategies": self._identify_risk_mitigations(agent_profiles),
-                    "methodology": business_metrics.methodology_notes.get("risk_reduction", ""),
+                    "methodology": business_metrics.methodology_notes.get("risk_reduction",
+                        ""),
                 },
                 "market_position": {
                     "positioning_score": f"{business_metrics.market_positioning:.1%}",
@@ -160,13 +161,15 @@ class CoalitionBusinessModelExporter:
                         formation_result, agent_profiles
                     ),
                     "market_readiness": self._assess_market_readiness(business_metrics),
-                    "methodology": business_metrics.methodology_notes.get("market_positioning", ""),
+                    "methodology": business_metrics.methodology_notes.get("market_positioning",
+                        ""),
                 },
                 "sustainability": {
                     "sustainability_score": f"{business_metrics.sustainability_score:.1%}",
                     "long_term_viability": self._assess_long_term_viability(business_metrics),
                     "resource_efficiency": self._analyze_resource_efficiency(agent_profiles),
-                    "methodology": business_metrics.methodology_notes.get("sustainability", ""),
+                    "methodology": business_metrics.methodology_notes.get("sustainability",
+                        ""),
                 },
                 "operational_metrics": {
                     "efficiency_score": f"{business_metrics.operational_efficiency:.1%}",
@@ -203,7 +206,8 @@ class CoalitionBusinessModelExporter:
             },
             "risk_assessment": {
                 "overall_risk_level": self._calculate_overall_risk(business_metrics),
-                "key_risk_factors": self._identify_key_risks(agent_profiles, business_metrics),
+                "key_risk_factors": self._identify_key_risks(agent_profiles,
+                    business_metrics),
                 "mitigation_strategies": self._recommend_mitigations(business_metrics),
                 "contingency_plans": self._suggest_contingencies(agent_profiles),
             },
@@ -288,9 +292,12 @@ class CoalitionBusinessModelExporter:
         # Executive summary
         exec_summary = business_model.get("executive_summary", {})
         csv_data.append(["Coalition Name", exec_summary.get("coalition_name", "")])
-        csv_data.append(["Total Business Value", exec_summary.get("total_business_value", "")])
-        csv_data.append(["Confidence Level", exec_summary.get("confidence_level", "")])
-        csv_data.append(["Investment Readiness", exec_summary.get("investment_readiness", "")])
+        csv_data.append(["Total Business Value", exec_summary.get("total_business_value",
+            "")])
+        csv_data.append(["Confidence Level", exec_summary.get("confidence_level",
+            "")])
+        csv_data.append(["Investment Readiness", exec_summary.get("investment_readiness",
+            "")])
 
         # Business metrics
         business_metrics = business_model.get("business_metrics", {})
@@ -516,7 +523,8 @@ class CoalitionBusinessModelExporter:
         return "Excellent strategic fit" if metrics.total_value > 0.7 else "Good strategic fit"
 
     def _identify_growth_opportunities(self, metrics: BusinessValueMetrics) -> List[str]:
-        return ["Market expansion", "Capability enhancement", "Resource optimization"]
+        return ["Market expansion", "Capability enhancement",
+            "Resource optimization"]
 
     def _calculate_overall_risk(self, metrics: BusinessValueMetrics) -> str:
         risk_score = 1.0 - metrics.risk_reduction
@@ -526,7 +534,8 @@ class CoalitionBusinessModelExporter:
         return ["Market volatility", "Resource constraints", "Coordination challenges"]
 
     def _recommend_mitigations(self, metrics: BusinessValueMetrics) -> List[str]:
-        return ["Diversification strategy", "Contingency planning", "Regular monitoring"]
+        return ["Diversification strategy", "Contingency planning",
+            "Regular monitoring"]
 
     def _suggest_contingencies(self, profiles: List) -> List[str]:
         return ["Backup resource allocation", "Alternative coordination methods", "Exit strategies"]

@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
@@ -30,7 +34,7 @@ This module provides decision-making capabilities for agents including:
 - Action selection mechanisms
 - Integration with Active Inference Engine
 - Behavioral patterns and strategies
-"""
+."""
 
 
 class ActionType(Enum):
@@ -74,7 +78,7 @@ class Action:
     prerequisites: List[str] = field(default_factory=list)
 
     def __hash__(self):
-        """Make Action hashable for use in sets"""
+        ."""Make Action hashable for use in sets."""
         return hash((self.action_type, str(self.target), tuple(self.parameters.items())))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -108,28 +112,28 @@ class DecisionContext:
     time_pressure: float = 0.0
 
     def get_perceived_threats(self) -> List[Percept]:
-        """Get perceived threats from percepts"""
+        ."""Get perceived threats from percepts."""
         return [p for p in self.percepts if p.stimulus.stimulus_type == StimulusType.DANGER]
 
     def get_perceived_agents(self) -> List[Percept]:
-        """Get perceived agents from percepts"""
+        ."""Get perceived agents from percepts."""
         return [p for p in self.percepts if p.stimulus.stimulus_type == StimulusType.AGENT]
 
     def get_perceived_resources(self) -> List[Percept]:
-        """Get perceived resources from percepts"""
+        ."""Get perceived resources from percepts."""
         return [p for p in self.percepts if p.stimulus.metadata.get("is_resource", False)]
 
 
 class UtilityFunction:
-    """Base class for utility functions"""
+    ."""Base class for utility functions."""
 
     def calculate(self, action: Action, context: DecisionContext) -> float:
-        """Calculate utility of an action in given context"""
+        ."""Calculate utility of an action in given context."""
         raise NotImplementedError
 
 
 class SafetyUtility(UtilityFunction):
-    """Utility function for safety/survival"""
+    ."""Utility function for safety/survival."""
 
     def calculate(self, action: Action, context: DecisionContext) -> float:
         """Calculate safety utility"""
@@ -154,7 +158,7 @@ class SafetyUtility(UtilityFunction):
 
 
 class GoalUtility(UtilityFunction):
-    """Utility function for goal achievement"""
+    ."""Utility function for goal achievement."""
 
     def calculate(self, action: Action, context: DecisionContext) -> float:
         """Calculate goal utility"""
@@ -180,7 +184,7 @@ class GoalUtility(UtilityFunction):
 
 
 class ResourceUtility(UtilityFunction):
-    """Utility function for resource management"""
+    ."""Utility function for resource management."""
 
     def calculate(self, action: Action, context: DecisionContext) -> float:
         """Calculate resource utility"""
@@ -205,7 +209,7 @@ class ResourceUtility(UtilityFunction):
 
 
 class SocialUtility(UtilityFunction):
-    """Utility function for social interactions"""
+    ."""Utility function for social interactions."""
 
     def calculate(self, action: Action, context: DecisionContext) -> float:
         """Calculate social utility"""
@@ -352,7 +356,7 @@ class DecisionMaker:
 
 
 class BehaviorTree:
-    """Simple behavior tree implementation for complex behaviors"""
+    ."""Simple behavior tree implementation for complex behaviors."""
 
     def __init__(self) -> None:
         self.root: Optional["BehaviorNode"] = None
@@ -365,10 +369,10 @@ class BehaviorTree:
 
 
 class BehaviorNode:
-    """Base class for behavior tree nodes"""
+    ."""Base class for behavior tree nodes."""
 
     def execute(self, context: DecisionContext) -> Optional[Action]:
-        """Execute this node"""
+        ."""Execute this node."""
         raise NotImplementedError
 
 
@@ -393,7 +397,7 @@ class SequenceNode(BehaviorNode):
 
 
 class SelectorNode(BehaviorNode):
-    """Execute children until one succeeds"""
+    ."""Execute children until one succeeds."""
 
     def __init__(self, children: List[BehaviorNode]) -> None:
         self.children = children
@@ -430,18 +434,18 @@ class ConditionNode(BehaviorNode):
 
 
 class ActionNode(BehaviorNode):
-    """Leaf node that returns an action"""
+    ."""Leaf node that returns an action."""
 
     def __init__(self, action_generator: Callable[[DecisionContext], Optional[Action]]) -> None:
         self.action_generator = action_generator
 
     def execute(self, context: DecisionContext) -> Optional[Action]:
-        """Generate and return action"""
+        ."""Generate and return action."""
         return self.action_generator(context)
 
 
 class ActionGenerator:
-    """Generates available actions based on agent state and environment"""
+    ."""Generates available actions based on agent state and environment."""
 
     def __init__(self, movement_controller: Optional[MovementController] = None) -> None:
         self.movement_controller = movement_controller
@@ -569,7 +573,7 @@ class DecisionSystem:
     def register_agent(
         self, agent: Agent, strategy: DecisionStrategy = DecisionStrategy.HYBRID
     ) -> None:
-        """Register an agent with the decision system"""
+        ."""Register an agent with the decision system."""
         self.decision_makers[agent.agent_id] = DecisionMaker(strategy)
         tree = self._create_default_behavior_tree()
         self.behavior_trees[agent.agent_id] = tree
@@ -713,7 +717,7 @@ class DecisionSystem:
     def get_decision_history(
         self, agent_id: str, limit: int = 10
     ) -> List[Tuple[DecisionContext, Action]]:
-        """Get recent decision history for an agent"""
+        ."""Get recent decision history for an agent."""
         history = self.decision_history.get(agent_id, [])
         return history[-limit:]
 

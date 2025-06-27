@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import logging
 from typing import Tuple, Union
 
@@ -5,9 +9,13 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from .generative_model import DiscreteGenerativeModel, ModelDimensions, ModelParameters
+from .generative_model import (
+    DiscreteGenerativeModel,
+    ModelDimensions,
+    ModelParameters)
 
 """\npymdp-Compatible Generative Model Implementation
+
 This module provides generative models that are compatible with the official pymdp library,
 converting existing custom implementations to use pymdp's expected matrix formats.
 """
@@ -42,6 +50,7 @@ class PyMDPGenerativeModel:
             A: numpy array of shape [num_observations, num_states]
                 A[o, s] = p(o|s) - probability of observation o given state s
         """
+
         # Create random observation model
         A = np.random.rand(self.dims.num_observations, self.dims.num_states)
         # Normalize columns so each column sums to 1 (proper probability distribution)
@@ -55,6 +64,7 @@ class PyMDPGenerativeModel:
             B: numpy array of shape [num_states, num_states, num_actions]
                 B[s', s, a] = p(s'|s, a) - probability of next state s' given current state s and action a
         """
+
         B = np.zeros((self.dims.num_states, self.dims.num_states, self.dims.num_actions))
         for a in range(self.dims.num_actions):
             # Create random transition matrix for this action
@@ -65,6 +75,7 @@ class PyMDPGenerativeModel:
 
     def _initialize_C_matrix(self) -> np.ndarray:
         """
+
         Initialize preference matrix C.
         Returns:
             C: numpy array of shape [num_observations, time_horizon]
@@ -134,6 +145,7 @@ class PyMDPGenerativeModel:
 
     def set_D_matrix(self, D: Union[np.ndarray, torch.Tensor]) -> None:
         """Set initial state prior from external source."""
+
         if isinstance(D, torch.Tensor):
             D = D.detach().cpu().numpy()
         assert D.shape == (

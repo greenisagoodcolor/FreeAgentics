@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import logging
 from abc import ABC, abstractmethod
 from collections import defaultdict

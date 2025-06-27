@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -8,7 +12,7 @@ import torch.nn as nn
 Hierarchical Inference for Active Inference Engine
 This module implements hierarchical active inference with multiple levels
 of abstraction and temporal prediction.
-"""
+."""
 
 
 @dataclass
@@ -129,14 +133,16 @@ class HierarchicalLevel(nn.Module):
         bottom_up_input: Optional[torch.Tensor] = None,
         top_down_input: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
-        """Update beliefs based on bottom-up and top-down inputs"""
+        """Update beliefs based on bottom-up and top-down inputs."""
         if self.state is None:
-            raise ValueError("State not initialized. Call initialize_state first.")
+            raise ValueError(
+                "State not initialized. Call initialize_state first.")
         current_beliefs = self.state.beliefs
         # Process inputs
         if bottom_up_input is not None:
             projected_input = self.input_projection(bottom_up_input)
-            bottom_up_processed = torch.sigmoid(self.bottom_up_net(projected_input))
+            bottom_up_processed = (
+                torch.sigmoid(self.bottom_up_net(projected_input)))
         else:
             bottom_up_processed = torch.zeros_like(current_beliefs)
         if top_down_input is not None:
@@ -193,7 +199,7 @@ class HierarchicalInference(nn.Module):
             self.levels.append(level)
 
     def initialize(self, batch_size: int) -> None:
-        """Initialize all levels"""
+        ."""Initialize all levels."""
         for level in self.levels:
             level.initialize_state(batch_size)
 

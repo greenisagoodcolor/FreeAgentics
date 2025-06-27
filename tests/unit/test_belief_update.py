@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 from typing import Tuple
 
 import pytest
@@ -43,7 +47,7 @@ class TestBeliefUpdateConfig:
 
 class TestDirectGraphObservationModel:
     def test_initialization(self) -> None:
-        """Test model initialization"""
+        ."""Test model initialization."""
         config = BeliefUpdateConfig(use_gpu=False)
         model = DirectGraphObservationModel(config)
         assert model.config == config
@@ -112,13 +116,13 @@ class TestGraphNNBeliefUpdater:
 class TestAttentionGraphBeliefUpdater:
     @pytest.fixture
     def setup_attention_updater(self) -> AttentionGraphBeliefUpdater:
-        """Setup attention-based updater"""
+        ."""Setup attention-based updater."""
         config = BeliefUpdateConfig(use_gpu=False)
         updater = AttentionGraphBeliefUpdater(config)
         return updater
 
     def test_initialization(self, setup_attention_updater: AttentionGraphBeliefUpdater) -> None:
-        """Test attention updater initialization"""
+        ."""Test attention updater initialization."""
         updater = setup_attention_updater
         assert updater.config is not None
         assert updater.device is not None
@@ -138,13 +142,13 @@ class TestAttentionGraphBeliefUpdater:
 class TestHierarchicalBeliefUpdater:
     @pytest.fixture
     def setup_hierarchical_updater(self) -> HierarchicalBeliefUpdater:
-        """Setup hierarchical updater"""
+        ."""Setup hierarchical updater."""
         config = BeliefUpdateConfig(use_gpu=False)
         updater = HierarchicalBeliefUpdater(config)
         return updater
 
     def test_initialization(self, setup_hierarchical_updater: HierarchicalBeliefUpdater) -> None:
-        """Test hierarchical updater initialization"""
+        ."""Test hierarchical updater initialization."""
         updater = setup_hierarchical_updater
         assert updater.config is not None
         assert updater.device is not None
@@ -163,19 +167,19 @@ class TestHierarchicalBeliefUpdater:
 
 class TestFactoryFunction:
     def test_create_graphnn_updater(self) -> None:
-        """Test creating GraphNN updater"""
+        ."""Test creating GraphNN updater."""
         config = BeliefUpdateConfig(use_gpu=False)
         updater = create_belief_updater("graphnn", config)
         assert isinstance(updater, GraphNNBeliefUpdater)
 
     def test_create_attention_updater(self) -> None:
-        """Test creating attention updater"""
+        ."""Test creating attention updater."""
         config = BeliefUpdateConfig(use_gpu=False)
         updater = create_belief_updater("attention", config)
         assert isinstance(updater, AttentionGraphBeliefUpdater)
 
     def test_create_hierarchical_updater(self) -> None:
-        """Test creating hierarchical updater"""
+        ."""Test creating hierarchical updater."""
         config = BeliefUpdateConfig(use_gpu=False)
         updater = create_belief_updater("hierarchical", config)
         assert isinstance(updater, HierarchicalBeliefUpdater)

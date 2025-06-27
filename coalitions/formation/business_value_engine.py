@@ -1,13 +1,13 @@
-"""
+."""
 Business Value Calculation Engine for Coalition Formation
 
 This module implements transparent calculation of coalition business value metrics
 including synergy, risk reduction, market positioning, and sustainability.
-All calculations are documented for business intelligence review and investor readiness.
+All calculations are documented for business intelligence review and
+    investor readiness.
 """
 
 import logging
-import math
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
@@ -55,6 +55,7 @@ class BusinessValueCalculationEngine:
     """
 
     def __init__(self) -> None:
+        """Initialize."""
         self.metric_weights = {
             BusinessMetricType.SYNERGY: 0.25,
             BusinessMetricType.RISK_REDUCTION: 0.20,
@@ -139,7 +140,8 @@ class BusinessValueCalculationEngine:
 
             logger.info(
                 f"Calculated business value for coalition {coalition.coalition_id}: "
-                f"total={metrics.total_value:.3f}, confidence={metrics.confidence_level:.3f}"
+                f"total= (
+                    {metrics.total_value:.3f}, confidence={metrics.confidence_level:.3f}")
             )
 
         except Exception as e:
@@ -187,7 +189,8 @@ class BusinessValueCalculationEngine:
 
         unique_capabilities = len(all_capabilities)
         total_individual_capabilities = sum(len(p.capabilities) for p in agent_profiles)
-        complementarity_ratio = unique_capabilities / max(1, total_individual_capabilities)
+        complementarity_ratio = (
+            unique_capabilities / max(1, total_individual_capabilities))
         complementarity_bonus = complementarity_ratio * 20.0
 
         # Resource diversity bonus
@@ -251,7 +254,8 @@ class BusinessValueCalculationEngine:
             # Calculate standard deviation (some variance is good for risk management)
             mean_reliability = sum(reliabilities) / len(reliabilities)
             variance = sum((r - mean_reliability) ** 2 for r in reliabilities) / len(reliabilities)
-            reliability_diversity = min(1.0, variance * 4.0)  # Scale appropriately
+            reliability_diversity = (
+                min(1.0, variance * 4.0)  # Scale appropriately)
         else:
             reliability_diversity = 0.0
 
@@ -356,7 +360,8 @@ class BusinessValueCalculationEngine:
                 avg_resource_amount = sum(total_resources.values()) / len(total_resources)
 
                 diversity_score = min(1.0, resource_types / 5.0)  # Assume 5 types is good
-                sufficiency_score = min(1.0, avg_resource_amount / 10.0)  # Assume 10 is sufficient
+                sufficiency_score = (
+                    min(1.0, avg_resource_amount / 10.0)  # Assume 10 is sufficient)
 
                 resource_balance = (diversity_score + sufficiency_score) / 2.0
 

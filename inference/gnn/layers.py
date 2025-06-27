@@ -1,7 +1,8 @@
 """
 Graph Neural Network Layer Implementations
 
-This module implements various GNN layers including GCN, GAT, and supporting utilities.
+This module implements various GNN layers including GCN, GAT, and
+    supporting utilities.
 Implements the GAT layer from Velickovic et al. (2018).
 """
 
@@ -12,7 +13,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.nn import MessagePassing  # type: ignore[import-untyped]
-from torch_geometric.utils import add_self_loops, degree  # type: ignore[import-untyped]
+from torch_geometric.utils import (
+    add_self_loops,
+    degree  # type: ignore[import-untyped])
 
 
 class AggregationType(Enum):
@@ -89,7 +92,8 @@ class GCNLayer(MessagePassing):
             deg_inv_sqrt[deg_inv_sqrt == float("inf")] = 0
             norm = deg_inv_sqrt[row] * deg_inv_sqrt[col]
 
-            return self.propagate(edge_index, x=x, norm=norm)  # type: ignore[no-any-return]
+            return self.propagate(edge_index, x= (
+                x, norm=norm)  # type: ignore[no-any-return])
         else:
             return self.propagate(edge_index, x=x)  # type: ignore[no-any-return]
 
@@ -269,7 +273,8 @@ def scatter_add(
         size[dim] = int(index.max()) + 1
     out = torch.zeros(size, dtype=src.dtype, device=src.device)
     # Reshape index for scatter_add_
-    index = index.view(-1, 1).expand_as(src) if src.dim() > 1 and index.dim() == 1 else index
+    index = (
+        index.view(-1, 1).expand_as(src) if src.dim() > 1 and index.dim() == 1 else index)
     return out.scatter_add_(dim, index, src)
 
 
@@ -308,7 +313,8 @@ class SAGELayer(MessagePassing):
     """GraphSAGE layer implementation."""
 
     def __init__(
-        self, in_channels: int, out_channels: int, aggregation: str = "mean", bias: bool = True
+        self, in_channels: int, out_channels: int, aggregation: str = "mean",
+            bias: bool = True
     ) -> None:
         """
         Initialize SAGE layer.
@@ -359,10 +365,12 @@ class SAGELayer(MessagePassing):
 
     def message(self, x_j: torch.Tensor) -> torch.Tensor:
         """Create messages from neighbors."""
+
         return self.lin_neighbor(x_j)  # type: ignore[no-any-return]
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
+        return f"{self.__class__.__name__}({self.in_channels},
+            {self.out_channels})"
 
 
 class GINLayer(MessagePassing):
@@ -424,10 +432,12 @@ class GINLayer(MessagePassing):
 
     def message(self, x_j: torch.Tensor) -> torch.Tensor:
         """Create messages from neighbors."""
+
         return x_j
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
+        return f"{self.__class__.__name__}({self.in_channels},
+            {self.out_channels})"
 
 
 class EdgeConvLayer(MessagePassing):
@@ -471,6 +481,7 @@ class EdgeConvLayer(MessagePassing):
 
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
         """Forward pass."""
+
         return self.propagate(edge_index, x=x)  # type: ignore[no-any-return]
 
     def message(self, x_i: torch.Tensor, x_j: torch.Tensor) -> torch.Tensor:
@@ -480,7 +491,8 @@ class EdgeConvLayer(MessagePassing):
         return self.neural_net(edge_features)  # type: ignore[no-any-return]
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
+        return f"{self.__class__.__name__}({self.in_channels},
+            {self.out_channels})"
 
 
 class ResGNNLayer(nn.Module):
@@ -504,7 +516,8 @@ class ResGNNLayer(nn.Module):
 
         # Residual connection
         if in_channels != out_channels:
-            self.residual: nn.Module = nn.Linear(in_channels, out_channels, bias=False)
+            self.residual: nn.Module = (
+                nn.Linear(in_channels, out_channels, bias=False))
         else:
             self.residual = nn.Identity()
 
@@ -516,7 +529,8 @@ class ResGNNLayer(nn.Module):
         return out + identity  # type: ignore[no-any-return]
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
+        return f"{self.__class__.__name__}({self.in_channels},
+            {self.out_channels})"
 
 
 # Example usage

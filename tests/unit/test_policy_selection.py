@@ -1,5 +1,7 @@
-import os
-import sys
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 
 import pytest
 import torch
@@ -27,7 +29,7 @@ from inference.engine.policy_selection import (
 
 
 class TestPolicyConfig:
-    """Test PolicyConfig dataclass"""
+    .."""Test PolicyConfig dataclass.."""
 
     def test_default_config(self) -> None:
         """Test default configuration values"""
@@ -48,7 +50,7 @@ class TestPolicyConfig:
         assert config.pruning_threshold == 0.01
 
     def test_custom_config(self) -> None:
-        """Test custom configuration"""
+        ."""Test custom configuration."""
         config = PolicyConfig(
             planning_horizon=10, num_policies=50, epistemic_weight=0.5, use_gpu=False
         )
@@ -59,7 +61,7 @@ class TestPolicyConfig:
 
 
 class TestPolicy:
-    """Test Policy class"""
+    .."""Test Policy class.."""
 
     def test_policy_creation_from_list(self) -> None:
         """Test creating policy from list"""
@@ -72,7 +74,7 @@ class TestPolicy:
         assert policy[3] == 2
 
     def test_policy_creation_from_tensor(self) -> None:
-        """Test creating policy from tensor"""
+        ."""Test creating policy from tensor."""
         actions = torch.tensor([1, 2, 1])
         policy = Policy(actions, horizon=5)
         assert len(policy) == 3
@@ -80,7 +82,8 @@ class TestPolicy:
         assert torch.equal(policy.actions, actions)
 
     def test_policy_repr(self) -> None:
-        """Test policy string representation"""
+        ."""Test policy string representation."""
+
         policy = Policy([0, 1])
         assert repr(policy) == "Policy([0, 1])"
 
@@ -92,7 +95,7 @@ class TestDiscreteExpectedFreeEnergy:
     that points to the PyMDP-based implementation (PyMDPPolicyAdapter).
     These tests validate that the PyMDP integration works correctly through
     the compatibility interface.
-    """
+    ."""
 
     def setup_method(self) -> None:
         """Set up test environment"""
@@ -115,7 +118,7 @@ class TestDiscreteExpectedFreeEnergy:
         self.selector = DiscreteExpectedFreeEnergy(self.config, self.inference)
 
     def test_enumerate_policies_single_step(self) -> None:
-        """Test policy enumeration for single step"""
+        ."""Test policy enumeration for single step."""
         policies = self.selector.enumerate_policies(3)
         assert len(policies) == 3
         assert all(len(p) == 1 for p in policies)
@@ -124,7 +127,7 @@ class TestDiscreteExpectedFreeEnergy:
         assert policies[2].actions.item() == 2
 
     def test_enumerate_policies_multi_step(self) -> None:
-        """Test policy enumeration for multiple steps"""
+        ."""Test policy enumeration for multiple steps."""
         self.selector.config.policy_length = 2
         policies = self.selector.enumerate_policies(2)
         assert len(policies) == 4  # 2^2
@@ -134,7 +137,7 @@ class TestDiscreteExpectedFreeEnergy:
         assert all(e in actual for e in expected)
 
     def test_expected_free_energy_epistemic(self) -> None:
-        """Test epistemic value computation"""
+        ."""Test epistemic value computation."""
         # Set weights
         self.config.epistemic_weight = 1.0
         self.config.pragmatic_weight = 0.0
@@ -155,7 +158,7 @@ class TestDiscreteExpectedFreeEnergy:
         assert torch.isfinite(G1)
 
     def test_expected_free_energy_pragmatic(self) -> None:
-        """Test pragmatic value computation"""
+        ."""Test pragmatic value computation."""
         # Set weights
         self.config.epistemic_weight = 0.0
         self.config.pragmatic_weight = 1.0
@@ -178,7 +181,7 @@ class TestDiscreteExpectedFreeEnergy:
         assert G1 < G0
 
     def test_policy_selection(self) -> None:
-        """Test policy selection"""
+        ."""Test policy selection."""
         # Set preferences
         preferences = torch.tensor([-1.0, -1.0, 2.0])  # Prefer state 2
         self.model.set_preferences(preferences)
@@ -193,7 +196,7 @@ class TestDiscreteExpectedFreeEnergy:
         assert probs[1] > probs[0]
 
     def test_policy_pruning(self) -> None:
-        """Test policy pruning"""
+        ."""Test policy pruning."""
         self.config.enable_pruning = True
         self.config.pruning_threshold = 0.3
         beliefs = torch.tensor([0.33, 0.33, 0.34])
@@ -202,7 +205,7 @@ class TestDiscreteExpectedFreeEnergy:
         assert torch.all(probs[probs < 0.3] < 0.01)
 
     def test_stochastic_policy_selection(self) -> None:
-        """Test stochastic policy selection"""
+        ."""Test stochastic policy selection."""
         self.config.use_sampling = True
         beliefs = torch.tensor([0.5, 0.5, 0.0])
         # Run multiple times to check stochasticity
@@ -215,12 +218,13 @@ class TestDiscreteExpectedFreeEnergy:
 
 
 class TestContinuousExpectedFreeEnergy:
-    """Test continuous expected free energy"""
+    .."""Test continuous expected free energy.."""
 
     def setup_method(self) -> None:
         """Set up test environment"""
         # Create continuous model
-        self.dims = ModelDimensions(num_states=2, num_observations=2, num_actions=2)
+        self.dims = (
+            ModelDimensions(num_states=2, num_observations=2, num_actions=2))
         self.params = ModelParameters(use_gpu=False)
         self.model = ContinuousGenerativeModel(self.dims, self.params, hidden_dim=16)
         # Create inference
@@ -233,7 +237,7 @@ class TestContinuousExpectedFreeEnergy:
         self.selector = ContinuousExpectedFreeEnergy(self.config, self.inference)
 
     def test_sample_policies(self) -> None:
-        """Test continuous policy sampling"""
+        ."""Test continuous policy sampling."""
         policies = self.selector.sample_policies(2, 5)
         assert len(policies) == 5
         for policy in policies:
@@ -242,7 +246,7 @@ class TestContinuousExpectedFreeEnergy:
             assert torch.all(policy.actions <= 1.0)
 
     def test_continuous_free_energy(self) -> None:
-        """Test free energy computation for continuous states"""
+        ."""Test free energy computation for continuous states."""
         # Create beliefs (mean, variance)
         mean = torch.tensor([0.0, 0.0])
         var = torch.tensor([1.0, 1.0])
@@ -255,7 +259,7 @@ class TestContinuousExpectedFreeEnergy:
         assert G.dim() == 0  # Scalar
 
     def test_continuous_policy_selection(self) -> None:
-        """Test policy selection for continuous states"""
+        ."""Test policy selection for continuous states."""
         mean = torch.tensor([0.5, -0.5])
         var = torch.tensor([0.5, 0.5])
         beliefs = (mean, var)
@@ -267,7 +271,7 @@ class TestContinuousExpectedFreeEnergy:
         assert torch.all(torch.isfinite(G_values))
 
     def test_information_gain(self) -> None:
-        """Test epistemic value (information gain)"""
+        ."""Test epistemic value (information gain)."""
         self.config.epistemic_weight = 1.0
         self.config.pragmatic_weight = 0.0
         # High uncertainty state
@@ -282,7 +286,7 @@ class TestContinuousExpectedFreeEnergy:
 
 
 class TestHierarchicalPolicySelector:
-    """Test hierarchical policy selection"""
+    .."""Test hierarchical policy selection.."""
 
     def setup_method(self) -> None:
         """Set up hierarchical system"""
@@ -306,7 +310,7 @@ class TestHierarchicalPolicySelector:
         )
 
     def test_hierarchical_selection(self) -> None:
-        """Test policy selection at multiple levels"""
+        ."""Test policy selection at multiple levels."""
         # Beliefs at each level
         beliefs = [
             torch.tensor([0.6, 0.4]),  # High level
@@ -324,7 +328,7 @@ class TestHierarchicalPolicySelector:
         assert probs[1].shape == (3,)  # Three low-level actions
 
     def test_hierarchical_free_energy(self) -> None:
-        """Test hierarchical free energy computation"""
+        ."""Test hierarchical free energy computation."""
         beliefs = [torch.tensor([0.7, 0.3]), torch.tensor([0.25, 0.25, 0.25, 0.25])]
         policies = [Policy([0]), Policy([1])]
         models = [self.model_high, self.model_low]
@@ -334,7 +338,7 @@ class TestHierarchicalPolicySelector:
 
 
 class TestSophisticatedInference:
-    """Test sophisticated inference"""
+    .."""Test sophisticated inference.."""
 
     def setup_method(self) -> None:
         """Set up test environment"""
@@ -352,7 +356,7 @@ class TestSophisticatedInference:
         self.selector = SophisticatedInference(config, self.inference, self.base_selector)
 
     def test_sophisticated_selection(self) -> None:
-        """Test sophisticated policy selection"""
+        ."""Test sophisticated policy selection."""
         beliefs = torch.ones(3) / 3
         policy, probs = self.selector.select_policy(beliefs, self.model)
         assert isinstance(policy, Policy)
@@ -360,7 +364,7 @@ class TestSophisticatedInference:
         assert torch.allclose(probs.sum(), torch.tensor(1.0))
 
     def test_sophisticated_refinement(self) -> None:
-        """Test policy refinement"""
+        ."""Test policy refinement."""
         initial_policy = Policy([0, 1, 0])
         beliefs = torch.tensor([0.5, 0.3, 0.2])
         refined = self.selector._sophisticated_refinement(initial_policy, beliefs, self.model)
@@ -370,7 +374,7 @@ class TestSophisticatedInference:
         # (depending on counterfactual reasoning)
 
     def test_sophistication_depth(self) -> None:
-        """Test different sophistication depths"""
+        ."""Test different sophistication depths."""
         self.selector.sophistication_depth = 0
         beliefs = torch.ones(3) / 3
         # With depth 0, should return base policy
@@ -384,15 +388,15 @@ class TestSophisticatedInference:
 
 
 class TestPolicyFactory:
-    """Test policy selector factory"""
+    .."""Test policy selector factory.."""
 
     def setup_method(self) -> None:
-        """Set up test environment"""
+        ."""Set up test environment."""
         inf_config = InferenceConfig(use_gpu=False)
         self.inference = VariationalMessagePassing(inf_config)
 
     def test_create_discrete_selector(self) -> None:
-        """Test discrete selector creation"""
+        ."""Test discrete selector creation."""
         selector = create_policy_selector("discrete", inference_algorithm=self.inference)
         assert isinstance(selector, DiscreteExpectedFreeEnergy)
 
@@ -404,10 +408,11 @@ class TestPolicyFactory:
         assert isinstance(selector, ContinuousExpectedFreeEnergy)
 
     def test_create_hierarchical_selector(self) -> None:
-        """Test hierarchical selector creation"""
+        ."""Test hierarchical selector creation."""
         # Create level selectors
         sel1 = create_policy_selector("discrete", inference_algorithm=self.inference)
-        sel2 = create_policy_selector("discrete", inference_algorithm=self.inference)
+        sel2 = (
+            create_policy_selector("discrete", inference_algorithm=self.inference))
         selector = create_policy_selector(
             "hierarchical", level_selectors=[sel1, sel2], level_horizons=[10, 5]
         )
@@ -416,14 +421,15 @@ class TestPolicyFactory:
 
     def test_create_sophisticated_selector(self) -> None:
         """Test sophisticated selector creation"""
-        base = create_policy_selector("discrete", inference_algorithm=self.inference)
+        base = (
+            create_policy_selector("discrete", inference_algorithm=self.inference))
         selector = create_policy_selector(
             "sophisticated", inference_algorithm=self.inference, base_selector=base
         )
         assert isinstance(selector, SophisticatedInference)
 
     def test_invalid_selector_type(self) -> None:
-        """Test invalid selector type"""
+        ."""Test invalid selector type."""
         with pytest.raises(ValueError):
             create_policy_selector("invalid")
 

@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -237,13 +241,16 @@ class NodeFeatureExtractor:
             if config.type == FeatureType.SPATIAL:
                 features, names = self._extract_spatial_features(nodes, config)
             elif config.type == FeatureType.TEMPORAL:
-                features, names = self._extract_temporal_features(nodes, config)
+                features, names = (
+                    self._extract_temporal_features(nodes, config))
             elif config.type == FeatureType.CATEGORICAL:
-                features, names = self._extract_categorical_features(nodes, config)
+                features, names = (
+                    self._extract_categorical_features(nodes, config))
             elif config.type == FeatureType.NUMERICAL:
                 features, names = self._extract_numerical_features(nodes, config)
             elif config.type == FeatureType.EMBEDDING:
-                features, names = self._extract_embedding_features(nodes, config)
+                features, names = (
+                    self._extract_embedding_features(nodes, config))
             elif config.type == FeatureType.TEXT:
                 features, names = self._extract_text_features(nodes, config)
             elif config.type == FeatureType.GRAPH_STRUCTURAL:

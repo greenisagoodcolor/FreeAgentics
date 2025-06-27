@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -9,11 +13,13 @@ import torch.nn.functional as F
 
 """
 Graph Neural Network Integration for Active Inference (GraphNN)
-This module provides the interface between Graph Neural Networks and Active Inference.
+This module provides the interface between Graph Neural Networks and
+    Active Inference.
 
 IMPORTANT NAMING DISTINCTION:
 - GraphNN = Graph Neural Networks (machine learning concept) - THIS MODULE
-- GNN = Generalized Notation Notation (mathematical notation standard from Active Inference Institute)
+- GNN = (
+    Generalized Notation Notation (mathematical notation standard from Active Inference Institute))
 
 Reference: https://github.com/ActiveInferenceInstitute/GeneralizedNotationNotation
 
@@ -98,7 +104,7 @@ class GraphToStateMapper(ABC):
     def map_to_states(
         self, graph_features: torch.Tensor, node_indices: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
-        """Map graph features to state representation"""
+        """Map graph features to state representation."""
         pass
 
     @abstractmethod
@@ -126,7 +132,8 @@ class DirectGraphMapper(GraphToStateMapper):
         self.obs_projection: Optional[nn.Linear]
 
         if config.output_dim != state_dim:
-            self.state_projection = nn.Linear(config.output_dim, state_dim).to(self.device)
+            self.state_projection = (
+                nn.Linear(config.output_dim, state_dim).to(self.device))
         else:
             self.state_projection = None
         if config.output_dim != observation_dim:
@@ -151,6 +158,7 @@ class DirectGraphMapper(GraphToStateMapper):
         self, graph_features: torch.Tensor, node_indices: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
         """Direct mapping to observations"""
+
         features = graph_features.to(self.device)
         if node_indices is not None:
             features = features[node_indices]
@@ -205,6 +213,7 @@ class LearnedGraphMapper(GraphToStateMapper):
         self, graph_features: torch.Tensor, node_indices: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
         """Learned mapping to observations"""
+
         features = graph_features.to(self.device)
         if node_indices is not None:
             features = features[node_indices]
@@ -242,7 +251,8 @@ class GNNActiveInferenceAdapter:
         # Type declaration for mapper - both inherit from same base
         self.mapper: Union[DirectGraphMapper, LearnedGraphMapper]
         if config.state_mapping == "direct":
-            self.mapper = DirectGraphMapper(config, self.state_dim, self.obs_dim)
+            self.mapper = (
+                DirectGraphMapper(config, self.state_dim, self.obs_dim))
         elif config.state_mapping == "learned":
             self.mapper = LearnedGraphMapper(config, self.state_dim, self.obs_dim)
         else:
@@ -273,7 +283,8 @@ class GNNActiveInferenceAdapter:
         if batch is not None:
             batch = batch.to(self.device)
         with torch.no_grad():
-            graph_features = self.gnn_model(node_features, edge_index, edge_features)
+            graph_features = (
+                self.gnn_model(node_features, edge_index, edge_features))
         if batch is not None:
             aggregated_features = self.aggregator.aggregate(graph_features, batch)
         else:
@@ -297,6 +308,7 @@ class GNNActiveInferenceAdapter:
         Returns:
             Belief states suitable for Active Inference
         """
+
         if agent_node_indices is None:
             features = graph_data["graph_features"]
         else:
@@ -317,6 +329,7 @@ class GNNActiveInferenceAdapter:
         Returns:
             Observations suitable for Active Inference
         """
+
         if observation_node_indices is None:
             features = graph_data["graph_features"]
         else:
@@ -371,6 +384,7 @@ class GNNActiveInferenceAdapter:
 
 class GraphFeatureAggregator:
     """
+
     Aggregates node features into graph-level representations.
     """
 
@@ -430,6 +444,7 @@ class GraphFeatureAggregator:
         Returns:
             Aggregated features [1 x feature_dim]
         """
+
         if self.config.aggregation_method == "mean":
             return node_features.mean(dim=0, keepdim=True)
         elif self.config.aggregation_method == "max":

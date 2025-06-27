@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import logging
 import time
 from pathlib import Path
@@ -229,7 +233,8 @@ class TestFullSystemIntegration:
         for cycle in range(40):
             await engine.step()
             if cycle % 5 == 0:
-                patterns = pattern_extractor.extract_patterns(engine.get_event_history())
+                patterns = (
+                    pattern_extractor.extract_patterns(engine.get_event_history()))
                 metrics = await engine.get_adaptation_metrics()
                 adaptation_metrics["collective_knowledge"].append(metrics["total_knowledge_nodes"])
                 adaptation_metrics["behavior_diversity"].append(metrics["behavior_entropy"])

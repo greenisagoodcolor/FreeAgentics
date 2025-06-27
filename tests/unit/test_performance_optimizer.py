@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import shutil
 import tempfile
 import time
@@ -25,12 +29,12 @@ from inference.gnn.performance_optimizer import (
 
 
 def extract_features_standalone(graph):
-    """Standalone feature extraction function for parallel processing."""
+    ."""Standalone feature extraction function for parallel processing.."""
     return {"id": graph["id"], "features": graph["data"].mean().item()}
 
 
 class TestOptimizationConfig(unittest.TestCase):
-    """Test optimization configuration"""
+    ."""Test optimization configuration."""
 
     def test_default_config(self) -> None:
         """Test default configuration values"""
@@ -54,7 +58,7 @@ class TestOptimizationConfig(unittest.TestCase):
 
 
 class TestMemoryOptimizer:
-    """Test memory optimization functionality"""
+    ."""Test memory optimization functionality."""
 
     def test_memory_optimizer_init(self) -> None:
         """Test memory optimizer initialization"""
@@ -128,7 +132,7 @@ class TestMemoryOptimizer:
 
 
 class TestHardwareAccelerator:
-    """Test hardware acceleration functionality"""
+    ."""Test hardware acceleration functionality."""
 
     @patch("torch.cuda.is_available")
     def test_device_detection_cpu(self, mock_cuda) -> None:
@@ -195,15 +199,15 @@ class TestHardwareAccelerator:
 
 
 class TestGraphCache:
-    """Test graph caching functionality"""
+    ."""Test graph caching functionality."""
 
     def setUp(self) -> None:
-        """Set up test cache directory"""
+        ."""Set up test cache directory."""
         self.temp_dir = tempfile.mkdtemp()
         self.cache_dir = Path(self.temp_dir) / "test_cache"
 
     def tearDown(self) -> None:
-        """Clean up test cache directory"""
+        ."""Clean up test cache directory."""
         if Path(self.temp_dir).exists():
             shutil.rmtree(self.temp_dir)
 
@@ -276,7 +280,7 @@ class TestGraphCache:
 
 
 class TestParallelProcessor(unittest.TestCase):
-    """Test parallel processing functionality"""
+    ."""Test parallel processing functionality."""
 
     def test_parallel_processor_init(self) -> None:
         """Test parallel processor initialization"""
@@ -317,15 +321,15 @@ class TestParallelProcessor(unittest.TestCase):
 
 
 class TestPerformanceProfiler(unittest.TestCase):
-    """Test performance profiling functionality"""
+    ."""Test performance profiling functionality."""
 
     def setUp(self) -> None:
-        """Set up test environment"""
+        ."""Set up test environment."""
         self.config = OptimizationConfig(enable_profiling=True)
         self.profiler = PerformanceProfiler(self.config)
 
     def test_profiler_init(self) -> None:
-        """Test profiler initialization"""
+        ."""Test profiler initialization."""
         assert self.profiler.config.enable_profiling
         assert len(self.profiler.profiles) == 0
 
@@ -365,7 +369,7 @@ class TestPerformanceProfiler(unittest.TestCase):
 
 
 class TestPerformanceOptimizer:
-    """Test main performance optimizer"""
+    ."""Test main performance optimizer."""
 
     def test_optimizer_init(self) -> None:
         """Test optimizer initialization"""
@@ -436,7 +440,7 @@ class TestPerformanceOptimizer:
 
 
 class TestOptimizationDecorators:
-    """Test optimization decorators"""
+    ."""Test optimization decorators."""
 
     def test_optimize_for_inference_decorator(self) -> None:
         """Test inference optimization decorator"""

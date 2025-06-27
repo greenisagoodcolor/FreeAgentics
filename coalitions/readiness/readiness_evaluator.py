@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import json
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -314,7 +318,7 @@ class AgentReadinessEvaluator:
         score.recommendations = recommendations
 
     def get_readiness_history(self, agent_id: str) -> List[ReadinessScore]:
-        """Get evaluation history for an agent"""
+        ."""Get evaluation history for an agent."""
         return self._evaluation_history.get(agent_id, [])
 
     def get_readiness_trend(self, agent_id: str) -> Dict[str, List[float]]:

@@ -1,4 +1,4 @@
-"""
+."""
 Core Hardware Abstraction Layer Architecture
 
 Defines the fundamental interfaces and architectural components for hardware abstraction.
@@ -11,7 +11,14 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Protocol, Tuple, runtime_checkable
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Protocol,
+    Tuple,
+    runtime_checkable)
 
 logger = logging.getLogger(__name__)
 
@@ -296,7 +303,8 @@ class HardwareAbstractionLayer:
         Execute an operation on hardware.
 
         If device_id is specified, use that device. Otherwise, automatically
-        select the best available device based on operation type and constraints.
+        select the best available device based on operation type and
+            constraints.
         """
         if device_id:
             # Use specific device
@@ -304,7 +312,8 @@ class HardwareAbstractionLayer:
             if not device:
                 return OperationStatus.NOT_AVAILABLE, f"Device {device_id} not found"
 
-            return self._execute_on_device(device, operation, data, constraints)
+            return self._execute_on_device(device, operation, data,
+                constraints)
 
         # Auto-select device
         device = self._select_best_device(operation, constraints)
@@ -316,10 +325,12 @@ class HardwareAbstractionLayer:
     def _select_best_device(
         self, operation: str, constraints: Optional[ResourceConstraints]
     ) -> Optional[HardwareInterface]:
-        """Select the best device for an operation based on availability and constraints."""
+        """Select the best device for an operation based on availability and
+        constraints."""
         # Determine device types that can handle the operation
         operation_category = self._categorize_operation(operation)
-        candidate_types = self._operation_routes.get(operation_category, [HardwareType.CPU])
+        candidate_types = (
+            self._operation_routes.get(operation_category, [HardwareType.CPU]))
 
         best_device = None
         best_score = -1
@@ -345,7 +356,8 @@ class HardwareAbstractionLayer:
                         continue
 
                 # Calculate device score
-                score = self._calculate_device_score(device, operation, constraints)
+                score = (
+                    self._calculate_device_score(device, operation, constraints))
 
                 if score > best_score:
                     best_score = score
@@ -390,7 +402,8 @@ class HardwareAbstractionLayer:
         """Execute operation on a specific device."""
         try:
             # Submit to executor for async execution
-            future = self._executor.submit(device.execute_operation, operation, data, constraints)
+            future = (
+                self._executor.submit(device.execute_operation, operation, data, constraints))
 
             # Wait with timeout
             timeout = constraints.timeout_seconds if constraints else 60.0
@@ -409,13 +422,17 @@ class HardwareAbstractionLayer:
         """Categorize an operation for routing."""
         operation_lower = operation.lower()
 
-        if any(term in operation_lower for term in ["compute", "calculate", "process", "infer"]):
+        if any(term in operation_lower for term in ["compute", "calculate", "process",
+            "infer"]):
             return "compute"
-        elif any(term in operation_lower for term in ["store", "save", "write", "cache"]):
+        elif any(term in operation_lower for term in ["store", "save", "write",
+            "cache"]):
             return "store"
-        elif any(term in operation_lower for term in ["network", "send", "receive", "transfer"]):
+        elif any(term in operation_lower for term in ["network", "send", "receive",
+            "transfer"]):
             return "network"
-        elif any(term in operation_lower for term in ["sense", "measure", "detect"]):
+        elif any(term in operation_lower for term in ["sense", "measure",
+            "detect"]):
             return "sense"
         else:
             return "compute"  # Default to compute

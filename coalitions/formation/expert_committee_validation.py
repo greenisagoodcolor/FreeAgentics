@@ -1,11 +1,11 @@
-"""
+."""
 Expert Committee Business Intelligence and Safety Validation Framework
 
-Implements the mandatory review and validation system by Multi-Agent and Architecture experts
+Implements the mandatory review and validation system by Multi-Agent and
+    Architecture experts
 as specified in Task 36.6 requirements.
 """
 
-import json
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -111,6 +111,7 @@ class ExpertCommitteeValidation:
     """
 
     def __init__(self) -> None:
+        """Initialize."""
         self.experts = self._initialize_expert_committee()
         self.validation_criteria = self._define_validation_criteria()
         self.review_history: List[CommitteeReview] = []
@@ -156,7 +157,8 @@ class ExpertCommitteeValidation:
                 name="Robert Martin",
                 domain=ExpertDomain.SOFTWARE_ARCHITECTURE,
                 credentials=["Clean Architecture", "SOLID Principles", "Uncle Bob"],
-                validation_authority=["architecture_design", "clean_code", "dependency_management"],
+                validation_authority= (
+                    ["architecture_design", "clean_code", "dependency_management"],)
                 active=True,
             ),
             "rich_hickey": ExpertProfile(
@@ -164,7 +166,8 @@ class ExpertCommitteeValidation:
                 name="Rich Hickey",
                 domain=ExpertDomain.SOFTWARE_ARCHITECTURE,
                 credentials=["Clojure Creator", "Functional Architecture Expert"],
-                validation_authority=["functional_design", "immutability", "data_orientation"],
+                validation_authority= (
+                    ["functional_design", "immutability", "data_orientation"],)
                 active=True,
             ),
             "kent_beck": ExpertProfile(
@@ -688,7 +691,8 @@ class ExpertCommitteeValidation:
 
             for criterion, required_score in criteria.items():
                 # Simulate validation score (in practice, would be actual validation)
-                actual_score = min(required_score + np.random.normal(0, 0.02), 1.0)
+                actual_score = (
+                    min(required_score + np.random.normal(0, 0.02), 1.0))
                 actual_score = max(actual_score, 0.0)
 
                 passes = actual_score >= required_score

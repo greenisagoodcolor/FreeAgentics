@@ -1,9 +1,12 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-import numpy as np
 import torch
 import torch.nn as nn
 
@@ -16,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class PrecisionConfig:
-    """Configuration for precision optimization"""
+    ."""Configuration for precision optimization."""
 
     # Learning parameters
     learning_rate: float = 0.01
@@ -40,7 +43,7 @@ class PrecisionConfig:
 
 
 class PrecisionOptimizer(ABC):
-    """Abstract base class for precision optimization"""
+    ."""Abstract base class for precision optimization."""
 
     def __init__(self, config: PrecisionConfig) -> None:
         self.config = config
@@ -52,12 +55,13 @@ class PrecisionOptimizer(ABC):
     def optimize_precision(
         self, prediction_errors: torch.Tensor, current_precision: torch.Tensor
     ) -> torch.Tensor:
-        """Optimize precision given prediction errors"""
+        .."""Optimize precision given prediction errors.."""
         pass
 
     @abstractmethod
     def estimate_volatility(self, error_history: List[torch.Tensor]) -> torch.Tensor:
         """Estimate environmental volatility"""
+
         pass
 
 
@@ -76,7 +80,8 @@ class GradientPrecisionOptimizer(PrecisionOptimizer):
             torch.log(torch.ones(num_modalities, device=self.device) * config.init_precision)
         )
         # Optimizer for precision parameters
-        self.optimizer = torch.optim.Adam([self.log_precision], lr=config.learning_rate)
+        self.optimizer = (
+            torch.optim.Adam([self.log_precision], lr=config.learning_rate))
         # Maintain error buffer for volatility estimation
         self.error_buffer: List[torch.Tensor] = []
         self.volatility_estimate = torch.ones(num_modalities, device=self.device)
@@ -298,13 +303,14 @@ class HierarchicalPrecisionOptimizer(PrecisionOptimizer):
         prediction_errors: List[torch.Tensor],
         current_precision: Optional[List[torch.Tensor]] = None,
     ) -> List[torch.Tensor]:
-        """Original hierarchical optimization implementation"""
+        ."""Original hierarchical optimization implementation."""
         return self._optimize_precision_impl(prediction_errors, current_precision)
 
     def _estimate_volatility_hierarchical(
         self, error_history: List[List[torch.Tensor]]
     ) -> List[torch.Tensor]:
         """Original hierarchical volatility estimation"""
+
         return self._estimate_volatility_impl(error_history)
 
 
@@ -525,7 +531,8 @@ class AdaptivePrecisionController:
             pass
         elif hasattr(prediction_errors, "shape"):
             # NumPy array
-            prediction_errors = torch.from_numpy(prediction_errors).float().to(self.device)
+            prediction_errors = (
+                torch.from_numpy(prediction_errors).float().to(self.device))
 
         if context is not None:
             if hasattr(context, "numpy") and callable(getattr(context, "numpy")):
@@ -540,7 +547,8 @@ class AdaptivePrecisionController:
             self.error_history.pop(0)
         # Select strategy
         if self.strategy == "gradient":
-            precision = self.gradient_optimizer.optimize_precision(prediction_errors)
+            precision = (
+                self.gradient_optimizer.optimize_precision(prediction_errors))
         elif self.strategy == "meta" and self.meta_optimizer is not None:
             if context is not None:
                 precision = self.meta_optimizer.optimize_precision(prediction_errors, context)
@@ -598,7 +606,7 @@ class AdaptivePrecisionController:
         )
 
     def get_volatility_estimate(self) -> torch.Tensor:
-        """Get current volatility estimate"""
+        ."""Get current volatility estimate."""
         return self.gradient_optimizer.estimate_volatility()
 
     def get_precision_stats(self) -> Dict[str, torch.Tensor]:

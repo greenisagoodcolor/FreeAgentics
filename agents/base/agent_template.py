@@ -1,7 +1,8 @@
-"""
+."""
 Agent Template System for FreeAgentics
 
-This module provides a template system for rapid agent creation, enabling users to
+This module provides a template system for rapid agent creation,
+    enabling users to
 instantiate agents from predefined configurations with Active Inference support.
 Follows ADR-002, ADR-003, and ADR-005 architectural patterns.
 """
@@ -23,7 +24,7 @@ from .data_model import Personality, Position, Resources
 
 
 class TemplateType(Enum):
-    """Predefined agent template types following Active Inference principles"""
+    ."""Predefined agent template types following Active Inference principles."""
 
     EXPLORER = "explorer"
     GUARDIAN = "guardian"
@@ -33,7 +34,7 @@ class TemplateType(Enum):
 
 @dataclass
 class ActiveInferenceConfig:
-    """Configuration for Active Inference parameters"""
+    ."""Configuration for Active Inference parameters."""
 
     # Generative model dimensions
     num_states: int = 4
@@ -42,7 +43,8 @@ class ActiveInferenceConfig:
 
     # State labels for interpretability
     state_labels: List[str] = field(
-        default_factory=lambda: ["idle", "exploring", "interacting", "planning"]
+        default_factory= (
+            lambda: ["idle", "exploring", "interacting", "planning"])
     )
 
     # Prior preferences (C matrix) - what the agent prefers
@@ -57,7 +59,7 @@ class ActiveInferenceConfig:
     planning_horizon: int = 3
 
     def __post_init__(self):
-        """Initialize default preferences if not provided"""
+        ."""Initialize default preferences if not provided."""
         if self.prior_preferences is None:
             # Default uniform preferences
             self.prior_preferences = np.ones(self.num_states) / self.num_states
@@ -65,7 +67,7 @@ class ActiveInferenceConfig:
 
 @dataclass
 class TemplateMetadata:
-    """Metadata for agent templates"""
+    ."""Metadata for agent templates."""
 
     name: str
     description: str
@@ -76,7 +78,7 @@ class TemplateMetadata:
 
 
 class IAgentTemplate(ABC):
-    """Abstract interface for agent templates"""
+    .."""Abstract interface for agent templates.."""
 
     @abstractmethod
     def get_template_type(self) -> TemplateType:
@@ -85,22 +87,22 @@ class IAgentTemplate(ABC):
 
     @abstractmethod
     def get_metadata(self) -> TemplateMetadata:
-        """Get template metadata"""
+        ."""Get template metadata."""
         pass
 
     @abstractmethod
     def create_agent_data(self, **kwargs) -> AgentData:
-        """Create agent data from template"""
+        ."""Create agent data from template."""
         pass
 
     @abstractmethod
     def get_active_inference_config(self) -> ActiveInferenceConfig:
-        """Get Active Inference configuration"""
+        ."""Get Active Inference configuration."""
         pass
 
 
 class BaseAgentTemplate(IAgentTemplate):
-    """Base implementation of agent template"""
+    ."""Base implementation of agent template."""
 
     def __init__(
         self,
@@ -113,8 +115,10 @@ class BaseAgentTemplate(IAgentTemplate):
         self.template_type = template_type
         self.metadata = metadata
         self.active_inference_config = active_inference_config
-        self.default_personality = default_personality or self._create_default_personality()
-        self.default_resources = default_resources or self._create_default_resources()
+        self.default_personality = (
+            default_personality or self._create_default_personality())
+        self.default_resources = (
+            default_resources or self._create_default_resources())
 
     def get_template_type(self) -> TemplateType:
         return self.template_type
@@ -206,14 +210,17 @@ class ExplorerTemplate(BaseAgentTemplate):
     def __init__(self) -> None:
         metadata = TemplateMetadata(
             name="Explorer Agent",
-            description="Agent optimized for exploration and discovery with high curiosity and mobility",
+            description= (
+                "Agent optimized for exploration and discovery with high curiosity and mobility",)
             tags=["exploration", "discovery", "mobile", "curious"],
-            use_cases=["Environment mapping", "Resource discovery", "Pathfinding"],
+            use_cases= (
+                ["Environment mapping", "Resource discovery", "Pathfinding"],)
         )
 
         ai_config = ActiveInferenceConfig(
             num_states=5,
-            state_labels=["idle", "exploring", "investigating", "mapping", "returning"],
+            state_labels= (
+                ["idle", "exploring", "investigating", "mapping", "returning"],)
             precision_sensory=3.0,
             precision_policy=20.0,
             planning_horizon=4,
@@ -228,9 +235,11 @@ class GuardianTemplate(BaseAgentTemplate):
     def __init__(self) -> None:
         metadata = TemplateMetadata(
             name="Guardian Agent",
-            description="Agent optimized for protection and monitoring with high reliability",
+            description= (
+                "Agent optimized for protection and monitoring with high reliability",)
             tags=["protection", "monitoring", "security", "reliable"],
-            use_cases=["Area monitoring", "Threat detection", "Resource protection"],
+            use_cases= (
+                ["Area monitoring", "Threat detection", "Resource protection"],)
         )
 
         ai_config = ActiveInferenceConfig(
@@ -250,7 +259,8 @@ class MerchantTemplate(BaseAgentTemplate):
     def __init__(self) -> None:
         metadata = TemplateMetadata(
             name="Merchant Agent",
-            description="Agent optimized for trade, negotiation, and resource management",
+            description= (
+                "Agent optimized for trade, negotiation, and resource management",)
             tags=["trade", "commerce", "negotiation", "social"],
             use_cases=["Resource trading", "Market analysis", "Negotiation"],
         )
@@ -279,14 +289,17 @@ class ScholarTemplate(BaseAgentTemplate):
     def __init__(self) -> None:
         metadata = TemplateMetadata(
             name="Scholar Agent",
-            description="Agent optimized for learning, research, and knowledge synthesis",
+            description= (
+                "Agent optimized for learning, research, and knowledge synthesis",)
             tags=["research", "learning", "knowledge", "analysis"],
-            use_cases=["Information gathering", "Pattern analysis", "Research coordination"],
+            use_cases= (
+                ["Information gathering", "Pattern analysis", "Research coordination"],)
         )
 
         ai_config = ActiveInferenceConfig(
             num_states=5,
-            state_labels=["idle", "researching", "analyzing", "synthesizing", "sharing"],
+            state_labels= (
+                ["idle", "researching", "analyzing", "synthesizing", "sharing"],)
             precision_sensory=2.5,
             precision_policy=14.0,
             planning_horizon=6,
@@ -296,7 +309,7 @@ class ScholarTemplate(BaseAgentTemplate):
 
 
 class AgentTemplateFactory:
-    """Factory for creating agent templates"""
+    ."""Factory for creating agent templates."""
 
     _templates: Dict[TemplateType, Type[BaseAgentTemplate]] = {
         TemplateType.EXPLORER: ExplorerTemplate,
@@ -307,7 +320,7 @@ class AgentTemplateFactory:
 
     @classmethod
     def create_template(cls, template_type: TemplateType) -> IAgentTemplate:
-        """Create a template instance"""
+        ."""Create a template instance."""
         template_class = cls._templates.get(template_type)
         if not template_class:
             raise ValueError(f"Unknown template type: {template_type}")
@@ -316,39 +329,44 @@ class AgentTemplateFactory:
 
     @classmethod
     def get_available_templates(cls) -> List[TemplateType]:
-        """Get list of available template types"""
+        ."""Get list of available template types."""
         return list(cls._templates.keys())
 
     @classmethod
-    def create_agent_from_template(cls, template_type: TemplateType, **kwargs) -> BaseAgent:
-        """Create a complete agent instance from template"""
+    def create_agent_from_template(cls, template_type: TemplateType,
+        **kwargs) -> BaseAgent:
+        ."""Create a complete agent instance from template."""
         template = cls.create_template(template_type)
         agent_data = template.create_agent_data(**kwargs)
         return BaseAgent(agent_data)
 
     @classmethod
     def get_template_metadata(cls, template_type: TemplateType) -> TemplateMetadata:
-        """Get metadata for a template type"""
+        ."""Get metadata for a template type."""
         template = cls.create_template(template_type)
         return template.get_metadata()
 
 
 # Convenience functions
 def create_explorer_agent(**kwargs) -> BaseAgent:
-    """Create an explorer agent"""
-    return AgentTemplateFactory.create_agent_from_template(TemplateType.EXPLORER, **kwargs)
+    ."""Create an explorer agent."""
+    return AgentTemplateFactory.create_agent_from_template(TemplateType.EXPLORER,
+        **kwargs)
 
 
 def create_guardian_agent(**kwargs) -> BaseAgent:
     """Create a guardian agent"""
-    return AgentTemplateFactory.create_agent_from_template(TemplateType.GUARDIAN, **kwargs)
+    return AgentTemplateFactory.create_agent_from_template(TemplateType.GUARDIAN,
+        **kwargs)
 
 
 def create_merchant_agent(**kwargs) -> BaseAgent:
     """Create a merchant agent"""
-    return AgentTemplateFactory.create_agent_from_template(TemplateType.MERCHANT, **kwargs)
+    return AgentTemplateFactory.create_agent_from_template(TemplateType.MERCHANT,
+        **kwargs)
 
 
 def create_scholar_agent(**kwargs) -> BaseAgent:
     """Create a scholar agent"""
-    return AgentTemplateFactory.create_agent_from_template(TemplateType.SCHOLAR, **kwargs)
+    return AgentTemplateFactory.create_agent_from_template(TemplateType.SCHOLAR,
+        **kwargs)

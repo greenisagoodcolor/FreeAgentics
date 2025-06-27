@@ -25,7 +25,6 @@ from numpy.typing import NDArray
 
 # Import pymdp with fallback handling
 try:
-    import pymdp
     from pymdp import Agent as PyMDPAgent
     from pymdp.maths import dot, entropy, kl_divergence, softmax
     from pymdp.utils import convert_observation_array_to_onehot, sample

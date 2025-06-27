@@ -1,4 +1,4 @@
-"""
+."""
 Deployment Verification
 
 Verifies that deployed agents are functioning correctly on target hardware.
@@ -164,7 +164,8 @@ class HealthMonitor:
                 status = await self.check_health()
 
                 # Record history
-                self.health_history.append({"timestamp": time.time(), "status": status.value})
+                self.health_history.append({"timestamp": time.time(),
+                    "status": status.value})
 
                 # Keep history bounded
                 if len(self.health_history) > self.max_history:
@@ -224,7 +225,8 @@ class ServiceManager:
         self.config = config
         self.service_info = ServiceInfo(name=config.agent_name)
 
-    def start_service(self, command: List[str], env: Optional[Dict[str, str]] = None) -> bool:
+    def start_service(self, command: List[str], env: Optional[Dict[str,
+        str]] = None) -> bool:
         """
         Start the agent service.
 
@@ -332,7 +334,8 @@ class ServiceManager:
             self.service_info.errors.append(str(e))
             return False
 
-    def restart_service(self, command: List[str], env: Optional[Dict[str, str]] = None) -> bool:
+    def restart_service(self, command: List[str], env: Optional[Dict[str,
+        str]] = None) -> bool:
         """Restart the agent service."""
         logger.info(f"Restarting service {self.config.agent_name}")
 
@@ -373,7 +376,8 @@ class ServiceManager:
             process = psutil.Process(self.service_info.pid)
 
             # Update metrics
-            self.service_info.memory_mb = process.memory_info().rss / (1024 * 1024)
+            self.service_info.memory_mb = (
+                process.memory_info().rss / (1024 * 1024))
             self.service_info.cpu_percent = process.cpu_percent(interval=1)
             self.service_info.uptime = time.time() - process.create_time()
 
@@ -437,7 +441,8 @@ class FunctionalTester:
             },
         }
 
-    async def _test_agent_info(self, session: aiohttp.ClientSession) -> Dict[str, Any]:
+    async def _test_agent_info(self, session: aiohttp.ClientSession) -> Dict[str,
+        Any]:
         """Test agent info endpoint."""
         test_name = "agent_info"
 
@@ -451,7 +456,8 @@ class FunctionalTester:
 
                     # Validate response structure
                     required_fields = ["id", "name", "class", "status"]
-                    missing_fields = [f for f in required_fields if f not in data]
+                    missing_fields = (
+                        [f for f in required_fields if f not in data])
 
                     if missing_fields:
                         return {
@@ -480,7 +486,8 @@ class FunctionalTester:
                 "message": f"Test failed: {str(e)}",
             }
 
-    async def _test_movement(self, session: aiohttp.ClientSession) -> Dict[str, Any]:
+    async def _test_movement(self, session: aiohttp.ClientSession) -> Dict[str,
+        Any]:
         """Test agent movement."""
         test_name = "movement"
 
@@ -499,7 +506,8 @@ class FunctionalTester:
             # Attempt movement
             move_data = {"direction": "north", "distance": 1}
 
-            async with session.post(f"{self.base_url}/api/agent/move", json=move_data) as response:
+            async with session.post(f"{self.base_url}/api/agent/move",
+                json=move_data) as response:
                 if response.status == 200:
                     new_pos = await response.json()
 
@@ -531,7 +539,8 @@ class FunctionalTester:
                 "message": f"Test failed: {str(e)}",
             }
 
-    async def _test_perception(self, session: aiohttp.ClientSession) -> Dict[str, Any]:
+    async def _test_perception(self, session: aiohttp.ClientSession) -> Dict[str,
+        Any]:
         """Test agent perception."""
         test_name = "perception"
 
@@ -568,7 +577,8 @@ class FunctionalTester:
                 "message": f"Test failed: {str(e)}",
             }
 
-    async def _test_communication(self, session: aiohttp.ClientSession) -> Dict[str, Any]:
+    async def _test_communication(self, session: aiohttp.ClientSession) -> Dict[str,
+        Any]:
         """Test agent communication."""
         test_name = "communication"
 
@@ -613,7 +623,8 @@ class FunctionalTester:
                 "message": f"Test failed: {str(e)}",
             }
 
-    async def _test_decision_making(self, session: aiohttp.ClientSession) -> Dict[str, Any]:
+    async def _test_decision_making(self, session: aiohttp.ClientSession) -> Dict[str,
+        Any]:
         """Test agent decision making."""
         test_name = "decision_making"
 
@@ -696,7 +707,8 @@ class DeploymentVerifier:
             }
 
         # Create health check objects
-        health_checks = [HealthCheck(**hc) for hc in config_data.get("health_checks", [])]
+        health_checks = (
+            [HealthCheck(**hc) for hc in config_data.get("health_checks", [])])
 
         return DeploymentConfig(
             agent_name=config_data.get("agent_name", "agent"),
@@ -767,7 +779,8 @@ class DeploymentVerifier:
         results["checks"]["resources"] = resource_usage
 
         # Generate overall status
-        results["overall_status"] = self._determine_overall_status(results["checks"])
+        results["overall_status"] = (
+            self._determine_overall_status(results["checks"]))
 
         # Save results
         results_file = self.deployment_dir / "verification_results.json"
@@ -852,7 +865,8 @@ class DeploymentVerifier:
 
         # Check resource usage
         resources = checks.get("resources", {})
-        if resources.get("cpu_percent", 0) > 90 or resources.get("memory_percent", 0) > 90:
+        if resources.get("cpu_percent", 0) > 90 or resources.get("memory_percent",
+            0) > 90:
             return "degraded"
 
         return "healthy"

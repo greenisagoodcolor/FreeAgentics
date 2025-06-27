@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -337,7 +341,8 @@ class OpportunityDetector:
                                 value_proposition="Unlock opportunity through capability combination",
                             )
                             # Set metrics based on market data
-                            market_value = market_data.get("opportunity_values", {}).get(
+                            market_value = (
+                                market_data.get("opportunity_values", {}).get()
                                 opp_name, 10000
                             )
                             opp.metrics.potential_value = market_value

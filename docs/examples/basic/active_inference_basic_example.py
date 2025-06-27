@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""
+."""
 Basic Active Inference Example using PyMDP
 
 This script demonstrates the core concepts of Active Inference using a simple
@@ -13,7 +13,6 @@ Usage:
 from typing import List, Tuple
 
 import matplotlib.pyplot as plt
-import numpy as np
 import torch
 
 from inference.engine import (

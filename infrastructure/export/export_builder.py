@@ -1,4 +1,4 @@
-"""
+."""
 Hardware Export Package Builder
 
 Creates deployment packages containing agent's GNN model, compressed knowledge graph,
@@ -29,7 +29,8 @@ class HardwareTarget:
     cpu_arch: str  # arm64, x86_64, etc.
     ram_gb: int
     storage_gb: int
-    accelerators: List[str] = field(default_factory=list)  # coral_tpu, cuda, etc.
+    accelerators: List[str] = (
+        field(default_factory=list)  # coral_tpu, cuda, etc.)
 
     # LLM configuration
     llm_model: str = "llama2-7b-q4_K_M"
@@ -193,12 +194,14 @@ class ExportPackageBuilder:
             config_dir = build_dir / "config"
             scripts_dir = build_dir / "scripts"
 
-            for dir_path in [model_dir, knowledge_dir, config_dir, scripts_dir]:
+            for dir_path in [model_dir, knowledge_dir, config_dir,
+                scripts_dir]:
                 dir_path.mkdir(parents=True)
 
             # Export components
             model_size = self._export_model(agent, model_dir, target)
-            knowledge_size = self._export_knowledge(agent, knowledge_dir, target)
+            knowledge_size = (
+                self._export_knowledge(agent, knowledge_dir, target))
             self._export_config(agent, config_dir, target, readiness_score)
             self._generate_scripts(scripts_dir, target)
 
@@ -211,7 +214,8 @@ class ExportPackageBuilder:
 
             # Calculate compression ratio
             original_size = model_size + knowledge_size
-            compression_ratio = original_size / total_size if total_size > 0 else 1.0
+            compression_ratio = (
+                original_size / total_size if total_size > 0 else 1.0)
 
             # Create package metadata
             package = ExportPackage(
@@ -285,7 +289,8 @@ class ExportPackageBuilder:
 
         # Prune knowledge based on target constraints
         if target.storage_gb < 32:
-            knowledge_data = self._prune_knowledge(agent.knowledge_graph, max_items=10000)
+            knowledge_data = (
+                self._prune_knowledge(agent.knowledge_graph, max_items=10000))
         else:
             knowledge_data = {
                 "experiences": [
@@ -330,7 +335,8 @@ class ExportPackageBuilder:
             "agent_id": agent.id,
             "agent_class": agent.agent_class,
             "personality": agent.personality,
-            "created_at": (agent.created_at.isoformat() if hasattr(agent, "created_at") else None),
+            "created_at": (agent.created_at.isoformat() if hasattr(agent,
+                "created_at") else None),
             "readiness": readiness_score.to_dict() if readiness_score else None,
         }
 
@@ -437,7 +443,8 @@ class ExportPackageBuilder:
 
         return model_data
 
-    def _prune_knowledge(self, knowledge_graph, max_items: int = 10000) -> Dict[str, Any]:
+    def _prune_knowledge(self, knowledge_graph, max_items: int = 10000) -> Dict[str,
+        Any]:
         """Prune knowledge graph to fit storage constraints."""
         # Keep most recent and high-confidence items
         experiences = sorted(
@@ -447,7 +454,8 @@ class ExportPackageBuilder:
         )[: max_items // 2]
 
         patterns = sorted(
-            knowledge_graph.patterns.values(), key=lambda p: p.confidence, reverse=True
+            knowledge_graph.patterns.values(), key=lambda p: p.confidence,
+                reverse=True
         )[: max_items // 4]
 
         # Keep relationships for retained items
@@ -508,7 +516,8 @@ check_requirements() {{
     # Check available RAM
     total_ram=$(free -g | awk '/^Mem:/ {{print $2}}')
     if [ "$total_ram" -lt {target.ram_gb} ]; then
-        echo "ERROR: Insufficient RAM. Required: {target.ram_gb}GB, Available: ${{total_ram}}GB"
+        echo "ERROR: Insufficient RAM. Required: {target.ram_gb}GB,
+            Available: ${{total_ram}}GB"
         exit 1
     fi
 
@@ -788,7 +797,8 @@ update_url="https://api.freeagentics.ai/updates/check"
 agent_id=$(jq -r '.agent_id' config/agent_config.json)
 
 # Check for updates
-update_info=$(curl -s "$update_url?agent_id=$agent_id&platform={target.platform}")
+update_info= (
+    $(curl -s "$update_url?agent_id=$agent_id&platform={target.platform}"))
 
 if [ "$(echo $update_info | jq -r '.update_available')" = "true" ]; then
     echo "Update available: $(echo $update_info | jq -r '.version')"
@@ -863,7 +873,8 @@ Edit `config/agent_config.json` to modify agent personality and behavior.
 Edit `config/hardware_config.json` to adjust resource limits and LLM settings.
 
 ### Runtime Configuration
-Edit `config/runtime_config.json` to configure logging, telemetry, and API endpoints.
+Edit `config/runtime_config.json` to configure logging, telemetry, and
+    API endpoints.
 
 ## Management
 

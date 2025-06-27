@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import asyncio
 import json
 import logging
@@ -257,7 +261,8 @@ class OllamaManager:
             # Model: (min_ram_gb, size_gb, use_cases)
             "tinyllama:latest": (2, 0.6, ["general", "chat"]),
             "phi:latest": (4, 1.6, ["general", "code"]),
-            "mistral:7b-instruct-q4_K_M": (6, 4.1, ["general", "chat", "code"]),
+            "mistral:7b-instruct-q4_K_M": (6, 4.1, ["general", "chat",
+                "code"]),
             "llama2:7b-q4_K_M": (6, 3.8, ["general", "chat"]),
             "llama2:13b-q4_K_M": (10, 7.4, ["general", "chat", "code"]),
             "codellama:7b-q4_K_M": (6, 3.8, ["code"]),

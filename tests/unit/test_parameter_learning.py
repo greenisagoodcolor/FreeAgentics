@@ -1,4 +1,7 @@
-import numpy as np
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import pytest
 import torch
 
@@ -21,7 +24,7 @@ from inference.engine.parameter_learning import (
 
 class TestLearningConfig:
     def test_default_config(self) -> None:
-        """Test default learning configuration"""
+        ."""Test default learning configuration."""
         config = LearningConfig()
         assert config.learning_rate_A == 0.01
         assert config.learning_rate_B == 0.01
@@ -30,7 +33,7 @@ class TestLearningConfig:
         assert config.replay_buffer_size == 10000
 
     def test_custom_config(self) -> None:
-        """Test custom learning configuration"""
+        ."""Test custom learning configuration."""
         config = LearningConfig(learning_rate_A=0.05, use_bayesian_learning=False, use_gpu=False)
         assert config.learning_rate_A == 0.05
         assert config.use_bayesian_learning is False
@@ -39,13 +42,13 @@ class TestLearningConfig:
 
 class TestExperienceBuffer:
     def test_buffer_initialization(self) -> None:
-        """Test buffer initialization"""
+        ."""Test buffer initialization."""
         buffer = ExperienceBuffer(max_size=100)
         assert len(buffer) == 0
         assert buffer.max_size == 100
 
     def test_add_experience(self) -> None:
-        """Test adding experiences"""
+        ."""Test adding experiences."""
         buffer = ExperienceBuffer(max_size=2)
         exp1 = Experience(
             state=torch.tensor([1.0, 0.0]),
@@ -73,7 +76,7 @@ class TestExperienceBuffer:
         assert len(buffer) == 2
 
     def test_sample_experiences(self) -> None:
-        """Test sampling from buffer"""
+        ."""Test sampling from buffer."""
         buffer = ExperienceBuffer(max_size=10)
         for i in range(5):
             exp = Experience(
@@ -88,7 +91,7 @@ class TestExperienceBuffer:
         assert all(isinstance(exp, Experience) for exp in batch)
 
     def test_clear_buffer(self) -> None:
-        """Test clearing buffer"""
+        ."""Test clearing buffer."""
         buffer = ExperienceBuffer(max_size=10)
         for i in range(5):
             exp = Experience(
@@ -105,7 +108,7 @@ class TestExperienceBuffer:
 
 class TestDiscreteParameterLearner:
     def setup_method(self) -> None:
-        """Setup for tests"""
+        ."""Setup for tests."""
         self.config = LearningConfig(use_gpu=False)
         self.model_dims = {"num_states": 4, "num_observations": 3, "num_actions": 2}
         self.learner = DiscreteParameterLearner(self.config, self.model_dims)
@@ -114,7 +117,7 @@ class TestDiscreteParameterLearner:
         self.model = DiscreteGenerativeModel(dims, params)
 
     def test_initialization(self) -> None:
-        """Test learner initialization"""
+        ."""Test learner initialization."""
         assert self.learner.num_states == 4
         assert self.learner.num_observations == 3
         assert self.learner.num_actions == 2
@@ -123,7 +126,7 @@ class TestDiscreteParameterLearner:
         assert self.learner.pD.shape == (4,)
 
     def test_bayesian_update(self) -> None:
-        """Test Bayesian parameter update"""
+        ."""Test Bayesian parameter update."""
         experiences = []
         for i in range(10):
             exp = Experience(
@@ -142,7 +145,7 @@ class TestDiscreteParameterLearner:
         assert torch.any(self.learner.pA > self.config.concentration_A)
 
     def test_gradient_update(self) -> None:
-        """Test gradient-based update"""
+        ."""Test gradient-based update."""
         self.learner.config.use_bayesian_learning = False
         experiences = []
         for i in range(5):
@@ -160,7 +163,7 @@ class TestDiscreteParameterLearner:
         assert metrics["grad_A_norm"] >= 0
 
     def test_learning_rate_decay(self) -> None:
-        """Test learning rate decay"""
+        ."""Test learning rate decay."""
         initial_lr = self.learner.lr_A
         exp = Experience(
             state=torch.tensor([1.0, 0.0, 0.0, 0.0]),
@@ -173,7 +176,7 @@ class TestDiscreteParameterLearner:
         assert self.learner.lr_A == initial_lr * self.config.decay_rate
 
     def test_get_learning_rates(self) -> None:
-        """Test getting current learning rates"""
+        ."""Test getting current learning rates."""
         rates = self.learner.get_learning_rates()
         assert "lr_A" in rates
         assert "lr_B" in rates
@@ -183,7 +186,7 @@ class TestDiscreteParameterLearner:
 
 class TestContinuousParameterLearner:
     def setup_method(self) -> None:
-        """Setup for tests"""
+        ."""Setup for tests."""
         self.config = LearningConfig(use_gpu=False)
         dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
         params = ModelParameters(use_gpu=False)
@@ -191,13 +194,13 @@ class TestContinuousParameterLearner:
         self.learner = ContinuousParameterLearner(self.config, self.model)
 
     def test_initialization(self) -> None:
-        """Test learner initialization"""
+        ."""Test learner initialization."""
         assert "transition" in self.learner.optimizers
         assert "observation" in self.learner.optimizers
         assert len(self.learner.schedulers) == len(self.learner.optimizers)
 
     def test_update_parameters(self) -> None:
-        """Test parameter update"""
+        ."""Test parameter update."""
         experiences = []
         for i in range(5):
             exp = Experience(
@@ -214,7 +217,7 @@ class TestContinuousParameterLearner:
         assert metrics["observation_loss"] > 0
 
     def test_transition_model_update(self) -> None:
-        """Test transition model update"""
+        ."""Test transition model update."""
         states = torch.randn(5, 4)
         actions = torch.randn(5, 2)
         next_states = torch.randn(5, 4)
@@ -225,7 +228,7 @@ class TestContinuousParameterLearner:
             assert not torch.allclose(initial, current)
 
     def test_observation_model_update(self) -> None:
-        """Test observation model update"""
+        ."""Test observation model update."""
         states = torch.randn(5, 4)
         observations = torch.randn(5, 3)
         initial_params = [p.clone() for p in self.model.obs_net.parameters()]
@@ -235,7 +238,7 @@ class TestContinuousParameterLearner:
             assert not torch.allclose(initial, current)
 
     def test_get_learning_rates(self) -> None:
-        """Test getting current learning rates"""
+        ."""Test getting current learning rates."""
         rates = self.learner.get_learning_rates()
         assert "lr_transition" in rates
         assert "lr_observation" in rates
@@ -244,7 +247,7 @@ class TestContinuousParameterLearner:
 
 class TestOnlineParameterLearner:
     def setup_method(self) -> None:
-        """Setup for tests"""
+        ."""Setup for tests."""
         self.config = LearningConfig(
             use_experience_replay=True,
             replay_buffer_size=100,
@@ -261,13 +264,13 @@ class TestOnlineParameterLearner:
         self.learner = OnlineParameterLearner(self.config, self.model, param_learner)
 
     def test_initialization(self) -> None:
-        """Test online learner initialization"""
+        ."""Test online learner initialization."""
         assert self.learner.replay_buffer is not None
         assert self.learner.total_experiences == 0
         assert len(self.learner.update_metrics) == 0
 
     def test_observe_single_experience(self) -> None:
-        """Test observing single experience"""
+        ."""Test observing single experience."""
         state = torch.tensor([1.0, 0.0, 0.0, 0.0])
         action = torch.tensor([0.0, 1.0])
         observation = torch.tensor([0.0, 1.0, 0.0])
@@ -277,7 +280,7 @@ class TestOnlineParameterLearner:
         assert len(self.learner.replay_buffer) == 1
 
     def test_update_with_sufficient_buffer(self) -> None:
-        """Test update when buffer has enough experiences"""
+        ."""Test update when buffer has enough experiences."""
         for i in range(25):
             state = torch.tensor([1.0, 0.0, 0.0, 0.0])
             action = torch.tensor([0.0, 1.0])
@@ -292,7 +295,7 @@ class TestOnlineParameterLearner:
         assert len(self.learner.update_metrics) == expected_updates
 
     def test_should_update_logic(self) -> None:
-        """Test update decision logic"""
+        ."""Test update decision logic."""
         assert not self.learner._should_update()
         for i in range(self.config.min_buffer_size):
             exp = Experience(
@@ -306,7 +309,7 @@ class TestOnlineParameterLearner:
         assert self.learner._should_update()
 
     def test_get_statistics(self) -> None:
-        """Test statistics collection"""
+        ."""Test statistics collection."""
         for i in range(30):
             state = torch.tensor([1.0, 0.0, 0.0, 0.0])
             action = torch.tensor([0.0, 1.0])
@@ -320,7 +323,7 @@ class TestOnlineParameterLearner:
         assert "learning_rates" in stats
 
     def test_no_replay_buffer(self) -> None:
-        """Test online learner without replay buffer"""
+        ."""Test online learner without replay buffer."""
         config = LearningConfig(use_experience_replay=False, use_gpu=False)
         model_dims = {"num_states": 4, "num_observations": 3, "num_actions": 2}
         param_learner = DiscreteParameterLearner(config, model_dims)
@@ -336,7 +339,7 @@ class TestOnlineParameterLearner:
 
 class TestCreateParameterLearner:
     def test_create_discrete_learner(self) -> None:
-        """Test creating discrete parameter learner"""
+        ."""Test creating discrete parameter learner."""
         config = LearningConfig(use_gpu=False)
         model_dims = {"num_states": 4, "num_observations": 3, "num_actions": 2}
         learner = create_parameter_learner("discrete", config, model_dims=model_dims)
@@ -344,7 +347,7 @@ class TestCreateParameterLearner:
         assert learner.num_states == 4
 
     def test_create_continuous_learner(self) -> None:
-        """Test creating continuous parameter learner"""
+        ."""Test creating continuous parameter learner."""
         config = LearningConfig(use_gpu=False)
         dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
         params = ModelParameters(use_gpu=False)
@@ -353,7 +356,7 @@ class TestCreateParameterLearner:
         assert isinstance(learner, ContinuousParameterLearner)
 
     def test_create_online_learner(self) -> None:
-        """Test creating online parameter learner"""
+        ."""Test creating online parameter learner."""
         config = LearningConfig(use_gpu=False)
         dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
         params = ModelParameters(use_gpu=False)
@@ -363,7 +366,7 @@ class TestCreateParameterLearner:
         assert isinstance(learner.parameter_learner, DiscreteParameterLearner)
 
     def test_create_learner_errors(self) -> None:
-        """Test error handling in learner creation"""
+        ."""Test error handling in learner creation."""
         config = LearningConfig()
         with pytest.raises(ValueError):
             create_parameter_learner("discrete", config)

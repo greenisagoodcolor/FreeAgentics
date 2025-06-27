@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""
+."""
 Test script for Deployment Validation
 
 Tests the export validation, hardware compatibility, and deployment verification
@@ -22,7 +22,8 @@ from deployment.hardware_compatibility import CompatibilityTester
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level= (
+        logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 )
 logger = logging.getLogger(__name__)
 
@@ -141,7 +142,8 @@ def test_export_validation() -> None:
 
         # Print results
         for result in results:
-            print(f"  {result.check_name}: {result.status.value} - {result.message}")
+            print(f"  {result.check_name}: {result.status.value} -
+                {result.message}")
 
         # Test with specific platform
         print("\n2. Testing platform-specific validation...")
@@ -157,7 +159,8 @@ def test_export_validation() -> None:
 
             # Show only platform-specific results
             platform_results = [
-                r for r in results if "platform" in r.check_name or "hardware" in r.check_name
+                r for r in results if "platform" in r.check_name or
+                    "hardware" in r.check_name
             ]
 
             for result in platform_results:
@@ -203,7 +206,8 @@ def test_hardware_compatibility() -> None:
         # Show test results
         for test_result in results["test_results"]:
             status = test_result["status"]
-            icon = {"passed": "✓", "failed": "✗", "skipped": "○", "timeout": "⏱"}.get(status, "?")
+            icon = (
+                {"passed": "✓", "failed": "✗", "skipped": "○", "timeout": "⏱"}.get(status, "?"))
 
             print(f"  {icon} {test_result['test_name']}: {test_result['message']}")
 
@@ -272,7 +276,10 @@ async def test_health_monitoring():
     """Test health monitoring."""
     print("\n=== Testing Health Monitoring ===")
 
-    from deployment.deployment_verification import DeploymentConfig, HealthCheck, HealthMonitor
+    from deployment.deployment_verification import (
+        DeploymentConfig,
+        HealthCheck,
+        HealthMonitor)
 
     # Create test configuration
     config = DeploymentConfig(
@@ -334,7 +341,8 @@ def test_package_compression() -> None:
         results = validator.validate_package(zip_path)
 
         # Check summary
-        summary = next((r for r in results if r.check_name == "validation_summary"), None)
+        summary = (
+            next((r for r in results if r.check_name == "validation_summary"), None))
         if summary:
             print(f"  Validation: {summary.status.value}")
             print(f"  {summary.message}")

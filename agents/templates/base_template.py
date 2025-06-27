@@ -106,7 +106,8 @@ class BeliefState:
         # Validate confidence bounds
         max_entropy = np.log(len(self.beliefs))
         if not (0 <= self.confidence <= max_entropy):
-            raise ValueError(f"Confidence must be in [0, {max_entropy}], got {self.confidence}")
+            raise ValueError(
+                f"Confidence must be in [0, {max_entropy}], got {self.confidence}")
 
     @classmethod
     def create_uniform(
@@ -136,7 +137,8 @@ class BeliefState:
             confidence=confidence,
         )
 
-    def update_beliefs(self, new_beliefs: NDArray[np.float64]) -> "BeliefState":
+    def update_beliefs(self,
+                       new_beliefs: NDArray[np.float64]) -> "BeliefState":
         """Create new belief state with updated beliefs (immutable)."""
         import time
 
@@ -160,7 +162,8 @@ class GenerativeModelParams:
 
     Mathematical Definition:
         - A: P(o|s) - observation model matrix [num_obs × num_states]
-        - B: P(s'|s,π) - transition model tensor [num_states × num_states × num_policies]
+        - B: P(s'|s,π) - transition model tensor
+          [num_states × num_states × num_policies]
         - C: ln P(o) - preference vector [num_obs] (log preferences)
         - D: P(s) - prior beliefs [num_states]
 
@@ -185,17 +188,20 @@ class GenerativeModelParams:
         """Validate generative model mathematical constraints."""
         # Validate A matrix (observation model)
         if not np.allclose(np.sum(self.A, axis=0), 1.0):
-            raise ValueError("A matrix columns must sum to 1 (stochastic observation model)")
+            raise ValueError(
+                "A matrix columns must sum to 1 (stochastic observation model)")
 
         # Validate B tensor (transition models)
         for policy_idx in range(self.B.shape[2]):
             if not np.allclose(np.sum(self.B[:, :, policy_idx], axis=0), 1.0):
-                raise ValueError(f"B[:,:,{policy_idx}] must be stochastic")
+                raise ValueError(
+                    f"B[:,:,{policy_idx}] must be stochastic")
 
         # Validate D vector (prior)
         if not np.isclose(np.sum(self.D), 1.0):
             raise ValueError("D vector must sum to 1 (prior probability)")
 
+        # Validate shapes consistency
         # Validate shapes consistency
         num_states = self.A.shape[1]
         if self.B.shape[0] != num_states or self.B.shape[1] != num_states:
@@ -428,7 +434,8 @@ class ActiveInferenceTemplate(TemplateInterface):
         pass  # Base implementation - no additional constraints
 
     def compute_free_energy(
-        self, beliefs: BeliefState, observations: NDArray[np.float64], model: GenerativeModelParams
+        self, beliefs: BeliefState, observations: NDArray[np.float64],
+            model: GenerativeModelParams
     ) -> float:
         """
         Compute variational free energy F = D_KL[q(s)||P(s)] - E_q[ln P(o|s)].
@@ -448,11 +455,13 @@ class ActiveInferenceTemplate(TemplateInterface):
         # For discrete observations, this is the inner product
         if len(observations.shape) == 1:  # Single observation
             obs_idx = int(np.argmax(observations))
-            expected_ll = np.dot(beliefs.beliefs, np.log(model.A[obs_idx, :] + 1e-16))
+            expected_ll = (
+                np.dot(beliefs.beliefs, np.log(model.A[obs_idx, :] + 1e-16)))
         else:  # Observation distribution
             expected_ll = np.sum(
                 [
-                    observations[o] * np.dot(beliefs.beliefs, np.log(model.A[o, :] + 1e-16))
+                    observations[o] * np.dot(beliefs.beliefs, np.log(model.A[o,
+                        :] + 1e-16))
                     for o in range(len(observations))
                 ]
             )
@@ -464,7 +473,8 @@ class ActiveInferenceTemplate(TemplateInterface):
 
     @abstractmethod
     def create_generative_model(self, config: TemplateConfig) -> GenerativeModelParams:
-        """Create template-specific generative model (implemented by subclasses)."""
+        """Create template-specific generative model (implemented by
+        subclasses)."""
         pass
 
     @abstractmethod

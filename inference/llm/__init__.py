@@ -1,6 +1,8 @@
-"""
+."""
+
 LLM Inference Module
-Multi-provider LLM management with usage tracking, health monitoring, and secure credential handling.
+Multi-provider LLM management with usage tracking, health monitoring, and
+    secure credential handling.
 """
 
 # Fallback mechanisms

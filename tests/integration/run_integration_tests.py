@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""
+."""
 Integration Test Runner
 
 Orchestrates and runs all integration tests with proper reporting.
@@ -16,7 +16,8 @@ from typing import Any, Dict, List, Optional
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level= (
+        logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 )
 logger = logging.getLogger(__name__)
 
@@ -72,7 +73,8 @@ class IntegrationTestRunner:
         start_time = time.time()
 
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, cwd=Path(__file__).parent)
+            result = (
+                subprocess.run(cmd, capture_output=True, text=True, cwd=Path(__file__).parent))
 
             duration = time.time() - start_time
 
@@ -127,7 +129,8 @@ class IntegrationTestRunner:
         ]
 
         if include_performance:
-            test_suites.append(("Performance Tests", "test_performance.py", ["performance"]))
+            test_suites.append(("Performance Tests", "test_performance.py",
+                ["performance"]))
 
         # Run each test suite
         for suite_name, test_file, markers in test_suites:
@@ -148,8 +151,10 @@ class IntegrationTestRunner:
         if isinstance(tests_dict, dict):
             total_passed = sum(t.get("passed", 0) for t in tests_dict.values())
             total_failed = sum(t.get("failed", 0) for t in tests_dict.values())
-            total_skipped = sum(t.get("skipped", 0) for t in tests_dict.values())
-            total_duration = sum(t.get("duration", 0) for t in tests_dict.values())
+            total_skipped = (
+                sum(t.get("skipped", 0) for t in tests_dict.values()))
+            total_duration = (
+                sum(t.get("duration", 0) for t in tests_dict.values()))
         else:
             total_passed = total_failed = total_skipped = total_duration = 0
 
@@ -207,9 +212,12 @@ class IntegrationTestRunner:
         <p><strong>End Time:</strong> {self.results['summary']['end_time']}</p>
         <p><strong>Total Duration:</strong> {self.results['summary']['duration']:.2f} seconds</p>
         <p><strong>Total Tests:</strong> {self.results['summary']['total_tests']}</p>
-        <p class="passed"><strong>Passed:</strong> {self.results['summary']['passed']}</p>
-        <p class="failed"><strong>Failed:</strong> {self.results['summary']['failed']}</p>
-        <p class="skipped"><strong>Skipped:</strong> {self.results['summary']['skipped']}</p>
+        <p class= (
+            "passed"><strong>Passed:</strong> {self.results['summary']['passed']}</p>)
+        <p class= (
+            "failed"><strong>Failed:</strong> {self.results['summary']['failed']}</p>)
+        <p class= (
+            "skipped"><strong>Skipped:</strong> {self.results['summary']['skipped']}</p>)
         <p><strong>Success Rate:</strong> {self.results['summary']['success_rate']:.1f}%</p>
     </div>
 
@@ -227,7 +235,8 @@ class IntegrationTestRunner:
 
         for suite_name, result in self.results["tests"].items():
             status = "✓" if result.get("success", False) else "✗"
-            status_class = "passed" if result.get("success", False) else "failed"
+            status_class = (
+                "passed" if result.get("success", False) else "failed")
 
             html_content += f"""
         <tr>
@@ -252,7 +261,8 @@ class IntegrationTestRunner:
             report_name = f"{suite_name.replace(' ', '_')}_report.html"
             if (self.output_dir / report_name).exists():
                 html_content += (
-                    f'        <li><a href="{report_name}">{suite_name} Detailed Report</a></li>\n'
+                    f'        <li><a href= (
+                        "{report_name}">{suite_name} Detailed Report</a></li>\n')
                 )
 
         html_content += """
@@ -281,12 +291,14 @@ def setup_test_environment() -> None:
     logger.info("Installing test requirements...")
 
     for req in requirements:
-        subprocess.run([sys.executable, "-m", "pip", "install", req], capture_output=True)
+        subprocess.run([sys.executable, "-m", "pip", "install", req],
+            capture_output=True)
 
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(description="Run FreeAgentics integration tests")
+    parser = (
+        argparse.ArgumentParser(description="Run FreeAgentics integration tests"))
     parser.add_argument(
         "--output-dir",
         type=str,
@@ -298,7 +310,8 @@ def main():
         action="store_true",
         help="Include performance tests (takes longer)",
     )
-    parser.add_argument("--setup", action="store_true", help="Set up test environment first")
+    parser.add_argument("--setup", action= (
+        "store_true", help="Set up test environment first"))
 
     args = parser.parse_args()
 

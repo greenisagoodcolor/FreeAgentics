@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import gc
 import multiprocessing as mp
 import pickle
@@ -24,7 +28,7 @@ Performance Optimization Module for GNN Processing
 This module provides various optimization techniques to improve the performance
 of GNN processing operations including memory optimization, hardware acceleration,
 caching, and parallel processing.
-"""
+."""
 logger = get_logger().logger
 
 
@@ -61,6 +65,7 @@ class MemoryOptimizer:
         Args:
             config: Optimization configuration
         """
+
         self.config = config
         self._memory_threshold_mb = 1024
 
@@ -87,7 +92,8 @@ class MemoryOptimizer:
     def _enable_gradient_checkpointing(self, model: nn.Module) -> None:
         """Enable gradient checkpointing for specific layers"""
 
-        def checkpoint_wrapper(module: nn.Module, *args: Any, **kwargs: Any) -> Any:
+        def checkpoint_wrapper(module: nn.Module, *args: Any,
+            **kwargs: Any) -> Any:
             if module.training:
                 return checkpoint(module._forward_impl, *args, **kwargs)
             else:
@@ -132,6 +138,7 @@ class MemoryOptimizer:
 
     def clear_cache(self) -> None:
         """Clear GPU cache and run garbage collection"""
+
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
             torch.cuda.synchronize()
@@ -140,6 +147,7 @@ class MemoryOptimizer:
 
 class HardwareAccelerator:
     """
+
     Manages hardware acceleration for GNN processing.
     Features:
     - GPU/TPU detection and setup
@@ -191,6 +199,7 @@ class HardwareAccelerator:
         Returns:
             Forward pass output
         """
+
         if self.config.enable_mixed_precision and self.device.type == "cuda":
             with amp.autocast():
                 return forward_fn(*args, **kwargs)
@@ -204,6 +213,7 @@ class HardwareAccelerator:
             loss: Loss tensor
             optimizer: Optimizer
         """
+
         if self.scaler is not None:
             self.scaler.scale(loss).backward()
             self.scaler.step(optimizer)
@@ -245,6 +255,7 @@ class HardwareAccelerator:
 
 class GraphCache:
     """
+
     Caching mechanism for graph processing results.
     Features:
     - LRU cache for processed features
@@ -259,6 +270,7 @@ class GraphCache:
         Args:
             config: Optimization configuration
         """
+
         self.config = config
         self.cache_dir = Path(".cache/gnn")
         self.cache_dir.mkdir(parents=True, exist_ok=True)
@@ -353,6 +365,7 @@ class GraphCache:
 
     def get_stats(self) -> Dict[str, Any]:
         """Get cache statistics"""
+
         total = self.hits + self.misses
         hit_rate = self.hits / total if total > 0 else 0
         return {
@@ -387,6 +400,7 @@ class ParallelProcessor:
         self, graphs: List[Dict[str, Any]], extractor_fn: Callable
     ) -> List[Any]:
         """
+
         Extract features from multiple graphs in parallel.
         Args:
             graphs: List of graphs
@@ -412,6 +426,7 @@ class ParallelProcessor:
         Returns:
             Optimized DataLoader
         """
+
         return torch.utils.data.DataLoader(
             dataset,
             batch_size=batch_size,
@@ -460,13 +475,14 @@ class PerformanceProfiler:
         Initialize profiler.
         Args:
             config: Optimization configuration
-        """
+        ."""
         self.config = config
         self.profiles = defaultdict(list)
         self._profiler = None
 
     def start_profiling(self):
         """Start profiling session"""
+
         if not self.config.enable_profiling:
             return
         if torch.cuda.is_available():
@@ -483,6 +499,7 @@ class PerformanceProfiler:
 
     def stop_profiling(self) -> Optional[str]:
         """
+
         Stop profiling and return report.
         Returns:
             Profiling report or None
@@ -510,6 +527,7 @@ class PerformanceProfiler:
         Returns:
             Operation result
         """
+
         start_time = time.time()
         start_memory = 0
         if torch.cuda.is_available():
@@ -537,6 +555,7 @@ class PerformanceProfiler:
         Returns:
             List of bottleneck operations
         """
+
         bottlenecks = []
         for operation, profiles in self.profiles.items():
             if not profiles:
@@ -559,6 +578,7 @@ class PerformanceProfiler:
 
 class PerformanceOptimizer:
     """
+
     Main performance optimization orchestrator.
     Combines all optimization techniques for maximum performance.
     """

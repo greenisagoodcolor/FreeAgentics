@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import concurrent.futures
 import gzip
 import hashlib
@@ -21,7 +25,7 @@ from .monitoring import get_logger
 Caching Manager for GNN Processing
 This module provides caching mechanisms for intermediate results
 in GNN processing pipelines to improve performance.
-"""
+."""
 logger = get_logger().logger
 
 
@@ -403,7 +407,7 @@ class GraphFeatureCache(CacheManager):
         self.set(key, features, metadata)
 
     def get_graph_features(self, graph_id: str, feature_type: str) -> Optional[torch.Tensor]:
-        """Get cached graph features"""
+        ."""Get cached graph features."""
         key = f"features_{graph_id}_{feature_type}"
         return self.get(key)
 
@@ -429,7 +433,7 @@ class ModelCache(CacheManager):
         self.set(key, data, {"model_id": model_id})
 
     def get_model(self, model_id: str) -> Optional[dict[str, Any]]:
-        """Get cached model"""
+        ."""Get cached model."""
         key = f"model_{model_id}"
         return self.get(key)
 

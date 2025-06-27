@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -69,6 +73,7 @@ class GraphToStateMapper(ABC):
         self, graph_features: torch.Tensor, node_indices: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
         """Map graph features to observation representation"""
+
         pass
 
 
@@ -87,7 +92,8 @@ class DirectGraphMapper(GraphToStateMapper):
         self.obs_projection: Optional[nn.Linear]
 
         if config.output_dim != state_dim:
-            self.state_projection = nn.Linear(config.output_dim, state_dim).to(self.device)
+            self.state_projection = (
+                nn.Linear(config.output_dim, state_dim).to(self.device))
         else:
             self.state_projection = None
         if config.output_dim != observation_dim:
@@ -112,6 +118,7 @@ class DirectGraphMapper(GraphToStateMapper):
         self, graph_features: torch.Tensor, node_indices: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
         """Direct mapping to observations"""
+
         features = graph_features.to(self.device)
         if node_indices is not None:
             features = features[node_indices]
@@ -164,6 +171,7 @@ class LearnedGraphMapper(GraphToStateMapper):
         self, graph_features: torch.Tensor, node_indices: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
         """Learned mapping to observations"""
+
         features = graph_features.to(self.device)
         if node_indices is not None:
             features = features[node_indices]
@@ -199,7 +207,8 @@ class GNNActiveInferenceAdapter:
             self.state_dim = generative_model.dims.num_states
             self.obs_dim = generative_model.dims.num_observations
         if config.state_mapping == "direct":
-            self.mapper = DirectGraphMapper(config, self.state_dim, self.obs_dim)
+            self.mapper = (
+                DirectGraphMapper(config, self.state_dim, self.obs_dim))
         elif config.state_mapping == "learned":
             self.mapper = LearnedGraphMapper(config, self.state_dim, self.obs_dim)
         else:
@@ -230,7 +239,8 @@ class GNNActiveInferenceAdapter:
         if batch is not None:
             batch = batch.to(self.device)
         with torch.no_grad():
-            graph_features = self.gnn_model(node_features, edge_index, edge_features)
+            graph_features = (
+                self.gnn_model(node_features, edge_index, edge_features))
         if batch is not None:
             aggregated_features = self.aggregator.aggregate(graph_features, batch)
         else:
@@ -254,6 +264,7 @@ class GNNActiveInferenceAdapter:
         Returns:
             Belief states suitable for Active Inference
         """
+
         if agent_node_indices is None:
             features = graph_data["graph_features"]
         else:
@@ -274,6 +285,7 @@ class GNNActiveInferenceAdapter:
         Returns:
             Observations suitable for Active Inference
         """
+
         if observation_node_indices is None:
             features = graph_data["graph_features"]
         else:
@@ -387,6 +399,7 @@ class GraphFeatureAggregator:
         Returns:
             Aggregated features [1 x feature_dim]
         """
+
         if self.config.aggregation_method == "mean":
             return node_features.mean(dim=0, keepdim=True)
         elif self.config.aggregation_method == "max":

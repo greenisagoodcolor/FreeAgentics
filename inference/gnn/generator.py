@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import copy
 import json
 import logging
@@ -249,7 +253,8 @@ class GMNGenerator:
 
     def _generate_update_equations(self, personality: Dict[str, float]) -> Dict[str, Any]:
         """Generate update equations based on personality."""
-        base_learning_rate = 0.1 + personality.get("curiosity", 0.5) / 100 * 0.1
+        base_learning_rate = (
+            0.1 + personality.get("curiosity", 0.5) / 100 * 0.1)
         equations = {
             "belief_update": {
                 "state": "S_beliefs",
@@ -298,7 +303,8 @@ class GMNGenerator:
         if pattern_type == "successful_action_sequence":
             if "C_pref" in model["connections"]:
                 action = pattern.get("dominant_action", "")
-                if action and action not in model["connections"]["C_pref"].get("action_biases", {}):
+                if action and action not in model["connections"]["C_pref"].get("action_biases",
+                    {}):
                     if "action_biases" not in model["connections"]["C_pref"]:
                         model["connections"]["C_pref"]["action_biases"] = {}
                     bias = pattern.get("success_rate", 0.5) * pattern.get("confidence", 0.8)

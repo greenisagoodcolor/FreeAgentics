@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import pytest
 import torch
 import torch.nn as nn
@@ -16,7 +20,7 @@ from inference.gnn.layers import (
 
 
 class TestLayerConfig:
-    """Test LayerConfig dataclass"""
+    ."""Test LayerConfig dataclass."""
 
     def test_default_config(self) -> None:
         """Test default configuration values"""
@@ -54,7 +58,7 @@ class TestLayerConfig:
 
 
 class TestGCNLayer:
-    """Test GCN layer implementation"""
+    ."""Test GCN layer implementation."""
 
     def test_initialization(self) -> None:
         """Test layer initialization"""
@@ -104,7 +108,7 @@ class TestGCNLayer:
 
 
 class TestGATLayer:
-    """Test GAT layer implementation"""
+    ."""Test GAT layer implementation."""
 
     def test_initialization(self) -> None:
         """Test layer initialization"""
@@ -156,7 +160,7 @@ class TestGATLayer:
 
 
 class TestSAGELayer:
-    """Test GraphSAGE layer implementation"""
+    ."""Test GraphSAGE layer implementation."""
 
     def test_initialization(self) -> None:
         """Test layer initialization"""
@@ -194,7 +198,7 @@ class TestSAGELayer:
 
 
 class TestGINLayer:
-    """Test GIN layer implementation"""
+    ."""Test GIN layer implementation."""
 
     def test_initialization(self) -> None:
         """Test layer initialization"""
@@ -213,7 +217,8 @@ class TestGINLayer:
 
     def test_trainable_eps(self) -> None:
         """Test with trainable epsilon"""
-        layer = GINLayer(in_channels=32, out_channels=64, eps=0.1, train_eps=True)
+        layer = (
+            GINLayer(in_channels=32, out_channels=64, eps=0.1, train_eps=True))
         assert isinstance(layer.eps, nn.Parameter)
         assert layer.eps.item() == pytest.approx(0.1)
         x = torch.randn(10, 32)
@@ -238,10 +243,10 @@ class TestGINLayer:
 
 
 class TestEdgeConvLayer:
-    """Test EdgeConv layer implementation"""
+    ."""Test EdgeConv layer implementation."""
 
     def test_initialization(self) -> None:
-        """Test layer initialization"""
+        ."""Test layer initialization."""
         layer = EdgeConvLayer(in_channels=32, out_channels=64)
         assert layer.in_channels == 32
         assert layer.out_channels == 64
@@ -266,7 +271,7 @@ class TestEdgeConvLayer:
 
 
 class TestResGNNLayer:
-    """Test residual GNN layer wrapper"""
+    ."""Test residual GNN layer wrapper."""
 
     def test_same_dimensions(self) -> None:
         """Test residual connection with same dimensions"""
@@ -289,11 +294,12 @@ class TestResGNNLayer:
 
 
 class TestGNNStack:
-    """Test GNN stack implementation"""
+    ."""Test GNN stack implementation."""
 
     def test_gcn_stack(self) -> None:
         """Test stack of GCN layers"""
-        configs = [LayerConfig(32, 64), LayerConfig(64, 128), LayerConfig(128, 64)]
+        configs = (
+            [LayerConfig(32, 64), LayerConfig(64, 128), LayerConfig(128, 64)])
         model = GNNStack(configs, layer_type="gcn")
         assert len(model.layers) == 3
         x = torch.randn(10, 32)

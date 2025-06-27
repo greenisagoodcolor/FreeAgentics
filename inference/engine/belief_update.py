@@ -1,31 +1,30 @@
-import logging
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from typing import Dict, List, Optional, Union
-
-import numpy as np
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-
-from .generative_model import DiscreteGenerativeModel, GenerativeModel
-
 """
-Belief Update Module for Active Inference
+Belief Update Module for Active Inference.
+
 This module implements belief update mechanisms for Active Inference systems,
 integrating with GraphNN (Graph Neural Networks) when needed.
 
 Note: GraphNN refers to Graph Neural Networks (machine learning),
-distinct from GNN (Generalized Notation Notation) from Active Inference Institute.
-Reference: https://github.com/ActiveInferenceInstitute/GeneralizedNotationNotation
+distinct from GNN (Generalized Notation Notation) from Active
+Inference Institute.
+Reference:
+https://github.com/ActiveInferenceInstitute/GeneralizedNotationNotation
 """
+import logging
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+
+import torch
+import torch.nn as nn
+
+from .generative_model import GenerativeModel
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class BeliefUpdateConfig:
-    """Configuration for belief update mechanisms"""
+    """Configuration for belief update mechanisms."""
 
     update_method: str = "variational"
     learning_rate: float = 0.01
@@ -36,9 +35,10 @@ class BeliefUpdateConfig:
 
 
 class BeliefUpdater(ABC):
-    """Abstract base class for belief update mechanisms"""
+    """Abstract base class for belief update mechanisms."""
 
     def __init__(self, config: BeliefUpdateConfig) -> None:
+        """Initialize belief updater."""
         self.config = config
         self.device = torch.device(
             "cuda" if config.use_gpu and torch.cuda.is_available() else "cpu"
@@ -51,38 +51,43 @@ class BeliefUpdater(ABC):
         observations: torch.Tensor,
         generative_model: GenerativeModel,
     ) -> torch.Tensor:
-        """Update beliefs given observations and generative model"""
+        """Update beliefs given observations and generative model."""
         pass
 
 
 class DirectGraphObservationModel:
-    """Direct mapping from graph features to observations"""
+    """Direct mapping from graph features to observations."""
 
     def __init__(self, config: BeliefUpdateConfig) -> None:
+        """Initialize belief updater."""
         self.config = config
 
     def forward(self, graph_features: torch.Tensor) -> torch.Tensor:
-        """Map graph features to observations"""
+        """Map graph features to observations."""
         return graph_features
 
 
 class LearnedGraphObservationModel(nn.Module):
-    """Learned mapping from graph features to observations"""
+    """Learned mapping from graph features to observations."""
 
-    def __init__(self, config: BeliefUpdateConfig, input_dim: int, output_dim: int) -> None:
+    def __init__(self, config: BeliefUpdateConfig, input_dim: int,
+                 output_dim: int) -> None:
+        """Initialize learned graph observation model."""
         super().__init__()
         self.config = config
-        self.network = nn.Sequential(nn.Linear(input_dim, 64), nn.ReLU(), nn.Linear(64, output_dim))
+        self.network = nn.Sequential(
+            nn.Linear(input_dim, 64), nn.ReLU(), nn.Linear(64, output_dim))
 
     def forward(self, graph_features: torch.Tensor) -> torch.Tensor:
-        """Map graph features to observations"""
+        """Map graph features to observations."""
         return self.network(graph_features)
 
 
 class GraphNNBeliefUpdater(BeliefUpdater):
-    """Belief updater that integrates Graph Neural Network features"""
+    """Belief updater that integrates Graph Neural Network features."""
 
     def __init__(self, config: BeliefUpdateConfig) -> None:
+        """Initialize belief updater."""
         super().__init__(config)
 
     def update_beliefs(
@@ -91,15 +96,16 @@ class GraphNNBeliefUpdater(BeliefUpdater):
         observations: torch.Tensor,
         generative_model: GenerativeModel,
     ) -> torch.Tensor:
-        """Update beliefs using GraphNN integration"""
+        """Update beliefs using GraphNN integration."""
         # Placeholder implementation
         return current_beliefs
 
 
 class AttentionGraphBeliefUpdater(BeliefUpdater):
-    """Belief updater with attention mechanisms for graph features"""
+    """Belief updater with attention mechanisms for graph features."""
 
     def __init__(self, config: BeliefUpdateConfig) -> None:
+        """Initialize belief updater."""
         super().__init__(config)
 
     def update_beliefs(
@@ -108,15 +114,16 @@ class AttentionGraphBeliefUpdater(BeliefUpdater):
         observations: torch.Tensor,
         generative_model: GenerativeModel,
     ) -> torch.Tensor:
-        """Update beliefs using attention over graph features"""
+        """Update beliefs using attention over graph features."""
         # Placeholder implementation
         return current_beliefs
 
 
 class HierarchicalBeliefUpdater(BeliefUpdater):
-    """Hierarchical belief updater for multi-level systems"""
+    """Hierarchical belief updater for multi-level systems."""
 
     def __init__(self, config: BeliefUpdateConfig) -> None:
+        """Initialize belief updater."""
         super().__init__(config)
 
     def update_beliefs(
@@ -125,13 +132,14 @@ class HierarchicalBeliefUpdater(BeliefUpdater):
         observations: torch.Tensor,
         generative_model: GenerativeModel,
     ) -> torch.Tensor:
-        """Update beliefs in hierarchical manner"""
+        """Update beliefs in hierarchical manner."""
         # Placeholder implementation
         return current_beliefs
 
 
-def create_belief_updater(updater_type: str, config: BeliefUpdateConfig) -> BeliefUpdater:
-    """Factory function to create belief updaters"""
+def create_belief_updater(
+        updater_type: str, config: BeliefUpdateConfig) -> BeliefUpdater:
+    """Create belief updaters."""
     if updater_type == "graphnn":
         return GraphNNBeliefUpdater(config)
     elif updater_type == "attention":

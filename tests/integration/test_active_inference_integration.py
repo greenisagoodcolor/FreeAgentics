@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import random
 import tempfile
 import time
@@ -19,14 +23,21 @@ from agents.base.active_inference_integration import (
 from agents.base.data_model import AgentGoal, AgentStatus, Position
 from agents.base.decision_making import Action, ActionType, DecisionSystem
 from agents.base.memory import Experience, MemorySystem, MemoryType
-from agents.base.movement import CollisionSystem, MovementController, PathfindingGrid
+from agents.base.movement import (
+    CollisionSystem,
+    MovementController,
+    PathfindingGrid)
 from agents.base.perception import Percept, PerceptionSystem, PerceptionType, Stimulus, StimulusType
 from agents.base.state_manager import AgentStateManager
-from agents.testing.agent_test_framework import AgentFactory, SimulationEnvironment
+from agents.testing.agent_test_framework import (
+    AgentFactory,
+    SimulationEnvironment)
 from inference.engine.active_inference import BeliefPropagation as ParticleFilter
 from inference.engine.active_inference import InferenceConfig
 from inference.engine.active_inference import VariationalMessagePassing as VariationalInference
-from inference.engine.active_learning import ActiveLearningAgent, ActiveLearningConfig
+from inference.engine.active_learning import (
+    ActiveLearningAgent,
+    ActiveLearningConfig)
 from inference.engine.belief_update import BeliefUpdateConfig as UpdateConfig
 from inference.engine.belief_update import BeliefUpdater
 from inference.engine.computational_optimization import ComputationalOptimizer, OptimizationConfig
@@ -37,8 +48,12 @@ from inference.engine.generative_model import (
     ModelDimensions,
     ModelParameters,
 )
-from inference.engine.gnn_integration import GNNActiveInferenceIntegration, GNNIntegrationConfig
-from inference.engine.hierarchical_inference import HierarchicalConfig, HierarchicalInference
+from inference.engine.gnn_integration import (
+    GNNActiveInferenceIntegration,
+    GNNIntegrationConfig)
+from inference.engine.hierarchical_inference import (
+    HierarchicalConfig,
+    HierarchicalInference)
 from inference.engine.parameter_learning import LearningConfig as ParamLearningConfig
 from inference.engine.parameter_learning import create_parameter_learner
 from inference.engine.policy_selection import DiscreteExpectedFreeEnergy, Policy, PolicyConfig
@@ -63,7 +78,8 @@ class TestBasicIntegration:
             obs_probs = gen_model.A[:, true_state]
             observation = torch.multinomial(obs_probs, 1).item()
             observation_tensor = torch.tensor(observation, dtype=torch.long)
-            belief = inference.infer_states(observation_tensor, gen_model, prior=belief)
+            belief = (
+                inference.infer_states(observation_tensor, gen_model, prior=belief))
             # Create a simple policy for testing
             test_policy = Policy([0])  # Single action policy
             G_values = policy_selector.compute_expected_free_energy(test_policy, belief, gen_model)
@@ -209,7 +225,8 @@ class TestLearningIntegration:
         dims = ModelDimensions(num_states=4, num_observations=3, num_actions=3)
         params = ModelParameters(use_gpu=False)
         gen_model = DiscreteGenerativeModel(dims, params)
-        al_config = ActiveLearningConfig(exploration_weight=0.5)  # Remove uncertainty_method
+        al_config = (
+            ActiveLearningConfig(exploration_weight=0.5)  # Remove uncertainty_method)
         inference = VariationalInference(InferenceConfig(use_gpu=False))
         policy_config = PolicyConfig()
         policy_selector = DiscreteExpectedFreeEnergy(policy_config, inference)
@@ -342,8 +359,10 @@ class TestFullSystemIntegration:
             print(
                 f"DEBUG: After precision controller B[:, :, 0] shape: {gen_model.B[:, :, 0].shape}"
             )
-            planning_config = PlanningConfig(max_depth=5, branching_factor=3, search_type="mcts")
-            planner = MonteCarloTreeSearch(planning_config, policy_selector, inference)
+            planning_config = (
+                PlanningConfig(max_depth=5, branching_factor=3, search_type="mcts"))
+            planner = (
+                MonteCarloTreeSearch(planning_config, policy_selector, inference))
             # DEBUG: Check B matrix after planner creation
             print(f"DEBUG: After planner B shape: {gen_model.B.shape}")
             print(f"DEBUG: After planner B[:, :, 0] shape: {gen_model.B[:, :, 0].shape}")
@@ -446,7 +465,8 @@ class TestFullSystemIntegration:
     def test_multi_agent_scenario(self) -> None:
         """Test multiple Active Inference agents interacting"""
         dims1 = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
-        dims2 = ModelDimensions(num_states=3, num_observations=4, num_actions=2)
+        dims2 = (
+            ModelDimensions(num_states=3, num_observations=4, num_actions=2))
         params = ModelParameters(use_gpu=False)
         agent1_model = DiscreteGenerativeModel(dims1, params)
         agent1_inference = VariationalInference(InferenceConfig(use_gpu=False))
@@ -590,7 +610,7 @@ class TestActiveInferenceIntegration:
 
     @pytest.fixture
     def components(self, agent):
-        """Create agent components"""
+        ."""Create agent components."""
         state_manager = AgentStateManager()
         state_manager.register_agent(agent)
         perception_system = PerceptionSystem(state_manager)
@@ -611,7 +631,7 @@ class TestActiveInferenceIntegration:
 
     @pytest.fixture
     def ai_config(self):
-        """Create Active Inference configuration"""
+        ."""Create Active Inference configuration."""
         return ActiveInferenceConfig(
             mode=IntegrationMode.HYBRID,
             num_states=50,
@@ -631,7 +651,7 @@ class TestActiveInferenceIntegration:
         assert integration.planner is not None
 
     def test_state_to_belief_mapping(self, agent, components, ai_config) -> None:
-        """Test mapping agent state to belief vector"""
+        ."""Test mapping agent state to belief vector."""
         integration = create_active_inference_agent(agent, **components, config=ai_config)
         agent.goals.append(
             AgentGoal(
@@ -691,7 +711,7 @@ class TestActiveInferenceIntegration:
             assert action.parameters is not None
 
     def test_full_integration_update(self, agent, components, ai_config) -> None:
-        """Test full integration update cycle"""
+        ."""Test full integration update cycle."""
         ai_config.mode = IntegrationMode.FULL
         integration = create_active_inference_agent(agent, **components, config=ai_config)
         percept = Percept(
@@ -711,7 +731,7 @@ class TestActiveInferenceIntegration:
         assert integration.last_observation is not None
 
     def test_hybrid_mode_integration(self, agent, components, ai_config) -> None:
-        """Test hybrid mode combining basic and AI decisions"""
+        ."""Test hybrid mode combining basic and AI decisions."""
         ai_config.mode = IntegrationMode.HYBRID
         integration = create_active_inference_agent(agent, **components, config=ai_config)
         agent.goals.append(
@@ -794,7 +814,7 @@ class TestActiveInferenceIntegration:
         ), "Beliefs should evolve significantly"
 
     def test_resource_constraints(self, agent, components, ai_config) -> None:
-        """Test action selection with resource constraints"""
+        ."""Test action selection with resource constraints."""
         integration = create_active_inference_agent(agent, **components, config=ai_config)
         agent.resources.energy = 5
         integration.update(dt=0.1)
@@ -817,7 +837,8 @@ class TestActiveInferenceIntegration:
 
     def test_memory_integration(self, agent, components, ai_config) -> None:
         """Test memory system integration"""
-        integration = create_active_inference_agent(agent, **components, config=ai_config)
+        integration = (
+            create_active_inference_agent(agent, **components, config=ai_config))
         for _ in range(5):
             integration.update(dt=0.1)
         memories = components["memory_system"].retrieve_memories({"memory_type": "episodic"}, 10)

@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import json
 import tempfile
 from datetime import datetime, timedelta

@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import importlib.util
 import os
 import sys
@@ -31,7 +35,7 @@ ResourceBusinessManager = resource_business_model.ResourceBusinessManager
 
 
 class TestResourceBusinessModel(unittest.TestCase):
-    """Test the resource and business model mechanics"""
+    ."""Test the resource and business model mechanics."""
 
     def test_resource_unit_creation(self) -> None:
         """Test creating resource units"""

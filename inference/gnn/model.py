@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 from dataclasses import dataclass, field
 from typing import Any, Dict, List
 

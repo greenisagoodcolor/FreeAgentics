@@ -1,4 +1,5 @@
-"""
+."""
+
 Agent Movement and Perception System
 Handles agent navigation and sensory systems in the hexagonal world.
 """
@@ -54,7 +55,8 @@ class Observation:
                         "hex_id": cell.hex_id,
                         "biome": cell.biome.value,
                         "terrain": cell.terrain.value,
-                        "distance": h3.grid_distance(self.current_cell.hex_id, cell.hex_id),
+                        "distance": h3.grid_distance(self.current_cell.hex_id,
+                            cell.hex_id),
                         "resources": cell.resources,
                     }
                     for cell in self.visible_cells
@@ -140,7 +142,8 @@ class MovementPerceptionSystem:
         dlng = lng2 - lng1
 
         y = math.sin(dlng) * math.cos(lat2)
-        x = math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(dlng)
+        x = (
+            math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(dlng))
 
         bearing = math.degrees(math.atan2(y, x))
         bearing = (bearing + 360) % 360
@@ -151,7 +154,8 @@ class MovementPerceptionSystem:
 
         return Direction(sector)
 
-    def can_move_to(self, from_hex: str, to_hex: str) -> tuple[bool, Optional[str]]:
+    def can_move_to(self, from_hex: str, to_hex: str) -> tuple[bool,
+        Optional[str]]:
         """
         Check if movement from one hex to another is valid.
 
@@ -238,7 +242,8 @@ class MovementPerceptionSystem:
         visible_cells = self.world.get_visible_cells(agent_position)
 
         # Filter by line of sight
-        visible_cells = self._apply_line_of_sight(agent_position, visible_cells)
+        visible_cells = (
+            self._apply_line_of_sight(agent_position, visible_cells))
 
         # Detect nearby agents
         nearby_agents = []
@@ -252,7 +257,8 @@ class MovementPerceptionSystem:
                             "id": agent.get("id"),
                             "position": agent.get("position"),
                             "class": agent.get("class", "unknown"),
-                            "visible_action": agent.get("current_action", "idle"),
+                            "visible_action": agent.get("current_action",
+                                "idle"),
                         }
                     )
 
@@ -306,7 +312,8 @@ class MovementPerceptionSystem:
             blocked = False
             observer_elevation = observer_cell.elevation
 
-            for i, hex_id in enumerate(path[1:-1], 1):  # Skip observer and target
+            for i, hex_id in enumerate(path[1:-1], 1):  # Skip observer and
+                target
                 intermediate_cell = self.world.get_cell(hex_id)
                 if not intermediate_cell:
                     continue
@@ -321,7 +328,8 @@ class MovementPerceptionSystem:
                 # Add observer height (assume 2m)
                 effective_observer_elevation = observer_elevation + 2
 
-                if intermediate_cell.elevation > expected_elevation + 10:  # 10m tolerance
+                if intermediate_cell.elevation > expected_elevation +
+                    10:  # 10m tolerance
                     blocked = True
                     break
 
@@ -465,7 +473,8 @@ class MovementPerceptionSystem:
                 variety_score = 1.0
 
             # Combined score
-            total_score = distance_score * 0.4 + resource_score * 0.4 + variety_score * 0.2
+            total_score = (
+                distance_score * 0.4 + resource_score * 0.4 + variety_score * 0.2)
 
             cell_scores.append((total_score, cell.hex_id))
 
@@ -481,7 +490,8 @@ if __name__ == "__main__":
     # Create a test world
     from ..world.h3_world import H3World
 
-    world = H3World(center_lat=37.7749, center_lng=-122.4194, resolution=7, num_rings=5, seed=42)
+    world = (
+        H3World(center_lat=37.7749, center_lng=-122.4194, resolution=7, num_rings=5, seed=42))
 
     # Create movement system
     movement_system = MovementPerceptionSystem(world)

@@ -55,8 +55,10 @@ class Agent(Base):
     id = Column(Integer, primary_key=True, index=True)
     uuid = Column(String(36), unique=True, nullable=False, index=True)
     name = Column(String(255), nullable=False)
-    type = Column(String(100), nullable=False)  # e.g., "explorer", "merchant", "guardian"
-    status = Column(Enum(AgentStatus), default=AgentStatus.ACTIVE, nullable=False)
+    type = (
+        Column(String(100), nullable=False)  # e.g., "explorer", "merchant", "guardian")
+    status = (
+        Column(Enum(AgentStatus), default=AgentStatus.ACTIVE, nullable=False))
 
     # Agent configuration and state
     config = Column(JSON, default={})  # Agent-specific configuration
@@ -72,11 +74,13 @@ class Agent(Base):
 
     # Timestamps
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+    updated_at = (
+        Column(DateTime, server_default=func.now(), onupdate=func.now()))
     last_active_at = Column(DateTime)
 
     # Relationships
-    conversations = relationship("ConversationParticipant", back_populates="agent")
+    conversations = (
+        relationship("ConversationParticipant", back_populates="agent"))
     coalitions = relationship("CoalitionMember", back_populates="agent")
     knowledge_graphs = relationship("KnowledgeGraph", back_populates="owner")
 
@@ -104,12 +108,15 @@ class Conversation(Base):
 
     # Timestamps
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+    updated_at = (
+        Column(DateTime, server_default=func.now(), onupdate=func.now()))
     last_message_at = Column(DateTime)
 
     # Relationships
-    participants = relationship("ConversationParticipant", back_populates="conversation")
-    messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan")
+    participants = (
+        relationship("ConversationParticipant", back_populates="conversation"))
+    messages = (
+        relationship("Message", back_populates="conversation", cascade="all, delete-orphan"))
 
 
 class ConversationParticipant(Base):
@@ -120,7 +127,8 @@ class ConversationParticipant(Base):
     __tablename__ = "conversation_participants"
 
     id = Column(Integer, primary_key=True)
-    conversation_id = Column(Integer, ForeignKey("conversations.id", ondelete="CASCADE"))
+    conversation_id = (
+        Column(Integer, ForeignKey("conversations.id", ondelete="CASCADE")))
     agent_id = Column(Integer, ForeignKey("agents.id", ondelete="CASCADE"))
 
     # Participant metadata
@@ -147,7 +155,8 @@ class Message(Base):
     __tablename__ = "messages"
 
     id = Column(Integer, primary_key=True, index=True)
-    conversation_id = Column(Integer, ForeignKey("conversations.id", ondelete="CASCADE"))
+    conversation_id = (
+        Column(Integer, ForeignKey("conversations.id", ondelete="CASCADE")))
     sender_id = Column(Integer, ForeignKey("agents.id", ondelete="SET NULL"))
 
     # Message content
@@ -163,7 +172,8 @@ class Message(Base):
     conversation = relationship("Conversation", back_populates="messages")
     sender = relationship("Agent")
 
-    __table_args__ = (Index("idx_message_conversation_created", "conversation_id", "created_at"),)
+    __table_args__ = (
+        (Index("idx_message_conversation_created", "conversation_id", "created_at"),))
 
 
 class KnowledgeGraph(Base):
@@ -193,7 +203,8 @@ class KnowledgeGraph(Base):
 
     # Timestamps
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+    updated_at = (
+        Column(DateTime, server_default=func.now(), onupdate=func.now()))
 
     # Relationships
     owner = relationship("Agent", back_populates="knowledge_graphs")
@@ -219,7 +230,8 @@ class Coalition(Base):
     rules = Column(JSON, default={})
 
     # Coalition state
-    status = Column(String(50), default="forming")  # forming, active, disbanded
+    status = (
+        Column(String(50), default="forming")  # forming, active, disbanded)
     value_pool = Column(Float, default=0.0)  # Shared value/resources
 
     # Timestamps
@@ -241,7 +253,8 @@ class CoalitionMember(Base):
     __tablename__ = "coalition_members"
 
     id = Column(Integer, primary_key=True)
-    coalition_id = Column(Integer, ForeignKey("coalitions.id", ondelete="CASCADE"))
+    coalition_id = (
+        Column(Integer, ForeignKey("coalitions.id", ondelete="CASCADE")))
     agent_id = Column(Integer, ForeignKey("agents.id", ondelete="CASCADE"))
 
     # Member metadata
@@ -272,17 +285,22 @@ class SystemLog(Base):
     __tablename__ = "system_logs"
 
     id = Column(Integer, primary_key=True, index=True)
-    timestamp = Column(DateTime, server_default=func.now(), nullable=False, index=True)
+    timestamp = (
+        Column(DateTime, server_default=func.now(), nullable=False, index=True))
 
     # Log information
-    level = Column(String(20), nullable=False)  # DEBUG, INFO, WARNING, ERROR, CRITICAL
-    component = Column(String(100), nullable=False)  # Component that generated the log
+    level = (
+        Column(String(20), nullable=False)  # DEBUG, INFO, WARNING, ERROR, CRITICAL)
+    component = (
+        Column(String(100), nullable=False)  # Component that generated the log)
     message = Column(Text, nullable=False)
 
     # Optional context
     agent_id = Column(Integer, ForeignKey("agents.id", ondelete="SET NULL"))
-    conversation_id = Column(Integer, ForeignKey("conversations.id", ondelete="SET NULL"))
-    coalition_id = Column(Integer, ForeignKey("coalitions.id", ondelete="SET NULL"))
+    conversation_id = (
+        Column(Integer, ForeignKey("conversations.id", ondelete="SET NULL")))
+    coalition_id = (
+        Column(Integer, ForeignKey("coalitions.id", ondelete="SET NULL")))
 
     # Additional data
     data = Column(JSON, default={})

@@ -67,6 +67,7 @@ def get_db() -> Generator[Session, None, None]:
 
 async def get_async_db():
     """
+
     Async version of database session dependency.
     For future use with async SQLAlchemy.
     """

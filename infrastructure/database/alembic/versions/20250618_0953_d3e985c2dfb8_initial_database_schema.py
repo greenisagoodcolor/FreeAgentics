@@ -1,4 +1,4 @@
-"""Initial database schema
+."""Initial database schema
 
 Revision ID: d3e985c2dfb8
 Revises:
@@ -24,8 +24,10 @@ def upgrade() -> None:
     """Create initial database schema."""
 
     # Create custom enums
-    op.execute("CREATE TYPE agentstatus AS ENUM ('active', 'inactive', 'suspended', 'terminated')")
-    op.execute("CREATE TYPE conversationtype AS ENUM ('direct', 'group', 'broadcast', 'system')")
+    op.execute("CREATE TYPE agentstatus AS ENUM ('active', 'inactive', 'suspended',
+        'terminated')")
+    op.execute("CREATE TYPE conversationtype AS ENUM ('direct', 'group', 'broadcast',
+        'system')")
 
     # Create agents table
     op.create_table(
@@ -36,7 +38,8 @@ def upgrade() -> None:
         sa.Column("type", sa.String(length=100), nullable=False),
         sa.Column(
             "status",
-            postgresql.ENUM("active", "inactive", "suspended", "terminated", name="agentstatus"),
+            postgresql.ENUM("active", "inactive", "suspended", "terminated",
+                name="agentstatus"),
             nullable=False,
         ),
         sa.Column("config", sa.JSON(), nullable=True),
@@ -45,15 +48,18 @@ def upgrade() -> None:
         sa.Column("location", sa.String(length=15), nullable=True),
         sa.Column("energy_level", sa.Float(), nullable=True),
         sa.Column("experience_points", sa.Integer(), nullable=True),
-        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=True),
+        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"),
+            nullable=False),
+        sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"),
+            nullable=True),
         sa.Column("last_active_at", sa.DateTime(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(op.f("ix_agents_id"), "agents", ["id"], unique=False)
     op.create_index(op.f("ix_agents_uuid"), "agents", ["uuid"], unique=True)
     op.create_index("idx_agent_location", "agents", ["location"], unique=False)
-    op.create_index("idx_agent_type_status", "agents", ["type", "status"], unique=False)
+    op.create_index("idx_agent_type_status", "agents", ["type", "status"],
+        unique=False)
 
     # Create conversations table
     op.create_table(
@@ -63,18 +69,23 @@ def upgrade() -> None:
         sa.Column("title", sa.String(length=255), nullable=True),
         sa.Column(
             "type",
-            postgresql.ENUM("direct", "group", "broadcast", "system", name="conversationtype"),
+            postgresql.ENUM("direct", "group", "broadcast", "system",
+                name="conversationtype"),
             nullable=True,
         ),
         sa.Column("meta_data", sa.JSON(), nullable=True),
         sa.Column("context", sa.JSON(), nullable=True),
-        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=True),
+        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"),
+            nullable=False),
+        sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"),
+            nullable=True),
         sa.Column("last_message_at", sa.DateTime(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_conversations_id"), "conversations", ["id"], unique=False)
-    op.create_index(op.f("ix_conversations_uuid"), "conversations", ["uuid"], unique=True)
+    op.create_index(op.f("ix_conversations_id"), "conversations", ["id"],
+        unique=False)
+    op.create_index(op.f("ix_conversations_uuid"), "conversations", ["uuid"],
+        unique=True)
 
     # Create coalitions table
     op.create_table(
@@ -88,20 +99,25 @@ def upgrade() -> None:
         sa.Column("rules", sa.JSON(), nullable=True),
         sa.Column("status", sa.String(length=50), nullable=True),
         sa.Column("value_pool", sa.Float(), nullable=True),
-        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"),
+            nullable=False),
         sa.Column("activated_at", sa.DateTime(), nullable=True),
         sa.Column("disbanded_at", sa.DateTime(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_coalitions_id"), "coalitions", ["id"], unique=False)
-    op.create_index(op.f("ix_coalitions_uuid"), "coalitions", ["uuid"], unique=True)
-    op.create_index("idx_coalition_status_type", "coalitions", ["status", "type"], unique=False)
+    op.create_index(op.f("ix_coalitions_id"), "coalitions", ["id"],
+        unique=False)
+    op.create_index(op.f("ix_coalitions_uuid"), "coalitions", ["uuid"],
+        unique=True)
+    op.create_index("idx_coalition_status_type", "coalitions", ["status", "type"],
+        unique=False)
 
     # Create system_logs table
     op.create_table(
         "system_logs",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("timestamp", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.Column("timestamp", sa.DateTime(), server_default=sa.text("now()"),
+            nullable=False),
         sa.Column("level", sa.String(length=20), nullable=False),
         sa.Column("component", sa.String(length=100), nullable=False),
         sa.Column("message", sa.Text(), nullable=False),
@@ -111,19 +127,24 @@ def upgrade() -> None:
         sa.Column("data", sa.JSON(), nullable=True),
         sa.Column("error_trace", sa.Text(), nullable=True),
         sa.ForeignKeyConstraint(["agent_id"], ["agents.id"], ondelete="SET NULL"),
-        sa.ForeignKeyConstraint(["coalition_id"], ["coalitions.id"], ondelete="SET NULL"),
-        sa.ForeignKeyConstraint(["conversation_id"], ["conversations.id"], ondelete="SET NULL"),
+        sa.ForeignKeyConstraint(["coalition_id"], ["coalitions.id"],
+            ondelete="SET NULL"),
+        sa.ForeignKeyConstraint(["conversation_id"], ["conversations.id"],
+            ondelete="SET NULL"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_system_logs_id"), "system_logs", ["id"], unique=False)
-    op.create_index(op.f("ix_system_logs_timestamp"), "system_logs", ["timestamp"], unique=False)
+    op.create_index(op.f("ix_system_logs_id"), "system_logs", ["id"],
+        unique=False)
+    op.create_index(op.f("ix_system_logs_timestamp"), "system_logs", ["timestamp"],
+        unique=False)
     op.create_index(
         "idx_log_component_timestamp",
         "system_logs",
         ["component", "timestamp"],
         unique=False,
     )
-    op.create_index("idx_log_timestamp_level", "system_logs", ["timestamp", "level"], unique=False)
+    op.create_index("idx_log_timestamp_level", "system_logs", ["timestamp", "level"],
+        unique=False)
 
     # Create knowledge_graphs table
     op.create_table(
@@ -139,13 +160,17 @@ def upgrade() -> None:
         sa.Column("meta_data", sa.JSON(), nullable=True),
         sa.Column("is_public", sa.Boolean(), nullable=True),
         sa.Column("access_list", sa.JSON(), nullable=True),
-        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
-        sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=True),
+        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"),
+            nullable=False),
+        sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"),
+            nullable=True),
         sa.ForeignKeyConstraint(["owner_id"], ["agents.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_knowledge_graphs_id"), "knowledge_graphs", ["id"], unique=False)
-    op.create_index(op.f("ix_knowledge_graphs_uuid"), "knowledge_graphs", ["uuid"], unique=True)
+    op.create_index(op.f("ix_knowledge_graphs_id"), "knowledge_graphs", ["id"],
+        unique=False)
+    op.create_index(op.f("ix_knowledge_graphs_uuid"), "knowledge_graphs", ["uuid"],
+        unique=True)
     op.create_index(
         "idx_knowledge_owner_type",
         "knowledge_graphs",
@@ -160,11 +185,13 @@ def upgrade() -> None:
         sa.Column("conversation_id", sa.Integer(), nullable=True),
         sa.Column("agent_id", sa.Integer(), nullable=True),
         sa.Column("role", sa.String(length=50), nullable=True),
-        sa.Column("joined_at", sa.DateTime(), server_default=sa.text("now()"), nullable=True),
+        sa.Column("joined_at", sa.DateTime(), server_default=sa.text("now()"),
+            nullable=True),
         sa.Column("left_at", sa.DateTime(), nullable=True),
         sa.Column("is_active", sa.Boolean(), nullable=True),
         sa.ForeignKeyConstraint(["agent_id"], ["agents.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["conversation_id"], ["conversations.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(["conversation_id"], ["conversations.id"],
+            ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("conversation_id", "agent_id", name="uq_conversation_agent"),
     )
@@ -184,11 +211,13 @@ def upgrade() -> None:
         sa.Column("role", sa.String(length=50), nullable=True),
         sa.Column("contribution", sa.Float(), nullable=True),
         sa.Column("share", sa.Float(), nullable=True),
-        sa.Column("joined_at", sa.DateTime(), server_default=sa.text("now()"), nullable=True),
+        sa.Column("joined_at", sa.DateTime(), server_default=sa.text("now()"),
+            nullable=True),
         sa.Column("left_at", sa.DateTime(), nullable=True),
         sa.Column("is_active", sa.Boolean(), nullable=True),
         sa.ForeignKeyConstraint(["agent_id"], ["agents.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["coalition_id"], ["coalitions.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(["coalition_id"], ["coalitions.id"],
+            ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("coalition_id", "agent_id", name="uq_coalition_agent"),
     )
@@ -208,10 +237,13 @@ def upgrade() -> None:
         sa.Column("content", sa.Text(), nullable=False),
         sa.Column("type", sa.String(length=50), nullable=True),
         sa.Column("meta_data", sa.JSON(), nullable=True),
-        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"),
+            nullable=False),
         sa.Column("edited_at", sa.DateTime(), nullable=True),
-        sa.ForeignKeyConstraint(["conversation_id"], ["conversations.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["sender_id"], ["agents.id"], ondelete="SET NULL"),
+        sa.ForeignKeyConstraint(["conversation_id"], ["conversations.id"],
+            ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(["sender_id"], ["agents.id"],
+            ondelete="SET NULL"),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(op.f("ix_messages_id"), "messages", ["id"], unique=False)

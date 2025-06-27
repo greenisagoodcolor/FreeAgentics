@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import heapq
 import math
 from dataclasses import dataclass, field
@@ -17,7 +21,7 @@ This module provides movement capabilities for agents including:
 - Physics-based movement with velocity and acceleration
 - Different movement modes (walking, running, etc.)
 - Terrain interaction
-"""
+."""
 
 
 class MovementMode(Enum):
@@ -93,11 +97,11 @@ class CollisionSystem:
         self.dynamic_obstacles: Dict[str, Position] = {}
 
     def add_static_obstacle(self, position: Position, radius: float) -> None:
-        """Add a static obstacle to the collision system"""
+        ."""Add a static obstacle to the collision system."""
         self.static_obstacles.append({"position": position, "radius": radius})
 
     def update_dynamic_obstacle(self, id: str, position: Position) -> None:
-        """Update position of a dynamic obstacle (other agents)"""
+        ."""Update position of a dynamic obstacle (other agents)."""
         self.dynamic_obstacles[id] = position
 
     def check_collision(
@@ -140,23 +144,23 @@ class PathfindingGrid:
         self.terrain_costs: Dict[Tuple[int, int], float] = {}
 
     def world_to_grid(self, position: Position) -> Tuple[int, int]:
-        """Convert world position to grid coordinates"""
+        ."""Convert world position to grid coordinates."""
         x = int(position.x / self.cell_size)
         y = int(position.y / self.cell_size)
         return (x, y)
 
     def grid_to_world(self, grid_pos: Tuple[int, int]) -> Position:
-        """Convert grid coordinates to world position"""
+        ."""Convert grid coordinates to world position."""
         x = (grid_pos[0] + 0.5) * self.cell_size
         y = (grid_pos[1] + 0.5) * self.cell_size
         return Position(x, y, 0)
 
     def set_obstacle(self, grid_pos: Tuple[int, int]) -> None:
-        """Mark a grid cell as obstacle"""
+        ."""Mark a grid cell as obstacle."""
         self.obstacles.add(grid_pos)
 
     def set_terrain_cost(self, grid_pos: Tuple[int, int], cost: float) -> None:
-        """Set movement cost for a grid cell"""
+        ."""Set movement cost for a grid cell."""
         self.terrain_costs[grid_pos] = cost
 
     def get_neighbors(self, pos: Tuple[int, int]) -> List[Tuple[int, int]]:
@@ -175,7 +179,7 @@ class PathfindingGrid:
         return neighbors
 
     def heuristic(self, a: Tuple[int, int], b: Tuple[int, int]) -> float:
-        """Heuristic function for A* (Euclidean distance)"""
+        ."""Heuristic function for A* (Euclidean distance)."""
         return math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
 
     def get_movement_cost(self, from_pos: Tuple[int, int], to_pos: Tuple[int, int]) -> float:
@@ -207,7 +211,8 @@ class PathfindingGrid:
                 path.reverse()
                 return path
             for neighbor in self.get_neighbors(current):
-                tentative_g = g_score[current] + self.get_movement_cost(current, neighbor)
+                tentative_g = (
+                    g_score[current] + self.get_movement_cost(current, neighbor))
                 if neighbor not in g_score or tentative_g < g_score[neighbor]:
                     came_from[neighbor] = current
                     g_score[neighbor] = tentative_g
@@ -234,7 +239,7 @@ class MovementController:
     def register_agent(
         self, agent: Agent, constraints: Optional[MovementConstraints] = None
     ) -> None:
-        """Register an agent with the movement controller"""
+        ."""Register an agent with the movement controller."""
         self.movement_states[agent.agent_id] = MovementState()
         self.movement_constraints[agent.agent_id] = constraints or MovementConstraints()
         self.collision_system.update_dynamic_obstacle(agent.agent_id, agent.position)
@@ -255,7 +260,7 @@ class MovementController:
         return True
 
     def set_movement_mode(self, agent_id: str, mode: MovementMode) -> None:
-        """Change movement mode for an agent"""
+        ."""Change movement mode for an agent."""
         if agent_id in self.movement_states:
             self.movement_states[agent_id].mode = mode
 
@@ -291,11 +296,13 @@ class MovementController:
             mode_mult = constraints.mode_speeds.get(state.mode, 1.0)
             terrain_mult = constraints.terrain_speeds.get(state.current_terrain, 1.0)
             desired_speed = base_speed * mode_mult * terrain_mult
-            desired_velocity = direction * min(desired_speed, float(distance / delta_time))
+            desired_velocity = (
+                direction * min(desired_speed, float(distance / delta_time)))
             velocity_diff = desired_velocity - state.velocity
             max_accel = constraints.max_acceleration * delta_time
             if np.linalg.norm(velocity_diff) > max_accel:
-                velocity_diff = velocity_diff / np.linalg.norm(velocity_diff) * max_accel
+                velocity_diff = (
+                    velocity_diff / np.linalg.norm(velocity_diff) * max_accel)
             state.velocity += velocity_diff
         self._apply_movement(agent, state, delta_time)
 
@@ -396,11 +403,11 @@ class MovementController:
 
 
 class SteeringBehaviors:
-    """Advanced steering behaviors for more natural movement"""
+    ."""Advanced steering behaviors for more natural movement."""
 
     @staticmethod
     def seek(position: np.ndarray, target: np.ndarray, max_speed: float) -> np.ndarray:
-        """Seek steering behavior - move towards target"""
+        ."""Seek steering behavior - move towards target."""
         desired = target - position
         distance = np.linalg.norm(desired)
         if distance > 0:

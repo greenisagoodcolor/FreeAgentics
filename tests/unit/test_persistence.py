@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 from datetime import datetime, timedelta
 from typing import Optional
 from unittest.mock import Mock, patch
@@ -22,7 +26,7 @@ from agents.base.persistence import AGENT_SCHEMA_VERSION, AgentPersistence, Agen
 
 
 class TestAgentPersistence:
-    """Test AgentPersistence class"""
+    ."""Test AgentPersistence class."""
 
     @pytest.fixture
     def mock_session(self):
@@ -67,7 +71,8 @@ class TestAgentPersistence:
             deadline=datetime.now() + timedelta(hours=1),
         )
         agent.add_goal(goal)
-        agent.add_to_memory({"event": "found_item", "location": [30, 40]}, is_important=True)
+        agent.add_to_memory({"event": "found_item", "location": [30, 40]},
+            is_important=True)
         return agent
 
     @patch("agents.base.persistence.get_db_session")
@@ -300,7 +305,7 @@ class TestAgentPersistence:
 
 
 class TestAgentSnapshot:
-    """Test AgentSnapshot class"""
+    ."""Test AgentSnapshot class."""
 
     @pytest.fixture
     def mock_persistence(self):
@@ -378,8 +383,9 @@ class TestAgentSnapshot:
         assert restored_agent.name == original_name
         assert restored_agent.position.x == 10.0
 
-    def test_restore_nonexistent_snapshot(self, mock_persistence, sample_agent) -> None:
-        """Test restoring a non-existent snapshot"""
+    def test_restore_nonexistent_snapshot(self, mock_persistence,
+        sample_agent) -> None:
+        ."""Test restoring a non-existent snapshot."""
         snapshot = AgentSnapshot(mock_persistence)
         mock_persistence.load_agent.return_value = sample_agent
         restored_agent = snapshot.restore_snapshot(sample_agent.agent_id, "fake-snapshot-id")

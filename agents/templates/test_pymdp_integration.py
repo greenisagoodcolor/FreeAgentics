@@ -18,7 +18,6 @@ Expert Committee Requirements:
 """
 
 import unittest
-import warnings
 from typing import Dict, List, Optional
 
 import numpy as np
@@ -137,7 +136,8 @@ class TestPyMDPIntegration(unittest.TestCase):
         # Analytical Bayesian update for validation
         likelihood = self.model_params.A[observation, :]  # P(o|s)
         analytical_posterior = initial_beliefs.beliefs * likelihood  # P(o|s) * P(s)
-        analytical_posterior = analytical_posterior / np.sum(analytical_posterior)  # Normalize
+        analytical_posterior = (
+            analytical_posterior / np.sum(analytical_posterior)  # Normalize)
 
         # Compare numerical and analytical results
         npt.assert_allclose(

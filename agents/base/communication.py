@@ -1,3 +1,8 @@
+"""
+Agent Conversation System.
+
+Inter-agent communication with Active Inference goals.
+"""
 import json
 import logging
 import random
@@ -8,11 +13,6 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from knowledge.knowledge_graph import KnowledgeGraph
-
-"""
-Agent Conversation System
-Inter-agent communication with Active Inference goals.
-"""
 
 
 # Define BeliefNode locally since it's not available in the imported module
@@ -79,13 +79,16 @@ class ConversationTurn:
 class AgentConversation:
     """
     Manages goal-driven conversations between agents.
+
     Conversations are driven by Active Inference goals where
     agents communicate to reduce uncertainty and achieve objectives.
     """
 
-    def __init__(self, conversation_id: Optional[str] = None, max_turns: int = 10) -> None:
+    def __init__(self, conversation_id: Optional[str] = None,
+                 max_turns: int = 10) -> None:
         """
         Initialize a conversation.
+
         Args:
             conversation_id: Unique identifier for the conversation
             max_turns: Maximum number of turns before ending
@@ -101,7 +104,8 @@ class AgentConversation:
         # Conversation state
         self.current_speaker: Optional[str] = None
         self.turn_count = 0
-        self.conversation_goals: Dict[str, List[str]] = {}  # agent_id -> goals
+        # agent_id -> goals
+        self.conversation_goals: Dict[str, List[str]] = {}
         logger.info(f"Created conversation {self.conversation_id}")
 
     def add_participant(self, agent_id: str, goals: Optional[List[str]] = None) -> None:
@@ -119,6 +123,7 @@ class AgentConversation:
         llm_client: Optional[Any] = None,
     ) -> ConversationMessage:
         """
+
         Generate a message based on speaker's goals and state.
         Args:
             speaker_id: ID of the speaking agent
@@ -139,10 +144,12 @@ class AgentConversation:
         # Generate content based on intent
         if llm_client:
             content = self._generate_with_llm(
-                speaker_id, speaker_state, intent, conversation_context, llm_client
+                speaker_id, speaker_state, intent, conversation_context,
+                    llm_client
             )
         else:
-            content = self._generate_template_message(speaker_id, speaker_state, intent)
+            content = (
+                self._generate_template_message(speaker_id, speaker_state, intent))
         # Create message
         message = ConversationMessage(
             id=str(uuid.uuid4()),
@@ -190,7 +197,8 @@ class AgentConversation:
         return other_participants[0]
 
     def _generate_template_message(
-        self, speaker_id: str, speaker_state: Dict[str, Any], intent: ConversationIntent
+        self, speaker_id: str, speaker_state: Dict[str, Any],
+            intent: ConversationIntent
     ) -> str:
         """Generate message using templates."""
         templates = {
@@ -229,15 +237,18 @@ class AgentConversation:
         template = random.choice(templates.get(intent, ["Hello"]))
         # Fill in template
         if intent == ConversationIntent.SHARE_DISCOVERY:
-            discoveries = speaker_state.get("recent_discoveries", ["something"])
+            discoveries = (
+                speaker_state.get("recent_discoveries", ["something"]))
             discovery = discoveries[0] if discoveries else "something"
             location = speaker_state.get("location", "nearby")
             return template.format(discovery=discovery, location=location)
         elif intent == ConversationIntent.PROPOSE_TRADE:
             resources = speaker_state.get("resources", {})
             # Find what's needed and what can be offered
-            need = min(resources.items(), key=lambda x: x[1])[0] if resources else "resources"
-            offer = max(resources.items(), key=lambda x: x[1])[0] if resources else "items"
+            need = (
+                min(resources.items(), key=lambda x: x[1])[0] if resources else "resources")
+            offer = (
+                max(resources.items(), key=lambda x: x[1])[0] if resources else "items")
             return template.format(need=need, offer=offer)
         elif intent == ConversationIntent.SEEK_INFORMATION:
             topic = speaker_state.get("uncertainty_topics", ["the area"])[0]
@@ -259,7 +270,8 @@ class AgentConversation:
     ) -> str:
         """Generate natural language using LLM."""
         # Build prompt
-        prompt = self._build_llm_prompt(speaker_id, speaker_state, intent, conversation_context)
+        prompt = (
+            self._build_llm_prompt(speaker_id, speaker_state, intent, conversation_context))
         # Generate response
         try:
             response = llm_client.generate(prompt, max_tokens=100)
@@ -267,7 +279,8 @@ class AgentConversation:
         except Exception as e:
             logger.error(f"LLM generation failed: {e}")
             # Fall back to template
-            return self._generate_template_message(speaker_id, speaker_state, intent)
+            return self._generate_template_message(speaker_id, speaker_state,
+                intent)
 
     def _build_llm_prompt(
         self,
@@ -284,7 +297,8 @@ class AgentConversation:
         context_str = ""
         for msg in conversation_context[-3:]:  # Last 3 messages
             context_str += f"{msg.sender_id}: {msg.content}\n"
-        prompt = f"""You are agent {speaker_id} with personality traits: {traits}.
+        prompt = (
+            f"""You are agent {speaker_id} with personality traits: {traits}.)
 Your current intent is: {intent.value}
 Your goals: {', '.join(self.conversation_goals.get(speaker_id, []))}
 Recent conversation:
@@ -339,7 +353,8 @@ Response:"""
             self.end_conversation()
         return turn
 
-    def _determine_action(self, agent_id: str, agent_state: Dict[str, Any]) -> str:
+    def _determine_action(self, agent_id: str, agent_state: Dict[str,
+        Any]) -> str:
         """Determine what action agent should take."""
         # Simple turn-taking logic
         # In full implementation, would use more sophisticated decision-making
@@ -381,7 +396,8 @@ Response:"""
             # Create belief about shared discovery
             belief = BeliefNode(
                 id=str(uuid.uuid4()),
-                statement=f"Agent {message.sender_id} discovered: {message.content}",
+                statement= (
+                    f"Agent {message.sender_id} discovered: {message.content}",)
                 confidence=0.7,  # Moderate confidence in shared info
                 supporting_patterns=[],
                 contradicting_patterns=[],
@@ -413,7 +429,8 @@ Response:"""
             # Create belief about trade opportunity
             belief = BeliefNode(
                 id=str(uuid.uuid4()),
-                statement=f"Trade opportunity with {message.sender_id}: {message.content}",
+                statement= (
+                    f"Trade opportunity with {message.sender_id}: {message.content}",)
                 confidence=0.6,
                 supporting_patterns=[],
                 contradicting_patterns=[],
@@ -428,7 +445,8 @@ Response:"""
         # Update trust/relationship beliefs
         trust_belief = BeliefNode(
             id=str(uuid.uuid4()),
-            statement=f"Agent {message.sender_id} communicated with intent {message.intent.value}",
+            statement= (
+                f"Agent {message.sender_id} communicated with intent {message.intent.value}",)
             confidence=0.8,
             supporting_patterns=[],
             contradicting_patterns=[],
@@ -456,7 +474,8 @@ Response:"""
             "participants": self.participants,
             "message_count": len(self.messages),
             "turn_count": self.turn_count,
-            "duration": ((self.end_time or datetime.utcnow()) - self.start_time).total_seconds(),
+            "duration": ((self.end_time or datetime.utcnow()) -
+                self.start_time).total_seconds(),
             "active": self.active,
             "intent_distribution": intent_counts,
             "start_time": self.start_time.isoformat(),
@@ -471,6 +490,7 @@ Response:"""
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert conversation to dictionary."""
+
         return {
             "conversation_id": self.conversation_id,
             "participants": self.participants,
@@ -487,7 +507,8 @@ class ConversationManager:
         self.agent_conversations: Dict[str, List[str]] = {}  # agent_id -> conv_ids
 
     def create_conversation(
-        self, participants: List[str], goals: Optional[Dict[str, List[str]]] = None
+        self, participants: List[str], goals: Optional[Dict[str,
+            List[str]]] = None
     ) -> AgentConversation:
         """
         Create a new conversation.
@@ -517,6 +538,7 @@ class ConversationManager:
 
     def get_active_conversations(self) -> List[AgentConversation]:
         """Get all active conversations."""
+
         return [conv for conv in self.conversations.values() if conv.active]
 
 
@@ -544,6 +566,7 @@ class CommunicationCapability:
             bandwidth: Maximum messages per cycle
             protocols: Supported communication protocols
         """
+
         self.message_system = message_system
         self.agent_id = agent_id
         self.communication_range = communication_range
@@ -606,6 +629,7 @@ class CommunicationCapability:
         Returns:
             True if message was processed successfully
         """
+
         # Check if within communication range (simplified)
         # In full implementation, would check actual positions
         self.message_queue.append(message)
@@ -632,6 +656,7 @@ class CommunicationCapability:
         Returns:
             Created conversation or None if failed
         """
+
         conversation_id = self._get_conversation_id(target_agent_id)
         if conversation_id in self.active_conversations:
             return self.active_conversations[conversation_id]
@@ -666,7 +691,8 @@ class CommunicationCapability:
         return False
 
     def reset_cycle(self) -> None:
-        """Reset per-cycle counters (called at start of each simulation cycle)."""
+        """Reset per-cycle counters (called at start of each simulation
+        cycle)."""
         self.sent_messages_count = 0
         self.received_messages_count = 0
 

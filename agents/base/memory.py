@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import heapq
 import pickle
 import uuid
@@ -20,7 +24,7 @@ This module provides memory and learning capabilities for agents including:
 - Learning algorithms for pattern recognition
 - Memory consolidation and decay
 - Experience-based decision improvement
-"""
+."""
 
 
 class MemoryType(Enum):
@@ -122,22 +126,22 @@ class Pattern:
 
 
 class MemoryStorage:
-    """Base class for memory storage backends"""
+    ."""Base class for memory storage backends."""
 
     def store(self, memory: Memory) -> None:
-        """Store a memory"""
+        ."""Store a memory."""
         raise NotImplementedError
 
     def retrieve(self, memory_id: str) -> Optional[Memory]:
-        """Retrieve a specific memory"""
+        ."""Retrieve a specific memory."""
         raise NotImplementedError
 
     def search(self, criteria: Dict[str, Any]) -> List[Memory]:
-        """Search memories by criteria"""
+        ."""Search memories by criteria."""
         raise NotImplementedError
 
     def remove(self, memory_id: str) -> bool:
-        """Remove a memory"""
+        ."""Remove a memory."""
         raise NotImplementedError
 
 
@@ -150,13 +154,13 @@ class InMemoryStorage(MemoryStorage):
         self.timestamp_index: List[Tuple[datetime, str]] = []
 
     def store(self, memory: Memory) -> None:
-        """Store memory with indexing"""
+        ."""Store memory with indexing."""
         self.memories[memory.memory_id] = memory
         self.type_index[memory.memory_type].add(memory.memory_id)
         heapq.heappush(self.timestamp_index, (memory.timestamp, memory.memory_id))
 
     def retrieve(self, memory_id: str) -> Optional[Memory]:
-        """Retrieve memory by ID"""
+        ."""Retrieve memory by ID."""
         return self.memories.get(memory_id)
 
     def search(self, criteria: Dict[str, Any]) -> List[Memory]:
@@ -203,7 +207,7 @@ class WorkingMemory:
         self.attention_weights: Dict[str, float] = {}
 
     def add(self, item: Any, weight: float = 1.0) -> None:
-        """Add item to working memory"""
+        ."""Add item to working memory."""
         item_id = str(id(item))
         self.items.append(item)
         self.attention_weights[item_id] = weight
@@ -225,7 +229,7 @@ class WorkingMemory:
             self.attention_weights[item_id] = max(0.0, min(1.0, self.attention_weights[item_id]))
 
     def clear(self) -> None:
-        """Clear working memory"""
+        ."""Clear working memory."""
         self.items.clear()
         self.attention_weights.clear()
 
@@ -319,14 +323,14 @@ class MemoryConsolidator:
 
 
 class LearningAlgorithm:
-    """Base class for learning algorithms"""
+    ."""Base class for learning algorithms."""
 
     def learn(self, experience: Experience) -> None:
-        """Learn from an experience"""
+        ."""Learn from an experience."""
         raise NotImplementedError
 
     def predict(self, state: Dict[str, Any]) -> Any:
-        """Make prediction based on learned knowledge"""
+        ."""Make prediction based on learned knowledge."""
         raise NotImplementedError
 
 
@@ -370,7 +374,7 @@ class ReinforcementLearner(LearningAlgorithm):
         return "|".join(key_parts)
 
     def _action_to_key(self, action: Action) -> str:
-        """Convert action to hashable key"""
+        ."""Convert action to hashable key."""
         return f"{action.action_type.value}:{action.target}"
 
 
@@ -680,7 +684,7 @@ class MessageSystem:
         self.message_queue.append(message)
 
     def get_messages(self, recipient_id: str) -> List[Dict[str, Any]]:
-        """Get messages for a specific recipient"""
+        ."""Get messages for a specific recipient."""
         return [msg for msg in self.messages if msg["recipient_id"] == recipient_id]
 
     def clear_messages(self) -> None:

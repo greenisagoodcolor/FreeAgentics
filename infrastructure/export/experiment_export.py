@@ -1,9 +1,10 @@
-"""
+."""
 Experiment State Export System
 
 Implements comprehensive experiment state serialization for reproducible research
 and collaboration, extending the existing export infrastructure with support for:
-- Complete experiment state (agents, conversations, knowledge graphs, parameters)
+- Complete experiment state (agents, conversations, knowledge graphs,
+    parameters)
 - Incremental exports and large state handling
 - Collaboration features (shareable links, version comparison)
 - Integration with core architecture modules per ADR-002
@@ -14,7 +15,6 @@ Follows ADR-008 for API integration and ADR-011 for security compliance.
 import hashlib
 import json
 import logging
-import pickle
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -105,6 +105,7 @@ class StateCollector:
     """Collects state from core domain modules per ADR-002."""
 
     def __init__(self, db_session: Session) -> None:
+        """Initialize."""
         self.db_session = db_session
         self.agent_registry = AgentRegistry()
         self.state_manager = AgentStateManager()

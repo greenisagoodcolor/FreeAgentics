@@ -1,4 +1,4 @@
-"""
+."""
 Comprehensive Readiness Report Integration for Edge Deployment
 
 Unified system that integrates technical, business, and safety assessments into a
@@ -15,7 +15,6 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-import numpy as np
 
 from coalitions.readiness.business_readiness_assessor import (
     BusinessReadinessAssessor,
@@ -236,7 +235,8 @@ class ComprehensiveReadinessIntegrator:
 
             # Safety and compliance assessment
             safety_report = await self.safety_verifier.verify_safety_compliance(
-                coalition_id, coalition_config, deployment_context, required_frameworks
+                coalition_id, coalition_config, deployment_context,
+                    required_frameworks
             )
 
             # Step 2: Integrate assessments
@@ -422,8 +422,10 @@ class ComprehensiveReadinessIntegrator:
         # Integration recommendations
         if len(recommendations) == 0:  # If no critical issues
             recommendations.append("Optimize deployment configuration for maximum performance")
-            recommendations.append("Implement comprehensive monitoring and alerting systems")
-            recommendations.append("Develop detailed operational procedures and runbooks")
+            recommendations.append("Implement comprehensive monitoring and
+                alerting systems")
+            recommendations.append("Develop detailed operational procedures and
+                runbooks")
 
         # Prioritize and limit recommendations
         return recommendations[:10]  # Top 10 recommendations

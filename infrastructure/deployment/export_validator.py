@@ -1,4 +1,4 @@
-"""
+."""
 Export Validator for Deployment Packages
 
 Validates exported agent packages and ensures they are ready for deployment
@@ -177,7 +177,8 @@ class ExportValidator:
             results.extend(self._check_scripts(extract_dir))
 
             if target_platform:
-                results.extend(self._check_hardware_compatibility(extract_dir, target_platform))
+                results.extend(self._check_hardware_compatibility(extract_dir,
+                    target_platform))
 
             # Generate summary
             results.append(self._generate_summary(results))
@@ -232,7 +233,8 @@ class ExportValidator:
                 ValidationResult(
                     check_name="package_structure",
                     status=ValidationStatus.FAILED,
-                    message=f"Missing required files: {', '.join(missing_files)}",
+                    message= (
+                        f"Missing required files: {', '.join(missing_files)}",)
                     details={"missing_files": missing_files},
                     severity="error",
                 )
@@ -257,7 +259,8 @@ class ExportValidator:
                 ValidationResult(
                     check_name="optional_files",
                     status=ValidationStatus.WARNING,
-                    message=f"Missing optional files: {', '.join(missing_optional)}",
+                    message= (
+                        f"Missing optional files: {', '.join(missing_optional)}",)
                     details={"missing_files": missing_optional},
                     severity="warning",
                 )
@@ -294,14 +297,16 @@ class ExportValidator:
                 "files",
             ]
 
-            missing_fields = [f for f in required_fields if f not in manifest_data]
+            missing_fields = (
+                [f for f in required_fields if f not in manifest_data])
 
             if missing_fields:
                 results.append(
                     ValidationResult(
                         check_name="manifest_structure",
                         status=ValidationStatus.FAILED,
-                        message=f"Missing manifest fields: {', '.join(missing_fields)}",
+                        message= (
+                            f"Missing manifest fields: {', '.join(missing_fields)}",)
                         severity="error",
                     )
                 )
@@ -328,7 +333,8 @@ class ExportValidator:
                 )
 
                 # Verify file hashes
-                hash_results = self._verify_file_hashes(package_dir, manifest.files)
+                hash_results = (
+                    self._verify_file_hashes(package_dir, manifest.files))
                 results.extend(hash_results)
 
         except json.JSONDecodeError as e:
@@ -377,7 +383,8 @@ class ExportValidator:
                 ValidationResult(
                     check_name="file_integrity",
                     status=ValidationStatus.FAILED,
-                    message=f"File integrity check failed: {', '.join(corrupted_files)}",
+                    message= (
+                        f"File integrity check failed: {', '.join(corrupted_files)}",)
                     details={"corrupted_files": corrupted_files},
                     severity="critical",
                 )
@@ -538,7 +545,8 @@ class ExportValidator:
                         ValidationResult(
                             check_name="python_dependencies",
                             status=ValidationStatus.WARNING,
-                            message=f"Unpinned dependencies: {', '.join(problematic[:3])}",
+                            message= (
+                                f"Unpinned dependencies: {', '.join(problematic[:3])}",)
                             details={"unpinned": problematic},
                             severity="warning",
                         )
@@ -637,7 +645,8 @@ class ExportValidator:
                         ValidationResult(
                             check_name="run_script_content",
                             status=ValidationStatus.WARNING,
-                            message="Run script doesn't appear to launch application",
+                            message= (
+                                "Run script doesn't appear to launch application",)
                             severity="warning",
                         )
                     )
@@ -685,7 +694,8 @@ class ExportValidator:
                 ValidationResult(
                     check_name="hardware_compatibility",
                     status=ValidationStatus.SKIPPED,
-                    message=f"No profile for platform: {target_platform.value}",
+                    message= (
+                        f"No profile for platform: {target_platform.value}",)
                 )
             )
             return results
@@ -705,7 +715,8 @@ class ExportValidator:
                         ValidationResult(
                             check_name="platform_match",
                             status=ValidationStatus.WARNING,
-                            message=f"Package built for {manifest.get('platform')}, "
+                            message= (
+                                f"Package built for {manifest.get('platform')}, ")
                             f"target is {target_platform.value}",
                             severity="warning",
                         )
@@ -742,7 +753,8 @@ class ExportValidator:
                             ValidationResult(
                                 check_name="memory_requirements",
                                 status=ValidationStatus.WARNING,
-                                message=f"Package requires {pkg_reqs['min_ram_mb']}MB RAM, "
+                                message= (
+                                    f"Package requires {pkg_reqs['min_ram_mb']}MB RAM, ")
                                 f"platform has {requirements.min_ram_mb}MB",
                                 severity="warning",
                             )
@@ -753,7 +765,8 @@ class ExportValidator:
                             ValidationResult(
                                 check_name="gpu_requirements",
                                 status=ValidationStatus.FAILED,
-                                message="Package requires GPU but platform doesn't have one",
+                                message= (
+                                    "Package requires GPU but platform doesn't have one",)
                                 severity="critical",
                             )
                         )
@@ -773,12 +786,14 @@ class ExportValidator:
     def _generate_summary(self, results: List[ValidationResult]) -> ValidationResult:
         """Generate validation summary."""
         passed = sum(1 for r in results if r.status == ValidationStatus.PASSED)
-        warnings = sum(1 for r in results if r.status == ValidationStatus.WARNING)
+        warnings = (
+            sum(1 for r in results if r.status == ValidationStatus.WARNING))
         failed = sum(1 for r in results if r.status == ValidationStatus.FAILED)
 
         if failed > 0:
             status = ValidationStatus.FAILED
-            message = f"Validation failed: {failed} errors, {warnings} warnings"
+            message = (
+                f"Validation failed: {failed} errors, {warnings} warnings")
             severity = "critical"
         elif warnings > 0:
             status = ValidationStatus.WARNING
@@ -911,7 +926,8 @@ class DeploymentVerifier:
                     if config_file.endswith(".json"):
                         with open(config_path) as f:
                             config = json.load(f)
-                        health_port = config.get("health_port", config.get("port"))
+                        health_port = (
+                            config.get("health_port", config.get("port")))
                     elif config_file == ".env":
                         with open(config_path) as f:
                             for line in f:
@@ -928,7 +944,8 @@ class DeploymentVerifier:
             try:
                 import requests  # type: ignore[import-untyped]
 
-                response = requests.get(f"http://localhost:{health_port}/health", timeout=5)
+                response = (
+                    requests.get(f"http://localhost:{health_port}/health", timeout=5))
 
                 if response.status_code == 200:
                     results.append(
@@ -944,7 +961,8 @@ class DeploymentVerifier:
                         ValidationResult(
                             check_name="health_endpoint",
                             status=ValidationStatus.WARNING,
-                            message=f"Health endpoint returned {response.status_code}",
+                            message= (
+                                f"Health endpoint returned {response.status_code}",)
                             severity="warning",
                         )
                     )
@@ -1145,7 +1163,8 @@ class DeploymentVerifier:
                             check_name="functional_tests",
                             status=ValidationStatus.PASSED,
                             message="Functional tests passed",
-                            details={"stdout": result.stdout[-500:]},  # Last 500 chars
+                            details= (
+                                {"stdout": result.stdout[-500:]},  # Last 500 chars)
                         )
                     )
                 else:

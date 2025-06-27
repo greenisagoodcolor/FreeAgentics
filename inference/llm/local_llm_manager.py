@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import hashlib
 import json
 import logging
@@ -381,9 +385,11 @@ class FallbackResponder:
         # Detect intent from prompt
         if any(word in prompt_lower for word in ["hello", "hi", "greet"]):
             category = "greeting"
-        elif any(word in prompt_lower for word in ["explore", "find", "search"]):
+        elif any(word in prompt_lower for word in ["explore", "find",
+            "search"]):
             category = "exploration"
-        elif any(word in prompt_lower for word in ["trade", "exchange", "buy", "sell"]):
+        elif any(word in prompt_lower for word in ["trade", "exchange", "buy",
+            "sell"]):
             category = "trading"
         elif any(word in prompt_lower for word in ["research", "analyze", "study"]):
             category = "research"

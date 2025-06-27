@@ -1,7 +1,8 @@
-"""
+."""
 Device Discovery Mechanism
 
-Automatically detects and enumerates available hardware devices and peripherals.
+Automatically detects and enumerates available hardware devices and
+    peripherals.
 """
 
 import json
@@ -26,7 +27,6 @@ except ImportError:
     GPU_UTIL_AVAILABLE = False
 
 try:
-    import pycuda.driver as cuda
 
     CUDA_AVAILABLE = True
 except ImportError:

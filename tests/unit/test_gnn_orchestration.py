@@ -1,6 +1,9 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 from unittest.mock import MagicMock, Mock
 
-import numpy as np
 import pytest
 import torch
 import torch.nn as nn
@@ -24,7 +27,7 @@ from inference.engine.gnn_integration import (
 
 """
 Unit tests for GNN Integration Layer
-"""
+."""
 
 
 class DummyGNN(nn.Module):
@@ -41,7 +44,7 @@ class DummyGNN(nn.Module):
 
 class TestGNNIntegrationConfig:
     def test_default_config(self) -> None:
-        """Test default configuration values"""
+        ."""Test default configuration values."""
         config = GNNIntegrationConfig()
         assert config.gnn_type == "gcn"
         assert config.num_layers == 3
@@ -51,7 +54,7 @@ class TestGNNIntegrationConfig:
         assert config.state_mapping == "direct"
 
     def test_custom_config(self) -> None:
-        """Test custom configuration"""
+        ."""Test custom configuration."""
         config = GNNIntegrationConfig(
             gnn_type="gat", num_layers=5, aggregation_method="attention", use_gpu=False
         )
@@ -63,7 +66,7 @@ class TestGNNIntegrationConfig:
 
 class TestDirectGraphMapper:
     def test_initialization(self) -> None:
-        """Test mapper initialization"""
+        ."""Test mapper initialization."""
         config = GNNIntegrationConfig(use_gpu=False)
         mapper = DirectGraphMapper(config, state_dim=10, observation_dim=5)
         assert mapper.state_dim == 10
@@ -72,7 +75,7 @@ class TestDirectGraphMapper:
         assert mapper.obs_projection is not None
 
     def test_map_to_states(self) -> None:
-        """Test mapping graph features to states"""
+        ."""Test mapping graph features to states."""
         config = GNNIntegrationConfig(use_gpu=False, output_dim=8)
         mapper = DirectGraphMapper(config, state_dim=4, observation_dim=3)
         graph_features = torch.randn(5, 8)
@@ -81,7 +84,7 @@ class TestDirectGraphMapper:
         assert torch.allclose(states.sum(dim=-1), torch.ones(5), atol=1e-06)
 
     def test_map_with_node_indices(self) -> None:
-        """Test mapping with specific node indices"""
+        ."""Test mapping with specific node indices."""
         config = GNNIntegrationConfig(use_gpu=False, output_dim=8)
         mapper = DirectGraphMapper(config, state_dim=4, observation_dim=3)
         graph_features = torch.randn(10, 8)
@@ -92,7 +95,7 @@ class TestDirectGraphMapper:
 
 class TestLearnedGraphMapper:
     def test_initialization(self) -> None:
-        """Test learned mapper initialization"""
+        ."""Test learned mapper initialization."""
         config = GNNIntegrationConfig(use_gpu=False)
         mapper = LearnedGraphMapper(config, state_dim=10, observation_dim=5)
         assert mapper.state_dim == 10
@@ -101,7 +104,7 @@ class TestLearnedGraphMapper:
         assert isinstance(mapper.obs_mapper, nn.Sequential)
 
     def test_map_to_states(self) -> None:
-        """Test learned mapping to states"""
+        ."""Test learned mapping to states."""
         config = GNNIntegrationConfig(use_gpu=False, output_dim=8)
         mapper = LearnedGraphMapper(config, state_dim=4, observation_dim=3)
         graph_features = torch.randn(5, 8)
@@ -110,7 +113,7 @@ class TestLearnedGraphMapper:
         assert torch.allclose(states.sum(dim=-1), torch.ones(5), atol=1e-06)
 
     def test_map_to_observations(self) -> None:
-        """Test learned mapping to observations"""
+        ."""Test learned mapping to observations."""
         config = GNNIntegrationConfig(use_gpu=False, output_dim=8)
         mapper = LearnedGraphMapper(config, state_dim=4, observation_dim=3)
         graph_features = torch.randn(5, 8)
@@ -120,7 +123,7 @@ class TestLearnedGraphMapper:
 
 class TestGraphFeatureAggregator:
     def test_mean_aggregation(self) -> None:
-        """Test mean aggregation"""
+        ."""Test mean aggregation."""
         config = GNNIntegrationConfig(use_gpu=False, aggregation_method="mean")
         aggregator = GraphFeatureAggregator(config)
         node_features = torch.randn(10, 8)
@@ -131,7 +134,7 @@ class TestGraphFeatureAggregator:
         assert torch.allclose(aggregated[0], expected_mean, atol=1e-06)
 
     def test_max_aggregation(self) -> None:
-        """Test max aggregation"""
+        ."""Test max aggregation."""
         config = GNNIntegrationConfig(use_gpu=False, aggregation_method="max")
         aggregator = GraphFeatureAggregator(config)
         node_features = torch.randn(10, 8)
@@ -142,7 +145,7 @@ class TestGraphFeatureAggregator:
         assert torch.allclose(aggregated[0], expected_max, atol=1e-06)
 
     def test_single_graph_aggregation(self) -> None:
-        """Test aggregation for single graph"""
+        ."""Test aggregation for single graph."""
         config = GNNIntegrationConfig(use_gpu=False, aggregation_method="mean")
         aggregator = GraphFeatureAggregator(config)
         node_features = torch.randn(5, 8)
@@ -155,7 +158,7 @@ class TestGraphFeatureAggregator:
 class TestGNNActiveInferenceAdapter:
     @pytest.fixture
     def setup_adapter(self) -> None:
-        """Setup adapter with mock components"""
+        ."""Setup adapter with mock components."""
         config = GNNIntegrationConfig(use_gpu=False, output_dim=8)
         gnn_model = DummyGNN(10, 32, 8)
         dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
@@ -167,7 +170,7 @@ class TestGNNActiveInferenceAdapter:
         return (adapter, config, gnn_model, gen_model, inference)
 
     def test_initialization(self, setup_adapter) -> None:
-        """Test adapter initialization"""
+        ."""Test adapter initialization."""
         adapter, config, gnn_model, gen_model, inference = setup_adapter
         assert adapter.config == config
         assert adapter.gnn_model == gnn_model
@@ -179,7 +182,7 @@ class TestGNNActiveInferenceAdapter:
         assert isinstance(adapter.aggregator, GraphFeatureAggregator)
 
     def test_process_graph(self, setup_adapter) -> None:
-        """Test graph processing"""
+        ."""Test graph processing."""
         adapter, _, _, _, _ = setup_adapter
         node_features = torch.randn(5, 10)
         edge_index = torch.tensor([[0, 1, 2, 3, 4], [1, 2, 3, 4, 0]])
@@ -191,7 +194,7 @@ class TestGNNActiveInferenceAdapter:
         assert result["graph_features"].shape == (1, 8)
 
     def test_graph_to_beliefs(self, setup_adapter) -> None:
-        """Test converting graph features to beliefs"""
+        ."""Test converting graph features to beliefs."""
         adapter, _, _, _, _ = setup_adapter
         node_features = torch.randn(5, 10)
         edge_index = torch.tensor([[0, 1, 2, 3, 4], [1, 2, 3, 4, 0]])
@@ -204,7 +207,7 @@ class TestGNNActiveInferenceAdapter:
         assert beliefs.shape == (2, 4)
 
     def test_update_beliefs_with_graph(self, setup_adapter) -> None:
-        """Test belief update with graph information"""
+        ."""Test belief update with graph information."""
         adapter, _, _, _, _ = setup_adapter
         current_beliefs = torch.tensor([[0.25, 0.25, 0.25, 0.25]])
         node_features = torch.randn(5, 10)
@@ -217,7 +220,7 @@ class TestGNNActiveInferenceAdapter:
 
 class TestHierarchicalGraphIntegration:
     def test_initialization(self) -> None:
-        """Test hierarchical integration initialization"""
+        ."""Test hierarchical integration initialization."""
         config = GNNIntegrationConfig(use_gpu=False)
         level_configs = [
             {"input_dim": 10, "hidden_dim": 32, "output_dim": 16},
@@ -231,7 +234,7 @@ class TestHierarchicalGraphIntegration:
         assert all(adapter is None for adapter in hier_integration.level_adapters)
 
     def test_set_generative_models(self) -> None:
-        """Test setting generative models"""
+        ."""Test setting generative models."""
         config = GNNIntegrationConfig(use_gpu=False)
         level_configs = [
             {"input_dim": 10, "hidden_dim": 32, "output_dim": 16},
@@ -241,7 +244,8 @@ class TestHierarchicalGraphIntegration:
         gen_models = []
         inf_algorithms = []
         for i in range(2):
-            dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
+            dims = (
+                ModelDimensions(num_states=4, num_observations=3, num_actions=2))
             params = ModelParameters(use_gpu=False)
             gen_models.append(DiscreteGenerativeModel(dims, params))
             inf_algorithms.append(VariationalMessagePassing(InferenceConfig(use_gpu=False)))
@@ -295,7 +299,7 @@ class TestFactoryFunction:
         assert adapter.num_levels == 2
 
     def test_invalid_adapter_type(self) -> None:
-        """Test invalid adapter type"""
+        ."""Test invalid adapter type."""
         with pytest.raises(ValueError, match="Unknown adapter type"):
             create_gnn_adapter("invalid")
 

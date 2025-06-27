@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import time
 
 import pytest
@@ -16,7 +20,7 @@ from agents.testing.agent_test_framework import (
 
 
 class TestAgentFactory:
-    """Test AgentFactory functionality"""
+    ."""Test AgentFactory functionality."""
 
     def test_create_basic_agent(self) -> None:
         """Test basic agent creation"""
@@ -50,7 +54,7 @@ class TestAgentFactory:
 
 
 class TestSimulationEnvironment:
-    """Test SimulationEnvironment functionality"""
+    ."""Test SimulationEnvironment functionality."""
 
     def test_environment_creation(self) -> None:
         """Test environment initialization"""
@@ -114,7 +118,7 @@ class TestSimulationEnvironment:
 
 
 class TestBehaviorValidator:
-    """Test BehaviorValidator functionality"""
+    ."""Test BehaviorValidator functionality."""
 
     def test_validator_creation(self) -> None:
         """Test validator initialization"""
@@ -159,10 +163,10 @@ class TestBehaviorValidator:
 
 
 class TestPerformanceBenchmark:
-    """Test PerformanceBenchmark functionality"""
+    ."""Test PerformanceBenchmark functionality."""
 
     def test_benchmark_creation(self) -> None:
-        """Test benchmark initialization"""
+        ."""Test benchmark initialization."""
         benchmark = PerformanceBenchmark()
         assert benchmark.results == {}
 
@@ -205,7 +209,7 @@ class TestPerformanceBenchmark:
 
 
 class TestTestOrchestrator:
-    """Test TestOrchestrator functionality"""
+    ."""Test TestOrchestrator functionality."""
 
     def test_orchestrator_creation(self) -> None:
         """Test orchestrator initialization"""
@@ -275,7 +279,7 @@ class TestTestOrchestrator:
 
 
 class TestPredefinedScenarios:
-    """Test predefined test scenarios"""
+    ."""Test predefined test scenarios."""
 
     def test_create_basic_test_scenarios(self) -> None:
         """Test creation of basic test scenarios"""

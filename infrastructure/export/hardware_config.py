@@ -1,4 +1,4 @@
-"""
+."""
 Hardware Configuration Management
 
 Manages hardware-specific configurations and optimizations for different deployment targets.
@@ -221,7 +221,8 @@ class HardwareDetector:
         """Detect Coral TPU availability."""
         try:
             # Check for Coral USB accelerator
-            result = subprocess.run(["lsusb"], capture_output=True, text=True, check=True)
+            result = (
+                subprocess.run(["lsusb"], capture_output=True, text=True, check=True))
             if "Google" in result.stdout and "Coral" in result.stdout:
                 return True
 
@@ -294,17 +295,20 @@ class HardwareOptimizer:
         profile = OptimizationProfile(
             name=f"{base_profile.name}_custom",
             description=f"Customized {base_profile.description}",
-            cpu_threads=min(base_profile.cpu_threads, capabilities.cpu_threads),
+            cpu_threads= (
+                min(base_profile.cpu_threads, capabilities.cpu_threads),)
             memory_limit_mb=int(
                 min(
                     base_profile.memory_limit_mb,
-                    capabilities.ram_available_gb * 1024 * 0.8,  # Use 80% of available
+                    capabilities.ram_available_gb * 1024 * 0.8,
+                        # Use 80% of available
                 )
             ),
             batch_size=base_profile.batch_size,
             use_mixed_precision=base_profile.use_mixed_precision,
             quantization_bits=base_profile.quantization_bits,
-            inference_threads=min(base_profile.inference_threads, capabilities.cpu_threads // 2),
+            inference_threads= (
+                min(base_profile.inference_threads, capabilities.cpu_threads // 2),)
             inference_timeout_ms=base_profile.inference_timeout_ms,
             power_mode=base_profile.power_mode,
         )

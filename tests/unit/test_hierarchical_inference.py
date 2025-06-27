@@ -1,4 +1,7 @@
-import numpy as np
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import pytest
 import torch
 import torch.nn as nn
@@ -23,7 +26,7 @@ from inference.engine.precision import GradientPrecisionOptimizer, PrecisionConf
 
 class TestHierarchicalConfig:
     def test_default_config(self) -> None:
-        """Test default configuration values"""
+        ."""Test default configuration values."""
         config = HierarchicalConfig()
         assert config.num_levels == 3
         assert config.level_dims == [8, 16, 32]
@@ -34,7 +37,7 @@ class TestHierarchicalConfig:
         assert config.use_precision_weighting
 
     def test_custom_config(self) -> None:
-        """Test custom configuration"""
+        ."""Test custom configuration."""
         config = HierarchicalConfig(
             num_levels=4,
             level_dims=[4, 8, 16, 32],
@@ -49,7 +52,7 @@ class TestHierarchicalConfig:
 
 class TestHierarchicalState:
     def test_state_creation(self) -> None:
-        """Test hierarchical state creation"""
+        ."""Test hierarchical state creation."""
         beliefs = torch.randn(2, 8)
         predictions = torch.randn(2, 8)
         errors = torch.randn(2, 8)
@@ -68,7 +71,7 @@ class TestHierarchicalState:
 class TestHierarchicalLevel:
     @pytest.fixture
     def setup_level(self) -> None:
-        """Setup a hierarchical level"""
+        ."""Setup a hierarchical level."""
         config = HierarchicalConfig(use_gpu=False)
         dims = ModelDimensions(num_states=8, num_observations=4, num_actions=2)
         params = ModelParameters(use_gpu=False)
@@ -87,7 +90,7 @@ class TestHierarchicalLevel:
         return (level, config, gen_model)
 
     def test_initialization(self, setup_level) -> None:
-        """Test level initialization"""
+        ."""Test level initialization."""
         level, config, gen_model = setup_level
         assert level.level_id == 1
         assert level.config == config
@@ -101,7 +104,7 @@ class TestHierarchicalLevel:
         assert isinstance(level.temporal_net, nn.GRUCell)
 
     def test_initialize_state(self, setup_level) -> None:
-        """Test state initialization"""
+        ."""Test state initialization."""
         level, _, _ = setup_level
         batch_size = 3
         state = level.initialize_state(batch_size)
@@ -113,7 +116,7 @@ class TestHierarchicalLevel:
         assert torch.allclose(state.beliefs.sum(dim=-1), torch.ones(3), atol=1e-06)
 
     def test_compute_prediction_error(self, setup_level) -> None:
-        """Test prediction error computation"""
+        ."""Test prediction error computation."""
         level, _, _ = setup_level
         observations = torch.softmax(torch.randn(2, 8), dim=-1)
         predictions = torch.softmax(torch.randn(2, 8), dim=-1)
@@ -122,7 +125,7 @@ class TestHierarchicalLevel:
         assert not torch.any(torch.isnan(error))
 
     def test_update_beliefs(self, setup_level) -> None:
-        """Test belief update"""
+        ."""Test belief update."""
         level, _, _ = setup_level
         batch_size = 2
         level.initialize_state(batch_size)
@@ -134,7 +137,7 @@ class TestHierarchicalLevel:
         assert torch.equal(updated_beliefs, level.state.beliefs)
 
     def test_temporal_buffer(self, setup_level) -> None:
-        """Test temporal buffer updates"""
+        ."""Test temporal buffer updates."""
         level, _, _ = setup_level
         level.initialize_state(2)
         for _ in range(5):
@@ -147,7 +150,7 @@ class TestHierarchicalLevel:
 class TestHierarchicalInference:
     @pytest.fixture
     def setup_hierarchical_system(self) -> None:
-        """Setup hierarchical inference system"""
+        ."""Setup hierarchical inference system."""
         config = HierarchicalConfig(num_levels=3, level_dims=[8, 16, 32], use_gpu=False)
         models = []
         algorithms = []
@@ -168,7 +171,7 @@ class TestHierarchicalInference:
         return (system, config, models)
 
     def test_initialization(self, setup_hierarchical_system) -> None:
-        """Test system initialization"""
+        ."""Test system initialization."""
         system, config, models = setup_hierarchical_system
         assert system.num_levels == 3
         assert len(system.levels) == 3
@@ -178,7 +181,7 @@ class TestHierarchicalInference:
             assert level.state_dim == config.level_dims[i]
 
     def test_system_initialize(self, setup_hierarchical_system) -> None:
-        """Test initializing all levels"""
+        ."""Test initializing all levels."""
         system, _, _ = setup_hierarchical_system
         batch_size = 2
         system.initialize(batch_size)
@@ -187,7 +190,7 @@ class TestHierarchicalInference:
             assert level.state.beliefs.shape[0] == batch_size
 
     def test_step(self, setup_hierarchical_system) -> None:
-        """Test one step of hierarchical inference"""
+        ."""Test one step of hierarchical inference."""
         system, _, _ = setup_hierarchical_system
         batch_size = 2
         system.initialize(batch_size)
@@ -199,12 +202,13 @@ class TestHierarchicalInference:
             assert torch.allclose(level_beliefs.sum(dim=-1), torch.ones(batch_size), atol=1e-06)
 
     def test_timescale_updates(self, setup_hierarchical_system) -> None:
-        """Test that levels update according to their timescales"""
+        ."""Test that levels update according to their timescales."""
         system, _, _ = setup_hierarchical_system
         batch_size = 2
         system.initialize(batch_size)
         observations = torch.randn(batch_size, 4)
-        initial_beliefs = [level.state.beliefs.clone() for level in system.levels]
+        initial_beliefs = (
+            [level.state.beliefs.clone() for level in system.levels])
         for _ in range(4):
             system.step(observations)
         assert not torch.allclose(system.levels[0].state.beliefs, initial_beliefs[0])
@@ -345,7 +349,7 @@ class TestFactoryFunction:
         assert hasattr(system, "temporal_predictors")
 
     def test_invalid_type(self) -> None:
-        """Test invalid inference type"""
+        ."""Test invalid inference type."""
         with pytest.raises(ValueError, match="Unknown inference type"):
             create_hierarchical_inference("invalid")
 

@@ -1,4 +1,4 @@
-"""
+."""
 Explorer Agent for FreeAgentics
 
 This module provides the Explorer agent type, specialized in exploration,
@@ -13,7 +13,12 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 # Import base agent system
-from agents.base import Agent, AgentCapability, BaseAgent, Position, get_default_factory
+from agents.base import (
+    Agent,
+    AgentCapability,
+    BaseAgent,
+    Position,
+    get_default_factory)
 from agents.base.behaviors import BaseBehavior, BehaviorPriority
 
 
@@ -75,7 +80,7 @@ class ExplorationMap:
         self.last_updated = datetime.now()
 
     def get_cell(self, position: Position) -> tuple[int, int]:
-        """Convert position to grid cell"""
+        ."""Convert position to grid cell."""
         return (int(position.x // self.grid_size), int(position.y // self.grid_size))
 
     def mark_explored(self, position: Position) -> bool:
@@ -88,11 +93,11 @@ class ExplorationMap:
         return False
 
     def is_explored(self, position: Position) -> bool:
-        """Check if a position has been explored"""
+        ."""Check if a position has been explored."""
         return self.get_cell(position) in self.explored_cells
 
     def add_discovery(self, discovery: Discovery) -> None:
-        """Add a new discovery to the map"""
+        ."""Add a new discovery to the map."""
         self.discoveries[discovery.discovery_id] = discovery
         self.mark_explored(discovery.position)
         self.last_updated = datetime.now()
@@ -136,7 +141,8 @@ class ExplorationMap:
         max_y = max(cell[1] for cell in self.explored_cells)
 
         total_area = (max_x - min_x + 1) * (max_y - min_y + 1)
-        explored_ratio = len(self.explored_cells) / total_area if total_area > 0 else 1.0
+        explored_ratio = (
+            len(self.explored_cells) / total_area if total_area > 0 else 1.0)
 
         return min(1.0, explored_ratio)
 
@@ -154,17 +160,20 @@ class AdvancedExplorationBehavior(BaseBehavior):
         self.exploration_radius = 15.0
         self.investigation_chance = 0.3
 
-    def _can_execute_custom(self, agent: Agent, context: Dict[str, Any]) -> bool:
+    def _can_execute_custom(self, agent: Agent, context: Dict[str,
+        Any]) -> bool:
         # Can always explore unless agent is critically low on energy
         return agent.resources.energy > 10.0
 
-    def _execute_custom(self, agent: Agent, context: Dict[str, Any]) -> Dict[str, Any]:
+    def _execute_custom(self, agent: Agent, context: Dict[str, Any]) -> Dict[str,
+        Any]:
         exploration_map = agent.metadata.get("exploration_map")
         if not exploration_map:
             return {"success": False, "reason": "no_exploration_map"}
 
         # Get unexplored directions
-        unexplored_directions = exploration_map.get_unexplored_directions(agent.position)
+        unexplored_directions = (
+            exploration_map.get_unexplored_directions(agent.position))
 
         if unexplored_directions:
             # Choose direction with least exploration
@@ -178,7 +187,8 @@ class AdvancedExplorationBehavior(BaseBehavior):
         base_distance = 8.0
 
         if personality_profile:
-            risk_tolerance = personality_profile.get_trait_value("risk_tolerance")
+            risk_tolerance = (
+                personality_profile.get_trait_value("risk_tolerance"))
             curiosity = personality_profile.get_trait_value("curiosity")
             distance_modifier = (risk_tolerance + curiosity) / 2.0
             distance = base_distance * (0.5 + distance_modifier)
@@ -239,7 +249,8 @@ class AdvancedExplorationBehavior(BaseBehavior):
             curiosity = personality_profile.get_trait_value("curiosity")
             openness = personality_profile.get_trait_value("openness")
             perception_modifier = (curiosity + openness) / 2.0
-            discovery_chance = base_discovery_chance * (1 + perception_modifier)
+            discovery_chance = (
+                base_discovery_chance * (1 + perception_modifier))
         else:
             discovery_chance = base_discovery_chance
 
@@ -250,7 +261,8 @@ class AdvancedExplorationBehavior(BaseBehavior):
             discovery = Discovery(
                 discovery_type=discovery_type,
                 position=position,
-                description=f"Discovered {discovery_type.value} at {position.x:.1f}, {position.y:.1f}",
+                description= (
+                    f"Discovered {discovery_type.value} at {position.x:.1f}, {position.y:.1f}",)
                 value=random.uniform(0.5, 2.0),
                 confidence=random.uniform(0.7, 1.0),
             )
@@ -272,10 +284,12 @@ class AdvancedExplorationBehavior(BaseBehavior):
 
         return discoveries
 
-    def _get_priority_modifier(self, agent: Agent, context: Dict[str, Any]) -> float:
+    def _get_priority_modifier(self, agent: Agent, context: Dict[str,
+        Any]) -> float:
         # Higher priority for explorers with active exploration goals
         if agent.agent_type == "explorer":
-            exploration_goals = [g for g in agent.goals if "explor" in g.description.lower()]
+            exploration_goals = (
+                [g for g in agent.goals if "explor" in g.description.lower()])
             return 1.5 if exploration_goals else 1.2
 
         return 0.8
@@ -291,20 +305,25 @@ class PathfindingBehavior(BaseBehavior):
             {AgentCapability.MOVEMENT, AgentCapability.PLANNING},
         )
 
-    def _can_execute_custom(self, agent: Agent, context: Dict[str, Any]) -> bool:
+    def _can_execute_custom(self, agent: Agent, context: Dict[str,
+        Any]) -> bool:
         # Can execute if agent has a specific destination goal
-        destination_goals = [g for g in agent.goals if g.target_position and not g.completed]
+        destination_goals = (
+            [g for g in agent.goals if g.target_position and not g.completed])
         return len(destination_goals) > 0
 
-    def _execute_custom(self, agent: Agent, context: Dict[str, Any]) -> Dict[str, Any]:
+    def _execute_custom(self, agent: Agent, context: Dict[str, Any]) -> Dict[str,
+        Any]:
         # Find the closest destination goal
-        destination_goals = [g for g in agent.goals if g.target_position and not g.completed]
+        destination_goals = (
+            [g for g in agent.goals if g.target_position and not g.completed])
         if not destination_goals:
             return {"success": False, "reason": "no_destination_goals"}
 
         # Sort by distance
         current_pos = agent.position
-        destination_goals.sort(key=lambda g: current_pos.distance_to(g.target_position))
+        destination_goals.sort(key= (
+            lambda g: current_pos.distance_to(g.target_position)))
 
         target_goal = destination_goals[0]
         target_position = target_goal.target_position
@@ -383,7 +402,8 @@ class ExplorerAgent(BaseAgent):
 
         # Merge with provided capabilities
         if "capabilities" in kwargs:
-            kwargs["capabilities"] = kwargs["capabilities"].union(default_capabilities)
+            kwargs["capabilities"] = (
+                kwargs["capabilities"].union(default_capabilities))
         else:
             kwargs["capabilities"] = default_capabilities
 
@@ -397,7 +417,7 @@ class ExplorerAgent(BaseAgent):
         self._setup_explorer_components()
 
     def _setup_explorer_components(self):
-        """Setup explorer-specific components"""
+        ."""Setup explorer-specific components."""
         # Initialize exploration map
         self.data.metadata["exploration_map"] = ExplorationMap()
         self.data.metadata["exploration_status"] = ExplorationStatus.IDLE
@@ -430,7 +450,8 @@ class ExplorerAgent(BaseAgent):
         # Discovery goal
         discovery_goal = AgentGoal(
             goal_id="make_discoveries",
-            description="Discover resources, locations, and points of interest",
+            description= (
+                "Discover resources, locations, and points of interest",)
             priority=0.7,
             target_position=None,
             deadline=datetime.now() + timedelta(hours=48),
@@ -449,7 +470,7 @@ class ExplorerAgent(BaseAgent):
         return []
 
     def get_exploration_status(self) -> ExplorationStatus:
-        """Get current exploration status"""
+        ."""Get current exploration status."""
         return self.data.metadata.get("exploration_status", ExplorationStatus.IDLE)
 
     def set_exploration_target(
@@ -493,7 +514,7 @@ class ExplorerAgent(BaseAgent):
         return True
 
     def get_exploration_efficiency(self) -> float:
-        """Calculate exploration efficiency score"""
+        ."""Calculate exploration efficiency score."""
         exploration_map = self.get_exploration_map()
         if not exploration_map:
             return 0.0
@@ -503,7 +524,8 @@ class ExplorerAgent(BaseAgent):
         discovery_count = len(exploration_map.discoveries)
 
         # Efficiency combines coverage with discovery rate
-        efficiency = (exploration_score * 0.7) + (min(discovery_count / 10.0, 1.0) * 0.3)
+        efficiency = (
+            (exploration_score * 0.7) + (min(discovery_count / 10.0, 1.0) * 0.3))
 
         self.data.metadata["exploration_efficiency"] = efficiency
         return efficiency

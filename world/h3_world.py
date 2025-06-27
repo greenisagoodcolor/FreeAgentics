@@ -1,17 +1,18 @@
+"""
+H3 Grid World Implementation.
+
+Hexagonal world using Uber's H3 system for agent environment.
+"""
 import json
 import logging
 import math
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import h3
 import numpy as np
 
-"""
-H3 Grid World Implementation
-Hexagonal world using Uber's H3 system for agent environment.
-"""
 logger = logging.getLogger(__name__)
 
 
@@ -80,6 +81,7 @@ class HexCell:
 class H3World:
     """
     Hexagonal grid world using H3 system.
+
     Creates a world with concentric rings of hexagons,
     varied biomes, terrain, and resources.
     """
@@ -97,6 +99,7 @@ class H3World:
     ) -> None:
         """
         Initialize the H3 world.
+
         Args:
             center_lat: Latitude of world center
             center_lng: Longitude of world center
@@ -117,7 +120,9 @@ class H3World:
         self.cells: Dict[str, HexCell] = {}
         # Generate the world
         self._generate_world()
-        logger.info(f"Created H3World with {len(self.cells)} cells at resolution {resolution}")
+        logger.info(
+            f"Created H3World with {len(self.cells)} cells at "
+            f"resolution {resolution}")
 
     def _generate_world(self):
         """Generate the hexagonal world with biomes and terrain."""
@@ -172,7 +177,8 @@ class H3World:
             movement_cost=movement_cost,
         )
 
-    def _calculate_biome(self, temperature: float, moisture: float, elevation: float) -> Biome:
+    def _calculate_biome(self, temperature: float, moisture: float,
+        elevation: float) -> Biome:
         """Calculate biome based on environmental factors."""
         # High elevation = mountain
         if elevation > 800:
@@ -219,7 +225,8 @@ class H3World:
         else:
             return TerrainType.FLAT
 
-    def _generate_resources(self, biome: Biome, terrain: TerrainType) -> Dict[str, float]:
+    def _generate_resources(self, biome: Biome, terrain: TerrainType) -> Dict[str,
+        float]:
         """Generate resources based on biome and terrain."""
         resources = {
             "food": 0.0,
@@ -258,7 +265,8 @@ class H3World:
         elif biome == Biome.ARCTIC or biome == Biome.TUNDRA:
             resources["food"] = np.random.uniform(0, 15)
             resources["water"] = np.random.uniform(30, 60)  # Ice
-            resources["knowledge"] = np.random.uniform(40, 60)  # Unique ecosystem
+            resources["knowledge"] = (
+                np.random.uniform(40, 60)  # Unique ecosystem)
         # Add some randomness
         for resource in resources:
             resources[resource] *= np.random.uniform(0.8, 1.2)

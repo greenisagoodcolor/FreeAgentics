@@ -1,11 +1,10 @@
-"""
+."""
 Coalition Formation Monitoring Integration
 
 This module provides the integration layer between coalition formation algorithms
 and the real-time monitoring system, ensuring ADR-002 and ADR-006 compliance.
 """
 
-import asyncio
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime

@@ -1,4 +1,4 @@
-"""
+."""
 Agent Test Framework
 
 This module provides testing utilities for agent systems including:
@@ -31,7 +31,10 @@ from agents.base.data_model import (
 from agents.base.decision_making import DecisionSystem
 from agents.base.interaction import InteractionSystem
 from agents.base.memory import MemorySystem
-from agents.base.movement import CollisionSystem, MovementController, PathfindingGrid
+from agents.base.movement import (
+    CollisionSystem,
+    MovementController,
+    PathfindingGrid)
 from agents.base.perception import PerceptionSystem
 from agents.base.state_manager import AgentStateManager
 
@@ -40,7 +43,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class AgentTestScenario:
-    """Represents a test scenario for agent behavior"""
+    ."""Represents a test scenario for agent behavior."""
 
     name: str
     description: str
@@ -53,7 +56,7 @@ class AgentTestScenario:
 
 @dataclass
 class AgentTestMetrics:
-    """Metrics collected during test execution"""
+    ."""Metrics collected during test execution."""
 
     scenario_name: str
     start_time: datetime
@@ -66,7 +69,7 @@ class AgentTestMetrics:
 
 
 class AgentFactory:
-    """Factory for creating test agents with various configurations"""
+    ."""Factory for creating test agents with various configurations."""
 
     @staticmethod
     def create_basic_agent(
@@ -75,9 +78,10 @@ class AgentFactory:
         personality: Optional[AgentPersonality] = None,
         capabilities: Optional[set[AgentCapability]] = None,
     ) -> Agent:
-        """Create a basic test agent"""
+        ."""Create a basic test agent."""
         if position is None:
-            position = Position(random.uniform(-100, 100), random.uniform(-100, 100), 0)
+            position = (
+                Position(random.uniform(-100, 100), random.uniform(-100, 100), 0))
         if personality is None:
             personality = AgentPersonality(
                 openness=random.random(),
@@ -87,7 +91,8 @@ class AgentFactory:
                 neuroticism=random.random(),
             )
         if capabilities is None:
-            capabilities = {AgentCapability.MOVEMENT, AgentCapability.PERCEPTION}
+            capabilities = (
+                {AgentCapability.MOVEMENT, AgentCapability.PERCEPTION})
         return Agent(
             agent_id=agent_id,
             name=f"TestAgent_{agent_id}",
@@ -95,7 +100,8 @@ class AgentFactory:
             orientation=Orientation(0, 0, 0, 1),
             personality=personality,
             capabilities=capabilities,
-            resources=AgentResources(energy=100.0, health=100.0, memory_capacity=100),
+            resources= (
+                AgentResources(energy=100.0, health=100.0, memory_capacity=100),)
         )
 
     @staticmethod
@@ -112,9 +118,11 @@ class AgentFactory:
             position=agent.position,
             orientation=agent.orientation,
             personality=agent.personality,
-            capabilities=agent.capabilities | {AgentCapability.RESOURCE_MANAGEMENT},
+            capabilities= (
+                agent.capabilities | {AgentCapability.RESOURCE_MANAGEMENT},)
             resources=agent.resources,
-            managed_resources={rt: 100.0 for rt in resource_types},  # Convert list to dict
+            managed_resources= (
+                {rt: 100.0 for rt in resource_types},  # Convert list to dict)
         )
 
     @staticmethod
@@ -135,7 +143,8 @@ class AgentFactory:
 class SimulationEnvironment:
     """Simulated environment for agent testing"""
 
-    def __init__(self, bounds: tuple[float, float, float, float], time_scale: float = 1.0) -> None:
+    def __init__(self, bounds: tuple[float, float, float, float],
+        time_scale: float = 1.0) -> None:
         """
         Initialize simulation environment
 
@@ -152,7 +161,8 @@ class SimulationEnvironment:
         self.events: List[Dict[str, Any]] = []
         self.state_managers: Dict[str, AgentStateManager] = {}
         self.movement_controllers: Dict[str, MovementController] = {}
-        self.state_manager = AgentStateManager()  # Main state manager for perception
+        self.state_manager = (
+            AgentStateManager()  # Main state manager for perception)
         self.perception_system = PerceptionSystem(self.state_manager)
         self.decision_systems: Dict[str, DecisionSystem] = {}
         self.interaction_system = InteractionSystem()
@@ -192,8 +202,9 @@ class SimulationEnvironment:
         # Create a memory system for this agent
         self.memory_systems[agent.agent_id] = MemorySystem(agent_id=agent.agent_id)
 
-    def add_resource(self, position: Position, resource_type: str, amount: float) -> None:
-        """Add a resource to the environment"""
+    def add_resource(self, position: Position, resource_type: str,
+        amount: float) -> None:
+        ."""Add a resource to the environment."""
         if position not in self.resources:
             self.resources[position] = {}
         self.resources[position][resource_type] = amount
@@ -228,7 +239,7 @@ class SimulationEnvironment:
         )
 
     def get_metrics(self) -> Dict[str, Any]:
-        """Get current environment metrics"""
+        ."""Get current environment metrics."""
         return {
             "time": self.current_time,
             "agent_count": len(self.agents),
@@ -248,7 +259,7 @@ class BehaviorValidator:
         self._register_default_validators()
 
     def _register_default_validators(self) -> None:
-        """Register default behavior validators"""
+        ."""Register default behavior validators."""
         self.validators["movement_coherence"] = self._validate_movement_coherence
         self.validators["decision_consistency"] = self._validate_decision_consistency
         self.validators["resource_efficiency"] = self._validate_resource_efficiency
@@ -262,7 +273,7 @@ class BehaviorValidator:
 
         Returns:
             (success, error_message)
-        """
+        ."""
         if behavior_type not in self.validators:
             return (False, f"Unknown behavior type: {behavior_type}")
         result = self.validators[behavior_type](agent, history)
@@ -281,7 +292,8 @@ class BehaviorValidator:
                     distance = positions[i].distance_to(positions[i - 1])
                 else:
                     distance = 0.0  # Fallback for None positions
-                time_delta = history[i].get("timestamp", 0) - history[i - 1].get("timestamp", 0)
+                time_delta = (
+                    history[i].get("timestamp", 0) - history[i - 1].get("timestamp", 0))
                 if time_delta > 0:
                     speed = distance / time_delta
                     if speed > 100:
@@ -291,19 +303,19 @@ class BehaviorValidator:
     def _validate_decision_consistency(
         self, agent: Agent, history: List[Dict[str, Any]]
     ) -> tuple[bool, Optional[str]]:
-        """Validate that decisions are consistent with agent goals"""
+        ."""Validate that decisions are consistent with agent goals."""
         return (True, None)
 
     def _validate_resource_efficiency(
         self, agent: Agent, history: List[Dict[str, Any]]
     ) -> tuple[bool, Optional[str]]:
-        """Validate resource usage efficiency"""
+        ."""Validate resource usage efficiency."""
         return (True, None)
 
     def _validate_social_cooperation(
         self, agent: Agent, history: List[Dict[str, Any]]
     ) -> tuple[bool, Optional[str]]:
-        """Validate social interaction patterns"""
+        ."""Validate social interaction patterns."""
         return (True, None)
 
 
@@ -315,7 +327,7 @@ class PerformanceBenchmark:
 
     @contextmanager
     def measure(self, operation: str):
-        """Context manager for measuring operation performance"""
+        ."""Context manager for measuring operation performance."""
         start_time = time.perf_counter()
         try:
             yield
@@ -326,7 +338,7 @@ class PerformanceBenchmark:
             self.results[operation].append(duration)
 
     def get_statistics(self, operation: str) -> Dict[str, float]:
-        """Get performance statistics for an operation"""
+        ."""Get performance statistics for an operation."""
         if operation not in self.results or not self.results[operation]:
             return {}
         times = self.results[operation]
@@ -340,12 +352,12 @@ class PerformanceBenchmark:
         }
 
     def get_report(self) -> Dict[str, Dict[str, float]]:
-        """Get full performance report"""
+        ."""Get full performance report."""
         return {operation: self.get_statistics(operation) for operation in self.results}
 
 
 class AgentTestOrchestrator:
-    """Orchestrates test execution and reporting"""
+    ."""Orchestrates test execution and reporting."""
 
     def __init__(self) -> None:
         self.scenarios: List[AgentTestScenario] = []
@@ -360,7 +372,8 @@ class AgentTestOrchestrator:
     def run_scenario(self, scenario: AgentTestScenario) -> AgentTestMetrics:
         """Run a single test scenario"""
         logger.info(f"Running scenario: {scenario.name}")
-        metrics = AgentTestMetrics(scenario_name=scenario.name, start_time=datetime.now())
+        metrics = (
+            AgentTestMetrics(scenario_name=scenario.name, start_time=datetime.now()))
         try:
             env_config = scenario.environment_config
             environment = SimulationEnvironment(
@@ -387,7 +400,8 @@ class AgentTestOrchestrator:
                 if step % 10 == 0:
                     self._collect_metrics(environment, metrics)
             self._collect_metrics(environment, metrics)
-            metrics.success = self._evaluate_criteria(scenario.success_criteria, metrics)
+            metrics.success = (
+                self._evaluate_criteria(scenario.success_criteria, metrics))
         except Exception as e:
             logger.error(f"Scenario failed: {e}")
             metrics.success = False
@@ -414,7 +428,8 @@ class AgentTestOrchestrator:
                 metrics.agent_metrics[agent_id] = {}
             metrics.agent_metrics[agent_id].update(
                 {
-                    "position": (agent.position.x, agent.position.y, agent.position.z),
+                    "position": (agent.position.x, agent.position.y,
+                        agent.position.z),
                     "status": agent.status.value,
                     "energy": agent.resources.energy,
                     "health": agent.resources.health,
@@ -470,7 +485,8 @@ def create_basic_test_scenarios() -> List[AgentTestScenario]:
                 {"type": "basic", "id": "mover1"},
                 {"type": "basic", "id": "mover2"},
             ],
-            environment_config={"bounds": (-50, -50, 50, 50), "time_scale": 1.0},
+            environment_config= (
+                {"bounds": (-50, -50, 50, 50), "time_scale": 1.0},)
             success_criteria={"all_agents_moved": True, "no_collisions": True},
             metrics_to_track=["position", "velocity", "energy"],
         )
@@ -494,7 +510,8 @@ def create_basic_test_scenarios() -> List[AgentTestScenario]:
                     {"position": (40, -40), "type": "energy", "amount": 40},
                 ],
             },
-            success_criteria={"resources_collected": 0.5, "agent_survival": 1.0},
+            success_criteria= (
+                {"resources_collected": 0.5, "agent_survival": 1.0},)
             metrics_to_track=["resources", "energy", "position"],
         )
     )
@@ -509,8 +526,10 @@ def create_basic_test_scenarios() -> List[AgentTestScenario]:
                 {"type": "social", "id": "social3"},
                 {"type": "social", "id": "social4"},
             ],
-            environment_config={"bounds": (-30, -30, 30, 30), "time_scale": 1.0},
-            success_criteria={"relationships_formed": 4, "trust_established": True},
+            environment_config= (
+                {"bounds": (-30, -30, 30, 30), "time_scale": 1.0},)
+            success_criteria= (
+                {"relationships_formed": 4, "trust_established": True},)
             metrics_to_track=["relationships", "trust", "communications"],
         )
     )

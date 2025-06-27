@@ -1,11 +1,12 @@
-"""
+."""
 Merchant Agent Module for FreeAgentics
 
 This module provides the Merchant agent type and related trading functionality,
 including market systems, trade offers, and specialized trading behaviors.
 """
 
-from .merchant import (  # Main agent class; Merchant-specific enums and data classes; Specialized behaviors; Factory functions
+from .merchant import (  # Main agent class; Merchant-specific enums and
+    data classes; Specialized behaviors; Factory functions
     Market,
     MarketAnalysisBehavior,
     MerchantAgent,

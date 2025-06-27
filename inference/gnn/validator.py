@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import logging
 import re
 import time
@@ -231,7 +235,8 @@ class GMNValidator:
         if not model.name:
             result.add_error("model.name", "Model name is required", "MISSING_NAME")
         elif not isinstance(model.name, str):
-            result.add_error("model.name", "Model name must be a string", "INVALID_NAME_TYPE")  # type: ignore[unreachable]
+            result.add_error("model.name", "Model name must be a string",
+                "INVALID_NAME_TYPE")  # type: ignore[unreachable]
         elif len(model.name) > ValidationConstraints.MAX_NAME_LENGTH:
             result.add_error(
                 "model.name",
@@ -251,7 +256,8 @@ class GMNValidator:
                 "MISSING_DESCRIPTION",
             )
         elif isinstance(model.description, str) and len(model.description) > 1000:
-            result.add_warning("model.description", "Description is very long", "LONG_DESCRIPTION")
+            result.add_warning("model.description", "Description is very long",
+                "LONG_DESCRIPTION")
         if not model.state_space:
             result.add_error("model.state_space", "State space is required", "MISSING_STATE_SPACE")
 
@@ -369,7 +375,8 @@ class GMNValidator:
                 result.add_error(field, f"Invalid min value: {min_val}", "INVALID_MIN_TYPE")
             if not isinstance(max_val, (int, float)):
                 result.add_error(field, f"Invalid max value: {max_val}", "INVALID_MAX_TYPE")
-            if isinstance(min_val, (int, float)) and isinstance(max_val, (int, float)):
+            if isinstance(min_val, (int, float)) and isinstance(max_val, (int,
+                float)):
                 if min_val > max_val:
                     result.add_error(field, f"Min ({min_val}) > Max ({max_val})", "INVALID_RANGE")
                 if min_val == max_val:
@@ -448,7 +455,8 @@ class GMNValidator:
             try:
                 max_size = int(constraints["max_size"])
                 if max_size < 0:
-                    result.add_error(field, "max_size must be non-negative", "NEGATIVE_MAX_SIZE")
+                    result.add_error(field, "max_size must be non-negative",
+                        "NEGATIVE_MAX_SIZE")
                 elif max_size > 10000:
                     result.add_warning(field, "Very large max_size specified", "LARGE_MAX_SIZE")
             except (ValueError, TypeError):

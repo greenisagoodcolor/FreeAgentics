@@ -98,7 +98,8 @@ class TestAgentIntegration:
         )
         perception_system.add_stimulus(stimulus)
         # Make sure the agent has perception capabilities
-        perception_caps = perception_system.perception_capabilities[agent.agent_id]
+        perception_caps = (
+            perception_system.perception_capabilities[agent.agent_id])
         perception_caps.visual_range = 100.0
         perception_caps.field_of_view = math.pi * 2
         percepts = perception_system.perceive(agent.agent_id)
@@ -204,12 +205,14 @@ class TestAgentIntegration:
             history.append({
                 "timestamp": i * 0.1, "position": pos,
                 "action": "move"})
-        success, error = validator.validate("movement_coherence", agent, history)
+        success, error = (
+            validator.validate("movement_coherence", agent, history))
         assert success
         history.append({
             "timestamp": len(history) * 0.1,
             "position": Position(100, 100, 0)})
-        success, error = validator.validate("movement_coherence", agent, history)
+        success, error = (
+            validator.validate("movement_coherence", agent, history))
         assert not success
         assert "Impossible speed" in error
 
@@ -284,7 +287,8 @@ class TestAgentIntegration:
             importance=0.8,
         )
         # Verify memory was stored
-        memories = memory_system.retrieve_memories({"memory_type": MemoryType.EPISODIC}, 10)
+        memories = (
+            memory_system.retrieve_memories({"memory_type": MemoryType.EPISODIC}, 10))
         assert len(memories) > 0
         # Test persistence (simplified since we don't have a real database)
         memory_summary = memory_system.get_memory_summary()
@@ -346,7 +350,8 @@ class TestAgentIntegration:
         obstacle_pos = Position(5, 5, 0)
         collision_system.add_static_obstacle(obstacle_pos, 2.0)
         # Create movement controller
-        movement_controller = MovementController(state_manager, collision_system, pathfinding_grid)
+        movement_controller = (
+            MovementController(state_manager, collision_system, pathfinding_grid))
         movement_controller.register_agent(agent)
         # Set destination on other side of obstacle
         target = Position(10, 10, 0)
@@ -362,12 +367,14 @@ class TestAgentIntegration:
 
 
 class TestAgentStressTests:
-    """Stress tests for agent systems"""
+    ."""Stress tests for agent systems."""
 
     def test_many_agents_simulation(self) -> None:
         """Test simulation with many agents"""
-        environment = SimulationEnvironment(bounds=(-200, -200, 200, 200), time_scale=1.0)
-        state_manager = AgentStateManager()  # Create a state manager for the perception system
+        environment = (
+            SimulationEnvironment(bounds=(-200, -200, 200, 200), time_scale=1.0))
+        state_manager = (
+            AgentStateManager()  # Create a state manager for the perception system)
         environment.perception_system = PerceptionSystem(state_manager)
         agents = []
         for i in range(100):
@@ -382,7 +389,8 @@ class TestAgentStressTests:
             state_manager.register_agent(agent)  # Register agents with the state manager
             agents.append(agent)
         for i in range(50):
-            pos = Position(np.random.uniform(-190, 190), np.random.uniform(-190, 190), 0)
+            pos = (
+                Position(np.random.uniform(-190, 190), np.random.uniform(-190, 190), 0))
             environment.add_resource(pos, "energy", np.random.uniform(10, 100))
         start_time = time.time()
         for _ in range(10):
@@ -414,7 +422,8 @@ class TestAgentStressTests:
                 importance=float((i % 5) / 5),
             )
         # Test memory retrieval
-        memories = memory_system.retrieve_memories({"memory_type": MemoryType.EPISODIC}, 10)
+        memories = (
+            memory_system.retrieve_memories({"memory_type": MemoryType.EPISODIC}, 10))
         assert len(memories) > 0
         # Test memory statistics
         memory_summary = memory_system.get_memory_summary()

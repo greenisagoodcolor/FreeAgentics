@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import json
 import random
 from dataclasses import dataclass
@@ -13,7 +17,7 @@ from .batch_processor import GraphData
 """
 Benchmark Datasets for GNN Testing
 Provides standard graph datasets for benchmarking and validation.
-"""
+."""
 
 
 @dataclass
@@ -346,6 +350,7 @@ class BenchmarkDatasets:
 
     def get_all_datasets(self) -> Dict[str, List[GraphData]]:
         """Get all available datasets"""
+
         all_datasets = {}
         for name in self.get_dataset_info().keys():
             all_datasets[name] = self.get_dataset(name)

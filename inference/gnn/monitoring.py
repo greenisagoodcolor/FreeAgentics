@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import json
 import logging
 import threading
@@ -9,8 +13,6 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
-import matplotlib.dates as mdates
-import matplotlib.pyplot as plt
 import numpy as np
 import psutil
 import torch
@@ -26,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class PerformanceMetrics:
-    """Container for performance metrics"""
+    ."""Container for performance metrics."""
 
     operation: str
     start_time: float
@@ -39,13 +41,13 @@ class PerformanceMetrics:
     additional_metrics: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary for serialization"""
+        ."""Convert to dictionary for serialization."""
         return asdict(self)
 
 
 @dataclass
 class ProcessingStats:
-    """Statistics for processing operations"""
+    ."""Statistics for processing operations."""
 
     total_operations: int = 0
     successful_operations: int = 0
@@ -128,7 +130,7 @@ class GNNLogger:
     def log_operation(
         self, operation: str, status: str, duration: Optional[float] = None, **kwargs: Any
     ) -> None:
-        """Log an operation with structured data"""
+        ."""Log an operation with structured data."""
         log_data = {
             "operation": operation,
             "status": status,
@@ -144,13 +146,13 @@ class GNNLogger:
             self.logger.warning(f"{operation} status: {status}", extra={"structured": log_data})
 
     def log_performance(self, metrics: PerformanceMetrics) -> None:
-        """Log performance metrics"""
+        ."""Log performance metrics."""
         self.logger.info(
             f"Performance: {metrics.operation}", extra={"structured": metrics.to_dict()}
         )
 
     def log_error(self, error: Exception, operation: str, **context: Any) -> None:
-        """Log error with context"""
+        ."""Log error with context."""
         error_data = {
             "operation": operation,
             "error_type": type(error).__name__,
@@ -166,7 +168,7 @@ class GNNLogger:
 
 
 class JsonFormatter(logging.Formatter):
-    """JSON formatter for structured logging"""
+    ."""JSON formatter for structured logging."""
 
     def format(self, record: logging.LogRecord) -> str:
         log_data = {
@@ -227,7 +229,7 @@ class PerformanceMonitor:
         self._monitor_thread.start()
 
     def start_operation(self, operation: str) -> "OperationContext":
-        """Start monitoring an operation"""
+        .."""Start monitoring an operation.."""
         return OperationContext(self, operation)
 
     def record_metrics(self, metrics: PerformanceMetrics) -> None:
@@ -238,7 +240,7 @@ class PerformanceMonitor:
             self._check_alerts(metrics)
 
     def _check_alerts(self, metrics: PerformanceMetrics) -> None:
-        """Check if metrics exceed thresholds"""
+        ."""Check if metrics exceed thresholds."""
         alerts = []
         if metrics.memory_used_mb > self.alert_thresholds["memory_mb"]:
             alerts.append(("memory", metrics.memory_used_mb))
@@ -256,7 +258,7 @@ class PerformanceMonitor:
     def add_alert_callback(
         self, callback: Callable[[str, float, PerformanceMetrics], None]
     ) -> None:
-        """Add callback for alerts"""
+        .."""Add callback for alerts.."""
         self.alert_callbacks.append(callback)
 
     def get_statistics(self, operation: Optional[str] = None) -> Dict[str, Any]:
@@ -303,7 +305,7 @@ class PerformanceMonitor:
             return stats
 
     def _monitor_resources(self) -> None:
-        """Background thread to monitor system resources"""
+        ."""Background thread to monitor system resources."""
         while self._monitoring:
             try:
                 # Monitor CPU
@@ -336,14 +338,14 @@ class PerformanceMonitor:
                 time.sleep(10)
 
     def stop(self) -> None:
-        """Stop monitoring"""
+        ."""Stop monitoring."""
         self._monitoring = False
         if self._monitor_thread.is_alive():
             self._monitor_thread.join(timeout=5)
 
 
 class OperationContext:
-    """Context manager for monitoring operations"""
+    ."""Context manager for monitoring operations."""
 
     def __init__(self, monitor: PerformanceMonitor, operation: str) -> None:
         self.monitor = monitor
@@ -402,6 +404,7 @@ class OperationContext:
 
 class MetricsVisualizer:
     """
+
     Visualizes performance metrics and statistics.
     Provides various visualization options for monitoring data.
     """
@@ -417,10 +420,8 @@ class MetricsVisualizer:
     def plot_operation_timeline(
         self, operation: str, metric: str = "duration", save_path: Optional[str] = None
     ) -> None:
-        """Plot timeline of operation metrics"""
+        ."""Plot timeline of operation metrics."""
         try:
-            import matplotlib.dates as mdates
-            import matplotlib.pyplot as plt
         except ImportError:
             logger.warning("Matplotlib not available for visualization")
             return
@@ -463,10 +464,8 @@ class MetricsVisualizer:
         time_window: int = 3600,  # 1 hour
         save_path: Optional[str] = None,
     ) -> None:
-        """Plot system resource usage"""
+        ."""Plot system resource usage."""
         try:
-            import matplotlib.dates as mdates
-            import matplotlib.pyplot as plt
         except ImportError:
             logger.warning("Matplotlib not available for visualization")
             return
@@ -515,7 +514,7 @@ class MetricsVisualizer:
         plt.close()
 
     def generate_report(self, output_path: str) -> None:
-        """Generate comprehensive performance report"""
+        ."""Generate comprehensive performance report."""
         report = {"timestamp": datetime.utcnow().isoformat(), "operations": {}}
         # Get statistics for each operation
         for operation in self.monitor.metrics_history:
@@ -540,7 +539,7 @@ _monitor = None
 
 
 def get_logger(name: str = "gnn_processing", log_dir: Optional[str] = None) -> GNNLogger:
-    """Get or create logger instance"""
+    ."""Get or create logger instance."""
     global _logger
     if _logger is None:
         _logger = GNNLogger(name=name, log_dir=log_dir)
@@ -548,7 +547,7 @@ def get_logger(name: str = "gnn_processing", log_dir: Optional[str] = None) -> G
 
 
 def get_monitor() -> PerformanceMonitor:
-    """Get or create performance monitor instance"""
+    ."""Get or create performance monitor instance."""
     global _monitor
     if _monitor is None:
         _monitor = PerformanceMonitor()
@@ -559,7 +558,7 @@ def get_monitor() -> PerformanceMonitor:
 def monitor_performance(
     operation: str = None,
 ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
-    """Decorator to monitor function performance"""
+    ."""Decorator to monitor function performance."""
 
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -575,7 +574,7 @@ def monitor_performance(
 
 
 def log_operation(operation: str = None) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
-    """Decorator to log operation execution"""
+    ."""Decorator to log operation execution."""
 
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         def wrapper(*args: Any, **kwargs: Any) -> Any:

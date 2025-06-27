@@ -1,8 +1,11 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import math
 import unittest
 from datetime import datetime, timedelta
 
-import numpy as np
 
 from agents.base.data_model import Agent, Orientation, Position
 from agents.base.perception import (
@@ -23,7 +26,7 @@ from agents.base.state_manager import AgentStateManager
 
 
 class TestStimulus(unittest.TestCase):
-    """Test Stimulus class"""
+    .."""Test Stimulus class.."""
 
     def test_stimulus_creation(self) -> None:
         """Test creating a stimulus"""
@@ -40,7 +43,7 @@ class TestStimulus(unittest.TestCase):
         self.assertEqual(stimulus.intensity, 0.8)
 
     def test_decay_over_distance(self) -> None:
-        """Test intensity decay calculation"""
+        ."""Test intensity decay calculation."""
         stimulus = Stimulus(
             stimulus_id="test",
             stimulus_type=StimulusType.SOUND,
@@ -55,7 +58,7 @@ class TestStimulus(unittest.TestCase):
 
 
 class TestPerceptionCapabilities(unittest.TestCase):
-    """Test PerceptionCapabilities"""
+    .."""Test PerceptionCapabilities.."""
 
     def test_default_capabilities(self) -> None:
         """Test default perception capabilities"""
@@ -67,7 +70,7 @@ class TestPerceptionCapabilities(unittest.TestCase):
         self.assertIn(PerceptionType.AUDITORY, cap.enabled_types)
 
     def test_custom_capabilities(self) -> None:
-        """Test custom perception capabilities"""
+        ."""Test custom perception capabilities."""
         cap = PerceptionCapabilities(
             visual_range=30.0,
             hearing_range=150.0,
@@ -79,7 +82,7 @@ class TestPerceptionCapabilities(unittest.TestCase):
 
 
 class TestPerceptionMemory(unittest.TestCase):
-    """Test PerceptionMemory"""
+    .."""Test PerceptionMemory.."""
 
     def test_memory_storage(self) -> None:
         """Test storing percepts in memory"""
@@ -92,7 +95,7 @@ class TestPerceptionMemory(unittest.TestCase):
         self.assertEqual(recent[0], percept)
 
     def test_memory_duration(self) -> None:
-        """Test memory duration filtering"""
+        ."""Test memory duration filtering."""
         memory = PerceptionMemory(memory_duration=1.0)
         old_stimulus = Stimulus("old", StimulusType.OBJECT, Position(0, 0, 0))
         old_percept = Percept(old_stimulus, PerceptionType.VISUAL)
@@ -107,7 +110,7 @@ class TestPerceptionMemory(unittest.TestCase):
         self.assertEqual(recent[0].stimulus.stimulus_id, "new")
 
     def test_stimulus_history(self) -> None:
-        """Test tracking stimulus history"""
+        ."""Test tracking stimulus history."""
         memory = PerceptionMemory()
         stimulus = Stimulus("tracked", StimulusType.AGENT, Position(0, 0, 0))
         for i in range(3):
@@ -118,7 +121,7 @@ class TestPerceptionMemory(unittest.TestCase):
 
 
 class TestVisualSensor(unittest.TestCase):
-    """Test VisualSensor"""
+    .."""Test VisualSensor.."""
 
     def setUp(self) -> None:
         """Set up test fixtures"""
@@ -127,7 +130,7 @@ class TestVisualSensor(unittest.TestCase):
         self.agent.perception_capabilities = PerceptionCapabilities()
 
     def test_visual_detection_in_front(self) -> None:
-        """Test detecting stimulus in front of agent"""
+        ."""Test detecting stimulus in front of agent."""
         stimulus = Stimulus("front", StimulusType.OBJECT, Position(10, 0, 0))
         percepts = self.sensor.sense(self.agent, [stimulus])
         self.assertEqual(len(percepts), 1)
@@ -135,7 +138,7 @@ class TestVisualSensor(unittest.TestCase):
         self.assertAlmostEqual(percepts[0].distance, 10.0)
 
     def test_visual_field_of_view(self) -> None:
-        """Test field of view limitations"""
+        ."""Test field of view limitations."""
         behind_stimulus = Stimulus("behind", StimulusType.OBJECT, Position(-10, 0, 0))
         percepts = self.sensor.sense(self.agent, [behind_stimulus])
         self.assertEqual(len(percepts), 0)
@@ -147,13 +150,13 @@ class TestVisualSensor(unittest.TestCase):
         self.assertEqual(len(edge_percepts), 1)
 
     def test_visual_range_limit(self) -> None:
-        """Test visual range limitations"""
+        ."""Test visual range limitations."""
         far_stimulus = Stimulus("far", StimulusType.OBJECT, Position(100, 0, 0))
         percepts = self.sensor.sense(self.agent, [far_stimulus])
         self.assertEqual(len(percepts), 0)
 
     def test_visual_confidence_decay(self) -> None:
-        """Test confidence decay with distance"""
+        ."""Test confidence decay with distance."""
         near_stimulus = Stimulus("near", StimulusType.OBJECT, Position(5, 0, 0))
         far_stimulus = Stimulus("far", StimulusType.OBJECT, Position(40, 0, 0))
         percepts = self.sensor.sense(self.agent, [near_stimulus, far_stimulus])
@@ -164,7 +167,7 @@ class TestVisualSensor(unittest.TestCase):
 
 
 class TestAuditorySensor(unittest.TestCase):
-    """Test AuditorySensor"""
+    .."""Test AuditorySensor.."""
 
     def setUp(self) -> None:
         """Set up test fixtures"""
@@ -173,7 +176,7 @@ class TestAuditorySensor(unittest.TestCase):
         self.agent.perception_capabilities = PerceptionCapabilities()
 
     def test_sound_detection(self) -> None:
-        """Test detecting sound stimuli"""
+        ."""Test detecting sound stimuli."""
         sound = Stimulus(
             "sound1", StimulusType.SOUND, Position(20, 0, 0), intensity=0.8, radius=30.0
         )
@@ -182,7 +185,7 @@ class TestAuditorySensor(unittest.TestCase):
         self.assertEqual(percepts[0].perception_type, PerceptionType.AUDITORY)
 
     def test_sound_decay(self) -> None:
-        """Test sound intensity decay"""
+        ."""Test sound intensity decay."""
         sound = Stimulus(
             "sound", StimulusType.SOUND, Position(15, 0, 0), intensity=1.0, radius=20.0
         )
@@ -192,20 +195,20 @@ class TestAuditorySensor(unittest.TestCase):
         self.assertAlmostEqual(percepts[0].metadata["perceived_intensity"], expected_intensity)
 
     def test_hearing_range(self) -> None:
-        """Test hearing range limit"""
+        ."""Test hearing range limit."""
         distant_sound = Stimulus("distant", StimulusType.SOUND, Position(150, 0, 0), intensity=1.0)
         percepts = self.sensor.sense(self.agent, [distant_sound])
         self.assertEqual(len(percepts), 0)
 
     def test_non_sound_filtering(self) -> None:
-        """Test that non-sound stimuli are ignored"""
+        ."""Test that non-sound stimuli are ignored."""
         visual_stimulus = Stimulus("visual", StimulusType.OBJECT, Position(10, 0, 0))
         percepts = self.sensor.sense(self.agent, [visual_stimulus])
         self.assertEqual(len(percepts), 0)
 
 
 class TestProximitySensor(unittest.TestCase):
-    """Test ProximitySensor"""
+    .."""Test ProximitySensor.."""
 
     def setUp(self) -> None:
         """Set up test fixtures"""
@@ -214,21 +217,21 @@ class TestProximitySensor(unittest.TestCase):
         self.agent.perception_capabilities = PerceptionCapabilities()
 
     def test_proximity_detection(self) -> None:
-        """Test detecting nearby stimuli"""
+        ."""Test detecting nearby stimuli."""
         close_stimulus = Stimulus("close", StimulusType.OBJECT, Position(2, 0, 0))
         percepts = self.sensor.sense(self.agent, [close_stimulus])
         self.assertEqual(len(percepts), 1)
         self.assertEqual(percepts[0].perception_type, PerceptionType.PROXIMITY)
 
     def test_touching_detection(self) -> None:
-        """Test detecting touching"""
+        ."""Test detecting touching."""
         touching_stimulus = Stimulus("touching", StimulusType.OBJECT, Position(0.3, 0, 0))
         percepts = self.sensor.sense(self.agent, [touching_stimulus])
         self.assertEqual(len(percepts), 1)
         self.assertTrue(percepts[0].metadata["is_touching"])
 
     def test_proximity_confidence(self) -> None:
-        """Test proximity confidence based on distance"""
+        ."""Test proximity confidence based on distance."""
         stim1 = Stimulus("s1", StimulusType.OBJECT, Position(1, 0, 0))
         stim2 = Stimulus("s2", StimulusType.OBJECT, Position(4, 0, 0))
         percepts = self.sensor.sense(self.agent, [stim1, stim2])
@@ -239,14 +242,16 @@ class TestProximitySensor(unittest.TestCase):
 
 
 class TestPerceptionFilters(unittest.TestCase):
-    """Test perception filters"""
+    .."""Test perception filters.."""
 
     def test_importance_filter(self) -> None:
         """Test ImportanceFilter"""
         filter = ImportanceFilter(importance_threshold=0.5)
         agent = Agent()
-        danger_stimulus = Stimulus("danger", StimulusType.DANGER, Position(0, 0, 0))
-        object_stimulus = Stimulus("object", StimulusType.OBJECT, Position(50, 0, 0))
+        danger_stimulus = (
+            Stimulus("danger", StimulusType.DANGER, Position(0, 0, 0)))
+        object_stimulus = (
+            Stimulus("object", StimulusType.OBJECT, Position(50, 0, 0)))
         percepts = [
             Percept(danger_stimulus, PerceptionType.VISUAL, confidence=0.3, distance=20),
             Percept(object_stimulus, PerceptionType.VISUAL, confidence=0.4, distance=50),
@@ -273,7 +278,7 @@ class TestPerceptionFilters(unittest.TestCase):
 
 
 class TestPerceptionSystem(unittest.TestCase):
-    """Test the main PerceptionSystem"""
+    ."""Test the main PerceptionSystem."""
 
     def setUp(self) -> None:
         """Set up test fixtures"""
@@ -287,7 +292,7 @@ class TestPerceptionSystem(unittest.TestCase):
         self.perception_system.register_agent(self.agent2)
 
     def test_agent_registration(self) -> None:
-        """Test registering agents with perception system"""
+        ."""Test registering agents with perception system."""
         self.assertIn(self.agent1.agent_id, self.perception_system.perception_capabilities)
         self.assertIn(self.agent1.agent_id, self.perception_system.perception_memories)
 
@@ -300,14 +305,14 @@ class TestPerceptionSystem(unittest.TestCase):
         self.assertEqual(len(self.perception_system.stimuli), 0)
 
     def test_agent_perception(self) -> None:
-        """Test perceiving other agents"""
+        ."""Test perceiving other agents."""
         self.perception_system.update_agent_positions()
         percepts = self.perception_system.perceive(self.agent1.agent_id)
         agent_percepts = [p for p in percepts if p.stimulus.stimulus_type == StimulusType.AGENT]
         self.assertEqual(len(agent_percepts), 1)
 
     def test_perceived_agents(self) -> None:
-        """Test getting perceived agents"""
+        ."""Test getting perceived agents."""
         self.perception_system.update_agent_positions()
         perceived = self.perception_system.get_perceived_agents(self.agent1.agent_id)
         self.assertEqual(len(perceived), 1)
@@ -321,7 +326,8 @@ class TestPerceptionSystem(unittest.TestCase):
             )
         )
         self.agent2.position = Position(100, 0, 0)
-        self.state_manager.update_agent_position(self.agent2.agent_id, self.agent2.position)
+        self.state_manager.update_agent_position(self.agent2.agent_id,
+            self.agent2.position)
         self.assertFalse(
             self.perception_system.can_perceive(
                 self.agent1.agent_id, self.agent2.agent_id, PerceptionType.VISUAL

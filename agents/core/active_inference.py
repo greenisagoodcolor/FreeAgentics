@@ -1,4 +1,4 @@
-"""
+."""
 Active Inference Agent Implementation
 
 This module implements the core Active Inference agent that uses GNN models
@@ -106,15 +106,19 @@ class ActiveInferenceAgent:
             },
             "preference_model": {
                 # Agent's preferences (from GNN model)
-                "exploration": self.executor.model.metadata.get("exploration_drive", 0.5),
-                "social": self.executor.model.metadata.get("social_drive", 0.5),
-                "resource": self.executor.model.metadata.get("resource_drive", 0.5),
+                "exploration": self.executor.model.metadata.get("exploration_drive",
+                    0.5),
+                "social": self.executor.model.metadata.get("social_drive",
+                    0.5),
+                "resource": self.executor.model.metadata.get("resource_drive",
+                    0.5),
             },
         }
 
     def _initialize_actions(self) -> List[str]:
         """Initialize available actions based on agent capabilities."""
-        return ["move", "gather", "communicate", "observe", "rest", "share_knowledge"]
+        return ["move", "gather", "communicate", "observe", "rest",
+            "share_knowledge"]
 
     def perceive(self, observation: Observation) -> None:
         """
@@ -142,7 +146,8 @@ class ActiveInferenceAgent:
             f"Agent {self.id} perceived {observation.type}, updated {len(belief_update)} beliefs"
         )
 
-    def _process_observation(self, observation: Observation) -> Dict[str, Belief]:
+    def _process_observation(self, observation: Observation) -> Dict[str,
+        Belief]:
         """Process observation through GNN to update beliefs."""
         # Prepare observation for GNN processing
         gnn_input = {
@@ -187,7 +192,8 @@ class ActiveInferenceAgent:
         action_evaluations = []
         for action_type in self.available_actions:
             if self._can_perform_action(action_type, world_state):
-                expected_fe = self._calculate_expected_free_energy(action_type, world_state)
+                expected_fe = (
+                    self._calculate_expected_free_energy(action_type, world_state))
                 action_evaluations.append((action_type, expected_fe))
 
         if not action_evaluations:
@@ -205,7 +211,8 @@ class ActiveInferenceAgent:
 
         return action
 
-    def _can_perform_action(self, action_type: str, world_state: Dict[str, Any]) -> bool:
+    def _can_perform_action(self, action_type: str, world_state: Dict[str,
+        Any]) -> bool:
         """Check if an action can be performed given current state."""
         if action_type == "move":
             return self.energy > 1.0
@@ -242,8 +249,10 @@ class ActiveInferenceAgent:
         gnn_output = self.executor.execute(gnn_input)
 
         # Extract free energy components
-        epistemic_value = gnn_output.get("epistemic_value", 0.0)  # Information gain
-        pragmatic_value = gnn_output.get("pragmatic_value", 0.0)  # Goal achievement
+        epistemic_value = (
+            gnn_output.get("epistemic_value", 0.0)  # Information gain)
+        pragmatic_value = (
+            gnn_output.get("pragmatic_value", 0.0)  # Goal achievement)
 
         # Free energy = -epistemic_value - pragmatic_value
         # (We want to maximize both values, so minimize negative)
@@ -251,7 +260,8 @@ class ActiveInferenceAgent:
 
         # Add energy cost consideration
         energy_cost = (
-            self.generative_model["transition_model"].get(action_type, {}).get("energy_cost", 0.0)
+            self.generative_model["transition_model"].get(action_type, {}).get("energy_cost",
+                0.0)
         )
 
         if self.energy < energy_cost * 2:
@@ -260,7 +270,8 @@ class ActiveInferenceAgent:
 
         return free_energy
 
-    def _create_action(self, action_type: str, world_state: Dict[str, Any]) -> Action:
+    def _create_action(self, action_type: str, world_state: Dict[str,
+        Any]) -> Action:
         """Create an action with appropriate parameters."""
         parameters = {}
 
@@ -337,7 +348,8 @@ class ActiveInferenceAgent:
             # Compare observation with beliefs
             for belief_key, belief in self.beliefs.items():
                 if belief_key in str(obs.data):
-                    # Simple error: difference between belief confidence and observation presence
+                    # Simple error: difference between belief confidence and
+                        observation presence
                     error = abs(belief.confidence - 1.0)
                     prediction_error += error
 
@@ -351,10 +363,12 @@ class ActiveInferenceAgent:
 
         return free_energy
 
-    def share_knowledge(self, other_agent: "ActiveInferenceAgent") -> Dict[str, Any]:
+    def share_knowledge(self, other_agent: "ActiveInferenceAgent") -> Dict[str,
+        Any]:
         """Share knowledge with another agent."""
         # Extract high-confidence beliefs
-        shared_beliefs = {k: v for k, v in self.beliefs.items() if v.confidence > 0.8}
+        shared_beliefs = (
+            {k: v for k, v in self.beliefs.items() if v.confidence > 0.8})
 
         # Extract recent positive experiences
         recent_experiences = self.knowledge_graph.get_similar_experiences(
@@ -376,14 +390,17 @@ class ActiveInferenceAgent:
         # Integrate beliefs with trust-based weighting
         trust_factor = 0.5  # Could be dynamic based on past interactions
 
-        for belief_key, other_belief in knowledge_package.get("beliefs", {}).items():
+        for belief_key, other_belief in knowledge_package.get("beliefs",
+            {}).items():
             if belief_key in self.beliefs:
                 # Weighted average of confidences
                 my_conf = self.beliefs[belief_key].confidence
                 other_conf = (
-                    other_belief.confidence if hasattr(other_belief, "confidence") else other_belief
+                    other_belief.confidence if hasattr(other_belief,
+                        "confidence") else other_belief
                 )
-                new_conf = (my_conf + trust_factor * other_conf) / (1 + trust_factor)
+                new_conf = (
+                    (my_conf + trust_factor * other_conf) / (1 + trust_factor))
                 self.beliefs[belief_key].confidence = new_conf
             else:
                 # Adopt new belief with reduced confidence
@@ -408,7 +425,8 @@ class ActiveInferenceAgent:
             "model_name": self.model_name,
             "position": self.position.__dict__ if self.position else None,
             "energy": self.energy,
-            "status": (self.status.value if hasattr(self.status, "value") else str(self.status)),
+            "status": (self.status.value if hasattr(self.status,
+                "value") else str(self.status)),
             "beliefs": {k: v.confidence for k, v in self.beliefs.items()},
             "free_energy": self.calculate_free_energy(),
             "action_count": len(self.action_history),

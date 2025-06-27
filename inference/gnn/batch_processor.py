@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import logging
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
@@ -12,7 +16,7 @@ Batch Processing Module for Graphs
 This module implements efficient batch processing mechanisms for handling
 multiple graphs or subgraphs simultaneously, including padding, masking,
 and memory optimization.
-"""
+."""
 logger = logging.getLogger(__name__)
 
 
@@ -278,7 +282,8 @@ class GraphBatchProcessor:
                 node_features = batched_data.x[node_indices]
             edge_mask = (
                 (batched_data.edge_index[0] >= node_indices[0])
-                & (batched_data.edge_index[0] < node_indices[0] + len(node_indices))
+                & (batched_data.edge_index[0] < node_indices[0] +
+                    len(node_indices))
                 & (batched_data.edge_index[1] >= node_indices[0])
                 & (batched_data.edge_index[1] < node_indices[0] + len(node_indices))
             )
@@ -325,6 +330,7 @@ class GraphBatchProcessor:
         Returns:
             BatchedGraphData
         """
+
         return self.create_batch(batch)
 
 
@@ -393,6 +399,7 @@ class DynamicBatchSampler:
 
     def __len__(self):
         """Total number of batches"""
+
         return sum(
             (len(group) + self.batch_size - 1) // self.batch_size for group in self.size_groups
         )
@@ -400,6 +407,7 @@ class DynamicBatchSampler:
 
 class StreamingBatchProcessor:
     """
+
     Processes graphs in a streaming fashion for memory efficiency.
     Useful for very large datasets that don't fit in memory.
     """

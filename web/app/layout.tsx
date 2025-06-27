@@ -5,6 +5,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/themeprovider";
 import { LLMProvider } from "@/contexts/llm-context";
 import { IsSendingProvider } from "@/contexts/is-sending-context";
+// import { ReduxProvider } from "@/providers/ReduxProvider";
 import NavBar from "@/components/navbar";
 
 const inter = Inter({
@@ -25,19 +26,21 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.variable} ${jetbrainsMono.variable} dark bg-[#0A0A0B] text-white`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem={false}
-          disableTransitionOnChange
-        >
-          <IsSendingProvider>
-            <LLMProvider>
-              <NavBar />
-              <main className="pt-16">{children}</main>
-            </LLMProvider>
-          </IsSendingProvider>
-        </ThemeProvider>
+        {/* <ReduxProvider> */}
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem={false}
+            disableTransitionOnChange
+          >
+            <IsSendingProvider>
+              <LLMProvider>
+                <NavBar />
+                <main className="pt-16">{children}</main>
+              </LLMProvider>
+            </IsSendingProvider>
+          </ThemeProvider>
+        {/* </ReduxProvider> */}
       </body>
     </html>
   );

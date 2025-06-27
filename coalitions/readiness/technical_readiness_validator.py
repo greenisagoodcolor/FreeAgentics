@@ -1,4 +1,4 @@
-"""
+."""
 Technical Readiness Validation for Edge Deployment
 
 Comprehensive assessment system that validates coalition technical readiness for edge deployment,
@@ -8,10 +8,7 @@ integrating with existing hardware infrastructure and providing detailed perform
 import asyncio
 import json
 import logging
-import os
 import platform
-import subprocess
-import threading
 import time
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
@@ -444,7 +441,8 @@ class EdgePerformanceBenchmarker:
         estimated_power = baseline_power_watts * (cpu_percent_avg / 100.0) * 1.5
 
         performance_ratio = baseline_power_watts / estimated_power
-        passed = not requirements.max_power_watts or estimated_power <= requirements.max_power_watts
+        passed = (
+            not requirements.max_power_watts or estimated_power <= requirements.max_power_watts)
 
         return PerformanceBenchmark(
             benchmark_name="power_consumption",
@@ -779,13 +777,16 @@ class TechnicalReadinessValidator:
         hardware_score = self._calculate_hardware_score(hardware_profile, requirements)
 
         # Compatibility score (0-100)
-        compatibility_score = self._calculate_compatibility_score(compatibility_results)
+        compatibility_score = (
+            self._calculate_compatibility_score(compatibility_results))
 
         # Performance score (0-100)
-        performance_score = self._calculate_performance_score(performance_benchmarks)
+        performance_score = (
+            self._calculate_performance_score(performance_benchmarks))
 
         # Resource score (0-100)
-        resource_score = self._calculate_resource_score(hardware_profile, requirements)
+        resource_score = (
+            self._calculate_resource_score(hardware_profile, requirements))
 
         # Overall score (weighted average)
         overall_score = (
@@ -901,7 +902,8 @@ class TechnicalReadinessValidator:
             score += min(10.0, (memory_ratio - 2.0) * 5)  # Bonus for excess capacity
 
         # Storage headroom
-        storage_ratio = hardware_profile.storage_gb / requirements.min_storage_gb
+        storage_ratio = (
+            hardware_profile.storage_gb / requirements.min_storage_gb)
         if storage_ratio < 1.0:
             score -= (1.0 - storage_ratio) * 25
 
@@ -958,7 +960,8 @@ class TechnicalReadinessValidator:
                 issues.append(f"Performance benchmark failed: {benchmark.benchmark_name}")
 
                 if benchmark.benchmark_name == "agent_startup_time":
-                    recommendations.append("Optimize agent initialization and model loading")
+                    recommendations.append("Optimize agent initialization and
+                        model loading")
                 elif benchmark.benchmark_name == "memory_footprint":
                     recommendations.append("Reduce memory usage or increase available RAM")
                 elif benchmark.benchmark_name == "inference_latency":
@@ -966,7 +969,8 @@ class TechnicalReadinessValidator:
                         "Optimize inference pipeline or enable hardware acceleration"
                     )
                 elif benchmark.benchmark_name == "concurrent_agents":
-                    recommendations.append("Optimize resource sharing and concurrency handling")
+                    recommendations.append("Optimize resource sharing and
+                        concurrency handling")
 
         # General recommendations
         if not issues:

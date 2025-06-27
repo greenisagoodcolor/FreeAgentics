@@ -1,9 +1,11 @@
-import argparse
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import json
 import logging
 import shutil
 import subprocess
-import sys
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -57,6 +59,7 @@ class ModelQuantizer:
 
     def __init__(self, config: QuantizationConfig) -> None:
         """Initialize model quantizer."""
+
         self.config = config
         self.calibration_data = []
 

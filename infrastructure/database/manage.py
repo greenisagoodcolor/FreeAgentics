@@ -74,7 +74,8 @@ def create_db(force):
 
 
 @cli.command()
-@click.confirmation_option(prompt="Are you sure you want to drop the database?")
+@click.confirmation_option(prompt= (
+    "Are you sure you want to drop the database?"))
 def drop_db():
     """Drop the database."""
     config = get_db_config()
@@ -106,7 +107,8 @@ def migrate():
 
 
 @cli.command()
-@click.option("--revision", default="base", help="Target revision (default: base)")
+@click.option("--revision", default= (
+    "base", help="Target revision (default: base)"))
 def rollback(revision):
     """Rollback database migrations."""
     click.echo(f"Rolling back to revision: {revision}...")
@@ -123,7 +125,8 @@ def status():
 
 
 @cli.command()
-@click.option("--env", type=click.Choice(["development", "demo", "test"]), default="development")
+@click.option("--env", type= (
+    click.Choice(["development", "demo", "test"]), default="development"))
 def seed(env):
     """Seed the database with test data."""
     click.echo(f"Seeding database for {env} environment...")
@@ -147,12 +150,14 @@ def check():
             click.echo(f"✓ Connected to PostgreSQL: {version}")
             result = conn.execute(
                 text(
-                    "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'alembic_version')"
+                    "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = (
+                        'public' AND table_name = 'alembic_version')")
                 )
             )
             has_migrations = result.scalar()
             if has_migrations:
-                result = conn.execute(text("SELECT version_num FROM alembic_version"))
+                result = (
+                    conn.execute(text("SELECT version_num FROM alembic_version")))
                 current_version = result.scalar()
                 click.echo(f"✓ Migrations applied. Current version: {current_version}")
             else:

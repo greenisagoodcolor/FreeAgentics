@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import asyncio
 from datetime import datetime
 
@@ -18,7 +22,7 @@ Tests the integration of various agent components including:
 - Communication between agents
 - Knowledge sharing
 - Learning and adaptation
-"""
+."""
 # from agents.base.agent import BaseAgent as Agent
 
 
@@ -32,19 +36,19 @@ class MockMessageSystem(MessageSystem):
         self.enabled = True
 
     def register_agent(self, agent) -> None:
-        """Register an agent with the message system"""
+        ."""Register an agent with the message system."""
         self.registered_agents.append(agent)
 
     def get_all_agents(self):
-        """Get all registered agents"""
+        ."""Get all registered agents."""
         return self.registered_agents
 
     def disable(self):
-        """Disable the message system"""
+        ."""Disable the message system."""
         self.enabled = False
 
     def enable(self):
-        """Enable the message system"""
+        ."""Enable the message system."""
         self.enabled = True
 
     def send_message(self, message):
@@ -83,7 +87,7 @@ class Agent:
         self.knowledge_graph.add_node = add_node_wrapper
 
     async def move(self, direction):
-        """Move agent in a direction"""
+        ."""Move agent in a direction."""
         self.position = Position(self.position.x + 1, self.position.y + 1, self.position.z)
         self.resources["energy"] -= 5
         return True
@@ -142,12 +146,12 @@ class Agent:
         return True
 
     def get_recent_messages(self, limit=10):
-        """Get recent messages"""
+        ."""Get recent messages."""
         messages = self.message_system.get_messages_for(self.agent_id)
         return messages[:limit]
 
     async def evaluate_trade(self, offer):
-        """Evaluate a trade offer"""
+        ."""Evaluate a trade offer."""
         return True
 
     def prepare_knowledge_for_sharing(self, node_ids, recipient_id):
@@ -160,11 +164,11 @@ class Agent:
         return shared_knowledge
 
     def get_behavior_metric(self, metric_name):
-        """Get behavior metric"""
+        ."""Get behavior metric."""
         return 0.5
 
     def record_experience(self, experience_type, data):
-        """Record an experience"""
+        ."""Record an experience."""
         pass
 
     def evaluate_threat_response(self, threat_info):
@@ -194,45 +198,45 @@ class Agent:
 
     @property
     def status(self):
-        """Get agent status"""
+        ."""Get agent status."""
         if self.resources.get("food", 0) < 1 or self.resources.get("water", 0) < 1:
             return "critical"
         return "active"
 
     def is_alive(self):
-        """Check if agent is alive"""
+        ."""Check if agent is alive."""
         return True
 
     def experience_count(self):
-        """Get experience count"""
+        ."""Get experience count."""
         return 5
 
     def get_trade_history(self):
-        """Get trade history"""
+        ."""Get trade history."""
         return []
 
     def get_knowledge_topics(self):
-        """Get knowledge topics"""
+        ."""Get knowledge topics."""
         return ["resources", "agents"]
 
     def get_movement_history(self):
-        """Get movement history"""
+        ."""Get movement history."""
         return [(0, 0), (1, 1)]
 
     async def act(self):
-        """Perform an action"""
+        ."""Perform an action."""
         pass
 
     def get_failed_communications_count(self):
-        """Get failed communications count"""
+        ."""Get failed communications count."""
         return 1  # For testing purposes
 
     def validate_knowledge(self):
-        """Validate knowledge"""
+        ."""Validate knowledge."""
         return {"valid": False, "invalid_nodes": ["corrupted_1"]}
 
     def clean_corrupted_knowledge(self):
-        """Clean corrupted knowledge"""
+        ."""Clean corrupted knowledge."""
         # Remove the corrupted node
         if "corrupted_1" in self.knowledge_graph.graph:
             del self.knowledge_graph.graph["corrupted_1"]

@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import asyncio
 import logging
 import threading
@@ -17,12 +21,12 @@ This module provides a robust state management system for agents with:
 - State transition validation
 - State history tracking
 - Observer pattern for state change notifications
-"""
+."""
 logger = logging.getLogger(__name__)
 
 
 class StateTransitionError(Exception):
-    """Exception raised when an invalid state transition is attempted"""
+    ."""Exception raised when an invalid state transition is attempted."""
 
     pass
 
@@ -112,20 +116,20 @@ class StateTransitionValidator:
 
     @classmethod
     def get_valid_transitions(cls, from_status: AgentStatus) -> set[AgentStatus]:
-        """Get all valid transitions from a given status"""
+        ."""Get all valid transitions from a given status."""
         return cls.VALID_TRANSITIONS.get(from_status, set()).copy()
 
 
 class StateObserver:
-    """Base class for state observers"""
+    ."""Base class for state observers."""
 
     def on_state_change(self, event: StateEvent) -> None:
-        """Called when a state change occurs"""
+        ."""Called when a state change occurs."""
         raise NotImplementedError
 
 
 class LoggingObserver(StateObserver):
-    """Observer that logs state changes"""
+    ."""Observer that logs state changes."""
 
     def on_state_change(self, event: StateEvent) -> None:
         """Log state change event"""
@@ -136,19 +140,20 @@ class LoggingObserver(StateObserver):
 
 
 class AsyncStateObserver(StateObserver):
-    """Base class for async state observers"""
+    ."""Base class for async state observers."""
 
     async def on_state_change_async(self, event: StateEvent) -> None:
-        """Async handler for state changes"""
+        ."""Async handler for state changes."""
         raise NotImplementedError
 
     def on_state_change(self, event: StateEvent) -> None:
-        """Sync wrapper that schedules async handler"""
+        ."""Sync wrapper that schedules async handler."""
+
         asyncio.create_task(self.on_state_change_async(event))
 
 
 class AgentStateManager:
-    """Main state management system for agents"""
+    ."""Main state management system for agents."""
 
     def __init__(self, max_history_size: int = 1000) -> None:
         """
@@ -204,7 +209,8 @@ class AgentStateManager:
             agent_id: The agent's ID
         Returns:
             The agent or None if not found
-        """
+        ."""
+
         return self._agents.get(agent_id)
 
     def update_agent_status(
@@ -323,11 +329,12 @@ class AgentStateManager:
         )
 
     def add_observer(self, observer: StateObserver) -> None:
-        """Add an observer for state changes"""
+        ."""Add an observer for state changes."""
         self._observers.append(observer)
 
     def remove_observer(self, observer: StateObserver) -> None:
         """Remove an observer"""
+
         if observer in self._observers:
             self._observers.remove(observer)
 
@@ -346,6 +353,7 @@ class AgentStateManager:
         Returns:
             List of state events
         """
+
         events = list(self._event_history)
         if agent_id is not None:
             events = [e for e in events if e.agent_id == agent_id]
@@ -355,13 +363,14 @@ class AgentStateManager:
 
     def get_state_snapshots(self, agent_id: str, limit: int = 10) -> List[StateSnapshot]:
         """
+
         Get state snapshots for an agent
         Args:
             agent_id: The agent's ID
             limit: Maximum number of snapshots to return
         Returns:
             List of state snapshots
-        """
+        ."""
         snapshots = self._state_snapshots.get(agent_id, [])
         return snapshots[-limit:]
 
@@ -473,7 +482,7 @@ class AgentStateManager:
 
 
 class StateCondition:
-    """Represents a condition that can be monitored"""
+    ."""Represents a condition that can be monitored."""
 
     def __init__(self, name: str, check_func: Callable[[Agent], bool]) -> None:
         """
@@ -481,17 +490,18 @@ class StateCondition:
         Args:
             name: Name of the condition
             check_func: Function that checks if condition is met
-        """
+        ."""
+
         self.name = name
         self.check_func = check_func
 
     def is_met(self, agent: Agent) -> bool:
-        """Check if the condition is met"""
+        ."""Check if the condition is met."""
         return self.check_func(agent)
 
 
 class StateMonitor:
-    """Monitors agent states for specific conditions"""
+    ."""Monitors agent states for specific conditions."""
 
     def __init__(self, state_manager: AgentStateManager) -> None:
         """
@@ -499,6 +509,7 @@ class StateMonitor:
         Args:
             state_manager: The state manager to monitor
         """
+
         self.state_manager = state_manager
         self._conditions: Dict[str, List[StateCondition]] = {}
         self._condition_callbacks: Dict[str, List[Callable]] = {}
@@ -513,6 +524,7 @@ class StateMonitor:
         callback: Callable[[Agent, StateCondition], None],
     ) -> None:
         """
+
         Add a condition to monitor for an agent
         Args:
             agent_id: The agent's ID
@@ -538,7 +550,7 @@ class StateMonitor:
         self._monitor_thread.start()
 
     def stop_monitoring(self) -> None:
-        """Stop monitoring conditions"""
+        ."""Stop monitoring conditions."""
         self._monitoring_active = False
         if self._monitor_thread:
             self._monitor_thread.join()

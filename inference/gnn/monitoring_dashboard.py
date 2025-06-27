@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import threading
 import time
 from datetime import datetime, timedelta
@@ -54,11 +58,11 @@ class MonitoringDashboard:
         self._update_thread = None
 
     def _setup_routes(self):
-        """Setup Flask routes"""
+        ."""Setup Flask routes."""
 
         @self.app.route("/")
         def index():
-            """Dashboard homepage"""
+            ."""Dashboard homepage."""
             return render_template_string(DASHBOARD_HTML)
 
         @self.app.route("/api/stats/realtime")
@@ -94,7 +98,8 @@ class MonitoringDashboard:
             return jsonify(
                 {
                     "cpu": {
-                        "current": system_stats.get("cpu_percent", {}).get("mean", 0),
+                        "current": system_stats.get("cpu_percent", {}).get("mean",
+                            0),
                         "max": system_stats.get("cpu_percent", {}).get("max", 0),
                     },
                     "memory": {
@@ -113,7 +118,7 @@ class MonitoringDashboard:
 
         @self.app.route("/api/alerts")
         def get_alerts():
-            """Get recent alerts"""
+            ."""Get recent alerts."""
             return jsonify([])
 
     def start(self):

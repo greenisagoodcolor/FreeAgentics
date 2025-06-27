@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import logging
 import time
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
@@ -70,12 +74,13 @@ class SparseOperations:
         indices = torch.nonzero(mask).t()
         values = tensor[mask]
         sparse_tensor = torch.sparse_coo_tensor(
-            indices, values, tensor.shape, dtype=tensor.dtype, device=tensor.device
+            indices, values, tensor.shape, dtype=tensor.dtype,
+                device=tensor.device
         )
         return sparse_tensor
 
     def sparse_matmul(self, sparse_a: torch.sparse.Tensor, dense_b: torch.Tensor) -> torch.Tensor:
-        """Efficient sparse-dense matrix multiplication"""
+        ."""Efficient sparse-dense matrix multiplication."""
         return torch.sparse.mm(sparse_a, dense_b)  # type: ignore[no-any-return]
 
     def sparse_log_sum_exp(self, sparse_tensor: torch.sparse.Tensor, dim: int) -> torch.Tensor:
@@ -172,7 +177,8 @@ class ParallelInference:
     ) -> torch.Tensor:
         """Parallel computation of expected free energy for multiple actions"""
         if not self.config.use_parallel_processing:
-            return torch.stack([self._single_efe(qs, A, B, C, action) for action in actions])
+            return torch.stack([self._single_efe(qs, A, B, C,
+                action) for action in actions])
         # Parallel EFE computation
         futures = []
         for action in actions:
@@ -232,7 +238,7 @@ class CachedInference:
         return str(hash(tuple(key_parts)))
 
     def _is_cache_valid(self, key: str) -> bool:
-        """Check if cache entry is still valid"""
+        ."""Check if cache entry is still valid."""
         if key not in self.cache_times:
             return False
         elapsed = time.time() - self.cache_times[key]
@@ -240,7 +246,7 @@ class CachedInference:
 
     @lru_cache(maxsize=1000)
     def cached_matrix_product(self, A_hash: int, B_hash: int) -> torch.Tensor:
-        """Cached matrix multiplication"""
+        ."""Cached matrix multiplication."""
         # This is a placeholder - in practice, we'd store the actual matrices
         # in a separate structure indexed by hash
         return torch.empty(0)  # Placeholder return
@@ -292,7 +298,7 @@ class CachedInference:
         return posterior
 
     def _evict_oldest(self) -> None:
-        """Evict oldest cache entries"""
+        ."""Evict oldest cache entries."""
         # Find oldest entry
         oldest_key = min(self.cache_times, key=self.cache_times.get)
         # Remove from cache
@@ -453,7 +459,7 @@ class BatchProcessor:
             self.results[request["id"]] = posteriors[i]
 
     def _batch_efe_computations(self, requests: List[Dict[str, Any]]) -> None:
-        """Batch process EFE computations"""
+        ."""Batch process EFE computations."""
         # Similar batching logic for EFE
         pass
 

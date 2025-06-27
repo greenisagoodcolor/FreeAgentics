@@ -1,11 +1,10 @@
-"""
+."""
 Coalition Monitoring WebSocket Endpoint
 
 Implements real-time WebSocket monitoring for coalition formation events
 following ADR-008 WebSocket patterns and ADR-002 canonical structure.
 """
 
-import asyncio
 import json
 import logging
 from datetime import datetime
@@ -235,6 +234,7 @@ async def handle_client_message(websocket: WebSocket, message: dict):
 # Function to trigger coalition formation (for testing/manual use)
 async def trigger_coalition_formation(agents_data: List[dict], strategy: str = "active_inference"):
     """
+
     Trigger a coalition formation process and broadcast events.
     This function can be called from other parts of the system.
     """

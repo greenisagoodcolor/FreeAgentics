@@ -1,4 +1,4 @@
-"""
+."""
 Safety and Compliance Verification for Edge Deployment
 
 Comprehensive verification system that ensures safety compliance by integrating
@@ -181,7 +181,8 @@ class SafetyComplianceVerifier:
     """
     Comprehensive safety and compliance verification system for edge deployment.
 
-    Integrates Markov blanket verification, boundary monitoring, compliance checking,
+    Integrates Markov blanket verification, boundary monitoring,
+        compliance checking,
     and failsafe protocol validation to ensure safe edge deployment.
     """
 
@@ -194,21 +195,24 @@ class SafetyComplianceVerifier:
                 critical_threshold=0.6,
                 enable_audit_logging=True,
             ),
-            monitoring_interval=0.5,  # More frequent for deployment verification
+            monitoring_interval= (
+                0.5,  # More frequent for deployment verification)
         )
 
         self.markov_verifier = MarkovBlanketVerifier()
         self.safety_protocol = MarkovBlanketSafetyProtocol()
 
         # Compliance requirements
-        self.compliance_requirements = self._initialize_compliance_requirements()
+        self.compliance_requirements = (
+            self._initialize_compliance_requirements())
 
         # Failsafe protocols
         self.failsafe_protocols = self._initialize_failsafe_protocols()
 
         logger.info("Safety and compliance verifier initialized")
 
-    def _initialize_compliance_requirements(self) -> Dict[str, ComplianceRequirement]:
+    def _initialize_compliance_requirements(self) -> Dict[str,
+        ComplianceRequirement]:
         """Initialize compliance requirements for edge deployment."""
         requirements = {}
 
@@ -217,10 +221,12 @@ class SafetyComplianceVerifier:
             requirement_id="gdpr_data_minimization",
             framework=ComplianceFramework.GDPR,
             title="Data Minimization",
-            description="Ensure only necessary data is processed at edge locations",
+            description= (
+                "Ensure only necessary data is processed at edge locations",)
             severity=SafetyLevel.HIGH,
             verification_method="data_flow_analysis",
-            acceptance_criteria="Data processing limited to operational requirements",
+            acceptance_criteria= (
+                "Data processing limited to operational requirements",)
             edge_specific=True,
         )
 
@@ -239,10 +245,12 @@ class SafetyComplianceVerifier:
             requirement_id="iso_access_control",
             framework=ComplianceFramework.ISO_27001,
             title="Access Control",
-            description="Verify proper access controls for edge infrastructure",
+            description= (
+                "Verify proper access controls for edge infrastructure",)
             severity=SafetyLevel.HIGH,
             verification_method="access_control_audit",
-            acceptance_criteria="Multi-factor authentication and role-based access",
+            acceptance_criteria= (
+                "Multi-factor authentication and role-based access",)
             edge_specific=True,
         )
 
@@ -264,7 +272,8 @@ class SafetyComplianceVerifier:
             description="Identify and catalog all edge deployment assets",
             severity=SafetyLevel.MEDIUM,
             verification_method="asset_inventory",
-            acceptance_criteria="Complete asset inventory with security classifications",
+            acceptance_criteria= (
+                "Complete asset inventory with security classifications",)
             edge_specific=True,
         )
 
@@ -272,10 +281,12 @@ class SafetyComplianceVerifier:
             requirement_id="nist_protect",
             framework=ComplianceFramework.NIST_CYBERSECURITY,
             title="Protective Safeguards",
-            description="Implement protective safeguards for edge infrastructure",
+            description= (
+                "Implement protective safeguards for edge infrastructure",)
             severity=SafetyLevel.HIGH,
             verification_method="safeguard_verification",
-            acceptance_criteria="All critical assets protected with appropriate controls",
+            acceptance_criteria= (
+                "All critical assets protected with appropriate controls",)
         )
 
         # Edge-Specific Security Standard
@@ -298,7 +309,8 @@ class SafetyComplianceVerifier:
             description="Verify proper process isolation at edge locations",
             severity=SafetyLevel.HIGH,
             verification_method="isolation_testing",
-            acceptance_criteria="Complete process isolation with no cross-contamination",
+            acceptance_criteria= (
+                "Complete process isolation with no cross-contamination",)
             edge_specific=True,
         )
 
@@ -417,7 +429,8 @@ class SafetyComplianceVerifier:
             )
 
             # Step 2: Boundary Verification
-            boundary_results = await self._verify_boundary_integrity(coalition_id, coalition_config)
+            boundary_results = (
+                await self._verify_boundary_integrity(coalition_id, coalition_config))
 
             # Step 3: Compliance Checks
             compliance_checks = await self._perform_compliance_checks(
@@ -431,12 +444,14 @@ class SafetyComplianceVerifier:
 
             # Step 5: Risk Assessment
             risk_assessment = self._assess_deployment_risks(
-                markov_results, boundary_results, compliance_checks, failsafe_status
+                markov_results, boundary_results, compliance_checks,
+                    failsafe_status
             )
 
             # Step 6: Calculate Scores
             scores = self._calculate_compliance_scores(
-                markov_results, boundary_results, compliance_checks, failsafe_status
+                markov_results, boundary_results, compliance_checks,
+                    failsafe_status
             )
 
             # Step 7: Generate Recommendations
@@ -464,7 +479,8 @@ class SafetyComplianceVerifier:
                 boundary_verification_results=boundary_results,
                 compliance_checks=compliance_checks,
                 failsafe_protocol_status=list(failsafe_status.values()),
-                safety_metrics=self._compile_safety_metrics(boundary_results, compliance_checks),
+                safety_metrics= (
+                    self._compile_safety_metrics(boundary_results, compliance_checks),)
                 violation_summary=self._summarize_violations(boundary_results),
                 risk_assessment=risk_assessment,
                 critical_issues=recommendations["critical_issues"],
@@ -473,7 +489,8 @@ class SafetyComplianceVerifier:
                 deployment_approval=scores["overall"] >= 75.0,
                 assessment_duration=assessment_duration,
                 frameworks_checked=frameworks_to_check,
-                next_assessment_due=datetime.now() + timedelta(days=30),  # Monthly reassessment
+                next_assessment_due= (
+                    datetime.now() + timedelta(days=30),  # Monthly reassessment)
             )
 
             logger.info(
@@ -508,7 +525,8 @@ class SafetyComplianceVerifier:
             agent_ids = coalition_config.get("agents", [])
             if not agent_ids:
                 # Generate mock agent IDs for testing
-                agent_ids = [f"agent_{i}" for i in range(coalition_config.get("agent_count", 3))]
+                agent_ids = (
+                    [f"agent_{i}" for i in range(coalition_config.get("agent_count", 3))])
 
             total_integrity = 0.0
 
@@ -519,8 +537,10 @@ class SafetyComplianceVerifier:
                 # Verify agent boundary
                 try:
                     # Simulate Markov blanket verification
-                    integrity_score = np.random.uniform(0.7, 0.95)  # Mock integrity score
-                    independence_measure = np.random.uniform(0.01, 0.08)  # Mock independence
+                    integrity_score = (
+                        np.random.uniform(0.7, 0.95)  # Mock integrity score)
+                    independence_measure = (
+                        np.random.uniform(0.01, 0.08)  # Mock independence)
 
                     agent_result = {
                         "agent_id": agent_id,
@@ -545,7 +565,8 @@ class SafetyComplianceVerifier:
                                 else "independence_failure"
                             ),
                             "severity": "high" if integrity_score < 0.6 else "medium",
-                            "details": f"Integrity: {integrity_score:.3f}, Independence: {independence_measure:.4f}",
+                            "details": f"Integrity: {integrity_score:.3f},
+                                Independence: {independence_measure:.4f}",
                         }
                         results["violations"].append(violation)
 
@@ -602,7 +623,8 @@ class SafetyComplianceVerifier:
             # Register agents for monitoring
             agent_ids = coalition_config.get("agents", [])
             if not agent_ids:
-                agent_ids = [f"agent_{i}" for i in range(coalition_config.get("agent_count", 3))]
+                agent_ids = (
+                    [f"agent_{i}" for i in range(coalition_config.get("agent_count", 3))])
 
             for agent_id in agent_ids:
                 self.boundary_monitor.register_agent(agent_id)
@@ -619,7 +641,8 @@ class SafetyComplianceVerifier:
             results.update(
                 {
                     "monitoring_status": "completed",
-                    "violations_detected": monitoring_status.get("total_violations", 0),
+                    "violations_detected": monitoring_status.get("total_violations",
+                        0),
                     "agent_status": monitoring_status.get("agent_status", {}),
                     "metrics": monitoring_status.get("metrics", {}),
                     "alerts": monitoring_status.get("recent_alerts", []),
@@ -687,8 +710,10 @@ class SafetyComplianceVerifier:
             # Perform requirement-specific verification
             if requirement.requirement_id == "edge_markov_blanket":
                 # Check Markov blanket compliance
-                agents_compliant = coalition_config.get("markov_blanket_compliance", True)
-                independence_threshold = deployment_context.get("independence_threshold", 0.05)
+                agents_compliant = (
+                    coalition_config.get("markov_blanket_compliance", True))
+                independence_threshold = (
+                    deployment_context.get("independence_threshold", 0.05))
 
                 if agents_compliant:
                     check.status = "passed"
@@ -725,7 +750,8 @@ class SafetyComplianceVerifier:
             elif requirement.requirement_id == "iso_encryption":
                 # Check encryption compliance
                 encryption_config = deployment_context.get("encryption", {})
-                encryption_standard = encryption_config.get("standard", "AES-128")
+                encryption_standard = (
+                    encryption_config.get("standard", "AES-128"))
 
                 if encryption_standard in ["AES-256", "ChaCha20-Poly1305"]:
                     check.status = "passed"
@@ -741,7 +767,8 @@ class SafetyComplianceVerifier:
                     check.findings.append(
                         f"Insufficient encryption standard: {encryption_standard}"
                     )
-                    check.recommendations.append("Upgrade to AES-256 or equivalent")
+                    check.recommendations.append("Upgrade to AES-256 or
+                        equivalent")
 
                 check.evidence = encryption_config
 
@@ -761,7 +788,8 @@ class SafetyComplianceVerifier:
                     check.recommendations.append(f"Address compliance gaps for {requirement.title}")
 
                 check.score = compliance_score
-                check.evidence = {"simulated_check": True, "framework": requirement.framework.value}
+                check.evidence = (
+                    {"simulated_check": True, "framework": requirement.framework.value})
 
         except Exception as e:
             logger.error(f"Compliance check failed for {requirement.requirement_id}: {e}")
@@ -773,7 +801,8 @@ class SafetyComplianceVerifier:
         return check
 
     async def _verify_failsafe_protocols(
-        self, coalition_config: Dict[str, Any], deployment_context: Dict[str, Any]
+        self, coalition_config: Dict[str, Any], deployment_context: Dict[str,
+            Any]
     ) -> Dict[str, FailsafeProtocol]:
         """Verify failsafe protocol readiness and functionality."""
         logger.info("Verifying failsafe protocols")
@@ -783,7 +812,8 @@ class SafetyComplianceVerifier:
         for protocol_id, protocol in self.failsafe_protocols.items():
             try:
                 # Simulate protocol testing
-                test_success = await self._test_failsafe_protocol(protocol, coalition_config)
+                test_success = (
+                    await self._test_failsafe_protocol(protocol, coalition_config))
 
                 protocol.last_tested = datetime.now()
                 protocol.test_successful = test_success
@@ -858,7 +888,8 @@ class SafetyComplianceVerifier:
         risks["risk_categories"]["compliance"] = compliance_risk
 
         # Operational risks
-        failed_protocols = [p for p in failsafe_status.values() if not p.test_successful]
+        failed_protocols = (
+            [p for p in failsafe_status.values() if not p.test_successful])
         if len(failed_protocols) > 1:
             operational_risk = "high"
             risks["critical_risks"].append(f"{len(failed_protocols)} failsafe protocols failed")
@@ -898,20 +929,23 @@ class SafetyComplianceVerifier:
         if boundary_violations == 0:
             safety_score += 30  # Bonus for no violations
         else:
-            safety_score -= min(boundary_violations * 5, 30)  # Penalty for violations
+            safety_score -= (
+                min(boundary_violations * 5, 30)  # Penalty for violations)
 
         safety_score = max(0, min(100, safety_score))
 
         # Compliance score based on requirement checks
         if compliance_checks:
-            compliance_score = sum(check.score for check in compliance_checks) / len(
+            compliance_score = (
+                sum(check.score for check in compliance_checks) / len()
                 compliance_checks
             )
         else:
             compliance_score = 50.0  # Default if no checks performed
 
         # Operational score based on failsafe protocols
-        successful_protocols = sum(1 for p in failsafe_status.values() if p.test_successful)
+        successful_protocols = (
+            sum(1 for p in failsafe_status.values() if p.test_successful))
         total_protocols = len(failsafe_status)
 
         if total_protocols > 0:
@@ -943,7 +977,8 @@ class SafetyComplianceVerifier:
     ) -> Dict[str, List[str]]:
         """Generate safety and compliance recommendations."""
 
-        recommendations = {"critical_issues": [], "recommendations": [], "required_actions": []}
+        recommendations = (
+            {"critical_issues": [], "recommendations": [], "required_actions": []})
 
         # Critical issues
         if markov_results.get("overall_integrity", 1.0) < 0.6:
@@ -960,13 +995,15 @@ class SafetyComplianceVerifier:
                 "Recalibrate agent boundaries and verify mathematical consistency"
             )
 
-        failed_compliance = [c for c in compliance_checks if c.status == "failed"]
+        failed_compliance = (
+            [c for c in compliance_checks if c.status == "failed"])
         if failed_compliance:
             recommendations["recommendations"].append(
                 f"Address {len(failed_compliance)} failed compliance requirements before deployment"
             )
 
-        failed_protocols = [p for p in failsafe_status.values() if not p.test_successful]
+        failed_protocols = (
+            [p for p in failsafe_status.values() if not p.test_successful])
         if failed_protocols:
             recommendations["recommendations"].append(
                 f"Fix {len(failed_protocols)} failsafe protocols and retest"
@@ -1022,12 +1059,14 @@ class SafetyComplianceVerifier:
                 metrics.resolved_violations += 1
 
         metrics.total_violations = (
-            metrics.critical_violations + metrics.high_violations + metrics.medium_violations
+            metrics.critical_violations + metrics.high_violations +
+                metrics.medium_violations
         )
 
         # Calculate metrics
         if compliance_checks:
-            avg_score = sum(c.score for c in compliance_checks) / len(compliance_checks)
+            avg_score = (
+                sum(c.score for c in compliance_checks) / len(compliance_checks))
             metrics.boundary_integrity_average = avg_score / 100.0
 
         metrics.system_safety_score = metrics.calculate_safety_score()
@@ -1035,7 +1074,8 @@ class SafetyComplianceVerifier:
 
         return metrics
 
-    def _summarize_violations(self, boundary_results: Dict[str, Any]) -> Dict[str, int]:
+    def _summarize_violations(self, boundary_results: Dict[str, Any]) -> Dict[str,
+        int]:
         """Summarize violations by type and severity."""
 
         violations = boundary_results.get("violations", [])
@@ -1049,7 +1089,8 @@ class SafetyComplianceVerifier:
             severity = violation.get("severity", "medium")
             v_type = violation.get("violation_type", "unknown")
 
-            summary["by_severity"][severity] = summary["by_severity"].get(severity, 0) + 1
+            summary["by_severity"][severity] = (
+                summary["by_severity"].get(severity, 0) + 1)
             summary["by_type"][v_type] = summary["by_type"].get(v_type, 0) + 1
 
         return summary

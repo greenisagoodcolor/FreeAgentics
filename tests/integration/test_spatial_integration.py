@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import time
 
 import pytest
@@ -41,7 +45,8 @@ class TestSpatialIntegration:
         cells = list(h3_world.cells.keys())
         start_hex = cells[0]
         end_hex = cells[10]
-        movement_costs = {hex_id: cell.movement_cost for hex_id, cell in h3_world.cells.items()}
+        movement_costs = (
+            {hex_id: cell.movement_cost for hex_id, cell in h3_world.cells.items()})
         obstacles = {
             hex_id for hex_id, cell in h3_world.cells.items() if cell.terrain == TerrainType.WATER
         }

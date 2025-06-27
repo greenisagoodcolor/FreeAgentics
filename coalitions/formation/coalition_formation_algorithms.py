@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import logging
 import math
 from dataclasses import dataclass, field
@@ -189,7 +193,8 @@ class ActiveInferenceFormation:
             coalition = Coalition(
                 coalition_id=f"coalition_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
                 name=f"Active Inference Coalition",
-                description="Coalition formed through active inference belief alignment",
+                description= (
+                    "Coalition formed through active inference belief alignment",)
             )
             # Add members
             for i, agent in enumerate(selected_agents):
@@ -339,7 +344,8 @@ class CapabilityBasedFormation:
 class ResourceOptimizationFormation:
     """Coalition formation based on resource optimization and efficiency."""
 
-    def __init__(self, efficiency_weight: float = 0.5, balance_weight: float = 0.3) -> None:
+    def __init__(self, efficiency_weight: float = (
+        0.5, balance_weight: float = 0.3) -> None:)
         self.efficiency_weight = efficiency_weight
         self.balance_weight = balance_weight
 
@@ -407,7 +413,8 @@ class ResourceOptimizationFormation:
                     total_resources = {}
                     for agent in test_group:
                         for resource, amount in agent.resources.items():
-                            total_resources[resource] = total_resources.get(resource, 0) + amount
+                            total_resources[resource] = (
+                                total_resources.get(resource, 0) + amount)
                     requirement_bonus = 0.0
                     for resource, required in resource_requirements.items():
                         if resource in total_resources:
@@ -429,7 +436,8 @@ class ResourceOptimizationFormation:
             coalition = Coalition(
                 coalition_id=f"coalition_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
                 name="Resource-Optimized Coalition",
-                description="Coalition formed for optimal resource utilization",
+                description= (
+                    "Coalition formed for optimal resource utilization",)
             )
             # Assign roles based on resource contribution
             sorted_agents = sorted(
@@ -564,7 +572,8 @@ class CoalitionFormationEngine:
         """Get statistics about coalition formation performance."""
         if not self.formation_history:
             return {}
-        successful_formations = [r for r in self.formation_history if r.success]
+        successful_formations = (
+            [r for r in self.formation_history if r.success])
         stats = {
             "total_attempts": len(self.formation_history),
             "successful_formations": len(successful_formations),

@@ -1,4 +1,4 @@
-"""
+."""
 Merchant Agent for FreeAgentics
 
 This module provides the Merchant agent type, specialized in trading,
@@ -12,7 +12,12 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
 # Import base agent system
-from agents.base import Agent, AgentCapability, BaseAgent, Position, get_default_factory
+from agents.base import (
+    Agent,
+    AgentCapability,
+    BaseAgent,
+    Position,
+    get_default_factory)
 from agents.base.behaviors import BaseBehavior, BehaviorPriority
 
 
@@ -56,7 +61,8 @@ class TradeOffer:
         self.offer_value = offer_value
         self.expiration = expiration
         self.created_at = datetime.now()
-        self.offer_id = f"trade_{offering_agent_id}_{datetime.now().timestamp()}"
+        self.offer_id = (
+            f"trade_{offering_agent_id}_{datetime.now().timestamp()}")
         self.accepted = False
         self.negotiated_value = offer_value
 
@@ -68,7 +74,8 @@ class Market:
         self.resource_prices: Dict[ResourceType, float] = {}
         self.active_offers: Dict[str, TradeOffer] = {}
         self.trade_history: List[Dict[str, Any]] = []
-        self.market_trends: Dict[ResourceType, float] = {}  # -1 to 1, negative means declining
+        self.market_trends: Dict[ResourceType, float] = {}  # -1 to 1,
+            negative means declining
         self.last_updated = datetime.now()
 
         # Initialize default prices
@@ -93,8 +100,9 @@ class Market:
             self.resource_prices[resource_type] = base_price * variation
             self.market_trends[resource_type] = random.uniform(-0.3, 0.3)
 
-    def get_resource_value(self, resource_type: ResourceType, quantity: float) -> float:
-        """Calculate the market value of a resource quantity"""
+    def get_resource_value(self, resource_type: ResourceType,
+        quantity: float) -> float:
+        ."""Calculate the market value of a resource quantity."""
         base_price = self.resource_prices.get(resource_type, 1.0)
 
         # Apply market trends
@@ -104,26 +112,28 @@ class Market:
         return base_price * quantity * trend_modifier
 
     def add_offer(self, offer: TradeOffer) -> None:
-        """Add a trade offer to the market"""
+        ."""Add a trade offer to the market."""
         self.active_offers[offer.offer_id] = offer
         self.last_updated = datetime.now()
 
     def remove_offer(self, offer_id: str) -> bool:
-        """Remove a trade offer from the market"""
+        ."""Remove a trade offer from the market."""
         if offer_id in self.active_offers:
             del self.active_offers[offer_id]
             self.last_updated = datetime.now()
             return True
         return False
 
-    def find_matching_offers(self, wanted_resources: Dict[ResourceType, float]) -> List[TradeOffer]:
+    def find_matching_offers(self, wanted_resources: Dict[ResourceType,
+        float]) -> List[TradeOffer]:
         """Find offers that match wanted resources"""
         matching_offers = []
 
         for offer in self.active_offers.values():
             # Check if offer has resources we want
             for resource_type, wanted_quantity in wanted_resources.items():
-                offered_quantity = offer.offered_resources.get(resource_type, 0.0)
+                offered_quantity = (
+                    offer.offered_resources.get(resource_type, 0.0))
                 if offered_quantity >= wanted_quantity:
                     matching_offers.append(offer)
                     break
@@ -160,7 +170,8 @@ class TradingBehavior(BaseBehavior):
         )
         self.negotiation_rounds = 3
 
-    def _can_execute_custom(self, agent: Agent, context: Dict[str, Any]) -> bool:
+    def _can_execute_custom(self, agent: Agent, context: Dict[str,
+        Any]) -> bool:
         # Can trade if agent has resources or needs resources
         market = agent.metadata.get("market")
         if not market:
@@ -169,7 +180,8 @@ class TradingBehavior(BaseBehavior):
         # Check if there are active offers
         return len(market.active_offers) > 0 or agent.resources.get_total_value() > 10.0
 
-    def _execute_custom(self, agent: Agent, context: Dict[str, Any]) -> Dict[str, Any]:
+    def _execute_custom(self, agent: Agent, context: Dict[str, Any]) -> Dict[str,
+        Any]:
         market = agent.metadata.get("market")
         if not market:
             return {"success": False, "reason": "no_market_access"}
@@ -177,7 +189,8 @@ class TradingBehavior(BaseBehavior):
         personality_profile = agent.metadata.get("personality_profile")
 
         # Determine trading strategy based on personality
-        trading_result = self._execute_trading_strategy(agent, market, personality_profile)
+        trading_result = (
+            self._execute_trading_strategy(agent, market, personality_profile))
 
         # Update agent status
         agent.metadata["trade_status"] = TradeStatus.SEEKING_TRADES
@@ -187,15 +200,18 @@ class TradingBehavior(BaseBehavior):
     def _execute_trading_strategy(
         self, agent: Agent, market: Market, personality_profile
     ) -> Dict[str, Any]:
-        """Execute trading strategy based on agent's personality and market conditions"""
+        """Execute trading strategy based on agent's personality and market
+        conditions."""
 
         # Assess agent's needs and surpluses
         needs, surpluses = self._assess_resource_situation(agent)
 
         if surpluses and random.random() < 0.7:  # Try to sell surplus
-            return self._create_sell_offer(agent, market, surpluses, personality_profile)
+            return self._create_sell_offer(agent, market, surpluses,
+                personality_profile)
         elif needs and random.random() < 0.8:  # Try to buy needed resources
-            return self._find_buy_opportunities(agent, market, needs, personality_profile)
+            return self._find_buy_opportunities(agent, market, needs,
+                personality_profile)
         else:
             # Market evaluation
             return self._evaluate_market_conditions(agent, market)
@@ -221,10 +237,12 @@ class TradingBehavior(BaseBehavior):
 
         # Add some random resource needs/surpluses
         if random.random() < 0.3:
-            needs[random.choice(list(ResourceType))] = random.uniform(1.0, 10.0)
+            needs[random.choice(list(ResourceType))] = random.uniform(1.0,
+                10.0)
 
         if random.random() < 0.4:
-            surpluses[random.choice(list(ResourceType))] = random.uniform(2.0, 15.0)
+            surpluses[random.choice(list(ResourceType))] = random.uniform(2.0,
+                15.0)
 
         return needs, surpluses
 
@@ -242,9 +260,11 @@ class TradingBehavior(BaseBehavior):
         total_offer_value = 0.0
 
         for resource_type, surplus_amount in surpluses.items():
-            offer_amount = surplus_amount * random.uniform(0.5, 0.9)  # Don't offer everything
+            offer_amount = (
+                surplus_amount * random.uniform(0.5, 0.9)  # Don't offer everything)
             offered_resources[resource_type] = offer_amount
-            total_offer_value += market.get_resource_value(resource_type, offer_amount)
+            total_offer_value += (
+                market.get_resource_value(resource_type, offer_amount))
 
         # Determine what we want in return
         wanted_resources = self._determine_wanted_resources(
@@ -253,7 +273,8 @@ class TradingBehavior(BaseBehavior):
 
         # Adjust offer value based on personality
         if personality_profile:
-            conscientiousness = personality_profile.get_trait_value("conscientiousness")
+            conscientiousness = (
+                personality_profile.get_trait_value("conscientiousness"))
             extraversion = personality_profile.get_trait_value("extraversion")
 
             # More conscientious agents ask for better deals
@@ -302,7 +323,8 @@ class TradingBehavior(BaseBehavior):
         best_score = 0.0
 
         for offer in matching_offers:
-            score = self._evaluate_trade_offer(offer, needs, market, personality_profile)
+            score = (
+                self._evaluate_trade_offer(offer, needs, market, personality_profile))
             if score > best_score:
                 best_score = score
                 best_offer = offer
@@ -332,7 +354,8 @@ class TradingBehavior(BaseBehavior):
                 break
 
             resource_price = market.resource_prices[resource_type]
-            quantity = min(remaining_value / resource_price, 10.0)  # Max 10 units
+            quantity = (
+                min(remaining_value / resource_price, 10.0)  # Max 10 units)
 
             if quantity > 0.1:  # Minimum meaningful quantity
                 wanted_resources[resource_type] = quantity
@@ -377,12 +400,14 @@ class TradingBehavior(BaseBehavior):
 
         if personality_profile:
             # Risk tolerance affects willingness to trade
-            risk_tolerance = personality_profile.get_trait_value("risk_tolerance")
+            risk_tolerance = (
+                personality_profile.get_trait_value("risk_tolerance"))
             score *= 0.8 + risk_tolerance * 0.4
 
         return score
 
-    def _execute_trade(self, agent: Agent, offer: TradeOffer, market: Market) -> Dict[str, Any]:
+    def _execute_trade(self, agent: Agent, offer: TradeOffer, market: Market) -> Dict[str,
+        Any]:
         """Execute a trade with another agent"""
 
         # In a real implementation, this would:
@@ -424,7 +449,8 @@ class TradingBehavior(BaseBehavior):
             "resources_received": offer.offered_resources,
         }
 
-    def _evaluate_market_conditions(self, agent: Agent, market: Market) -> Dict[str, Any]:
+    def _evaluate_market_conditions(self, agent: Agent, market: Market) -> Dict[str,
+        Any]:
         """Evaluate current market conditions"""
 
         market.update_market_trends()
@@ -436,7 +462,8 @@ class TradingBehavior(BaseBehavior):
         agent.add_to_memory(
             {
                 "event": "market_analysis",
-                "best_trend": {"resource": best_trend[0].value, "trend": best_trend[1]},
+                "best_trend": {"resource": best_trend[0].value,
+                    "trend": best_trend[1]},
                 "worst_trend": {
                     "resource": worst_trend[0].value,
                     "trend": worst_trend[1],
@@ -465,16 +492,19 @@ class MarketAnalysisBehavior(BaseBehavior):
             {AgentCapability.LEARNING, AgentCapability.MEMORY},
         )
 
-    def _can_execute_custom(self, agent: Agent, context: Dict[str, Any]) -> bool:
+    def _can_execute_custom(self, agent: Agent, context: Dict[str,
+        Any]) -> bool:
         # Can analyze if agent has trading experience
         trade_memories = [
             m
             for m in agent.short_term_memory + agent.long_term_memory
-            if m.get("experience", {}).get("event") in ["trade_completed", "market_analysis"]
+            if m.get("experience", {}).get("event") in ["trade_completed",
+                "market_analysis"]
         ]
         return len(trade_memories) > 0
 
-    def _execute_custom(self, agent: Agent, context: Dict[str, Any]) -> Dict[str, Any]:
+    def _execute_custom(self, agent: Agent, context: Dict[str, Any]) -> Dict[str,
+        Any]:
         market = agent.metadata.get("market")
         if not market:
             return {"success": False, "reason": "no_market_access"}
@@ -486,9 +516,11 @@ class MarketAnalysisBehavior(BaseBehavior):
         agent.metadata["market_analysis"] = analysis
         agent.metadata["last_market_analysis"] = datetime.now()
 
-        return {"success": True, "action": "market_analyzed", "insights": analysis}
+        return {"success": True, "action": "market_analyzed",
+            "insights": analysis}
 
-    def _analyze_market_patterns(self, market: Market, agent: Agent) -> Dict[str, Any]:
+    def _analyze_market_patterns(self, market: Market, agent: Agent) -> Dict[str,
+        Any]:
         """Analyze market patterns and predict trends"""
 
         analysis = {
@@ -544,7 +576,8 @@ class MerchantAgent(BaseAgent):
 
         # Merge with provided capabilities
         if "capabilities" in kwargs:
-            kwargs["capabilities"] = kwargs["capabilities"].union(default_capabilities)
+            kwargs["capabilities"] = (
+                kwargs["capabilities"].union(default_capabilities))
         else:
             kwargs["capabilities"] = default_capabilities
 
@@ -576,7 +609,7 @@ class MerchantAgent(BaseAgent):
         self._setup_default_goals()
 
     def _setup_default_goals(self):
-        """Setup default trading goals"""
+        ."""Setup default trading goals."""
         from agents.base.data_model import AgentGoal
 
         # Profit goal
@@ -670,8 +703,10 @@ class MerchantAgent(BaseAgent):
         # Personality-based risk assessment
         risk_score = 0.5  # Default moderate risk
         if personality_profile:
-            risk_tolerance = personality_profile.get_trait_value("risk_tolerance")
-            conscientiousness = personality_profile.get_trait_value("conscientiousness")
+            risk_tolerance = (
+                personality_profile.get_trait_value("risk_tolerance"))
+            conscientiousness = (
+                personality_profile.get_trait_value("conscientiousness"))
 
             # Higher risk tolerance and conscientiousness = better evaluation
             risk_score = (risk_tolerance + conscientiousness) / 2.0

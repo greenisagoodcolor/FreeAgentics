@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""
+."""
 Test script for Local LLM Integration
 
 Tests the local LLM functionality including Ollama integration,
@@ -27,7 +27,8 @@ from llm.ollama_integration import OllamaAgentAdapter, OllamaManager
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level= (
+        logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 )
 logger = logging.getLogger(__name__)
 
@@ -111,7 +112,8 @@ def test_local_llm_manager() -> None:
     # Test generation
     try:
         print("\nTesting generation...")
-        response = manager.generate("What are the benefits of edge computing?", temperature=0.7)
+        response = (
+            manager.generate("What are the benefits of edge computing?", temperature=0.7))
 
         print(f"Response: {response.text}")
         print(f"Provider: {response.provider}")
@@ -137,7 +139,8 @@ def test_local_llm_manager() -> None:
     cpu_cores = psutil.cpu_count()
     has_gpu = False  # Would need to detect properly
 
-    optimized_config = manager.optimize_for_hardware(ram_gb, cpu_cores, has_gpu)
+    optimized_config = (
+        manager.optimize_for_hardware(ram_gb, cpu_cores, has_gpu))
     print(f"Optimized config for {ram_gb:.1f}GB RAM, {cpu_cores} cores:")
     print(f"  Quantization: {optimized_config.quantization.value}")
     print(f"  Context size: {optimized_config.context_size}")
@@ -165,7 +168,8 @@ def test_edge_optimization() -> None:
         print(f"\nOptimizing for {device}...")
 
         try:
-            results = optimizer.optimize_for_device(dummy_model, device, output_dir)
+            results = (
+                optimizer.optimize_for_device(dummy_model, device, output_dir))
 
             print(f"Results: {json.dumps(results, indent=2)}")
 
@@ -265,7 +269,8 @@ async def test_agent_adapter():
     for agent_class in agent_classes:
         print(f"\nTesting {agent_class} agent...")
 
-        adapter = OllamaAgentAdapter(model_name="llama2:7b-q4_K_M", agent_class=agent_class)
+        adapter = (
+            OllamaAgentAdapter(model_name="llama2:7b-q4_K_M", agent_class=agent_class))
 
         # Setup custom model (this would fail without Ollama)
         try:

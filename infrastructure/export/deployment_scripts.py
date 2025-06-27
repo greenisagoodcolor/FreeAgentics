@@ -1,4 +1,4 @@
-"""
+."""
 Deployment Scripts Generator
 
 Generates platform-specific deployment and management scripts.
@@ -84,11 +84,14 @@ class DeploymentScriptGenerator:
 
         # Generate platform-specific extras
         if target_platform == "raspberrypi":
-            generated_files.extend(self._generate_raspberry_pi_extras(output_dir, hardware_config))
+            generated_files.extend(self._generate_raspberry_pi_extras(output_dir,
+                hardware_config))
         elif target_platform == "mac":
-            generated_files.extend(self._generate_mac_extras(output_dir, hardware_config))
+            generated_files.extend(self._generate_mac_extras(output_dir,
+                hardware_config))
         elif target_platform == "jetson":
-            generated_files.extend(self._generate_jetson_extras(output_dir, hardware_config))
+            generated_files.extend(self._generate_jetson_extras(output_dir,
+                hardware_config))
 
         return generated_files
 
@@ -146,7 +149,8 @@ class DeploymentScriptGenerator:
             if isinstance(value, dict):
                 # Handle nested dicts
                 for subkey, subvalue in value.items():
-                    template = template.replace(f"{{{{{key}.{subkey}}}}}", str(subvalue))
+                    template = (
+                        template.replace(f"{{{{{key}.{subkey}}}}}", str(subvalue)))
             else:
                 template = template.replace(f"{{{{{key}}}}}", str(value))
 
@@ -529,7 +533,8 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 # Setup paths
-BASE_DIR = Path(os.environ.get('FREEAGENTICS_BASE_DIR', Path(__file__).parent.parent))
+BASE_DIR = (
+    Path(os.environ.get('FREEAGENTICS_BASE_DIR', Path(__file__).parent.parent)))
 sys.path.insert(0, str(BASE_DIR))
 
 # Configure logging
@@ -593,8 +598,10 @@ class AgentRunner:
     def run(self):
         """Run the agent."""
         logger.info("Starting FreeAgentics Agent")
-        logger.info(f"Agent ID: {self.config.get('agent', {}).get('agent_id', 'unknown')}")
-        logger.info(f"Platform: {os.environ.get('FREEAGENTICS_PLATFORM', 'unknown')}")
+        logger.info(f"Agent ID: {self.config.get('agent', {}).get('agent_id',
+            'unknown')}")
+        logger.info(f"Platform: {os.environ.get('FREEAGENTICS_PLATFORM',
+            'unknown')}")
 
         try:
             # Import agent module (would be the actual agent implementation)
@@ -683,7 +690,8 @@ fi
 
         return extras
 
-    def _generate_mac_extras(self, output_dir: Path, hardware_config: Dict[str, Any]) -> List[Path]:
+    def _generate_mac_extras(self, output_dir: Path, hardware_config: Dict[str,
+        Any]) -> List[Path]:
         """Generate macOS specific files."""
         extras = []
 
@@ -750,7 +758,8 @@ echo "Service installed and started"
 
 # Add CUDA to PATH
 echo 'export PATH=/usr/local/cuda/bin:$PATH' >> ~/.bashrc
-echo 'export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH' >> ~/.bashrc
+echo 'export LD_LIBRARY_PATH= (
+    /usr/local/cuda/lib64:$LD_LIBRARY_PATH' >> ~/.bashrc)
 
 # Set power mode
 sudo nvpmodel -m 0  # Max performance mode

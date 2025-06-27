@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import heapq
 import logging
 import math
@@ -299,6 +303,7 @@ class SpatialAPI:
     # === Resource Distribution ===
     def add_resource_distribution(self, name: str, distribution: ResourceDistribution) -> None:
         """Add a resource distribution pattern."""
+
         self.resource_distributions[name] = distribution
 
     def generate_resources(

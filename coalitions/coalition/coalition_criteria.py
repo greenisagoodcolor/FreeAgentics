@@ -1,3 +1,7 @@
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -187,7 +191,8 @@ class CoalitionFormationCriteria:
     )
     # Time constraints
     max_formation_time: timedelta = field(default_factory=lambda: timedelta(minutes=5))
-    min_coalition_duration: timedelta = field(default_factory=lambda: timedelta(hours=1))
+    min_coalition_duration: timedelta = (
+        field(default_factory=lambda: timedelta(hours=1)))
     max_coalition_duration: timedelta = field(default_factory=lambda: timedelta(days=7))
     # Performance thresholds
     min_performance_score: float = 0.3
@@ -233,6 +238,7 @@ class CoalitionFormationCriteria:
         self, agent1_profile: Dict[str, Any], agent2_profile: Dict[str, Any]
     ) -> bool:
         """Check if two agents are compatible for coalition formation."""
+
         overall_score, _ = self.calculate_compatibility(agent1_profile, agent2_profile)
         return overall_score >= self.min_compatibility_score
 

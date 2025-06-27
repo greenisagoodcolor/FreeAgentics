@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""
+."""
 FreeAgentics Agent Creation Examples
 
 This file contains comprehensive examples demonstrating agent creation,
@@ -16,7 +16,7 @@ from uuid import uuid4
 
 
 async def example_1_basic_agent():
-    """Example 1: Create a basic agent"""
+    ."""Example 1: Create a basic agent."""
     print("\n=== EXAMPLE 1: Basic Agent Creation ===")
 
     agent_config = {
@@ -51,7 +51,7 @@ async def example_1_basic_agent():
 
 
 async def example_2_coalition_formation():
-    """Example 2: Coalition formation"""
+    ."""Example 2: Coalition formation."""
     print("\n=== EXAMPLE 2: Coalition Formation ===")
 
     # Create multiple agents for coalition
@@ -102,7 +102,7 @@ async def example_2_coalition_formation():
 
 
 async def example_3_communication():
-    """Example 3: Communication patterns"""
+    ."""Example 3: Communication patterns."""
     print("\n=== EXAMPLE 3: Communication Patterns ===")
 
     messages = []
@@ -165,11 +165,11 @@ async def example_3_communication():
 
 
 async def example_4_error_handling():
-    """Example 4: Error handling and validation"""
+    ."""Example 4: Error handling and validation."""
     print("\n=== EXAMPLE 4: Error Handling ===")
 
     def validate_agent_config(config):
-        """Validate agent configuration"""
+        ."""Validate agent configuration."""
         errors = []
 
         # Name validation
@@ -177,7 +177,8 @@ async def example_4_error_handling():
             errors.append("Agent name must be at least 3 characters")
 
         # Type validation
-        valid_types = ["explorer", "monitor", "coordinator", "specialist", "guardian"]
+        valid_types = (
+            ["explorer", "monitor", "coordinator", "specialist", "guardian"])
         if config.get("agent_type") not in valid_types:
             errors.append(f"Invalid agent type: {config.get('agent_type')}")
 
@@ -224,12 +225,12 @@ async def example_4_error_handling():
 
 
 async def example_5_performance():
-    """Example 5: Performance optimization"""
+    ."""Example 5: Performance optimization."""
     print("\n=== EXAMPLE 5: Performance Optimization ===")
 
     # Batch creation simulation
     async def create_agents_batch(count, batch_size=5):
-        """Simulate batch agent creation"""
+        ."""Simulate batch agent creation."""
         results = []
 
         for i in range(0, count, batch_size):
@@ -243,7 +244,8 @@ async def example_5_performance():
                 agent_id = str(uuid4())
                 agent_name = f"Batch-Agent-{i+j+1:03d}"
 
-                result = {"agent_id": agent_id, "name": agent_name, "status": "created"}
+                result = (
+                    {"agent_id": agent_id, "name": agent_name, "status": "created"})
                 results.append(result)
                 await asyncio.sleep(0.01)  # Simulate processing time
 
@@ -284,7 +286,7 @@ async def example_5_performance():
 
 
 async def main():
-    """Run all examples"""
+    ."""Run all examples."""
     print("🤖 FreeAgentics Agent Creation Examples")
     print("=" * 50)
 

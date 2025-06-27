@@ -1,4 +1,4 @@
-"""
+."""
 Model Compression Utilities
 
 Implements various compression techniques to reduce model size for edge deployment.
@@ -137,7 +137,8 @@ class ModelCompressor:
 
             # 1. Quantize parameters
             if config["quantize_bits"] < 32:
-                quant_stats = self._quantize_parameters(gnn, config["quantize_bits"])
+                quant_stats = (
+                    self._quantize_parameters(gnn, config["quantize_bits"]))
                 params_quantized = quant_stats["count"]
                 precision_losses.append(quant_stats["precision_loss"])
 
@@ -166,14 +167,16 @@ class ModelCompressor:
             parameters_quantized=params_quantized,
             nodes_pruned=nodes_pruned,
             edges_pruned=edges_pruned,
-            precision_loss=np.mean(precision_losses) if precision_losses else 0.0,
+            precision_loss= (
+                np.mean(precision_losses) if precision_losses else 0.0,)
         )
 
         logger.info(f"Compression complete: {stats.compression_ratio:.2f}x reduction")
 
         return compressed, stats
 
-    def _quantize_parameters(self, gnn: Dict[str, Any], bits: int) -> Dict[str, Any]:
+    def _quantize_parameters(self, gnn: Dict[str, Any], bits: int) -> Dict[str,
+        Any]:
         """Quantize floating point parameters to reduce precision."""
         stats = {"count": 0, "precision_loss": 0.0}
         losses = []
@@ -222,7 +225,8 @@ class ModelCompressor:
         else:
             return value
 
-    def _prune_graph(self, gnn: Dict[str, Any], threshold: float) -> Dict[str, Any]:
+    def _prune_graph(self, gnn: Dict[str, Any], threshold: float) -> Dict[str,
+        Any]:
         """Prune low-importance nodes and edges."""
         stats = {"nodes_pruned": 0, "edges_pruned": 0}
 
@@ -234,7 +238,8 @@ class ModelCompressor:
                 importance = 0.0
                 if "parameters" in node:
                     values = [
-                        abs(v) for v in node["parameters"].values() if isinstance(v, (int, float))
+                        abs(v) for v in node["parameters"].values() if isinstance(v, (int,
+                            float))
                     ]
                     importance = np.mean(values) if values else 0.0
                 node_importance[node["id"]] = importance
@@ -242,7 +247,8 @@ class ModelCompressor:
             # Prune nodes below threshold
             original_count = len(gnn["nodes"])
             gnn["nodes"] = [
-                node for node in gnn["nodes"] if node_importance.get(node["id"], 0) >= threshold
+                node for node in gnn["nodes"] if node_importance.get(node["id"],
+                    0) >= threshold
             ]
             stats["nodes_pruned"] = original_count - len(gnn["nodes"])
 
@@ -368,7 +374,8 @@ class ModelCompressor:
         # Parse JSON
         return json.loads(decompressed.decode("utf-8"))
 
-    def estimate_runtime_memory(self, model_data: Dict[str, Any]) -> Dict[str, float]:
+    def estimate_runtime_memory(self, model_data: Dict[str, Any]) -> Dict[str,
+        float]:
         """
         Estimate runtime memory requirements.
 
@@ -407,7 +414,8 @@ class ModelCompressor:
 
         # Knowledge graph estimate
         if "knowledge_size" in model_data:
-            estimates["knowledge_graph"] = model_data["knowledge_size"] / (1024 * 1024)
+            estimates["knowledge_graph"] = (
+                model_data["knowledge_size"] / (1024 * 1024))
         else:
             estimates["knowledge_graph"] = 50.0  # Default 50MB
 
@@ -468,7 +476,8 @@ class ModelCompressor:
             for node in comp_gnn.get("nodes", []):
                 if "parameters" in node:
                     for key, value in node["parameters"].items():
-                        if not isinstance(value, (int, float, str, bool, type(None))):
+                        if not isinstance(value, (int, float, str, bool,
+                            type(None))):
                             results["parameters_valid"] = False
                             break
 

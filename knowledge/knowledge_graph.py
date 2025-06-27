@@ -155,7 +155,8 @@ class KnowledgeGraph:
         Args:
             source_id: Source node ID
             target_id: Target node ID
-            relationship_type: Type of relationship (e.g., "supports", "contradicts")
+            relationship_type: Type of relationship (e.g., "supports",
+                "contradicts")
             strength: Strength of the relationship (0.0 to 1.0)
             metadata: Additional metadata
 
@@ -180,7 +181,8 @@ class KnowledgeGraph:
         self.node_relationships[source_id].add(target_id)
         self.node_relationships[target_id].add(source_id)
 
-        logger.debug(f"Added relationship {relationship_type} between {source_id} and {target_id}")
+        logger.debug(f"Added relationship {relationship_type} between {source_id} and
+            {target_id}")
         return edge
 
     def query_beliefs(
@@ -255,13 +257,15 @@ class KnowledgeGraph:
         belief_statement = f"Agent {sender_id} communicated: {message_content}"
 
         # Check if similar belief exists
-        existing_beliefs = self.query_beliefs(pattern=f"Agent {sender_id} communicated")
+        existing_beliefs = (
+            self.query_beliefs(pattern=f"Agent {sender_id} communicated"))
 
         if existing_beliefs:
             # Update existing belief
             node = existing_beliefs[0]
             node.statement = belief_statement
-            node.confidence = min(1.0, node.confidence + 0.1)  # Increase confidence slightly
+            node.confidence = (
+                min(1.0, node.confidence + 0.1)  # Increase confidence slightly)
             node.updated_at = datetime.utcnow()
             updated_nodes.append(node)
         else:
@@ -341,7 +345,8 @@ class KnowledgeGraph:
 class PatternExtractor:
     """Extract patterns and relationships from data for knowledge graphs."""
 
-    def __init__(self, min_support: float = 0.1, min_confidence: float = 0.5) -> None:
+    def __init__(self, min_support: float = (
+        0.1, min_confidence: float = 0.5) -> None:)
         """
         Initialize pattern extractor.
 
@@ -356,7 +361,8 @@ class PatternExtractor:
 
         logger.info("PatternExtractor initialized")
 
-    def extract_patterns(self, data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def extract_patterns(self, data: List[Dict[str, Any]]) -> List[Dict[str,
+        Any]]:
         """
         Extract patterns from structured data.
 
@@ -406,7 +412,8 @@ class PatternExtractor:
         logger.info(f"Extracted {len(patterns)} patterns")
         return patterns
 
-    def extract_relationships(self, data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def extract_relationships(self, data: List[Dict[str, Any]]) -> List[Dict[str,
+        Any]]:
         """
         Extract relationships between attributes.
 
@@ -480,7 +487,8 @@ class PatternExtractor:
         }
 
     def filter_patterns(
-        self, pattern_type: Optional[str] = None, min_support: Optional[float] = None
+        self, pattern_type: Optional[str] = (
+            None, min_support: Optional[float] = None)
     ) -> List[Dict[str, Any]]:
         """Filter patterns by type and support."""
         filtered = self.patterns

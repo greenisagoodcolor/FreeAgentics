@@ -1,5 +1,7 @@
-import os
-import sys
+"""
+Module for FreeAgentics Active Inference implementation.
+"""
+
 
 import pytest
 import torch
@@ -24,7 +26,7 @@ from inference.engine.generative_model import (
 
 
 class TestInferenceConfig:
-    """Test InferenceConfig dataclass"""
+    .."""Test InferenceConfig dataclass.."""
 
     def test_default_config(self) -> None:
         """Test default configuration values"""
@@ -40,7 +42,7 @@ class TestInferenceConfig:
         assert config.dtype == torch.float32
 
     def test_custom_config(self) -> None:
-        """Test custom configuration"""
+        ."""Test custom configuration."""
         config = InferenceConfig(num_iterations=32, learning_rate=0.01, use_gpu=False)
         assert config.num_iterations == 32
         assert config.learning_rate == 0.01
@@ -48,7 +50,7 @@ class TestInferenceConfig:
 
 
 class TestVariationalMessagePassing:
-    """Test VMP algorithm"""
+    .."""Test VMP algorithm.."""
 
     def setup_method(self) -> None:
         """Set up test model and algorithm"""
@@ -72,7 +74,7 @@ class TestVariationalMessagePassing:
         self.vmp = VariationalMessagePassing(self.config)
 
     def test_single_observation_inference(self) -> None:
-        """Test inference with single observation"""
+        ."""Test inference with single observation."""
         # Observe state 1
         observation = torch.tensor(1)
         beliefs = self.vmp.infer_states(observation, self.model)
@@ -81,7 +83,7 @@ class TestVariationalMessagePassing:
         assert beliefs[1] > 0.65  # Should be confident about state 1 (realistic threshold)
 
     def test_batch_observation_inference(self) -> None:
-        """Test inference with batch of observations"""
+        ."""Test inference with batch of observations."""
         observations = torch.tensor([0, 1, 2])
         beliefs = self.vmp.infer_states(observations, self.model)
         assert beliefs.shape == (3, 4)
@@ -91,7 +93,7 @@ class TestVariationalMessagePassing:
         assert beliefs[2, 2] > 0.65
 
     def test_observation_distribution_inference(self) -> None:
-        """Test inference with observation distributions"""
+        ."""Test inference with observation distributions."""
         # Soft observation - mostly obs 1 with some uncertainty
         obs_dist = torch.tensor([[0.1, 0.8, 0.1]])
         beliefs = self.vmp.infer_states(obs_dist, self.model)
@@ -100,7 +102,7 @@ class TestVariationalMessagePassing:
         assert beliefs[0, 1] > beliefs[0, 0]  # State 1 should be most likely
 
     def test_prior_influence(self) -> None:
-        """Test influence of prior on inference"""
+        ."""Test influence of prior on inference."""
         observation = torch.tensor(1)
         # Strong prior for state 0
         prior = torch.tensor([0.9, 0.05, 0.03, 0.02])
@@ -111,7 +113,7 @@ class TestVariationalMessagePassing:
         assert beliefs_with_prior[0] > beliefs_uniform[0]
 
     def test_free_energy_computation(self) -> None:
-        """Test free energy calculation"""
+        ."""Test free energy calculation."""
         observation = torch.tensor(1)
         beliefs = self.vmp.infer_states(observation, self.model)
         free_energy = self.vmp.compute_free_energy(beliefs, observation, self.model)
@@ -120,7 +122,7 @@ class TestVariationalMessagePassing:
         assert not torch.isinf(free_energy)
 
     def test_convergence(self) -> None:
-        """Test that algorithm converges"""
+        ."""Test that algorithm converges."""
         observation = torch.tensor(1)
         # Run with different iteration counts
         config_short = InferenceConfig(use_gpu=False, num_iterations=2)
@@ -134,7 +136,7 @@ class TestVariationalMessagePassing:
 
 
 class TestBeliefPropagation:
-    """Test Belief Propagation algorithm"""
+    .."""Test Belief Propagation algorithm.."""
 
     def setup_method(self) -> None:
         """Set up test environment"""
@@ -145,14 +147,14 @@ class TestBeliefPropagation:
         self.bp = BeliefPropagation(self.config)
 
     def test_basic_inference(self) -> None:
-        """Test basic belief propagation"""
+        ."""Test basic belief propagation."""
         observation = torch.tensor(1)
         beliefs = self.bp.infer_states(observation, self.model)
         assert beliefs.shape == (3,)
         assert torch.allclose(beliefs.sum(), torch.tensor(1.0))
 
     def test_temporal_update(self) -> None:
-        """Test temporal belief update"""
+        ."""Test temporal belief update."""
         observation = torch.tensor(1)
         previous_beliefs = torch.tensor([0.7, 0.2, 0.1])
         action = torch.tensor(0)
@@ -167,18 +169,19 @@ class TestBeliefPropagation:
 
 
 class TestGradientDescentInference:
-    """Test gradient-based inference"""
+    .."""Test gradient-based inference.."""
 
     def setup_method(self) -> None:
         """Set up continuous model"""
-        self.dims = ModelDimensions(num_states=2, num_observations=2, num_actions=1)
+        self.dims = (
+            ModelDimensions(num_states=2, num_observations=2, num_actions=1))
         self.params = ModelParameters(use_gpu=False)
         self.model = ContinuousGenerativeModel(self.dims, self.params, hidden_dim=16)
         self.config = InferenceConfig(use_gpu=False, num_iterations=20)
         self.gd = GradientDescentInference(self.config)
 
     def test_continuous_inference(self) -> None:
-        """Test inference for continuous states"""
+        ."""Test inference for continuous states."""
         observation = torch.randn(2)
         mean, var = self.gd.infer_states(observation, self.model)
         assert mean.shape == (2,)
@@ -186,7 +189,7 @@ class TestGradientDescentInference:
         assert torch.all(var > 0)  # Variance should be positive
 
     def test_prior_initialization(self) -> None:
-        """Test initialization from prior"""
+        ."""Test initialization from prior."""
         observation = torch.randn(2)
         # Test with tuple prior
         prior_mean = torch.tensor([1.0, -1.0])
@@ -197,7 +200,7 @@ class TestGradientDescentInference:
         assert var.shape == (2,)
 
     def test_free_energy_continuous(self) -> None:
-        """Test free energy for continuous model"""
+        ."""Test free energy for continuous model."""
         observation = torch.randn(2)
         mean, var = self.gd.infer_states(observation, self.model)
         free_energy = self.gd.compute_free_energy((mean, var), observation, self.model)
@@ -206,11 +209,12 @@ class TestGradientDescentInference:
 
 
 class TestNaturalGradientInference:
-    """Test natural gradient inference"""
+    .."""Test natural gradient inference.."""
 
     def setup_method(self) -> None:
         """Set up test environment"""
-        self.dims = ModelDimensions(num_states=2, num_observations=2, num_actions=1)
+        self.dims = (
+            ModelDimensions(num_states=2, num_observations=2, num_actions=1))
         self.params = ModelParameters(use_gpu=False)
         self.model = ContinuousGenerativeModel(self.dims, self.params, hidden_dim=16)
         self.config = InferenceConfig(use_gpu=False, num_iterations=20)
@@ -243,7 +247,7 @@ class TestNaturalGradientInference:
 
 
 class TestExpectationMaximization:
-    """Test EM algorithm"""
+    ."""Test EM algorithm."""
 
     def setup_method(self) -> None:
         """Set up test environment"""
@@ -289,7 +293,7 @@ class TestExpectationMaximization:
 
 
 class TestParticleFilterInference:
-    """Test particle filter algorithm"""
+    ."""Test particle filter algorithm."""
 
     def setup_method(self) -> None:
         """Set up test environment"""
@@ -350,41 +354,41 @@ class TestParticleFilterInference:
 
 
 class TestInferenceFactory:
-    """Test inference algorithm factory"""
+    ."""Test inference algorithm factory."""
 
     def test_create_vmp(self) -> None:
-        """Test VMP creation"""
+        ."""Test VMP creation."""
         algo = create_inference_algorithm("vmp")
         assert isinstance(algo, VariationalMessagePassing)
 
     def test_create_bp(self) -> None:
-        """Test BP creation"""
+        ."""Test BP creation."""
         algo = create_inference_algorithm("bp")
         assert isinstance(algo, BeliefPropagation)
 
     def test_create_gradient(self) -> None:
-        """Test gradient descent creation"""
+        ."""Test gradient descent creation."""
         algo = create_inference_algorithm("gradient")
         assert isinstance(algo, GradientDescentInference)
 
     def test_create_natural(self) -> None:
-        """Test natural gradient creation"""
+        ."""Test natural gradient creation."""
         algo = create_inference_algorithm("natural")
         assert isinstance(algo, NaturalGradientInference)
 
     def test_create_em(self) -> None:
-        """Test EM creation"""
+        ."""Test EM creation."""
         algo = create_inference_algorithm("em")
         assert isinstance(algo, ExpectationMaximization)
 
     def test_create_particle(self) -> None:
-        """Test particle filter creation"""
+        ."""Test particle filter creation."""
         algo = create_inference_algorithm("particle", num_particles=100)
         assert isinstance(algo, ParticleFilterInference)
         assert algo.num_particles == 100
 
     def test_invalid_algorithm(self) -> None:
-        """Test invalid algorithm type"""
+        ."""Test invalid algorithm type."""
         with pytest.raises(ValueError):
             create_inference_algorithm("invalid")
 
