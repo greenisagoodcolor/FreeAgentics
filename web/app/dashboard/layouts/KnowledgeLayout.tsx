@@ -2,84 +2,66 @@
 
 import React from 'react';
 import { DashboardView } from '../page';
-
-interface PanelConfig {
-  id: string;
-  component: React.ComponentType<any>;
-  title: string;
-}
+import AgentPanel from '../components/panels/AgentPanel';
+import AnalyticsPanel from '../components/panels/AnalyticsPanel';
+import KnowledgePanel from '../components/panels/KnowledgePanel';
 
 interface KnowledgeLayoutProps {
   view: DashboardView;
-  panels: PanelConfig[];
 }
 
-export default function KnowledgeLayout({ view, panels }: KnowledgeLayoutProps) {
-  const getPanelComponent = (panelId: string) => {
-    const panel = panels.find(p => p.id === panelId);
-    if (!panel) return null;
-    
-    const Component = panel.component;
-    return (
-      <div className="h-full flex flex-col">
-        <div className="bg-[var(--bg-tertiary)] px-4 py-2 border-b border-[var(--bg-quaternary)]">
-          <h3 className="text-sm font-semibold text-[var(--text-primary)]">
-            {panel.title}
-          </h3>
-        </div>
-        <div className="flex-1 overflow-hidden">
-          <Component view={view} />
-        </div>
-      </div>
-    );
-  };
-
+export default function KnowledgeLayout({ view }: KnowledgeLayoutProps) {
   return (
-    <div className="h-full bg-[var(--bg-primary)] knowledge-layout p-1">
-      {/* Knowledge-Centric Grid Layout */}
-      <div className="h-full grid grid-cols-12 grid-rows-12 gap-1">
-        {/* Main Knowledge Graph - Takes center stage */}
-        <div className="col-span-8 row-span-10 bg-[var(--bg-secondary)] border border-[var(--bg-tertiary)] rounded overflow-hidden">
-          {getPanelComponent('knowledge')}
-        </div>
+    <div className="knowledge-layout h-full bg-primary">
+      {/* Research-focused Layout */}
+      <div className="h-full flex gap-1 p-1">
         
-        {/* Right Side - Analytics */}
-        <div className="col-span-4 row-span-6 bg-[var(--bg-secondary)] border border-[var(--bg-tertiary)] rounded overflow-hidden">
-          {getPanelComponent('analytics')}
-        </div>
-        
-        {/* Right Side - Agents */}
-        <div className="col-span-4 row-span-4 bg-[var(--bg-secondary)] border border-[var(--bg-tertiary)] rounded overflow-hidden">
-          {getPanelComponent('agents')}
-        </div>
-        
-        {/* Bottom Row - Knowledge Insights/Controls */}
-        <div className="col-span-12 row-span-2 bg-[var(--bg-secondary)] border border-[var(--bg-tertiary)] rounded">
-          <div className="h-full p-4 flex items-center justify-between text-sm">
-            <div className="flex items-center gap-6">
-              <span className="text-[var(--text-secondary)]">
-                KNOWLEDGE NODES: {/* Will be populated by knowledge panel */}
-              </span>
-              <span className="text-[var(--text-secondary)]">
-                CONNECTIONS: {/* Will be populated by knowledge panel */}
-              </span>
-              <span className="text-[var(--text-secondary)]">
-                CONFIDENCE: {/* Will be populated by knowledge panel */}
-              </span>
+        {/* Main Knowledge Graph */}
+        <div className="flex-1">
+          <div className="card h-full">
+            <div className="card-header border-b border-primary-amber">
+              <h2 className="card-title text-primary-amber">KNOWLEDGE GRAPH</h2>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="status-dot active"></div>
+                  <span className="text-xs font-mono text-text-secondary">LIVE UPDATES</span>
+                </div>
+                <button className="button button-xs button-secondary">
+                  Export
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-              <button className="px-3 py-1 bg-[var(--accent-primary)] text-white rounded text-xs">
-                Export Graph
-              </button>
-              <button className="px-3 py-1 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded text-xs">
-                Filter Nodes
-              </button>
-              <button className="px-3 py-1 bg-[var(--bg-tertiary)] text-[var(--text-primary)] rounded text-xs">
-                Analyze Patterns
-              </button>
+            <div className="card-content p-0">
+              <KnowledgePanel view={view} />
             </div>
           </div>
         </div>
+
+        {/* Right Sidebar */}
+        <div className="w-80 flex flex-col gap-1">
+          
+          {/* Analytics Panel */}
+          <div className="card h-1/2">
+            <div className="card-header">
+              <h2 className="card-title text-primary-amber">ANALYTICS</h2>
+            </div>
+            <div className="card-content p-0">
+              <AnalyticsPanel view={view} />
+            </div>
+          </div>
+
+          {/* Agent Control Panel */}
+          <div className="card h-1/2">
+            <div className="card-header">
+              <h2 className="card-title text-primary-amber">RESEARCH AGENTS</h2>
+            </div>
+            <div className="card-content p-0">
+              <AgentPanel view={view} />
+            </div>
+          </div>
+
+        </div>
+
       </div>
     </div>
   );

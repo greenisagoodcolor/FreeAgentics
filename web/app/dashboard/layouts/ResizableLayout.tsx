@@ -1,97 +1,72 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { DashboardView } from '../page';
-
-interface PanelConfig {
-  id: string;
-  component: React.ComponentType<any>;
-  title: string;
-}
+import AgentPanel from '../components/panels/AgentPanel';
+import ConversationPanel from '../components/panels/ConversationPanel';
+import AnalyticsPanel from '../components/panels/AnalyticsPanel';
+import KnowledgePanel from '../components/panels/KnowledgePanel';
 
 interface ResizableLayoutProps {
   view: DashboardView;
-  panels: PanelConfig[];
 }
 
-export default function ResizableLayout({ view, panels }: ResizableLayoutProps) {
-  const [panelSizes, setPanelSizes] = useState<Record<string, number>>({
-    left: 25,
-    center: 50,
-    right: 25,
-  });
-
-  const getPanelComponent = (panelId: string) => {
-    const panel = panels.find(p => p.id === panelId);
-    if (!panel) return null;
-    
-    const Component = panel.component;
-    return (
-      <div className="h-full flex flex-col">
-        <div className="bg-[var(--bg-tertiary)] px-4 py-2 border-b border-[var(--bg-quaternary)]">
-          <h3 className="text-sm font-semibold text-[var(--text-primary)]">
-            {panel.title}
-          </h3>
-        </div>
-        <div className="flex-1 overflow-hidden">
-          <Component view={view} />
-        </div>
-      </div>
-    );
-  };
-
-  // Arrange panels based on view configuration
-  const arrangePanels = () => {
-    if (view.id === 'minimal') {
-      // Two-panel layout for minimal view
-      return (
-        <div className="h-full flex gap-1">
-          <div 
-            className="bg-[var(--bg-secondary)] border border-[var(--bg-tertiary)] rounded overflow-hidden"
-            style={{ width: `${panelSizes.left}%` }}
-          >
-            {getPanelComponent('conversation')}
-          </div>
-          <div 
-            className="bg-[var(--bg-secondary)] border border-[var(--bg-tertiary)] rounded overflow-hidden"
-            style={{ width: `${100 - panelSizes.left}%` }}
-          >
-            {getPanelComponent('agents')}
-          </div>
-        </div>
-      );
-    }
-
-    // Three-panel layout for technical view
-    return (
-      <div className="h-full flex gap-1">
-        <div 
-          className="bg-[var(--bg-secondary)] border border-[var(--bg-tertiary)] rounded overflow-hidden"
-          style={{ width: `${panelSizes.left}%` }}
-        >
-          {getPanelComponent('agents')}
-        </div>
-        <div 
-          className="bg-[var(--bg-secondary)] border border-[var(--bg-tertiary)] rounded overflow-hidden"
-          style={{ width: `${panelSizes.center}%` }}
-        >
-          {getPanelComponent('conversation')}
-        </div>
-        <div className="flex flex-col gap-1" style={{ width: `${panelSizes.right}%` }}>
-          <div className="flex-1 bg-[var(--bg-secondary)] border border-[var(--bg-tertiary)] rounded overflow-hidden">
-            {getPanelComponent('analytics')}
-          </div>
-          <div className="flex-1 bg-[var(--bg-secondary)] border border-[var(--bg-tertiary)] rounded overflow-hidden">
-            {getPanelComponent('controls')}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
+export default function ResizableLayout({ view }: ResizableLayoutProps) {
   return (
-    <div className="h-full bg-[var(--bg-primary)] p-1">
-      {arrangePanels()}
+    <div className="resizable-layout h-full" style={{ background: 'var(--bg-primary)' }}>
+      {/* Technical Dashboard Layout */}
+      <div className="flex h-full gap-1 p-1">
+        
+        {/* Left Panel: Agent Management */}
+        <div className="w-1/4 flex flex-col gap-1">
+          <div className="card h-1/2">
+            <div className="card-header">
+              <h2 className="card-title" style={{ color: 'var(--primary-amber)' }}>AGENTS</h2>
+            </div>
+            <div className="card-content p-0">
+              <AgentPanel view={view} />
+            </div>
+          </div>
+          
+          <div className="card h-1/2">
+            <div className="card-header">
+              <h2 className="card-title" style={{ color: 'var(--primary-amber)' }}>ANALYTICS</h2>
+            </div>
+            <div className="card-content p-0">
+              <AnalyticsPanel view={view} />
+            </div>
+          </div>
+        </div>
+
+        {/* Center Panel: Conversation */}
+        <div className="flex-1">
+          <div className="card h-full">
+            <div className="card-header" style={{ borderBottom: '1px solid var(--primary-amber)' }}>
+              <h2 className="card-title" style={{ color: 'var(--primary-amber)' }}>CONVERSATION</h2>
+              <div className="flex items-center gap-2">
+                <div className="status-dot active"></div>
+                <span className="text-xs font-mono" style={{ color: 'var(--text-secondary)' }}>LIVE</span>
+              </div>
+            </div>
+            <div className="card-content p-0">
+              <ConversationPanel view={view} />
+            </div>
+          </div>
+        </div>
+
+        {/* Right Panel: Knowledge Graph */}
+        <div className="w-1/3">
+          <div className="card h-full">
+            <div className="card-header" style={{ borderBottom: '1px solid var(--primary-amber)' }}>
+              <h2 className="card-title" style={{ color: 'var(--primary-amber)' }}>KNOWLEDGE</h2>
+            </div>
+            <div className="card-content p-0">
+              <KnowledgePanel view={view} />
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 } 

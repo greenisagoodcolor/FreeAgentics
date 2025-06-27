@@ -31,16 +31,21 @@ export default function DashboardPage({}: DashboardPageProps) {
   };
 
   return (
-    <div className="dashboard-container bg-primary min-h-screen">
+    <div className="dashboard-container" style={{ background: 'var(--bg-primary)', minHeight: '100vh' }}>
       {/* Bloomberg-style Command Bar */}
-      <div className="command-bar bg-secondary border-b border-tertiary h-12 flex items-center justify-between px-6">
+      <div className="command-bar h-12 flex items-center justify-between px-6" style={{ 
+        background: 'var(--bg-secondary)', 
+        borderBottom: '1px solid var(--bg-tertiary)' 
+      }}>
         {/* Left: Logo & Navigation */}
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary-amber rounded-md flex items-center justify-center">
-              <span className="text-bg-primary font-bold text-sm">CN</span>
+            <div className="w-8 h-8 rounded-md flex items-center justify-center" style={{ 
+              background: 'var(--primary-amber)' 
+            }}>
+              <span className="font-bold text-sm" style={{ color: 'var(--bg-primary)' }}>CN</span>
             </div>
-            <h1 className="text-text-primary font-semibold text-lg">CogniticNet</h1>
+            <h1 className="font-semibold text-lg" style={{ color: 'var(--text-primary)' }}>CogniticNet</h1>
           </div>
           
           {/* View Selector */}
@@ -53,7 +58,7 @@ export default function DashboardPage({}: DashboardPageProps) {
                   currentView === view 
                     ? 'button-primary' 
                     : 'button-ghost'
-                } transition-all duration-fast`}
+                }`}
               >
                 {view.charAt(0).toUpperCase() + view.slice(1)}
               </button>
@@ -65,9 +70,9 @@ export default function DashboardPage({}: DashboardPageProps) {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <div className="status-dot active"></div>
-            <span className="text-text-secondary text-sm font-mono">SYSTEM ONLINE</span>
+            <span className="text-sm font-mono" style={{ color: 'var(--text-secondary)' }}>SYSTEM ONLINE</span>
           </div>
-          <div className="text-text-tertiary text-sm font-mono">
+          <div className="text-sm font-mono" style={{ color: 'var(--text-tertiary)' }}>
             {new Date().toLocaleTimeString()}
           </div>
         </div>
