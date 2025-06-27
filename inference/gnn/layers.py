@@ -12,7 +12,7 @@ from typing import Any, List, Optional, Union
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch_geometric.nn import MessagePassing  # type: ignore[import-untyped]
+from torch_geometric.nn import MessagePassing, GCNConv, GATConv, SAGEConv, GINConv, EdgeConv  # type: ignore[import-untyped]
 from torch_geometric.utils import degree  # type: ignore[import-untyped]
 from torch_geometric.utils import add_self_loops
 
@@ -52,8 +52,8 @@ class LayerConfig:
         self.residual = residual
 
 
-class GCNLayer(MessagePassing):
-    """Graph Convolutional Network layer implementation"""
+class GCNLayer(nn.Module):
+    """Graph Convolutional Network layer using PyTorch Geometric"""
 
     def __init__(
         self,
@@ -64,7 +64,7 @@ class GCNLayer(MessagePassing):
         bias: bool = True,
         normalize: bool = True,
     ) -> None:
-        super().__init__(aggr="add")
+        super().__init__()
 
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -72,47 +72,36 @@ class GCNLayer(MessagePassing):
         self.cached = cached
         self.normalize = normalize
 
-        self.lin = nn.Linear(in_channels, out_channels, bias=bias)
-
-        self.reset_parameters()
+        self.conv = GCNConv(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            improved=improved,
+            cached=cached,
+            bias=bias,
+            normalize=normalize,
+        )
 
     @property
     def bias(self) -> Optional[torch.Tensor]:
-        """Access bias parameter from linear layer"""
-        return self.lin.bias
+        """Access bias parameter from underlying layer"""
+        return self.conv.bias
+
+    @property
+    def lin(self) -> nn.Module:
+        """Access linear layer for compatibility"""
+        return self.conv.lin
 
     def reset_parameters(self) -> None:
         """Reset layer parameters"""
-        self.lin.reset_parameters()
+        self.conv.reset_parameters()
 
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
         """Forward pass through GCN layer"""
-        # Add self-loops to the adjacency matrix
-        if self.normalize:
-            edge_index, _ = add_self_loops(edge_index, num_nodes=x.size(0))
-
-        # Linear transformation
-        x = self.lin(x)
-
-        # Normalize node features by degree
-        if self.normalize:
-            row, col = edge_index
-            deg = degree(col, x.size(0), dtype=x.dtype)
-            deg_inv_sqrt = deg.pow(-0.5)
-            deg_inv_sqrt[deg_inv_sqrt == float("inf")] = 0
-            norm = deg_inv_sqrt[row] * deg_inv_sqrt[col]
-
-            return self.propagate(edge_index, size=None, x=x, norm=norm)  # type: ignore[no-any-return]
-        else:
-            return self.propagate(edge_index, size=None, x=x)  # type: ignore[no-any-return]
-
-    def message(self, x_j: torch.Tensor, norm: Optional[torch.Tensor] = None) -> torch.Tensor:
-        """Construct messages from neighbors"""
-        return norm.view(-1, 1) * x_j if norm is not None else x_j
+        return self.conv(x, edge_index)  # type: ignore[no-any-return]
 
 
-class GATLayer(MessagePassing):
-    """Graph Attention Network layer implementation"""
+class GATLayer(nn.Module):
+    """Graph Attention Network layer using PyTorch Geometric"""
 
     def __init__(
         self,
@@ -124,74 +113,42 @@ class GATLayer(MessagePassing):
         dropout: float = 0.0,
         bias: bool = True,
     ) -> None:
-        super().__init__(aggr="add", node_dim=0)
+        super().__init__()
 
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.heads = heads
         self.concat = concat
         self.negative_slope = negative_slope
-        self.dropout = dropout
+        self.dropout_p = dropout
 
-        self.lin = nn.Linear(in_channels, heads * out_channels, bias=False)
-        self.att = nn.Parameter(torch.Tensor(1, heads, 2 * out_channels))
+        self.conv = GATConv(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            heads=heads,
+            concat=concat,
+            negative_slope=negative_slope,
+            dropout=dropout,
+            bias=bias,
+        )
 
-        if bias and concat:
-            self.bias = nn.Parameter(torch.Tensor(heads * out_channels))
-        elif bias and not concat:
-            self.bias = nn.Parameter(torch.Tensor(out_channels))
-        else:
-            self.register_parameter("bias", None)
+    @property
+    def bias(self) -> Optional[torch.Tensor]:
+        """Access bias parameter from underlying layer"""
+        return self.conv.bias
 
-        self.reset_parameters()
+    @property
+    def lin(self) -> nn.Module:
+        """Access linear layer for compatibility"""
+        return self.conv.lin
 
     def reset_parameters(self) -> None:
         """Reset layer parameters"""
-        nn.init.xavier_uniform_(self.lin.weight)
-        nn.init.xavier_uniform_(self.att)
-        if self.bias is not None:
-            nn.init.constant_(self.bias, 0)
+        self.conv.reset_parameters()
 
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
         """Forward pass through GAT layer"""
-        H, C = self.heads, self.out_channels
-
-        # Linear transformation and reshape
-        x = self.lin(x).view(-1, H, C)
-
-        # Add self-loops
-        edge_index, _ = add_self_loops(edge_index, num_nodes=x.size(0))
-
-        return self.propagate(edge_index, x=x)  # type: ignore[no-any-return]
-
-    def message(
-        self, x_i: torch.Tensor, x_j: torch.Tensor, edge_index_i: torch.Tensor
-    ) -> torch.Tensor:
-        """Construct attention-weighted messages"""
-        # Concatenate node features
-        alpha = torch.cat([x_i, x_j], dim=-1)  # [E, H, 2*C]
-
-        # Compute attention coefficients
-        alpha = (alpha * self.att).sum(dim=-1)  # [E, H]
-        alpha = F.leaky_relu(alpha, self.negative_slope)
-        alpha = F.softmax(alpha, dim=1)
-
-        # Apply dropout to attention coefficients
-        alpha = F.dropout(alpha, p=self.dropout, training=self.training)
-
-        return x_j * alpha.unsqueeze(-1)
-
-    def update(self, aggr_out: torch.Tensor) -> torch.Tensor:
-        """Update node embeddings"""
-        if self.concat:
-            aggr_out = aggr_out.view(-1, self.heads * self.out_channels)
-        else:
-            aggr_out = aggr_out.mean(dim=1)
-
-        if self.bias is not None:
-            aggr_out += self.bias
-
-        return aggr_out
+        return self.conv(x, edge_index)  # type: ignore[no-any-return]
 
 
 class GNNStack(nn.Module):
@@ -225,8 +182,33 @@ class GNNStack(nn.Module):
                     dropout=config.dropout,
                     bias=config.bias,
                 )
+            elif self.layer_type == "sage":
+                layer = SAGELayer(
+                    in_channels=config.in_channels,
+                    out_channels=config.out_channels,
+                    bias=config.bias,
+                )
+            elif self.layer_type == "gin":
+                layer = GINLayer(
+                    in_channels=config.in_channels,
+                    out_channels=config.out_channels,
+                )
+            elif self.layer_type == "edgeconv":
+                layer = EdgeConvLayer(
+                    in_channels=config.in_channels,
+                    out_channels=config.out_channels,
+                )
             else:
                 raise ValueError(f"Unknown layer type: {self.layer_type}")
+
+            # Wrap with ResGNNLayer if residual connections are requested
+            if config.residual:
+                layer = ResGNNLayer(
+                    layer=layer,
+                    in_channels=config.in_channels,
+                    out_channels=config.out_channels,
+                    dropout=config.dropout,
+                )
 
             self.layers.append(layer)
 
@@ -317,8 +299,8 @@ def scatter_max(
     return out.scatter_reduce_(dim, index.expand_as(src), src, "amax"), arg_out
 
 
-class SAGELayer(MessagePassing):
-    """GraphSAGE layer implementation"""
+class SAGELayer(nn.Module):
+    """GraphSAGE layer using PyTorch Geometric"""
 
     def __init__(
         self, in_channels: int, out_channels: int, aggregation: str = "mean", bias: bool = True
@@ -332,21 +314,31 @@ class SAGELayer(MessagePassing):
             aggregation: Aggregation method ('mean', 'max', 'sum')
             bias: Whether to use bias
         """
-        super().__init__(aggr=aggregation)
+        super().__init__()
 
         self.in_channels = in_channels
         self.out_channels = out_channels
 
-        # Linear transformations
-        self.lin_self = nn.Linear(in_channels, out_channels, bias=bias)
-        self.lin_neighbor = nn.Linear(in_channels, out_channels, bias=bias)
+        self.conv = SAGEConv(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            aggr=aggregation,
+            bias=bias,
+        )
 
-        self.reset_parameters()
+    @property
+    def bias(self) -> Optional[torch.Tensor]:
+        """Access bias parameter from underlying layer"""
+        return getattr(self.conv, 'bias', None)
+
+    @property
+    def lin(self) -> nn.Module:
+        """Access linear layer for compatibility"""
+        return getattr(self.conv, 'lin', self.conv)
 
     def reset_parameters(self) -> None:
         """Reset parameters"""
-        self.lin_self.reset_parameters()
-        self.lin_neighbor.reset_parameters()
+        self.conv.reset_parameters()
 
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
         """
@@ -359,29 +351,15 @@ class SAGELayer(MessagePassing):
         Returns:
             Updated node features [num_nodes, out_channels]
         """
-        # Propagate messages
-        neighbor_out = self.propagate(edge_index, x=x)
-
-        # Self transformation
-        self_out = self.lin_self(x)
-
-        # Combine self and neighbor information
-        out = self_out + neighbor_out
-
-        return out  # type: ignore[no-any-return]
-
-    def message(self, x_j: torch.Tensor) -> torch.Tensor:
-        """Create messages from neighbors"""
-
-        return self.lin_neighbor(x_j)  # type: ignore[no-any-return]
+        return self.conv(x, edge_index)  # type: ignore[no-any-return]
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
 
 
-class GINLayer(MessagePassing):
+class GINLayer(nn.Module):
     """
-    Graph Isomorphism Network layer.
+    Graph Isomorphism Network layer using PyTorch Geometric.
     Implements the GIN layer from Xu et al. (2019):
     "How Powerful are Graph Neural Networks?"
     """
@@ -395,51 +373,37 @@ class GINLayer(MessagePassing):
         train_eps: bool = False,
         **kwargs: Any,
     ) -> None:
-        super().__init__(aggr="add")
+        super().__init__()
 
         self.in_channels = in_channels
         self.out_channels = out_channels
-        self.eps_init = eps
-
-        if train_eps:
-            self.eps = nn.Parameter(torch.tensor([eps]))
-        else:
-            self.register_buffer("eps", torch.tensor([eps]))
 
         if neural_net is None:
-            self.neural_net: nn.Module = nn.Sequential(
+            neural_net = nn.Sequential(
                 nn.Linear(in_channels, out_channels),
                 nn.ReLU(),
                 nn.Linear(out_channels, out_channels),
             )
-        else:
-            self.neural_net = neural_net
 
-        self.reset_parameters()
+        self.conv = GINConv(nn=neural_net, eps=eps, train_eps=train_eps)
+
+    @property
+    def bias(self) -> Optional[torch.Tensor]:
+        """Access bias parameter from underlying layer"""
+        return getattr(self.conv, 'bias', None)
+
+    @property
+    def lin(self) -> nn.Module:
+        """Access linear layer for compatibility"""
+        return getattr(self.conv, 'nn', self.conv)
 
     def reset_parameters(self) -> None:
         """Reset parameters"""
-        self.eps.data.fill_(self.eps_init)
-        if hasattr(self.neural_net, "reset_parameters"):
-            self.neural_net.reset_parameters()  # type: ignore[operator]
+        self.conv.reset_parameters()
 
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
         """Forward pass"""
-        # Add self-loops
-        edge_index, _ = add_self_loops(edge_index, num_nodes=x.size(0))
-
-        # Message passing
-        out = self.propagate(edge_index, x=x)
-
-        # Apply neural network
-        out = self.neural_net((1 + self.eps) * x + out)
-
-        return out  # type: ignore[no-any-return]
-
-    def message(self, x_j: torch.Tensor) -> torch.Tensor:
-        """Create messages from neighbors"""
-
-        return x_j
+        return self.conv(x, edge_index)  # type: ignore[no-any-return]
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
