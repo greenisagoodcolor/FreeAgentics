@@ -6,12 +6,11 @@ import json
 import tempfile
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Optional
 from unittest.mock import Mock
 
 import numpy as np
 import pytest
-
-from typing import Optional
 
 from coalitions.readiness.readiness_evaluator import (
     AgentReadinessEvaluator,
@@ -21,16 +20,16 @@ from coalitions.readiness.readiness_evaluator import (
 
 
 class TestReadinessEvaluator:
-    """Test suite for AgentReadinessEvaluator."""
+    """Test suite for AgentReadinessEvaluator"""
 
     @pytest.fixture
     def evaluator(self):
-        """Create evaluator with default thresholds."""
+        """Create evaluator with default thresholds"""
         return AgentReadinessEvaluator()
 
     @pytest.fixture
     def custom_evaluator(self):
-        """Create evaluator with custom thresholds."""
+        """Create evaluator with custom thresholds"""
         thresholds = ReadinessThresholds(
             min_experiences=500,
             min_patterns=25,
@@ -43,7 +42,7 @@ class TestReadinessEvaluator:
 
     @pytest.fixture
     def mock_agent(self):
-        """Create a mock agent with test data."""
+        """Create a mock agent with test data"""
         agent = Mock()
         agent.id = "test_agent_123"
         # Mock knowledge graph
@@ -78,7 +77,7 @@ class TestReadinessEvaluator:
         return agent
 
     def test_evaluate_ready_agent(self, evaluator, mock_agent) -> None:
-        """Test evaluation of an agent that meets all criteria."""
+        """Test evaluation of an agent that meets all criteria"""
         score = evaluator.evaluate_agent(mock_agent)
         assert score.agent_id == "test_agent_123"
         assert score.is_ready is True
@@ -97,7 +96,7 @@ class TestReadinessEvaluator:
         assert "resources" in score.metrics
 
     def test_evaluate_not_ready_agent(self, evaluator) -> None:
-        """Test evaluation of an agent that doesn't meet criteria."""
+        """Test evaluation of an agent that doesn't meet criteria"""
         agent = Mock()
         agent.id = "novice_agent"
         # Insufficient experience
@@ -124,7 +123,7 @@ class TestReadinessEvaluator:
         assert len(score.recommendations) > 0
 
     def test_knowledge_evaluation(self, evaluator, mock_agent) -> None:
-        """Test knowledge maturity evaluation specifically."""
+        """Test knowledge maturity evaluation specifically"""
         score = ReadinessScore(agent_id=mock_agent.id, timestamp=datetime.now())
         knowledge_score = evaluator._evaluate_knowledge(mock_agent, score)
         assert knowledge_score > 0.8
@@ -133,7 +132,7 @@ class TestReadinessEvaluator:
         assert score.metrics["knowledge"]["avg_pattern_confidence"] > 0.85
 
     def test_goal_evaluation(self, evaluator, mock_agent) -> None:
-        """Test goal achievement evaluation."""
+        """Test goal achievement evaluation"""
         score = ReadinessScore(agent_id=mock_agent.id, timestamp=datetime.now())
         goal_score = evaluator._evaluate_goals(mock_agent, score)
         assert goal_score > 0.9
@@ -141,7 +140,7 @@ class TestReadinessEvaluator:
         assert score.metrics["goals"]["complex_completed"] == 6
 
     def test_model_stability_evaluation(self, evaluator, mock_agent) -> None:
-        """Test model stability evaluation."""
+        """Test model stability evaluation"""
         score = ReadinessScore(agent_id=mock_agent.id, timestamp=datetime.now())
         stability_score = evaluator._evaluate_model_stability(mock_agent, score)
         assert stability_score > 0.8
@@ -149,7 +148,7 @@ class TestReadinessEvaluator:
         assert score.metrics["model_stability"]["stable_iterations"] > 100
 
     def test_collaboration_evaluation(self, evaluator, mock_agent) -> None:
-        """Test collaboration evaluation."""
+        """Test collaboration evaluation"""
         score = ReadinessScore(agent_id=mock_agent.id, timestamp=datetime.now())
         collab_score = evaluator._evaluate_collaboration(mock_agent, score)
         assert collab_score > 0.8
@@ -158,7 +157,7 @@ class TestReadinessEvaluator:
         assert score.metrics["collaboration"]["unique_collaborators"] == 3
 
     def test_resource_evaluation(self, evaluator, mock_agent) -> None:
-        """Test resource management evaluation."""
+        """Test resource management evaluation"""
         score = ReadinessScore(agent_id=mock_agent.id, timestamp=datetime.now())
         resource_score = evaluator._evaluate_resources(mock_agent, score)
         assert resource_score > 0.8
@@ -166,7 +165,7 @@ class TestReadinessEvaluator:
         assert score.metrics["resources"]["sustainability_score"] == 0.88
 
     def test_edge_case_barely_ready(self, custom_evaluator) -> None:
-        """Test edge case of agent barely meeting thresholds."""
+        """Test edge case of agent barely meeting thresholds"""
         agent = Mock()
         agent.id = "edge_case_agent"
         # Exactly at thresholds
@@ -202,7 +201,7 @@ class TestReadinessEvaluator:
         assert 0.8 <= score.overall_score <= 0.85
 
     def test_recommendations_generation(self, evaluator) -> None:
-        """Test that appropriate recommendations are generated."""
+        """Test that appropriate recommendations are generated"""
         agent = Mock()
         agent.id = "needs_improvement"
         # Poor performance across dimensions
@@ -235,7 +234,7 @@ class TestReadinessEvaluator:
         assert "efficiency" in rec_text.lower()
 
     def test_readiness_history(self, evaluator, mock_agent) -> None:
-        """Test that evaluation history is maintained."""
+        """Test that evaluation history is maintained"""
         # Evaluate multiple times
         scores = []
         for _ in range(3):
@@ -247,7 +246,7 @@ class TestReadinessEvaluator:
         assert history[-1] == scores[-1]
 
     def test_readiness_trends(self, evaluator, mock_agent) -> None:
-        """Test trend calculation over time."""
+        """Test trend calculation over time"""
         # Create evaluations over time
         for i in range(5):
             # Modify agent stats slightly
@@ -265,7 +264,7 @@ class TestReadinessEvaluator:
         assert trends["goals"][-1] >= trends["goals"][0]
 
     def test_export_readiness_report(self, evaluator, mock_agent) -> None:
-        """Test report export functionality."""
+        """Test report export functionality"""
         # Evaluate agent
         evaluator.evaluate_agent(mock_agent)
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -282,7 +281,7 @@ class TestReadinessEvaluator:
             assert "recommendation_summary" in report
 
     def test_batch_evaluation(self, evaluator) -> None:
-        """Test evaluating multiple agents at once."""
+        """Test evaluating multiple agents at once"""
         agents = []
         for i in range(3):
             agent = Mock()
@@ -313,7 +312,7 @@ class TestReadinessEvaluator:
         assert all(isinstance(score, ReadinessScore) for score in results.values())
 
     def test_error_handling(self, evaluator) -> None:
-        """Test graceful error handling."""
+        """Test graceful error handling"""
         # Agent with missing attributes
         bad_agent = Mock()
         bad_agent.id = "bad_agent"
@@ -327,7 +326,7 @@ class TestReadinessEvaluator:
         assert not score.is_ready
 
     def test_custom_weights(self) -> None:
-        """Test that dimension weights affect overall score correctly."""
+        """Test that dimension weights affect overall score correctly"""
         agent = Mock()
         agent.id = "weighted_test"
         # Perfect in one dimension, poor in others

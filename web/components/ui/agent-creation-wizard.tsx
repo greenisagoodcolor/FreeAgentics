@@ -1,29 +1,35 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  CheckCircle2, 
-  ArrowLeft, 
-  ArrowRight, 
-  Rocket, 
+import {
+  CheckCircle2,
+  ArrowLeft,
+  ArrowRight,
+  Rocket,
   Info,
   AlertTriangle,
-  Brain
+  Brain,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { 
-  AgentTemplateSelector, 
-  AgentTemplate, 
-  AGENT_TEMPLATES 
+import {
+  AgentTemplateSelector,
+  AgentTemplate,
+  AGENT_TEMPLATES,
 } from "./agent-template-selector";
-import { 
-  AgentConfigurationForm, 
-  AgentConfigurationData 
+import {
+  AgentConfigurationForm,
+  AgentConfigurationData,
 } from "./agent-configuration-form";
 
 // Wizard step definitions
@@ -48,10 +54,13 @@ const WIZARD_STEPS = [
   },
 ] as const;
 
-type WizardStep = typeof WIZARD_STEPS[number]["id"];
+type WizardStep = (typeof WIZARD_STEPS)[number]["id"];
 
 interface AgentCreationWizardProps {
-  onAgentCreate: (template: AgentTemplate, configuration: AgentConfigurationData) => Promise<void>;
+  onAgentCreate: (
+    template: AgentTemplate,
+    configuration: AgentConfigurationData,
+  ) => Promise<void>;
   onCancel: () => void;
   className?: string;
   initialTemplate?: AgentTemplate;
@@ -64,15 +73,15 @@ export function AgentCreationWizard({
   initialTemplate,
 }: AgentCreationWizardProps) {
   const [currentStep, setCurrentStep] = useState<WizardStep>("template");
-  const [selectedTemplate, setSelectedTemplate] = useState<AgentTemplate | null>(
-    initialTemplate || null
-  );
-  const [configurationData, setConfigurationData] = useState<AgentConfigurationData | null>(null);
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<AgentTemplate | null>(initialTemplate || null);
+  const [configurationData, setConfigurationData] =
+    useState<AgentConfigurationData | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Calculate progress percentage
-  const stepIndex = WIZARD_STEPS.findIndex(step => step.id === currentStep);
+  const stepIndex = WIZARD_STEPS.findIndex((step) => step.id === currentStep);
   const progress = ((stepIndex + 1) / WIZARD_STEPS.length) * 100;
 
   // Navigation helpers
@@ -116,11 +125,14 @@ export function AgentCreationWizard({
     setError(null);
   }, []);
 
-  const handleConfiguration = useCallback((data: AgentConfigurationData) => {
-    setConfigurationData(data);
-    setError(null);
-    goNext(); // Auto-advance to review step
-  }, [goNext]);
+  const handleConfiguration = useCallback(
+    (data: AgentConfigurationData) => {
+      setConfigurationData(data);
+      setError(null);
+      goNext(); // Auto-advance to review step
+    },
+    [goNext],
+  );
 
   const handleCreateAgent = async () => {
     if (!selectedTemplate || !configurationData) {
@@ -141,7 +153,7 @@ export function AgentCreationWizard({
   };
 
   const getCurrentStepInfo = () => {
-    return WIZARD_STEPS.find(step => step.id === currentStep);
+    return WIZARD_STEPS.find((step) => step.id === currentStep);
   };
 
   const stepInfo = getCurrentStepInfo();
@@ -152,7 +164,9 @@ export function AgentCreationWizard({
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Create Active Inference Agent</h1>
+            <h1 className="text-3xl font-bold">
+              Create Active Inference Agent
+            </h1>
             <p className="text-muted-foreground">
               Design and deploy a mathematically rigorous AI agent
             </p>
@@ -173,7 +187,7 @@ export function AgentCreationWizard({
             </div>
           </div>
           <Progress value={progress} className="w-full" />
-          
+
           {/* Step Navigation */}
           <div className="flex items-center justify-center space-x-4">
             {WIZARD_STEPS.map((step, index) => {
@@ -188,15 +202,16 @@ export function AgentCreationWizard({
                     "flex items-center space-x-2",
                     isActive && "text-primary",
                     isCompleted && "text-green-600",
-                    !isActive && !isCompleted && "text-muted-foreground"
+                    !isActive && !isCompleted && "text-muted-foreground",
                   )}
                 >
                   <div
                     className={cn(
                       "flex items-center justify-center w-8 h-8 rounded-full border-2",
-                      isActive && "border-primary bg-primary text-primary-foreground",
+                      isActive &&
+                        "border-primary bg-primary text-primary-foreground",
                       isCompleted && "border-green-600 bg-green-600 text-white",
-                      !isActive && !isCompleted && "border-muted"
+                      !isActive && !isCompleted && "border-muted",
                     )}
                   >
                     {isCompleted ? (
@@ -251,129 +266,194 @@ export function AgentCreationWizard({
           )}
 
           {/* Review Step */}
-          {currentStep === "review" && selectedTemplate && configurationData && (
-            <div className="space-y-6">
-              {/* Template Summary */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Agent Configuration Summary</h3>
-                
-                <div className="grid gap-4 md:grid-cols-2">
-                  {/* Template Info */}
+          {currentStep === "review" &&
+            selectedTemplate &&
+            configurationData && (
+              <div className="space-y-6">
+                {/* Template Summary */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">
+                    Agent Configuration Summary
+                  </h3>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {/* Template Info */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          {selectedTemplate.icon}
+                          Selected Template
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">
+                            {selectedTemplate.name}
+                          </span>
+                          <Badge variant="outline">
+                            {selectedTemplate.complexity}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {selectedTemplate.description}
+                        </p>
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div>
+                            <span className="font-medium">States:</span>{" "}
+                            {
+                              selectedTemplate.mathematicalFoundation
+                                .beliefsStates
+                            }
+                          </div>
+                          <div>
+                            <span className="font-medium">Actions:</span>{" "}
+                            {
+                              selectedTemplate.mathematicalFoundation
+                                .actionSpaces
+                            }
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Configuration Info */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">
+                          Agent Configuration
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-2">
+                        <div>
+                          <span className="font-medium">Name:</span>{" "}
+                          {configurationData.name}
+                        </div>
+                        {configurationData.description && (
+                          <div>
+                            <span className="font-medium">Description:</span>{" "}
+                            <span className="text-sm">
+                              {configurationData.description}
+                            </span>
+                          </div>
+                        )}
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div>
+                            <span className="font-medium">
+                              Sensory Precision:
+                            </span>{" "}
+                            {
+                              configurationData.mathematics.precision
+                                .sensoryPrecision
+                            }
+                          </div>
+                          <div>
+                            <span className="font-medium">
+                              Policy Precision:
+                            </span>{" "}
+                            {
+                              configurationData.mathematics.precision
+                                .policyPrecision
+                            }
+                          </div>
+                          <div>
+                            <span className="font-medium">
+                              Planning Horizon:
+                            </span>{" "}
+                            {configurationData.mathematics.planningHorizon}
+                          </div>
+                          <div>
+                            <span className="font-medium">Learning:</span>{" "}
+                            {configurationData.mathematics.enableLearning
+                              ? "Enabled"
+                              : "Disabled"}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Mathematical Parameters */}
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-base flex items-center gap-2">
-                        {selectedTemplate.icon}
-                        Selected Template
+                      <CardTitle className="text-base">
+                        Mathematical Foundation
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">{selectedTemplate.name}</span>
-                        <Badge variant="outline">{selectedTemplate.complexity}</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {selectedTemplate.description}
-                      </p>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div>
-                          <span className="font-medium">States:</span>{" "}
-                          {selectedTemplate.mathematicalFoundation.beliefsStates}
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div className="space-y-1">
+                          <div className="font-medium text-muted-foreground">
+                            A Matrix
+                          </div>
+                          <div>
+                            {
+                              configurationData.mathematics.matrices.aMatrix
+                                .rows
+                            }{" "}
+                            ×{" "}
+                            {
+                              configurationData.mathematics.matrices.aMatrix
+                                .cols
+                            }
+                          </div>
                         </div>
-                        <div>
-                          <span className="font-medium">Actions:</span>{" "}
-                          {selectedTemplate.mathematicalFoundation.actionSpaces}
+                        <div className="space-y-1">
+                          <div className="font-medium text-muted-foreground">
+                            B Matrix
+                          </div>
+                          <div>
+                            {
+                              configurationData.mathematics.matrices.bMatrix
+                                .observations
+                            }{" "}
+                            ×{" "}
+                            {
+                              configurationData.mathematics.matrices.bMatrix
+                                .states
+                            }
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <div className="font-medium text-muted-foreground">
+                            Memory
+                          </div>
+                          <div>
+                            {configurationData.mathematics.memoryCapacity.toLocaleString()}
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <div className="font-medium text-muted-foreground">
+                            Hierarchical
+                          </div>
+                          <div>
+                            {configurationData.mathematics.useHierarchical
+                              ? "Yes"
+                              : "No"}
+                          </div>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
 
-                  {/* Configuration Info */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">Agent Configuration</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      <div>
-                        <span className="font-medium">Name:</span> {configurationData.name}
+                  {/* Expert Review Box */}
+                  <Alert>
+                    <Info className="h-4 w-4" />
+                    <AlertDescription>
+                      <div className="space-y-2">
+                        <p className="font-semibold">Ready for Expert Review</p>
+                        <p className="text-sm">
+                          This configuration follows Active Inference
+                          mathematical principles and is ready for deployment.
+                          The agent will use Bayesian belief updating with
+                          precision parameters optimized for{" "}
+                          {selectedTemplate.category} behavior.
+                        </p>
                       </div>
-                      {configurationData.description && (
-                        <div>
-                          <span className="font-medium">Description:</span>{" "}
-                          <span className="text-sm">{configurationData.description}</span>
-                        </div>
-                      )}
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div>
-                          <span className="font-medium">Sensory Precision:</span>{" "}
-                          {configurationData.mathematics.precision.sensoryPrecision}
-                        </div>
-                        <div>
-                          <span className="font-medium">Policy Precision:</span>{" "}
-                          {configurationData.mathematics.precision.policyPrecision}
-                        </div>
-                        <div>
-                          <span className="font-medium">Planning Horizon:</span>{" "}
-                          {configurationData.mathematics.planningHorizon}
-                        </div>
-                        <div>
-                          <span className="font-medium">Learning:</span>{" "}
-                          {configurationData.mathematics.enableLearning ? "Enabled" : "Disabled"}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    </AlertDescription>
+                  </Alert>
                 </div>
-
-                {/* Mathematical Parameters */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">Mathematical Foundation</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div className="space-y-1">
-                        <div className="font-medium text-muted-foreground">A Matrix</div>
-                        <div>
-                          {configurationData.mathematics.matrices.aMatrix.rows} × {" "}
-                          {configurationData.mathematics.matrices.aMatrix.cols}
-                        </div>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="font-medium text-muted-foreground">B Matrix</div>
-                        <div>
-                          {configurationData.mathematics.matrices.bMatrix.observations} × {" "}
-                          {configurationData.mathematics.matrices.bMatrix.states}
-                        </div>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="font-medium text-muted-foreground">Memory</div>
-                        <div>{configurationData.mathematics.memoryCapacity.toLocaleString()}</div>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="font-medium text-muted-foreground">Hierarchical</div>
-                        <div>{configurationData.mathematics.useHierarchical ? "Yes" : "No"}</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Expert Review Box */}
-                <Alert>
-                  <Info className="h-4 w-4" />
-                  <AlertDescription>
-                    <div className="space-y-2">
-                      <p className="font-semibold">Ready for Expert Review</p>
-                      <p className="text-sm">
-                        This configuration follows Active Inference mathematical principles and
-                        is ready for deployment. The agent will use Bayesian belief updating
-                        with precision parameters optimized for {selectedTemplate.category} behavior.
-                      </p>
-                    </div>
-                  </AlertDescription>
-                </Alert>
               </div>
-            </div>
-          )}
+            )}
         </CardContent>
       </Card>
 
@@ -390,8 +470,8 @@ export function AgentCreationWizard({
 
         <div className="flex items-center space-x-2">
           {currentStep !== "review" && (
-            <Button 
-              onClick={goNext} 
+            <Button
+              onClick={goNext}
               disabled={!canGoNext()}
               className="min-w-[100px]"
             >
@@ -423,4 +503,4 @@ export function AgentCreationWizard({
 }
 
 export type { WizardStep };
-export { WIZARD_STEPS }; 
+export { WIZARD_STEPS };

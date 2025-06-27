@@ -4,14 +4,14 @@ import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -21,10 +21,10 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { DatePickerWithRange } from "@/components/ui/date-range-picker";
 import type { Message, Agent, Conversation } from "@/lib/types";
-import { 
-  Search, 
-  Filter, 
-  X, 
+import {
+  Search,
+  Filter,
+  X,
   Calendar,
   Users,
   MessageSquare,
@@ -34,7 +34,7 @@ import {
   User,
   AlertCircle,
   CheckCircle,
-  Settings
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DateRange } from "react-day-picker";
@@ -78,7 +78,7 @@ const defaultFilters: ConversationFilters = {
   hasErrors: false,
   isLive: false,
   threadCount: [0, 10],
-  agentTypes: []
+  agentTypes: [],
 };
 
 export function ConversationSearch({
@@ -88,7 +88,7 @@ export function ConversationSearch({
   onFiltersChange,
   onSearch,
   searchResults,
-  className
+  className,
 }: ConversationSearchProps) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchValue, setSearchValue] = useState(filters.searchQuery);
@@ -107,27 +107,36 @@ export function ConversationSearch({
 
   // Calculate filter statistics
   const filterStats = useMemo(() => {
-    const statusCounts = conversations.reduce((acc, conv) => {
-      const status = conv.endTime ? 'completed' : 'active';
-      acc[status] = (acc[status] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const statusCounts = conversations.reduce(
+      (acc, conv) => {
+        const status = conv.endTime ? "completed" : "active";
+        acc[status] = (acc[status] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
-    const participantCounts = agents.reduce((acc, agent) => {
-      const count = conversations.filter(conv => 
-        conv.participants?.includes(agent.id)
-      ).length;
-      if (count > 0) acc[agent.id] = count;
-      return acc;
-    }, {} as Record<string, number>);
+    const participantCounts = agents.reduce(
+      (acc, agent) => {
+        const count = conversations.filter((conv) =>
+          conv.participants?.includes(agent.id),
+        ).length;
+        if (count > 0) acc[agent.id] = count;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
-    const messageTypeCounts = conversations.reduce((acc, conv) => {
-      conv.messages?.forEach(msg => {
-        const type = msg.metadata?.type || 'regular';
-        acc[type] = (acc[type] || 0) + 1;
-      });
-      return acc;
-    }, {} as Record<string, number>);
+    const messageTypeCounts = conversations.reduce(
+      (acc, conv) => {
+        conv.messages?.forEach((msg) => {
+          const type = msg.metadata?.type || "regular";
+          acc[type] = (acc[type] || 0) + 1;
+        });
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     return {
       statusCounts,
@@ -135,14 +144,17 @@ export function ConversationSearch({
       messageTypeCounts,
       totalConversations: conversations.length,
       activeConversations: statusCounts.active || 0,
-      completedConversations: statusCounts.completed || 0
+      completedConversations: statusCounts.completed || 0,
     };
   }, [conversations, agents]);
 
   // Handle filter updates
-  const updateFilter = useCallback((key: keyof ConversationFilters, value: any) => {
-    onFiltersChange({ ...filters, [key]: value });
-  }, [filters, onFiltersChange]);
+  const updateFilter = useCallback(
+    (key: keyof ConversationFilters, value: any) => {
+      onFiltersChange({ ...filters, [key]: value });
+    },
+    [filters, onFiltersChange],
+  );
 
   // Clear all filters
   const clearAllFilters = useCallback(() => {
@@ -158,7 +170,8 @@ export function ConversationSearch({
     if (filters.participants.length > 0) count++;
     if (filters.messageTypes.length > 0) count++;
     if (filters.dateRange) count++;
-    if (filters.messageCountRange[0] > 0 || filters.messageCountRange[1] < 1000) count++;
+    if (filters.messageCountRange[0] > 0 || filters.messageCountRange[1] < 1000)
+      count++;
     if (filters.durationRange[0] > 0 || filters.durationRange[1] < 120) count++;
     if (filters.hasErrors) count++;
     if (filters.isLive) count++;
@@ -199,7 +212,10 @@ export function ConversationSearch({
                 <Filter className="w-4 h-4" />
                 Filters
                 {activeFilterCount > 0 && (
-                  <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-xs">
+                  <Badge
+                    variant="secondary"
+                    className="ml-1 px-1.5 py-0 text-xs"
+                  >
                     {activeFilterCount}
                   </Badge>
                 )}
@@ -223,23 +239,31 @@ export function ConversationSearch({
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Status</Label>
                   <div className="flex gap-2">
-                    {Object.entries(filterStats.statusCounts).map(([status, count]) => (
-                      <div key={status} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`status-${status}`}
-                          checked={filters.status.includes(status)}
-                          onCheckedChange={(checked) => {
-                            const newStatus = checked
-                              ? [...filters.status, status]
-                              : filters.status.filter(s => s !== status);
-                            updateFilter('status', newStatus);
-                          }}
-                        />
-                        <Label htmlFor={`status-${status}`} className="text-sm">
-                          {status} ({count})
-                        </Label>
-                      </div>
-                    ))}
+                    {Object.entries(filterStats.statusCounts).map(
+                      ([status, count]) => (
+                        <div
+                          key={status}
+                          className="flex items-center space-x-2"
+                        >
+                          <Checkbox
+                            id={`status-${status}`}
+                            checked={filters.status.includes(status)}
+                            onCheckedChange={(checked) => {
+                              const newStatus = checked
+                                ? [...filters.status, status]
+                                : filters.status.filter((s) => s !== status);
+                              updateFilter("status", newStatus);
+                            }}
+                          />
+                          <Label
+                            htmlFor={`status-${status}`}
+                            className="text-sm"
+                          >
+                            {status} ({count})
+                          </Label>
+                        </div>
+                      ),
+                    )}
                   </div>
                 </div>
 
@@ -247,30 +271,42 @@ export function ConversationSearch({
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Participants</Label>
                   <div className="max-h-32 overflow-y-auto space-y-1">
-                    {agents.filter(agent => filterStats.participantCounts[agent.id]).map(agent => {
-                      const count = filterStats.participantCounts[agent.id];
-                      return (
-                        <div key={agent.id} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`participant-${agent.id}`}
-                            checked={filters.participants.includes(agent.id)}
-                            onCheckedChange={(checked) => {
-                              const newParticipants = checked
-                                ? [...filters.participants, agent.id]
-                                : filters.participants.filter(p => p !== agent.id);
-                              updateFilter('participants', newParticipants);
-                            }}
-                          />
-                          <Label htmlFor={`participant-${agent.id}`} className="text-sm flex items-center gap-2">
-                            <div 
-                              className="w-3 h-3 rounded-full" 
-                              style={{ backgroundColor: agent.color }}
+                    {agents
+                      .filter(
+                        (agent) => filterStats.participantCounts[agent.id],
+                      )
+                      .map((agent) => {
+                        const count = filterStats.participantCounts[agent.id];
+                        return (
+                          <div
+                            key={agent.id}
+                            className="flex items-center space-x-2"
+                          >
+                            <Checkbox
+                              id={`participant-${agent.id}`}
+                              checked={filters.participants.includes(agent.id)}
+                              onCheckedChange={(checked) => {
+                                const newParticipants = checked
+                                  ? [...filters.participants, agent.id]
+                                  : filters.participants.filter(
+                                      (p) => p !== agent.id,
+                                    );
+                                updateFilter("participants", newParticipants);
+                              }}
                             />
-                            {agent.name} ({count})
-                          </Label>
-                        </div>
-                      );
-                    })}
+                            <Label
+                              htmlFor={`participant-${agent.id}`}
+                              className="text-sm flex items-center gap-2"
+                            >
+                              <div
+                                className="w-3 h-3 rounded-full"
+                                style={{ backgroundColor: agent.color }}
+                              />
+                              {agent.name} ({count})
+                            </Label>
+                          </div>
+                        );
+                      })}
                   </div>
                 </div>
 
@@ -278,23 +314,27 @@ export function ConversationSearch({
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Message Types</Label>
                   <div className="flex flex-wrap gap-2">
-                    {Object.entries(filterStats.messageTypeCounts).map(([type, count]) => (
-                      <div key={type} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`type-${type}`}
-                          checked={filters.messageTypes.includes(type)}
-                          onCheckedChange={(checked) => {
-                            const newTypes = checked
-                              ? [...filters.messageTypes, type]
-                              : filters.messageTypes.filter(t => t !== type);
-                            updateFilter('messageTypes', newTypes);
-                          }}
-                        />
-                        <Label htmlFor={`type-${type}`} className="text-sm">
-                          {type} ({count})
-                        </Label>
-                      </div>
-                    ))}
+                    {Object.entries(filterStats.messageTypeCounts).map(
+                      ([type, count]) => (
+                        <div key={type} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`type-${type}`}
+                            checked={filters.messageTypes.includes(type)}
+                            onCheckedChange={(checked) => {
+                              const newTypes = checked
+                                ? [...filters.messageTypes, type]
+                                : filters.messageTypes.filter(
+                                    (t) => t !== type,
+                                  );
+                              updateFilter("messageTypes", newTypes);
+                            }}
+                          />
+                          <Label htmlFor={`type-${type}`} className="text-sm">
+                            {type} ({count})
+                          </Label>
+                        </div>
+                      ),
+                    )}
                   </div>
                 </div>
 
@@ -303,18 +343,23 @@ export function ConversationSearch({
                   <Label className="text-sm font-medium">Date Range</Label>
                   <DatePickerWithRange
                     date={filters.dateRange}
-                    onDateChange={(dateRange) => updateFilter('dateRange', dateRange)}
+                    onDateChange={(dateRange) =>
+                      updateFilter("dateRange", dateRange)
+                    }
                   />
                 </div>
 
                 {/* Message Count Range */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">
-                    Message Count: {filters.messageCountRange[0]} - {filters.messageCountRange[1]}
+                    Message Count: {filters.messageCountRange[0]} -{" "}
+                    {filters.messageCountRange[1]}
                   </Label>
                   <Slider
                     value={filters.messageCountRange}
-                    onValueChange={(value) => updateFilter('messageCountRange', value)}
+                    onValueChange={(value) =>
+                      updateFilter("messageCountRange", value)
+                    }
                     min={0}
                     max={1000}
                     step={10}
@@ -325,11 +370,14 @@ export function ConversationSearch({
                 {/* Duration Range */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">
-                    Duration (minutes): {filters.durationRange[0]} - {filters.durationRange[1]}
+                    Duration (minutes): {filters.durationRange[0]} -{" "}
+                    {filters.durationRange[1]}
                   </Label>
                   <Slider
                     value={filters.durationRange}
-                    onValueChange={(value) => updateFilter('durationRange', value)}
+                    onValueChange={(value) =>
+                      updateFilter("durationRange", value)
+                    }
                     min={0}
                     max={120}
                     step={5}
@@ -340,11 +388,14 @@ export function ConversationSearch({
                 {/* Thread Count Range */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">
-                    Thread Count: {filters.threadCount[0]} - {filters.threadCount[1]}
+                    Thread Count: {filters.threadCount[0]} -{" "}
+                    {filters.threadCount[1]}
                   </Label>
                   <Slider
                     value={filters.threadCount}
-                    onValueChange={(value) => updateFilter('threadCount', value)}
+                    onValueChange={(value) =>
+                      updateFilter("threadCount", value)
+                    }
                     min={0}
                     max={10}
                     step={1}
@@ -358,18 +409,22 @@ export function ConversationSearch({
                     <Checkbox
                       id="has-errors"
                       checked={filters.hasErrors}
-                      onCheckedChange={(checked) => updateFilter('hasErrors', checked)}
+                      onCheckedChange={(checked) =>
+                        updateFilter("hasErrors", checked)
+                      }
                     />
                     <Label htmlFor="has-errors" className="text-sm">
                       Has errors or issues
                     </Label>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="is-live"
                       checked={filters.isLive}
-                      onCheckedChange={(checked) => updateFilter('isLive', checked)}
+                      onCheckedChange={(checked) =>
+                        updateFilter("isLive", checked)
+                      }
                     />
                     <Label htmlFor="is-live" className="text-sm">
                       Live conversations only
@@ -383,21 +438,21 @@ export function ConversationSearch({
           {/* Quick Filter Badges */}
           {filters.status.length > 0 && (
             <Badge variant="outline" className="gap-1">
-              Status: {filters.status.join(', ')}
-              <X 
-                className="w-3 h-3 cursor-pointer" 
-                onClick={() => updateFilter('status', [])}
+              Status: {filters.status.join(", ")}
+              <X
+                className="w-3 h-3 cursor-pointer"
+                onClick={() => updateFilter("status", [])}
               />
             </Badge>
           )}
-          
+
           {filters.participants.length > 0 && (
             <Badge variant="outline" className="gap-1">
               <Users className="w-3 h-3" />
               {filters.participants.length} participants
-              <X 
-                className="w-3 h-3 cursor-pointer" 
-                onClick={() => updateFilter('participants', [])}
+              <X
+                className="w-3 h-3 cursor-pointer"
+                onClick={() => updateFilter("participants", [])}
               />
             </Badge>
           )}
@@ -428,17 +483,21 @@ export function ConversationSearch({
               Search Results ({searchResults.totalResults})
             </h4>
             <Badge variant="secondary">
-              {searchResults.conversations.length} conversations, {searchResults.messages.length} messages
+              {searchResults.conversations.length} conversations,{" "}
+              {searchResults.messages.length} messages
             </Badge>
           </div>
-          
+
           {/* Message results preview */}
           {searchResults.messages.length > 0 && (
             <div className="space-y-2">
               <Label className="text-sm font-medium">Message matches:</Label>
               <div className="max-h-32 overflow-y-auto space-y-1">
                 {searchResults.messages.slice(0, 5).map((result, index) => (
-                  <div key={index} className="text-sm p-2 bg-background rounded border">
+                  <div
+                    key={index}
+                    className="text-sm p-2 bg-background rounded border"
+                  >
                     <div className="font-medium text-xs text-muted-foreground mb-1">
                       Conversation {result.conversationId.substring(0, 8)}
                     </div>
@@ -457,4 +516,4 @@ export function ConversationSearch({
       )}
     </div>
   );
-} 
+}

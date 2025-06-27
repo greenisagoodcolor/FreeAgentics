@@ -124,10 +124,11 @@ Information for contributors:
 ## Core Documentation
 
 ### Active Inference & Mathematical Models
+
 Information about the Generative Model Notation (GMN) system for PyMDP mathematical models:
 
 - **[GMN System Overview](gnn/README.md)** - Mathematical notation for Active Inference models
 - **[GMN Model Format](gnn/gnn-model-format.md)** - Specification for `.gmn.md` files
 - **[Model Examples](examples/)** - Example mathematical models and usage patterns
 
-*Note: For Graph Neural Network components, see the neural network documentation in `inference/gnn/layers.py`*
+_Note: For Graph Neural Network components, see the neural network documentation in `inference/gnn/layers.py`_

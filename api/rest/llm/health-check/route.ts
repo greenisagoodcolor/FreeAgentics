@@ -1,5 +1,5 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { getApiKey } from "@/lib/api-key-storage"
+import { type NextRequest, NextResponse } from "next/server";
+import { getApiKey } from "@/lib/api-key-storage";
 
 /**
  * POST /api/llm/health-check
@@ -20,80 +20,86 @@ import { getApiKey } from "@/lib/api-key-storage"
  * }
  */
 export async function POST(request: NextRequest) {
-  const startTime = Date.now()
+  const startTime = Date.now();
 
   try {
-    const body = await request.json()
-    const { 
-      providerId, 
-      providerType, 
-      providerIds, 
-      includeDetails = false 
-    } = body
+    const body = await request.json();
+    const {
+      providerId,
+      providerType,
+      providerIds,
+      includeDetails = false,
+    } = body;
 
-    let targetProviders: string[] = []
+    let targetProviders: string[] = [];
 
     if (providerId) {
-      targetProviders = [providerId]
+      targetProviders = [providerId];
     } else if (providerIds && Array.isArray(providerIds)) {
-      targetProviders = providerIds
+      targetProviders = providerIds;
     } else {
       // Get all configured providers if none specified
-      targetProviders = await getAllConfiguredProviders()
+      targetProviders = await getAllConfiguredProviders();
     }
 
     if (targetProviders.length === 0) {
-      return NextResponse.json({
-        success: false,
-        error: "No providers specified for health check"
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          error: "No providers specified for health check",
+        },
+        { status: 400 },
+      );
     }
 
     // Perform health checks for all target providers
-    const healthCheckPromises = targetProviders.map(id => 
-      performProviderHealthCheck(id, includeDetails)
-    )
+    const healthCheckPromises = targetProviders.map((id) =>
+      performProviderHealthCheck(id, includeDetails),
+    );
 
-    const healthCheckResults = await Promise.allSettled(healthCheckPromises)
+    const healthCheckResults = await Promise.allSettled(healthCheckPromises);
 
     // Process results
-    const results: Record<string, any> = {}
-    
+    const results: Record<string, any> = {};
+
     healthCheckResults.forEach((result, index) => {
-      const providerId = targetProviders[index]
-      
+      const providerId = targetProviders[index];
+
       if (result.status === "fulfilled") {
-        results[providerId] = result.value
+        results[providerId] = result.value;
       } else {
         results[providerId] = {
           isHealthy: false,
           status: "error",
           error: result.reason?.message || "Health check failed",
           responseTimeMs: 0,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        };
       }
-    })
+    });
 
-    const totalDuration = Date.now() - startTime
+    const totalDuration = Date.now() - startTime;
 
     return NextResponse.json({
       success: true,
       results,
       summary: {
         totalProviders: targetProviders.length,
-        healthyProviders: Object.values(results).filter((r: any) => r.isHealthy).length,
-        totalDurationMs: totalDuration
-      }
-    })
-
+        healthyProviders: Object.values(results).filter((r: any) => r.isHealthy)
+          .length,
+        totalDurationMs: totalDuration,
+      },
+    });
   } catch (error) {
-    console.error("[HEALTH-CHECK] Error performing health checks:", error)
-    return NextResponse.json({
-      success: false,
-      error: "Health check failed",
-      details: error instanceof Error ? error.message : "Unknown error"
-    }, { status: 500 })
+    console.error("[HEALTH-CHECK] Error performing health checks:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Health check failed",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
+    );
   }
 }
 
@@ -112,31 +118,33 @@ export async function GET(request: NextRequest) {
         uptime: 99.8,
         lastCheck: new Date().toISOString(),
         consecutiveFailures: 0,
-        errorCount: 2
+        errorCount: 2,
       },
       "anthropic-secondary": {
         isHealthy: true,
-        status: "healthy", 
+        status: "healthy",
         responseTimeMs: 180,
         uptime: 99.5,
         lastCheck: new Date().toISOString(),
         consecutiveFailures: 0,
-        errorCount: 1
-      }
-    }
+        errorCount: 1,
+      },
+    };
 
     return NextResponse.json({
       success: true,
       providers: healthStatus,
-      timestamp: new Date().toISOString()
-    })
-
+      timestamp: new Date().toISOString(),
+    });
   } catch (error) {
-    console.error("[HEALTH-CHECK] Error fetching health status:", error)
-    return NextResponse.json({
-      success: false,
-      error: "Failed to fetch health status"
-    }, { status: 500 })
+    console.error("[HEALTH-CHECK] Error fetching health status:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Failed to fetch health status",
+      },
+      { status: 500 },
+    );
   }
 }
 
@@ -144,24 +152,27 @@ export async function GET(request: NextRequest) {
  * Perform health check for a specific provider
  */
 async function performProviderHealthCheck(
-  providerId: string, 
-  includeDetails: boolean = false
+  providerId: string,
+  includeDetails: boolean = false,
 ): Promise<any> {
-  const startTime = Date.now()
+  const startTime = Date.now();
 
   try {
     // Get provider configuration (in real implementation, from database)
-    const providerConfig = await getProviderConfig(providerId)
-    
+    const providerConfig = await getProviderConfig(providerId);
+
     if (!providerConfig) {
-      throw new Error(`Provider ${providerId} not found`)
+      throw new Error(`Provider ${providerId} not found`);
     }
 
     // Get stored API credentials
-    const apiKey = await getApiKey(providerConfig.type, providerConfig.sessionId)
-    
+    const apiKey = await getApiKey(
+      providerConfig.type,
+      providerConfig.sessionId,
+    );
+
     if (!apiKey) {
-      throw new Error(`No API key found for provider ${providerId}`)
+      throw new Error(`No API key found for provider ${providerId}`);
     }
 
     // Perform provider-specific health check
@@ -169,10 +180,10 @@ async function performProviderHealthCheck(
       providerConfig.type,
       apiKey,
       providerConfig,
-      includeDetails
-    )
+      includeDetails,
+    );
 
-    const responseTime = Date.now() - startTime
+    const responseTime = Date.now() - startTime;
 
     return {
       isHealthy: healthResult.isHealthy,
@@ -182,20 +193,19 @@ async function performProviderHealthCheck(
       ...(includeDetails && {
         details: healthResult.details,
         rateLimits: healthResult.rateLimits,
-        availableModels: healthResult.availableModels
-      })
-    }
-
+        availableModels: healthResult.availableModels,
+      }),
+    };
   } catch (error) {
-    const responseTime = Date.now() - startTime
-    
+    const responseTime = Date.now() - startTime;
+
     return {
       isHealthy: false,
       status: "error",
       error: error instanceof Error ? error.message : "Unknown error",
       responseTimeMs: responseTime,
-      timestamp: new Date().toISOString()
-    }
+      timestamp: new Date().toISOString(),
+    };
   }
 }
 
@@ -206,68 +216,85 @@ async function checkProviderHealth(
   providerType: string,
   apiKey: string,
   config: any,
-  includeDetails: boolean
+  includeDetails: boolean,
 ): Promise<any> {
   switch (providerType) {
     case "openai":
-      return await checkOpenAIHealth(apiKey, config, includeDetails)
+      return await checkOpenAIHealth(apiKey, config, includeDetails);
     case "anthropic":
-      return await checkAnthropicHealth(apiKey, config, includeDetails)
+      return await checkAnthropicHealth(apiKey, config, includeDetails);
     case "openrouter":
-      return await checkOpenRouterHealth(apiKey, config, includeDetails)
+      return await checkOpenRouterHealth(apiKey, config, includeDetails);
     case "azure_openai":
-      return await checkAzureOpenAIHealth(apiKey, config, includeDetails)
+      return await checkAzureOpenAIHealth(apiKey, config, includeDetails);
     default:
-      throw new Error(`Health check not implemented for provider type: ${providerType}`)
+      throw new Error(
+        `Health check not implemented for provider type: ${providerType}`,
+      );
   }
 }
 
 /**
  * OpenAI health check
  */
-async function checkOpenAIHealth(apiKey: string, config: any, includeDetails: boolean) {
+async function checkOpenAIHealth(
+  apiKey: string,
+  config: any,
+  includeDetails: boolean,
+) {
   try {
     // Simple models endpoint check
     const response = await fetch("https://api.openai.com/v1/models", {
       headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        ...(config.organizationId && { "OpenAI-Organization": config.organizationId })
+        Authorization: `Bearer ${apiKey}`,
+        ...(config.organizationId && {
+          "OpenAI-Organization": config.organizationId,
+        }),
       },
-      signal: AbortSignal.timeout(10000) // 10 second timeout
-    })
+      signal: AbortSignal.timeout(10000), // 10 second timeout
+    });
 
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`)
+      throw new Error(
+        `OpenAI API error: ${response.status} ${response.statusText}`,
+      );
     }
 
-    const data = await response.json()
-    const rateLimits = extractRateLimits(response.headers)
+    const data = await response.json();
+    const rateLimits = extractRateLimits(response.headers);
 
     return {
       isHealthy: true,
       status: "healthy",
-      details: includeDetails ? {
-        modelsCount: data.data?.length || 0,
-        apiVersion: response.headers.get("openai-version"),
-        organization: response.headers.get("openai-organization")
-      } : undefined,
+      details: includeDetails
+        ? {
+            modelsCount: data.data?.length || 0,
+            apiVersion: response.headers.get("openai-version"),
+            organization: response.headers.get("openai-organization"),
+          }
+        : undefined,
       rateLimits: includeDetails ? rateLimits : undefined,
-      availableModels: includeDetails ? data.data?.slice(0, 5).map((m: any) => m.id) : undefined
-    }
-
+      availableModels: includeDetails
+        ? data.data?.slice(0, 5).map((m: any) => m.id)
+        : undefined,
+    };
   } catch (error) {
     return {
       isHealthy: false,
       status: "unhealthy",
-      error: error instanceof Error ? error.message : "Unknown error"
-    }
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
   }
 }
 
 /**
  * Anthropic health check
  */
-async function checkAnthropicHealth(apiKey: string, config: any, includeDetails: boolean) {
+async function checkAnthropicHealth(
+  apiKey: string,
+  config: any,
+  includeDetails: boolean,
+) {
   try {
     // Simple message API check with minimal tokens
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -275,130 +302,154 @@ async function checkAnthropicHealth(apiKey: string, config: any, includeDetails:
       headers: {
         "Content-Type": "application/json",
         "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01"
+        "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
         model: "claude-3-haiku-20240307",
         max_tokens: 1,
-        messages: [{ role: "user", content: "Hi" }]
+        messages: [{ role: "user", content: "Hi" }],
       }),
-      signal: AbortSignal.timeout(10000)
-    })
+      signal: AbortSignal.timeout(10000),
+    });
 
     if (!response.ok) {
-      const errorText = await response.text()
-      throw new Error(`Anthropic API error: ${response.status} - ${errorText}`)
+      const errorText = await response.text();
+      throw new Error(`Anthropic API error: ${response.status} - ${errorText}`);
     }
 
-    const data = await response.json()
-    const rateLimits = extractAnthropicRateLimits(response.headers)
+    const data = await response.json();
+    const rateLimits = extractAnthropicRateLimits(response.headers);
 
     return {
       isHealthy: true,
       status: "healthy",
-      details: includeDetails ? {
-        model: data.model,
-        usage: data.usage
-      } : undefined,
+      details: includeDetails
+        ? {
+            model: data.model,
+            usage: data.usage,
+          }
+        : undefined,
       rateLimits: includeDetails ? rateLimits : undefined,
-      availableModels: includeDetails ? [
-        "claude-3-opus-20240229",
-        "claude-3-sonnet-20240229", 
-        "claude-3-haiku-20240307"
-      ] : undefined
-    }
-
+      availableModels: includeDetails
+        ? [
+            "claude-3-opus-20240229",
+            "claude-3-sonnet-20240229",
+            "claude-3-haiku-20240307",
+          ]
+        : undefined,
+    };
   } catch (error) {
     return {
       isHealthy: false,
       status: "unhealthy",
-      error: error instanceof Error ? error.message : "Unknown error"
-    }
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
   }
 }
 
 /**
  * OpenRouter health check
  */
-async function checkOpenRouterHealth(apiKey: string, config: any, includeDetails: boolean) {
+async function checkOpenRouterHealth(
+  apiKey: string,
+  config: any,
+  includeDetails: boolean,
+) {
   try {
     // Check models endpoint
     const response = await fetch("https://openrouter.ai/api/v1/models", {
       headers: {
-        "Authorization": `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
         "HTTP-Referer": "https://freeagentics.vercel.app",
-        "X-Title": "FreeAgentics"
+        "X-Title": "FreeAgentics",
       },
-      signal: AbortSignal.timeout(10000)
-    })
+      signal: AbortSignal.timeout(10000),
+    });
 
     if (!response.ok) {
-      throw new Error(`OpenRouter API error: ${response.status} ${response.statusText}`)
+      throw new Error(
+        `OpenRouter API error: ${response.status} ${response.statusText}`,
+      );
     }
 
-    const data = await response.json()
+    const data = await response.json();
 
     return {
       isHealthy: true,
       status: "healthy",
-      details: includeDetails ? {
-        modelsCount: data.data?.length || 0
-      } : undefined,
-      availableModels: includeDetails ? data.data?.slice(0, 5).map((m: any) => m.id) : undefined
-    }
-
+      details: includeDetails
+        ? {
+            modelsCount: data.data?.length || 0,
+          }
+        : undefined,
+      availableModels: includeDetails
+        ? data.data?.slice(0, 5).map((m: any) => m.id)
+        : undefined,
+    };
   } catch (error) {
     return {
       isHealthy: false,
       status: "unhealthy",
-      error: error instanceof Error ? error.message : "Unknown error"
-    }
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
   }
 }
 
 /**
  * Azure OpenAI health check
  */
-async function checkAzureOpenAIHealth(apiKey: string, config: any, includeDetails: boolean) {
+async function checkAzureOpenAIHealth(
+  apiKey: string,
+  config: any,
+  includeDetails: boolean,
+) {
   if (!config.endpointUrl) {
     return {
       isHealthy: false,
       status: "configuration_error",
-      error: "Azure endpoint URL not configured"
-    }
+      error: "Azure endpoint URL not configured",
+    };
   }
 
   try {
     // Check deployments endpoint
-    const response = await fetch(`${config.endpointUrl}/openai/deployments?api-version=2023-12-01-preview`, {
-      headers: {
-        "api-key": apiKey
+    const response = await fetch(
+      `${config.endpointUrl}/openai/deployments?api-version=2023-12-01-preview`,
+      {
+        headers: {
+          "api-key": apiKey,
+        },
+        signal: AbortSignal.timeout(10000),
       },
-      signal: AbortSignal.timeout(10000)
-    })
+    );
 
     if (!response.ok) {
-      throw new Error(`Azure OpenAI API error: ${response.status} ${response.statusText}`)
+      throw new Error(
+        `Azure OpenAI API error: ${response.status} ${response.statusText}`,
+      );
     }
 
-    const data = await response.json()
+    const data = await response.json();
 
     return {
       isHealthy: true,
       status: "healthy",
-      details: includeDetails ? {
-        deploymentsCount: data.data?.length || 0,
-        endpoint: config.endpointUrl
-      } : undefined,
-      availableModels: includeDetails ? data.data?.map((d: any) => d.model) : undefined
-    }
-
+      details: includeDetails
+        ? {
+            deploymentsCount: data.data?.length || 0,
+            endpoint: config.endpointUrl,
+          }
+        : undefined,
+      availableModels: includeDetails
+        ? data.data?.map((d: any) => d.model)
+        : undefined,
+    };
   } catch (error) {
     return {
       isHealthy: false,
       status: "unhealthy",
-      error: error instanceof Error ? error.message : "Unknown error"
-    }
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
   }
 }
 
@@ -408,12 +459,16 @@ async function checkAzureOpenAIHealth(apiKey: string, config: any, includeDetail
 function extractRateLimits(headers: Headers): any {
   return {
     requestsLimit: parseInt(headers.get("x-ratelimit-limit-requests") || "0"),
-    requestsRemaining: parseInt(headers.get("x-ratelimit-remaining-requests") || "0"),
+    requestsRemaining: parseInt(
+      headers.get("x-ratelimit-remaining-requests") || "0",
+    ),
     tokensLimit: parseInt(headers.get("x-ratelimit-limit-tokens") || "0"),
-    tokensRemaining: parseInt(headers.get("x-ratelimit-remaining-tokens") || "0"),
+    tokensRemaining: parseInt(
+      headers.get("x-ratelimit-remaining-tokens") || "0",
+    ),
     resetRequests: headers.get("x-ratelimit-reset-requests"),
-    resetTokens: headers.get("x-ratelimit-reset-tokens")
-  }
+    resetTokens: headers.get("x-ratelimit-reset-tokens"),
+  };
 }
 
 /**
@@ -421,12 +476,20 @@ function extractRateLimits(headers: Headers): any {
  */
 function extractAnthropicRateLimits(headers: Headers): any {
   return {
-    requestsLimit: parseInt(headers.get("anthropic-ratelimit-requests-limit") || "0"),
-    requestsRemaining: parseInt(headers.get("anthropic-ratelimit-requests-remaining") || "0"),
-    tokensLimit: parseInt(headers.get("anthropic-ratelimit-tokens-limit") || "0"),
-    tokensRemaining: parseInt(headers.get("anthropic-ratelimit-tokens-remaining") || "0"),
-    resetTime: headers.get("anthropic-ratelimit-requests-reset")
-  }
+    requestsLimit: parseInt(
+      headers.get("anthropic-ratelimit-requests-limit") || "0",
+    ),
+    requestsRemaining: parseInt(
+      headers.get("anthropic-ratelimit-requests-remaining") || "0",
+    ),
+    tokensLimit: parseInt(
+      headers.get("anthropic-ratelimit-tokens-limit") || "0",
+    ),
+    tokensRemaining: parseInt(
+      headers.get("anthropic-ratelimit-tokens-remaining") || "0",
+    ),
+    resetTime: headers.get("anthropic-ratelimit-requests-reset"),
+  };
 }
 
 /**
@@ -434,7 +497,7 @@ function extractAnthropicRateLimits(headers: Headers): any {
  */
 async function getAllConfiguredProviders(): Promise<string[]> {
   // In a real implementation, this would query the database
-  return ["openai-primary", "anthropic-secondary"]
+  return ["openai-primary", "anthropic-secondary"];
 }
 
 /**
@@ -446,13 +509,13 @@ async function getProviderConfig(providerId: string): Promise<any> {
     "openai-primary": {
       type: "openai",
       sessionId: "session-openai-123",
-      organizationId: null
+      organizationId: null,
     },
     "anthropic-secondary": {
-      type: "anthropic", 
-      sessionId: "session-anthropic-456"
-    }
-  }
+      type: "anthropic",
+      sessionId: "session-anthropic-456",
+    },
+  };
 
-  return configs[providerId] || null
-} 
+  return configs[providerId] || null;
+}

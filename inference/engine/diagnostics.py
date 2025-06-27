@@ -24,7 +24,7 @@ from matplotlib.animation import FuncAnimation
 Diagnostic and Visualization Tools for Active Inference
 This module provides comprehensive diagnostic tools and visualization capabilities
 for understanding, debugging, and analyzing Active Inference agents.
-."""
+"""
 logger = logging.getLogger(__name__)
 
 
@@ -69,8 +69,7 @@ class BeliefTracker:
     ) -> None:
         self.config = config
         self.num_states = num_states
-        self.state_labels = (
-            state_labels or [f"State {i}" for i in range(num_states)])
+        self.state_labels = state_labels or [f"State {i}" for i in range(num_states)]
         # History buffers
         self.belief_history: DequeType[torch.Tensor] = deque(maxlen=config.buffer_size)
         self.timestamp_history: DequeType[float] = deque(maxlen=config.buffer_size)
@@ -220,8 +219,7 @@ class FreeEnergyMonitor:
 
     def plot_free_energy_components(self, save_path: Optional[Path] = None) -> plt.Figure:
         """Plot free energy components over time"""
-        fig, axes = (
-            plt.subplots(3, 1, figsize=self.config.figure_size, sharex=True))
+        fig, axes = plt.subplots(3, 1, figsize=self.config.figure_size, sharex=True)
         timestamps = np.array(self.timestamps)
         # VFE components
         if len(self.vfe_history) > 0:
@@ -547,13 +545,13 @@ class DiagnosticSuite:
     def create_belief_tracker(
         self, name: str, num_states: int, state_labels: Optional[List[str]] = None
     ) -> BeliefTracker:
-        ."""Create named belief tracker."""
+        """Create named belief tracker"""
         tracker = BeliefTracker(self.config, num_states, state_labels)
         self.belief_trackers[name] = tracker
         return tracker
 
     def log_inference_step(self, step_data: Dict[str, Any]) -> None:
-        ."""Log complete inference step."""
+        """Log complete inference step"""
         logger.info(f"Inference step: {json.dumps(step_data, indent=2)}")
         # Track performance metrics
         if "computation_time" in step_data:

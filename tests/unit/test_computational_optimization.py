@@ -21,7 +21,7 @@ from inference.engine.computational_optimization import (
 
 class TestOptimizationConfig:
     def test_default_config(self) -> None:
-        ."""Test default optimization configuration."""
+        """Test default optimization configuration"""
         config = OptimizationConfig()
         assert config.use_sparse_operations is True
         assert config.use_parallel_processing is True
@@ -30,7 +30,7 @@ class TestOptimizationConfig:
         assert config.cache_size == 1000
 
     def test_custom_config(self) -> None:
-        ."""Test custom optimization configuration."""
+        """Test custom optimization configuration"""
         config = OptimizationConfig(
             use_sparse_operations=False, num_threads=8, batch_size=64, use_gpu=False
         )
@@ -42,7 +42,7 @@ class TestOptimizationConfig:
 
 class TestSparseOperations:
     def setup_method(self) -> None:
-        .."""Setup for tests.."""
+        """Setup for tests"""
         self.config = OptimizationConfig(use_gpu=False)
         self.sparse_ops = SparseOperations(self.config)
 
@@ -66,7 +66,7 @@ class TestSparseOperations:
         assert dense_result[2, 1] == 0.0
 
     def test_sparse_matmul(self) -> None:
-        ."""Test sparse-dense matrix multiplication."""
+        """Test sparse-dense matrix multiplication"""
         sparse_a = torch.sparse_coo_tensor(indices=[[0, 1], [0, 2]], values=[1.0, 2.0], size=(3, 3))
         dense_b = torch.tensor([[1.0], [2.0], [3.0]])
         result = self.sparse_ops.sparse_matmul(sparse_a, dense_b)
@@ -74,7 +74,7 @@ class TestSparseOperations:
         assert torch.allclose(result, expected)
 
     def test_optimize_belief_update(self) -> None:
-        ."""Test optimized belief update with sparse operations."""
+        """Test optimized belief update with sparse operations"""
         A = torch.tensor([[0.9, 0.1, 0.0, 0.0], [0.1, 0.8, 0.1, 0.0], [0.0, 0.1, 0.9, 0.0]])
         sparse_A = self.sparse_ops.sparsify_tensor(A)
         observation = torch.tensor([0.0, 1.0, 0.0])
@@ -86,12 +86,12 @@ class TestSparseOperations:
 
 class TestParallelInference:
     def setup_method(self) -> None:
-        .."""Setup for tests.."""
+        """Setup for tests"""
         self.config = OptimizationConfig(use_parallel_processing=True, num_threads=2, use_gpu=False)
         self.parallel = ParallelInference(self.config)
 
     def teardown_method(self):
-        ."""Cleanup after tests."""
+        """Cleanup after tests"""
         self.parallel.cleanup()
 
     def test_parallel_belief_updates(self) -> None:
@@ -116,7 +116,7 @@ class TestParallelInference:
             assert torch.allclose(belief.sum(), torch.tensor(1.0))
 
     def test_parallel_expected_free_energy(self) -> None:
-        ."""Test parallel EFE computation."""
+        """Test parallel EFE computation"""
         qs = torch.tensor([0.25, 0.25, 0.25, 0.25])
         A = torch.rand(3, 4)
         A /= A.sum(dim=0, keepdim=True)
@@ -130,7 +130,7 @@ class TestParallelInference:
         assert all(torch.isfinite(G_values))
 
     def test_non_parallel_fallback(self) -> None:
-        ."""Test fallback to sequential processing."""
+        """Test fallback to sequential processing"""
         self.parallel.config.use_parallel_processing = False
         beliefs = [torch.rand(4) for _ in range(2)]
         observations = [torch.rand(3) for _ in range(2)]
@@ -141,14 +141,14 @@ class TestParallelInference:
 
 class TestCachedInference:
     def setup_method(self) -> None:
-        ."""Setup for tests."""
+        """Setup for tests"""
         self.config = OptimizationConfig(
             use_caching=True, cache_size=10, cache_ttl=60, use_gpu=False
         )
         self.cache = CachedInference(self.config)
 
     def test_cache_key_generation(self) -> None:
-        ."""Test cache key generation."""
+        """Test cache key generation"""
         tensor1 = torch.tensor([1.0, 2.0])
         tensor2 = torch.tensor([[1.0, 2.0], [3.0, 4.0]])
         scalar = 42
@@ -159,7 +159,7 @@ class TestCachedInference:
         assert key1 != key3
 
     def test_cached_belief_update(self) -> None:
-        ."""Test belief update caching."""
+        """Test belief update caching"""
         belief = torch.tensor([0.25, 0.25, 0.25, 0.25])
         observation = torch.tensor([1.0, 0.0, 0.0])
         A = torch.tensor([[0.9, 0.1, 0.0, 0.0], [0.1, 0.8, 0.1, 0.0], [0.0, 0.1, 0.9, 0.0]])
@@ -172,7 +172,7 @@ class TestCachedInference:
         assert torch.allclose(result1, result2)
 
     def test_cache_eviction(self) -> None:
-        ."""Test cache eviction when full."""
+        """Test cache eviction when full"""
         for i in range(15):
             belief = torch.rand(4)
             observation = torch.rand(3)
@@ -181,7 +181,7 @@ class TestCachedInference:
         assert len(self.cache.cache) <= self.config.cache_size
 
     def test_cache_ttl(self) -> None:
-        ."""Test cache TTL expiration."""
+        """Test cache TTL expiration"""
         self.cache.config.cache_ttl = 0.1
         belief = torch.rand(4)
         observation = torch.rand(3)
@@ -192,7 +192,7 @@ class TestCachedInference:
         assert not self.cache._is_cache_valid(key)
 
     def test_get_cache_stats(self) -> None:
-        ."""Test cache statistics."""
+        """Test cache statistics"""
         for i in range(5):
             belief = torch.rand(4)
             observation = torch.rand(3)
@@ -208,7 +208,7 @@ class TestCachedInference:
 
 class TestGPUOptimizer:
     def setup_method(self) -> None:
-        .."""Setup for tests.."""
+        """Setup for tests"""
         self.config = OptimizationConfig(use_gpu=False, use_mixed_precision=True)
         self.gpu_opt = GPUOptimizer(self.config)
 
@@ -223,14 +223,14 @@ class TestGPUOptimizer:
 
     @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA not available")
     def test_mixed_precision_inference(self) -> None:
-        ."""Test mixed precision inference."""
+        """Test mixed precision inference"""
         model = torch.nn.Linear(10, 5)
         inputs = torch.rand(32, 10)
         outputs = self.gpu_opt.mixed_precision_inference(model, inputs)
         assert outputs.shape == (32, 5)
 
     def test_cuda_graph_creation(self) -> None:
-        ."""Test CUDA graph creation (CPU fallback)."""
+        """Test CUDA graph creation (CPU fallback)"""
 
         def simple_func(x, y):
             return x + y
@@ -243,7 +243,7 @@ class TestGPUOptimizer:
 
 class TestBatchProcessor:
     def setup_method(self) -> None:
-        .."""Setup for tests.."""
+        """Setup for tests"""
         self.config = OptimizationConfig(batch_size=3, use_gpu=False)
         self.batch_proc = BatchProcessor(self.config)
 
@@ -259,7 +259,7 @@ class TestBatchProcessor:
         assert len(self.batch_proc.results) == 0
 
     def test_batch_processing(self) -> None:
-        ."""Test batch processing when full."""
+        """Test batch processing when full"""
 
         def dummy_computation(x):
             return x * 2
@@ -272,7 +272,7 @@ class TestBatchProcessor:
             assert result == i * 2
 
     def test_batch_belief_updates(self) -> None:
-        ."""Test batched belief update processing."""
+        """Test batched belief update processing"""
         requests = []
         for i in range(3):
             belief = torch.rand(4)
@@ -292,14 +292,14 @@ class TestBatchProcessor:
             assert result.shape == (4,)
 
     def test_get_result_timeout(self) -> None:
-        ."""Test result retrieval with timeout."""
+        """Test result retrieval with timeout"""
         result = self.batch_proc.get_result("nonexistent", timeout=0.1)
         assert result is None
 
 
 class TestComputationalOptimizer:
     def setup_method(self) -> None:
-        ."""Setup for tests."""
+        """Setup for tests"""
         self.config = OptimizationConfig(
             use_sparse_operations=True,
             use_parallel_processing=True,
@@ -309,7 +309,7 @@ class TestComputationalOptimizer:
         self.optimizer = ComputationalOptimizer(self.config)
 
     def teardown_method(self):
-        .."""Cleanup after tests.."""
+        """Cleanup after tests"""
         self.optimizer.cleanup()
 
     def test_optimized_belief_update(self) -> None:
@@ -323,7 +323,7 @@ class TestComputationalOptimizer:
         assert "belief_update" in self.optimizer.timing_stats
 
     def test_optimized_belief_update_sparse(self) -> None:
-        ."""Test belief update with sparse matrix."""
+        """Test belief update with sparse matrix"""
         belief = torch.rand(10)
         belief /= belief.sum()
         observation = torch.zeros(8)
@@ -339,7 +339,7 @@ class TestComputationalOptimizer:
         assert torch.allclose(result.sum(), torch.tensor(1.0), atol=1e-06)
 
     def test_optimized_action_selection(self) -> None:
-        ."""Test optimized action selection."""
+        """Test optimized action selection"""
         qs = torch.tensor([0.25, 0.25, 0.25, 0.25])
         A = torch.rand(3, 4)
         A /= A.sum(dim=0, keepdim=True)
@@ -355,7 +355,7 @@ class TestComputationalOptimizer:
         assert "action_selection" in self.optimizer.timing_stats
 
     def test_performance_report(self) -> None:
-        ."""Test performance report generation."""
+        """Test performance report generation"""
         for _ in range(5):
             belief = torch.rand(4)
             belief /= belief.sum()
@@ -371,7 +371,7 @@ class TestComputationalOptimizer:
         assert belief_stats["avg_time_ms"] > 0
 
     def test_automatic_sparse_detection(self) -> None:
-        ."""Test automatic sparse matrix detection."""
+        """Test automatic sparse matrix detection"""
         belief = torch.rand(20)
         belief /= belief.sum()
         observation = torch.zeros(15)
@@ -386,7 +386,7 @@ class TestComputationalOptimizer:
 
 
 class TestIntegration:
-    .."""Integration tests for computational optimization.."""
+    """Integration tests for computational optimization"""
 
     def test_full_inference_cycle(self) -> None:
         """Test complete inference cycle with optimizations"""

@@ -31,7 +31,7 @@ class MockStateObserver(StateObserver):
 
 
 class TestStateTransitionValidator(unittest.TestCase):
-    ."""Test state transition validation."""
+    """Test state transition validation"""
 
     def test_valid_transitions(self) -> None:
         """Test valid state transitions"""
@@ -71,7 +71,7 @@ class TestStateTransitionValidator(unittest.TestCase):
 
 
 class TestAgentStateManager(unittest.TestCase):
-    ."""Test the main state management system."""
+    """Test the main state management system"""
 
     def setUp(self) -> None:
         """Set up test fixtures"""
@@ -171,15 +171,12 @@ class TestAgentStateManager(unittest.TestCase):
         """Test state history tracking"""
         self.state_manager.register_agent(self.test_agent)
         self.state_manager.update_agent_status(self.test_agent.agent_id, AgentStatus.PLANNING)
-        self.state_manager.update_agent_position(self.test_agent.agent_id, Position(5.0,
-            5.0))
-        self.state_manager.update_agent_resources(self.test_agent.agent_id,
-            energy_delta=-10.0)
+        self.state_manager.update_agent_position(self.test_agent.agent_id, Position(5.0, 5.0))
+        self.state_manager.update_agent_resources(self.test_agent.agent_id, energy_delta=-10.0)
         history = self.state_manager.get_state_history()
         self.assertGreaterEqual(len(history), 3)
         agent_history = self.state_manager.get_state_history(agent_id=self.test_agent.agent_id)
-        self.assertTrue(all(e.agent_id = (
-            = self.test_agent.agent_id for e in agent_history)))
+        self.assertTrue(all(e.agent_id == self.test_agent.agent_id for e in agent_history))
         status_history = self.state_manager.get_state_history(
             event_type=StateEventType.STATUS_CHANGED
         )
@@ -273,7 +270,7 @@ class TestStateMonitor(unittest.TestCase):
     """Test state monitoring functionality"""
 
     def setUp(self) -> None:
-        ."""Set up test fixtures."""
+        """Set up test fixtures"""
         self.state_manager = AgentStateManager()
         self.monitor = StateMonitor(self.state_manager)
         self.test_agent = Agent(name="TestAgent")

@@ -1,4 +1,4 @@
-."""
+"""
 Deployment Scripts Generator
 
 Generates platform-specific deployment and management scripts.
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class ScriptTemplate:
-    """Template for a deployment script."""
+    """Template for a deployment script"""
 
     name: str
     filename: str
@@ -26,10 +26,10 @@ class ScriptTemplate:
 
 
 class DeploymentScriptGenerator:
-    """Generates deployment scripts for various platforms."""
+    """Generates deployment scripts for various platforms"""
 
     def __init__(self) -> None:
-        """Initialize script generator."""
+        """Initialize script generator"""
         self.templates = self._create_templates()
 
     def generate_scripts(
@@ -84,19 +84,16 @@ class DeploymentScriptGenerator:
 
         # Generate platform-specific extras
         if target_platform == "raspberrypi":
-            generated_files.extend(self._generate_raspberry_pi_extras(output_dir,
-                hardware_config))
+            generated_files.extend(self._generate_raspberry_pi_extras(output_dir, hardware_config))
         elif target_platform == "mac":
-            generated_files.extend(self._generate_mac_extras(output_dir,
-                hardware_config))
+            generated_files.extend(self._generate_mac_extras(output_dir, hardware_config))
         elif target_platform == "jetson":
-            generated_files.extend(self._generate_jetson_extras(output_dir,
-                hardware_config))
+            generated_files.extend(self._generate_jetson_extras(output_dir, hardware_config))
 
         return generated_files
 
     def _create_templates(self) -> List[ScriptTemplate]:
-        """Create script templates."""
+        """Create script templates"""
         return [
             # Main run script
             ScriptTemplate(
@@ -143,21 +140,20 @@ class DeploymentScriptGenerator:
         ]
 
     def _render_template(self, template: str, **kwargs) -> str:
-        """Render template with variables."""
+        """Render template with variables"""
         # Simple template rendering
         for key, value in kwargs.items():
             if isinstance(value, dict):
                 # Handle nested dicts
                 for subkey, subvalue in value.items():
-                    template = (
-                        template.replace(f"{{{{{key}.{subkey}}}}}", str(subvalue)))
+                    template = template.replace(f"{{{{{key}.{subkey}}}}}", str(subvalue))
             else:
                 template = template.replace(f"{{{{{key}}}}}", str(value))
 
         return template
 
     def _run_script_template(self) -> str:
-        """Template for main run script."""
+        """Template for main run script"""
         return """#!/bin/bash
 # FreeAgentics Agent Run Script
 # Platform: {{platform}}
@@ -237,7 +233,7 @@ echo "Logs: $FREEAGENTICS_LOG_DIR/agent.log"
 """
 
     def _stop_script_template(self) -> str:
-        """Template for stop script."""
+        """Template for stop script"""
         return """#!/bin/bash
 # FreeAgentics Agent Stop Script
 
@@ -282,7 +278,7 @@ echo "Agent stopped."
 """
 
     def _status_script_template(self) -> str:
-        """Template for status script."""
+        """Template for status script"""
         return """#!/bin/bash
 # FreeAgentics Agent Status Script
 
@@ -344,7 +340,7 @@ fi
 """
 
     def _backup_script_template(self) -> str:
-        """Template for backup script."""
+        """Template for backup script"""
         return """#!/bin/bash
 # FreeAgentics Agent Backup Script
 
@@ -391,7 +387,7 @@ echo "Backup complete."
 """
 
     def _restore_script_template(self) -> str:
-        """Template for restore script."""
+        """Template for restore script"""
         return """#!/bin/bash
 # FreeAgentics Agent Restore Script
 
@@ -449,7 +445,7 @@ echo "Pre-restore backup saved to: $PRE_RESTORE_BACKUP"
 """
 
     def _monitor_script_template(self) -> str:
-        """Template for monitoring script."""
+        """Template for monitoring script"""
         return """#!/bin/bash
 # FreeAgentics Agent Monitor Script
 
@@ -515,7 +511,7 @@ done
 """
 
     def _python_runner_template(self) -> str:
-        """Template for Python runner script."""
+        """Template for Python runner script"""
         return '''#!/usr/bin/env python3
 """
 FreeAgentics Agent Runner
@@ -554,10 +550,10 @@ logger = logging.getLogger(__name__)
 
 
 class AgentRunner:
-    """Runs the FreeAgentics agent."""
+    """Runs the FreeAgentics agent"""
 
     def __init__(self) -> None:
-        """Initialize runner."""
+        """Initialize runner"""
         self.running = False
         self.agent = None
         self.config = self._load_config()
@@ -567,7 +563,7 @@ class AgentRunner:
         signal.signal(signal.SIGINT, self._signal_handler)
 
     def _load_config(self) -> Dict[str, Any]:
-        """Load configuration files."""
+        """Load configuration files"""
         config = {}
 
         # Load agent config
@@ -591,12 +587,12 @@ class AgentRunner:
         return config
 
     def _signal_handler(self, signum, frame):
-        """Handle shutdown signals."""
+        """Handle shutdown signals"""
         logger.info(f"Received signal {signum}, shutting down...")
         self.running = False
 
     def run(self):
-        """Run the agent."""
+        """Run the agent"""
         logger.info("Starting FreeAgentics Agent")
         logger.info(f"Agent ID: {self.config.get('agent', {}).get('agent_id',
             'unknown')}")
@@ -632,7 +628,7 @@ class AgentRunner:
 
 
 def main():
-    """Main entry point."""
+    """Main entry point"""
     runner = AgentRunner()
     runner.run()
 
@@ -644,7 +640,7 @@ if __name__ == '__main__':
     def _generate_raspberry_pi_extras(
         self, output_dir: Path, hardware_config: Dict[str, Any]
     ) -> List[Path]:
-        """Generate Raspberry Pi specific files."""
+        """Generate Raspberry Pi specific files"""
         extras = []
 
         # GPIO setup script
@@ -690,9 +686,8 @@ fi
 
         return extras
 
-    def _generate_mac_extras(self, output_dir: Path, hardware_config: Dict[str,
-        Any]) -> List[Path]:
-        """Generate macOS specific files."""
+    def _generate_mac_extras(self, output_dir: Path, hardware_config: Dict[str, Any]) -> List[Path]:
+        """Generate macOS specific files"""
         extras = []
 
         # LaunchAgent installer
@@ -746,7 +741,7 @@ echo "Service installed and started"
     def _generate_jetson_extras(
         self, output_dir: Path, hardware_config: Dict[str, Any]
     ) -> List[Path]:
-        """Generate Jetson specific files."""
+        """Generate Jetson specific files"""
         extras = []
 
         # CUDA setup

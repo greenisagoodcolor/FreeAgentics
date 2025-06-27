@@ -1,4 +1,4 @@
-."""
+"""
 Markov Blanket Verification Service
 
 This service monitors agent boundaries using the pymdp-based MarkovBlanket interface
@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class VerificationConfig:
-    ."""Configuration for Markov blanket verification service."""
+    """Configuration for Markov blanket verification service"""
 
     # Monitoring intervals
     verification_interval: float = 1.0  # seconds
@@ -63,7 +63,7 @@ class VerificationConfig:
 
 @dataclass
 class AgentMonitoringState:
-    ."""State tracking for individual agent monitoring."""
+    """State tracking for individual agent monitoring"""
 
     agent_id: str
     markov_blanket: PyMDPMarkovBlanket
@@ -82,7 +82,7 @@ class AgentMonitoringState:
 
 @dataclass
 class SystemMetrics:
-    ."""System-wide metrics for boundary verification."""
+    """System-wide metrics for boundary verification"""
 
     total_agents_monitored: int = 0
     active_violations: int = 0
@@ -110,7 +110,7 @@ class MarkovBlanketVerificationService:
     """
 
     def __init__(self, config: Optional[VerificationConfig] = None) -> None:
-        ."""Initialize the verification service."""
+        """Initialize the verification service"""
         self.config = config or VerificationConfig()
 
         # Agent monitoring
@@ -124,8 +124,7 @@ class MarkovBlanketVerificationService:
 
         # Event handlers
         self.violation_handlers: List[Callable[[BoundaryViolationEvent], None]] = []
-        self.metrics_handlers: List[Callable[[str, BoundaryMetrics],
-            None]] = []
+        self.metrics_handlers: List[Callable[[str, BoundaryMetrics], None]] = []
 
         # Background tasks
         self._verification_task: Optional[asyncio.Task] = None
@@ -134,7 +133,7 @@ class MarkovBlanketVerificationService:
         logger.info("Initialized Markov blanket verification service with pymdp")
 
     async def start_monitoring(self) -> None:
-        ."""Start the background monitoring service."""
+        """Start the background monitoring service"""
         if self.is_running:
             logger.warning("Verification service is already running")
             return
@@ -143,13 +142,12 @@ class MarkovBlanketVerificationService:
 
         # Start background tasks
         self._verification_task = asyncio.create_task(self._verification_loop())
-        self._metrics_task = (
-            asyncio.create_task(self._metrics_collection_loop()))
+        self._metrics_task = asyncio.create_task(self._metrics_collection_loop())
 
         logger.info("Started Markov blanket verification service")
 
     async def stop_monitoring(self) -> None:
-        ."""Stop the background monitoring service."""
+        """Stop the background monitoring service"""
         if not self.is_running:
             return
 
@@ -178,7 +176,7 @@ class MarkovBlanketVerificationService:
         agent_state: Optional[AgentState] = None,
         environment_state: Optional[np.ndarray] = None,
     ) -> bool:
-        ."""Register an agent for boundary monitoring."""
+        """Register an agent for boundary monitoring"""
         try:
             if len(self.monitored_agents) >= self.config.max_agents_monitored:
                 logger.error(
@@ -221,7 +219,7 @@ class MarkovBlanketVerificationService:
             return False
 
     def unregister_agent(self, agent_id: str) -> bool:
-        ."""Unregister an agent from boundary monitoring."""
+        """Unregister an agent from boundary monitoring"""
         try:
             if agent_id not in self.monitored_agents:
                 logger.warning(f"Agent {agent_id} is not registered")
@@ -245,17 +243,17 @@ class MarkovBlanketVerificationService:
             return False
 
     def update_agent_state(self, agent_id: str, agent_state: AgentState) -> None:
-        ."""Update agent state for boundary monitoring."""
+        """Update agent state for boundary monitoring"""
         if agent_id in self.monitored_agents:
             self.agent_states[agent_id] = agent_state
 
     def update_environment_state(self, agent_id: str, environment_state: np.ndarray) -> None:
-        ."""Update environment state for boundary monitoring."""
+        """Update environment state for boundary monitoring"""
         if agent_id in self.monitored_agents:
             self.environment_states[agent_id] = environment_state
 
     def get_agent_metrics(self, agent_id: str) -> Optional[BoundaryMetrics]:
-        ."""Get current boundary metrics for an agent."""
+        """Get current boundary metrics for an agent"""
         if agent_id not in self.monitored_agents:
             return None
 
@@ -263,7 +261,7 @@ class MarkovBlanketVerificationService:
         return monitoring_state.markov_blanket.get_metrics()
 
     def get_agent_boundary_state(self, agent_id: str) -> Optional[BoundaryState]:
-        ."""Get current boundary state for an agent."""
+        """Get current boundary state for an agent"""
         if agent_id not in self.monitored_agents:
             return None
 
@@ -271,11 +269,11 @@ class MarkovBlanketVerificationService:
         return monitoring_state.markov_blanket.get_boundary_state()
 
     def get_system_metrics(self) -> SystemMetrics:
-        ."""Get system-wide monitoring metrics."""
+        """Get system-wide monitoring metrics"""
         return self.system_metrics
 
     def get_violation_history(self, agent_id: Optional[str] = None) -> List[BoundaryViolationEvent]:
-        ."""Get violation history for an agent or all agents."""
+        """Get violation history for an agent or all agents"""
         if agent_id:
             if agent_id in self.monitored_agents:
                 return self.monitored_agents[agent_id].recent_violations.copy()
@@ -291,15 +289,15 @@ class MarkovBlanketVerificationService:
         return all_violations
 
     def add_violation_handler(self, handler: Callable[[BoundaryViolationEvent], None]) -> None:
-        ."""Add a handler for boundary violation events."""
+        """Add a handler for boundary violation events"""
         self.violation_handlers.append(handler)
 
     def add_metrics_handler(self, handler: Callable[[str, BoundaryMetrics], None]) -> None:
-        ."""Add a handler for metrics updates."""
+        """Add a handler for metrics updates"""
         self.metrics_handlers.append(handler)
 
     async def verify_agent_boundary(self, agent_id: str) -> Optional[Dict[str, Any]]:
-        ."""Manually trigger boundary verification for a specific agent."""
+        """Manually trigger boundary verification for a specific agent"""
         if agent_id not in self.monitored_agents:
             return None
 
@@ -348,7 +346,7 @@ class MarkovBlanketVerificationService:
             return None
 
     async def _verification_loop(self) -> None:
-        ."""Background loop for continuous boundary verification."""
+        """Background loop for continuous boundary verification"""
         while self.is_running:
             try:
                 # Verify all active agents
@@ -372,7 +370,7 @@ class MarkovBlanketVerificationService:
                 await asyncio.sleep(1.0)  # Brief pause on error
 
     async def _metrics_collection_loop(self) -> None:
-        ."""Background loop for metrics collection."""
+        """Background loop for metrics collection"""
         while self.is_running:
             try:
                 # Collect metrics from all agents
@@ -414,7 +412,7 @@ class MarkovBlanketVerificationService:
                 await asyncio.sleep(1.0)  # Brief pause on error
 
     def _handle_violation(self, violation: BoundaryViolationEvent) -> None:
-        ."""Handle boundary violation events."""
+        """Handle boundary violation events"""
         try:
             agent_id = violation.agent_id
 
@@ -459,7 +457,7 @@ class MarkovBlanketVerificationService:
             logger.error(f"Error handling violation: {e}")
 
     def _update_performance_metrics(self, verification_time: float) -> None:
-        ."""Update performance metrics."""
+        """Update performance metrics"""
         # Update verification time statistics
         if verification_time > self.system_metrics.max_verification_time:
             self.system_metrics.max_verification_time = verification_time
@@ -474,7 +472,7 @@ class MarkovBlanketVerificationService:
             )
 
     def _update_system_metrics(self) -> None:
-        ."""Update system-wide metrics."""
+        """Update system-wide metrics"""
         try:
             total_agents = len(self.monitored_agents)
             if total_agents == 0:
@@ -493,8 +491,7 @@ class MarkovBlanketVerificationService:
                 integrity_scores.append(metrics.boundary_integrity)
 
                 boundary_state = monitoring_state.markov_blanket.get_boundary_state()
-                if boundary_state in [BoundaryState.COMPROMISED,
-                    BoundaryState.VIOLATED]:
+                if boundary_state in [BoundaryState.COMPROMISED, BoundaryState.VIOLATED]:
                     compromised_count += 1
 
                 # Count recent violations (last 5 minutes)
@@ -521,17 +518,17 @@ class MarkovBlanketVerificationService:
 def create_verification_service(
     config: Optional[VerificationConfig] = None,
 ) -> MarkovBlanketVerificationService:
-    ."""Create a Markov blanket verification service."""
+    """Create a Markov blanket verification service"""
     return MarkovBlanketVerificationService(config)
 
 
 def create_default_config() -> VerificationConfig:
-    ."""Create default verification configuration."""
+    """Create default verification configuration"""
     return VerificationConfig()
 
 
 def create_high_frequency_config() -> VerificationConfig:
-    ."""Create configuration for high-frequency monitoring."""
+    """Create configuration for high-frequency monitoring"""
     return VerificationConfig(
         verification_interval=0.5,
         metrics_collection_interval=2.0,

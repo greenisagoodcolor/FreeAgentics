@@ -1,4 +1,4 @@
-."""
+"""
 Markov Blanket Interface for Agent Boundary System
 
 This module implements the MarkovBlanket interface within the /agents boundary
@@ -48,7 +48,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class AgentState:
-    ."""Simple adapter for agent state representation."""
+    """Simple adapter for agent state representation"""
 
     agent_id: str
     position: Optional[Any] = None
@@ -60,7 +60,7 @@ class AgentState:
 
     @classmethod
     def from_agent(cls, agent: Agent) -> "AgentState":
-        ."""Create AgentState from Agent instance."""
+        """Create AgentState from Agent instance"""
         return cls(
             agent_id=agent.agent_id,
             position=agent.position,
@@ -72,7 +72,7 @@ class AgentState:
 
 
 class BoundaryState(Enum):
-    ."""States of the Markov blanket boundary."""
+    """States of the Markov blanket boundary"""
 
     INTACT = "intact"
     COMPROMISED = "compromised"
@@ -81,7 +81,7 @@ class BoundaryState(Enum):
 
 
 class ViolationType(Enum):
-    ."""Types of boundary violations."""
+    """Types of boundary violations"""
 
     INDEPENDENCE_FAILURE = "independence_failure"
     BOUNDARY_BREACH = "boundary_breach"
@@ -93,7 +93,7 @@ class ViolationType(Enum):
 
 @dataclass
 class MarkovBlanketDimensions:
-    ."""Dimensions of the Markov blanket using pymdp-compatible format."""
+    """Dimensions of the Markov blanket using pymdp-compatible format"""
 
     # Internal states (μ) - agent's private states (beliefs)
     internal_states: np.ndarray = field(default_factory=lambda: np.array([]))
@@ -112,7 +112,7 @@ class MarkovBlanketDimensions:
     external_dimension: int = 0
 
     def __post_init__(self):
-        ."""Initialize dimensions based on state arrays."""
+        """Initialize dimensions based on state arrays"""
         if self.internal_states.size > 0:
             self.internal_dimension = len(self.internal_states)
         if self.sensory_states.size > 0:
@@ -123,7 +123,7 @@ class MarkovBlanketDimensions:
             self.external_dimension = len(self.external_states)
 
     def get_total_dimension(self) -> int:
-        ."""Get total dimensionality of the Markov blanket."""
+        """Get total dimensionality of the Markov blanket"""
         return (
             self.internal_dimension
             + self.sensory_dimension
@@ -132,7 +132,7 @@ class MarkovBlanketDimensions:
         )
 
     def get_boundary_states(self) -> np.ndarray:
-        ."""Get the boundary states (sensory + active) in pymdp format."""
+        """Get the boundary states (sensory + active) in pymdp format"""
         if self.sensory_states.size == 0 and self.active_states.size == 0:
             return np.array([])
 
@@ -147,7 +147,7 @@ class MarkovBlanketDimensions:
 
 @dataclass
 class BoundaryViolationEvent:
-    ."""Event representing a boundary violation detected by pymdp analysis."""
+    """Event representing a boundary violation detected by pymdp analysis"""
 
     event_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     agent_id: str = ""
@@ -176,7 +176,7 @@ class BoundaryViolationEvent:
 
 @dataclass
 class BoundaryMetrics:
-    ."""Metrics for boundary integrity monitoring using pymdp."""
+    """Metrics for boundary integrity monitoring using pymdp"""
 
     # Core metrics from pymdp
     free_energy: float = 0.0  # Variational free energy
@@ -196,7 +196,7 @@ class BoundaryMetrics:
     last_violation_time: Optional[datetime] = None
 
     def update_from_pymdp_agent(self, pymdp_agent: "PyMDPAgent") -> None:
-        ."""Update metrics from pymdp agent state."""
+        """Update metrics from pymdp agent state"""
         if not PYMDP_AVAILABLE or pymdp_agent is None:
             return
 
@@ -226,8 +226,7 @@ class BoundaryMetrics:
                     if isinstance(pymdp_agent.qs, list) and len(pymdp_agent.qs) > 0:
                         beliefs = pymdp_agent.qs[0]  # First factor
                         prior = (
-                            pymdp_agent.D[0] if isinstance(pymdp_agent.D,
-                                list) else pymdp_agent.D
+                            pymdp_agent.D[0] if isinstance(pymdp_agent.D, list) else pymdp_agent.D
                         )
 
                         # Ensure arrays are properly normalized
@@ -235,8 +234,7 @@ class BoundaryMetrics:
                         prior = prior / np.sum(prior)
 
                         # Compute KL divergence: KL(q||p) = sum(q * log(q/p))
-                        self.kl_divergence = (
-                            float(pymdp_utils.kl_divergence(beliefs, prior)))
+                        self.kl_divergence = float(pymdp_utils.kl_divergence(beliefs, prior))
                 except Exception as e:
                     logger.debug(f"Could not compute KL divergence: {e}")
 
@@ -247,7 +245,7 @@ class BoundaryMetrics:
 
 
 class MarkovBlanketInterface(ABC):
-    .."""Abstract interface for Markov blanket implementations using pymdp.."""
+    """Abstract interface for Markov blanket implementations using pymdp."""
 
     @abstractmethod
     def get_dimensions(self) -> MarkovBlanketDimensions:
@@ -256,28 +254,27 @@ class MarkovBlanketInterface(ABC):
 
     @abstractmethod
     def update_states(self, agent_state: AgentState, environment_state: np.ndarray) -> None:
-        ."""Update internal states based on agent and environment."""
+        """Update internal states based on agent and environment"""
         pass
 
     @abstractmethod
     def verify_independence(self) -> Tuple[float, Dict[str, Any]]:
-        ."""Verify conditional independence using pymdp."""
+        """Verify conditional independence using pymdp"""
         pass
 
     @abstractmethod
     def detect_violations(self) -> List[BoundaryViolationEvent]:
-        ."""Detect any boundary violations using pymdp analysis."""
+        """Detect any boundary violations using pymdp analysis"""
         pass
 
     @abstractmethod
     def get_metrics(self) -> BoundaryMetrics:
-        ."""Get current boundary metrics from pymdp."""
+        """Get current boundary metrics from pymdp"""
         pass
 
     @abstractmethod
-    def set_violation_handler(self, handler: Callable[[BoundaryViolationEvent],
-        None]) -> None:
-        ."""Set handler for violation events."""
+    def set_violation_handler(self, handler: Callable[[BoundaryViolationEvent], None]) -> None:
+        """Set handler for violation events"""
         pass
 
 
@@ -308,8 +305,7 @@ class PyMDPMarkovBlanket(MarkovBlanketInterface):
             independence_threshold: Threshold for conditional independence
         """
         if not PYMDP_AVAILABLE:
-            raise ImportError(
-                "pymdp is required for PyMDPMarkovBlanket but not available")
+            raise ImportError("pymdp is required for PyMDPMarkovBlanket but not available")
 
         self.agent_id = agent_id
         self.independence_threshold = independence_threshold
@@ -342,8 +338,7 @@ class PyMDPMarkovBlanket(MarkovBlanketInterface):
 
         # Violation tracking
         self.violation_events: List[BoundaryViolationEvent] = []
-        self.violation_handlers: List[Callable[[BoundaryViolationEvent],
-            None]] = []
+        self.violation_handlers: List[Callable[[BoundaryViolationEvent], None]] = []
 
         # Metrics
         self.metrics = BoundaryMetrics()
@@ -355,7 +350,7 @@ class PyMDPMarkovBlanket(MarkovBlanketInterface):
         logger.info(f"Initialized pymdp Markov blanket for agent {agent_id}")
 
     def get_dimensions(self) -> MarkovBlanketDimensions:
-        ."""Get current Markov blanket dimensions."""
+        """Get current Markov blanket dimensions"""
         return self.dimensions
 
     def update_states(self, agent_state: AgentState, environment_state: np.ndarray) -> None:
@@ -364,8 +359,7 @@ class PyMDPMarkovBlanket(MarkovBlanketInterface):
             # Update observations from environment
             if environment_state.size > 0:
                 # Extract observations (limit to model's observation space)
-                obs_size = (
-                    min(len(environment_state), self.dimensions.sensory_dimension))
+                obs_size = min(len(environment_state), self.dimensions.sensory_dimension)
                 if obs_size > 0:
                     observations = environment_state[:obs_size]
 
@@ -390,8 +384,7 @@ class PyMDPMarkovBlanket(MarkovBlanketInterface):
                 # Update external states (remaining environment state)
                 if environment_state.size > obs_size:
                     external_size = min(
-                        self.dimensions.external_dimension, environment_state.size -
-                            obs_size
+                        self.dimensions.external_dimension, environment_state.size - obs_size
                     )
                     if external_size > 0:
                         self.dimensions.external_states = environment_state[
@@ -402,8 +395,7 @@ class PyMDPMarkovBlanket(MarkovBlanketInterface):
             if hasattr(agent_state, "intended_action") and agent_state.intended_action is not None:
                 action = np.array(agent_state.intended_action)
                 if action.size > 0:
-                    action_size = (
-                        min(self.dimensions.active_dimension, action.size))
+                    action_size = min(self.dimensions.active_dimension, action.size)
                     self.dimensions.active_states[:action_size] = action[:action_size]
 
             # Update metrics from pymdp agent
@@ -446,8 +438,7 @@ class PyMDPMarkovBlanket(MarkovBlanketInterface):
             # Compute boundary integrity based on free energy
             # Lower free energy indicates better boundary integrity
             if self.metrics.free_energy > 0:
-                self.metrics.boundary_integrity = (
-                    max(0.0, 1.0 - (self.metrics.free_energy / 10.0)))
+                self.metrics.boundary_integrity = max(0.0, 1.0 - (self.metrics.free_energy / 10.0))
             else:
                 self.metrics.boundary_integrity = 1.0
 
@@ -470,8 +461,7 @@ class PyMDPMarkovBlanket(MarkovBlanketInterface):
                 violation = BoundaryViolationEvent(
                     agent_id=self.agent_id,
                     violation_type=ViolationType.INDEPENDENCE_FAILURE,
-                    severity= (
-                        min(1.0, independence_measure / self.independence_threshold),)
+                    severity=min(1.0, independence_measure / self.independence_threshold),
                     independence_measure=independence_measure,
                     threshold_violated=self.independence_threshold,
                     free_energy=self.metrics.free_energy,
@@ -505,21 +495,19 @@ class PyMDPMarkovBlanket(MarkovBlanketInterface):
             return []
 
     def get_metrics(self) -> BoundaryMetrics:
-        ."""Get current boundary metrics from pymdp."""
+        """Get current boundary metrics from pymdp"""
         # Update metrics from current pymdp agent state
         self.metrics.update_from_pymdp_agent(self.pymdp_agent)
 
         # Update time-based metrics
         if self.metrics.last_violation_time:
             time_since = datetime.now() - self.metrics.last_violation_time
-            self.metrics.stability_over_time = (
-                max(0.0, 1.0 - (time_since.total_seconds() / 3600.0)))
+            self.metrics.stability_over_time = max(0.0, 1.0 - (time_since.total_seconds() / 3600.0))
 
         return self.metrics
 
-    def set_violation_handler(self, handler: Callable[[BoundaryViolationEvent],
-        None]) -> None:
-        ."""Set handler for violation events."""
+    def set_violation_handler(self, handler: Callable[[BoundaryViolationEvent], None]) -> None:
+        """Set handler for violation events"""
         self.violation_handlers.append(handler)
 
     def get_boundary_state(self) -> BoundaryState:
@@ -554,8 +542,7 @@ class PyMDPMarkovBlanket(MarkovBlanketInterface):
     def _get_pymdp_agent_state(self) -> Dict[str, Any]:
         """Extract current state from pymdp agent for logging"""
         try:
-            state = (
-                {"agent_id": self.agent_id, "timestamp": datetime.now().isoformat()})
+            state = {"agent_id": self.agent_id, "timestamp": datetime.now().isoformat()}
 
             if hasattr(self.pymdp_agent, "qs") and self.pymdp_agent.qs is not None:
                 state["beliefs"] = [q.tolist() for q in self.pymdp_agent.qs]
@@ -625,8 +612,7 @@ class MarkovBlanketFactory:
 
     @staticmethod
     def create_pymdp_blanket(
-        agent_id: str, num_states: int = (
-            4, num_observations: int = 4, num_actions: int = 4)
+        agent_id: str, num_states: int = 4, num_observations: int = 4, num_actions: int = 4
     ) -> PyMDPMarkovBlanket:
         """Create a pymdp-based Markov blanket"""
         return PyMDPMarkovBlanket(
@@ -645,6 +631,5 @@ class MarkovBlanketFactory:
             num_states = max(4, len(agent.belief_state))
 
         return PyMDPMarkovBlanket(
-            agent_id= (
-                agent.agent_id, num_states=num_states, num_observations=4, num_actions=4)
+            agent_id=agent.agent_id, num_states=num_states, num_observations=4, num_actions=4
         )

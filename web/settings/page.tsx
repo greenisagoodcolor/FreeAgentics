@@ -103,7 +103,10 @@ export default function SettingsPage() {
         if (settings.apiKeySessionId) {
           setIsValidatingApiKey(true);
           try {
-            const isValid = await validateStoredSession(settings.provider, settings.apiKeySessionId);
+            const isValid = await validateStoredSession(
+              settings.provider,
+              settings.apiKeySessionId,
+            );
             setHasStoredApiKey(isValid);
           } catch (error) {
             console.error("Error validating API key session:", error);

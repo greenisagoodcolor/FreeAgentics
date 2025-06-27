@@ -138,13 +138,11 @@ FreeAgentics uses environment variables to configure the application for differe
    ```
 
 2. **Key Rotation**
-
    - Rotate all secrets quarterly
    - Use different keys per environment
    - Never reuse development keys
 
 3. **Access Control**
-
    - Limit access to production configs
    - Use secrets management services
    - Enable audit logging
@@ -170,12 +168,10 @@ services:
 ### Common Issues
 
 1. **Missing Variables**
-
    - Check all required variables are set
    - Reference env.example for complete list
 
 2. **Connection Errors**
-
    - Verify database/Redis URLs
    - Check network configuration
    - Ensure services are running

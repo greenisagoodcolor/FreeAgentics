@@ -13,7 +13,7 @@ Personality and Trait System for FreeAgentics
 This module provides a comprehensive personality and trait system that influences
 agent behavior, decision-making, and interactions. It extends the basic Big Five
 model with behavioral integration, trait evolution, and extensibility.
-."""
+"""
 
 
 class TraitCategory(Enum):
@@ -57,7 +57,7 @@ class TraitDefinition:
     stability: float = 0.8  # Resistance to change
 
     def validate_value(self, value: float) -> float:
-        ."""Ensure trait value is within valid range."""
+        """Ensure trait value is within valid range"""
         return max(self.min_value, min(self.max_value, value))
 
 
@@ -92,7 +92,7 @@ class PersonalityTrait:
         return self.definition.validate_value(effective_value)
 
     def add_temporary_modifier(self, name: str, value: float, duration: timedelta) -> None:
-        ."""Add a temporary modifier to the trait."""
+        """Add a temporary modifier to the trait"""
         expiry_time = datetime.now() + duration
         self.temporary_modifiers[name] = (value, expiry_time)
 
@@ -286,8 +286,7 @@ class PersonalitySystem:
         for trait in personality_profile.traits.values():
             trait_value = trait.get_effective_value()
             if behavior_type in trait.definition.behavior_modifiers:
-                base_modifier = (
-                    trait.definition.behavior_modifiers[behavior_type])
+                base_modifier = trait.definition.behavior_modifiers[behavior_type]
                 # Apply trait influence based on its type
                 if trait.definition.influence_type == TraitInfluence.MULTIPLICATIVE:
                     # Higher trait values increase the modifier effect
@@ -435,8 +434,7 @@ class PersonalityProfile:
         base_impact = 0.1 if success else -0.05
         # Apply specific trait evolution based on experience type
         if experience_type == "exploration":
-            self._evolve_trait_if_exists("openness", base_impact,
-                "exploration_experience")
+            self._evolve_trait_if_exists("openness", base_impact, "exploration_experience")
             self._evolve_trait_if_exists("curiosity", base_impact, "exploration_experience")
         elif experience_type == "social_interaction":
             if social_context:
@@ -448,13 +446,11 @@ class PersonalityProfile:
                 )
         elif experience_type == "risk_taking":
             risk_impact = base_impact * risk_level
-            self._evolve_trait_if_exists("risk_tolerance", risk_impact,
-                "risk_experience")
+            self._evolve_trait_if_exists("risk_tolerance", risk_impact, "risk_experience")
             if not success:
                 self._evolve_trait_if_exists("neuroticism", abs(risk_impact), "failed_risk")
         elif experience_type == "cooperation":
-            self._evolve_trait_if_exists("agreeableness", base_impact,
-                "cooperation_experience")
+            self._evolve_trait_if_exists("agreeableness", base_impact, "cooperation_experience")
             self._evolve_trait_if_exists("empathy", base_impact, "cooperation_experience")
         elif experience_type == "leadership":
             self._evolve_trait_if_exists("dominance", base_impact, "leadership_experience")
@@ -464,14 +460,13 @@ class PersonalityProfile:
         self.last_updated = datetime.now()
 
     def _evolve_trait_if_exists(self, trait_name: str, impact: float, context: str) -> None:
-        .."""Helper method to evolve a trait if it exists.."""
+        """Helper method to evolve a trait if it exists."""
         if trait_name in self.traits:
             self.traits[trait_name].evolve_trait(impact, context)
 
     def get_behavior_modifier(self, behavior_type: str) -> float:
-        ."""Get the personality modifier for a specific behavior."""
-        return self.personality_system.calculate_behavior_modifier(self,
-            behavior_type)
+        """Get the personality modifier for a specific behavior"""
+        return self.personality_system.calculate_behavior_modifier(self, behavior_type)
 
     def get_interaction_effect(self, interaction_type: str) -> float:
         """Get the personality effect on social interactions"""
@@ -541,7 +536,7 @@ _global_personality_system = PersonalitySystem()
 
 
 def get_personality_system() -> PersonalitySystem:
-    ."""Get the global personality system instance."""
+    """Get the global personality system instance"""
     return _global_personality_system
 
 

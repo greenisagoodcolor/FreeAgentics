@@ -14,7 +14,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-interface DatePickerWithRangeProps extends React.HTMLAttributes<HTMLDivElement> {
+interface DatePickerWithRangeProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   date: DateRange | undefined;
   onDateChange: (date: DateRange | undefined) => void;
 }
@@ -33,7 +34,7 @@ export function DatePickerWithRange({
             variant={"outline"}
             className={cn(
               "w-[300px] justify-start text-left font-normal",
-              !date && "text-muted-foreground"
+              !date && "text-muted-foreground",
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
@@ -64,4 +65,4 @@ export function DatePickerWithRange({
       </Popover>
     </div>
   );
-} 
+}

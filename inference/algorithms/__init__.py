@@ -1,5 +1,4 @@
-."""
-
+"""
 Inference Algorithms Module
 Provides backward compatibility for test imports.
 """

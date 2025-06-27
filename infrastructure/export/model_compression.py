@@ -1,4 +1,4 @@
-."""
+"""
 Model Compression Utilities
 
 Implements various compression techniques to reduce model size for edge deployment.
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class CompressionLevel(Enum):
-    """Compression level presets."""
+    """Compression level presets"""
 
     NONE = "none"
     LIGHT = "light"  # ~20% reduction
@@ -29,7 +29,7 @@ class CompressionLevel(Enum):
 
 @dataclass
 class CompressionStats:
-    """Statistics about compression results."""
+    """Statistics about compression results"""
 
     original_size_bytes: int
     compressed_size_bytes: int
@@ -40,7 +40,7 @@ class CompressionStats:
     precision_loss: float
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary."""
+        """Convert to dictionary"""
         return {
             "original_size_bytes": self.original_size_bytes,
             "compressed_size_bytes": self.compressed_size_bytes,
@@ -65,7 +65,7 @@ class ModelCompressor:
     """
 
     def __init__(self) -> None:
-        """Initialize compressor."""
+        """Initialize compressor"""
         self.compression_configs = {
             CompressionLevel.NONE: {
                 "quantize_bits": 32,
@@ -137,8 +137,7 @@ class ModelCompressor:
 
             # 1. Quantize parameters
             if config["quantize_bits"] < 32:
-                quant_stats = (
-                    self._quantize_parameters(gnn, config["quantize_bits"]))
+                quant_stats = self._quantize_parameters(gnn, config["quantize_bits"])
                 params_quantized = quant_stats["count"]
                 precision_losses.append(quant_stats["precision_loss"])
 
@@ -167,17 +166,15 @@ class ModelCompressor:
             parameters_quantized=params_quantized,
             nodes_pruned=nodes_pruned,
             edges_pruned=edges_pruned,
-            precision_loss= (
-                np.mean(precision_losses) if precision_losses else 0.0,)
+            precision_loss=(np.mean(precision_losses) if precision_losses else 0.0,),
         )
 
         logger.info(f"Compression complete: {stats.compression_ratio:.2f}x reduction")
 
         return compressed, stats
 
-    def _quantize_parameters(self, gnn: Dict[str, Any], bits: int) -> Dict[str,
-        Any]:
-        """Quantize floating point parameters to reduce precision."""
+    def _quantize_parameters(self, gnn: Dict[str, Any], bits: int) -> Dict[str, Any]:
+        """Quantize floating point parameters to reduce precision"""
         stats = {"count": 0, "precision_loss": 0.0}
         losses = []
 
@@ -206,7 +203,7 @@ class ModelCompressor:
         return stats
 
     def _quantize_value(self, value: float, bits: int) -> float:
-        """Quantize a single value to specified bit precision."""
+        """Quantize a single value to specified bit precision"""
         if bits == 32:
             return value
         elif bits == 16:
@@ -225,9 +222,8 @@ class ModelCompressor:
         else:
             return value
 
-    def _prune_graph(self, gnn: Dict[str, Any], threshold: float) -> Dict[str,
-        Any]:
-        """Prune low-importance nodes and edges."""
+    def _prune_graph(self, gnn: Dict[str, Any], threshold: float) -> Dict[str, Any]:
+        """Prune low-importance nodes and edges"""
         stats = {"nodes_pruned": 0, "edges_pruned": 0}
 
         # Calculate importance scores for nodes
@@ -238,8 +234,7 @@ class ModelCompressor:
                 importance = 0.0
                 if "parameters" in node:
                     values = [
-                        abs(v) for v in node["parameters"].values() if isinstance(v, (int,
-                            float))
+                        abs(v) for v in node["parameters"].values() if isinstance(v, (int, float))
                     ]
                     importance = np.mean(values) if values else 0.0
                 node_importance[node["id"]] = importance
@@ -247,8 +242,7 @@ class ModelCompressor:
             # Prune nodes below threshold
             original_count = len(gnn["nodes"])
             gnn["nodes"] = [
-                node for node in gnn["nodes"] if node_importance.get(node["id"],
-                    0) >= threshold
+                node for node in gnn["nodes"] if node_importance.get(node["id"], 0) >= threshold
             ]
             stats["nodes_pruned"] = original_count - len(gnn["nodes"])
 
@@ -272,7 +266,7 @@ class ModelCompressor:
         return stats
 
     def _apply_weight_sharing(self, gnn: Dict[str, Any]):
-        """Apply weight sharing to reduce unique parameter values."""
+        """Apply weight sharing to reduce unique parameter values"""
         # Collect all weight values
         all_weights = []
 
@@ -316,7 +310,7 @@ class ModelCompressor:
         gnn["shared_weights"] = shared_weights
 
     def _convert_to_sparse(self, gnn: Dict[str, Any], threshold: float):
-        """Convert to sparse representation for values near zero."""
+        """Convert to sparse representation for values near zero"""
         # For edges, store only non-zero weights
         if "edges" in gnn:
             for edge in gnn["edges"]:
@@ -374,8 +368,7 @@ class ModelCompressor:
         # Parse JSON
         return json.loads(decompressed.decode("utf-8"))
 
-    def estimate_runtime_memory(self, model_data: Dict[str, Any]) -> Dict[str,
-        float]:
+    def estimate_runtime_memory(self, model_data: Dict[str, Any]) -> Dict[str, float]:
         """
         Estimate runtime memory requirements.
 
@@ -414,8 +407,7 @@ class ModelCompressor:
 
         # Knowledge graph estimate
         if "knowledge_size" in model_data:
-            estimates["knowledge_graph"] = (
-                model_data["knowledge_size"] / (1024 * 1024))
+            estimates["knowledge_graph"] = model_data["knowledge_size"] / (1024 * 1024)
         else:
             estimates["knowledge_graph"] = 50.0  # Default 50MB
 
@@ -476,8 +468,7 @@ class ModelCompressor:
             for node in comp_gnn.get("nodes", []):
                 if "parameters" in node:
                     for key, value in node["parameters"].items():
-                        if not isinstance(value, (int, float, str, bool,
-                            type(None))):
+                        if not isinstance(value, (int, float, str, bool, type(None))):
                             results["parameters_valid"] = False
                             break
 

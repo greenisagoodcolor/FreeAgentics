@@ -1,4 +1,4 @@
-."""
+"""
 Comprehensive Readiness Report Integration for Edge Deployment
 
 Unified system that integrates technical, business, and safety assessments into a
@@ -14,7 +14,6 @@ from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-
 
 from coalitions.readiness.business_readiness_assessor import (
     BusinessReadinessAssessor,
@@ -43,7 +42,7 @@ logger = logging.getLogger(__name__)
 
 
 class OverallReadinessLevel(Enum):
-    """Overall deployment readiness levels."""
+    """Overall deployment readiness levels"""
 
     NOT_READY = "not_ready"
     CONDITIONALLY_READY = "conditionally_ready"
@@ -52,7 +51,7 @@ class OverallReadinessLevel(Enum):
 
 
 class RiskLevel(Enum):
-    """Risk levels for deployment decisions."""
+    """Risk levels for deployment decisions"""
 
     CRITICAL = "critical"
     HIGH = "high"
@@ -61,7 +60,7 @@ class RiskLevel(Enum):
 
 
 class ActionPriority(Enum):
-    """Priority levels for recommended actions."""
+    """Priority levels for recommended actions"""
 
     IMMEDIATE = "immediate"
     URGENT = "urgent"
@@ -72,7 +71,7 @@ class ActionPriority(Enum):
 
 @dataclass
 class ReadinessScore:
-    """Comprehensive readiness scoring breakdown."""
+    """Comprehensive readiness scoring breakdown"""
 
     overall_score: float
     technical_score: float
@@ -89,7 +88,7 @@ class ReadinessScore:
     assessment_reliability: float = 0.0
 
     def calculate_weighted_score(self) -> float:
-        """Calculate the weighted overall score."""
+        """Calculate the weighted overall score"""
         return (
             self.technical_score * self.technical_weight
             + self.business_score * self.business_weight
@@ -99,7 +98,7 @@ class ReadinessScore:
 
 @dataclass
 class RecommendedAction:
-    """Individual recommended action for deployment readiness."""
+    """Individual recommended action for deployment readiness"""
 
     action_id: str
     category: str  # 'technical', 'business', 'safety', 'integration'
@@ -123,7 +122,7 @@ class RecommendedAction:
 
 @dataclass
 class ComprehensiveReadinessReport:
-    """Unified comprehensive readiness assessment report."""
+    """Unified comprehensive readiness assessment report"""
 
     coalition_id: str
     assessment_timestamp: datetime
@@ -150,7 +149,7 @@ class ComprehensiveReadinessReport:
     assessment_duration: float = 0.0
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary representation."""
+        """Convert to dictionary representation"""
         return {
             "coalition_id": self.coalition_id,
             "assessment_timestamp": self.assessment_timestamp.isoformat(),
@@ -235,8 +234,7 @@ class ComprehensiveReadinessIntegrator:
 
             # Safety and compliance assessment
             safety_report = await self.safety_verifier.verify_safety_compliance(
-                coalition_id, coalition_config, deployment_context,
-                    required_frameworks
+                coalition_id, coalition_config, deployment_context, required_frameworks
             )
 
             # Step 2: Integrate assessments
@@ -268,7 +266,7 @@ class ComprehensiveReadinessIntegrator:
         business_report: BusinessReadinessReport,
         safety_report: SafetyComplianceReport,
     ) -> ComprehensiveReadinessReport:
-        """Integrate all assessment results into unified report."""
+        """Integrate all assessment results into unified report"""
 
         # Extract scores
         technical_score = technical_report.overall_score
@@ -338,7 +336,7 @@ class ComprehensiveReadinessIntegrator:
         business_report: BusinessReadinessReport,
         safety_report: SafetyComplianceReport,
     ) -> OverallReadinessLevel:
-        """Determine overall readiness level based on all assessments."""
+        """Determine overall readiness level based on all assessments"""
 
         # Check for critical blockers first
         has_critical_safety_issues = not safety_report.deployment_approval
@@ -394,7 +392,7 @@ class ComprehensiveReadinessIntegrator:
         business_report: BusinessReadinessReport,
         safety_report: SafetyComplianceReport,
     ) -> List[str]:
-        """Generate integrated recommendations across all assessment areas."""
+        """Generate integrated recommendations across all assessment areas"""
 
         recommendations = []
 
@@ -422,10 +420,8 @@ class ComprehensiveReadinessIntegrator:
         # Integration recommendations
         if len(recommendations) == 0:  # If no critical issues
             recommendations.append("Optimize deployment configuration for maximum performance")
-            recommendations.append("Implement comprehensive monitoring and
-                alerting systems")
-            recommendations.append("Develop detailed operational procedures and
-                runbooks")
+            recommendations.append("Implement comprehensive monitoring and " "alerting systems")
+            recommendations.append("Develop detailed operational procedures and " "runbooks")
 
         # Prioritize and limit recommendations
         return recommendations[:10]  # Top 10 recommendations
@@ -436,7 +432,7 @@ class ComprehensiveReadinessIntegrator:
         business_report: BusinessReadinessReport,
         safety_report: SafetyComplianceReport,
     ) -> str:
-        """Assess integrated risk level across all dimensions."""
+        """Assess integrated risk level across all dimensions"""
 
         # Safety risks (highest priority)
         if not safety_report.deployment_approval:
@@ -464,7 +460,7 @@ class ComprehensiveReadinessIntegrator:
         return "low"
 
     def _generate_default_market_data(self, business_context: Dict[str, Any]) -> Dict[str, Any]:
-        """Generate default market data if not provided."""
+        """Generate default market data if not provided"""
         return {
             "market_size": {
                 "total_addressable_market": business_context.get("market_size", 10000000),
@@ -477,7 +473,7 @@ class ComprehensiveReadinessIntegrator:
         }
 
     def save_report(self, report: ComprehensiveReadinessReport, output_path: Path) -> None:
-        """Save comprehensive readiness report to file."""
+        """Save comprehensive readiness report to file"""
         report_data = report.to_dict()
 
         with open(output_path, "w") as f:
@@ -486,7 +482,7 @@ class ComprehensiveReadinessIntegrator:
         logger.info(f"Comprehensive readiness report saved to {output_path}")
 
     def generate_executive_summary(self, report: ComprehensiveReadinessReport) -> Dict[str, Any]:
-        """Generate executive summary of readiness assessment."""
+        """Generate executive summary of readiness assessment"""
 
         return {
             "coalition_id": report.coalition_id,

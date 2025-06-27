@@ -5,7 +5,7 @@ Module for FreeAgentics Active Inference implementation.
 import inspect
 import itertools
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Union, cast, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 
 if TYPE_CHECKING:
     from .pymdp_generative_model import PyMDPGenerativeModel as PyMDPGenerativeModelType
@@ -159,7 +159,11 @@ class PyMDPPolicySelector(PolicySelector):
             # pymdp calculates expected free energy internally during policy inference
             if hasattr(self.agent, "G") and self.agent.G is not None:
                 # Use pymdp's calculated expected free energy
-                if isinstance(self.agent.G, list) and isinstance(action_idx, int) and len(self.agent.G) > action_idx:
+                if (
+                    isinstance(self.agent.G, list)
+                    and isinstance(action_idx, int)
+                    and len(self.agent.G) > action_idx
+                ):
                     G = float(self.agent.G[action_idx])
                 elif hasattr(self.agent.G, "__getitem__") and isinstance(action_idx, int):
                     try:
@@ -190,8 +194,7 @@ class PyMDPPolicySelector(PolicySelector):
             try:
                 # ROBUST NON-PYMDP FALLBACK: Calculate free energy without PyMDP
                 logger.info("Using enhanced non-PyMDP fallback calculations")
-                # Simple but functional free energy calculation based on action and
-                    beliefs
+                # Simple but functional free energy calculation based on action and beliefs
                 # This ensures the integration continues working even with PyMDP issues
                 # Action-dependent base free energy (different actions have different costs)
                 base_G = 1.0 + 0.1 * float(action_idx)
@@ -216,8 +219,11 @@ class PyMDPPolicySelector(PolicySelector):
                 logger.info(
                     f"Non-PyMDP fallback: G={G:.3f}, epistemic={epistemic_value:.3f}, pragmatic={pragmatic_value:.3f}"
                 )
-                return torch.tensor(G), torch.tensor(epistemic_value),
-                    torch.tensor(pragmatic_value)
+                return (
+                    torch.tensor(G),
+                    torch.tensor(epistemic_value),
+                    torch.tensor(pragmatic_value),
+                )
             except Exception as e2:
                 logger.error(f"Enhanced fallback also failed: {e2}")
                 # Final emergency fallback: return action-dependent values
@@ -403,8 +409,9 @@ class PyMDPPolicyAdapter:
             # Fallback to default selector
             return self.pymdp_selector
 
-    def select_policy(self, beliefs: Any, generative_model: Any = None,
-        preferences: Any = None) -> Any:
+    def select_policy(
+        self, beliefs: Any, generative_model: Any = None, preferences: Any = None
+    ) -> Any:
         """Adapter method for existing interface"""
         # ✅ CRITICAL FIX: Use cached selector instead of creating new ones
         # This prevents the Einstein summation error from excessive agent creation
@@ -416,8 +423,9 @@ class PyMDPPolicyAdapter:
             )
         else:
             # Use the provided pymdp model or default
-            return self.pymdp_selector.select_policy(beliefs, self.pymdp_selector.generative_model,
-                preferences)
+            return self.pymdp_selector.select_policy(
+                beliefs, self.pymdp_selector.generative_model, preferences
+            )
 
     def compute_expected_free_energy(self, *args: Any, **kwargs: Any) -> Any:
         """Adapter method that handles multiple calling conventions"""
@@ -434,16 +442,13 @@ class PyMDPPolicyAdapter:
                     B_np = B.detach().cpu().numpy().copy()  # Explicit copy
                     C_np = C.detach().cpu().numpy().copy()  # Explicit copy
                 else:
-                    A_np = (
-                        np.array(A, copy=True)  # Explicit copy for numpy arrays)
+                    A_np = np.array(A, copy=True)  # Explicit copy for numpy arrays
                     B_np = np.array(B, copy=True)  # Explicit copy for numpy arrays
-                    C_np = (
-                        np.array(C, copy=True)  # Explicit copy for numpy arrays)
+                    C_np = np.array(C, copy=True)  # Explicit copy for numpy arrays
                 if hasattr(beliefs, "detach"):  # PyTorch tensor
                     beliefs_np = beliefs.detach().cpu().numpy().copy()  # Explicit copy
                 else:
-                    beliefs_np = (
-                        np.array(beliefs, copy=True)  # Explicit copy for numpy arrays)
+                    beliefs_np = np.array(beliefs, copy=True)  # Explicit copy for numpy arrays
                 # Infer dimensions from the COPIED matrices (not originals)
                 if hasattr(A_np, "shape"):
                     num_observations = A_np.shape[0] if len(A_np.shape) > 1 else 1
@@ -487,8 +492,7 @@ class PyMDPPolicyAdapter:
                 if hasattr(temp_agent, "G") and temp_agent.G is not None:
                     # Use pymdp's calculated expected free energy
                     if isinstance(temp_agent.G, list):
-                        free_energies = (
-                            [float(g) for g in temp_agent.G[:num_actions]])
+                        free_energies = [float(g) for g in temp_agent.G[:num_actions]]
                     else:
                         # If G is scalar, use for all actions with small variation
                         base_G = float(temp_agent.G)
@@ -620,18 +624,23 @@ if __name__ == "__main__":
     selector = create_pymdp_policy_selector(config, pymdp_model)
     # Test policy selection
     beliefs = np.array([0.25, 0.25, 0.25, 0.25])
-    policy, probs = (
-        selector.select_policy(torch.from_numpy(beliefs).float(), selector.generative_model))
+    policy, probs = selector.select_policy(
+        torch.from_numpy(beliefs).float(), selector.generative_model
+    )
     print(f"Selected policy: {policy}")
     print(f"Policy probabilities: {probs}")
     # Test expected free energy calculation
-    G, epistemic, pragmatic = selector.compute_expected_free_energy(policy, torch.from_numpy(beliefs).float(), selector.generative_model)
+    G, epistemic, pragmatic = selector.compute_expected_free_energy(
+        policy, torch.from_numpy(beliefs).float(), selector.generative_model
+    )
     print(f"Expected free energy: {G}")
     print(f"Epistemic value: {epistemic}")
     print(f"Pragmatic value: {pragmatic}")
     # Test multiple policies to verify different values
     policies = selector.enumerate_policies(2)
     for i, pol in enumerate(policies):
-        G, _, _ = selector.compute_expected_free_energy(pol, torch.from_numpy(beliefs).float(), selector.generative_model)
+        G, _, _ = selector.compute_expected_free_energy(
+            pol, torch.from_numpy(beliefs).float(), selector.generative_model
+        )
         print(f"Policy {i}: {pol.actions} -> G = {G}")
     print("✅ pymdp policy selector test completed successfully!")

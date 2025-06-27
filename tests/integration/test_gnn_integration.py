@@ -35,7 +35,7 @@ from inference.gnn.testing_framework import GNNTestSuite, GNNValidator, create_t
 
 
 class TestGNNPipelineIntegration:
-    ."""Test complete GNN processing pipeline."""
+    """Test complete GNN processing pipeline"""
 
     def test_parser_to_model_pipeline(self) -> None:
         """Test parsing GNN model and creating architecture"""
@@ -83,8 +83,7 @@ training {
         """Test feature extraction integration"""
         feature_config_dicts = [
             {"name": "feat1", "type": FeatureType.NUMERICAL},
-            {"name": "feat2", "type": FeatureType.CATEGORICAL, "values": ["a",
-                "b"]},
+            {"name": "feat2", "type": FeatureType.CATEGORICAL, "values": ["a", "b"]},
         ]
         feature_configs = [FeatureConfig(**fc) for fc in feature_config_dicts]
         extractor = NodeFeatureExtractor(feature_configs=feature_configs)
@@ -289,7 +288,7 @@ training {
 
 
 class TestGNNComponentInteraction:
-    ."""Test interactions between GNN components."""
+    """Test interactions between GNN components"""
 
     def test_parser_validator_interaction(self) -> None:
         """Test parser and validator working together"""
@@ -308,7 +307,7 @@ architecture {
     ]
 }
 ```
-."""
+"""
         parsed = parser.parse(model_content)
         validator = GNNValidator()
         assert not parsed.errors, f"Parsing errors: {parsed.errors}"

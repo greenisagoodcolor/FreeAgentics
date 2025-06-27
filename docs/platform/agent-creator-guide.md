@@ -122,7 +122,6 @@ Choose from base templates:
 
 1. Click "Generate Backstory"
 2. Select a template:
-
    - **Origin Story**: Where they came from
    - **Defining Moment**: Key life event
    - **Quest**: Current mission

@@ -27,7 +27,7 @@ from .policy_selection import (
 
 
 class InformationMetric(Enum):
-    ."""Types of information metrics for active learning."""
+    """Types of information metrics for active learning"""
 
     ENTROPY = "entropy"
     MUTUAL_INFORMATION = "mutual_information"
@@ -38,7 +38,7 @@ class InformationMetric(Enum):
 
 @dataclass
 class ActiveLearningConfig:
-    ."""Configuration for active learning."""
+    """Configuration for active learning"""
 
     exploration_weight: float = 0.3
     information_metric: InformationMetric = InformationMetric.EXPECTED_INFORMATION_GAIN
@@ -55,7 +55,7 @@ class ActiveLearningConfig:
 
 
 class InformationSeeker(ABC):
-    ."""Abstract base class for information seeking strategies."""
+    """Abstract base class for information seeking strategies"""
 
     def __init__(self, config: ActiveLearningConfig) -> None:
         self.config = config
@@ -67,14 +67,14 @@ class InformationSeeker(ABC):
     def compute_information_value(
         self, beliefs: torch.Tensor, possible_observations: torch.Tensor
     ) -> torch.Tensor:
-        ."""Compute the value of potential observations for reducing uncertainty."""
+        """Compute the value of potential observations for reducing uncertainty"""
         pass
 
     @abstractmethod
     def select_informative_action(
         self, beliefs: torch.Tensor, available_actions: torch.Tensor
     ) -> torch.Tensor:
-        ."""Select action that maximizes information gain."""
+        """Select action that maximizes information gain"""
 
         pass
 
@@ -90,7 +90,7 @@ class EntropyBasedSeeker(InformationSeeker):
         self.generative_model = generative_model
 
     def compute_entropy(self, beliefs: torch.Tensor) -> torch.Tensor:
-        ."""Compute Shannon entropy of beliefs."""
+        """Compute Shannon entropy of beliefs"""
 
         safe_beliefs = beliefs + self.config.eps
         entropy = -torch.sum(safe_beliefs * torch.log(safe_beliefs), dim=-1)
@@ -169,7 +169,7 @@ class MutualInformationSeeker(InformationSeeker):
     def compute_mutual_information(
         self, beliefs: torch.Tensor, observation_dist: torch.Tensor
     ) -> torch.Tensor:
-        ."""
+        """
         Compute mutual information I(S;O) = H(S) - H(S|O)
         Args:
             beliefs: Belief distribution over states
@@ -194,7 +194,7 @@ class MutualInformationSeeker(InformationSeeker):
     def compute_information_value(
         self, beliefs: torch.Tensor, possible_observations: torch.Tensor
     ) -> torch.Tensor:
-        ."""Compute information value based on mutual information."""
+        """Compute information value based on mutual information"""
         num_obs = possible_observations.shape[0]
         info_values = torch.zeros(num_obs, device=self.device)
         for i in range(num_obs):
@@ -206,7 +206,7 @@ class MutualInformationSeeker(InformationSeeker):
     def select_informative_action(
         self, beliefs: torch.Tensor, available_actions: torch.Tensor
     ) -> torch.Tensor:
-        ."""Select action that maximizes mutual information."""
+        """Select action that maximizes mutual information"""
         num_actions = available_actions.shape[0]
         expected_mi = torch.zeros(num_actions, device=self.device)
         if isinstance(self.generative_model, DiscreteGenerativeModel):
@@ -334,7 +334,7 @@ class ActiveLearningAgent:
         return selected_action_index, info
 
     def _simulate_policy_observations(self, beliefs: torch.Tensor, policy: Policy) -> torch.Tensor:
-        ."""Simulate expected observations from executing a policy."""
+        """Simulate expected observations from executing a policy"""
         current_beliefs = beliefs.clone()
         observations = []
         if isinstance(self.generative_model, DiscreteGenerativeModel):
@@ -348,11 +348,10 @@ class ActiveLearningAgent:
         if observations:
             return torch.stack(observations)
         else:
-            return torch.zeros(1, self.generative_model.dims.num_observations,
-                device=self.device)
+            return torch.zeros(1, self.generative_model.dims.num_observations, device=self.device)
 
     def _generate_policies(self, available_actions: torch.Tensor) -> List[Policy]:
-        """Generate a list of single-step policies for each available action."""
+        """Generate a list of single-step policies for each available action"""
         action_indices = torch.argmax(available_actions, dim=1)
         policies = []
         for action_index in action_indices:
@@ -369,7 +368,7 @@ class ActiveLearningAgent:
         return novelty_values
 
     def _hash_belief_state(self, beliefs: torch.Tensor) -> str:
-        ."""Create hash of belief state for novelty tracking."""
+        """Create hash of belief state for novelty tracking"""
         discretized = (beliefs * 100).round().int()
         return str(discretized.tolist())
 

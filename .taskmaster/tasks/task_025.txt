@@ -42,4 +42,3 @@ Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytes
 The committee will assess: (a) codebase modularity and maintainability (Robert C. Martin, Martin Fowler), (b) system scalability and monitoring (Yann LeCun, Conor Heins), (c) risk assessment and mitigation strategies (Demis Hassabis, Karl Friston), and (d) alignment with industry best practices and ethical guidelines (Anil Seth, Andy Clark).
 
 Before task completion, pass integration and end-to-end tests. Reference the PRD for acceptance criteria and committee review. Ensure all tests (mypy, tsc, jest, pytest, flake8, ESLint) pass and integration/end-to-end tests are green before closing the task.
-

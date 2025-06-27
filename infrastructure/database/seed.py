@@ -31,30 +31,25 @@ fake = Faker()
 
 
 def create_agents(session: Session, count: int = 10) -> List[Agent]:
-    """Create sample agents."""
-    agent_types = (
-        ["explorer", "merchant", "guardian", "researcher", "coordinator"])
+    """Create sample agents"""
+    agent_types = ["explorer", "merchant", "guardian", "researcher", "coordinator"]
     agents = []
     for i in range(count):
         agent = Agent(
             uuid=str(uuid.uuid4()),
             name=fake.name(),
             type=choice(agent_types),
-            status= (
-                AgentStatus.ACTIVE if i < count - 2 else AgentStatus.INACTIVE,)
+            status=AgentStatus.ACTIVE if i < count - 2 else AgentStatus.INACTIVE,
             config={
-                "personality": choice(["curious", "cautious", "aggressive",
-                    "cooperative"]),
+                "personality": choice(["curious", "cautious", "aggressive", "cooperative"]),
                 "skills": fake.words(nb=3),
                 "preferences": {
-                    "communication_style": choice(["formal", "casual",
-                        "technical"]),
+                    "communication_style": choice(["formal", "casual", "technical"]),
                     "risk_tolerance": uniform(0.1, 0.9),
                 },
             },
             state={
-                "current_task": choice(["exploring", "trading", "patrolling", "researching",
-                    None]),
+                "current_task": choice(["exploring", "trading", "patrolling", "researching", None]),
                 "mood": choice(["happy", "neutral", "focused", "tired"]),
             },
             beliefs={
@@ -67,8 +62,7 @@ def create_agents(session: Session, count: int = 10) -> List[Agent]:
             location=f"8{fake.hexify(text='^^^^^^')}",
             energy_level=uniform(0.3, 1.0),
             experience_points=randint(0, 1000),
-            last_active_at= (
-                datetime.utcnow() - timedelta(minutes=randint(0, 60)),)
+            last_active_at=datetime.utcnow() - timedelta(minutes=randint(0, 60)),
         )
         agents.append(agent)
         session.add(agent)
@@ -77,7 +71,7 @@ def create_agents(session: Session, count: int = 10) -> List[Agent]:
 
 
 def create_conversations(session: Session, agents: List[Agent]) -> List[Conversation]:
-    """Create sample conversations between agents."""
+    """Create sample conversations between agents"""
     conversations = []
     for i in range(5):
         conv = Conversation(
@@ -85,21 +79,18 @@ def create_conversations(session: Session, agents: List[Agent]) -> List[Conversa
             title=f"Discussion about {fake.catch_phrase()}",
             type=ConversationType.DIRECT,
             meta_data={
-                "topic": choice(["resources", "exploration", "strategy",
-                    "cooperation"]),
+                "topic": choice(["resources", "exploration", "strategy", "cooperation"]),
                 "priority": choice(["high", "medium", "low"]),
             },
             context={
                 "location": f"8{fake.hexify(text='^^^^^^')}",
                 "weather": choice(["sunny", "rainy", "foggy"]),
             },
-            last_message_at= (
-                datetime.utcnow() - timedelta(minutes=randint(0, 30)),)
+            last_message_at=datetime.utcnow() - timedelta(minutes=randint(0, 30)),
         )
         conversations.append(conv)
         session.add(conv)
-        participants = (
-            fake.random_elements(elements=agents, length=2, unique=True))
+        participants = fake.random_elements(elements=agents, length=2, unique=True)
         for idx, agent in enumerate(participants):
             participant = ConversationParticipant(
                 conversation=conv,
@@ -115,13 +106,10 @@ def create_conversations(session: Session, agents: List[Agent]) -> List[Conversa
                     content=fake.text(max_nb_chars=200),
                     type="text",
                     meta_data={
-                        "sentiment": choice(["positive", "neutral",
-                            "negative"]),
-                        "intent": choice(["inform", "query", "suggest",
-                            "confirm"]),
+                        "sentiment": choice(["positive", "neutral", "negative"]),
+                        "intent": choice(["inform", "query", "suggest", "confirm"]),
                     },
-                    created_at= (
-                        datetime.utcnow() - timedelta(minutes=randint(0, 30)),)
+                    created_at=datetime.utcnow() - timedelta(minutes=randint(0, 30)),
                 )
                 session.add(message)
     for i in range(3):
@@ -130,16 +118,14 @@ def create_conversations(session: Session, agents: List[Agent]) -> List[Conversa
             title=f"Group: {fake.company()}",
             type=ConversationType.GROUP,
             meta_data={
-                "purpose": choice(["planning", "coordination", "emergency",
-                    "social"]),
+                "purpose": choice(["planning", "coordination", "emergency", "social"]),
                 "max_participants": randint(5, 10),
             },
         )
         conversations.append(conv)
         session.add(conv)
         participants = fake.random_elements(
-            elements= (
-                agents, length=randint(3, min(6, len(agents))), unique=True)
+            elements=agents, length=randint(3, min(6, len(agents))), unique=True
         )
         for agent in participants:
             participant = ConversationParticipant(
@@ -154,7 +140,7 @@ def create_conversations(session: Session, agents: List[Agent]) -> List[Conversa
 
 
 def create_knowledge_graphs(session: Session, agents: List[Agent]) -> List[KnowledgeGraph]:
-    """Create sample knowledge graphs."""
+    """Create sample knowledge graphs"""
     graphs = []
     for agent in agents[:5]:
         graph = KnowledgeGraph(
@@ -180,8 +166,7 @@ def create_knowledge_graphs(session: Session, agents: List[Agent]) -> List[Knowl
                     "id": str(uuid.uuid4()),
                     "source": str(uuid.uuid4()),
                     "target": str(uuid.uuid4()),
-                    "type": choice(["relates_to", "causes", "prevents",
-                        "similar_to"]),
+                    "type": choice(["relates_to", "causes", "prevents", "similar_to"]),
                     "weight": uniform(0.1, 1.0),
                 }
                 for _ in range(randint(3, 8))
@@ -192,8 +177,7 @@ def create_knowledge_graphs(session: Session, agents: List[Agent]) -> List[Knowl
                 "total_facts": randint(10, 100),
             },
             is_public=choice([True, False]),
-            access_list= (
-                [str(a.id) for a in fake.random_elements(agents, length=randint(0, 3))],)
+            access_list=[str(a.id) for a in fake.random_elements(agents, length=randint(0, 3))],
         )
         graphs.append(graph)
         session.add(graph)
@@ -218,7 +202,7 @@ def create_knowledge_graphs(session: Session, agents: List[Agent]) -> List[Knowl
 
 
 def create_coalitions(session: Session, agents: List[Agent]) -> List[Coalition]:
-    """Create sample coalitions."""
+    """Create sample coalitions"""
     coalitions = []
     coalition_configs = [
         {
@@ -262,8 +246,7 @@ def create_coalitions(session: Session, agents: List[Agent]) -> List[Coalition]:
         coalitions.append(coalition)
         session.add(coalition)
         member_count = randint(3, min(7, len(agents)))
-        members = (
-            fake.random_elements(elements=agents, length=member_count, unique=True))
+        members = fake.random_elements(elements=agents, length=member_count, unique=True)
         for idx, agent in enumerate(members):
             member = CoalitionMember(
                 coalition=coalition,
@@ -281,7 +264,7 @@ def create_coalitions(session: Session, agents: List[Agent]) -> List[Coalition]:
 def create_system_logs(
     session: Session, agents: List[Agent], conversations: List[Conversation]
 ) -> None:
-    """Create sample system logs."""
+    """Create sample system logs"""
     components = [
         "agent_manager",
         "conversation_engine",
@@ -296,8 +279,7 @@ def create_system_logs(
             component=choice(components),
             message=fake.sentence(),
             agent_id=choice(agents).id if randint(0, 1) else None,
-            conversation_id= (
-                choice(conversations).id if randint(0, 2) == 0 else None,)
+            conversation_id=choice(conversations).id if randint(0, 2) == 0 else None,
             data={
                 "action": choice(["create", "update", "delete", "process"]),
                 "duration_ms": randint(10, 1000),
@@ -311,7 +293,7 @@ def create_system_logs(
 
 
 def seed_development_data():
-    """Seed data for development environment."""
+    """Seed data for development environment"""
     session = SessionLocal()
     try:
         print("Creating agents...")
@@ -334,7 +316,7 @@ def seed_development_data():
 
 
 def seed_demo_data():
-    """Seed data for demo environment with specific scenarios."""
+    """Seed data for demo environment with specific scenarios"""
     session = SessionLocal()
     try:
         demo_agents = []
@@ -365,8 +347,7 @@ def seed_demo_data():
             status=AgentStatus.ACTIVE,
             config={
                 "personality": "strategic",
-                "skills": ["market_analysis", "price_discovery",
-                    "liquidity_provision"],
+                "skills": ["market_analysis", "price_discovery", "liquidity_provision"],
                 "specialization": "market_making",
             },
             state={"current_task": "maintaining_liquidity"},
@@ -415,8 +396,7 @@ def seed_demo_data():
         session.add(market_conv)
         for agent in [optimizer, market_maker]:
             participant = ConversationParticipant(
-                conversation= (
-                    market_conv, agent=agent, role="negotiator", is_active=True)
+                conversation=market_conv, agent=agent, role="negotiator", is_active=True
             )
             session.add(participant)
         demo_coalition = Coalition(

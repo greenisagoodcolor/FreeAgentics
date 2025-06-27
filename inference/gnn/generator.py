@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class GMNGenerator:
-    """Generate and modify GMN models for Active Inference agents."""
+    """Generate and modify GMN models for Active Inference agents"""
 
     def __init__(self) -> None:
         self.parser = GMNParser()
@@ -100,7 +100,7 @@ class GMNGenerator:
         return refined_model
 
     def _get_class_template(self, agent_class: str) -> Dict[str, Any]:
-        """Get base template for agent class."""
+        """Get base template for agent class"""
         templates = {
             "Explorer": {
                 "focus": "discovery",
@@ -144,7 +144,7 @@ class GMNGenerator:
     def _generate_state_space(
         self, agent_class: str, personality: Dict[str, float]
     ) -> Dict[str, Any]:
-        """Generate state space based on class and personality."""
+        """Generate state space based on class and personality"""
         state_space = {
             "S_energy": {"type": "Real[0, 100]", "description": "Agent energy level"},
             "S_position": {
@@ -218,7 +218,7 @@ class GMNGenerator:
         return state_space
 
     def _generate_connections(self, personality: Dict[str, float]) -> Dict[str, Any]:
-        """Generate connections based on personality."""
+        """Generate connections based on personality"""
         exploration_weight = personality.get("exploration", 0.5) / 100
         cooperation_weight = personality.get("cooperation", 0.5) / 100
         efficiency_weight = personality.get("efficiency", 0.5) / 100
@@ -252,9 +252,8 @@ class GMNGenerator:
         return connections
 
     def _generate_update_equations(self, personality: Dict[str, float]) -> Dict[str, Any]:
-        """Generate update equations based on personality."""
-        base_learning_rate = (
-            0.1 + personality.get("curiosity", 0.5) / 100 * 0.1)
+        """Generate update equations based on personality"""
+        base_learning_rate = 0.1 + personality.get("curiosity", 0.5) / 100 * 0.1
         equations = {
             "belief_update": {
                 "state": "S_beliefs",
@@ -292,7 +291,7 @@ class GMNGenerator:
     def _apply_pattern_to_model(
         self, model: Dict[str, Any], pattern: Dict[str, Any]
     ) -> Optional[dict[str, Any]]:
-        """Apply a learned pattern to the model."""
+        """Apply a learned pattern to the model"""
         change_record = {
             "timestamp": datetime.now().isoformat(),
             "pattern_type": pattern.get("type", "unknown"),
@@ -303,8 +302,7 @@ class GMNGenerator:
         if pattern_type == "successful_action_sequence":
             if "C_pref" in model["connections"]:
                 action = pattern.get("dominant_action", "")
-                if action and action not in model["connections"]["C_pref"].get("action_biases",
-                    {}):
+                if action and action not in model["connections"]["C_pref"].get("action_biases", {}):
                     if "action_biases" not in model["connections"]["C_pref"]:
                         model["connections"]["C_pref"]["action_biases"] = {}
                     bias = pattern.get("success_rate", 0.5) * pattern.get("confidence", 0.8)
@@ -375,7 +373,7 @@ class GMNGenerator:
     def _extract_patterns_from_experience(
         self, experience_summary: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
-        """Extract learnable patterns from experience summary."""
+        """Extract learnable patterns from experience summary"""
         patterns = []
         action_stats = experience_summary.get("action_statistics", {})
         for action, stats in action_stats.items():

@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class Edge:
-    """Represents an edge in a graph with source, target, and optional weight."""
+    """Represents an edge in a graph with source, target, and optional weight"""
 
     source: int
     target: int
@@ -44,7 +44,7 @@ class Edge:
 
 @dataclass
 class EdgeConfig:
-    """Configuration for edge processing."""
+    """Configuration for edge processing"""
 
     directed: bool = True
     self_loops: bool = False
@@ -55,7 +55,7 @@ class EdgeConfig:
 
 @dataclass
 class EdgeBatch:
-    """Batch of processed edges."""
+    """Batch of processed edges"""
 
     edge_index: torch.Tensor  # Shape: [2, num_edges]
     edge_weight: torch.Tensor  # Shape: [num_edges]
@@ -64,10 +64,10 @@ class EdgeBatch:
 
 
 class EdgeProcessor:
-    """Processes edges for GNN training."""
+    """Processes edges for GNN training"""
 
     def __init__(self, config: EdgeConfig) -> None:
-        """Initialize edge processor with configuration."""
+        """Initialize edge processor with configuration"""
         self.config = config
 
     def process_edges(self, edges: List[Edge], num_nodes: int) -> EdgeBatch:
@@ -241,16 +241,13 @@ class NodeFeatureExtractor:
             if config.type == FeatureType.SPATIAL:
                 features, names = self._extract_spatial_features(nodes, config)
             elif config.type == FeatureType.TEMPORAL:
-                features, names = (
-                    self._extract_temporal_features(nodes, config))
+                features, names = self._extract_temporal_features(nodes, config)
             elif config.type == FeatureType.CATEGORICAL:
-                features, names = (
-                    self._extract_categorical_features(nodes, config))
+                features, names = self._extract_categorical_features(nodes, config)
             elif config.type == FeatureType.NUMERICAL:
                 features, names = self._extract_numerical_features(nodes, config)
             elif config.type == FeatureType.EMBEDDING:
-                features, names = (
-                    self._extract_embedding_features(nodes, config))
+                features, names = self._extract_embedding_features(nodes, config)
             elif config.type == FeatureType.TEXT:
                 features, names = self._extract_text_features(nodes, config)
             elif config.type == FeatureType.GRAPH_STRUCTURAL:
@@ -537,7 +534,7 @@ class NodeFeatureExtractor:
     def _extract_structural_features(
         self, nodes: List[Dict[str, Any]], config: FeatureConfig, graph: Optional[Any]
     ) -> tuple[np.ndarray, list[str]]:
-        """Extract graph structural features like degree, centrality, etc."""
+        """Extract graph structural features like degree, centrality, etc"""
         if graph is None:
             # Return default features if no graph provided
             num_features = 5  # degree, in_degree, out_degree, clustering, pagerank
@@ -707,7 +704,7 @@ if __name__ == "__main__":
 
 @dataclass
 class LayerConfig:
-    """Configuration for individual GNN layers."""
+    """Configuration for individual GNN layers"""
 
     in_channels: int
     out_channels: int
@@ -720,7 +717,7 @@ class LayerConfig:
 
 @dataclass
 class GraphData:
-    """Represents a single graph with node features and edge information."""
+    """Represents a single graph with node features and edge information"""
 
     node_features: torch.Tensor
     edge_index: torch.Tensor
@@ -737,7 +734,7 @@ class GraphData:
 
 @dataclass
 class GraphBatch:
-    """Batched graph data for efficient processing."""
+    """Batched graph data for efficient processing"""
 
     x: torch.Tensor  # Node features
     edge_index: torch.Tensor  # Edge indices
@@ -752,7 +749,7 @@ class GraphBatch:
 
 
 class GraphBatchProcessor:
-    """Processes graphs into batches for training."""
+    """Processes graphs into batches for training"""
 
     def __init__(
         self,
@@ -760,13 +757,13 @@ class GraphBatchProcessor:
         pad_node_features: bool = False,
         max_nodes_per_graph: int = 100,
     ) -> None:
-        """Initialize batch processor."""
+        """Initialize batch processor"""
         self.use_torch_geometric = use_torch_geometric
         self.pad_node_features = pad_node_features
         self.max_nodes_per_graph = max_nodes_per_graph
 
     def create_batch(self, graphs: List[GraphData]) -> GraphBatch:
-        """Create a batch from list of graphs."""
+        """Create a batch from list of graphs"""
         if not graphs:
             return GraphBatch(
                 x=torch.empty(0, 0),
@@ -801,7 +798,7 @@ class GraphBatchProcessor:
         return GraphBatch(x=x, edge_index=edge_index, batch=batch, num_graphs=len(graphs))
 
     def unbatch(self, batch: GraphBatch) -> List[GraphData]:
-        """Unbatch a GraphBatch back into individual graphs."""
+        """Unbatch a GraphBatch back into individual graphs"""
         graphs = []
 
         for i in range(batch.num_graphs):
@@ -836,7 +833,7 @@ class GraphBatchProcessor:
 
 
 class StreamingBatchProcessor(GraphBatchProcessor):
-    """Streaming version of batch processor for large datasets."""
+    """Streaming version of batch processor for large datasets"""
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -844,7 +841,7 @@ class StreamingBatchProcessor(GraphBatchProcessor):
         self.buffer_size = kwargs.get("buffer_size", 32)
 
     def add_graph(self, graph: GraphData) -> Optional[GraphBatch]:
-        """Add graph to buffer and return batch if buffer is full."""
+        """Add graph to buffer and return batch if buffer is full"""
         self.buffer.append(graph)
 
         if len(self.buffer) >= self.buffer_size:
@@ -855,7 +852,7 @@ class StreamingBatchProcessor(GraphBatchProcessor):
         return None
 
     def flush(self) -> Optional[GraphBatch]:
-        """Flush remaining graphs in buffer."""
+        """Flush remaining graphs in buffer"""
         if self.buffer:
             batch = self.create_batch(self.buffer)
             self.buffer.clear()
@@ -864,7 +861,7 @@ class StreamingBatchProcessor(GraphBatchProcessor):
 
 
 class GNNStack(torch.nn.Module):
-    """Stack of GNN layers for graph neural network architectures."""
+    """Stack of GNN layers for graph neural network architectures"""
 
     def __init__(
         self, layer_configs: List[LayerConfig], layer_type: str = "GCN", global_pool: str = "mean"
@@ -907,7 +904,7 @@ class GNNStack(torch.nn.Module):
         )
 
     def _create_layer(self, config: LayerConfig) -> torch.nn.Module:
-        """Create a GNN layer based on configuration."""
+        """Create a GNN layer based on configuration"""
         if self.layer_type == "GCN":
             return torch.nn.Linear(config.in_channels, config.out_channels)
         elif self.layer_type == "GAT":
@@ -943,7 +940,7 @@ class GNNStack(torch.nn.Module):
         return self._global_pool(x, batch)
 
     def _global_pool(self, x: torch.Tensor, batch: torch.Tensor) -> torch.Tensor:
-        """Apply global pooling to get graph-level representations."""
+        """Apply global pooling to get graph-level representations"""
         num_graphs = int(batch.max().item()) + 1
         graph_embeddings = []
 

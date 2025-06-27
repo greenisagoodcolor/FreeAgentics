@@ -22,10 +22,10 @@ from coalitions.formation.coalition_formation_algorithms import (
 
 
 class TestCoalitionModels:
-    """Test coalition data models."""
+    """Test coalition data models"""
 
     def test_coalition_goal_creation(self) -> None:
-        """Test creating and managing coalition goals."""
+        """Test creating and managing coalition goals"""
         goal = CoalitionGoal(
             goal_id="test_goal",
             title="Test Goal",
@@ -40,7 +40,7 @@ class TestCoalitionModels:
         assert not goal.is_overdue
 
     def test_coalition_goal_voting(self) -> None:
-        """Test goal voting and consensus."""
+        """Test goal voting and consensus"""
         goal = CoalitionGoal("test_goal", "Test Goal", "Description")
         # Add votes
         goal.add_vote("agent1", True)
@@ -54,7 +54,7 @@ class TestCoalitionModels:
         assert consensus == pytest.approx(2 / 3, rel=1e-2)
 
     def test_coalition_goal_progress(self) -> None:
-        """Test goal progress tracking."""
+        """Test goal progress tracking"""
         goal = CoalitionGoal("test_goal", "Test Goal", "Description")
         goal.status = CoalitionGoalStatus.ACCEPTED
         # Update progress
@@ -68,7 +68,7 @@ class TestCoalitionModels:
         assert goal.is_completed
 
     def test_coalition_member_creation(self) -> None:
-        """Test creating and managing coalition members."""
+        """Test creating and managing coalition members"""
         member = CoalitionMember(
             agent_id="agent1",
             role=CoalitionRole.LEADER,
@@ -83,7 +83,7 @@ class TestCoalitionModels:
         assert "leadership" in member.capability_contributions
 
     def test_coalition_member_performance(self) -> None:
-        """Test member performance tracking."""
+        """Test member performance tracking"""
         member = CoalitionMember("agent1")
         # Complete some goals
         member.complete_goal(True)
@@ -95,7 +95,7 @@ class TestCoalitionModels:
         assert member.reliability_score < 1.0  # Should decrease due to failure
 
     def test_coalition_creation(self) -> None:
-        """Test creating and managing coalitions."""
+        """Test creating and managing coalitions"""
         coalition = Coalition(
             coalition_id="test_coalition",
             name="Test Coalition",
@@ -108,7 +108,7 @@ class TestCoalitionModels:
         assert not coalition.is_viable  # No members yet
 
     def test_coalition_membership(self) -> None:
-        """Test adding and removing coalition members."""
+        """Test adding and removing coalition members"""
         coalition = Coalition("test_coalition", "Test Coalition")
         # Add members
         success = coalition.add_member(
@@ -134,7 +134,7 @@ class TestCoalitionModels:
         assert coalition.status == CoalitionStatus.DISSOLVING  # Below minimum
 
     def test_coalition_goals_management(self) -> None:
-        """Test managing coalition goals."""
+        """Test managing coalition goals"""
         coalition = Coalition("test_coalition", "Test Coalition")
         coalition.add_member("agent1", CoalitionRole.LEADER)
         coalition.add_member("agent2", CoalitionRole.CONTRIBUTOR)
@@ -151,10 +151,10 @@ class TestCoalitionModels:
 
 
 class TestCoalitionFormation:
-    """Test coalition formation algorithms."""
+    """Test coalition formation algorithms"""
 
     def create_test_agents(self) -> List[AgentProfile]:
-        """Create test agents for formation testing."""
+        """Create test agents for formation testing"""
         agents = [
             AgentProfile(
                 agent_id="agent1",
@@ -188,7 +188,7 @@ class TestCoalitionFormation:
         return agents
 
     def test_active_inference_formation(self) -> None:
-        """Test active inference coalition formation."""
+        """Test active inference coalition formation"""
         engine = CoalitionFormationEngine()
         agents = self.create_test_agents()
         result = engine.form_coalition(
@@ -206,7 +206,7 @@ class TestCoalitionFormation:
         assert coalition.leader_id in result.participants
 
     def test_capability_based_formation(self) -> None:
-        """Test capability-based coalition formation."""
+        """Test capability-based coalition formation"""
         engine = CoalitionFormationEngine()
         agents = self.create_test_agents()
         required_capabilities = {"technical", "communication", "planning"}
@@ -223,7 +223,7 @@ class TestCoalitionFormation:
         assert coverage > 0.5  # At least 50% coverage
 
     def test_resource_optimization_formation(self) -> None:
-        """Test resource optimization coalition formation."""
+        """Test resource optimization coalition formation"""
         engine = CoalitionFormationEngine()
         agents = self.create_test_agents()
         result = engine.form_coalition(
@@ -238,7 +238,7 @@ class TestCoalitionFormation:
         assert sum(total_resources.values()) > 0  # Should have significant resources
 
     def test_multiple_strategy_formation(self) -> None:
-        """Test trying multiple formation strategies."""
+        """Test trying multiple formation strategies"""
         engine = CoalitionFormationEngine()
         agents = self.create_test_agents()
         strategies = [
@@ -254,7 +254,7 @@ class TestCoalitionFormation:
         assert result.score > 0
 
     def test_formation_with_constraints(self) -> None:
-        """Test formation with agent constraints."""
+        """Test formation with agent constraints"""
         engine = CoalitionFormationEngine()
         agents = self.create_test_agents()
         # Set constraints on some agents
@@ -270,10 +270,10 @@ class TestCoalitionFormation:
 
 
 class TestCoalitionIntegration:
-    """Test integration between different coalition components."""
+    """Test integration between different coalition components"""
 
     def test_end_to_end_coalition_lifecycle(self) -> None:
-        """Test complete coalition lifecycle from formation to dissolution."""
+        """Test complete coalition lifecycle from formation to dissolution"""
         engine = CoalitionFormationEngine()
         # Create agents
         agents = [
@@ -324,7 +324,7 @@ class TestCoalitionIntegration:
         assert summary["goals"]["completed"] == 1
 
     def test_formation_statistics(self) -> None:
-        """Test formation statistics tracking."""
+        """Test formation statistics tracking"""
         engine = CoalitionFormationEngine()
         agents = [
             AgentProfile(
@@ -344,7 +344,7 @@ class TestCoalitionIntegration:
         assert stats["total_attempts"] == 3
 
     def test_coalition_value_distribution(self) -> None:
-        """Test coalition value distribution among members."""
+        """Test coalition value distribution among members"""
         coalition = Coalition("test", "Test Coalition")
         # Add members with different contributions
         coalition.add_member(

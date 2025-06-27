@@ -2249,7 +2249,8 @@ Format your response as a JSON array with one object per belief:
             </CardHeader>
             <CardContent>
               <p>
-                Are you sure you want to delete &quot;{knowledgeToDelete?.title}&quot;?
+                Are you sure you want to delete &quot;{knowledgeToDelete?.title}
+                &quot;?
               </p>
               <div className="mt-4 flex justify-end gap-2">
                 <Button

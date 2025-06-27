@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 # Note: Some imports commented out due to missing modules
 # from ...gnn.feature_extractor import FeatureExtractor
-from inference.gnn.layers import GATLayer, GCNLayer, GraphSAGELayer
+from inference.gnn.layers import GATLayer, GCNLayer, SAGELayer
 
 from .active_inference import InferenceAlgorithm, InferenceConfig, VariationalMessagePassing
 
@@ -92,8 +92,7 @@ class DirectGraphMapper(GraphToStateMapper):
         self.obs_projection: Optional[nn.Linear]
 
         if config.output_dim != state_dim:
-            self.state_projection = (
-                nn.Linear(config.output_dim, state_dim).to(self.device))
+            self.state_projection = nn.Linear(config.output_dim, state_dim).to(self.device)
         else:
             self.state_projection = None
         if config.output_dim != observation_dim:
@@ -207,8 +206,7 @@ class GNNActiveInferenceAdapter:
             self.state_dim = generative_model.dims.num_states
             self.obs_dim = generative_model.dims.num_observations
         if config.state_mapping == "direct":
-            self.mapper = (
-                DirectGraphMapper(config, self.state_dim, self.obs_dim))
+            self.mapper = DirectGraphMapper(config, self.state_dim, self.obs_dim)
         elif config.state_mapping == "learned":
             self.mapper = LearnedGraphMapper(config, self.state_dim, self.obs_dim)
         else:
@@ -239,8 +237,7 @@ class GNNActiveInferenceAdapter:
         if batch is not None:
             batch = batch.to(self.device)
         with torch.no_grad():
-            graph_features = (
-                self.gnn_model(node_features, edge_index, edge_features))
+            graph_features = self.gnn_model(node_features, edge_index, edge_features)
         if batch is not None:
             aggregated_features = self.aggregator.aggregate(graph_features, batch)
         else:
@@ -453,7 +450,7 @@ class HierarchicalGraphIntegration:
             elif gnn_type == "gat":
                 layer = GATLayer(in_dim, out_dim)
             elif gnn_type == "graphsage":
-                layer = GraphSAGELayer(in_dim, out_dim)
+                layer = SAGELayer(in_dim, out_dim)
             else:
                 layer = GCNLayer(in_dim, out_dim)
             layers.append(layer)

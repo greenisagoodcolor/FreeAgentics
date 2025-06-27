@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { 
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -13,11 +13,11 @@ import {
 } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Agent, Message, Conversation } from "@/lib/types";
-import { 
-  Clock, 
-  Loader2, 
-  AlertTriangle, 
-  CheckCircle, 
+import {
+  Clock,
+  Loader2,
+  AlertTriangle,
+  CheckCircle,
   Pause,
   Play,
   X,
@@ -30,7 +30,7 @@ import {
   Bot,
   User,
   Hash,
-  BarChart3
+  BarChart3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, formatDistanceToNow } from "date-fns";
@@ -40,9 +40,9 @@ export interface QueuedMessage {
   conversationId: string;
   messageId?: string; // Message being responded to
   agentId: string;
-  type: 'response' | 'autonomous' | 'tool_call' | 'retry';
-  priority: 'low' | 'normal' | 'high' | 'urgent';
-  status: 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled';
+  type: "response" | "autonomous" | "tool_call" | "retry";
+  priority: "low" | "normal" | "high" | "urgent";
+  status: "queued" | "processing" | "completed" | "failed" | "cancelled";
   queuedAt: Date;
   startedAt?: Date;
   completedAt?: Date;
@@ -97,22 +97,24 @@ export function MessageQueueVisualization({
   onPauseQueue,
   onResumeQueue,
   isPaused = false,
-  className
+  className,
 }: MessageQueueVisualizationProps) {
-  const [selectedTab, setSelectedTab] = useState<'queue' | 'processing' | 'completed' | 'failed'>('queue');
+  const [selectedTab, setSelectedTab] = useState<
+    "queue" | "processing" | "completed" | "failed"
+  >("queue");
   const [autoRefresh, setAutoRefresh] = useState(true);
 
   // Filter messages by status
   const filteredMessages = useMemo(() => {
     switch (selectedTab) {
-      case 'queue':
-        return queue.filter(msg => msg.status === 'queued');
-      case 'processing':
-        return queue.filter(msg => msg.status === 'processing');
-      case 'completed':
-        return queue.filter(msg => msg.status === 'completed');
-      case 'failed':
-        return queue.filter(msg => msg.status === 'failed');
+      case "queue":
+        return queue.filter((msg) => msg.status === "queued");
+      case "processing":
+        return queue.filter((msg) => msg.status === "processing");
+      case "completed":
+        return queue.filter((msg) => msg.status === "completed");
+      case "failed":
+        return queue.filter((msg) => msg.status === "failed");
       default:
         return queue;
     }
@@ -120,18 +122,18 @@ export function MessageQueueVisualization({
 
   // Get agent info
   const getAgent = (agentId: string) => {
-    return agents.find(agent => agent.id === agentId);
+    return agents.find((agent) => agent.id === agentId);
   };
 
   // Get conversation info
   const getConversation = (conversationId: string) => {
-    return conversations.find(conv => conv.id === conversationId);
+    return conversations.find((conv) => conv.id === conversationId);
   };
 
   // Calculate queue position
   const getQueuePosition = (messageId: string) => {
-    const queuedMessages = queue.filter(msg => msg.status === 'queued');
-    return queuedMessages.findIndex(msg => msg.id === messageId) + 1;
+    const queuedMessages = queue.filter((msg) => msg.status === "queued");
+    return queuedMessages.findIndex((msg) => msg.id === messageId) + 1;
   };
 
   // Format duration
@@ -144,33 +146,40 @@ export function MessageQueueVisualization({
   // Get priority color
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'urgent': return 'text-red-500';
-      case 'high': return 'text-orange-500';
-      case 'normal': return 'text-blue-500';
-      case 'low': return 'text-gray-500';
-      default: return 'text-gray-500';
+      case "urgent":
+        return "text-red-500";
+      case "high":
+        return "text-orange-500";
+      case "normal":
+        return "text-blue-500";
+      case "low":
+        return "text-gray-500";
+      default:
+        return "text-gray-500";
     }
   };
 
   // Get status icon
   const getStatusIcon = (status: string, progress?: number) => {
     switch (status) {
-      case 'queued':
+      case "queued":
         return <Clock className="w-4 h-4 text-yellow-500" />;
-      case 'processing':
-        return progress !== undefined ? 
+      case "processing":
+        return progress !== undefined ? (
           <div className="relative w-4 h-4">
             <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
             <div className="absolute inset-0 flex items-center justify-center text-xs text-blue-500">
               {Math.round(progress)}
             </div>
-          </div> :
-          <Loader2 className="w-4 h-4 animate-spin text-blue-500" />;
-      case 'completed':
+          </div>
+        ) : (
+          <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+        );
+      case "completed":
         return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case 'failed':
+      case "failed":
         return <AlertTriangle className="w-4 h-4 text-red-500" />;
-      case 'cancelled':
+      case "cancelled":
         return <X className="w-4 h-4 text-gray-500" />;
       default:
         return <Clock className="w-4 h-4" />;
@@ -183,7 +192,7 @@ export function MessageQueueVisualization({
 
     const interval = setInterval(() => {
       // Trigger refresh - in real app this would call an API
-      console.log('Auto-refreshing queue visualization');
+      console.log("Auto-refreshing queue visualization");
     }, 2000);
 
     return () => clearInterval(interval);
@@ -197,7 +206,9 @@ export function MessageQueueVisualization({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Queued</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Queued
+                </p>
                 <p className="text-2xl font-bold">{metrics.totalQueued}</p>
               </div>
               <Clock className="w-8 h-8 text-yellow-500" />
@@ -209,7 +220,9 @@ export function MessageQueueVisualization({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Processing</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Processing
+                </p>
                 <p className="text-2xl font-bold">{metrics.totalProcessing}</p>
               </div>
               <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
@@ -221,7 +234,9 @@ export function MessageQueueVisualization({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Completed</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Completed
+                </p>
                 <p className="text-2xl font-bold">{metrics.totalCompleted}</p>
               </div>
               <CheckCircle className="w-8 h-8 text-green-500" />
@@ -233,7 +248,9 @@ export function MessageQueueVisualization({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Failed</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Failed
+                </p>
                 <p className="text-2xl font-bold">{metrics.totalFailed}</p>
               </div>
               <AlertTriangle className="w-8 h-8 text-red-500" />
@@ -301,8 +318,12 @@ export function MessageQueueVisualization({
             onClick={isPaused ? onResumeQueue : onPauseQueue}
             className="gap-2"
           >
-            {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-            {isPaused ? 'Resume Queue' : 'Pause Queue'}
+            {isPaused ? (
+              <Play className="w-4 h-4" />
+            ) : (
+              <Pause className="w-4 h-4" />
+            )}
+            {isPaused ? "Resume Queue" : "Pause Queue"}
           </Button>
 
           <Button
@@ -311,7 +332,9 @@ export function MessageQueueVisualization({
             onClick={() => setAutoRefresh(!autoRefresh)}
             className="gap-2"
           >
-            <Activity className={cn("w-4 h-4", autoRefresh && "animate-pulse")} />
+            <Activity
+              className={cn("w-4 h-4", autoRefresh && "animate-pulse")}
+            />
             Auto Refresh
           </Button>
         </div>
@@ -319,14 +342,22 @@ export function MessageQueueVisualization({
         {/* Tab Navigation */}
         <div className="flex gap-1">
           {[
-            { id: 'queue', label: 'Queued', count: metrics.totalQueued },
-            { id: 'processing', label: 'Processing', count: metrics.totalProcessing },
-            { id: 'completed', label: 'Completed', count: metrics.totalCompleted },
-            { id: 'failed', label: 'Failed', count: metrics.totalFailed }
-          ].map(tab => (
+            { id: "queue", label: "Queued", count: metrics.totalQueued },
+            {
+              id: "processing",
+              label: "Processing",
+              count: metrics.totalProcessing,
+            },
+            {
+              id: "completed",
+              label: "Completed",
+              count: metrics.totalCompleted,
+            },
+            { id: "failed", label: "Failed", count: metrics.totalFailed },
+          ].map((tab) => (
             <Button
               key={tab.id}
-              variant={selectedTab === tab.id ? 'default' : 'outline'}
+              variant={selectedTab === tab.id ? "default" : "outline"}
               size="sm"
               onClick={() => setSelectedTab(tab.id as any)}
               className="gap-2"
@@ -359,7 +390,10 @@ export function MessageQueueVisualization({
                 filteredMessages.map((message) => {
                   const agent = getAgent(message.agentId);
                   const conversation = getConversation(message.conversationId);
-                  const queuePosition = message.status === 'queued' ? getQueuePosition(message.id) : null;
+                  const queuePosition =
+                    message.status === "queued"
+                      ? getQueuePosition(message.id)
+                      : null;
 
                   return (
                     <Card key={message.id} className="p-4">
@@ -377,11 +411,13 @@ export function MessageQueueVisualization({
                               <div className="flex items-center gap-1">
                                 {agent ? (
                                   <>
-                                    <div 
-                                      className="w-3 h-3 rounded-full" 
+                                    <div
+                                      className="w-3 h-3 rounded-full"
                                       style={{ backgroundColor: agent.color }}
                                     />
-                                    <span className="font-medium">{agent.name}</span>
+                                    <span className="font-medium">
+                                      {agent.name}
+                                    </span>
                                   </>
                                 ) : (
                                   <Bot className="w-4 h-4" />
@@ -389,9 +425,12 @@ export function MessageQueueVisualization({
                               </div>
 
                               {/* Priority */}
-                              <Badge 
-                                variant="outline" 
-                                className={cn("text-xs", getPriorityColor(message.priority))}
+                              <Badge
+                                variant="outline"
+                                className={cn(
+                                  "text-xs",
+                                  getPriorityColor(message.priority),
+                                )}
                               >
                                 {message.priority}
                               </Badge>
@@ -412,7 +451,8 @@ export function MessageQueueVisualization({
                             {/* Conversation */}
                             <div className="text-sm text-muted-foreground mb-2">
                               <Hash className="w-3 h-3 inline mr-1" />
-                              {conversation?.id.substring(0, 8) || message.conversationId.substring(0, 8)}
+                              {conversation?.id.substring(0, 8) ||
+                                message.conversationId.substring(0, 8)}
                             </div>
 
                             {/* Message Content Preview */}
@@ -423,42 +463,57 @@ export function MessageQueueVisualization({
                             )}
 
                             {/* Progress Bar */}
-                            {message.status === 'processing' && message.progress !== undefined && (
-                              <div className="mb-2">
-                                <Progress value={message.progress} className="h-2" />
-                                <div className="text-xs text-muted-foreground mt-1">
-                                  {message.progress}% complete
+                            {message.status === "processing" &&
+                              message.progress !== undefined && (
+                                <div className="mb-2">
+                                  <Progress
+                                    value={message.progress}
+                                    className="h-2"
+                                  />
+                                  <div className="text-xs text-muted-foreground mt-1">
+                                    {message.progress}% complete
+                                  </div>
                                 </div>
-                              </div>
-                            )}
+                              )}
 
                             {/* Timing Info */}
                             <div className="flex items-center gap-4 text-xs text-muted-foreground">
                               <span>
-                                Queued {formatDistanceToNow(message.queuedAt, { addSuffix: true })}
+                                Queued{" "}
+                                {formatDistanceToNow(message.queuedAt, {
+                                  addSuffix: true,
+                                })}
                               </span>
-                              
+
                               {message.startedAt && (
                                 <span>
-                                  Started {formatDistanceToNow(message.startedAt, { addSuffix: true })}
+                                  Started{" "}
+                                  {formatDistanceToNow(message.startedAt, {
+                                    addSuffix: true,
+                                  })}
                                 </span>
                               )}
-                              
+
                               {message.completedAt && (
                                 <span>
-                                  Completed {formatDistanceToNow(message.completedAt, { addSuffix: true })}
+                                  Completed{" "}
+                                  {formatDistanceToNow(message.completedAt, {
+                                    addSuffix: true,
+                                  })}
                                 </span>
                               )}
-                              
+
                               {message.estimatedDuration && (
                                 <span>
-                                  ETA: {formatDuration(message.estimatedDuration)}
+                                  ETA:{" "}
+                                  {formatDuration(message.estimatedDuration)}
                                 </span>
                               )}
-                              
+
                               {message.actualDuration && (
                                 <span>
-                                  Duration: {formatDuration(message.actualDuration)}
+                                  Duration:{" "}
+                                  {formatDuration(message.actualDuration)}
                                 </span>
                               )}
                             </div>
@@ -478,14 +533,23 @@ export function MessageQueueVisualization({
                                     Model: {message.metadata.modelUsed}
                                   </Badge>
                                 )}
-                                {message.metadata.toolsUsed && message.metadata.toolsUsed.length > 0 && (
-                                  <Badge variant="outline" className="text-xs">
-                                    Tools: {message.metadata.toolsUsed.join(', ')}
-                                  </Badge>
-                                )}
+                                {message.metadata.toolsUsed &&
+                                  message.metadata.toolsUsed.length > 0 && (
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      Tools:{" "}
+                                      {message.metadata.toolsUsed.join(", ")}
+                                    </Badge>
+                                  )}
                                 {message.metadata.confidence && (
                                   <Badge variant="outline" className="text-xs">
-                                    Confidence: {Math.round(message.metadata.confidence * 100)}%
+                                    Confidence:{" "}
+                                    {Math.round(
+                                      message.metadata.confidence * 100,
+                                    )}
+                                    %
                                   </Badge>
                                 )}
                               </div>
@@ -495,7 +559,7 @@ export function MessageQueueVisualization({
 
                         {/* Actions */}
                         <div className="flex gap-1">
-                          {message.status === 'queued' && onCancelMessage && (
+                          {message.status === "queued" && onCancelMessage && (
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -514,7 +578,7 @@ export function MessageQueueVisualization({
                             </TooltipProvider>
                           )}
 
-                          {message.status === 'failed' && onRetryMessage && (
+                          {message.status === "failed" && onRetryMessage && (
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -544,4 +608,4 @@ export function MessageQueueVisualization({
       </Card>
     </div>
   );
-} 
+}

@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Brain, Compass, Shield, BookOpen, CheckCircle2 } from "lucide-react";
@@ -35,7 +41,8 @@ const AGENT_TEMPLATES: AgentTemplate[] = [
   {
     id: "explorer",
     name: "Explorer Agent",
-    description: "Epistemic value maximization for environment exploration and discovery",
+    description:
+      "Epistemic value maximization for environment exploration and discovery",
     icon: <Compass className="h-6 w-6" />,
     category: "explorer",
     complexity: "beginner",
@@ -62,7 +69,8 @@ const AGENT_TEMPLATES: AgentTemplate[] = [
       "Environment analysis",
       "Path optimization",
     ],
-    expertRecommendation: "Ideal for newcomers to Active Inference - clear epistemic objectives",
+    expertRecommendation:
+      "Ideal for newcomers to Active Inference - clear epistemic objectives",
   },
   {
     id: "guardian",
@@ -125,7 +133,8 @@ const AGENT_TEMPLATES: AgentTemplate[] = [
       "Market optimization",
       "Coalition economics",
     ],
-    expertRecommendation: "Requires strong understanding of multi-agent economic dynamics",
+    expertRecommendation:
+      "Requires strong understanding of multi-agent economic dynamics",
   },
   {
     id: "scholar",
@@ -194,8 +203,9 @@ export function AgentTemplateSelector({
       <div className="space-y-2">
         <h2 className="text-2xl font-bold">Select Agent Template</h2>
         <p className="text-muted-foreground">
-          Choose an Active Inference agent template based on your requirements. Each template
-          includes mathematically rigorous belief state management and behavior optimization.
+          Choose an Active Inference agent template based on your requirements.
+          Each template includes mathematically rigorous belief state management
+          and behavior optimization.
         </p>
       </div>
 
@@ -211,7 +221,7 @@ export function AgentTemplateSelector({
               className={cn(
                 "cursor-pointer transition-all duration-200 hover:shadow-lg",
                 isSelected && "ring-2 ring-primary bg-primary/5",
-                isHovered && !isSelected && "shadow-md border-primary/50"
+                isHovered && !isSelected && "shadow-md border-primary/50",
               )}
               onMouseEnter={() => setHoveredTemplate(template.id)}
               onMouseLeave={() => setHoveredTemplate(null)}
@@ -266,7 +276,10 @@ export function AgentTemplateSelector({
                       </div>
                       <div>
                         <span className="font-medium">Precision γ:</span>{" "}
-                        {template.mathematicalFoundation.defaultPrecision.sensory}
+                        {
+                          template.mathematicalFoundation.defaultPrecision
+                            .sensory
+                        }
                       </div>
                     </div>
                   </div>
@@ -279,7 +292,11 @@ export function AgentTemplateSelector({
                   </h4>
                   <div className="flex flex-wrap gap-1">
                     {template.capabilities.slice(0, 3).map((capability) => (
-                      <Badge key={capability} variant="secondary" className="text-xs">
+                      <Badge
+                        key={capability}
+                        variant="secondary"
+                        className="text-xs"
+                      >
                         {capability}
                       </Badge>
                     ))}
@@ -295,7 +312,9 @@ export function AgentTemplateSelector({
                 {template.expertRecommendation && (isSelected || isHovered) && (
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <p className="text-xs text-blue-800">
-                      <span className="font-semibold">Expert Recommendation:</span>{" "}
+                      <span className="font-semibold">
+                        Expert Recommendation:
+                      </span>{" "}
                       {template.expertRecommendation}
                     </p>
                   </div>
@@ -321,19 +340,25 @@ export function AgentTemplateSelector({
       {/* Mathematical Details Explainer */}
       {showMathematicalDetails && (
         <div className="p-4 bg-muted/50 rounded-lg border">
-          <h3 className="text-sm font-semibold mb-2">Mathematical Parameters Explained</h3>
+          <h3 className="text-sm font-semibold mb-2">
+            Mathematical Parameters Explained
+          </h3>
           <div className="text-xs text-muted-foreground space-y-1">
             <p>
-              <strong>Belief States:</strong> Dimensionality of the state space |S| in the probability simplex Δ^|S|
+              <strong>Belief States:</strong> Dimensionality of the state space
+              |S| in the probability simplex Δ^|S|
             </p>
             <p>
-              <strong>Modalities:</strong> Number of observation channels in the generative model
+              <strong>Modalities:</strong> Number of observation channels in the
+              generative model
             </p>
             <p>
-              <strong>Actions:</strong> Size of the action space for policy inference
+              <strong>Actions:</strong> Size of the action space for policy
+              inference
             </p>
             <p>
-              <strong>Precision γ:</strong> Sensory precision parameter controlling belief update confidence
+              <strong>Precision γ:</strong> Sensory precision parameter
+              controlling belief update confidence
             </p>
           </div>
         </div>
@@ -342,4 +367,4 @@ export function AgentTemplateSelector({
   );
 }
 
-export { AGENT_TEMPLATES }; 
+export { AGENT_TEMPLATES };

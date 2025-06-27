@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 class FallbackLevel(Enum):
-    """Levels of fallback mechanisms."""
+    """Levels of fallback mechanisms"""
 
     FULL_MODEL = 0  # Full model inference
     CACHED = 1  # Cached responses
@@ -42,7 +42,7 @@ class FallbackLevel(Enum):
 
 @dataclass
 class ResourceConstraints:
-    """Current resource constraints."""
+    """Current resource constraints"""
 
     available_memory_mb: float
     cpu_usage_percent: float
@@ -54,7 +54,7 @@ class ResourceConstraints:
 
 @dataclass
 class FallbackResponse:
-    """Response from fallback mechanism."""
+    """Response from fallback mechanism"""
 
     text: str
     fallback_level: FallbackLevel
@@ -75,7 +75,7 @@ class ResponseCache:
     """
 
     def __init__(self, cache_dir: Path, max_size_mb: int = 100) -> None:
-        """Initialize response cache."""
+        """Initialize response cache"""
         self.cache_dir = cache_dir
         self.cache_dir.mkdir(parents=True, exist_ok=True)
         self.max_size_bytes = max_size_mb * 1024 * 1024
@@ -90,7 +90,7 @@ class ResponseCache:
         self.lock = threading.Lock()
 
     def _init_database(self):
-        """Initialize SQLite database for persistent cache."""
+        """Initialize SQLite database for persistent cache"""
         conn = sqlite3.connect(str(self.db_path))
         cursor = conn.cursor()
         cursor.execute(
@@ -126,18 +126,18 @@ class ResponseCache:
         conn.close()
 
     def _generate_key(self, prompt: str, context: Optional[Dict[str, Any]] = None) -> str:
-        """Generate cache key from prompt and context."""
+        """Generate cache key from prompt and context"""
         key_data = {"prompt": prompt, "context": context or {}}
         key_str = json.dumps(key_data, sort_keys=True)
         return hashlib.sha256(key_str.encode()).hexdigest()
 
     def _compress_response(self, response: FallbackResponse) -> bytes:
-        """Compress response for storage."""
+        """Compress response for storage"""
         data = pickle.dumps(response)
         return zlib.compress(data, level=6)
 
     def _decompress_response(self, data: bytes) -> FallbackResponse:
-        """Decompress stored response."""
+        """Decompress stored response"""
         decompressed = zlib.decompress(data)
         return pickle.loads(decompressed)
 
@@ -214,7 +214,7 @@ class ResponseCache:
         response: FallbackResponse,
         context: Optional[Dict[str, Any]] = None,
     ):
-        """Store response in cache."""
+        """Store response in cache"""
         with self.lock:
             key = self._generate_key(prompt, context)
             # Add to memory cache
@@ -253,14 +253,14 @@ class ResponseCache:
             conn.close()
 
     def _add_to_memory_cache(self, key: str, response: FallbackResponse):
-        """Add response to memory cache with LRU eviction."""
+        """Add response to memory cache with LRU eviction"""
         if len(self.memory_cache) >= self.max_memory_entries:
             # Remove least recently used
             self.memory_cache.popitem(last=False)
         self.memory_cache[key] = response
 
     def _evict_entries(self, cursor: sqlite3.Cursor, bytes_to_free: int):
-        """Evict cache entries to free space."""
+        """Evict cache entries to free space"""
         # Evict least recently used entries
         cursor.execute(
             """
@@ -289,7 +289,7 @@ class ResponseCache:
                 self.memory_cache.pop(key, None)
 
     def get_stats(self) -> Dict[str, Any]:
-        """Get cache statistics."""
+        """Get cache statistics"""
         with self.lock:
             conn = sqlite3.connect(str(self.db_path))
             cursor = conn.cursor()
@@ -324,12 +324,12 @@ class TemplateEngine:
     """
 
     def __init__(self, template_dir: Optional[Path] = None) -> None:
-        """Initialize template engine."""
+        """Initialize template engine"""
         self.template_dir = template_dir or Path("templates")
         self.templates = self._load_templates()
 
     def _load_templates(self) -> Dict[str, List[str]]:
-        """Load response templates."""
+        """Load response templates"""
         templates = {
             "greeting": [
                 "Hello! How can I assist you today?",
@@ -414,11 +414,11 @@ class RuleBasedResponder:
     """
 
     def __init__(self) -> None:
-        """Initialize rule-based responder."""
+        """Initialize rule-based responder"""
         self.rules = self._create_rules()
 
     def _create_rules(self) -> List[tuple[callable, callable]]:
-        """Create rule set."""
+        """Create rule set"""
         rules = []
 
         # Greeting rule
@@ -463,7 +463,7 @@ class RuleBasedResponder:
         return rules
 
     def generate(self, prompt: str, context: Dict[str, Any]) -> Optional[str]:
-        """Generate response based on rules."""
+        """Generate response based on rules"""
         for condition, response_func in self.rules:
             if condition(prompt, context):
                 return response_func(prompt, context)
@@ -476,13 +476,13 @@ class PrecomputedResponses:
     """
 
     def __init__(self, data_file: Optional[Path] = None) -> None:
-        """Initialize precomputed responses."""
+        """Initialize precomputed responses"""
         self.data_file = data_file or Path("precomputed_responses.json")
         self.responses = self._load_responses()
         self.embeddings = {}  # Would store embeddings for similarity matching
 
     def _load_responses(self) -> Dict[str, List[Dict[str, Any]]]:
-        """Load precomputed responses."""
+        """Load precomputed responses"""
         if self.data_file.exists():
             try:
                 with open(self.data_file) as f:
@@ -530,7 +530,7 @@ class PrecomputedResponses:
         }
 
     def find_best_match(self, category: str, context: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """Find best matching precomputed response."""
+        """Find best matching precomputed response"""
         if category not in self.responses:
             return None
         candidates = self.responses[category]
@@ -547,7 +547,7 @@ class PrecomputedResponses:
     def _calculate_context_similarity(
         self, candidate_context: str, actual_context: Dict[str, Any]
     ) -> float:
-        """Calculate similarity between contexts."""
+        """Calculate similarity between contexts"""
         # Simplified similarity calculation
         context_str = json.dumps(actual_context).lower()
         if candidate_context in context_str:
@@ -564,7 +564,7 @@ class FallbackManager:
     """
 
     def __init__(self, cache_dir: Path, config: Optional[Dict[str, Any]] = None) -> None:
-        """Initialize fallback manager."""
+        """Initialize fallback manager"""
         self.cache_dir = cache_dir
         self.config = config or {}
         # Initialize components
@@ -623,7 +623,7 @@ class FallbackManager:
         )
 
     def _determine_fallback_level(self, constraints: ResourceConstraints) -> FallbackLevel:
-        """Determine appropriate fallback level based on constraints."""
+        """Determine appropriate fallback level based on constraints"""
         # Memory-based decision
         if constraints.available_memory_mb < 50:
             return FallbackLevel.RANDOM
@@ -649,7 +649,7 @@ class FallbackManager:
     def _generate_template_response(
         self, prompt: str, context: Dict[str, Any]
     ) -> Optional[FallbackResponse]:
-        """Generate template-based response."""
+        """Generate template-based response"""
         # Detect intent (simplified)
         intent = self._detect_intent(prompt)
         if intent:
@@ -666,7 +666,7 @@ class FallbackManager:
     def _generate_precomputed_response(
         self, prompt: str, context: Dict[str, Any]
     ) -> Optional[FallbackResponse]:
-        """Generate precomputed response."""
+        """Generate precomputed response"""
         category = self._detect_category(prompt)
         if category:
             match = self.precomputed.find_best_match(category, context)
@@ -682,7 +682,7 @@ class FallbackManager:
     def _generate_rule_based_response(
         self, prompt: str, context: Dict[str, Any]
     ) -> Optional[FallbackResponse]:
-        """Generate rule-based response."""
+        """Generate rule-based response"""
         text = self.rule_based.generate(prompt, context)
         if text:
             return FallbackResponse(
@@ -694,7 +694,7 @@ class FallbackManager:
         return None
 
     def _generate_random_response(self, context: Dict[str, Any]) -> FallbackResponse:
-        """Generate random valid response."""
+        """Generate random valid response"""
         responses = [
             "Processing your request...",
             "Analyzing the situation...",
@@ -709,7 +709,7 @@ class FallbackManager:
         )
 
     def _detect_intent(self, prompt: str) -> Optional[str]:
-        """Detect intent from prompt."""
+        """Detect intent from prompt"""
         prompt_lower = prompt.lower()
         intents = {
             "greeting": ["hello", "hi", "hey"],
@@ -726,7 +726,7 @@ class FallbackManager:
         return None
 
     def _detect_category(self, prompt: str) -> Optional[str]:
-        """Detect category from prompt."""
+        """Detect category from prompt"""
         prompt_lower = prompt.lower()
         categories = {
             "exploration": ["explore", "discover", "search"],
@@ -739,7 +739,7 @@ class FallbackManager:
         return None
 
     def _record_performance(self, response: FallbackResponse, constraints: ResourceConstraints):
-        """Record performance metrics."""
+        """Record performance metrics"""
         metric = {
             "timestamp": time.time(),
             "fallback_level": response.fallback_level.value,
@@ -754,7 +754,7 @@ class FallbackManager:
             self.performance_history.pop(0)
 
     def get_performance_stats(self) -> Dict[str, Any]:
-        """Get performance statistics."""
+        """Get performance statistics"""
         if not self.performance_history:
             return {}
         # Calculate statistics

@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class InferenceResult:
-    """Result of an Active Inference step."""
+    """Result of an Active Inference step"""
 
     action: str
     free_energy: float
@@ -32,7 +32,7 @@ class InferenceResult:
 
 
 class GMNExecutor:
-    """Execute Active Inference based on GMN models."""
+    """Execute Active Inference based on GMN models"""
 
     def __init__(self) -> None:
         self.parser = GMNParser()
@@ -85,7 +85,7 @@ class GMNExecutor:
     def _initialize_beliefs(
         self, state_space: Dict[str, Any], observation: Dict[str, Any]
     ) -> Dict[str, Any]:
-        """Initialize belief distributions from state space and observation."""
+        """Initialize belief distributions from state space and observation"""
         beliefs = {}
         for state_name, state_def in state_space.items():
             if state_name.startswith("S_"):
@@ -159,7 +159,7 @@ class GMNExecutor:
         connections: Dict[str, Any],
         update_equations: Dict[str, Any],
     ) -> float:
-        """Calculate expected free energy after taking an action."""
+        """Calculate expected free energy after taking an action"""
         simulated_beliefs = self._simulate_belief_update(beliefs, action, update_equations)
         expected_surprise = 0.0
         expected_utility = 0.0
@@ -185,7 +185,7 @@ class GMNExecutor:
         return expected_surprise - expected_utility
 
     def _get_available_actions(self, state_space: Dict[str, Any]) -> List[str]:
-        """Extract available actions from state space."""
+        """Extract available actions from state space"""
         actions = []
         for key, value in state_space.items():
             if key.startswith("A_"):
@@ -212,7 +212,7 @@ class GMNExecutor:
         observation: Dict[str, Any],
         update_equations: Dict[str, Any],
     ) -> Dict[str, Any]:
-        """Update beliefs based on action and new observation."""
+        """Update beliefs based on action and new observation"""
         updated_beliefs = beliefs.copy()
         for eq_name, equation in update_equations.items():
             if "state" in equation and "formula" in equation:
@@ -238,7 +238,7 @@ class GMNExecutor:
     def _simulate_belief_update(
         self, beliefs: Dict[str, Any], action: str, update_equations: Dict[str, Any]
     ) -> Dict[str, Any]:
-        """Simulate how beliefs would change after taking an action."""
+        """Simulate how beliefs would change after taking an action"""
         simulated = beliefs.copy()
         if "explore" in action:
             for state_name, belief in simulated.items():
@@ -255,7 +255,7 @@ class GMNExecutor:
     def _get_action_effects(
         self, action: str, update_equations: Dict[str, Any]
     ) -> Dict[str, float]:
-        """Predict the effects of an action on preferences."""
+        """Predict the effects of an action on preferences"""
         effects = {}
         action_mappings = {
             "explore": {"Exploration": 0.8, "Resources": -0.1, "Social": 0.2},
@@ -274,7 +274,7 @@ class GMNExecutor:
         return effects
 
     def _calculate_confidence(self, expected_free_energies: Dict[str, float]) -> float:
-        """Calculate confidence based on free energy differences."""
+        """Calculate confidence based on free energy differences"""
         if len(expected_free_energies) < 2:
             return 1.0
         values = list(expected_free_energies.values())
@@ -285,9 +285,8 @@ class GMNExecutor:
         confidence = 1.0 - np.exp(-difference)
         return float(np.clip(confidence, 0.0, 1.0))
 
-    def _initialize_distribution(self, dist_type: str, observation: Dict[str,
-        Any]) -> List[float]:
-        """Initialize a distribution based on type and observation."""
+    def _initialize_distribution(self, dist_type: str, observation: Dict[str, Any]) -> List[float]:
+        """Initialize a distribution based on type and observation"""
         return [0.25, 0.25, 0.25, 0.25]
 
     def execute_from_file(self, gnn_file_path: str, observation: Dict[str, Any]) -> InferenceResult:

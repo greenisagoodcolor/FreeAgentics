@@ -1,4 +1,4 @@
-."""
+"""
 Export Validator for Deployment Packages
 
 Validates exported agent packages and ensures they are ready for deployment
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 class ValidationStatus(Enum):
-    """Validation status levels."""
+    """Validation status levels"""
 
     PASSED = "passed"
     WARNING = "warning"
@@ -32,7 +32,7 @@ class ValidationStatus(Enum):
 
 
 class HardwarePlatform(Enum):
-    """Supported hardware platforms."""
+    """Supported hardware platforms"""
 
     RASPBERRY_PI = "raspberry_pi"
     MAC_MINI = "mac_mini"
@@ -43,7 +43,7 @@ class HardwarePlatform(Enum):
 
 @dataclass
 class ValidationResult:
-    """Result of a validation check."""
+    """Result of a validation check"""
 
     check_name: str
     status: ValidationStatus
@@ -54,7 +54,7 @@ class ValidationResult:
 
 @dataclass
 class PackageManifest:
-    """Package manifest information."""
+    """Package manifest information"""
 
     package_name: str
     version: str
@@ -68,7 +68,7 @@ class PackageManifest:
 
 @dataclass
 class HardwareRequirements:
-    """Hardware requirements for deployment."""
+    """Hardware requirements for deployment"""
 
     min_ram_mb: int
     min_storage_mb: int
@@ -91,7 +91,7 @@ class ExportValidator:
     """
 
     def __init__(self) -> None:
-        """Initialize export validator."""
+        """Initialize export validator"""
         self.required_files = {
             "manifest.json",
             "agent_config.json",
@@ -177,8 +177,7 @@ class ExportValidator:
             results.extend(self._check_scripts(extract_dir))
 
             if target_platform:
-                results.extend(self._check_hardware_compatibility(extract_dir,
-                    target_platform))
+                results.extend(self._check_hardware_compatibility(extract_dir, target_platform))
 
             # Generate summary
             results.append(self._generate_summary(results))
@@ -191,7 +190,7 @@ class ExportValidator:
         return results
 
     def _extract_package(self, package_path: Path) -> Optional[Path]:
-        """Extract compressed package."""
+        """Extract compressed package"""
         extract_dir = Path(tempfile.mkdtemp(prefix="freeagentics_validate_"))
 
         try:
@@ -219,7 +218,7 @@ class ExportValidator:
             return None
 
     def _check_structure(self, package_dir: Path) -> List[ValidationResult]:
-        """Check package structure."""
+        """Check package structure"""
         results = []
 
         # Check for required files
@@ -233,8 +232,7 @@ class ExportValidator:
                 ValidationResult(
                     check_name="package_structure",
                     status=ValidationStatus.FAILED,
-                    message= (
-                        f"Missing required files: {', '.join(missing_files)}",)
+                    message=f"Missing required files: {', '.join(missing_files)}",
                     details={"missing_files": missing_files},
                     severity="error",
                 )
@@ -259,8 +257,7 @@ class ExportValidator:
                 ValidationResult(
                     check_name="optional_files",
                     status=ValidationStatus.WARNING,
-                    message= (
-                        f"Missing optional files: {', '.join(missing_optional)}",)
+                    message=f"Missing optional files: {', '.join(missing_optional)}",
                     details={"missing_files": missing_optional},
                     severity="warning",
                 )
@@ -269,7 +266,7 @@ class ExportValidator:
         return results
 
     def _check_manifest(self, package_dir: Path) -> List[ValidationResult]:
-        """Check package manifest."""
+        """Check package manifest"""
         results = []
         manifest_path = package_dir / "manifest.json"
 
@@ -297,16 +294,14 @@ class ExportValidator:
                 "files",
             ]
 
-            missing_fields = (
-                [f for f in required_fields if f not in manifest_data])
+            missing_fields = [f for f in required_fields if f not in manifest_data]
 
             if missing_fields:
                 results.append(
                     ValidationResult(
                         check_name="manifest_structure",
                         status=ValidationStatus.FAILED,
-                        message= (
-                            f"Missing manifest fields: {', '.join(missing_fields)}",)
+                        message=f"Missing manifest fields: {', '.join(missing_fields)}",
                         severity="error",
                     )
                 )
@@ -333,8 +328,7 @@ class ExportValidator:
                 )
 
                 # Verify file hashes
-                hash_results = (
-                    self._verify_file_hashes(package_dir, manifest.files))
+                hash_results = self._verify_file_hashes(package_dir, manifest.files)
                 results.extend(hash_results)
 
         except json.JSONDecodeError as e:
@@ -361,7 +355,7 @@ class ExportValidator:
     def _verify_file_hashes(
         self, package_dir: Path, file_hashes: Dict[str, str]
     ) -> List[ValidationResult]:
-        """Verify file integrity using hashes."""
+        """Verify file integrity using hashes"""
         results = []
         corrupted_files = []
 
@@ -383,8 +377,7 @@ class ExportValidator:
                 ValidationResult(
                     check_name="file_integrity",
                     status=ValidationStatus.FAILED,
-                    message= (
-                        f"File integrity check failed: {', '.join(corrupted_files)}",)
+                    message=f"File integrity check failed: {', '.join(corrupted_files)}",
                     details={"corrupted_files": corrupted_files},
                     severity="critical",
                 )
@@ -401,7 +394,7 @@ class ExportValidator:
         return results
 
     def _calculate_file_hash(self, file_path: Path) -> str:
-        """Calculate SHA256 hash of file."""
+        """Calculate SHA256 hash of file"""
         sha256_hash = hashlib.sha256()
 
         with open(file_path, "rb") as f:
@@ -411,7 +404,7 @@ class ExportValidator:
         return sha256_hash.hexdigest()
 
     def _check_files(self, package_dir: Path) -> List[ValidationResult]:
-        """Check individual files."""
+        """Check individual files"""
         results = []
 
         # Check agent config
@@ -489,7 +482,7 @@ class ExportValidator:
         return results
 
     def _check_configuration(self, package_dir: Path) -> List[ValidationResult]:
-        """Check configuration files."""
+        """Check configuration files"""
         results = []
 
         # Check for environment configuration
@@ -522,7 +515,7 @@ class ExportValidator:
         return results
 
     def _check_dependencies(self, package_dir: Path) -> List[ValidationResult]:
-        """Check package dependencies."""
+        """Check package dependencies"""
         results = []
 
         # Check Python dependencies
@@ -545,8 +538,7 @@ class ExportValidator:
                         ValidationResult(
                             check_name="python_dependencies",
                             status=ValidationStatus.WARNING,
-                            message= (
-                                f"Unpinned dependencies: {', '.join(problematic[:3])}",)
+                            message=f"Unpinned dependencies: {', '.join(problematic[:3])}",
                             details={"unpinned": problematic},
                             severity="warning",
                         )
@@ -599,7 +591,7 @@ class ExportValidator:
         return results
 
     def _check_scripts(self, package_dir: Path) -> List[ValidationResult]:
-        """Check executable scripts."""
+        """Check executable scripts"""
         results = []
 
         # Check run script
@@ -645,8 +637,7 @@ class ExportValidator:
                         ValidationResult(
                             check_name="run_script_content",
                             status=ValidationStatus.WARNING,
-                            message= (
-                                "Run script doesn't appear to launch application",)
+                            message="Run script doesn't appear to launch application",
                             severity="warning",
                         )
                     )
@@ -686,7 +677,7 @@ class ExportValidator:
     def _check_hardware_compatibility(
         self, package_dir: Path, target_platform: HardwarePlatform
     ) -> List[ValidationResult]:
-        """Check hardware compatibility."""
+        """Check hardware compatibility"""
         results = []
 
         if target_platform not in self.hardware_profiles:
@@ -694,8 +685,7 @@ class ExportValidator:
                 ValidationResult(
                     check_name="hardware_compatibility",
                     status=ValidationStatus.SKIPPED,
-                    message= (
-                        f"No profile for platform: {target_platform.value}",)
+                    message=f"No profile for platform: {target_platform.value}",
                 )
             )
             return results
@@ -715,9 +705,7 @@ class ExportValidator:
                         ValidationResult(
                             check_name="platform_match",
                             status=ValidationStatus.WARNING,
-                            message= (
-                                f"Package built for {manifest.get('platform')}, ")
-                            f"target is {target_platform.value}",
+                            message=f"Package built for {manifest.get('platform')}, target is {target_platform.value}",
                             severity="warning",
                         )
                     )
@@ -753,9 +741,7 @@ class ExportValidator:
                             ValidationResult(
                                 check_name="memory_requirements",
                                 status=ValidationStatus.WARNING,
-                                message= (
-                                    f"Package requires {pkg_reqs['min_ram_mb']}MB RAM, ")
-                                f"platform has {requirements.min_ram_mb}MB",
+                                message=f"Package requires {pkg_reqs['min_ram_mb']}MB RAM, platform has {requirements.min_ram_mb}MB",
                                 severity="warning",
                             )
                         )
@@ -765,8 +751,7 @@ class ExportValidator:
                             ValidationResult(
                                 check_name="gpu_requirements",
                                 status=ValidationStatus.FAILED,
-                                message= (
-                                    "Package requires GPU but platform doesn't have one",)
+                                message="Package requires GPU but platform doesn't have one",
                                 severity="critical",
                             )
                         )
@@ -784,16 +769,14 @@ class ExportValidator:
         return results
 
     def _generate_summary(self, results: List[ValidationResult]) -> ValidationResult:
-        """Generate validation summary."""
+        """Generate validation summary"""
         passed = sum(1 for r in results if r.status == ValidationStatus.PASSED)
-        warnings = (
-            sum(1 for r in results if r.status == ValidationStatus.WARNING))
+        warnings = sum(1 for r in results if r.status == ValidationStatus.WARNING)
         failed = sum(1 for r in results if r.status == ValidationStatus.FAILED)
 
         if failed > 0:
             status = ValidationStatus.FAILED
-            message = (
-                f"Validation failed: {failed} errors, {warnings} warnings")
+            message = f"Validation failed: {failed} errors, {warnings} warnings"
             severity = "critical"
         elif warnings > 0:
             status = ValidationStatus.WARNING
@@ -824,7 +807,7 @@ class DeploymentVerifier:
     """
 
     def __init__(self) -> None:
-        """Initialize deployment verifier."""
+        """Initialize deployment verifier"""
         self.test_timeout = 300  # 5 minutes
 
     def verify_deployment(
@@ -860,7 +843,7 @@ class DeploymentVerifier:
         return results
 
     def _check_process_running(self, package_dir: Path) -> List[ValidationResult]:
-        """Check if agent process is running."""
+        """Check if agent process is running"""
         results = []
 
         # Look for PID file
@@ -912,7 +895,7 @@ class DeploymentVerifier:
         return results
 
     def _check_health_endpoint(self, package_dir: Path) -> List[ValidationResult]:
-        """Check health endpoint if available."""
+        """Check health endpoint if available"""
         results = []
 
         # Try to find health check configuration
@@ -926,8 +909,7 @@ class DeploymentVerifier:
                     if config_file.endswith(".json"):
                         with open(config_path) as f:
                             config = json.load(f)
-                        health_port = (
-                            config.get("health_port", config.get("port")))
+                        health_port = config.get("health_port", config.get("port"))
                     elif config_file == ".env":
                         with open(config_path) as f:
                             for line in f:
@@ -944,8 +926,7 @@ class DeploymentVerifier:
             try:
                 import requests  # type: ignore[import-untyped]
 
-                response = (
-                    requests.get(f"http://localhost:{health_port}/health", timeout=5))
+                response = requests.get(f"http://localhost:{health_port}/health", timeout=5)
 
                 if response.status_code == 200:
                     results.append(
@@ -961,8 +942,7 @@ class DeploymentVerifier:
                         ValidationResult(
                             check_name="health_endpoint",
                             status=ValidationStatus.WARNING,
-                            message= (
-                                f"Health endpoint returned {response.status_code}",)
+                            message=f"Health endpoint returned {response.status_code}",
                             severity="warning",
                         )
                     )
@@ -988,7 +968,7 @@ class DeploymentVerifier:
         return results
 
     def _check_resource_usage(self, platform: HardwarePlatform) -> List[ValidationResult]:
-        """Check resource usage on platform."""
+        """Check resource usage on platform"""
         results = []
 
         try:
@@ -1067,7 +1047,7 @@ class DeploymentVerifier:
         return results
 
     def _check_logs(self, package_dir: Path) -> List[ValidationResult]:
-        """Check logs for errors."""
+        """Check logs for errors"""
         results = []
 
         log_dir = package_dir / "logs"
@@ -1133,7 +1113,7 @@ class DeploymentVerifier:
         return results
 
     def _run_functional_tests(self, package_dir: Path) -> List[ValidationResult]:
-        """Run functional tests if available."""
+        """Run functional tests if available"""
         results = []
 
         # Look for test script
@@ -1163,8 +1143,7 @@ class DeploymentVerifier:
                             check_name="functional_tests",
                             status=ValidationStatus.PASSED,
                             message="Functional tests passed",
-                            details= (
-                                {"stdout": result.stdout[-500:]},  # Last 500 chars)
+                            details={"stdout": result.stdout[-500:]},  # Last 500 chars
                         )
                     )
                 else:

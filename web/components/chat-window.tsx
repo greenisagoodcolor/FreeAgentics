@@ -266,13 +266,7 @@ export default function ChatWindow({
       // Mark this message as processed
       processedMessageRef.current = latestMessage.id;
     }
-  }, [
-    conversation,
-    agents,
-    isSending,
-    isProcessing,
-    queueAgentResponse,
-  ]);
+  }, [conversation, agents, isSending, isProcessing, queueAgentResponse]);
 
   // Scroll to bottom when messages change
   useEffect(() => {

@@ -4,12 +4,12 @@ Welcome to the FreeAgentics API documentation. This documentation provides compr
 
 ## Available API Documentation
 
-| API | Description | Format |
-|-----|-------------|--------|
-| [Agents API](agents-api.md) | Documentation for the Agent management API endpoints | Markdown |
-| [GNN API](gnn-api.md) | Documentation for the Graph Neural Network processing API | Markdown |
-| [REST API](rest-api.md) | Complete REST API documentation for all platform features | Markdown |
-| [OpenAPI Specification](openapi.yml) | OpenAPI 3.1.0 specification for all APIs | YAML |
+| API                                  | Description                                               | Format   |
+| ------------------------------------ | --------------------------------------------------------- | -------- |
+| [Agents API](agents-api.md)          | Documentation for the Agent management API endpoints      | Markdown |
+| [GNN API](gnn-api.md)                | Documentation for the Graph Neural Network processing API | Markdown |
+| [REST API](rest-api.md)              | Complete REST API documentation for all platform features | Markdown |
+| [OpenAPI Specification](openapi.yml) | OpenAPI 3.1.0 specification for all APIs                  | YAML     |
 
 ## API Overview
 

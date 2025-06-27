@@ -1,4 +1,4 @@
-."""
+"""
 GridPosition Interface for Spatial Grid World MVP
 
 This module provides a simplified grid-based positioning system for agents
@@ -18,7 +18,7 @@ from agents.base.data_model import Position
 
 
 class GridSize(Enum):
-    ."""Supported grid sizes for the spatial world."""
+    """Supported grid sizes for the spatial world"""
 
     SMALL = (5, 5)
     MEDIUM = (10, 10)
@@ -26,7 +26,7 @@ class GridSize(Enum):
 
 
 class ProximityLevel(Enum):
-    ."""Proximity levels for agent interactions."""
+    """Proximity levels for agent interactions"""
 
     IMMEDIATE = 1  # Adjacent cells
     CLOSE = 2  # Within 2 cells
@@ -36,31 +36,30 @@ class ProximityLevel(Enum):
 
 @dataclass
 class GridCoordinate:
-    ."""Grid-based coordinate system for simplified spatial positioning."""
+    """Grid-based coordinate system for simplified spatial positioning"""
 
     x: int
     y: int
 
     def __post_init__(self):
-        ."""Validate coordinates are non-negative."""
+        """Validate coordinates are non-negative"""
         if self.x < 0 or self.y < 0:
-            raise ValueError(
-                f"Grid coordinates must be non-negative: ({self.x}, {self.y})")
+            raise ValueError(f"Grid coordinates must be non-negative: ({self.x}, {self.y})")
 
     def distance_to(self, other: "GridCoordinate") -> float:
-        ."""Calculate Manhattan distance to another grid coordinate."""
+        """Calculate Manhattan distance to another grid coordinate"""
         return abs(self.x - other.x) + abs(self.y - other.y)
 
     def euclidean_distance_to(self, other: "GridCoordinate") -> float:
-        ."""Calculate Euclidean distance to another grid coordinate."""
+        """Calculate Euclidean distance to another grid coordinate"""
         return math.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
 
     def is_adjacent(self, other: "GridCoordinate") -> bool:
-        ."""Check if this coordinate is adjacent (distance = 1) to another."""
+        """Check if this coordinate is adjacent (distance = 1) to another"""
         return self.distance_to(other) == 1
 
     def get_neighbors(self, grid_size: Tuple[int, int]) -> List["GridCoordinate"]:
-        ."""Get all valid neighboring coordinates within grid bounds."""
+        """Get all valid neighboring coordinates within grid bounds"""
         neighbors = []
         max_x, max_y = grid_size
 
@@ -75,10 +74,9 @@ class GridCoordinate:
         return neighbors
 
     def to_world_position(
-        self, cell_size: float = (
-            1.0, origin_offset: Tuple[float, float] = (0.0, 0.0))
+        self, cell_size: float = 1.0, origin_offset: Tuple[float, float] = (0.0, 0.0)
     ) -> Position:
-        ."""Convert grid coordinate to world Position for integration with
+        """Convert grid coordinate to world Position for integration with
         existing agent system"""
         world_x = self.x * cell_size + origin_offset[0]
         world_y = self.y * cell_size + origin_offset[1]
@@ -91,13 +89,13 @@ class GridCoordinate:
         cell_size: float = 1.0,
         origin_offset: Tuple[float, float] = (0.0, 0.0),
     ) -> "GridCoordinate":
-        ."""Convert world Position to grid coordinate."""
+        """Convert world Position to grid coordinate"""
         grid_x = int((position.x - origin_offset[0]) / cell_size)
         grid_y = int((position.y - origin_offset[1]) / cell_size)
         return cls(max(0, grid_x), max(0, grid_y))
 
     def __hash__(self) -> int:
-        .."""Make GridCoordinate hashable for use as dictionary key.."""
+        """Make GridCoordinate hashable for use as dictionary key."""
         return hash((self.x, self.y))
 
     def __eq__(self, other: object) -> bool:
@@ -107,14 +105,14 @@ class GridCoordinate:
         return self.x == other.x and self.y == other.y
 
     def __str__(self) -> str:
-        ."""String representation."""
+        """String representation"""
 
         return f"GridCoordinate({self.x}, {self.y})"
 
 
 @dataclass
 class GridPosition:
-    ."""
+    """
     Enhanced grid position with proximity radius and spatial logic
     Integrates with existing agents/base positioning logic per ADR-002
     """
@@ -141,7 +139,7 @@ class GridPosition:
     def get_proximity_agents(
         self, all_positions: Dict[str, "GridPosition"]
     ) -> Dict[str, "GridPosition"]:
-        ."""Get all agents within proximity radius."""
+        """Get all agents within proximity radius"""
         nearby = {}
 
         for agent_id, other_pos in all_positions.items():
@@ -155,7 +153,7 @@ class GridPosition:
         return nearby
 
     def get_proximity_level(self, other: "GridPosition") -> ProximityLevel:
-        ."""Determine proximity level to another position."""
+        """Determine proximity level to another position"""
         distance = self.coordinate.distance_to(other.coordinate)
 
         if distance <= 1:
@@ -168,12 +166,12 @@ class GridPosition:
             return ProximityLevel.DISTANT
 
     def can_interact_with(self, other: "GridPosition") -> bool:
-        .."""Check if interaction is possible with another position.."""
+        """Check if interaction is possible with another position."""
         return self.coordinate.distance_to(other.coordinate) <= self.proximity_radius
 
     def get_interaction_strength(self, other: "GridPosition") -> float:
         """Calculate interaction strength based on proximity (1.0 = closest,
-            0.0 = out of range)"""
+        0.0 = out of range)"""
         distance = self.coordinate.distance_to(other.coordinate)
         if distance > self.proximity_radius:
             return 0.0
@@ -182,12 +180,11 @@ class GridPosition:
         return max(0.0, 1.0 - (distance / self.proximity_radius))
 
     def get_world_position(self) -> Position:
-        ."""Get world Position for integration with existing agent system."""
-        return self.coordinate.to_world_position(self.cell_size,
-            self.origin_offset)
+        """Get world Position for integration with existing agent system"""
+        return self.coordinate.to_world_position(self.cell_size, self.origin_offset)
 
     def update_from_world_position(self, position: Position) -> None:
-        ."""Update grid position from world Position."""
+        """Update grid position from world Position"""
         new_coordinate = GridCoordinate.from_world_position(
             position, self.cell_size, self.origin_offset
         )
@@ -207,21 +204,19 @@ class GridPosition:
         self.last_updated = datetime.now()
 
     def get_movement_trail(self, max_entries: int = 10) -> List[GridCoordinate]:
-        ."""Get recent movement trail for visualization."""
-        recent_history = (
-            self.movement_history[-max_entries:] if self.movement_history else [])
+        """Get recent movement trail for visualization"""
+        recent_history = self.movement_history[-max_entries:] if self.movement_history else []
         trail = [coord for coord, _ in recent_history]
         trail.append(self.coordinate)  # Include current position
         return trail
 
     def is_within_bounds(self, grid_size: Tuple[int, int]) -> bool:
-        ."""Check if position is within grid bounds."""
+        """Check if position is within grid bounds"""
         max_x, max_y = grid_size
-        return 0 <= (
-            self.coordinate.x < max_x and 0 <= self.coordinate.y < max_y)
+        return 0 <= (self.coordinate.x < max_x and 0 <= self.coordinate.y < max_y)
 
     def snap_to_grid(self, grid_size: Tuple[int, int]) -> None:
-        ."""Snap position to valid grid bounds."""
+        """Snap position to valid grid bounds"""
         max_x, max_y = grid_size
         snapped_x = max(0, min(self.coordinate.x, max_x - 1))
         snapped_y = max(0, min(self.coordinate.y, max_y - 1))
@@ -263,8 +258,7 @@ class GridPosition:
         )
 
         if "last_updated" in data:
-            position.last_updated = (
-                datetime.fromisoformat(data["last_updated"]))
+            position.last_updated = datetime.fromisoformat(data["last_updated"])
 
         # Restore movement history
         if "movement_history" in data:
@@ -277,25 +271,24 @@ class GridPosition:
         return position
 
     def __str__(self) -> str:
-        ."""String representation."""
+        """String representation"""
         return f"GridPosition({self.coordinate}, radius={self.proximity_radius})"
 
 
 class SpatialGridLogic:
-    ."""
+    """
     Spatial logic engine for grid-based proximity calculations and triggers
     Provides real-time spatial operations for the MVP grid world system
     """
 
-    def __init__(self, grid_size: Tuple[int, int] = (10, 10),
-        cell_size: float = 1.0):
+    def __init__(self, grid_size: Tuple[int, int] = (10, 10), cell_size: float = 1.0):
         """
         Initialize spatial grid logic
 
         Args:
             grid_size: Tuple of (width, height) for grid dimensions
             cell_size: Size of each grid cell in world units
-        ."""
+        """
         self.grid_size = grid_size
         self.cell_size = cell_size
         self.agent_positions: Dict[str, GridPosition] = {}
@@ -345,15 +338,14 @@ class SpatialGridLogic:
         return True
 
     def remove_agent(self, agent_id: str) -> bool:
-        ."""Remove an agent from the spatial grid."""
+        """Remove an agent from the spatial grid"""
         if agent_id in self.agent_positions:
             del self.agent_positions[agent_id]
             self._clear_proximity_cache()
             return True
         return False
 
-    def get_proximity_pairs(self, max_distance: int = 3) -> List[Tuple[str, str,
-        float]]:
+    def get_proximity_pairs(self, max_distance: int = 3) -> List[Tuple[str, str, float]]:
         """Get all agent pairs within proximity range with their distances"""
         pairs = []
         agent_ids = list(self.agent_positions.keys())
@@ -367,7 +359,7 @@ class SpatialGridLogic:
         return pairs
 
     def get_agents_in_radius(self, center: GridCoordinate, radius: int) -> List[str]:
-        ."""Get all agents within a radius of a center point."""
+        """Get all agents within a radius of a center point"""
         nearby_agents = []
 
         for agent_id, position in self.agent_positions.items():
@@ -387,12 +379,10 @@ class SpatialGridLogic:
 
             for agent2_id, position2 in nearby.items():
                 proximity_level = position1.get_proximity_level(position2)
-                interaction_strength = (
-                    position1.get_interaction_strength(position2))
+                interaction_strength = position1.get_interaction_strength(position2)
 
                 # Trigger conversation for close proximity
-                if proximity_level in [ProximityLevel.IMMEDIATE,
-                    ProximityLevel.CLOSE]:
+                if proximity_level in [ProximityLevel.IMMEDIATE, ProximityLevel.CLOSE]:
                     triggers.append(
                         {
                             "type": "conversation_trigger",
@@ -407,7 +397,7 @@ class SpatialGridLogic:
         return triggers
 
     def auto_arrange_agents(self, arrangement_type: str = "grid") -> None:
-        ."""Auto-arrange agents on the grid."""
+        """Auto-arrange agents on the grid"""
         agent_ids = list(self.agent_positions.keys())
 
         if arrangement_type == "grid":
@@ -441,8 +431,7 @@ class SpatialGridLogic:
 
     def _is_position_valid(self, coordinate: GridCoordinate) -> bool:
         """Check if a position is within grid bounds"""
-        return 0 <= (
-            coordinate.x < self.grid_size[0] and 0 <= coordinate.y < self.grid_size[1])
+        return 0 <= (coordinate.x < self.grid_size[0] and 0 <= coordinate.y < self.grid_size[1])
 
     def _is_position_blocked(
         self, coordinate: GridCoordinate, exclude_agent: Optional[str] = None
@@ -456,9 +445,8 @@ class SpatialGridLogic:
         return False
 
     def _get_cached_distance(self, agent1_id: str, agent2_id: str) -> float:
-        ."""Get cached distance between two agents."""
-        cache_key = (
-            (agent1_id, agent2_id) if agent1_id < agent2_id else (agent2_id, agent1_id))
+        """Get cached distance between two agents"""
+        cache_key = (agent1_id, agent2_id) if agent1_id < agent2_id else (agent2_id, agent1_id)
 
         if cache_key not in self.proximity_cache:
             pos1 = self.agent_positions[agent1_id]
@@ -479,7 +467,7 @@ class SpatialGridLogic:
         self.interaction_triggers = self.check_conversation_triggers()
 
     def _arrange_in_grid(self, agent_ids: List[str]) -> None:
-        ."""Arrange agents in a regular grid pattern."""
+        """Arrange agents in a regular grid pattern"""
         cols = int(math.sqrt(len(agent_ids))) + 1
 
         for i, agent_id in enumerate(agent_ids):
@@ -491,7 +479,7 @@ class SpatialGridLogic:
                 self.agent_positions[agent_id].move_to(coordinate)
 
     def _arrange_in_circle(self, agent_ids: List[str]) -> None:
-        ."""Arrange agents in a circular pattern."""
+        """Arrange agents in a circular pattern"""
         center_x, center_y = self.grid_size[0] // 2, self.grid_size[1] // 2
         radius = min(center_x, center_y) - 1
 
@@ -501,16 +489,14 @@ class SpatialGridLogic:
             y = int(center_y + radius * math.sin(angle))
 
             coordinate = GridCoordinate(
-                max(0, min(x, self.grid_size[0] - 1)), max(0, min(y,
-                    self.grid_size[1] - 1))
+                max(0, min(x, self.grid_size[0] - 1)), max(0, min(y, self.grid_size[1] - 1))
             )
             self.agent_positions[agent_id].move_to(coordinate)
 
     def _arrange_in_clusters(self, agent_ids: List[str]) -> None:
         """Arrange agents in clusters"""
         cluster_size = max(2, len(agent_ids) // 3)
-        clusters = (
-            [agent_ids[i : i + cluster_size] for i in range(0, len(agent_ids), cluster_size)])
+        clusters = [agent_ids[i : i + cluster_size] for i in range(0, len(agent_ids), cluster_size)]
 
         cluster_centers = [
             (self.grid_size[0] // 4, self.grid_size[1] // 4),
@@ -535,7 +521,7 @@ class SpatialGridLogic:
                 self.agent_positions[agent_id].move_to(coordinate)
 
     def _arrange_randomly(self, agent_ids: List[str]) -> None:
-        ."""Arrange agents randomly on the grid."""
+        """Arrange agents randomly on the grid"""
         import random
 
         occupied_positions = set()

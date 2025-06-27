@@ -53,14 +53,12 @@ _(Note: This is a conceptual model. The Application layer is an implicit set of 
 ### Specific Directory-Level Rules
 
 1. **`agents/`, `inference/`, `coalitions/`, `world/` (The Domain Core)**:
-
    - These directories represent the center of the architecture.
    - They **MUST NOT** depend on any other layer. They cannot import from `api`, `web`, `infrastructure`, `config`, etc.
    - They can depend on each other (e.g., `coalitions` can depend on `agents`), but this should be modeled carefully.
    - They must not have any knowledge of databases, UI frameworks, or specific external services.
 
 2. **`api/`, `web/` (The Interface Layer)**:
-
    - This layer is the entry point for external systems (users, other services).
    - It **CAN** depend on the Domain Core (`agents`, etc.). It orchestrates the domain logic to fulfill requests.
    - It **MUST NOT** be depended upon by the Domain Core.

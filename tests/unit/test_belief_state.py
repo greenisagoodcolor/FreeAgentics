@@ -20,10 +20,10 @@ from inference.engine import (
 
 
 class TestBeliefStateConfig:
-    """Test BeliefStateConfig dataclass."""
+    """Test BeliefStateConfig dataclass"""
 
     def test_default_config(self) -> None:
-        """Test default configuration values."""
+        """Test default configuration values"""
         config = BeliefStateConfig()
         assert config.use_gpu is True
         assert config.dtype == torch.float32
@@ -35,7 +35,7 @@ class TestBeliefStateConfig:
         assert config.max_history_length == 100
 
     def test_custom_config(self) -> None:
-        """Test custom configuration."""
+        """Test custom configuration"""
         config = BeliefStateConfig(use_gpu=False, eps=1e-6, max_history_length=50)
         assert config.use_gpu is False
         assert config.eps == 1e-6
@@ -43,20 +43,20 @@ class TestBeliefStateConfig:
 
 
 class TestDiscreteBeliefState:
-    """Test discrete belief state implementation."""
+    """Test discrete belief state implementation"""
 
     @pytest.fixture
     def config(self):
-        """Create test configuration."""
+        """Create test configuration"""
         return BeliefStateConfig(use_gpu=False)  # Force CPU for testing
 
     @pytest.fixture
     def belief_state(self, config):
-        """Create test belief state."""
+        """Create test belief state"""
         return DiscreteBeliefState(num_states=4, config=config)
 
     def test_initialization(self, config) -> None:
-        """Test belief state initialization."""
+        """Test belief state initialization"""
         belief_state = DiscreteBeliefState(num_states=4, config=config)
         assert belief_state.num_states == 4
         assert belief_state.beliefs.shape == (4,)
@@ -64,7 +64,7 @@ class TestDiscreteBeliefState:
         assert belief_state.update_count == 0
 
     def test_initialization_with_priors(self, config) -> None:
-        """Test initialization with custom priors."""
+        """Test initialization with custom priors"""
         initial_beliefs = torch.tensor([0.4, 0.3, 0.2, 0.1])
         belief_state = DiscreteBeliefState(
             num_states=4, config=config, initial_beliefs=initial_beliefs
@@ -72,7 +72,7 @@ class TestDiscreteBeliefState:
         assert torch.allclose(belief_state.beliefs, initial_beliefs)
 
     def test_get_set_beliefs(self, belief_state) -> None:
-        """Test getting and setting beliefs."""
+        """Test getting and setting beliefs"""
         # Test get
         beliefs = belief_state.get_beliefs()
         assert beliefs.shape == (4,)
@@ -83,7 +83,7 @@ class TestDiscreteBeliefState:
         assert torch.allclose(belief_state.beliefs, new_beliefs)
 
     def test_bayesian_update(self, belief_state) -> None:
-        """Test Bayesian belief update."""
+        """Test Bayesian belief update"""
         # Observe state 0
         observation = torch.tensor(0)
         belief_state.update_beliefs(observation, update_method="bayes")
@@ -93,7 +93,7 @@ class TestDiscreteBeliefState:
         assert belief_state.metadata["last_update_method"] == "bayes"
 
     def test_linear_update(self, belief_state) -> None:
-        """Test linear interpolation update."""
+        """Test linear interpolation update"""
         observation = torch.tensor(1)
         belief_state.update_beliefs(observation, update_method="linear")
         # Should interpolate toward observed state
@@ -101,7 +101,7 @@ class TestDiscreteBeliefState:
         assert belief_state.metadata["last_update_method"] == "linear"
 
     def test_momentum_update(self, belief_state) -> None:
-        """Test momentum-based update."""
+        """Test momentum-based update"""
         # First update
         belief_state.update_beliefs(torch.tensor(0), update_method="momentum")
         # Second update with momentum
@@ -110,7 +110,7 @@ class TestDiscreteBeliefState:
         assert belief_state.metadata["last_update_method"] == "momentum"
 
     def test_entropy_calculation(self, belief_state) -> None:
-        """Test entropy computation."""
+        """Test entropy computation"""
         # Uniform distribution should have maximum entropy
         uniform_entropy = belief_state.entropy()
         expected_entropy = torch.log(torch.tensor(4.0))  # log(num_states)
@@ -121,12 +121,12 @@ class TestDiscreteBeliefState:
         assert concentrated_entropy < uniform_entropy
 
     def test_most_likely_state(self, belief_state) -> None:
-        """Test most likely state identification."""
+        """Test most likely state identification"""
         belief_state.set_beliefs(torch.tensor([0.1, 0.6, 0.2, 0.1]))
         assert belief_state.most_likely_state() == 1
 
     def test_top_k_states(self, belief_state) -> None:
-        """Test top-k state retrieval."""
+        """Test top-k state retrieval"""
         belief_state.set_beliefs(torch.tensor([0.1, 0.4, 0.3, 0.2]))
         indices, probs = belief_state.get_top_k_states(k=2)
         assert len(indices) == 2
@@ -135,7 +135,7 @@ class TestDiscreteBeliefState:
         assert indices[1] == 2  # Second most likely
 
     def test_sampling(self, belief_state) -> None:
-        """Test state sampling."""
+        """Test state sampling"""
         # Set deterministic beliefs for testing
         belief_state.set_beliefs(torch.tensor([1.0, 0.0, 0.0, 0.0]))
         # Should always sample state 0
@@ -143,7 +143,7 @@ class TestDiscreteBeliefState:
         assert all(s == 0 for s in samples)
 
     def test_temperature_sampling(self, belief_state) -> None:
-        """Test temperature-scaled sampling."""
+        """Test temperature-scaled sampling"""
         belief_state.set_beliefs(torch.tensor([0.7, 0.2, 0.05, 0.05]))
         # High temperature should be more random
         high_temp_sample = belief_state.sample_state(temperature=2.0)
@@ -153,7 +153,7 @@ class TestDiscreteBeliefState:
         assert low_temp_sample in [0, 1, 2, 3]
 
     def test_kl_divergence(self, belief_state) -> None:
-        """Test KL divergence computation."""
+        """Test KL divergence computation"""
         # Create another belief state
         other_belief = DiscreteBeliefState(
             num_states=4,
@@ -167,7 +167,7 @@ class TestDiscreteBeliefState:
         assert torch.allclose(self_kl, torch.tensor(0.0), atol=1e-6)
 
     def test_history_tracking(self, belief_state) -> None:
-        """Test belief history tracking."""
+        """Test belief history tracking"""
         assert len(belief_state.belief_history) == 0
         # Make some updates
         for i in range(3):
@@ -176,7 +176,7 @@ class TestDiscreteBeliefState:
         assert len(belief_state.entropy_history) == 3
 
     def test_reset_to_uniform(self, belief_state) -> None:
-        """Test resetting to uniform distribution."""
+        """Test resetting to uniform distribution"""
         # Make some updates
         belief_state.update_beliefs(torch.tensor(0))
         belief_state.update_beliefs(torch.tensor(1))
@@ -189,7 +189,7 @@ class TestDiscreteBeliefState:
         assert len(belief_state.belief_history) == 0
 
     def test_compression(self, belief_state) -> None:
-        """Test belief compression."""
+        """Test belief compression"""
         # Enable compression
         belief_state.config.compression_enabled = True
         belief_state.config.sparse_threshold = 0.1
@@ -202,7 +202,7 @@ class TestDiscreteBeliefState:
         assert belief_state.beliefs[3] == 0.0
 
     def test_clone(self, belief_state) -> None:
-        """Test belief state cloning."""
+        """Test belief state cloning"""
         # Make some changes
         belief_state.update_beliefs(torch.tensor(0))
         belief_state.metadata["test_key"] = "test_value"
@@ -217,7 +217,7 @@ class TestDiscreteBeliefState:
         assert not torch.allclose(cloned.beliefs, belief_state.beliefs)
 
     def test_serialization(self, belief_state) -> None:
-        """Test serialization to dictionary."""
+        """Test serialization to dictionary"""
         belief_state.update_beliefs(torch.tensor(0))
         belief_state.metadata["test_key"] = "test_value"
         # Serialize
@@ -235,7 +235,7 @@ class TestDiscreteBeliefState:
         assert new_belief.metadata["test_key"] == "test_value"
 
     def test_file_save_load(self, belief_state) -> None:
-        """Test saving and loading from files."""
+        """Test saving and loading from files"""
         belief_state.update_beliefs(torch.tensor(2))
         with tempfile.TemporaryDirectory() as tmpdir:
             # Test JSON save/load
@@ -251,20 +251,20 @@ class TestDiscreteBeliefState:
 
 
 class TestContinuousBeliefState:
-    """Test continuous belief state implementation."""
+    """Test continuous belief state implementation"""
 
     @pytest.fixture
     def config(self):
-        """Create test configuration."""
+        """Create test configuration"""
         return BeliefStateConfig(use_gpu=False)
 
     @pytest.fixture
     def belief_state(self, config):
-        """Create test continuous belief state."""
+        """Create test continuous belief state"""
         return ContinuousBeliefState(state_dim=3, config=config)
 
     def test_initialization(self, config) -> None:
-        """Test continuous belief state initialization."""
+        """Test continuous belief state initialization"""
         belief_state = ContinuousBeliefState(state_dim=3, config=config)
         assert belief_state.state_dim == 3
         assert belief_state.mean.shape == (3,)
@@ -273,7 +273,7 @@ class TestContinuousBeliefState:
         assert torch.allclose(belief_state.cov, torch.eye(3))
 
     def test_initialization_with_parameters(self, config) -> None:
-        """Test initialization with custom parameters."""
+        """Test initialization with custom parameters"""
         mean = torch.tensor([1.0, 2.0, 3.0])
         cov = 2.0 * torch.eye(3)
         belief_state = ContinuousBeliefState(
@@ -283,10 +283,12 @@ class TestContinuousBeliefState:
         assert torch.allclose(belief_state.cov, cov)
 
     def test_get_set_beliefs(self, belief_state) -> None:
-        """Test getting and setting beliefs."""
-        mean, cov = belief_state.get_beliefs()
-        assert mean.shape == (3,)
-        assert cov.shape == (3, 3)
+        """Test getting and setting beliefs"""
+        beliefs = belief_state.get_beliefs()
+        # get_beliefs returns concatenated mean and log_var, check properties instead
+        assert belief_state.mean.shape == (3,)
+        assert belief_state.cov.shape == (3, 3)
+        assert beliefs.shape == (6,)  # 3 for mean + 3 for log_var
         # Set new beliefs
         new_mean = torch.tensor([1.0, 0.0, -1.0])
         new_cov = 0.5 * torch.eye(3)
@@ -295,7 +297,7 @@ class TestContinuousBeliefState:
         assert torch.allclose(belief_state.cov, new_cov)
 
     def test_gaussian_bayesian_update(self, belief_state) -> None:
-        """Test Gaussian Bayesian update."""
+        """Test Gaussian Bayesian update"""
         obs = torch.tensor([1.0, 0.0, 0.0])
         obs_cov = 0.1 * torch.eye(3)
         belief_state.update_beliefs((obs, obs_cov), update_method="bayes")
@@ -306,7 +308,7 @@ class TestContinuousBeliefState:
         assert torch.det(belief_state.cov) < 1.0  # Less than initial determinant
 
     def test_kalman_update(self, belief_state) -> None:
-        """Test Kalman filter update."""
+        """Test Kalman filter update"""
         obs = torch.tensor([0.5, 0.5, 0.5])
         obs_cov = 0.2 * torch.eye(3)
         belief_state.update_beliefs((obs, obs_cov), update_method="kalman")
@@ -315,7 +317,7 @@ class TestContinuousBeliefState:
         assert belief_state.update_count == 1
 
     def test_entropy_calculation(self, belief_state) -> None:
-        """Test differential entropy calculation."""
+        """Test differential entropy calculation"""
         entropy = belief_state.entropy()
         assert entropy.item() > 0  # Should be positive for Gaussian
         # Smaller covariance should have lower entropy
@@ -324,13 +326,13 @@ class TestContinuousBeliefState:
         assert small_entropy < entropy
 
     def test_most_likely_state(self, belief_state) -> None:
-        """Test most likely state (mean) retrieval."""
+        """Test most likely state (mean) retrieval"""
         belief_state.set_beliefs((torch.tensor([1.0, 2.0, 3.0]), belief_state.cov))
         most_likely = belief_state.most_likely_state()
         assert torch.allclose(most_likely, torch.tensor([1.0, 2.0, 3.0]))
 
     def test_sampling(self, belief_state) -> None:
-        """Test state sampling from Gaussian."""
+        """Test state sampling from Gaussian"""
         samples = belief_state.sample_state(num_samples=1000)
         assert samples.shape == (1000, 3)
         # Samples should be roughly centered around mean with sufficient samples
@@ -340,22 +342,22 @@ class TestContinuousBeliefState:
 
 
 class TestFactoryFunctions:
-    """Test factory functions for belief state creation."""
+    """Test factory functions for belief state creation"""
 
     def test_create_discrete_belief_state(self) -> None:
-        """Test discrete belief state factory."""
+        """Test discrete belief state factory"""
         belief_state = create_discrete_belief_state(num_states=5)
         assert isinstance(belief_state, DiscreteBeliefState)
         assert belief_state.num_states == 5
 
     def test_create_continuous_belief_state(self) -> None:
-        """Test continuous belief state factory."""
+        """Test continuous belief state factory"""
         belief_state = create_continuous_belief_state(state_dim=4)
         assert isinstance(belief_state, ContinuousBeliefState)
         assert belief_state.state_dim == 4
 
     def test_create_belief_state_factory(self) -> None:
-        """Test general belief state factory."""
+        """Test general belief state factory"""
         # Discrete
         discrete_belief = create_belief_state("discrete", num_states=3)
         assert isinstance(discrete_belief, DiscreteBeliefState)
@@ -370,10 +372,10 @@ class TestFactoryFunctions:
 
 
 class TestBeliefStateIntegration:
-    """Test integration with other Active Inference components."""
+    """Test integration with other Active Inference components"""
 
     def test_discrete_belief_with_inference(self) -> None:
-        """Test discrete belief state with inference algorithms."""
+        """Test discrete belief state with inference algorithms"""
         from inference.engine import (
             DiscreteGenerativeModel,
             InferenceConfig,
@@ -394,8 +396,7 @@ class TestBeliefStateIntegration:
         inference = VariationalMessagePassing(inference_config)
         # Test inference with belief state
         observation = torch.tensor(0)
-        updated_beliefs = (
-            inference.infer_states(observation, model, belief_state.get_beliefs()))
+        updated_beliefs = inference.infer_states(observation, model, belief_state.get_beliefs())
         # Update belief state with results
         belief_state.set_beliefs(updated_beliefs)
         assert belief_state.beliefs.shape == (4,)

@@ -1,4 +1,4 @@
-."""Precision optimization for active inference."""
+"""Precision optimization for active inference"""
 
 from dataclasses import dataclass
 from typing import List, Optional
@@ -10,7 +10,7 @@ from torch.nn.utils.rnn import pad_sequence
 
 @dataclass
 class PrecisionConfig:
-    ."""Configuration for precision optimization."""
+    """Configuration for precision optimization"""
 
     learning_rate: float = 0.01
     meta_learning_rate: float = 0.001
@@ -29,18 +29,17 @@ class PrecisionConfig:
 
 
 class GradientPrecisionOptimizer:
-    ."""Gradient-based precision optimization."""
+    """Gradient-based precision optimization"""
 
     def __init__(self, config: PrecisionConfig, num_modalities: int) -> None:
-        """Initialize."""
+        """Initialize"""
         self.config = config
         self.num_modalities = num_modalities
-        self.log_precision = (
-            torch.log(torch.ones(num_modalities) * config.init_precision))
+        self.log_precision = torch.log(torch.ones(num_modalities) * config.init_precision)
         self.error_history = []
 
     def optimize_precision(self, errors, context=None):
-        ."""Optimize precision based on errors."""
+        """Optimize precision based on errors"""
         if errors.dim() == 1:
             errors = errors.unsqueeze(0)
 
@@ -53,8 +52,7 @@ class GradientPrecisionOptimizer:
 
         # Clamp to bounds
         precision = torch.exp(self.log_precision)
-        precision = (
-            torch.clamp(precision, self.config.min_precision, self.config.max_precision))
+        precision = torch.clamp(precision, self.config.min_precision, self.config.max_precision)
         self.log_precision = torch.log(precision)
 
         # Store error history
@@ -65,7 +63,7 @@ class GradientPrecisionOptimizer:
         return precision
 
     def estimate_volatility(self):
-        ."""Estimate volatility from error history."""
+        """Estimate volatility from error history"""
         if len(self.error_history) < 2:
             return torch.zeros(self.num_modalities)
 
@@ -73,14 +71,14 @@ class GradientPrecisionOptimizer:
         return errors.std(dim=0).mean(dim=0)
 
     def adapt_to_volatility(self):
-        ."""Adapt precision based on volatility."""
+        """Adapt precision based on volatility"""
         volatility = self.estimate_volatility()
         adaptation = self.config.adaptation_rate * volatility
         self.log_precision += adaptation
 
 
 class HierarchicalPrecisionOptimizer:
-    ."""Hierarchical precision optimization."""
+    """Hierarchical precision optimization"""
 
     def __init__(self, config: PrecisionConfig, level_dims: List[int]) -> None:
         self.config = config
@@ -100,11 +98,10 @@ class HierarchicalPrecisionOptimizer:
             self.coupling_weights.append(weight)
 
     def optimize_precision(self, errors_list, context=None):
-        ."""Optimize precision across all levels."""
+        """Optimize precision across all levels"""
         precisions = []
 
-        for i, (errors, log_precision) in enumerate(zip(errors_list,
-            self.level_precisions)):
+        for i, (errors, log_precision) in enumerate(zip(errors_list, self.level_precisions)):
             if errors.dim() == 1:
                 errors = errors.unsqueeze(0)
 
@@ -115,14 +112,12 @@ class HierarchicalPrecisionOptimizer:
 
             # Apply coupling from other levels
             if i > 0:
-                coupling_effect = (
-                    self.coupling_weights[i - 1] * self.level_precisions[i - 1].mean())
+                coupling_effect = self.coupling_weights[i - 1] * self.level_precisions[i - 1].mean()
                 log_precision += coupling_effect * 0.1
 
             # Clamp to bounds
             precision = torch.exp(log_precision)
-            precision = (
-                torch.clamp(precision, self.config.min_precision, self.config.max_precision))
+            precision = torch.clamp(precision, self.config.min_precision, self.config.max_precision)
             self.level_precisions[i] = torch.log(precision)
             precisions.append(precision)
 
@@ -135,10 +130,8 @@ class HierarchicalPrecisionOptimizer:
             if len(error_history) < 2:
                 volatilities.append(torch.zeros(self.level_dims[i]))
             else:
-                errors = (
-                    pad_sequence([e[0] for e in error_history], batch_first=True))
-                log_abs_diff = (
-                    torch.log(torch.abs(errors[1:] - errors[:-1]) + 1e-6))
+                errors = pad_sequence([e[0] for e in error_history], batch_first=True)
+                log_abs_diff = torch.log(torch.abs(errors[1:] - errors[:-1]) + 1e-6)
                 volatility = torch.exp(torch.mean(log_abs_diff, dim=0))
                 volatilities.append(volatility)
         return volatilities
@@ -173,8 +166,7 @@ class MetaLearningPrecisionOptimizer:
         )
 
         # Base precision
-        self.base_precision = (
-            torch.ones(num_modalities) * config.init_precision)
+        self.base_precision = torch.ones(num_modalities) * config.init_precision
 
         # Context buffer
         self.context_buffer = []
@@ -214,8 +206,7 @@ class MetaLearningPrecisionOptimizer:
 
         # Apply adjustment to base precision
         precision = self.base_precision * torch.exp(adjustment)
-        precision = (
-            torch.clamp(precision, self.config.min_precision, self.config.max_precision))
+        precision = torch.clamp(precision, self.config.min_precision, self.config.max_precision)
 
         # Update context buffer
         self.context_buffer.append((errors.detach().clone(), context))
@@ -254,27 +245,24 @@ class MetaLearningPrecisionOptimizer:
             optimizer.step()
 
     def estimate_volatility(self):
-        ."""Estimate volatility from context buffer."""
+        """Estimate volatility from context buffer"""
         if len(self.context_buffer) < 2:
             return torch.zeros(self.num_modalities)
 
-        errors = (
-            torch.stack([item[0].mean(dim=0) for item in self.context_buffer]))
+        errors = torch.stack([item[0].mean(dim=0) for item in self.context_buffer])
         return errors.std(dim=0)
 
 
 class AdaptivePrecisionController:
     """Adaptive precision controller that switches between strategies"""
 
-    def __init__(self, config: PrecisionConfig, num_modalities: int,
-        context_dim: int = 0) -> None:
+    def __init__(self, config: PrecisionConfig, num_modalities: int, context_dim: int = 0) -> None:
         self.config = config
         self.num_modalities = num_modalities
         self.context_dim = context_dim
 
         # Initialize different optimizers
-        self.gradient_optimizer = (
-            GradientPrecisionOptimizer(config, num_modalities))
+        self.gradient_optimizer = GradientPrecisionOptimizer(config, num_modalities)
         self.meta_optimizer = MetaLearningPrecisionOptimizer(
             config, context_dim + num_modalities * 3, 64, num_modalities
         )
@@ -282,22 +270,18 @@ class AdaptivePrecisionController:
         # Strategy selection
         self.strategy = "gradient"  # "gradient", "meta", "hybrid"
         self.performance_history = {"gradient": [], "meta": [], "hybrid": []}
-        self.strategy_performance = (
-            {"gradient": 0.0, "meta": 0.0, "hybrid": 0.0})
+        self.strategy_performance = {"gradient": 0.0, "meta": 0.0, "hybrid": 0.0}
 
     def optimize(self, errors, context=None):
         """Optimize precision using selected strategy"""
         if self.strategy == "gradient":
-            precision = (
-                self.gradient_optimizer.optimize_precision(errors, context))
+            precision = self.gradient_optimizer.optimize_precision(errors, context)
         elif self.strategy == "meta":
             precision = self.meta_optimizer.optimize_precision(errors, context)
         elif self.strategy == "hybrid":
             # Use both and average
-            grad_precision = (
-                self.gradient_optimizer.optimize_precision(errors, context))
-            meta_precision = (
-                self.meta_optimizer.optimize_precision(errors, context))
+            grad_precision = self.gradient_optimizer.optimize_precision(errors, context)
+            meta_precision = self.meta_optimizer.optimize_precision(errors, context)
             precision = (grad_precision + meta_precision) / 2
         else:
             raise ValueError(f"Unknown strategy: {self.strategy}")
@@ -327,8 +311,7 @@ class AdaptivePrecisionController:
             if recent_performance > 1.0:  # High error
                 strategies = ["gradient", "meta", "hybrid"]
                 strategies.remove(self.strategy)
-                self.strategy = (
-                    strategies[torch.randint(0, len(strategies), (1,)).item()])
+                self.strategy = strategies[torch.randint(0, len(strategies), (1,)).item()]
 
     def get_volatility_estimate(self):
         """Get volatility estimate from current optimizer"""
@@ -343,7 +326,7 @@ class AdaptivePrecisionController:
             return (grad_vol + meta_vol) / 2
 
     def get_precision_stats(self):
-        ."""Get precision statistics."""
+        """Get precision statistics"""
         # Return dummy stats for now
         current_precision = torch.ones(self.num_modalities)
         return {
@@ -374,8 +357,7 @@ def create_precision_optimizer(
         input_dim = kwargs.get("input_dim", 10)
         hidden_dim = kwargs.get("hidden_dim", 64)
         num_modalities = kwargs.get("num_modalities", 1)
-        return MetaLearningPrecisionOptimizer(config, input_dim, hidden_dim,
-            num_modalities)
+        return MetaLearningPrecisionOptimizer(config, input_dim, hidden_dim, num_modalities)
 
     elif optimizer_type == "adaptive":
         num_modalities = kwargs.get("num_modalities", 1)

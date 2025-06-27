@@ -1,4 +1,4 @@
-"""Generative models for active inference."""
+"""Generative models for active inference"""
 
 from dataclasses import dataclass
 from typing import List
@@ -9,7 +9,7 @@ import torch.nn as nn
 
 @dataclass
 class ModelDimensions:
-    """Dimensions for generative models."""
+    """Dimensions for generative models"""
 
     num_states: int
     num_observations: int
@@ -21,7 +21,7 @@ class ModelDimensions:
 
 @dataclass
 class ModelParameters:
-    """Parameters for generative models."""
+    """Parameters for generative models"""
 
     learning_rate: float = 0.01
     precision_init: float = 1.0
@@ -33,10 +33,10 @@ class ModelParameters:
 
 
 class DiscreteGenerativeModel(nn.Module):
-    """Discrete generative model for active inference."""
+    """Discrete generative model for active inference"""
 
     def __init__(self, dims: ModelDimensions, params: ModelParameters) -> None:
-        """Initialize discrete generative model."""
+        """Initialize discrete generative model"""
         super().__init__()
         self.dims = dims
         self.params = params
@@ -49,14 +49,14 @@ class DiscreteGenerativeModel(nn.Module):
         self.D = torch.ones(dims.num_states) / dims.num_states
 
     def observation_model(self, state):
-        """Compute observation probabilities."""
+        """Compute observation probabilities"""
         if state.dim() == 1:
             return torch.matmul(self.A, state)
         else:
             return torch.matmul(state, self.A.T)
 
     def transition_model(self, state, action):
-        """Compute state transitions."""
+        """Compute state transitions"""
         if state.dim() == 1:
             # Single state case
             if isinstance(action, int):
@@ -78,12 +78,11 @@ class DiscreteGenerativeModel(nn.Module):
                 else:
                     # action is one-hot encoded
                     action_idx = torch.argmax(action[i]).item()
-                next_states[i] = (
-                    torch.matmul(self.B[:, :, action_idx], state[i]))
+                next_states[i] = torch.matmul(self.B[:, :, action_idx], state[i])
             return next_states
 
     def set_preferences(self, preferences, timestep=None) -> None:
-        """Set preference vectors."""
+        """Set preference vectors"""
         if timestep is None:
             for t in range(self.dims.time_horizon):
                 self.C[:, t] = preferences
@@ -91,11 +90,11 @@ class DiscreteGenerativeModel(nn.Module):
             self.C[:, timestep] = preferences
 
     def get_preferences(self, timestep):
-        """Get preferences for timestep."""
+        """Get preferences for timestep"""
         return self.C[:, timestep]
 
     def update_model(self, observations, states, actions) -> None:
-        """Update model parameters."""
+        """Update model parameters"""
         # Simplified update - just add noise to simulate learning
         self.A += torch.randn_like(self.A) * 0.01
         self.A = self.A / self.A.sum(dim=0, keepdim=True)
@@ -104,13 +103,12 @@ class DiscreteGenerativeModel(nn.Module):
 
 
 class ContinuousGenerativeModel(nn.Module):
-    """Continuous generative model for active inference."""
+    """Continuous generative model for active inference"""
 
     def __init__(
-        self, dims: ModelDimensions, params: ModelParameters,
-            hidden_dim: int = 32
+        self, dims: ModelDimensions, params: ModelParameters, hidden_dim: int = 32
     ) -> None:
-        """Initialize continuous generative model."""
+        """Initialize continuous generative model"""
         super().__init__()
         self.dims = dims
         self.params = params
@@ -133,7 +131,7 @@ class ContinuousGenerativeModel(nn.Module):
         self.D_log_var = torch.zeros(dims.num_states)
 
     def observation_model(self, state):
-        """Compute observation distribution."""
+        """Compute observation distribution"""
         if state.dim() == 1:
             state = state.unsqueeze(0)
         output = self.obs_net(state)
@@ -145,7 +143,7 @@ class ContinuousGenerativeModel(nn.Module):
         return mean, var
 
     def transition_model(self, state, action):
-        """Compute state transition distribution."""
+        """Compute state transition distribution"""
         if state.dim() == 1:
             state = state.unsqueeze(0)
         if isinstance(action, int):
@@ -183,7 +181,7 @@ class ContinuousGenerativeModel(nn.Module):
         return mean, var
 
     def forward(self, states, actions):
-        """Forward pass."""
+        """Forward pass"""
         obs_mean, obs_var = self.observation_model(states)
         next_mean, next_var = self.transition_model(states, actions)
         return {
@@ -195,31 +193,28 @@ class ContinuousGenerativeModel(nn.Module):
 
 
 class HierarchicalGenerativeModel(nn.Module):
-    """Hierarchical generative model."""
+    """Hierarchical generative model"""
 
     def __init__(self, dims_list: List[ModelDimensions], params: ModelParameters) -> None:
-        """Initialize hierarchical generative model."""
+        """Initialize hierarchical generative model"""
         super().__init__()
         self.dims_list = dims_list
         self.params = params
         self.num_levels = len(dims_list)
         # Create models for each level
-        self.levels = (
-            nn.ModuleList([DiscreteGenerativeModel(dims, params) for dims in dims_list]))
+        self.levels = nn.ModuleList([DiscreteGenerativeModel(dims, params) for dims in dims_list])
         # Inter-level connection matrices
         self.E_matrices = {}
         for i in range(self.num_levels - 1):
             lower_states = dims_list[i].num_actions
             upper_states = dims_list[i].num_states
-            self.E_matrices[(i, i + 1)] = torch.rand(lower_states,
-                upper_states)
-            self.E_matrices[(i, i + 1)] = (
-                self.E_matrices[(i, i + 1)] / self.E_matrices[)
+            self.E_matrices[(i, i + 1)] = torch.rand(lower_states, upper_states)
+            self.E_matrices[(i, i + 1)] = self.E_matrices[(i, i + 1)] / self.E_matrices[
                 (i, i + 1)
             ].sum(dim=1, keepdim=True)
 
     def hierarchical_observation_model(self, states):
-        """Compute observations for all levels."""
+        """Compute observations for all levels"""
         observations = []
         for _i, (level, state) in enumerate(zip(self.levels, states)):
             obs = level.observation_model(state)
@@ -227,17 +222,16 @@ class HierarchicalGenerativeModel(nn.Module):
         return observations
 
     def hierarchical_transition_model(self, states, actions):
-        """Compute transitions for all levels."""
+        """Compute transitions for all levels"""
         next_states = []
-        for _i, (level, state, action) in enumerate(zip(self.levels, states,
-            actions)):
+        for _i, (level, state, action) in enumerate(zip(self.levels, states, actions)):
             next_state = level.transition_model(state, action)
             next_states.append(next_state)
         return next_states
 
 
 class FactorizedGenerativeModel(nn.Module):
-    """Factorized generative model."""
+    """Factorized generative model"""
 
     def __init__(
         self,
@@ -246,7 +240,7 @@ class FactorizedGenerativeModel(nn.Module):
         num_actions: int,
         params: ModelParameters,
     ) -> None:
-        """Initialize factorized generative model."""
+        """Initialize factorized generative model"""
         super().__init__()
         self.factor_dims = factor_dims
         self.num_factors = len(factor_dims)
@@ -272,7 +266,7 @@ class FactorizedGenerativeModel(nn.Module):
         self.A = self.A / self.A.sum(dim=0, keepdim=True)
 
     def factor_to_state_idx(self, factor_indices):
-        """Convert factor indices to a single state index."""
+        """Convert factor indices to a single state index"""
         state_idx = 0
         multiplier = 1
         for i in range(self.num_factors - 1, -1, -1):
@@ -281,7 +275,7 @@ class FactorizedGenerativeModel(nn.Module):
         return state_idx
 
     def state_to_factor_idx(self, state_idx):
-        """Convert a single state index to factor indices."""
+        """Convert a single state index to factor indices"""
         factor_indices = []
         remaining = state_idx
         # Calculate multipliers for each factor
@@ -299,7 +293,7 @@ class FactorizedGenerativeModel(nn.Module):
         return factor_indices
 
     def factorized_transition(self, factor_states, action):
-        """Compute transitions for each factor."""
+        """Compute transitions for each factor"""
         next_factor_states = []
         for i in range(self.num_factors):
             trans_matrix = self.factor_B[i][:, :, action]
@@ -309,7 +303,7 @@ class FactorizedGenerativeModel(nn.Module):
 
 
 def create_generative_model(model_type: str, **kwargs) -> nn.Module:
-    """Create a generative model of the specified type."""
+    """Create a generative model of the specified type"""
     if model_type == "discrete":
         dims = kwargs.get("dims", kwargs.get("dimensions"))
         params = kwargs.get("params", ModelParameters())
@@ -327,8 +321,7 @@ def create_generative_model(model_type: str, **kwargs) -> nn.Module:
         params = kwargs.get("params", ModelParameters())
         return HierarchicalGenerativeModel(dims_list=dims_list, params=params)
     elif model_type == "factorized":
-        factor_dims = (
-            kwargs.get("factor_dims", kwargs.get("factor_dimensions")))
+        factor_dims = kwargs.get("factor_dims", kwargs.get("factor_dimensions"))
         num_obs = kwargs.get("num_obs", kwargs.get("num_observations"))
         num_actions = kwargs.get("num_actions", 4)  # default
         params = kwargs.get("params", ModelParameters())

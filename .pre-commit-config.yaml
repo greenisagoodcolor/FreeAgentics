@@ -27,7 +27,7 @@ repos:
       - id: check-symlinks
       - id: check-added-large-files
         args: [--maxkb=1000]
-      
+
       # Python-specific checks
       - id: check-ast
       - id: check-builtin-literals
@@ -76,19 +76,20 @@ repos:
     rev: v1.10.0
     hooks:
       - id: mypy
-        args: [
-          --verbose,
-          --show-traceback, 
-          --show-error-context,
-          --show-column-numbers,
-          --show-error-codes,
-          --pretty,
-          --show-absolute-path,
-          --config-file=pyproject.toml
-        ]
+        args:
+          [
+            --verbose,
+            --show-traceback,
+            --show-error-context,
+            --show-column-numbers,
+            --show-error-codes,
+            --pretty,
+            --show-absolute-path,
+            --config-file=pyproject.toml,
+          ]
         additional_dependencies:
           - types-requests
-          - types-redis  
+          - types-redis
           - types-psycopg2
         files: ^(agents|inference|coalitions|world|api|infrastructure)/.*\.py$
 
@@ -125,7 +126,7 @@ repos:
         exclude: ^(\.next/|node_modules/|coverage/|dist/)
         args: [--write]
 
-  - repo: https://github.com/pre-commit/mirrors-eslint  
+  - repo: https://github.com/pre-commit/mirrors-eslint
     rev: v8.56.0
     hooks:
       - id: eslint
@@ -133,10 +134,10 @@ repos:
         args: [--fix, --max-warnings=0]
         exclude: ^(\.next/|node_modules/|coverage/|dist/)
         additional_dependencies:
-          - '@typescript-eslint/eslint-plugin@^6.17.0'
-          - '@typescript-eslint/parser@^6.17.0'
-          - 'eslint-config-next@14.0.4'
-          - 'eslint-config-prettier@^9.1.0'
+          - "@typescript-eslint/eslint-plugin@^6.17.0"
+          - "@typescript-eslint/parser@^6.17.0"
+          - "eslint-config-next@14.0.4"
+          - "eslint-config-prettier@^9.1.0"
 
   # =====================================================
   # COMMIT MESSAGE STANDARDS
@@ -179,7 +180,7 @@ repos:
         name: import dependency validation
         entry: python
         language: python
-        args: 
+        args:
           - -c
           - |
             import ast, sys
@@ -249,26 +250,26 @@ repos:
 ci:
   autofix_commit_msg: |
     [pre-commit.ci] auto fixes from pre-commit.com hooks
-    
+
      CI approved automated fixes:
     - Code formatting (Black, isort, Prettier)
     - Basic quality improvements (trailing whitespace, etc.)
-    
+
     Manual review required for:
     - Type errors (mypy)
     - Security issues (bandit)
     - Complex logic changes
-  
+
   autofix_prs: true
-  autoupdate_branch: ''
-  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_branch: ""
+  autoupdate_commit_msg: "[pre-commit.ci] pre-commit autoupdate"
   autoupdate_schedule: weekly
-  skip: [mypy, safety, radon-complexity]  # Skip expensive checks in CI
+  skip: [mypy, safety, radon-complexity] # Skip expensive checks in CI
   submodules: false
 
 # =====================================================
 # PERFORMANCE OPTIMIZATION
 # =====================================================
 default_stages: [commit, push]
-fail_fast: false  # Run all hooks even if some fail
+fail_fast: false # Run all hooks even if some fail
 minimum_pre_commit_version: 3.5.0

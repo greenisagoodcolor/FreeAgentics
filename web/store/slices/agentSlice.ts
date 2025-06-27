@@ -1,11 +1,11 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { nanoid } from 'nanoid';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { nanoid } from "nanoid";
 
 // Types from PRD
 export interface AgentTemplate {
   id: string;
   name: string;
-  category: 'researcher' | 'student' | 'expert' | 'generalist' | 'contrarian';
+  category: "researcher" | "student" | "expert" | "generalist" | "contrarian";
   defaultBiography: string;
   defaultKnowledgeDomains: string[];
   defaultParameters: {
@@ -29,7 +29,7 @@ export interface Agent {
     turnTakingProbability: number;
     conversationEngagement: number;
   };
-  status: 'idle' | 'active' | 'processing' | 'typing' | 'error' | 'offline';
+  status: "idle" | "active" | "processing" | "typing" | "error" | "offline";
   avatarUrl: string;
   color: string;
   createdAt: number;
@@ -56,108 +56,246 @@ interface AgentState {
 // Default templates from PRD
 const defaultTemplates: Record<string, AgentTemplate> = {
   explorer: {
-    id: 'explorer',
-    name: 'Explorer',
-    category: 'researcher',
-    defaultBiography: 'An adventurous agent that discovers new territories and maps unknown environments. Specializes in exploration and discovery.',
-    defaultKnowledgeDomains: ['exploration', 'mapping', 'discovery', 'navigation'],
+    id: "explorer",
+    name: "Explorer",
+    category: "researcher",
+    defaultBiography:
+      "An adventurous agent that discovers new territories and maps unknown environments. Specializes in exploration and discovery.",
+    defaultKnowledgeDomains: [
+      "exploration",
+      "mapping",
+      "discovery",
+      "navigation",
+    ],
     defaultParameters: {
       responseThreshold: 0.6,
       turnTakingProbability: 0.7,
       conversationEngagement: 0.8,
     },
-    avatarUrl: '/avatars/explorer.svg',
-    icon: 'Search',
-    color: '#10B981',
+    avatarUrl: "/avatars/explorer.svg",
+    icon: "Search",
+    color: "#10B981",
   },
   merchant: {
-    id: 'merchant',
-    name: 'Merchant',
-    category: 'expert',
-    defaultBiography: 'A savvy trader that optimizes resource allocation and market dynamics. Expert in negotiations and value assessment.',
-    defaultKnowledgeDomains: ['trading', 'economics', 'negotiation', 'resource-management'],
+    id: "merchant",
+    name: "Merchant",
+    category: "expert",
+    defaultBiography:
+      "A savvy trader that optimizes resource allocation and market dynamics. Expert in negotiations and value assessment.",
+    defaultKnowledgeDomains: [
+      "trading",
+      "economics",
+      "negotiation",
+      "resource-management",
+    ],
     defaultParameters: {
       responseThreshold: 0.7,
       turnTakingProbability: 0.6,
       conversationEngagement: 0.7,
     },
-    avatarUrl: '/avatars/merchant.svg',
-    icon: 'ShoppingCart',
-    color: '#3B82F6',
+    avatarUrl: "/avatars/merchant.svg",
+    icon: "ShoppingCart",
+    color: "#3B82F6",
   },
   scholar: {
-    id: 'scholar',
-    name: 'Scholar',
-    category: 'student',
-    defaultBiography: 'A learned agent that analyzes patterns and synthesizes knowledge. Dedicated to understanding and teaching.',
-    defaultKnowledgeDomains: ['analysis', 'synthesis', 'education', 'research'],
+    id: "scholar",
+    name: "Scholar",
+    category: "student",
+    defaultBiography:
+      "A learned agent that analyzes patterns and synthesizes knowledge. Dedicated to understanding and teaching.",
+    defaultKnowledgeDomains: ["analysis", "synthesis", "education", "research"],
     defaultParameters: {
       responseThreshold: 0.8,
       turnTakingProbability: 0.5,
       conversationEngagement: 0.6,
     },
-    avatarUrl: '/avatars/scholar.svg',
-    icon: 'BookOpen',
-    color: '#8B5CF6',
+    avatarUrl: "/avatars/scholar.svg",
+    icon: "BookOpen",
+    color: "#8B5CF6",
   },
   guardian: {
-    id: 'guardian',
-    name: 'Guardian',
-    category: 'expert',
-    defaultBiography: 'A protective agent that safeguards systems and responds to threats. Specializes in security and defense.',
-    defaultKnowledgeDomains: ['security', 'defense', 'protection', 'threat-analysis'],
+    id: "guardian",
+    name: "Guardian",
+    category: "expert",
+    defaultBiography:
+      "A protective agent that safeguards systems and responds to threats. Specializes in security and defense.",
+    defaultKnowledgeDomains: [
+      "security",
+      "defense",
+      "protection",
+      "threat-analysis",
+    ],
     defaultParameters: {
       responseThreshold: 0.5,
       turnTakingProbability: 0.8,
       conversationEngagement: 0.6,
     },
-    avatarUrl: '/avatars/guardian.svg',
-    icon: 'Shield',
-    color: '#EF4444',
+    avatarUrl: "/avatars/guardian.svg",
+    icon: "Shield",
+    color: "#EF4444",
   },
   generalist: {
-    id: 'generalist',
-    name: 'Generalist',
-    category: 'generalist',
-    defaultBiography: 'An adaptable problem solver with broad capabilities. Can handle diverse tasks and situations.',
-    defaultKnowledgeDomains: ['problem-solving', 'adaptation', 'general-knowledge', 'collaboration'],
+    id: "generalist",
+    name: "Generalist",
+    category: "generalist",
+    defaultBiography:
+      "An adaptable problem solver with broad capabilities. Can handle diverse tasks and situations.",
+    defaultKnowledgeDomains: [
+      "problem-solving",
+      "adaptation",
+      "general-knowledge",
+      "collaboration",
+    ],
     defaultParameters: {
       responseThreshold: 0.6,
       turnTakingProbability: 0.6,
       conversationEngagement: 0.7,
     },
-    avatarUrl: '/avatars/generalist.svg',
-    icon: 'Brain',
-    color: '#F59E0B',
+    avatarUrl: "/avatars/generalist.svg",
+    icon: "Brain",
+    color: "#F59E0B",
+  },
+};
+
+// Demo agents for CEO presentation
+const demoAgents: Record<string, Agent> = {
+  "demo-agent-1": {
+    id: "demo-agent-1",
+    name: "Explorer Alpha",
+    templateId: "explorer",
+    biography:
+      "An adventurous agent that discovers new territories and maps unknown environments. Specializes in exploration and discovery.",
+    knowledgeDomains: ["exploration", "mapping", "discovery", "navigation"],
+    parameters: {
+      responseThreshold: 0.6,
+      turnTakingProbability: 0.7,
+      conversationEngagement: 0.8,
+    },
+    status: "active",
+    avatarUrl: "/avatars/explorer.svg",
+    color: "#10B981",
+    createdAt: Date.now() - 7200000,
+    lastActive: Date.now() - 300000,
+    inConversation: true,
+    autonomyEnabled: true,
+    activityMetrics: {
+      messagesCount: 47,
+      beliefCount: 12,
+      responseTime: [340, 280, 410, 290],
+    },
+  },
+  "demo-agent-2": {
+    id: "demo-agent-2",
+    name: "Scholar Beta",
+    templateId: "scholar",
+    biography:
+      "A learned agent that analyzes patterns and synthesizes knowledge. Dedicated to understanding and teaching.",
+    knowledgeDomains: ["analysis", "synthesis", "education", "research"],
+    parameters: {
+      responseThreshold: 0.8,
+      turnTakingProbability: 0.5,
+      conversationEngagement: 0.6,
+    },
+    status: "active",
+    avatarUrl: "/avatars/scholar.svg",
+    color: "#8B5CF6",
+    createdAt: Date.now() - 5400000,
+    lastActive: Date.now() - 120000,
+    inConversation: true,
+    autonomyEnabled: true,
+    activityMetrics: {
+      messagesCount: 38,
+      beliefCount: 19,
+      responseTime: [520, 480, 390, 450],
+    },
+  },
+  "demo-agent-3": {
+    id: "demo-agent-3",
+    name: "Merchant Gamma",
+    templateId: "merchant",
+    biography:
+      "A savvy trader that optimizes resource allocation and market dynamics. Expert in negotiations and value assessment.",
+    knowledgeDomains: [
+      "trading",
+      "economics",
+      "negotiation",
+      "resource-management",
+    ],
+    parameters: {
+      responseThreshold: 0.7,
+      turnTakingProbability: 0.6,
+      conversationEngagement: 0.7,
+    },
+    status: "idle",
+    avatarUrl: "/avatars/merchant.svg",
+    color: "#3B82F6",
+    createdAt: Date.now() - 3600000,
+    lastActive: Date.now() - 600000,
+    inConversation: false,
+    autonomyEnabled: false,
+    activityMetrics: {
+      messagesCount: 23,
+      beliefCount: 8,
+      responseTime: [380, 320, 290, 350],
+    },
+  },
+  "demo-agent-4": {
+    id: "demo-agent-4",
+    name: "Guardian Delta",
+    templateId: "guardian",
+    biography:
+      "A protective agent that safeguards systems and responds to threats. Specializes in security and defense.",
+    knowledgeDomains: ["security", "defense", "protection", "threat-analysis"],
+    parameters: {
+      responseThreshold: 0.5,
+      turnTakingProbability: 0.8,
+      conversationEngagement: 0.6,
+    },
+    status: "processing",
+    avatarUrl: "/avatars/guardian.svg",
+    color: "#EF4444",
+    createdAt: Date.now() - 1800000,
+    lastActive: Date.now() - 30000,
+    inConversation: true,
+    autonomyEnabled: true,
+    activityMetrics: {
+      messagesCount: 31,
+      beliefCount: 6,
+      responseTime: [210, 190, 240, 220],
+    },
   },
 };
 
 const initialState: AgentState = {
-  agents: {},
+  agents: demoAgents, // ← NOW HAS DEMO AGENTS
   templates: defaultTemplates,
   selectedAgentId: null,
-  typingAgents: [],
-  agentOrder: [],
+  typingAgents: ["demo-agent-4"], // Guardian is typing
+  agentOrder: ["demo-agent-1", "demo-agent-2", "demo-agent-3", "demo-agent-4"],
 };
 
 const agentSlice = createSlice({
-  name: 'agents',
+  name: "agents",
   initialState,
   reducers: {
     // Create agent from template
-    createAgent: (state, action: PayloadAction<{
-      templateId: string;
-      name?: string;
-      parameterOverrides?: Partial<Agent['parameters']>;
-    }>) => {
+    createAgent: (
+      state,
+      action: PayloadAction<{
+        templateId: string;
+        name?: string;
+        parameterOverrides?: Partial<Agent["parameters"]>;
+      }>,
+    ) => {
       const { templateId, name, parameterOverrides } = action.payload;
       const template = state.templates[templateId];
       if (!template) return;
 
       const agentId = nanoid();
-      const agentNumber = Object.keys(state.agents).filter(id => 
-        state.agents[id].templateId === templateId
-      ).length + 1;
+      const agentNumber =
+        Object.keys(state.agents).filter(
+          (id) => state.agents[id].templateId === templateId,
+        ).length + 1;
 
       const agent: Agent = {
         id: agentId,
@@ -169,7 +307,7 @@ const agentSlice = createSlice({
           ...template.defaultParameters,
           ...parameterOverrides,
         },
-        status: 'idle',
+        status: "idle",
         avatarUrl: template.avatarUrl,
         color: template.color,
         createdAt: Date.now(),
@@ -188,10 +326,13 @@ const agentSlice = createSlice({
     },
 
     // Update agent status
-    updateAgentStatus: (state, action: PayloadAction<{
-      agentId: string;
-      status: Agent['status'];
-    }>) => {
+    updateAgentStatus: (
+      state,
+      action: PayloadAction<{
+        agentId: string;
+        status: Agent["status"];
+      }>,
+    ) => {
       const { agentId, status } = action.payload;
       if (state.agents[agentId]) {
         state.agents[agentId].status = status;
@@ -203,9 +344,9 @@ const agentSlice = createSlice({
     setTypingAgents: (state, action: PayloadAction<string[]>) => {
       state.typingAgents = action.payload;
       // Update agent statuses
-      action.payload.forEach(agentId => {
+      action.payload.forEach((agentId) => {
         if (state.agents[agentId]) {
-          state.agents[agentId].status = 'typing';
+          state.agents[agentId].status = "typing";
         }
       });
     },
@@ -216,10 +357,13 @@ const agentSlice = createSlice({
     },
 
     // Update agent position (for spatial grid)
-    updateAgentPosition: (state, action: PayloadAction<{
-      agentId: string;
-      position: { x: number; y: number };
-    }>) => {
+    updateAgentPosition: (
+      state,
+      action: PayloadAction<{
+        agentId: string;
+        position: { x: number; y: number };
+      }>,
+    ) => {
       const { agentId, position } = action.payload;
       if (state.agents[agentId]) {
         state.agents[agentId].position = position;
@@ -227,10 +371,13 @@ const agentSlice = createSlice({
     },
 
     // Update agent parameters
-    updateAgentParameters: (state, action: PayloadAction<{
-      agentId: string;
-      parameters: Partial<Agent['parameters']>;
-    }>) => {
+    updateAgentParameters: (
+      state,
+      action: PayloadAction<{
+        agentId: string;
+        parameters: Partial<Agent["parameters"]>;
+      }>,
+    ) => {
       const { agentId, parameters } = action.payload;
       if (state.agents[agentId]) {
         state.agents[agentId].parameters = {
@@ -244,15 +391,19 @@ const agentSlice = createSlice({
     toggleAgentAutonomy: (state, action: PayloadAction<string>) => {
       const agentId = action.payload;
       if (state.agents[agentId]) {
-        state.agents[agentId].autonomyEnabled = !state.agents[agentId].autonomyEnabled;
+        state.agents[agentId].autonomyEnabled =
+          !state.agents[agentId].autonomyEnabled;
       }
     },
 
     // Update activity metrics
-    updateActivityMetrics: (state, action: PayloadAction<{
-      agentId: string;
-      metrics: Partial<Agent['activityMetrics']>;
-    }>) => {
+    updateActivityMetrics: (
+      state,
+      action: PayloadAction<{
+        agentId: string;
+        metrics: Partial<Agent["activityMetrics"]>;
+      }>,
+    ) => {
       const { agentId, metrics } = action.payload;
       if (state.agents[agentId]) {
         state.agents[agentId].activityMetrics = {
@@ -271,7 +422,7 @@ const agentSlice = createSlice({
     deleteAgent: (state, action: PayloadAction<string>) => {
       const agentId = action.payload;
       delete state.agents[agentId];
-      state.agentOrder = state.agentOrder.filter(id => id !== agentId);
+      state.agentOrder = state.agentOrder.filter((id) => id !== agentId);
       if (state.selectedAgentId === agentId) {
         state.selectedAgentId = null;
       }
@@ -279,7 +430,7 @@ const agentSlice = createSlice({
 
     // Batch create agents (Quick Start)
     quickStartAgents: (state) => {
-      const templates = ['explorer', 'scholar', 'merchant'];
+      const templates = ["explorer", "scholar", "merchant"];
       templates.forEach((templateId, index) => {
         const template = state.templates[templateId];
         if (!template) return;
@@ -292,7 +443,7 @@ const agentSlice = createSlice({
           biography: template.defaultBiography,
           knowledgeDomains: [...template.defaultKnowledgeDomains],
           parameters: { ...template.defaultParameters },
-          status: 'idle',
+          status: "idle",
           avatarUrl: template.avatarUrl,
           color: template.color,
           createdAt: Date.now() + index,
@@ -327,4 +478,4 @@ export const {
   quickStartAgents,
 } = agentSlice.actions;
 
-export default agentSlice.reducer; 
+export default agentSlice.reducer;

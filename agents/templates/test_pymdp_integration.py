@@ -31,26 +31,26 @@ from .pymdp_integration import PyMDPAgentWrapper, create_pymdp_agent
 
 # Mathematical validation functions
 def entropy(p: np.ndarray, axis: int = -1) -> float:
-    """Compute entropy with numerical stability."""
+    """Compute entropy with numerical stability"""
     return -np.sum(p * np.log(p + 1e-16), axis=axis)
 
 
 def kl_divergence(p: np.ndarray, q: np.ndarray) -> float:
-    """Compute KL divergence with numerical stability."""
+    """Compute KL divergence with numerical stability"""
     return np.sum(p * np.log((p + 1e-16) / (q + 1e-16)))
 
 
 def softmax(x: np.ndarray, axis: int = -1) -> np.ndarray:
-    """Compute softmax with numerical stability."""
+    """Compute softmax with numerical stability"""
     exp_x = np.exp(x - np.max(x, axis=axis, keepdims=True))
     return exp_x / np.sum(exp_x, axis=axis, keepdims=True)
 
 
 class TestPyMDPIntegration(unittest.TestCase):
-    """Test suite for PyMDP integration layer."""
+    """Test suite for PyMDP integration layer"""
 
     def setUp(self) -> None:
-        """Set up test fixtures."""
+        """Set up test fixtures"""
         # Create test configuration
         self.config = TemplateConfig(
             template_id="test_explorer",
@@ -73,7 +73,7 @@ class TestPyMDPIntegration(unittest.TestCase):
         self.agent_wrapper = create_pymdp_agent(self.model_params, self.config)
 
     def test_generative_model_mathematical_constraints(self) -> None:
-        """Test that generative model satisfies mathematical constraints."""
+        """Test that generative model satisfies mathematical constraints"""
         # Test A matrix (observation model) stochasticity
         A_col_sums = np.sum(self.model_params.A, axis=0)
         npt.assert_allclose(A_col_sums, 1.0, atol=1e-10, err_msg="A matrix columns must sum to 1")
@@ -95,7 +95,7 @@ class TestPyMDPIntegration(unittest.TestCase):
         self.assertTrue(np.all(self.model_params.D >= 0), "D vector must be non-negative")
 
     def test_belief_state_mathematical_properties(self) -> None:
-        """Test that belief states satisfy mathematical properties."""
+        """Test that belief states satisfy mathematical properties"""
         # Initialize beliefs
         beliefs = self.explorer_template.initialize_beliefs(self.config)
 
@@ -123,7 +123,7 @@ class TestPyMDPIntegration(unittest.TestCase):
         )
 
     def test_bayesian_belief_update_mathematical_correctness(self) -> None:
-        """Test Bayesian belief update: P(s|o) ∝ P(o|s)P(s)."""
+        """Test Bayesian belief update: P(s|o) ∝ P(o|s)P(s)"""
         # Get initial beliefs
         initial_beliefs = self.explorer_template.initialize_beliefs(self.config)
 
@@ -136,8 +136,7 @@ class TestPyMDPIntegration(unittest.TestCase):
         # Analytical Bayesian update for validation
         likelihood = self.model_params.A[observation, :]  # P(o|s)
         analytical_posterior = initial_beliefs.beliefs * likelihood  # P(o|s) * P(s)
-        analytical_posterior = (
-            analytical_posterior / np.sum(analytical_posterior)  # Normalize)
+        analytical_posterior = analytical_posterior / np.sum(analytical_posterior)  # Normalize
 
         # Compare numerical and analytical results
         npt.assert_allclose(
@@ -156,7 +155,7 @@ class TestPyMDPIntegration(unittest.TestCase):
         )
 
     def test_free_energy_computation_mathematical_correctness(self) -> None:
-        """Test free energy: F = D_KL[q(s)||P(s)] - E_q[ln P(o|s)]."""
+        """Test free energy: F = D_KL[q(s)||P(s)] - E_q[ln P(o|s)]"""
         # Get beliefs and observation
         beliefs = self.explorer_template.initialize_beliefs(self.config)
         observation = 0
@@ -185,7 +184,7 @@ class TestPyMDPIntegration(unittest.TestCase):
         )
 
     def test_epistemic_value_computation(self) -> None:
-        """Test epistemic value computation for exploration."""
+        """Test epistemic value computation for exploration"""
         # Create beliefs with some uncertainty
         beliefs = BeliefState.create_uniform(
             num_states=self.config.num_states, num_policies=self.config.num_policies
@@ -223,7 +222,7 @@ class TestPyMDPIntegration(unittest.TestCase):
         )
 
     def test_policy_inference_mathematical_properties(self) -> None:
-        """Test policy inference using expected free energy minimization."""
+        """Test policy inference using expected free energy minimization"""
         # Get initial beliefs
         beliefs = self.explorer_template.initialize_beliefs(self.config)
 
@@ -242,7 +241,7 @@ class TestPyMDPIntegration(unittest.TestCase):
         )
 
     def test_precision_parameter_integration(self) -> None:
-        """Test ADR-005 precision parameter integration."""
+        """Test ADR-005 precision parameter integration"""
         # Validate precision parameters are properly set
         summary = self.agent_wrapper.get_mathematical_summary()
 
@@ -256,7 +255,7 @@ class TestPyMDPIntegration(unittest.TestCase):
         self.assertGreater(summary["precision_state"], 0, "State precision must be positive")
 
     def test_explorer_template_behavioral_properties(self) -> None:
-        """Test explorer-specific behavioral properties."""
+        """Test explorer-specific behavioral properties"""
         # Test epistemic bonus
         self.assertGreater(
             self.explorer_template.epistemic_bonus, 0.5, "Explorer should have high epistemic bonus"
@@ -275,7 +274,7 @@ class TestPyMDPIntegration(unittest.TestCase):
         self.assertIn("epistemic", description.lower(), "Description must mention epistemic value")
 
     def test_mathematical_summary_completeness(self) -> None:
-        """Test mathematical summary includes all required metrics."""
+        """Test mathematical summary includes all required metrics"""
         summary = self.agent_wrapper.get_mathematical_summary()
 
         required_keys = [
@@ -304,7 +303,7 @@ class TestPyMDPIntegration(unittest.TestCase):
         self.assertEqual(dims["num_policies"], self.config.num_policies)
 
     def test_fallback_behavior_without_pymdp(self) -> None:
-        """Test graceful fallback when pymdp is not available."""
+        """Test graceful fallback when pymdp is not available"""
         # This test validates that the system works even without pymdp
         # The fallback implementations should provide mathematically correct results
 
@@ -329,7 +328,7 @@ class TestPyMDPIntegration(unittest.TestCase):
         self.assertIsInstance(fe, float, "Fallback free energy must return float")
 
     def test_integration_with_agent_data(self) -> None:
-        """Test integration with AgentData model."""
+        """Test integration with AgentData model"""
         from ..base.data_model import Position
 
         # Create agent data using template
@@ -353,10 +352,10 @@ class TestPyMDPIntegration(unittest.TestCase):
 
 
 class TestMathematicalValidation(unittest.TestCase):
-    """Additional mathematical validation tests."""
+    """Additional mathematical validation tests"""
 
     def test_belief_update_convergence(self) -> None:
-        """Test belief update convergence properties."""
+        """Test belief update convergence properties"""
         # Create simple 2-state, 2-observation model
         config = TemplateConfig(
             template_id="test_convergence",
@@ -383,7 +382,7 @@ class TestMathematicalValidation(unittest.TestCase):
         self.assertGreater(max_belief, 0.8, "Repeated observations should increase certainty")
 
     def test_free_energy_minimization_property(self) -> None:
-        """Test that free energy decreases with informative observations."""
+        """Test that free energy decreases with informative observations"""
         config = TemplateConfig(
             template_id="test_fe_min",
             category=TemplateCategory.EXPLORER,

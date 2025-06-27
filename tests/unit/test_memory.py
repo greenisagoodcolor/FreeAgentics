@@ -66,12 +66,12 @@ def sample_pattern() -> Pattern:
 
 @pytest.fixture
 def memory_system() -> MemorySystem:
-    ."""Create a memory system for testing."""
+    """Create a memory system for testing"""
     return MemorySystem("test_agent_1")
 
 
 class TestMemory:
-    ."""Test Memory dataclass."""
+    """Test Memory dataclass"""
 
     def test_memory_creation(self, sample_memory) -> None:
         """Test memory creation and attributes"""
@@ -103,10 +103,10 @@ class TestMemory:
 
 
 class TestPattern:
-    ."""Test Pattern dataclass."""
+    """Test Pattern dataclass"""
 
     def test_pattern_creation(self, sample_pattern) -> None:
-        ."""Test pattern creation and attributes."""
+        """Test pattern creation and attributes"""
         assert sample_pattern.pattern_id == "pattern_1"
         assert sample_pattern.confidence == 0.8
         assert sample_pattern.get_success_rate() == 0.8
@@ -127,7 +127,7 @@ class TestPattern:
 
 
 class TestInMemoryStorage:
-    ."""Test in-memory storage implementation."""
+    """Test in-memory storage implementation"""
 
     def test_store_and_retrieve(self, sample_memory) -> None:
         """Test storing and retrieving memories"""
@@ -204,7 +204,7 @@ class TestInMemoryStorage:
 
 
 class TestWorkingMemory:
-    ."""Test working memory functionality."""
+    """Test working memory functionality"""
 
     def test_capacity_limit(self) -> None:
         """Test working memory capacity limit"""
@@ -240,7 +240,7 @@ class TestWorkingMemory:
 
 
 class TestMemoryConsolidator:
-    ."""Test memory consolidation."""
+    """Test memory consolidation"""
 
     def test_consolidation_evaluation(self, sample_memory) -> None:
         """Test evaluation for consolidation"""
@@ -318,7 +318,7 @@ class TestMemoryConsolidator:
 
 
 class TestReinforcementLearner:
-    ."""Test reinforcement learning."""
+    """Test reinforcement learning"""
 
     def test_q_learning(self, sample_experience) -> None:
         """Test Q-learning updates"""
@@ -348,7 +348,7 @@ class TestReinforcementLearner:
 
 
 class TestPatternRecognizer:
-    ."""Test pattern recognition."""
+    """Test pattern recognition"""
 
     def test_pattern_extraction(self) -> None:
         """Test extracting patterns from experiences"""
@@ -389,13 +389,12 @@ class TestPatternRecognizer:
 
 
 class TestMemorySystem:
-    ."""Test integrated memory system.."""
+    """Test integrated memory system."""
 
     def test_store_and_retrieve_memory(self, memory_system) -> None:
         """Test storing and retrieving memories"""
         memory = memory_system.store_memory(
-            content= (
-                {"event": "test"}, memory_type=MemoryType.EPISODIC, importance=0.8)
+            content={"event": "test"}, memory_type=MemoryType.EPISODIC, importance=0.8
         )
         assert memory_system.total_memories == 1
         assert memory_system.memory_types_count[MemoryType.EPISODIC] == 1
@@ -404,7 +403,7 @@ class TestMemorySystem:
         assert retrieved[0].content["event"] == "test"
 
     def test_store_experience(self, memory_system, sample_experience) -> None:
-        ."""Test storing experiences."""
+        """Test storing experiences"""
         memory_system.store_experience(sample_experience)
         assert len(memory_system.experience_buffer) == 1
         assert memory_system.total_memories == 1
@@ -517,7 +516,7 @@ class TestMemorySystem:
         assert memory_system.total_memories < initial_count
 
     def test_save_and_load(self, memory_system) -> None:
-        """Test saving and loading memory system."""
+        """Test saving and loading memory system"""
         memory_system.store_memory(
             content={"test": "data"}, memory_type=MemoryType.SEMANTIC, importance=0.7
         )

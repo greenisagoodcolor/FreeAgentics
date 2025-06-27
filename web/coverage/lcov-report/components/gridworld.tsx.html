@@ -15,41 +15,41 @@
         }
     </style>
 </head>
-    
+
 <body>
 <div class='wrapper'>
     <div class='pad1'>
         <h1><a href="../index.html">All files</a> / <a href="index.html">components</a> gridworld.tsx</h1>
         <div class='clearfix'>
-            
+
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
                 <span class='fraction'>0/166</span>
             </div>
-        
-            
+
+
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
                 <span class='fraction'>0/24</span>
             </div>
-        
-            
+
+
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
                 <span class='fraction'>0/25</span>
             </div>
-        
-            
+
+
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
                 <span class='fraction'>0/154</span>
             </div>
-        
-            
+
+
         </div>
         <p class="quiet">
             Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
@@ -527,7 +527,10 @@
 <a name='L462'></a><a href='#L462'>462</a>
 <a name='L463'></a><a href='#L463'>463</a>
 <a name='L464'></a><a href='#L464'>464</a>
-<a name='L465'></a><a href='#L465'>465</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L465'></a><a href='#L465'>465</a>
+<a name='L466'></a><a href='#L466'>466</a>
+<a name='L467'></a><a href='#L467'>467</a>
+<a name='L468'></a><a href='#L468'>468</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -587,15 +590,16 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -603,6 +607,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1050,24 +1056,27 @@ export default function <span class="cstat-no" title="statement not covered" ><s
 <span class="cstat-no" title="statement not covered" >    setResizeStartY(e.clientY);</span>
   };
 &nbsp;
-  const handleResizeMove = <span class="cstat-no" title="statement not covered" >useCallback(<span class="fstat-no" title="function not covered" >(e</span>: MouseEvent) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (!isResizing || !containerRef.current) <span class="cstat-no" title="statement not covered" >return;</span></span>
+  const handleResizeMove = <span class="cstat-no" title="statement not covered" >useCallback(</span>
+<span class="fstat-no" title="function not covered" >    (e</span>: MouseEvent) =&gt; {
+<span class="cstat-no" title="statement not covered" >      <span class="missing-if-branch" title="if path not taken" >I</span>if (!isResizing || !containerRef.current) <span class="cstat-no" title="statement not covered" >return;</span></span>
 &nbsp;
-    const containerRect = <span class="cstat-no" title="statement not covered" >containerRef.current.getBoundingClientRect();</span>
-    const containerHeight = <span class="cstat-no" title="statement not covered" >containerRect.height;</span>
-    const mouseY = <span class="cstat-no" title="statement not covered" >e.clientY - containerRect.top;</span>
+      const containerRect = <span class="cstat-no" title="statement not covered" >containerRef.current.getBoundingClientRect();</span>
+      const containerHeight = <span class="cstat-no" title="statement not covered" >containerRect.height;</span>
+      const mouseY = <span class="cstat-no" title="statement not covered" >e.clientY - containerRect.top;</span>
 &nbsp;
-    // Calculate new height percentage with constraints
-    const newHeightPercentage = <span class="cstat-no" title="statement not covered" >Math.min(</span>
-      Math.max(
-        (mouseY / containerHeight) * 100,
-        20, // Minimum 20%
-      ),
-      80, // Maximum 80%
-    );
+      // Calculate new height percentage with constraints
+      const newHeightPercentage = <span class="cstat-no" title="statement not covered" >Math.min(</span>
+        Math.max(
+          (mouseY / containerHeight) * 100,
+          20, // Minimum 20%
+        ),
+        80, // Maximum 80%
+      );
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    setGridWorldHeight(newHeightPercentage);</span>
-  }, [isResizing]);
+<span class="cstat-no" title="statement not covered" >      setGridWorldHeight(newHeightPercentage);</span>
+    },
+    [isResizing],
+  );
 &nbsp;
   const handleResizeEnd = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >() =&gt; {</span></span>
 <span class="cstat-no" title="statement not covered" >    setIsResizing(false);</span>
@@ -1462,7 +1471,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-06-26T20:02:48.859Z
+                at 2025-06-27T07:54:46.448Z
             </div>
         <script src="../prettify.js"></script>
         <script>
@@ -1474,4 +1483,3 @@ export default function <span class="cstat-no" title="statement not covered" ><s
         <script src="../block-navigation.js"></script>
     </body>
 </html>
-    

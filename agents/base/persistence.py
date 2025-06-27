@@ -33,24 +33,24 @@ from .data_model import (
 Agent Persistence and Serialization Module
 This module provides functionality for saving and loading agent states to/from
 the database, including serialization, deserialization, and version management.
-."""
+"""
 logger = logging.getLogger(__name__)
 AGENT_SCHEMA_VERSION = "1.0.0"
 
 
 class AgentPersistence:
-    ."""Handles persistence operations for agents."""
+    """Handles persistence operations for agents"""
 
     def __init__(self, session: Optional[Session] = None) -> None:
         """Initialize persistence handler
         Args:
             session: SQLAlchemy session. If None, will create new sessions as needed.
-        ."""
+        """
         self.session = session
         self._use_external_session = session is not None
 
     def _get_session(self) -> Session:
-        ."""Get database session."""
+        """Get database session"""
 
         if self._use_external_session:
             return self.session
@@ -332,7 +332,7 @@ class AgentPersistence:
         return agent
 
     def _serialize_goal(self, goal: AgentGoal) -> Dict[str, Any]:
-        ."""Serialize AgentGoal to dictionary."""
+        """Serialize AgentGoal to dictionary"""
         serialized = asdict(goal)
         serialized["goal_id"] = goal.goal_id
         return serialized
@@ -349,14 +349,14 @@ class AgentPersistence:
 
 
 class AgentSnapshot:
-    ."""Handles agent state snapshots for versioning and rollback."""
+    """Handles agent state snapshots for versioning and rollback"""
 
     def __init__(self, persistence: AgentPersistence) -> None:
         """Initialize snapshot handler
 
         Args:
             persistence: AgentPersistence instance
-        ."""
+        """
         self.persistence = persistence
 
     def create_snapshot(self, agent: Agent, description: str = "") -> str:

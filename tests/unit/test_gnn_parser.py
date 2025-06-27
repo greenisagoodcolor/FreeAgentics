@@ -11,7 +11,7 @@ from inference.gnn.parser import GMNBlockParser, GMNLexer, GMNParser, GMNSyntaxE
 
 
 class TestGMNLexer:
-    ."""Test the GNN lexical analyzer."""
+    """Test the GNN lexical analyzer"""
 
     def test_tokenize_simple_object(self) -> None:
         """Test tokenizing a simple GNN object"""
@@ -68,7 +68,7 @@ class TestGMNLexer:
 
 
 class TestGMNBlockParser:
-    ."""Test the GNN block parser."""
+    """Test the GNN block parser"""
 
     def test_parse_simple_object(self) -> None:
         """Test parsing a simple object"""
@@ -141,7 +141,7 @@ class TestGMNBlockParser:
 
 
 class TestGMNParser:
-    ."""Test the main GNN parser."""
+    """Test the main GNN parser"""
 
     def test_parse_minimal_gnn(self) -> None:
         """Test parsing a minimal valid GNN file"""

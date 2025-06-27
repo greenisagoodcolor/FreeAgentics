@@ -9,13 +9,7 @@ This module handles all database operations including:
 """
 
 from .connection import SessionLocal, engine, get_db
-from .models import (
-    Agent,
-    Base,
-    Coalition,
-    Conversation,
-    KnowledgeGraph,
-    SystemLog)
+from .models import Agent, Base, Coalition, Conversation, KnowledgeGraph, SystemLog
 
 __all__ = [
     "Base",

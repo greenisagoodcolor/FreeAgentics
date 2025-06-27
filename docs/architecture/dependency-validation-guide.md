@@ -5,6 +5,7 @@ This guide provides practical tools and methods for validating architectural dep
 ## Quick Reference: Dependency Rules
 
 ### Core Principle
+
 All dependencies MUST flow inward toward the domain core:
 
 ```
@@ -13,11 +14,11 @@ Infrastructure → Interface → Application → Domain
 
 ### Directory Dependency Matrix
 
-| From Layer | Can Import From | Cannot Import From |
-|------------|-----------------|-------------------|
+| From Layer                                                | Can Import From           | Cannot Import From                           |
+| --------------------------------------------------------- | ------------------------- | -------------------------------------------- |
 | `agents/`, `inference/`, `coalitions/`, `world/` (Domain) | Only other domain modules | `api/`, `web/`, `infrastructure/`, `config/` |
-| `api/`, `web/` (Interface) | Domain modules | `infrastructure/`, `config/` (directly) |
-| `infrastructure/`, `config/` (Infrastructure) | Any layer | N/A (outermost layer) |
+| `api/`, `web/` (Interface)                                | Domain modules            | `infrastructure/`, `config/` (directly)      |
+| `infrastructure/`, `config/` (Infrastructure)             | Any layer                 | N/A (outermost layer)                        |
 
 ## Validation Tools
 
@@ -194,11 +195,7 @@ repos:
   "python.analysis.diagnosticSeverityOverrides": {
     "reportMissingImports": "error"
   },
-  "eslint.validate": [
-    "javascript",
-    "typescript",
-    "typescriptreact"
-  ],
+  "eslint.validate": ["javascript", "typescript", "typescriptreact"],
   "files.associations": {
     "*.py": "python",
     "*.ts": "typescript",
@@ -298,7 +295,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |

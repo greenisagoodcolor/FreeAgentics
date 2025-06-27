@@ -16,7 +16,7 @@ from inference.gnn.edge_processor import (
 
 
 class TestEdgeConfig:
-    .."""Test EdgeConfig dataclass.."""
+    """Test EdgeConfig dataclass"""
 
     def test_default_config(self) -> None:
         """Test default configuration values"""
@@ -29,7 +29,7 @@ class TestEdgeConfig:
         assert config.edge_sampling_strategy is None
 
     def test_custom_config(self) -> None:
-        ."""Test custom configuration values."""
+        """Test custom configuration values"""
         config = EdgeConfig(
             edge_type=EdgeType.UNDIRECTED,
             feature_types=[EdgeFeatureType.WEIGHT, EdgeFeatureType.DISTANCE],
@@ -47,7 +47,7 @@ class TestEdgeConfig:
 
 
 class TestEdge:
-    .."""Test Edge dataclass.."""
+    """Test Edge dataclass"""
 
     def test_edge_creation(self) -> None:
         """Test edge creation with default values"""
@@ -60,7 +60,7 @@ class TestEdge:
         assert edge.metadata == {}
 
     def test_edge_with_features(self) -> None:
-        ."""Test edge creation with features."""
+        """Test edge creation with features"""
         edge = Edge(
             source=0,
             target=1,
@@ -77,7 +77,7 @@ class TestEdge:
 
 
 class TestEdgeProcessor:
-    .."""Test EdgeProcessor class.."""
+    """Test EdgeProcessor class"""
 
     def test_initialization(self) -> None:
         """Test processor initialization"""
@@ -88,7 +88,7 @@ class TestEdgeProcessor:
         assert processor.edge_type_mapping == {}
 
     def test_empty_edges(self) -> None:
-        ."""Test processing empty edge list."""
+        """Test processing empty edge list"""
         config = EdgeConfig()
         processor = EdgeProcessor(config)
         batch = processor.process_edges([], num_nodes=5)
@@ -99,7 +99,7 @@ class TestEdgeProcessor:
         assert batch.metadata["num_nodes"] == 5
 
     def test_directed_edges(self) -> None:
-        ."""Test processing directed edges."""
+        """Test processing directed edges"""
         config = EdgeConfig(edge_type=EdgeType.DIRECTED)
         processor = EdgeProcessor(config)
         edges = [
@@ -113,7 +113,7 @@ class TestEdgeProcessor:
         assert torch.equal(batch.edge_index[1], torch.tensor([1, 2, 0]))
 
     def test_undirected_edges(self) -> None:
-        ."""Test converting to undirected edges."""
+        """Test converting to undirected edges"""
         config = EdgeConfig(edge_type=EdgeType.UNDIRECTED)
         processor = EdgeProcessor(config)
         edges = [
@@ -125,7 +125,7 @@ class TestEdgeProcessor:
         assert batch.edge_index.shape[1] == 2
 
     def test_bidirectional_edges(self) -> None:
-        ."""Test converting to bidirectional edges."""
+        """Test converting to bidirectional edges"""
         config = EdgeConfig(edge_type=EdgeType.BIDIRECTIONAL)
         processor = EdgeProcessor(config)
         edges = [Edge(source=0, target=1), Edge(source=1, target=2)]
@@ -133,7 +133,7 @@ class TestEdgeProcessor:
         assert batch.edge_index.shape[1] == 4
 
     def test_self_loops(self) -> None:
-        ."""Test adding self-loops."""
+        """Test adding self-loops"""
         config = EdgeConfig(self_loops=True)
         processor = EdgeProcessor(config)
         edges = [Edge(source=0, target=1), Edge(source=1, target=2)]
@@ -142,7 +142,7 @@ class TestEdgeProcessor:
         assert batch.metadata["has_self_loops"] == True
 
     def test_weight_features(self) -> None:
-        ."""Test weight feature extraction."""
+        """Test weight feature extraction"""
         config = EdgeConfig(feature_types=[EdgeFeatureType.WEIGHT], normalize_weights=True)
         processor = EdgeProcessor(config)
         edges = [
@@ -157,7 +157,7 @@ class TestEdgeProcessor:
         assert torch.allclose(batch.edge_weight, torch.tensor([0.5, 1.0, 0.2]))
 
     def test_distance_features(self) -> None:
-        ."""Test distance feature extraction."""
+        """Test distance feature extraction"""
         config = EdgeConfig(feature_types=[EdgeFeatureType.DISTANCE])
         processor = EdgeProcessor(config)
         edges = [
@@ -172,7 +172,7 @@ class TestEdgeProcessor:
         assert torch.max(batch.edge_attr) <= 1
 
     def test_categorical_features(self) -> None:
-        ."""Test categorical feature extraction."""
+        """Test categorical feature extraction"""
         config = EdgeConfig(feature_types=[EdgeFeatureType.CATEGORICAL])
         processor = EdgeProcessor(config)
         edges = [
@@ -187,7 +187,7 @@ class TestEdgeProcessor:
         assert torch.sum(batch.edge_attr, dim=1).allclose(torch.ones(4))
 
     def test_temporal_features(self) -> None:
-        ."""Test temporal feature extraction."""
+        """Test temporal feature extraction"""
         config = EdgeConfig(feature_types=[EdgeFeatureType.TEMPORAL])
         processor = EdgeProcessor(config)
         edges = [
@@ -199,7 +199,7 @@ class TestEdgeProcessor:
         assert batch.edge_attr.shape == (2, 7)
 
     def test_embedding_features(self) -> None:
-        ."""Test embedding feature extraction."""
+        """Test embedding feature extraction"""
         config = EdgeConfig(feature_types=[EdgeFeatureType.EMBEDDING])
         processor = EdgeProcessor(config)
         edges = [
@@ -214,7 +214,7 @@ class TestEdgeProcessor:
         assert torch.allclose(norms, torch.ones(3), atol=1e-06)
 
     def test_multiple_features(self) -> None:
-        ."""Test extraction of multiple feature types."""
+        """Test extraction of multiple feature types"""
         config = EdgeConfig(
             feature_types=[
                 EdgeFeatureType.WEIGHT,
@@ -242,7 +242,7 @@ class TestEdgeProcessor:
         assert batch.edge_attr.shape[1] >= 4
 
     def test_edge_sampling_random(self) -> None:
-        ."""Test random edge sampling."""
+        """Test random edge sampling"""
         config = EdgeConfig(max_edges_per_node=2, edge_sampling_strategy="random")
         processor = EdgeProcessor(config)
         edges = [Edge(source=0, target=i) for i in range(1, 6)]
@@ -252,7 +252,7 @@ class TestEdgeProcessor:
         assert node_0_edges <= 2
 
     def test_edge_sampling_topk(self) -> None:
-        ."""Test top-k edge sampling by weight."""
+        """Test top-k edge sampling by weight"""
         config = EdgeConfig(max_edges_per_node=2, edge_sampling_strategy="topk")
         processor = EdgeProcessor(config)
         edges = [
@@ -271,7 +271,7 @@ class TestEdgeProcessor:
         assert 0.7 in node_0_weights
 
     def test_edge_types(self) -> None:
-        ."""Test edge type extraction."""
+        """Test edge type extraction"""
         config = EdgeConfig()
         processor = EdgeProcessor(config)
         edges = [
@@ -286,7 +286,7 @@ class TestEdgeProcessor:
         assert len(processor.edge_type_mapping) >= 2
 
     def test_adjacency_matrix_conversion(self) -> None:
-        ."""Test conversion to sparse adjacency matrix."""
+        """Test conversion to sparse adjacency matrix"""
         config = EdgeConfig()
         processor = EdgeProcessor(config)
         edges = [
@@ -302,7 +302,7 @@ class TestEdgeProcessor:
         assert adj_matrix[2, 0] == 0.9
 
     def test_edge_statistics(self) -> None:
-        ."""Test edge statistics computation."""
+        """Test edge statistics computation"""
         config = EdgeConfig()
         processor = EdgeProcessor(config)
         edges = [

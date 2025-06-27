@@ -1,5 +1,9 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { storeApiKey, deleteApiKey, validateSession } from "@/lib/api-key-storage"
+import { type NextRequest, NextResponse } from "next/server";
+import {
+  storeApiKey,
+  deleteApiKey,
+  validateSession,
+} from "@/lib/api-key-storage";
 
 /**
  * POST /api/api-key
@@ -21,30 +25,42 @@ import { storeApiKey, deleteApiKey, validateSession } from "@/lib/api-key-storag
 export async function POST(request: NextRequest) {
   try {
     // Parse request body
-    const body = await request.json()
-    const { provider, apiKey } = body
+    const body = await request.json();
+    const { provider, apiKey } = body;
 
     // Validate inputs
     if (!provider || !apiKey) {
-      return NextResponse.json({ success: false, error: "Missing provider or API key" }, { status: 400 })
+      return NextResponse.json(
+        { success: false, error: "Missing provider or API key" },
+        { status: 400 },
+      );
     }
 
     if (typeof provider !== "string" || typeof apiKey !== "string") {
-      return NextResponse.json({ success: false, error: "Invalid provider or API key format" }, { status: 400 })
+      return NextResponse.json(
+        { success: false, error: "Invalid provider or API key format" },
+        { status: 400 },
+      );
     }
 
     // Only allow supported providers
     if (provider !== "openai" && provider !== "openrouter") {
-      return NextResponse.json({ success: false, error: "Unsupported provider" }, { status: 400 })
+      return NextResponse.json(
+        { success: false, error: "Unsupported provider" },
+        { status: 400 },
+      );
     }
 
     // Store the API key
-    const sessionId = await storeApiKey(provider, apiKey)
+    const sessionId = await storeApiKey(provider, apiKey);
 
-    return NextResponse.json({ success: true, sessionId })
+    return NextResponse.json({ success: true, sessionId });
   } catch (error) {
-    console.error("Error storing API key:", error)
-    return NextResponse.json({ success: false, error: "Server error" }, { status: 500 })
+    console.error("Error storing API key:", error);
+    return NextResponse.json(
+      { success: false, error: "Server error" },
+      { status: 500 },
+    );
   }
 }
 
@@ -67,21 +83,27 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     // Parse request body
-    const body = await request.json()
-    const { provider, sessionId } = body
+    const body = await request.json();
+    const { provider, sessionId } = body;
 
     // Validate inputs
     if (!provider || !sessionId) {
-      return NextResponse.json({ success: false, error: "Missing provider or session ID" }, { status: 400 })
+      return NextResponse.json(
+        { success: false, error: "Missing provider or session ID" },
+        { status: 400 },
+      );
     }
 
     // Delete the API key
-    await deleteApiKey(provider, sessionId)
+    await deleteApiKey(provider, sessionId);
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting API key:", error)
-    return NextResponse.json({ success: false, error: "Server error" }, { status: 500 })
+    console.error("Error deleting API key:", error);
+    return NextResponse.json(
+      { success: false, error: "Server error" },
+      { status: 500 },
+    );
   }
 }
 
@@ -103,21 +125,27 @@ export async function DELETE(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     // Get query parameters
-    const { searchParams } = new URL(request.url)
-    const provider = searchParams.get("provider")
-    const sessionId = searchParams.get("sessionId")
+    const { searchParams } = new URL(request.url);
+    const provider = searchParams.get("provider");
+    const sessionId = searchParams.get("sessionId");
 
     // Validate inputs
     if (!provider || !sessionId) {
-      return NextResponse.json({ success: false, error: "Missing provider or session ID" }, { status: 400 })
+      return NextResponse.json(
+        { success: false, error: "Missing provider or session ID" },
+        { status: 400 },
+      );
     }
 
     // Validate the session
-    const valid = await validateSession(provider, sessionId)
+    const valid = await validateSession(provider, sessionId);
 
-    return NextResponse.json({ success: true, valid })
+    return NextResponse.json({ success: true, valid });
   } catch (error) {
-    console.error("Error validating session:", error)
-    return NextResponse.json({ success: false, error: "Server error" }, { status: 500 })
+    console.error("Error validating session:", error);
+    return NextResponse.json(
+      { success: false, error: "Server error" },
+      { status: 500 },
+    );
   }
 }

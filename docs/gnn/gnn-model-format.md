@@ -10,7 +10,7 @@ A `.gmn.md` file consists of several sections, each serving a specific purpose i
 
 A `.gmn.md` file consists of several sections, each serving a specific purpose in defining the GNN model:
 
-```markdown
+````markdown
 # Model Name
 
 ## Metadata
@@ -36,7 +36,9 @@ architecture {
   dropout: 0.2
 }
 ```
-```
+````
+
+````
 
 ## Parameters
 
@@ -47,7 +49,7 @@ parameters {
   batch_size: 32
   epochs: 100
 }
-```
+````
 
 ## Active Inference Mapping
 
@@ -120,7 +122,8 @@ validation {
   }
 }
 ```
-```
+
+````
 
 ## Section Details
 
@@ -137,7 +140,7 @@ The metadata section contains essential information about the model:
 - Tags: Array of descriptive tags
 - Dependencies: Optional list of required models
 - License: Optional license information
-```
+````
 
 ### 2. Description Section
 
@@ -520,7 +523,7 @@ active_inference {
 
 ## Example: Complete Explorer Model
 
-```markdown
+````markdown
 # Explorer Cautious Model
 
 ## Metadata
@@ -552,7 +555,9 @@ architecture {
   batch_norm: true
 }
 ```
-```
+````
+
+````
 
 ## Parameters
 
@@ -570,7 +575,7 @@ parameters {
     monitor: "val_loss"
   }
 }
-```
+````
 
 ## Active Inference Mapping
 
@@ -673,6 +678,7 @@ validation {
   required_edge_features: ["distance"]
 }
 ```
+
 ```
 
 ## Error Messages

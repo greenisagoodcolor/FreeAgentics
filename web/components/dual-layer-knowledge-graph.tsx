@@ -1,36 +1,42 @@
 "use client";
 
-import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
-import * as d3 from 'd3';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Play, 
-  Pause, 
-  RotateCcw, 
-  ZoomIn, 
-  ZoomOut, 
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
+import * as d3 from "d3";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Play,
+  Pause,
+  RotateCcw,
+  ZoomIn,
+  ZoomOut,
   Download,
   Eye,
   EyeOff,
   Settings,
   Layers,
   Filter,
-  Search
-} from 'lucide-react';
-import { 
-  KnowledgeGraph, 
-  KnowledgeNode, 
-  KnowledgeEdge, 
+  Search,
+} from "lucide-react";
+import {
+  KnowledgeGraph,
+  KnowledgeNode,
+  KnowledgeEdge,
   KnowledgeGraphLayer,
-  KnowledgeGraphFilters 
-} from '@/lib/types';
-import { knowledgeGraphApi } from '@/lib/api/knowledge-graph';
+  KnowledgeGraphFilters,
+} from "@/lib/types";
+import { knowledgeGraphApi } from "@/lib/api/knowledge-graph";
 
 // Dual-Layer Knowledge Graph Visualization Component
 // Implements ADR inference engine integration, WebSocket communication, and canonical structure
@@ -63,7 +69,7 @@ interface D3Node extends KnowledgeNode {
   layerColor?: string;
 }
 
-interface D3Edge extends Omit<KnowledgeEdge, 'source' | 'target'> {
+interface D3Edge extends Omit<KnowledgeEdge, "source" | "target"> {
   source: D3Node;
   target: D3Node;
   index?: number;
@@ -88,7 +94,7 @@ export default function DualLayerKnowledgeGraph({
   onNodeClick,
   onEdgeClick,
   onNodeHover,
-  className = '',
+  className = "",
 }: DualLayerKnowledgeGraphProps) {
   // Refs for D3 elements
   const svgRef = useRef<SVGSVGElement>(null);
@@ -96,18 +102,22 @@ export default function DualLayerKnowledgeGraph({
   const simulationRef = useRef<d3.Simulation<D3Node, D3Edge> | null>(null);
 
   // State management
-  const [knowledgeGraph, setKnowledgeGraph] = useState<KnowledgeGraph | null>(null);
+  const [knowledgeGraph, setKnowledgeGraph] = useState<KnowledgeGraph | null>(
+    null,
+  );
   const [isSimulationRunning, setIsSimulationRunning] = useState(true);
   const [selectedNode, setSelectedNode] = useState<KnowledgeNode | null>(null);
   const [selectedEdge, setSelectedEdge] = useState<KnowledgeEdge | null>(null);
   const [hoveredNode, setHoveredNode] = useState<KnowledgeNode | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [showSettings, setShowSettings] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
   // Layer management state
-  const [layerSettings, setLayerSettings] = useState<Record<string, LayerSettings>>({});
-  const [activeLayer, setActiveLayer] = useState<string>('all');
+  const [layerSettings, setLayerSettings] = useState<
+    Record<string, LayerSettings>
+  >({});
+  const [activeLayer, setActiveLayer] = useState<string>("all");
 
   // Simulation settings
   const [simulationSettings, setSimulationSettings] = useState({
@@ -136,12 +146,16 @@ export default function DualLayerKnowledgeGraph({
     // Process each layer
     knowledgeGraph.layers.forEach((layer: any) => {
       const layerSetting = layerSettings[layer.id];
-      if (!layerSetting?.visible && activeLayer !== 'all' && activeLayer !== layer.id) {
+      if (
+        !layerSetting?.visible &&
+        activeLayer !== "all" &&
+        activeLayer !== layer.id
+      ) {
         return; // Skip invisible layers
       }
 
       // Add nodes with layer context
-      const layerNodes: D3Node[] = layer.nodes.map(node => ({
+      const layerNodes: D3Node[] = layer.nodes.map((node) => ({
         ...node,
         layerId: layer.id,
         layerType: layer.type,
@@ -150,23 +164,25 @@ export default function DualLayerKnowledgeGraph({
       }));
 
       // Add edges with layer context
-      const layerEdges: D3Edge[] = layer.edges.map(edge => {
-        const sourceNode = layerNodes.find(n => n.id === edge.source);
-        const targetNode = layerNodes.find(n => n.id === edge.target);
-        
-        if (!sourceNode || !targetNode) {
-          console.warn(`Edge ${edge.id} references missing nodes`);
-          return null;
-        }
+      const layerEdges: D3Edge[] = layer.edges
+        .map((edge) => {
+          const sourceNode = layerNodes.find((n) => n.id === edge.source);
+          const targetNode = layerNodes.find((n) => n.id === edge.target);
 
-        return {
-          ...edge,
-          source: sourceNode,
-          target: targetNode,
-          layerId: layer.id,
-          layerOpacity: layerSetting?.opacity || 1.0,
-        };
-      }).filter(Boolean) as D3Edge[];
+          if (!sourceNode || !targetNode) {
+            console.warn(`Edge ${edge.id} references missing nodes`);
+            return null;
+          }
+
+          return {
+            ...edge,
+            source: sourceNode,
+            target: targetNode,
+            layerId: layer.id,
+            layerOpacity: layerSetting?.opacity || 1.0,
+          };
+        })
+        .filter(Boolean) as D3Edge[];
 
       allNodes.push(...layerNodes);
       allEdges.push(...layerEdges);
@@ -175,16 +191,19 @@ export default function DualLayerKnowledgeGraph({
     // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      allNodes = allNodes.filter(node => 
-        node.title.toLowerCase().includes(query) ||
-        node.content?.toLowerCase().includes(query) ||
-        node.tags?.some(tag => tag.toLowerCase().includes(query))
+      allNodes = allNodes.filter(
+        (node) =>
+          node.title.toLowerCase().includes(query) ||
+          node.content?.toLowerCase().includes(query) ||
+          node.tags?.some((tag) => tag.toLowerCase().includes(query)),
       );
-      
+
       // Filter edges to only include those with both nodes visible
-      const visibleNodeIds = new Set(allNodes.map(n => n.id));
-      allEdges = allEdges.filter(edge => 
-        visibleNodeIds.has(edge.source.id) && visibleNodeIds.has(edge.target.id)
+      const visibleNodeIds = new Set(allNodes.map((n) => n.id));
+      allEdges = allEdges.filter(
+        (edge) =>
+          visibleNodeIds.has(edge.source.id) &&
+          visibleNodeIds.has(edge.target.id),
       );
     }
 
@@ -193,35 +212,44 @@ export default function DualLayerKnowledgeGraph({
       // Sort by importance and take top nodes
       allNodes.sort((a, b) => (b.importance || 0) - (a.importance || 0));
       allNodes = allNodes.slice(0, maxNodes);
-      
-      const visibleNodeIds = new Set(allNodes.map(n => n.id));
-      allEdges = allEdges.filter(edge => 
-        visibleNodeIds.has(edge.source.id) && visibleNodeIds.has(edge.target.id)
+
+      const visibleNodeIds = new Set(allNodes.map((n) => n.id));
+      allEdges = allEdges.filter(
+        (edge) =>
+          visibleNodeIds.has(edge.source.id) &&
+          visibleNodeIds.has(edge.target.id),
       );
     }
 
-    return { 
-      nodes: allNodes, 
-      edges: allEdges, 
-      layers: knowledgeGraph.layers 
+    return {
+      nodes: allNodes,
+      edges: allEdges,
+      layers: knowledgeGraph.layers,
     };
-  }, [knowledgeGraph, layerSettings, activeLayer, searchQuery, performanceMode, maxNodes]);
+  }, [
+    knowledgeGraph,
+    layerSettings,
+    activeLayer,
+    searchQuery,
+    performanceMode,
+    maxNodes,
+  ]);
 
   // Initialize layer settings when graph changes
   useEffect(() => {
     if (knowledgeGraph) {
       const newLayerSettings: Record<string, LayerSettings> = {};
-      
-      knowledgeGraph.layers.forEach(layer => {
+
+      knowledgeGraph.layers.forEach((layer) => {
         newLayerSettings[layer.id] = {
           visible: layer.isVisible,
           opacity: layer.opacity,
-          color: layer.color || '#3b82f6',
+          color: layer.color || "#3b82f6",
           nodeScale: 1.0,
           edgeScale: 1.0,
         };
       });
-      
+
       setLayerSettings(newLayerSettings);
     }
   }, [knowledgeGraph]);
@@ -241,110 +269,111 @@ export default function DualLayerKnowledgeGraph({
         } else {
           // Create mock data for demonstration
           const mockGraph: KnowledgeGraph = {
-            id: 'demo-graph',
-            name: 'Demo Knowledge Graph',
-            description: 'Demonstration dual-layer knowledge graph',
+            id: "demo-graph",
+            name: "Demo Knowledge Graph",
+            description: "Demonstration dual-layer knowledge graph",
             layers: [
               {
-                id: 'collective-layer',
-                name: 'Collective Knowledge',
-                type: 'collective',
+                id: "collective-layer",
+                name: "Collective Knowledge",
+                type: "collective",
                 nodes: [
                   {
-                    id: 'concept-1',
-                    title: 'Resource Management',
-                    type: 'concept',
-                    content: 'Collective understanding of resource allocation strategies',
+                    id: "concept-1",
+                    title: "Resource Management",
+                    type: "concept",
+                    content:
+                      "Collective understanding of resource allocation strategies",
                     x: 200,
                     y: 200,
                     radius: 20,
-                    color: '#3b82f6',
-                    ownerType: 'collective',
+                    color: "#3b82f6",
+                    ownerType: "collective",
                     confidence: 0.9,
                     importance: 0.8,
                     lastUpdated: new Date(),
                     createdAt: new Date(),
-                    tags: ['resources', 'strategy', 'collective'],
+                    tags: ["resources", "strategy", "collective"],
                   },
                   {
-                    id: 'fact-1',
-                    title: 'Trading Post Alpha',
-                    type: 'fact',
-                    content: 'Verified trading location with high activity',
+                    id: "fact-1",
+                    title: "Trading Post Alpha",
+                    type: "fact",
+                    content: "Verified trading location with high activity",
                     x: 300,
                     y: 150,
                     radius: 15,
-                    color: '#10b981',
-                    ownerType: 'collective',
+                    color: "#10b981",
+                    ownerType: "collective",
                     confidence: 0.95,
                     importance: 0.7,
                     lastUpdated: new Date(),
                     createdAt: new Date(),
-                    tags: ['trading', 'location', 'verified'],
+                    tags: ["trading", "location", "verified"],
                   },
                 ],
                 edges: [
                   {
-                    id: 'edge-1',
-                    source: 'concept-1',
-                    target: 'fact-1',
-                    type: 'relates_to',
+                    id: "edge-1",
+                    source: "concept-1",
+                    target: "fact-1",
+                    type: "relates_to",
                     strength: 0.8,
                     confidence: 0.85,
-                    color: '#6366f1',
+                    color: "#6366f1",
                     createdAt: new Date(),
                     lastUpdated: new Date(),
                   },
                 ],
                 isVisible: true,
                 opacity: 1.0,
-                color: '#3b82f6',
+                color: "#3b82f6",
               },
               {
-                id: 'individual-layer',
-                name: 'Individual Beliefs',
-                type: 'individual',
-                agentId: agentIds[0] || 'agent-1',
+                id: "individual-layer",
+                name: "Individual Beliefs",
+                type: "individual",
+                agentId: agentIds[0] || "agent-1",
                 nodes: [
                   {
-                    id: 'belief-1',
-                    title: 'Market Opportunity',
-                    type: 'belief',
-                    content: 'Personal belief about emerging market trends',
+                    id: "belief-1",
+                    title: "Market Opportunity",
+                    type: "belief",
+                    content: "Personal belief about emerging market trends",
                     x: 250,
                     y: 300,
                     radius: 12,
-                    color: '#f59e0b',
-                    agentId: agentIds[0] || 'agent-1',
-                    ownerType: 'individual',
+                    color: "#f59e0b",
+                    agentId: agentIds[0] || "agent-1",
+                    ownerType: "individual",
                     confidence: 0.75,
                     importance: 0.6,
                     lastUpdated: new Date(),
                     createdAt: new Date(),
-                    tags: ['market', 'opportunity', 'personal'],
+                    tags: ["market", "opportunity", "personal"],
                   },
                 ],
                 edges: [],
                 isVisible: true,
                 opacity: 0.8,
-                color: '#f59e0b',
+                color: "#f59e0b",
               },
             ],
             createdAt: new Date(),
             lastUpdated: new Date(),
-            version: '1.0.0',
-            layout: 'force-directed',
-            renderer: 'd3',
+            version: "1.0.0",
+            layout: "force-directed",
+            renderer: "d3",
             maxNodes: 1000,
             lodEnabled: true,
             clusteringEnabled: false,
             filters: {
-              nodeTypes: ['concept', 'fact', 'belief'],
+              nodeTypes: ["concept", "fact", "belief"],
               confidenceRange: [0.0, 1.0],
               importanceRange: [0.0, 1.0],
               agentIds: agentIds,
               tags: [],
-              edgeTypes: ['relates_to', 'supports', 'contradicts'],
+              edgeTypes: ["relates_to", "supports", "contradicts"],
               strengthRange: [0.0, 1.0],
               showOnlyConnected: false,
               hideIsolatedNodes: false,
@@ -354,11 +383,11 @@ export default function DualLayerKnowledgeGraph({
             zoom: 1.0,
             pan: { x: 0, y: 0 },
           };
-          
+
           setKnowledgeGraph(mockGraph);
         }
       } catch (error) {
-        console.error('Failed to load knowledge graph:', error);
+        console.error("Failed to load knowledge graph:", error);
       }
     };
 
@@ -370,30 +399,41 @@ export default function DualLayerKnowledgeGraph({
     if (!svgRef.current || !processedData.nodes.length) return;
 
     const svg = d3.select(svgRef.current);
-    const container = svg.select('.graph-container');
+    const container = svg.select(".graph-container");
 
     // Clear existing content
-    container.selectAll('*').remove();
+    container.selectAll("*").remove();
 
     // Create groups for different elements
-    const edgeGroup = container.append('g').attr('class', 'edges');
-    const nodeGroup = container.append('g').attr('class', 'nodes');
-    const labelGroup = container.append('g').attr('class', 'labels');
+    const edgeGroup = container.append("g").attr("class", "edges");
+    const nodeGroup = container.append("g").attr("class", "nodes");
+    const labelGroup = container.append("g").attr("class", "labels");
 
     // Initialize force simulation
-    const simulation = d3.forceSimulation<D3Node>(processedData.nodes)
-      .force('link', d3.forceLink<D3Node, D3Edge>(processedData.edges)
-        .id(d => d.id)
-        .strength(simulationSettings.linkStrength)
+    const simulation = d3
+      .forceSimulation<D3Node>(processedData.nodes)
+      .force(
+        "link",
+        d3
+          .forceLink<D3Node, D3Edge>(processedData.edges)
+          .id((d) => d.id)
+          .strength(simulationSettings.linkStrength),
       )
-      .force('charge', d3.forceManyBody()
-        .strength(simulationSettings.chargeStrength)
+      .force(
+        "charge",
+        d3.forceManyBody().strength(simulationSettings.chargeStrength),
       )
-      .force('center', d3.forceCenter(width / 2, height / 2)
-        .strength(simulationSettings.centerForce)
+      .force(
+        "center",
+        d3
+          .forceCenter(width / 2, height / 2)
+          .strength(simulationSettings.centerForce),
       )
-      .force('collision', d3.forceCollide<D3Node>()
-        .radius(d => (d.radius || 10) + simulationSettings.collideRadius)
+      .force(
+        "collision",
+        d3
+          .forceCollide<D3Node>()
+          .radius((d) => (d.radius || 10) + simulationSettings.collideRadius),
       )
       .alphaDecay(simulationSettings.alphaDecay)
       .velocityDecay(simulationSettings.velocityDecay);
@@ -402,21 +442,21 @@ export default function DualLayerKnowledgeGraph({
 
     // Create edges
     const edges = edgeGroup
-      .selectAll('.edge')
+      .selectAll(".edge")
       .data(processedData.edges)
       .enter()
-      .append('line')
-      .attr('class', 'edge')
-      .attr('stroke', d => d.color)
-      .attr('stroke-width', d => Math.max(1, (d.strength || 0.5) * 3))
-      .attr('stroke-opacity', d => (d.layerOpacity || 1) * 0.6)
-      .style('cursor', 'pointer')
-      .on('click', (event, d) => {
+      .append("line")
+      .attr("class", "edge")
+      .attr("stroke", (d) => d.color)
+      .attr("stroke-width", (d) => Math.max(1, (d.strength || 0.5) * 3))
+      .attr("stroke-opacity", (d) => (d.layerOpacity || 1) * 0.6)
+      .style("cursor", "pointer")
+      .on("click", (event, d) => {
         event.stopPropagation();
         const edge: KnowledgeEdge = {
           ...d,
-          source: typeof d.source === 'object' ? d.source.id : d.source,
-          target: typeof d.target === 'object' ? d.target.id : d.target
+          source: typeof d.source === "object" ? d.source.id : d.source,
+          target: typeof d.target === "object" ? d.target.id : d.target,
         };
         setSelectedEdge(edge);
         onEdgeClick?.(edge);
@@ -424,43 +464,44 @@ export default function DualLayerKnowledgeGraph({
 
     // Create nodes
     const nodes = nodeGroup
-      .selectAll('.node')
+      .selectAll(".node")
       .data(processedData.nodes)
       .enter()
-      .append('circle')
-      .attr('class', 'node')
-      .attr('r', d => d.radius || 10)
-      .attr('fill', d => d.layerColor || d.color)
-      .attr('fill-opacity', d => d.layerOpacity || 1)
-      .attr('stroke', d => selectedNode?.id === d.id ? '#000' : 'none')
-      .attr('stroke-width', 2)
-      .style('cursor', 'pointer')
-      .on('click', (event, d) => {
+      .append("circle")
+      .attr("class", "node")
+      .attr("r", (d) => d.radius || 10)
+      .attr("fill", (d) => d.layerColor || d.color)
+      .attr("fill-opacity", (d) => d.layerOpacity || 1)
+      .attr("stroke", (d) => (selectedNode?.id === d.id ? "#000" : "none"))
+      .attr("stroke-width", 2)
+      .style("cursor", "pointer")
+      .on("click", (event, d) => {
         event.stopPropagation();
         setSelectedNode(d);
         onNodeClick?.(d);
       })
-      .on('mouseenter', (event, d) => {
+      .on("mouseenter", (event, d) => {
         setHoveredNode(d);
         onNodeHover?.(d);
       })
-      .on('mouseleave', () => {
+      .on("mouseleave", () => {
         setHoveredNode(null);
         onNodeHover?.(null);
       });
 
     // Add drag behavior
-    const drag = d3.drag<SVGCircleElement, D3Node>()
-      .on('start', (event, d) => {
+    const drag = d3
+      .drag<SVGCircleElement, D3Node>()
+      .on("start", (event, d) => {
         if (!event.active) simulation.alphaTarget(0.3).restart();
         d.fx = d.x;
         d.fy = d.y;
       })
-      .on('drag', (event, d) => {
+      .on("drag", (event, d) => {
         d.fx = event.x;
         d.fy = event.y;
       })
-      .on('end', (event, d) => {
+      .on("end", (event, d) => {
         if (!event.active) simulation.alphaTarget(0);
         d.fx = null;
         d.fy = null;
@@ -470,33 +511,33 @@ export default function DualLayerKnowledgeGraph({
 
     // Create labels
     const labels = labelGroup
-      .selectAll('.label')
+      .selectAll(".label")
       .data(processedData.nodes)
       .enter()
-      .append('text')
-      .attr('class', 'label')
-      .attr('text-anchor', 'middle')
-      .attr('dy', '.35em')
-      .attr('font-size', '12px')
-      .attr('fill', '#333')
-      .attr('pointer-events', 'none')
-      .text(d => d.title.length > 15 ? d.title.slice(0, 15) + '...' : d.title);
+      .append("text")
+      .attr("class", "label")
+      .attr("text-anchor", "middle")
+      .attr("dy", ".35em")
+      .attr("font-size", "12px")
+      .attr("fill", "#333")
+      .attr("pointer-events", "none")
+      .text((d) =>
+        d.title.length > 15 ? d.title.slice(0, 15) + "..." : d.title,
+      );
 
     // Update positions on simulation tick
-    simulation.on('tick', () => {
+    simulation.on("tick", () => {
       edges
-        .attr('x1', d => d.source.x)
-        .attr('y1', d => d.source.y)
-        .attr('x2', d => d.target.x)
-        .attr('y2', d => d.target.y);
+        .attr("x1", (d) => d.source.x)
+        .attr("y1", (d) => d.source.y)
+        .attr("x2", (d) => d.target.x)
+        .attr("y2", (d) => d.target.y);
 
-      nodes
-        .attr('cx', d => d.x)
-        .attr('cy', d => d.y);
+      nodes.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
 
       labels
-        .attr('x', d => d.x)
-        .attr('y', d => d.y + (d.radius || 10) + 15);
+        .attr("x", (d) => d.x)
+        .attr("y", (d) => d.y + (d.radius || 10) + 15);
     });
 
     // Stop simulation if not running
@@ -507,27 +548,38 @@ export default function DualLayerKnowledgeGraph({
     return () => {
       simulation.stop();
     };
-  }, [processedData, simulationSettings, width, height, selectedNode, isSimulationRunning, onNodeClick, onEdgeClick, onNodeHover]);
+  }, [
+    processedData,
+    simulationSettings,
+    width,
+    height,
+    selectedNode,
+    isSimulationRunning,
+    onNodeClick,
+    onEdgeClick,
+    onNodeHover,
+  ]);
 
   // Setup zoom behavior
   useEffect(() => {
     if (!svgRef.current) return;
 
     const svg = d3.select(svgRef.current);
-    const container = svg.select('.graph-container');
+    const container = svg.select(".graph-container");
 
-    const zoom = d3.zoom<SVGSVGElement, unknown>()
+    const zoom = d3
+      .zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.1, 10])
-      .on('zoom', (event) => {
+      .on("zoom", (event) => {
         const { transform } = event;
         setTransform(transform);
-        container.attr('transform', transform);
+        container.attr("transform", transform);
       });
 
     svg.call(zoom);
 
     return () => {
-      svg.on('.zoom', null);
+      svg.on(".zoom", null);
     };
   }, []);
 
@@ -538,25 +590,24 @@ export default function DualLayerKnowledgeGraph({
     const connectWebSocket = async () => {
       try {
         await knowledgeGraphApi.connectWebSocket(graphId);
-        
+
         // Subscribe to updates
-        knowledgeGraphApi.subscribe('node_added', (update) => {
-          console.log('Node added:', update);
+        knowledgeGraphApi.subscribe("node_added", (update) => {
+          console.log("Node added:", update);
           // Handle node addition
         });
 
-        knowledgeGraphApi.subscribe('node_updated', (update) => {
-          console.log('Node updated:', update);
+        knowledgeGraphApi.subscribe("node_updated", (update) => {
+          console.log("Node updated:", update);
           // Handle node update
         });
 
-        knowledgeGraphApi.subscribe('edge_added', (update) => {
-          console.log('Edge added:', update);
+        knowledgeGraphApi.subscribe("edge_added", (update) => {
+          console.log("Edge added:", update);
           // Handle edge addition
         });
-
       } catch (error) {
-        console.error('Failed to connect WebSocket:', error);
+        console.error("Failed to connect WebSocket:", error);
       }
     };
 
@@ -589,20 +640,18 @@ export default function DualLayerKnowledgeGraph({
   const zoomIn = useCallback(() => {
     if (svgRef.current) {
       const svg = d3.select(svgRef.current);
-      svg.transition().call(
-        d3.zoom<SVGSVGElement, unknown>().scaleBy as any,
-        1.5
-      );
+      svg
+        .transition()
+        .call(d3.zoom<SVGSVGElement, unknown>().scaleBy as any, 1.5);
     }
   }, []);
 
   const zoomOut = useCallback(() => {
     if (svgRef.current) {
       const svg = d3.select(svgRef.current);
-      svg.transition().call(
-        d3.zoom<SVGSVGElement, unknown>().scaleBy as any,
-        1 / 1.5
-      );
+      svg
+        .transition()
+        .call(d3.zoom<SVGSVGElement, unknown>().scaleBy as any, 1 / 1.5);
     }
   }, []);
 
@@ -611,7 +660,7 @@ export default function DualLayerKnowledgeGraph({
 
     try {
       const exportConfig = {
-        format: 'svg' as const,
+        format: "svg" as const,
         includeMetadata: true,
         includeFilters: false,
         includeAllLayers: true,
@@ -621,24 +670,24 @@ export default function DualLayerKnowledgeGraph({
 
       const response = await knowledgeGraphApi.exportKnowledgeGraph(
         knowledgeGraph.id,
-        exportConfig
+        exportConfig,
       );
 
       if (response.success && response.data) {
         const url = URL.createObjectURL(response.data);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
         a.download = `${knowledgeGraph.name}.svg`;
         a.click();
         URL.revokeObjectURL(url);
       }
     } catch (error) {
-      console.error('Failed to export graph:', error);
+      console.error("Failed to export graph:", error);
     }
   }, [knowledgeGraph]);
 
   const toggleLayerVisibility = useCallback((layerId: string) => {
-    setLayerSettings(prev => ({
+    setLayerSettings((prev) => ({
       ...prev,
       [layerId]: {
         ...prev[layerId],
@@ -648,7 +697,7 @@ export default function DualLayerKnowledgeGraph({
   }, []);
 
   const updateLayerOpacity = useCallback((layerId: string, opacity: number) => {
-    setLayerSettings(prev => ({
+    setLayerSettings((prev) => ({
       ...prev,
       [layerId]: {
         ...prev[layerId],
@@ -658,12 +707,15 @@ export default function DualLayerKnowledgeGraph({
   }, []);
 
   return (
-    <div className={`dual-layer-knowledge-graph ${className}`} ref={containerRef}>
+    <div
+      className={`dual-layer-knowledge-graph ${className}`}
+      ref={containerRef}
+    >
       <Card className="w-full">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg font-semibold">
-              {knowledgeGraph?.name || 'Knowledge Graph'}
+              {knowledgeGraph?.name || "Knowledge Graph"}
             </CardTitle>
             <div className="flex items-center gap-2">
               <Badge variant="outline">
@@ -677,43 +729,27 @@ export default function DualLayerKnowledgeGraph({
               </Badge>
             </div>
           </div>
-          
+
           {/* Controls */}
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={toggleSimulation}
-              >
-                {isSimulationRunning ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+              <Button variant="outline" size="sm" onClick={toggleSimulation}>
+                {isSimulationRunning ? (
+                  <Pause className="h-4 w-4" />
+                ) : (
+                  <Play className="h-4 w-4" />
+                )}
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={resetSimulation}
-              >
+              <Button variant="outline" size="sm" onClick={resetSimulation}>
                 <RotateCcw className="h-4 w-4" />
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={zoomIn}
-              >
+              <Button variant="outline" size="sm" onClick={zoomIn}>
                 <ZoomIn className="h-4 w-4" />
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={zoomOut}
-              >
+              <Button variant="outline" size="sm" onClick={zoomOut}>
                 <ZoomOut className="h-4 w-4" />
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={exportGraph}
-              >
+              <Button variant="outline" size="sm" onClick={exportGraph}>
                 <Download className="h-4 w-4" />
               </Button>
             </div>
@@ -774,7 +810,7 @@ export default function DualLayerKnowledgeGraph({
 
                 <TabsContent value="layers" className="p-4 space-y-4">
                   <div className="space-y-3">
-                    {processedData.layers.map(layer => (
+                    {processedData.layers.map((layer) => (
                       <div key={layer.id} className="space-y-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
@@ -783,33 +819,35 @@ export default function DualLayerKnowledgeGraph({
                               size="sm"
                               onClick={() => toggleLayerVisibility(layer.id)}
                             >
-                              {layerSettings[layer.id]?.visible ? 
-                                <Eye className="h-4 w-4" /> : 
+                              {layerSettings[layer.id]?.visible ? (
+                                <Eye className="h-4 w-4" />
+                              ) : (
                                 <EyeOff className="h-4 w-4" />
-                              }
+                              )}
                             </Button>
                             <span className="font-medium">{layer.name}</span>
                           </div>
-                          <Badge variant="secondary">
-                            {layer.type}
-                          </Badge>
+                          <Badge variant="secondary">{layer.type}</Badge>
                         </div>
-                        
+
                         <div className="ml-6 space-y-2">
                           <div className="flex items-center gap-2">
                             <Label className="text-xs">Opacity</Label>
                             <Slider
                               value={[layerSettings[layer.id]?.opacity || 1]}
-                              onValueChange={([value]) => updateLayerOpacity(layer.id, value)}
+                              onValueChange={([value]) =>
+                                updateLayerOpacity(layer.id, value)
+                              }
                               max={1}
                               min={0}
                               step={0.1}
                               className="flex-1"
                             />
                           </div>
-                          
+
                           <div className="text-xs text-muted-foreground">
-                            {layer.nodes.length} nodes, {layer.edges.length} edges
+                            {layer.nodes.length} nodes, {layer.edges.length}{" "}
+                            edges
                           </div>
                         </div>
                       </div>
@@ -821,14 +859,17 @@ export default function DualLayerKnowledgeGraph({
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label className="text-sm font-medium">Simulation</Label>
-                      
+
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
                           <Label className="text-xs">Link Strength</Label>
                           <Slider
                             value={[simulationSettings.linkStrength]}
-                            onValueChange={([value]) => 
-                              setSimulationSettings(prev => ({ ...prev, linkStrength: value }))
+                            onValueChange={([value]) =>
+                              setSimulationSettings((prev) => ({
+                                ...prev,
+                                linkStrength: value,
+                              }))
                             }
                             max={1}
                             min={0}
@@ -836,13 +877,18 @@ export default function DualLayerKnowledgeGraph({
                             className="w-24"
                           />
                         </div>
-                        
+
                         <div className="flex items-center justify-between">
                           <Label className="text-xs">Charge Strength</Label>
                           <Slider
-                            value={[Math.abs(simulationSettings.chargeStrength)]}
-                            onValueChange={([value]) => 
-                              setSimulationSettings(prev => ({ ...prev, chargeStrength: -value }))
+                            value={[
+                              Math.abs(simulationSettings.chargeStrength),
+                            ]}
+                            onValueChange={([value]) =>
+                              setSimulationSettings((prev) => ({
+                                ...prev,
+                                chargeStrength: -value,
+                              }))
                             }
                             max={1000}
                             min={0}
@@ -850,13 +896,16 @@ export default function DualLayerKnowledgeGraph({
                             className="w-24"
                           />
                         </div>
-                        
+
                         <div className="flex items-center justify-between">
                           <Label className="text-xs">Collision Radius</Label>
                           <Slider
                             value={[simulationSettings.collideRadius]}
-                            onValueChange={([value]) => 
-                              setSimulationSettings(prev => ({ ...prev, collideRadius: value }))
+                            onValueChange={([value]) =>
+                              setSimulationSettings((prev) => ({
+                                ...prev,
+                                collideRadius: value,
+                              }))
                             }
                             max={50}
                             min={0}
@@ -869,7 +918,7 @@ export default function DualLayerKnowledgeGraph({
 
                     <div className="space-y-2">
                       <Label className="text-sm font-medium">Performance</Label>
-                      
+
                       <div className="flex items-center justify-between">
                         <Label className="text-xs">Performance Mode</Label>
                         <Switch
@@ -877,7 +926,7 @@ export default function DualLayerKnowledgeGraph({
                           onCheckedChange={setPerformanceMode}
                         />
                       </div>
-                      
+
                       {performanceMode && (
                         <div className="flex items-center justify-between">
                           <Label className="text-xs">Max Nodes</Label>
@@ -900,18 +949,32 @@ export default function DualLayerKnowledgeGraph({
                     <div className="space-y-3">
                       <h3 className="font-medium">{selectedNode.title}</h3>
                       <div className="space-y-2 text-sm">
-                        <div><strong>Type:</strong> {selectedNode.type}</div>
-                        <div><strong>Confidence:</strong> {(selectedNode.confidence * 100).toFixed(1)}%</div>
-                        <div><strong>Importance:</strong> {(selectedNode.importance * 100).toFixed(1)}%</div>
+                        <div>
+                          <strong>Type:</strong> {selectedNode.type}
+                        </div>
+                        <div>
+                          <strong>Confidence:</strong>{" "}
+                          {(selectedNode.confidence * 100).toFixed(1)}%
+                        </div>
+                        <div>
+                          <strong>Importance:</strong>{" "}
+                          {(selectedNode.importance * 100).toFixed(1)}%
+                        </div>
                         {selectedNode.content && (
-                          <div><strong>Content:</strong> {selectedNode.content}</div>
+                          <div>
+                            <strong>Content:</strong> {selectedNode.content}
+                          </div>
                         )}
                         {selectedNode.tags && selectedNode.tags.length > 0 && (
                           <div>
                             <strong>Tags:</strong>
                             <div className="flex flex-wrap gap-1 mt-1">
-                              {selectedNode.tags.map(tag => (
-                                <Badge key={tag} variant="outline" className="text-xs">
+                              {selectedNode.tags.map((tag) => (
+                                <Badge
+                                  key={tag}
+                                  variant="outline"
+                                  className="text-xs"
+                                >
                                   {tag}
                                 </Badge>
                               ))}
@@ -924,7 +987,8 @@ export default function DualLayerKnowledgeGraph({
                     <div className="space-y-2">
                       <h3 className="font-medium">{hoveredNode.title}</h3>
                       <div className="text-sm text-muted-foreground">
-                        {hoveredNode.type} • {(hoveredNode.confidence * 100).toFixed(1)}% confidence
+                        {hoveredNode.type} •{" "}
+                        {(hoveredNode.confidence * 100).toFixed(1)}% confidence
                       </div>
                     </div>
                   ) : (
@@ -940,4 +1004,4 @@ export default function DualLayerKnowledgeGraph({
       </Card>
     </div>
   );
-} 
+}

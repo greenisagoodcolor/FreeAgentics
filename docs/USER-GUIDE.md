@@ -5,7 +5,7 @@
 ## Table of Contents
 
 1. [Quick Start](#quick-start) - Get running in 5 minutes
-2. [Core Concepts](#core-concepts) - Active Inference fundamentals  
+2. [Core Concepts](#core-concepts) - Active Inference fundamentals
 3. [Creating Your First Agent](#creating-your-first-agent) - Step-by-step walkthrough
 4. [Agent Types & Templates](#agent-types--templates) - Explorer, Guardian, Merchant, Scholar
 5. [Coalition Formation](#coalition-formation) - Multi-agent coordination
@@ -20,11 +20,13 @@
 ## Quick Start
 
 ### Prerequisites
+
 - Python 3.9+ with numpy, torch
 - Node.js 18+ (for web interface)
 - 8GB+ RAM (for multi-agent simulations)
 
 ### Installation
+
 ```bash
 # Clone the repository
 git clone https://github.com/your-org/freeagentics.git
@@ -41,11 +43,12 @@ npm run dev
 ```
 
 ### Your First Agent in 2 Minutes
+
 ```python
 from freeagentics import Agent
 
 # Create an explorer agent with Active Inference
-explorer = Agent.create("Explorer", 
+explorer = Agent.create("Explorer",
                        name="Alice",
                        personality={'curiosity': 0.8, 'caution': 0.3})
 
@@ -67,7 +70,7 @@ print(f"Next action: {explorer.select_action()}")
 FreeAgentics implements **Active Inference** - a mathematical theory of brain function where agents:
 
 1. **Maintain Beliefs** about hidden world states
-2. **Minimize Free Energy** (surprise about observations)  
+2. **Minimize Free Energy** (surprise about observations)
 3. **Plan Actions** to achieve preferred outcomes
 4. **Update Beliefs** through Bayesian inference
 
@@ -76,13 +79,14 @@ FreeAgentics implements **Active Inference** - a mathematical theory of brain fu
 Every agent operates on four key matrices (from pymdp framework):
 
 - **A Matrix**: Observation likelihood `P(observation|state)`
-- **B Matrix**: Transition dynamics `P(next_state|state,action)`  
+- **B Matrix**: Transition dynamics `P(next_state|state,action)`
 - **C Matrix**: Preferences over observations
 - **D Matrix**: Prior beliefs over initial states
 
 ### Agent Autonomy
 
 Unlike scripted bots, FreeAgentics agents are truly autonomous:
+
 - **No hardcoded behaviors** - all actions emerge from Active Inference
 - **Adaptive** - learn and adjust to new environments
 - **Mathematically principled** - based on peer-reviewed cognitive science
@@ -101,11 +105,11 @@ from freeagentics import Agent
 # Explorer: High curiosity, seeks novel information
 explorer = Agent.create("Explorer", name="Scout")
 
-# Guardian: Defensive, maintains system stability  
+# Guardian: Defensive, maintains system stability
 guardian = Agent.create("Guardian", name="Protector")
 
 # Merchant: Trade-focused, resource optimization
-merchant = Agent.create("Merchant", name="Trader") 
+merchant = Agent.create("Merchant", name="Trader")
 
 # Scholar: Knowledge-focused, information processing
 scholar = Agent.create("Scholar", name="Researcher")
@@ -144,7 +148,7 @@ world.add_agent(custom_explorer)
 # Run simulation
 for step in range(100):
     world.step()  # Agents act according to Active Inference
-    
+
     # Monitor agent beliefs and actions
     if step % 10 == 0:
         print(f"Step {step}: {custom_explorer.beliefs}")
@@ -159,12 +163,13 @@ for step in range(100):
 **Purpose**: Information gathering and environment mapping
 
 **Active Inference Characteristics**:
+
 - High precision on exploration actions
 - Preferences for novel observations
 - Low entropy beliefs (confident in what they've observed)
 
 ```python
-explorer = Agent.create("Explorer", 
+explorer = Agent.create("Explorer",
     name="PathFinder",
     inference_params={
         'curiosity_weight': 0.8,  # Strong preference for information gain
@@ -173,7 +178,7 @@ explorer = Agent.create("Explorer",
 )
 
 # Explorers excel at:
-# - Mapping unknown territories  
+# - Mapping unknown territories
 # - Discovering resources
 # - Providing information to other agents
 ```
@@ -183,13 +188,14 @@ explorer = Agent.create("Explorer",
 **Purpose**: System protection and stability maintenance
 
 **Active Inference Characteristics**:
+
 - High precision on defensive actions
 - Strong preferences for maintaining current state
 - Conservative belief updating
 
 ```python
 guardian = Agent.create("Guardian",
-    name="Sentinel", 
+    name="Sentinel",
     inference_params={
         'stability_weight': 0.9,   # Strong preference for current state
         'threat_sensitivity': 0.8   # High alertness to changes
@@ -202,11 +208,12 @@ guardian = Agent.create("Guardian",
 # - Coordinating defensive responses
 ```
 
-### Merchant Template  
+### Merchant Template
 
 **Purpose**: Resource optimization and trade facilitation
 
 **Active Inference Characteristics**:
+
 - High precision on trade actions
 - Preferences for resource accumulation
 - Economic belief models
@@ -231,6 +238,7 @@ merchant = Agent.create("Merchant",
 **Purpose**: Knowledge processing and research
 
 **Active Inference Characteristics**:
+
 - High precision on learning actions
 - Preferences for information accuracy
 - Deep belief hierarchies
@@ -259,7 +267,7 @@ scholar = Agent.create("Scholar",
 Coalitions emerge when agents discover mutual benefit through cooperation. In FreeAgentics, coalition formation follows Active Inference principles:
 
 1. **Agents detect** potential collaboration opportunities
-2. **Evaluate expected utility** of joining vs. staying independent  
+2. **Evaluate expected utility** of joining vs. staying independent
 3. **Form coalitions** when expected free energy decreases
 4. **Maintain coalitions** as long as benefits persist
 
@@ -270,7 +278,7 @@ from freeagentics import World, Coalition
 
 # Create complementary agents
 explorer = Agent.create("Explorer", name="Scout")
-guardian = Agent.create("Guardian", name="Guard") 
+guardian = Agent.create("Guardian", name="Guard")
 merchant = Agent.create("Merchant", name="Trader")
 
 # Add to world
@@ -285,12 +293,12 @@ world.add_agents([explorer, guardian, merchant])
 # Run simulation to observe coalition formation
 for step in range(200):
     world.step()
-    
+
     # Check for emergent coalitions
     if step % 50 == 0:
         coalitions = world.get_coalitions()
         print(f"Step {step}: {len(coalitions)} coalitions active")
-        
+
         for coalition in coalitions:
             print(f"  Coalition: {[a.name for a in coalition.members]}")
             print(f"  Purpose: {coalition.objective}")
@@ -311,7 +319,7 @@ coalition = Coalition(
 coalition.assign_role(explorer, "primary_scout")
 coalition.assign_role(guardian, "security_escort")
 
-# Set coalition-level preferences  
+# Set coalition-level preferences
 coalition.set_preferences({
     'safety_priority': 0.8,     # High safety preference
     'speed_priority': 0.6,      # Moderate speed preference
@@ -325,6 +333,7 @@ world.add_coalition(coalition)
 ### Coalition Strategies
 
 #### Hierarchical Coordination
+
 ```python
 # One agent leads, others follow
 hierarchical_coalition = Coalition(
@@ -334,17 +343,19 @@ hierarchical_coalition = Coalition(
 )
 ```
 
-#### Democratic Coordination  
+#### Democratic Coordination
+
 ```python
 # Decisions made by consensus
 democratic_coalition = Coalition(
-    coordination_strategy="democratic", 
+    coordination_strategy="democratic",
     voting_method="majority",  # or "consensus", "weighted"
     discussion_rounds=3  # Max debate cycles
 )
 ```
 
 #### Market Coordination
+
 ```python
 # Internal resource markets
 market_coalition = Coalition(
@@ -401,13 +412,13 @@ class CustomVisionModel(ObservationModel):
     def __init__(self, visual_range=5, accuracy=0.9):
         self.visual_range = visual_range
         self.accuracy = accuracy
-    
+
     def observe(self, agent_state, world_state):
         """Convert world state to agent observation."""
         nearby_entities = world_state.get_entities_in_range(
             agent_state.position, self.visual_range
         )
-        
+
         # Add noise based on accuracy
         noisy_observations = self.add_noise(nearby_entities, self.accuracy)
         return noisy_observations
@@ -427,15 +438,15 @@ advanced_agent = Agent.create("Scholar",
         # Belief updating
         'learning_rate': 0.15,          # Speed of belief updates (0.0-1.0)
         'prior_strength': 2.0,          # Strength of initial beliefs
-        
-        # Action selection  
+
+        # Action selection
         'precision': 1.5,               # Confidence in action selection
         'temperature': 0.1,             # Randomness in action selection
-        
+
         # Planning
         'planning_horizon': 8,          # Steps ahead to plan
         'discount_factor': 0.95,        # Future reward discounting
-        
+
         # Exploration
         'curiosity_weight': 0.3,        # Information-seeking behavior
         'epistemic_precision': 0.8      # Confidence in exploration
@@ -458,7 +469,7 @@ from freeagentics.gnn import create_agent_from_description
 description = """
 Create an agent that:
 - Explores new areas when energy is high
-- Returns to base when energy is low  
+- Returns to base when energy is low
 - Avoids dangerous areas
 - Shares discoveries with nearby agents
 - Prefers areas with valuable resources
@@ -469,7 +480,7 @@ agent = create_agent_from_description(description)
 
 # The GNN parser creates appropriate:
 # - State space definitions
-# - Action repertoires  
+# - Action repertoires
 # - Preference structures
 # - Belief initialization
 ```
@@ -496,7 +507,7 @@ actions:
 
 preferences:
   - high_energy_exploration: 0.8
-  - safety_maintenance: 0.9  
+  - safety_maintenance: 0.9
   - knowledge_sharing: 0.6
   - resource_efficiency: 0.7
 
@@ -589,7 +600,7 @@ from freeagentics.world import MultiScaleWorld
 multi_world = MultiScaleWorld(
     scales={
         'macro': World(grid_size=100),      # Large-scale strategic view
-        'micro': World(grid_size=1000),     # Detailed local view  
+        'micro': World(grid_size=1000),     # Detailed local view
         'nano': World(grid_size=10000)      # Individual interaction view
     },
     scale_transitions={
@@ -600,7 +611,7 @@ multi_world = MultiScaleWorld(
 
 # Agents can operate at appropriate scales
 strategic_agent = Agent.create("Commander", scale='macro')
-tactical_agent = Agent.create("Squad", scale='micro') 
+tactical_agent = Agent.create("Squad", scale='micro')
 individual_agent = Agent.create("Explorer", scale='nano')
 ```
 
@@ -648,7 +659,7 @@ monitor.track_metrics([
 world_monitor = WorldMonitor(world)
 world_monitor.track_emergent_properties([
     'coalition_formation_rate',
-    'resource_distribution_entropy', 
+    'resource_distribution_entropy',
     'agent_spatial_clustering',
     'information_flow_patterns'
 ])
@@ -668,17 +679,17 @@ config = ProductionConfig(
     checkpointing=True,           # Save state periodically
     checkpoint_interval=1000,     # Every 1000 steps
     auto_recovery=True,           # Restart from checkpoints on failure
-    
-    # Scalability  
+
+    # Scalability
     distributed_computing=True,   # Multi-node execution
     load_balancing='dynamic',     # Adaptive agent distribution
     memory_optimization=True,     # Efficient memory usage
-    
+
     # Monitoring
     logging_level='INFO',         # Production logging
     metrics_collection=True,      # Performance metrics
     alerting_enabled=True,        # System health alerts
-    
+
     # Security
     secure_communication=True,    # Encrypted agent communication
     access_control='rbac',        # Role-based access control
@@ -700,27 +711,27 @@ world = World.create_production(config=config)
 def setup_information_cascade():
     # Create diverse agent network
     agents = [
-        Agent.create("Explorer", name=f"Scout_{i}", 
-                    communication_range=3) 
+        Agent.create("Explorer", name=f"Scout_{i}",
+                    communication_range=3)
         for i in range(20)
     ]
-    
+
     # Sparse initial placement
     world = World(grid_size=50)
     world.scatter_agents(agents, density=0.1)
-    
+
     # One agent discovers important information
     agents[0].add_knowledge("valuable_resource_location", (25, 25))
-    
+
     return world, agents
 
 # Run simulation to watch information spread
 world, agents = setup_information_cascade()
 for step in range(100):
     world.step()
-    
+
     # Track information propagation
-    informed_agents = [a for a in agents 
+    informed_agents = [a for a in agents
                       if a.has_knowledge("valuable_resource_location")]
     print(f"Step {step}: {len(informed_agents)} agents informed")
 ```
@@ -732,7 +743,7 @@ for step in range(100):
 def setup_emergent_specialization():
     # Start with identical general-purpose agents
     agents = [Agent.create("General", name=f"Agent_{i}") for i in range(10)]
-    
+
     # Diverse environment with different challenges
     world = World(grid_size=30)
     world.add_zones({
@@ -740,14 +751,14 @@ def setup_emergent_specialization():
         'dangerous': [(20, 20, 30, 30)],        # Requires caution
         'communication_hub': [(15, 15, 20, 20)] # Social interaction
     })
-    
+
     return world, agents
 
 # Agents adapt to their environment and develop specializations
 world, agents = setup_emergent_specialization()
 for step in range(500):
     world.step()
-    
+
     # Check for specialization emergence
     if step % 100 == 0:
         for agent in agents:
@@ -763,30 +774,30 @@ def setup_hierarchical_coordination():
     # Create agents with different leadership capabilities
     commanders = [Agent.create("Guardian", name=f"Cmd_{i}",
                               leadership_weight=0.8) for i in range(3)]
-    
+
     lieutenants = [Agent.create("Explorer", name=f"Lt_{i}",
                                leadership_weight=0.4) for i in range(6)]
-    
+
     soldiers = [Agent.create("General", name=f"Soldier_{i}",
                             leadership_weight=0.1) for i in range(15)]
-    
+
     all_agents = commanders + lieutenants + soldiers
-    
+
     # Mission-oriented environment
     world = World(grid_size=40)
     world.add_objectives([
         'secure_perimeter',
-        'gather_intelligence', 
+        'gather_intelligence',
         'establish_supply_lines'
     ])
-    
+
     return world, all_agents
 
 # Watch hierarchical structure emerge
 world, agents = setup_hierarchical_coordination()
 for step in range(300):
     world.step()
-    
+
     # Analyze command structure
     if step % 50 == 0:
         hierarchy = world.analyze_command_structure()
@@ -799,18 +810,21 @@ for step in range(300):
 ## Next Steps
 
 ### Advanced Features
+
 - **Multi-Modal Agents**: Vision, audio, and sensor integration
-- **Continuous State Spaces**: Real-valued belief states  
+- **Continuous State Spaces**: Real-valued belief states
 - **Hierarchical Active Inference**: Multi-level planning
 - **Cultural Evolution**: Agent societies and traditions
 
 ### Integration Opportunities
+
 - **LLM Integration**: Natural language understanding and generation
 - **Robotics**: Physical embodiment of Active Inference agents
 - **Game Development**: NPCs with genuine intelligence
 - **Scientific Modeling**: Cognitive science research platform
 
 ### Community Resources
+
 - **Discord Server**: Real-time community support
 - **GitHub Discussions**: Technical questions and feature requests
 - **Academic Papers**: Research publications using FreeAgentics
@@ -818,4 +832,4 @@ for step in range(300):
 
 ---
 
-*This guide represents the collaborative expertise of the FreeAgentics community and expert committee. For technical questions, consult the [Developer Guide](DEVELOPER-GUIDE.md) or [API Reference](API-REFERENCE.md).* 
+_This guide represents the collaborative expertise of the FreeAgentics community and expert committee. For technical questions, consult the [Developer Guide](DEVELOPER-GUIDE.md) or [API Reference](API-REFERENCE.md)._

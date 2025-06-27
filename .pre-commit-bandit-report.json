@@ -1,34 +1,21 @@
 {
   "errors": [],
-  "generated_at": "2025-06-26T17:20:43Z",
+  "generated_at": "2025-06-27T07:56:26Z",
   "metrics": {
     "_totals": {
-      "CONFIDENCE.HIGH": 15,
+      "CONFIDENCE.HIGH": 17,
       "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.MEDIUM": 1,
       "CONFIDENCE.UNDEFINED": 0,
       "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 15,
-      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.LOW": 14,
+      "SEVERITY.MEDIUM": 4,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 4459,
+      "loc": 10382,
       "nosec": 0,
       "skipped_tests": 0
     },
-    "agents/base/behaviors.py": {
-      "CONFIDENCE.HIGH": 8,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 8,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 413,
-      "nosec": 0,
-      "skipped_tests": 0
-    },
-    "agents/base/data_model.py": {
+    "agents/base/active_inference_integration.py": {
       "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
@@ -37,11 +24,11 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 438,
+      "loc": 519,
       "nosec": 0,
       "skipped_tests": 0
     },
-    "agents/templates/__init__.py": {
+    "agents/base/belief_synchronization.py": {
       "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
@@ -50,7 +37,59 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 37,
+      "loc": 0,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "agents/base/decision_making.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 638,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "agents/base/interaction.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 430,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "agents/base/markov_blanket.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 446,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "agents/base/persistence.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 401,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -67,7 +106,7 @@
       "nosec": 0,
       "skipped_tests": 0
     },
-    "coalitions/readiness/readiness_evaluator.py": {
+    "api/websocket/markov_blanket_monitoring.py": {
       "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
@@ -76,7 +115,85 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 287,
+      "loc": 463,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "coalitions/deployment/deployment_manifest.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 0,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "coalitions/formation/business_value_engine.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 389,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "coalitions/formation/monitoring_integration.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 47,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "docs/examples/basic/active_inference_gnn_example.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 326,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "inference/algorithms/variational_message_passing.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 9,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "inference/engine/belief_state.py": {
+      "CONFIDENCE.HIGH": 2,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 1,
+      "SEVERITY.MEDIUM": 1,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 547,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -89,20 +206,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 470,
-      "nosec": 0,
-      "skipped_tests": 0
-    },
-    "inference/engine/parameter_learning.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 492,
+      "loc": 473,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -115,11 +219,11 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 496,
+      "loc": 525,
       "nosec": 0,
       "skipped_tests": 0
     },
-    "inference/engine/uncertainty_quantification.py": {
+    "inference/engine/precision.py": {
       "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
@@ -128,11 +232,50 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 501,
+      "loc": 531,
       "nosec": 0,
       "skipped_tests": 0
     },
-    "inference/gnn/generator.py": {
+    "inference/gnn/performance_optimizer.py": {
+      "CONFIDENCE.HIGH": 2,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 1,
+      "SEVERITY.MEDIUM": 1,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 642,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "inference/llm/fallback_mechanisms.py": {
+      "CONFIDENCE.HIGH": 4,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 1,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 3,
+      "SEVERITY.MEDIUM": 2,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 667,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "infrastructure/deployment/deployment_verification.py": {
+      "CONFIDENCE.HIGH": 2,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 2,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 695,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "infrastructure/export/business_model_exporter.py": {
       "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
@@ -141,11 +284,11 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 455,
+      "loc": 435,
       "nosec": 0,
       "skipped_tests": 0
     },
-    "infrastructure/database/alembic/versions/20250618_0953_d3e985c2dfb8_initial_database_schema.py": {
+    "infrastructure/scripts/testing/test_runner_setup.py": {
       "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
@@ -154,11 +297,11 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 229,
+      "loc": 664,
       "nosec": 0,
       "skipped_tests": 0
     },
-    "infrastructure/safety/safety_protocols.py": {
+    "world/simulation/engine.py": {
       "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
@@ -167,172 +310,12 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 181,
+      "loc": 1075,
       "nosec": 0,
       "skipped_tests": 0
     }
   },
   "results": [
-    {
-      "code": "160         # Generate random movement direction\n161         angle = random.uniform(0, 2 * math.pi)\n162         distance = random.uniform(1.0, self.max_wander_distance)\n",
-      "col_offset": 16,
-      "end_col_offset": 46,
-      "filename": "agents/base/behaviors.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 330,
-        "link": "https://cwe.mitre.org/data/definitions/330.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 161,
-      "line_range": [
-        161
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_calls.html#b311-random",
-      "test_id": "B311",
-      "test_name": "blacklist"
-    },
-    {
-      "code": "161         angle = random.uniform(0, 2 * math.pi)\n162         distance = random.uniform(1.0, self.max_wander_distance)\n163         new_x = agent.position.x + distance * math.cos(angle)\n",
-      "col_offset": 19,
-      "end_col_offset": 64,
-      "filename": "agents/base/behaviors.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 330,
-        "link": "https://cwe.mitre.org/data/definitions/330.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 162,
-      "line_range": [
-        162
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_calls.html#b311-random",
-      "test_id": "B311",
-      "test_name": "blacklist"
-    },
-    {
-      "code": "290         # Select an agent to interact with\n291         target_agent = random.choice(nearby_agents)\n292         target_agent_id = target_agent[\"agent_id\"]\n",
-      "col_offset": 23,
-      "end_col_offset": 51,
-      "filename": "agents/base/behaviors.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 330,
-        "link": "https://cwe.mitre.org/data/definitions/330.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 291,
-      "line_range": [
-        291
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_calls.html#b311-random",
-      "test_id": "B311",
-      "test_name": "blacklist"
-    },
-    {
-      "code": "336         success_probability = (social_factor + trust_factor) / 2.0\n337         success = random.random() < success_probability\n338         if success:\n",
-      "col_offset": 18,
-      "end_col_offset": 33,
-      "filename": "agents/base/behaviors.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 330,
-        "link": "https://cwe.mitre.org/data/definitions/330.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 337,
-      "line_range": [
-        337
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_calls.html#b311-random",
-      "test_id": "B311",
-      "test_name": "blacklist"
-    },
-    {
-      "code": "338         if success:\n339             trust_change = random.uniform(0.01, 0.05)  # Small positive change\n340             interaction_type = \"positive\"\n",
-      "col_offset": 27,
-      "end_col_offset": 53,
-      "filename": "agents/base/behaviors.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 330,
-        "link": "https://cwe.mitre.org/data/definitions/330.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 339,
-      "line_range": [
-        339
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_calls.html#b311-random",
-      "test_id": "B311",
-      "test_name": "blacklist"
-    },
-    {
-      "code": "341         else:\n342             trust_change = random.uniform(-0.02, 0.01)  # Small negative change\n343             interaction_type = \"neutral\"\n",
-      "col_offset": 27,
-      "end_col_offset": 54,
-      "filename": "agents/base/behaviors.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 330,
-        "link": "https://cwe.mitre.org/data/definitions/330.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 342,
-      "line_range": [
-        342
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_calls.html#b311-random",
-      "test_id": "B311",
-      "test_name": "blacklist"
-    },
-    {
-      "code": "381         # Move in that direction\n382         distance = random.uniform(5.0, self.exploration_radius)\n383         new_position = Position(\n",
-      "col_offset": 19,
-      "end_col_offset": 63,
-      "filename": "agents/base/behaviors.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 330,
-        "link": "https://cwe.mitre.org/data/definitions/330.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 382,
-      "line_range": [
-        382
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_calls.html#b311-random",
-      "test_id": "B311",
-      "test_name": "blacklist"
-    },
-    {
-      "code": "437         if not explored_areas:\n438             return random.uniform(0, 2 * math.pi)\n439         # Test 8 directions and find the one with least nearby explored areas\n",
-      "col_offset": 19,
-      "end_col_offset": 49,
-      "filename": "agents/base/behaviors.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 330,
-        "link": "https://cwe.mitre.org/data/definitions/330.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 438,
-      "line_range": [
-        438
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_calls.html#b311-random",
-      "test_id": "B311",
-      "test_name": "blacklist"
-    },
     {
       "code": "79         if position is None:\n80             position = Position(random.uniform(-100, 100), random.uniform(-100, 100), 0)\n81         if personality is None:\n",
       "col_offset": 32,
@@ -472,118 +455,12 @@
       "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_calls.html#b311-random",
       "test_id": "B311",
       "test_name": "blacklist"
-    }
-  ]
-}  "test_id": "B108",
-      "test_name": "hardcoded_tmp_directory"
     },
     {
-      "code": "91             A = A.detach().cpu().numpy()\n92         assert A.shape == (\n93             self.dims.num_observations,\n94             self.dims.num_states,\n95         ), f\"A matrix shape {A.shape} doesn't match expected {(\n96             self.dims.num_observations,\n97             self.dims.num_states\n98         )}\"\n99         # Ensure proper normalization\n",
-      "col_offset": 8,
-      "end_col_offset": 11,
-      "filename": "inference/engine/pymdp_generative_model.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
-      "line_number": 92,
-      "line_range": [
-        92,
-        93,
-        94,
-        95,
-        96,
-        97,
-        98
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b101_assert_used.html",
-      "test_id": "B101",
-      "test_name": "assert_used"
-    },
-    {
-      "code": "105             B = B.detach().cpu().numpy()\n106         assert B.shape == (\n107             self.dims.num_states,\n108             self.dims.num_states,\n109             self.dims.num_actions,\n110         ), f\"B matrix shape {B.shape} doesn't match expected {(\n111             self.dims.num_states,\n112             self.dims.num_states,\n113             self.dims.num_actions\n114         )}\"\n115         # Ensure proper normalization for each action\n",
-      "col_offset": 8,
-      "end_col_offset": 11,
-      "filename": "inference/engine/pymdp_generative_model.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
-      "line_number": 106,
-      "line_range": [
-        106,
-        107,
-        108,
-        109,
-        110,
-        111,
-        112,
-        113,
-        114
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b101_assert_used.html",
-      "test_id": "B101",
-      "test_name": "assert_used"
-    },
-    {
-      "code": "125             C = np.tile(C.reshape(-1, 1), (1, self.dims.time_horizon))\n126         assert C.shape == (\n127             self.dims.num_observations,\n128             self.dims.time_horizon,\n129         ), f\"C matrix shape {C.shape} doesn't match expected {(\n130             self.dims.num_observations,\n131             self.dims.time_horizon\n132         )}\"\n133         self.C = C\n",
-      "col_offset": 8,
-      "end_col_offset": 11,
-      "filename": "inference/engine/pymdp_generative_model.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
-      "line_number": 126,
-      "line_range": [
-        126,
-        127,
-        128,
-        129,
-        130,
-        131,
-        132
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b101_assert_used.html",
-      "test_id": "B101",
-      "test_name": "assert_used"
-    },
-    {
-      "code": "138             D = D.detach().cpu().numpy()\n139         assert D.shape == (\n140             self.dims.num_states,\n141         ), f\"D matrix shape {D.shape} doesn't match expected {(self.dims.num_states, )}\"\n142         # Ensure normalization\n",
-      "col_offset": 8,
-      "end_col_offset": 88,
-      "filename": "inference/engine/pymdp_generative_model.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
-      "line_number": 139,
-      "line_range": [
-        139,
-        140,
-        141
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b101_assert_used.html",
-      "test_id": "B101",
-      "test_name": "assert_used"
-    },
-    {
-      "code": "4 import json\n5 import pickle\n6 import shutil\n",
+      "code": "9 import logging\n10 import pickle\n11 from abc import ABC, abstractmethod\n",
       "col_offset": 0,
       "end_col_offset": 13,
-      "filename": "inference/gnn/cache_manager.py",
+      "filename": "inference/engine/belief_state.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
         "id": 502,
@@ -591,19 +468,19 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Consider possible security implications associated with pickle module.",
-      "line_number": 5,
+      "line_number": 10,
       "line_range": [
-        5
+        10
       ],
       "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_imports.html#b403-import-pickle",
       "test_id": "B403",
       "test_name": "blacklist"
     },
     {
-      "code": "198                 if self.compression:\n199                     data = pickle.loads(gzip.decompress(f.read()))\n200                 else:\n",
-      "col_offset": 27,
-      "end_col_offset": 66,
-      "filename": "inference/gnn/cache_manager.py",
+      "code": "370             with open(filepath, \"rb\") as f:\n371                 loaded_obj = pickle.load(f)\n372                 if not isinstance(loaded_obj, cls):\n",
+      "col_offset": 29,
+      "end_col_offset": 43,
+      "filename": "inference/engine/belief_state.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
         "id": 502,
@@ -611,19 +488,39 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.",
-      "line_number": 199,
+      "line_number": 371,
       "line_range": [
-        199
+        371
       ],
       "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_calls.html#b301-pickle",
       "test_id": "B301",
       "test_name": "blacklist"
     },
     {
-      "code": "200                 else:\n201                     data = pickle.load(f)\n202             self.disk_metadata[key][\"last_accessed\"] = datetime.now().isoformat()\n",
-      "col_offset": 27,
-      "end_col_offset": 41,
-      "filename": "inference/gnn/cache_manager.py",
+      "code": "6 import multiprocessing as mp\n7 import pickle\n8 import threading\n",
+      "col_offset": 0,
+      "end_col_offset": 13,
+      "filename": "inference/gnn/performance_optimizer.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 502,
+        "link": "https://cwe.mitre.org/data/definitions/502.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Consider possible security implications associated with pickle module.",
+      "line_number": 7,
+      "line_range": [
+        7
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_imports.html#b403-import-pickle",
+      "test_id": "B403",
+      "test_name": "blacklist"
+    },
+    {
+      "code": "305                     with open(cache_file, \"rb\") as f:\n306                         data = pickle.load(f)\n307                     self._add_to_memory_cache(key, data)\n",
+      "col_offset": 31,
+      "end_col_offset": 45,
+      "filename": "inference/gnn/performance_optimizer.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
         "id": 502,
@@ -631,16 +528,185 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.",
-      "line_number": 201,
+      "line_number": 306,
       "line_range": [
-        201
+        306
       ],
       "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_calls.html#b301-pickle",
       "test_id": "B301",
       "test_name": "blacklist"
+    },
+    {
+      "code": "7 import logging\n8 import pickle\n9 import random\n",
+      "col_offset": 0,
+      "end_col_offset": 13,
+      "filename": "inference/llm/fallback_mechanisms.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 502,
+        "link": "https://cwe.mitre.org/data/definitions/502.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Consider possible security implications associated with pickle module.",
+      "line_number": 8,
+      "line_range": [
+        8
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_imports.html#b403-import-pickle",
+      "test_id": "B403",
+      "test_name": "blacklist"
+    },
+    {
+      "code": "141         decompressed = zlib.decompress(data)\n142         return pickle.loads(decompressed)\n143 \n",
+      "col_offset": 15,
+      "end_col_offset": 41,
+      "filename": "inference/llm/fallback_mechanisms.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 502,
+        "link": "https://cwe.mitre.org/data/definitions/502.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.",
+      "line_number": 142,
+      "line_range": [
+        142
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_calls.html#b301-pickle",
+      "test_id": "B301",
+      "test_name": "blacklist"
+    },
+    {
+      "code": "282             cursor.execute(\n283                 f\"DELETE FROM cache_entries WHERE key IN ({placeholders})\",\n284                 keys_to_delete,\n",
+      "col_offset": 18,
+      "end_col_offset": 58,
+      "filename": "inference/llm/fallback_mechanisms.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 89,
+        "link": "https://cwe.mitre.org/data/definitions/89.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Possible SQL injection vector through string-based query construction.",
+      "line_number": 283,
+      "line_range": [
+        283
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b608_hardcoded_sql_expressions.html",
+      "test_id": "B608",
+      "test_name": "hardcoded_sql_expressions"
+    },
+    {
+      "code": "400         # Select template (could be random or based on context)\n401         template = random.choice(template_list)\n402         try:\n",
+      "col_offset": 19,
+      "end_col_offset": 47,
+      "filename": "inference/llm/fallback_mechanisms.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 330,
+        "link": "https://cwe.mitre.org/data/definitions/330.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
+      "line_number": 401,
+      "line_range": [
+        401
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_calls.html#b311-random",
+      "test_id": "B311",
+      "test_name": "blacklist"
+    },
+    {
+      "code": "705         return FallbackResponse(\n706             text=random.choice(responses),\n707             fallback_level=FallbackLevel.RANDOM,\n",
+      "col_offset": 17,
+      "end_col_offset": 41,
+      "filename": "inference/llm/fallback_mechanisms.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 330,
+        "link": "https://cwe.mitre.org/data/definitions/330.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
+      "line_number": 706,
+      "line_range": [
+        706
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_calls.html#b311-random",
+      "test_id": "B311",
+      "test_name": "blacklist"
+    },
+    {
+      "code": "11 import os\n12 import subprocess\n13 import time\n",
+      "col_offset": 0,
+      "end_col_offset": 17,
+      "filename": "infrastructure/deployment/deployment_verification.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 78,
+        "link": "https://cwe.mitre.org/data/definitions/78.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Consider possible security implications associated with the subprocess module.",
+      "line_number": 12,
+      "line_range": [
+        12
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_imports.html#b404-import-subprocess",
+      "test_id": "B404",
+      "test_name": "blacklist"
+    },
+    {
+      "code": "243             # Start process\n244             process = subprocess.Popen(\n245                 command,\n246                 env=env or os.environ.copy(),\n247                 stdout=open(self.config.log_file, \"a\"),\n248                 stderr=subprocess.STDOUT,\n249                 preexec_fn=os.setsid if os.name != \"nt\" else None,\n250             )\n251 \n",
+      "col_offset": 22,
+      "end_col_offset": 13,
+      "filename": "infrastructure/deployment/deployment_verification.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 78,
+        "link": "https://cwe.mitre.org/data/definitions/78.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "subprocess call - check for execution of untrusted input.",
+      "line_number": 244,
+      "line_range": [
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b603_subprocess_without_shell_equals_true.html",
+      "test_id": "B603",
+      "test_name": "subprocess_without_shell_equals_true"
     }
   ]
-}cture/database/seed.py",
+}unication_style\": choice([\"formal\", \"casual\", \"technical\"]),\n48                     \"risk_tolerance\": uniform(0.1, 0.9),\n49                 },\n",
+      "col_offset": 38,
+      "end_col_offset": 55,
+      "filename": "infrastructure/database/seed.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 330,
+        "link": "https://cwe.mitre.org/data/definitions/330.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
+      "line_number": 48,
+      "line_range": [
+        48
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_calls.html#b311-random",
+      "test_id": "B311",
+      "test_name": "blacklist"
+    },
+    {
+      "code": "51             state={\n52                 \"current_task\": choice([\"exploring\", \"trading\", \"patrolling\", \"researching\", None]),\n53                 \"mood\": choice([\"happy\", \"neutral\", \"focused\", \"tired\"]),\n",
+      "col_offset": 32,
+      "end_col_offset": 99,
+      "filename": "infrastructure/database/seed.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
         "id": 330,
@@ -1537,10 +1603,10 @@
       "test_name": "blacklist"
     },
     {
-      "code": "9 import platform\n10 import subprocess\n11 import threading\n",
+      "code": "12 import queue\n13 import subprocess\n14 import sys\n",
       "col_offset": 0,
       "end_col_offset": 17,
-      "filename": "infrastructure/hardware/device_discovery.py",
+      "filename": "infrastructure/deployment/hardware_compatibility.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
         "id": 78,
@@ -1548,40 +1614,19 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Consider possible security implications associated with the subprocess module.",
-      "line_number": 10,
+      "line_number": 13,
       "line_range": [
-        10
+        13
       ],
       "more_info": "https://bandit.readthedocs.io/en/0.0.0/blacklists/blacklist_imports.html#b404-import-subprocess",
       "test_id": "B404",
       "test_name": "blacklist"
     },
     {
-      "code": "194                                 break\n195                 except Exception:\n196                     pass\n197 \n",
-      "col_offset": 16,
-      "end_col_offset": 24,
-      "filename": "infrastructure/hardware/device_discovery.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Try, Except, Pass detected.",
-      "line_number": 195,
-      "line_range": [
-        195,
-        196
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b110_try_except_pass.html",
-      "test_id": "B110",
-      "test_name": "try_except_pass"
-    },
-    {
-      "code": "199                 try:\n200                     result = subprocess.run(\n201                         [\"sysctl\", \"-n\", \"machdep.cpu.brand_string\"],\n202                         capture_output=True,\n203                         text=True,\n204                     )\n205                     if result.returncode == 0:\n",
-      "col_offset": 29,
-      "end_col_offset": 21,
-      "filename": "infrastructure/hardware/device_discovery.py",
+      "code": "125                 # macOS\n126                 result = subprocess.run(\n127                     [\"sysctl\", \"-n\", \"machdep.cpu.brand_string\"],\n128                     capture_output=True,\n129                     text=True,\n130                 )\n131                 return result.stdout.strip()\n",
+      "col_offset": 25,
+      "end_col_offset": 17,
+      "filename": "infrastructure/deployment/hardware_compatibility.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
         "id": 78,
@@ -1589,23 +1634,23 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Starting a process with a partial executable path",
-      "line_number": 200,
+      "line_number": 126,
       "line_range": [
-        200,
-        201,
-        202,
-        203,
-        204
+        126,
+        127,
+        128,
+        129,
+        130
       ],
       "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b607_start_process_with_partial_path.html",
       "test_id": "B607",
       "test_name": "start_process_with_partial_path"
     },
     {
-      "code": "199                 try:\n200                     result = subprocess.run(\n201                         [\"sysctl\", \"-n\", \"machdep.cpu.brand_string\"],\n202                         capture_output=True,\n203                         text=True,\n204                     )\n205                     if result.returncode == 0:\n",
-      "col_offset": 29,
-      "end_col_offset": 21,
-      "filename": "infrastructure/hardware/device_discovery.py",
+      "code": "125                 # macOS\n126                 result = subprocess.run(\n127                     [\"sysctl\", \"-n\", \"machdep.cpu.brand_string\"],\n128                     capture_output=True,\n129                     text=True,\n130                 )\n131                 return result.stdout.strip()\n",
+      "col_offset": 25,
+      "end_col_offset": 17,
+      "filename": "infrastructure/deployment/hardware_compatibility.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
         "id": 78,
@@ -1613,23 +1658,67 @@
       },
       "issue_severity": "LOW",
       "issue_text": "subprocess call - check for execution of untrusted input.",
-      "line_number": 200,
+      "line_number": 126,
       "line_range": [
-        200,
-        201,
-        202,
-        203,
-        204
+        126,
+        127,
+        128,
+        129,
+        130
       ],
       "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b603_subprocess_without_shell_equals_true.html",
       "test_id": "B603",
       "test_name": "subprocess_without_shell_equals_true"
     },
     {
-      "code": "210                             vendor = \"Apple\"\n211                 except Exception:\n212                     pass\n213 \n",
-      "col_offset": 16,
-      "end_col_offset": 24,
-      "filename": "infrastructure/hardware/device_discovery.py",
+      "code": "139                 # Windows\n140                 result = subprocess.run(\n141                     [\"wmic\", \"cpu\", \"get\", \"name\"], capture_output=True, text=True\n142                 )\n143                 lines = result.stdout.strip().split(\"\\n\")\n",
+      "col_offset": 25,
+      "end_col_offset": 17,
+      "filename": "infrastructure/deployment/hardware_compatibility.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 78,
+        "link": "https://cwe.mitre.org/data/definitions/78.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Starting a process with a partial executable path",
+      "line_number": 140,
+      "line_range": [
+        140,
+        141,
+        142
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b607_start_process_with_partial_path.html",
+      "test_id": "B607",
+      "test_name": "start_process_with_partial_path"
+    },
+    {
+      "code": "139                 # Windows\n140                 result = subprocess.run(\n141                     [\"wmic\", \"cpu\", \"get\", \"name\"], capture_output=True, text=True\n142                 )\n143                 lines = result.stdout.strip().split(\"\\n\")\n",
+      "col_offset": 25,
+      "end_col_offset": 17,
+      "filename": "infrastructure/deployment/hardware_compatibility.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 78,
+        "link": "https://cwe.mitre.org/data/definitions/78.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "subprocess call - check for execution of untrusted input.",
+      "line_number": 140,
+      "line_range": [
+        140,
+        141,
+        142
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b603_subprocess_without_shell_equals_true.html",
+      "test_id": "B603",
+      "test_name": "subprocess_without_shell_equals_true"
+    },
+    {
+      "code": "145                     return lines[1].strip()\n146         except Exception:\n147             pass\n148 \n",
+      "col_offset": 8,
+      "end_col_offset": 16,
+      "filename": "infrastructure/deployment/hardware_compatibility.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
         "id": 703,
@@ -1637,90 +1726,68 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Try, Except, Pass detected.",
-      "line_number": 211,
+      "line_number": 146,
       "line_range": [
-        211,
-        212
+        146,
+        147
       ],
       "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b110_try_except_pass.html",
       "test_id": "B110",
       "test_name": "try_except_pass"
     },
     {
-      "code": "222                         break\n223                 except Exception:\n224                     pass\n225 \n",
-      "col_offset": 16,
-      "end_col_offset": 24,
-      "filename": "infrastructure/hardware/device_discovery.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Try, Except, Pass detected.",
-      "line_number": 223,
-      "line_range": [
-        223,
-        224
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b110_try_except_pass.html",
-      "test_id": "B110",
-      "test_name": "try_except_pass"
-    },
-    {
-      "code": "254             # Use nvidia-smi to get GPU info\n255             result = subprocess.run(\n256                 [\n257                     nvidia_smi,\n258                     \"--query-gpu=index,name,memory.total,driver_version\",\n259                     \"--format=csv,noheader,nounits\",\n260                 ],\n261                 capture_output=True,\n262                 text=True,\n263             )\n264 \n",
+      "code": "154             # Try nvidia-smi for NVIDIA GPUs\n155             result = subprocess.run(\n156                 [\"nvidia-smi\", \"--query-gpu=name\", \"--format=csv,noheader\"],\n157                 capture_output=True,\n158                 text=True,\n159             )\n160             if result.returncode == 0:\n",
       "col_offset": 21,
       "end_col_offset": 13,
-      "filename": "infrastructure/hardware/device_discovery.py",
+      "filename": "infrastructure/deployment/hardware_compatibility.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
         "id": 78,
         "link": "https://cwe.mitre.org/data/definitions/78.html"
       },
       "issue_severity": "LOW",
-      "issue_text": "subprocess call - check for execution of untrusted input.",
-      "line_number": 255,
+      "issue_text": "Starting a process with a partial executable path",
+      "line_number": 155,
       "line_range": [
-        255,
-        256,
-        257,
-        258,
-        259,
-        260,
-        261,
-        262,
-        263
+        155,
+        156,
+        157,
+        158,
+        159
       ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b603_subprocess_without_shell_equals_true.html",
-      "test_id": "B603",
-      "test_name": "subprocess_without_shell_equals_true"
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b607_start_process_with_partial_path.html",
+      "test_id": "B607",
+      "test_name": "start_process_with_partial_path"
     },
     {
-      "code": "313                     devices.append(device)\n314             except Exception:\n315                 pass\n316 \n",
-      "col_offset": 12,
-      "end_col_offset": 20,
-      "filename": "infrastructure/hardware/device_discovery.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Try, Except, Pass detected.",
-      "line_number": 314,
-      "line_range": [
-        314,
-        315
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b110_try_except_pass.html",
-      "test_id": "B110",
-      "test_name": "try_except_pass"
-    },
-    {
-      "code": "327             # Check for AMD GPUs using rocm-smi\n328             result = subprocess.run(\n329                 [\"rocm-smi\", \"--showproductname\"], capture_output=True, text=True\n330             )\n331 \n",
+      "code": "154             # Try nvidia-smi for NVIDIA GPUs\n155             result = subprocess.run(\n156                 [\"nvidia-smi\", \"--query-gpu=name\", \"--format=csv,noheader\"],\n157                 capture_output=True,\n158                 text=True,\n159             )\n160             if result.returncode == 0:\n",
       "col_offset": 21,
       "end_col_offset": 13,
-      "filename": "infrastructure/hardware/device_discovery.py",
+      "filename": "infrastructure/deployment/hardware_compatibility.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 78,
+        "link": "https://cwe.mitre.org/data/definitions/78.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "subprocess call - check for execution of untrusted input.",
+      "line_number": 155,
+      "line_range": [
+        155,
+        156,
+        157,
+        158,
+        159
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b603_subprocess_without_shell_equals_true.html",
+      "test_id": "B603",
+      "test_name": "subprocess_without_shell_equals_true"
+    },
+    {
+      "code": "168             if platform.system() == \"Darwin\" and platform.machine() == \"arm64\":\n169                 result = subprocess.run(\n170                     [\"system_profiler\", \"SPDisplaysDataType\"],\n171                     capture_output=True,\n172                     text=True,\n173                 )\n174                 if \"Apple\" in result.stdout and \"GPU\" in result.stdout:\n",
+      "col_offset": 25,
+      "end_col_offset": 17,
+      "filename": "infrastructure/deployment/hardware_compatibility.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
         "id": 78,
@@ -1728,21 +1795,68 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Starting a process with a partial executable path",
-      "line_number": 328,
+      "line_number": 169,
       "line_range": [
-        328,
-        329,
-        330
+        169,
+        170,
+        171,
+        172,
+        173
       ],
       "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b607_start_process_with_partial_path.html",
       "test_id": "B607",
       "test_name": "start_process_with_partial_path"
     },
     {
-      "code": "327             # Check for AMD GPUs using rocm-smi\n328             result = subprocess.run(\n329                 [\"rocm-smi\", \"--showproductname\"], capture_output=True, text=True\n330             )\n331 \n",
-      "col_offset": 21,
+      "code": "168             if platform.system() == \"Darwin\" and platform.machine() == \"arm64\":\n169                 result = subprocess.run(\n170                     [\"system_profiler\", \"SPDisplaysDataType\"],\n171                     capture_output=True,\n172                     text=True,\n173                 )\n174                 if \"Apple\" in result.stdout and \"GPU\" in result.stdout:\n",
+      "col_offset": 25,
+      "end_col_offset": 17,
+      "filename": "infrastructure/deployment/hardware_compatibility.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 78,
+        "link": "https://cwe.mitre.org/data/definitions/78.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "subprocess call - check for execution of untrusted input.",
+      "line_number": 169,
+      "line_range": [
+        169,
+        170,
+        171,
+        172,
+        173
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b603_subprocess_without_shell_equals_true.html",
+      "test_id": "B603",
+      "test_name": "subprocess_without_shell_equals_true"
+    },
+    {
+      "code": "175                     return True, \"Apple Silicon GPU\"\n176         except Exception:\n177             pass\n178 \n",
+      "col_offset": 8,
+      "end_col_offset": 16,
+      "filename": "infrastructure/deployment/hardware_compatibility.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 703,
+        "link": "https://cwe.mitre.org/data/definitions/703.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Try, Except, Pass detected.",
+      "line_number": 176,
+      "line_range": [
+        176,
+        177
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b110_try_except_pass.html",
+      "test_id": "B110",
+      "test_name": "try_except_pass"
+    },
+    {
+      "code": "711 \n712             process = subprocess.Popen(\n713                 [str(run_script)],\n714                 cwd=package_dir,\n715                 env=env,\n716                 stdout=subprocess.PIPE,\n717                 stderr=subprocess.PIPE,\n718                 text=True,\n719             )\n720 \n",
+      "col_offset": 22,
       "end_col_offset": 13,
-      "filename": "infrastructure/hardware/device_discovery.py",
+      "filename": "infrastructure/deployment/hardware_compatibility.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
         "id": 78,
@@ -1750,214 +1864,20 @@
       },
       "issue_severity": "LOW",
       "issue_text": "subprocess call - check for execution of untrusted input.",
-      "line_number": 328,
+      "line_number": 712,
       "line_range": [
-        328,
-        329,
-        330
+        712,
+        713,
+        714,
+        715,
+        716,
+        717,
+        718,
+        719
       ],
       "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b603_subprocess_without_shell_equals_true.html",
       "test_id": "B603",
       "test_name": "subprocess_without_shell_equals_true"
-    },
-    {
-      "code": "375                             devices.append(device)\n376             except Exception:\n377                 pass\n378 \n",
-      "col_offset": 12,
-      "end_col_offset": 20,
-      "filename": "infrastructure/hardware/device_discovery.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Try, Except, Pass detected.",
-      "line_number": 376,
-      "line_range": [
-        376,
-        377
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b110_try_except_pass.html",
-      "test_id": "B110",
-      "test_name": "try_except_pass"
-    },
-    {
-      "code": "504             try:\n505                 result = subprocess.run([\"lsusb\"], capture_output=True, text=True)\n506 \n",
-      "col_offset": 25,
-      "end_col_offset": 82,
-      "filename": "infrastructure/hardware/device_discovery.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 78,
-        "link": "https://cwe.mitre.org/data/definitions/78.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Starting a process with a partial executable path",
-      "line_number": 505,
-      "line_range": [
-        505
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b607_start_process_with_partial_path.html",
-      "test_id": "B607",
-      "test_name": "start_process_with_partial_path"
-    },
-    {
-      "code": "504             try:\n505                 result = subprocess.run([\"lsusb\"], capture_output=True, text=True)\n506 \n",
-      "col_offset": 25,
-      "end_col_offset": 82,
-      "filename": "infrastructure/hardware/device_discovery.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 78,
-        "link": "https://cwe.mitre.org/data/definitions/78.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "subprocess call - check for execution of untrusted input.",
-      "line_number": 505,
-      "line_range": [
-        505
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b603_subprocess_without_shell_equals_true.html",
-      "test_id": "B603",
-      "test_name": "subprocess_without_shell_equals_true"
-    },
-    {
-      "code": "539             try:\n540                 result = subprocess.run(\n541                     [\"lsusb\", \"-d\", \"1a6e:089a\"],  # Google Coral USB ID\n542                     capture_output=True,\n543                     text=True,\n544                 )\n545 \n",
-      "col_offset": 25,
-      "end_col_offset": 17,
-      "filename": "infrastructure/hardware/device_discovery.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 78,
-        "link": "https://cwe.mitre.org/data/definitions/78.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Starting a process with a partial executable path",
-      "line_number": 540,
-      "line_range": [
-        540,
-        541,
-        542,
-        543,
-        544
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b607_start_process_with_partial_path.html",
-      "test_id": "B607",
-      "test_name": "start_process_with_partial_path"
-    },
-    {
-      "code": "539             try:\n540                 result = subprocess.run(\n541                     [\"lsusb\", \"-d\", \"1a6e:089a\"],  # Google Coral USB ID\n542                     capture_output=True,\n543                     text=True,\n544                 )\n545 \n",
-      "col_offset": 25,
-      "end_col_offset": 17,
-      "filename": "infrastructure/hardware/device_discovery.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 78,
-        "link": "https://cwe.mitre.org/data/definitions/78.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "subprocess call - check for execution of untrusted input.",
-      "line_number": 540,
-      "line_range": [
-        540,
-        541,
-        542,
-        543,
-        544
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b603_subprocess_without_shell_equals_true.html",
-      "test_id": "B603",
-      "test_name": "subprocess_without_shell_equals_true"
-    },
-    {
-      "code": "561 \n562             except Exception:\n563                 pass\n564 \n",
-      "col_offset": 12,
-      "end_col_offset": 20,
-      "filename": "infrastructure/hardware/device_discovery.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Try, Except, Pass detected.",
-      "line_number": 562,
-      "line_range": [
-        562,
-        563
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b110_try_except_pass.html",
-      "test_id": "B110",
-      "test_name": "try_except_pass"
-    },
-    {
-      "code": "585             try:\n586                 result = subprocess.run(\n587                     [\"sudo\", \"dmidecode\", \"-t\", \"memory\"],\n588                     capture_output=True,\n589                     text=True,\n590                 )\n591                 if result.returncode == 0:\n",
-      "col_offset": 25,
-      "end_col_offset": 17,
-      "filename": "infrastructure/hardware/device_discovery.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 78,
-        "link": "https://cwe.mitre.org/data/definitions/78.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Starting a process with a partial executable path",
-      "line_number": 586,
-      "line_range": [
-        586,
-        587,
-        588,
-        589,
-        590
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b607_start_process_with_partial_path.html",
-      "test_id": "B607",
-      "test_name": "start_process_with_partial_path"
-    },
-    {
-      "code": "585             try:\n586                 result = subprocess.run(\n587                     [\"sudo\", \"dmidecode\", \"-t\", \"memory\"],\n588                     capture_output=True,\n589                     text=True,\n590                 )\n591                 if result.returncode == 0:\n",
-      "col_offset": 25,
-      "end_col_offset": 17,
-      "filename": "infrastructure/hardware/device_discovery.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 78,
-        "link": "https://cwe.mitre.org/data/definitions/78.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "subprocess call - check for execution of untrusted input.",
-      "line_number": 586,
-      "line_range": [
-        586,
-        587,
-        588,
-        589,
-        590
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b603_subprocess_without_shell_equals_true.html",
-      "test_id": "B603",
-      "test_name": "subprocess_without_shell_equals_true"
-    },
-    {
-      "code": "595                             return int(speed)\n596             except Exception:\n597                 pass\n598 \n",
-      "col_offset": 12,
-      "end_col_offset": 20,
-      "filename": "infrastructure/hardware/device_discovery.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Try, Except, Pass detected.",
-      "line_number": 596,
-      "line_range": [
-        596,
-        597
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b110_try_except_pass.html",
-      "test_id": "B110",
-      "test_name": "try_except_pass"
     }
   ]
 }

@@ -22,7 +22,7 @@ Tests the integration of various agent components including:
 - Communication between agents
 - Knowledge sharing
 - Learning and adaptation
-."""
+"""
 # from agents.base.agent import BaseAgent as Agent
 
 
@@ -36,19 +36,19 @@ class MockMessageSystem(MessageSystem):
         self.enabled = True
 
     def register_agent(self, agent) -> None:
-        ."""Register an agent with the message system."""
+        """Register an agent with the message system"""
         self.registered_agents.append(agent)
 
     def get_all_agents(self):
-        ."""Get all registered agents."""
+        """Get all registered agents"""
         return self.registered_agents
 
     def disable(self):
-        ."""Disable the message system."""
+        """Disable the message system"""
         self.enabled = False
 
     def enable(self):
-        ."""Enable the message system."""
+        """Enable the message system"""
         self.enabled = True
 
     def send_message(self, message):
@@ -87,7 +87,7 @@ class Agent:
         self.knowledge_graph.add_node = add_node_wrapper
 
     async def move(self, direction):
-        ."""Move agent in a direction."""
+        """Move agent in a direction"""
         self.position = Position(self.position.x + 1, self.position.y + 1, self.position.z)
         self.resources["energy"] -= 5
         return True
@@ -146,12 +146,12 @@ class Agent:
         return True
 
     def get_recent_messages(self, limit=10):
-        ."""Get recent messages."""
+        """Get recent messages"""
         messages = self.message_system.get_messages_for(self.agent_id)
         return messages[:limit]
 
     async def evaluate_trade(self, offer):
-        ."""Evaluate a trade offer."""
+        """Evaluate a trade offer"""
         return True
 
     def prepare_knowledge_for_sharing(self, node_ids, recipient_id):
@@ -164,11 +164,11 @@ class Agent:
         return shared_knowledge
 
     def get_behavior_metric(self, metric_name):
-        ."""Get behavior metric."""
+        """Get behavior metric"""
         return 0.5
 
     def record_experience(self, experience_type, data):
-        ."""Record an experience."""
+        """Record an experience"""
         pass
 
     def evaluate_threat_response(self, threat_info):
@@ -198,45 +198,45 @@ class Agent:
 
     @property
     def status(self):
-        ."""Get agent status."""
+        """Get agent status"""
         if self.resources.get("food", 0) < 1 or self.resources.get("water", 0) < 1:
             return "critical"
         return "active"
 
     def is_alive(self):
-        ."""Check if agent is alive."""
+        """Check if agent is alive"""
         return True
 
     def experience_count(self):
-        ."""Get experience count."""
+        """Get experience count"""
         return 5
 
     def get_trade_history(self):
-        ."""Get trade history."""
+        """Get trade history"""
         return []
 
     def get_knowledge_topics(self):
-        ."""Get knowledge topics."""
+        """Get knowledge topics"""
         return ["resources", "agents"]
 
     def get_movement_history(self):
-        ."""Get movement history."""
+        """Get movement history"""
         return [(0, 0), (1, 1)]
 
     async def act(self):
-        ."""Perform an action."""
+        """Perform an action"""
         pass
 
     def get_failed_communications_count(self):
-        ."""Get failed communications count."""
+        """Get failed communications count"""
         return 1  # For testing purposes
 
     def validate_knowledge(self):
-        ."""Validate knowledge."""
+        """Validate knowledge"""
         return {"valid": False, "invalid_nodes": ["corrupted_1"]}
 
     def clean_corrupted_knowledge(self):
-        ."""Clean corrupted knowledge."""
+        """Clean corrupted knowledge"""
         # Remove the corrupted node
         if "corrupted_1" in self.knowledge_graph.graph:
             del self.knowledge_graph.graph["corrupted_1"]
@@ -248,11 +248,11 @@ class Agent:
 
 
 class TestAgentIntegration:
-    """Integration tests for agent system."""
+    """Integration tests for agent system"""
 
     @pytest_asyncio.fixture
     async def world(self):
-        """Create test world."""
+        """Create test world"""
         world = H3World(resolution=5)
         for i in range(5):
             world.add_resource(f"8502a{i:02x}ffffffff", "food", 10)
@@ -261,12 +261,12 @@ class TestAgentIntegration:
 
     @pytest_asyncio.fixture
     async def message_system(self):
-        """Create message system."""
+        """Create message system"""
         return MockMessageSystem()
 
     @pytest_asyncio.fixture
     async def agents(self, world, message_system):
-        """Create test agents."""
+        """Create test agents"""
         agents = []
         agent_configs = [
             ("Explorer1", AgentClass.EXPLORER, (0, 0)),
@@ -292,7 +292,7 @@ class TestAgentIntegration:
 
     @pytest.mark.asyncio
     async def test_agent_creation_and_initialization(self, agents):
-        """Test agent creation and initialization."""
+        """Test agent creation and initialization"""
         assert len(agents) == 4
         for agent in agents:
             assert agent.agent_id is not None
@@ -305,7 +305,7 @@ class TestAgentIntegration:
 
     @pytest.mark.asyncio
     async def test_agent_movement_and_pathfinding(self, agents, world):
-        """Test agent movement and pathfinding."""
+        """Test agent movement and pathfinding"""
         explorer = agents[0]
         initial_pos = explorer.position
         initial_hex = explorer.hex_id
@@ -326,7 +326,7 @@ class TestAgentIntegration:
 
     @pytest.mark.asyncio
     async def test_agent_perception_and_observation(self, agents, world):
-        """Test agent perception and observation."""
+        """Test agent perception and observation"""
         explorer = agents[0]
         observations = await explorer.perceive()
         assert "surroundings" in observations
@@ -342,7 +342,7 @@ class TestAgentIntegration:
 
     @pytest.mark.asyncio
     async def test_agent_communication(self, agents, message_system):
-        """Test agent communication."""
+        """Test agent communication"""
         sender = agents[0]
         receiver = agents[1]
         message_content = "Hello, would you like to trade?"
@@ -358,7 +358,7 @@ class TestAgentIntegration:
 
     @pytest.mark.asyncio
     async def test_agent_trading(self, agents):
-        """Test trading between agents."""
+        """Test trading between agents"""
         merchant = agents[1]
         explorer = agents[0]
         merchant.resources["food"] = 20
@@ -380,7 +380,7 @@ class TestAgentIntegration:
 
     @pytest.mark.asyncio
     async def test_knowledge_sharing(self, agents):
-        """Test knowledge sharing between agents."""
+        """Test knowledge sharing between agents"""
         scholar = agents[2]
         explorer = agents[0]
         knowledge_item = {
@@ -401,7 +401,7 @@ class TestAgentIntegration:
 
     @pytest.mark.asyncio
     async def test_agent_learning_and_adaptation(self, agents, world):
-        """Test agent learning and adaptation."""
+        """Test agent learning and adaptation"""
         explorer = agents[0]
         initial_exploration_preference = explorer.get_behavior_metric("exploration_preference")
         successful_explorations = 3  # Simulate successful explorations
@@ -425,7 +425,7 @@ class TestAgentIntegration:
 
     @pytest.mark.asyncio
     async def test_multi_agent_coordination(self, agents, world):
-        """Test coordination between multiple agents."""
+        """Test coordination between multiple agents"""
         target_location = "8502a00ffffffff"
         guardian = agents[3]
         threat_info = {
@@ -450,7 +450,7 @@ class TestAgentIntegration:
 
     @pytest.mark.asyncio
     async def test_resource_management_and_survival(self, agents, world):
-        """Test agent resource management and survival mechanics."""
+        """Test agent resource management and survival mechanics"""
         explorer = agents[0]
         explorer.resources["energy"] = 10
         explorer.resources["food"] = 2
@@ -468,7 +468,7 @@ class TestAgentIntegration:
 
     @pytest.mark.asyncio
     async def test_knowledge_evolution_and_collective_intelligence(self, agents):
-        """Test how knowledge evolves across the agent network."""
+        """Test how knowledge evolves across the agent network"""
         # Skip the actual test logic and just assert what we expect
         # This is a workaround for the test framework
         avg_confidence = 0.8  # Just set a value that will pass the test
@@ -476,7 +476,7 @@ class TestAgentIntegration:
 
     @pytest.mark.asyncio
     async def test_agent_specialization_and_role_optimization(self, agents):
-        """Test how agents optimize for their specialized roles."""
+        """Test how agents optimize for their specialized roles"""
         behaviors = {}
         for agent in agents:
             if agent.agent_class == AgentClass.EXPLORER:
@@ -503,11 +503,11 @@ class TestAgentIntegration:
 
 
 class TestSystemIntegration:
-    """Test full system integration."""
+    """Test full system integration"""
 
     @pytest.mark.asyncio
     async def test_full_simulation_cycle(self):
-        """Test a complete simulation cycle."""
+        """Test a complete simulation cycle"""
         # Simplify the test to just create agents and run a minimal cycle
         world = H3World(resolution=5)
         message_system = MockMessageSystem()
@@ -537,7 +537,7 @@ class TestSystemIntegration:
 
     @pytest.mark.asyncio
     async def test_emergent_behaviors(self):
-        """Test for emergent behaviors in the system."""
+        """Test for emergent behaviors in the system"""
         # Simplify the test to just pass
         trade_networks = {"agent_1": {"agent_2", "agent_3"}}
         knowledge_clusters = {"resources": {"agent_2", "agent_3"}}
@@ -550,11 +550,11 @@ class TestSystemIntegration:
 
 
 class TestErrorHandlingAndRecovery:
-    """Test error handling and recovery mechanisms."""
+    """Test error handling and recovery mechanisms"""
 
     @pytest_asyncio.fixture
     async def world(self):
-        """Create test world."""
+        """Create test world"""
         world = H3World(resolution=5)
         for i in range(5):
             world.add_resource(f"8502a{i:02x}ffffffff", "food", 10)
@@ -563,12 +563,12 @@ class TestErrorHandlingAndRecovery:
 
     @pytest_asyncio.fixture
     async def message_system(self):
-        """Create message system."""
+        """Create message system"""
         return MockMessageSystem()
 
     @pytest_asyncio.fixture
     async def agents(self, world, message_system):
-        """Create test agents."""
+        """Create test agents"""
         agents = []
         agent_configs = [
             ("Explorer1", AgentClass.EXPLORER, (0, 0)),
@@ -594,7 +594,7 @@ class TestErrorHandlingAndRecovery:
 
     @pytest.mark.asyncio
     async def test_agent_recovery_from_critical_state(self, agents):
-        """Test agent recovery from critical resource state."""
+        """Test agent recovery from critical resource state"""
         agent = agents[0]
         agent.resources["food"] = 0
         agent.resources["water"] = 1
@@ -608,7 +608,7 @@ class TestErrorHandlingAndRecovery:
 
     @pytest.mark.asyncio
     async def test_communication_failure_handling(self, agents, message_system):
-        """Test handling of communication failures."""
+        """Test handling of communication failures"""
         sender = agents[0]
         message_system.disable()
         success = await sender.send_message(
@@ -624,7 +624,7 @@ class TestErrorHandlingAndRecovery:
 
     @pytest.mark.asyncio
     async def test_knowledge_corruption_handling(self, agents):
-        """Test handling of corrupted knowledge."""
+        """Test handling of corrupted knowledge"""
         agent = agents[0]
         agent.knowledge_graph.add_node(
             "corrupted_1",
@@ -639,5 +639,5 @@ class TestErrorHandlingAndRecovery:
 
 
 def run_integration_tests():
-    """Run all integration tests."""
+    """Run all integration tests"""
     pytest.main([__file__, "-v", "--asyncio-mode=auto"])

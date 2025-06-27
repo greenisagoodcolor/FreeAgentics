@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 
 class ActionType(Enum):
-    """Types of actions agents can perform in the world."""
+    """Types of actions agents can perform in the world"""
 
     MOVE = "move"
     OBSERVE = "observe"
@@ -46,7 +46,7 @@ class ActionType(Enum):
 
 
 class EventType(Enum):
-    """Types of world events that agents can respond to."""
+    """Types of world events that agents can respond to"""
 
     AGENT_MOVED = "agent_moved"
     RESOURCE_DEPLETED = "resource_depleted"
@@ -59,7 +59,7 @@ class EventType(Enum):
 
 @dataclass
 class WorldEvent:
-    """Represents an event that occurred in the world."""
+    """Represents an event that occurred in the world"""
 
     event_type: EventType
     location: str  # hex_id where event occurred
@@ -71,7 +71,7 @@ class WorldEvent:
 
 @dataclass
 class Perception:
-    """What an agent perceives about its environment."""
+    """What an agent perceives about its environment"""
 
     current_location: str
     visible_cells: List[Any]  # Will be HexCell objects
@@ -85,7 +85,7 @@ class Perception:
 
 @dataclass
 class ActionResult:
-    """Result of an agent action in the world."""
+    """Result of an agent action in the world"""
 
     success: bool
     action_type: ActionType
@@ -96,82 +96,82 @@ class ActionResult:
 
 
 class IWorldPerceptionInterface(ABC):
-    """Interface for agent world perception."""
+    """Interface for agent world perception"""
 
     @abstractmethod
     def perceive_environment(self, agent_id: str) -> Perception:
-        """Get agent's perception of the environment."""
+        """Get agent's perception of the environment"""
         pass
 
     @abstractmethod
     def get_agent_location(self, agent_id: str) -> Optional[str]:
-        """Get current location of an agent."""
+        """Get current location of an agent"""
         pass
 
     @abstractmethod
     def get_visible_agents(self, observer_id: str) -> Dict[str, str]:
-        """Get other agents visible to the observer."""
+        """Get other agents visible to the observer"""
         pass
 
     @abstractmethod
     def get_available_actions(self, agent_id: str) -> List[ActionType]:
-        """Get list of actions available to agent at current location."""
+        """Get list of actions available to agent at current location"""
         pass
 
 
 class IWorldActionInterface(ABC):
-    """Interface for agent world actions."""
+    """Interface for agent world actions"""
 
     @abstractmethod
     def perform_action(
         self, agent_id: str, action_type: ActionType, parameters: Dict[str, Any]
     ) -> ActionResult:
-        """Perform an action in the world."""
+        """Perform an action in the world"""
         pass
 
     @abstractmethod
     def validate_action(
         self, agent_id: str, action_type: ActionType, parameters: Dict[str, Any]
     ) -> bool:
-        """Check if an action is valid."""
+        """Check if an action is valid"""
         pass
 
     @abstractmethod
     def get_action_cost(
         self, agent_id: str, action_type: ActionType, parameters: Dict[str, Any]
     ) -> float:
-        """Get energy cost of performing an action."""
+        """Get energy cost of performing an action"""
         pass
 
 
 class IWorldEventSystem(ABC):
-    """Interface for world event handling."""
+    """Interface for world event handling"""
 
     @abstractmethod
     def subscribe_to_events(
         self, agent_id: str, event_types: List[EventType], callback: Callable[[WorldEvent], None]
     ) -> None:
-        """Subscribe an agent to specific types of world events."""
+        """Subscribe an agent to specific types of world events"""
         pass
 
     @abstractmethod
     def unsubscribe_from_events(self, agent_id: str, event_types: List[EventType]) -> None:
-        """Unsubscribe an agent from event types."""
+        """Unsubscribe an agent from event types"""
         pass
 
     @abstractmethod
     def publish_event(self, event: WorldEvent) -> None:
-        """Publish an event to all subscribed agents."""
+        """Publish an event to all subscribed agents"""
         pass
 
     @abstractmethod
     def get_recent_events(self, location: str, time_window_minutes: int = 10) -> List[WorldEvent]:
-        """Get recent events near a location."""
+        """Get recent events near a location"""
         pass
 
 
 class WorldEventSystem(IWorldEventSystem):
-    """Implementation of world event system."""
+    """Implementation of world event system"""
 
     def __init__(self) -> None:
         self.subscribers: Dict[EventType, Dict[str, Callable]] = defaultdict(dict)
@@ -181,20 +181,20 @@ class WorldEventSystem(IWorldEventSystem):
     def subscribe_to_events(
         self, agent_id: str, event_types: List[EventType], callback: Callable[[WorldEvent], None]
     ) -> None:
-        """Subscribe an agent to specific types of world events."""
+        """Subscribe an agent to specific types of world events"""
         for event_type in event_types:
             self.subscribers[event_type][agent_id] = callback
         logger.debug(f"Agent {agent_id} subscribed to events: {[e.value for e in event_types]}")
 
     def unsubscribe_from_events(self, agent_id: str, event_types: List[EventType]) -> None:
-        """Unsubscribe an agent from event types."""
+        """Unsubscribe an agent from event types"""
         for event_type in event_types:
             if agent_id in self.subscribers[event_type]:
                 del self.subscribers[event_type][agent_id]
         logger.debug(f"Agent {agent_id} unsubscribed from events: {[e.value for e in event_types]}")
 
     def publish_event(self, event: WorldEvent) -> None:
-        """Publish an event to all subscribed agents."""
+        """Publish an event to all subscribed agents"""
         # Store in history
         self.event_history.append(event)
         if len(self.event_history) > self.max_history_size:
@@ -215,7 +215,7 @@ class WorldEventSystem(IWorldEventSystem):
         logger.debug(f"Published event {event.event_type.value} to {len(subscribers)} subscribers")
 
     def get_recent_events(self, location: str, time_window_minutes: int = 10) -> List[WorldEvent]:
-        """Get recent events near a location."""
+        """Get recent events near a location"""
         cutoff_time = datetime.now(timezone.utc).timestamp() - (time_window_minutes * 60)
         recent_events = []
         for event in reversed(self.event_history):  # Most recent first
@@ -248,7 +248,7 @@ class AgentWorldManager:
         logger.info("Initialized AgentWorldManager")
 
     def place_agent(self, agent_id: str, hex_id: str) -> bool:
-        """Place an agent at a specific location."""
+        """Place an agent at a specific location"""
         cell = self.world.get_cell(hex_id)
         if not cell:
             logger.warning(f"Cannot place agent {agent_id} at invalid location {hex_id}")
@@ -267,7 +267,7 @@ class AgentWorldManager:
         return True
 
     def remove_agent(self, agent_id: str) -> None:
-        """Remove an agent from the world."""
+        """Remove an agent from the world"""
         if agent_id in self.agent_locations:
             del self.agent_locations[agent_id]
         if agent_id in self.agent_resources:
@@ -277,7 +277,7 @@ class AgentWorldManager:
         logger.debug(f"Removed agent {agent_id} from world")
 
     def perceive_environment(self, agent_id: str) -> Optional[Perception]:
-        """Get agent's perception of the environment."""
+        """Get agent's perception of the environment"""
         location = self.agent_locations.get(agent_id)
         if not location:
             return None
@@ -320,7 +320,7 @@ class AgentWorldManager:
         )
 
     def get_available_actions(self, agent_id: str) -> List[ActionType]:
-        """Get list of actions available to agent at current location."""
+        """Get list of actions available to agent at current location"""
         location = self.agent_locations.get(agent_id)
         if not location:
             return []
@@ -342,7 +342,7 @@ class AgentWorldManager:
     def perform_action(
         self, agent_id: str, action_type: ActionType, parameters: Dict[str, Any]
     ) -> ActionResult:
-        """Perform an action in the world."""
+        """Perform an action in the world"""
         location = self.agent_locations.get(agent_id)
         if not location:
             return ActionResult(
@@ -378,7 +378,7 @@ class AgentWorldManager:
     def _calculate_action_cost(
         self, agent_id: str, action_type: ActionType, parameters: Dict[str, Any]
     ) -> float:
-        """Calculate energy cost of performing an action."""
+        """Calculate energy cost of performing an action"""
         base_costs = {
             ActionType.MOVE: 10.0,
             ActionType.OBSERVE: 5.0,
@@ -406,7 +406,7 @@ class AgentWorldManager:
     def _perform_move_action(
         self, agent_id: str, parameters: Dict[str, Any], cost: float
     ) -> ActionResult:
-        """Perform movement action."""
+        """Perform movement action"""
         target_hex = parameters.get("target_hex")
         if not target_hex:
             return ActionResult(
@@ -448,7 +448,7 @@ class AgentWorldManager:
     def _perform_harvest_action(
         self, agent_id: str, parameters: Dict[str, Any], cost: float
     ) -> ActionResult:
-        """Perform resource harvesting action."""
+        """Perform resource harvesting action"""
         resource_type = parameters.get("resource_type")
         amount = parameters.get("amount", 10.0)
         if not resource_type:
@@ -508,7 +508,7 @@ class AgentWorldManager:
     def _perform_observe_action(
         self, agent_id: str, parameters: Dict[str, Any], cost: float
     ) -> ActionResult:
-        """Perform observation action."""
+        """Perform observation action"""
         # Consume energy
         self.agent_energy[agent_id] -= cost
         # Get enhanced perception
@@ -524,7 +524,7 @@ class AgentWorldManager:
     def _perform_communicate_action(
         self, agent_id: str, parameters: Dict[str, Any], cost: float
     ) -> ActionResult:
-        """Perform communication action."""
+        """Perform communication action"""
         target_agent = parameters.get("target_agent")
         message = parameters.get("message", "")
         # Consume energy
@@ -549,7 +549,7 @@ class AgentWorldManager:
     def _perform_build_action(
         self, agent_id: str, parameters: Dict[str, Any], cost: float
     ) -> ActionResult:
-        """Perform building action."""
+        """Perform building action"""
         structure_type = parameters.get("structure_type", "basic_shelter")
         location = self.agent_locations[agent_id]
         # Check if already has structure
@@ -586,20 +586,20 @@ class AgentWorldManager:
 
     # === Agent State Management ===
     def get_agent_energy(self, agent_id: str) -> float:
-        """Get current energy level of an agent."""
+        """Get current energy level of an agent"""
         return self.agent_energy.get(agent_id, 0.0)
 
     def restore_agent_energy(self, agent_id: str, amount: float) -> None:
-        """Restore energy to an agent."""
+        """Restore energy to an agent"""
         current = self.agent_energy.get(agent_id, 0.0)
         self.agent_energy[agent_id] = min(100.0, current + amount)
 
     def get_agent_resources(self, agent_id: str) -> Dict[str, float]:
-        """Get resources carried by an agent."""
+        """Get resources carried by an agent"""
         return self.agent_resources.get(agent_id, {}).copy()
 
     def get_world_state_summary(self) -> Dict[str, Any]:
-        """Get summary of current world state."""
+        """Get summary of current world state"""
         return {
             "num_agents": len(self.agent_locations),
             "total_energy": sum(self.agent_energy.values()),
@@ -633,7 +633,7 @@ class AgentWorldManager:
         logger.info("Initialized AgentWorldManager")
 
     def place_agent(self, agent_id: str, hex_id: str) -> bool:
-        """Place an agent at a specific location."""
+        """Place an agent at a specific location"""
         cell = self.world.get_cell(hex_id)
         if not cell:
             logger.warning(f"Cannot place agent {agent_id} at invalid location {hex_id}")
@@ -652,7 +652,7 @@ class AgentWorldManager:
         return True
 
     def remove_agent(self, agent_id: str) -> None:
-        """Remove an agent from the world."""
+        """Remove an agent from the world"""
         if agent_id in self.agent_locations:
             del self.agent_locations[agent_id]
         if agent_id in self.agent_resources:
@@ -662,7 +662,7 @@ class AgentWorldManager:
         logger.debug(f"Removed agent {agent_id} from world")
 
     def perceive_environment(self, agent_id: str) -> Optional[Perception]:
-        """Get agent's perception of the environment."""
+        """Get agent's perception of the environment"""
         location = self.agent_locations.get(agent_id)
         if not location:
             return None
@@ -705,7 +705,7 @@ class AgentWorldManager:
         )
 
     def get_available_actions(self, agent_id: str) -> List[ActionType]:
-        """Get list of actions available to agent at current location."""
+        """Get list of actions available to agent at current location"""
         location = self.agent_locations.get(agent_id)
         if not location:
             return []
@@ -727,7 +727,7 @@ class AgentWorldManager:
     def perform_action(
         self, agent_id: str, action_type: ActionType, parameters: Dict[str, Any]
     ) -> ActionResult:
-        """Perform an action in the world."""
+        """Perform an action in the world"""
         location = self.agent_locations.get(agent_id)
         if not location:
             return ActionResult(
@@ -763,7 +763,7 @@ class AgentWorldManager:
     def _calculate_action_cost(
         self, agent_id: str, action_type: ActionType, parameters: Dict[str, Any]
     ) -> float:
-        """Calculate energy cost of performing an action."""
+        """Calculate energy cost of performing an action"""
         base_costs = {
             ActionType.MOVE: 10.0,
             ActionType.OBSERVE: 5.0,
@@ -791,7 +791,7 @@ class AgentWorldManager:
     def _perform_move_action(
         self, agent_id: str, parameters: Dict[str, Any], cost: float
     ) -> ActionResult:
-        """Perform movement action."""
+        """Perform movement action"""
         target_hex = parameters.get("target_hex")
         if not target_hex:
             return ActionResult(
@@ -833,7 +833,7 @@ class AgentWorldManager:
     def _perform_harvest_action(
         self, agent_id: str, parameters: Dict[str, Any], cost: float
     ) -> ActionResult:
-        """Perform resource harvesting action."""
+        """Perform resource harvesting action"""
         resource_type = parameters.get("resource_type")
         amount = parameters.get("amount", 10.0)
         if not resource_type:
@@ -893,7 +893,7 @@ class AgentWorldManager:
     def _perform_deposit_action(
         self, agent_id: str, parameters: Dict[str, Any], cost: float
     ) -> ActionResult:
-        """Perform resource deposit action."""
+        """Perform resource deposit action"""
         resource_type = parameters.get("resource_type")
         amount = parameters.get("amount", 10.0)
         if not resource_type:
@@ -932,7 +932,7 @@ class AgentWorldManager:
     def _perform_observe_action(
         self, agent_id: str, parameters: Dict[str, Any], cost: float
     ) -> ActionResult:
-        """Perform observation action."""
+        """Perform observation action"""
         # Consume energy
         self.agent_energy[agent_id] -= cost
         # Get enhanced perception
@@ -948,7 +948,7 @@ class AgentWorldManager:
     def _perform_communicate_action(
         self, agent_id: str, parameters: Dict[str, Any], cost: float
     ) -> ActionResult:
-        """Perform communication action."""
+        """Perform communication action"""
         target_agent = parameters.get("target_agent")
         message = parameters.get("message", "")
         # Consume energy
@@ -973,7 +973,7 @@ class AgentWorldManager:
     def _perform_build_action(
         self, agent_id: str, parameters: Dict[str, Any], cost: float
     ) -> ActionResult:
-        """Perform building action."""
+        """Perform building action"""
         structure_type = parameters.get("structure_type", "basic_shelter")
         location = self.agent_locations[agent_id]
         # Check if already has structure
@@ -1010,20 +1010,20 @@ class AgentWorldManager:
 
     # === Agent State Management ===
     def get_agent_energy(self, agent_id: str) -> float:
-        """Get current energy level of an agent."""
+        """Get current energy level of an agent"""
         return self.agent_energy.get(agent_id, 0.0)
 
     def restore_agent_energy(self, agent_id: str, amount: float) -> None:
-        """Restore energy to an agent."""
+        """Restore energy to an agent"""
         current = self.agent_energy.get(agent_id, 0.0)
         self.agent_energy[agent_id] = min(100.0, current + amount)
 
     def get_agent_resources(self, agent_id: str) -> Dict[str, float]:
-        """Get resources carried by an agent."""
+        """Get resources carried by an agent"""
         return self.agent_resources.get(agent_id, {}).copy()
 
     def get_world_state_summary(self) -> Dict[str, Any]:
-        """Get summary of current world state."""
+        """Get summary of current world state"""
         return {
             "num_agents": len(self.agent_locations),
             "total_energy": sum(self.agent_energy.values()),

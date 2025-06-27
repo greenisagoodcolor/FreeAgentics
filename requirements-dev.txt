@@ -1,4 +1,4 @@
-# FreeAgentics Development Dependencies  
+# FreeAgentics Development Dependencies
 # Expert Committee: Robert C. Martin, Kent Beck, Rich Hickey, Conor Heins
 # Install with: pip install -r requirements-dev.txt
 
@@ -8,7 +8,7 @@
 pre-commit==3.7.1
 
 # =====================================================
-# CODE QUALITY & FORMATTING (Rich Hickey - Simplicity)  
+# CODE QUALITY & FORMATTING (Rich Hickey - Simplicity)
 # =====================================================
 black==24.4.2
 isort==5.13.2
@@ -100,6 +100,57 @@ ptvsd==4.3.2
 
 # Expert Committee Quality Principles:
 # - Robert C. Martin: Clean, readable, maintainable code
-# - Kent Beck: Test-driven development and incremental improvement  
+# - Kent Beck: Test-driven development and incremental improvement
 # - Rich Hickey: Simple, correct, understandable solutions
-# - Conor Heins: Type-safe, mathematically rigorous implementations 
+# - Conor Heins: Type-safe, mathematically rigorous implementations
+
+# Expert Committee Standards - Development Dependencies
+# Enhanced for MVP Dashboard Development & Test Strategy Compliance
+
+# Core Testing Framework (Kent Beck Standards)
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.0.0
+
+# MISSING: Property-Based Testing (ADR-007 Mandated)
+hypothesis>=6.0.0
+pytest-hypothesis>=0.19.0
+
+# MISSING: Behavior-Driven Development Testing (ADR-007 Mandated)
+pytest-bdd>=6.0.0
+behave>=1.2.0
+
+# MISSING: API Contract Testing
+pact-python>=2.0.0
+httpx>=0.24.0  # For API testing
+responses>=0.21.0  # HTTP mocking
+
+# MISSING: Security Testing
+bandit>=1.7.0  # Security vulnerability scanner
+safety>=2.0.0  # Dependency vulnerability scanner
+
+# MISSING: Performance & Load Testing
+pytest-benchmark>=4.0.0
+locust>=2.0.0  # Load testing framework
+
+# MISSING: Chaos Engineering
+chaostoolkit>=1.14.0
+chaostoolkit-lib>=1.25.0
+pytest-randomly>=3.12.0  # Random test execution order
+
+# MISSING: Database Testing
+pytest-postgresql>=5.0.0
+alembic-utils>=0.8.0  # Database testing utilities
+
+# Code Quality & Type Checking
+mypy>=1.5.0
+flake8>=6.0.0
+black>=23.0.0
+isort>=5.12.0
+bandit>=1.7.0
+
+# Development Tools
+pre-commit>=3.0.0
+pytest-xdist>=3.0.0  # Parallel test execution
+pytest-mock>=3.11.0
+factory-boy>=3.3.0  # Test data factories

@@ -36,6 +36,7 @@ Our naming conventions are designed for clarity, consistency, and professionalis
 ### File Naming
 
 #### Python Files
+
 - **Format**: `kebab-case.py`
 - **Examples**: `agent-manager.py`, `belief-update.py`, `active-inference.py`
 - **Test files**: `test-agent-manager.py`, `test-belief-update.py`
@@ -54,6 +55,7 @@ tests/TestCoalitionFormation.py
 #### TypeScript/JavaScript Files
 
 **React Components** (PascalCase):
+
 ```bash
 ✅ Good
 components/AgentDashboard.tsx
@@ -65,6 +67,7 @@ components/belief_visualizer.tsx
 ```
 
 **Utilities and Services** (camelCase):
+
 ```bash
 ✅ Good
 utils/apiClient.ts
@@ -76,6 +79,7 @@ services/belief_processor.ts
 ```
 
 **React Hooks** (camelCase with 'use' prefix):
+
 ```bash
 ✅ Good
 hooks/useAgentState.ts
@@ -87,6 +91,7 @@ hooks/use-belief-update.ts
 ```
 
 #### Configuration Files
+
 - **Format**: `kebab-case.ext`
 - **Examples**: `docker-compose.yml`, `jest-config.js`, `eslint-config.js`
 
@@ -95,6 +100,7 @@ hooks/use-belief-update.ts
 #### Python Code
 
 **Classes** (PascalCase):
+
 ```python
 ✅ Good
 class ExplorerAgent:
@@ -108,6 +114,7 @@ class coalition_manager:
 ```
 
 **Functions and Methods** (snake_case):
+
 ```python
 ✅ Good
 def update_beliefs(self):
@@ -121,6 +128,7 @@ def InitializeAgentPool():
 ```
 
 **Variables** (snake_case):
+
 ```python
 ✅ Good
 belief_state = {}
@@ -134,6 +142,7 @@ AgentPool = []
 ```
 
 **Constants** (UPPER_SNAKE_CASE):
+
 ```python
 ✅ Good
 MAX_BELIEF_PRECISION = 1e-6
@@ -148,6 +157,7 @@ defaultLearningRate = 0.1
 #### TypeScript Code
 
 **Interfaces** (PascalCase with 'I' prefix for domain interfaces):
+
 ```typescript
 ✅ Good
 interface IAgent {
@@ -170,6 +180,7 @@ interface IUserPreferences {  // Don't use 'I' for simple data
 ```
 
 **Functions** (camelCase):
+
 ```typescript
 ✅ Good
 function calculateBeliefEntropy(beliefs: Belief[]): number
@@ -181,6 +192,7 @@ function update_agent_state(agent: IAgent): void
 ```
 
 **Event Handlers** (camelCase with 'handle' prefix):
+
 ```typescript
 ✅ Good
 const handleCreateAgent = () => {}
@@ -192,6 +204,7 @@ const onBeliefUpdate = (belief: Belief) => {}
 ```
 
 **React Hooks** (camelCase with 'use' prefix):
+
 ```typescript
 ✅ Good
 const useAgentStore = () => {}
@@ -205,6 +218,7 @@ const getBeliefState = (agentId: string) => {}
 ### Database Schema
 
 **Tables** (snake_case, plural):
+
 ```sql
 ✅ Good
 agents
@@ -218,6 +232,7 @@ coalitionFormation
 ```
 
 **Columns** (snake_case):
+
 ```sql
 ✅ Good
 agent_id
@@ -233,6 +248,7 @@ beliefPrecision
 ### API Endpoints
 
 **REST Endpoints** (kebab-case resources):
+
 ```
 ✅ Good
 GET /api/v1/agents
@@ -249,6 +265,7 @@ GET /api/v1/agents/:id/beliefStates
 ### Git Conventions
 
 **Branch Names**:
+
 ```bash
 ✅ Good
 feature/agent-coalition-formation
@@ -263,6 +280,7 @@ MyNewFeature
 ```
 
 **Commit Messages** (Conventional Commits):
+
 ```bash
 ✅ Good
 feat(agents): add coalition formation algorithm
@@ -281,28 +299,31 @@ Refactoring
 
 These gaming terms have been replaced with professional alternatives:
 
-| Prohibited | Professional Alternative | Context |
-|------------|-------------------------|---------|
-| `PlayerAgent` | `ExplorerAgent` | Agent that explores environment |
-| `NPCAgent` | `AutonomousAgent` | Agent with autonomous behavior |
-| `EnemyAgent` | `CompetitiveAgent` | Agent in competitive scenarios |
-| `GameWorld` | `Environment` | The execution environment |
-| `spawn()` | `initialize()` | Creating new instances |
-| `respawn()` | `reset()` | Resetting to initial state |
+| Prohibited    | Professional Alternative | Context                         |
+| ------------- | ------------------------ | ------------------------------- |
+| `PlayerAgent` | `ExplorerAgent`          | Agent that explores environment |
+| `NPCAgent`    | `AutonomousAgent`        | Agent with autonomous behavior  |
+| `EnemyAgent`  | `CompetitiveAgent`       | Agent in competitive scenarios  |
+| `GameWorld`   | `Environment`            | The execution environment       |
+| `spawn()`     | `initialize()`           | Creating new instances          |
+| `respawn()`   | `reset()`                | Resetting to initial state      |
 
 ## Development Workflow
 
 ### 1. Create a Feature Branch
+
 ```bash
 git checkout -b feature/your-feature-name
 ```
 
 ### 2. Make Changes
+
 - Follow naming conventions
 - Write tests for new functionality
 - Update documentation as needed
 
 ### 3. Run Quality Checks
+
 ```bash
 # Python formatting and linting
 black .
@@ -319,12 +340,14 @@ cd web && npm test
 ```
 
 ### 4. Commit Changes
+
 ```bash
 git add .
 git commit -m "feat(module): add new functionality"
 ```
 
 ### 5. Push and Create PR
+
 ```bash
 git push origin feature/your-feature-name
 # Create pull request via GitHub UI
@@ -335,6 +358,7 @@ git push origin feature/your-feature-name
 ### Automated Enforcement
 
 Our pre-commit hooks automatically check:
+
 - ✅ Naming convention compliance
 - ✅ Code formatting (Black for Python, Prettier for TypeScript)
 - ✅ Linting (flake8 for Python, ESLint for TypeScript)
@@ -345,6 +369,7 @@ Our pre-commit hooks automatically check:
 ### Manual Review Points
 
 During code review, we also check:
+
 - 📋 Architectural compliance (see ADRs in `docs/architecture/`)
 - 📋 Test coverage and quality
 - 📋 Documentation updates
@@ -354,6 +379,7 @@ During code review, we also check:
 ## Testing
 
 ### Python Tests
+
 ```bash
 # Run all tests
 pytest
@@ -366,6 +392,7 @@ pytest tests/test-agent-manager.py
 ```
 
 ### TypeScript Tests
+
 ```bash
 cd web
 
@@ -380,6 +407,7 @@ npm test -- AgentDashboard.test.tsx
 ```
 
 ### Integration Tests
+
 ```bash
 # Run full integration test suite
 npm run test:integration
@@ -402,20 +430,24 @@ Before submitting a PR, ensure:
 
 ```markdown
 ## Description
+
 Brief description of changes
 
 ## Type of Change
+
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Breaking change
 - [ ] Documentation update
 
 ## Testing
+
 - [ ] Unit tests added/updated
 - [ ] Integration tests pass
 - [ ] Manual testing completed
 
 ## Checklist
+
 - [ ] Code follows naming conventions
 - [ ] Self-review completed
 - [ ] Documentation updated
@@ -462,24 +494,28 @@ pre-commit run --all-files
 The pre-commit system includes several automated checks:
 
 #### 1. **Enhanced Naming Convention Check**
+
 - **Script**: `scripts/enhanced-check-naming.py`
 - **Purpose**: Validates file names and code content against ADR-004 conventions
 - **Scope**: All Python, TypeScript, JavaScript files
 - **Failure Action**: Provides specific violation details with suggestions
 
 #### 2. **Prohibited Terms Check**
+
 - **Script**: `scripts/enhanced-prohibited-terms.py`
 - **Purpose**: Prevents gaming terminology and old project names
 - **Scope**: All source files
 - **Failure Action**: Lists violations with recommended replacements
 
 #### 3. **Architectural Dependencies Check**
+
 - **Script**: `scripts/validate-dependencies.py`
 - **Purpose**: Enforces ADR-003 architectural dependency rules
 - **Scope**: Python files
 - **Failure Action**: Shows violating imports and correct alternatives
 
 #### 4. **File Naming Validation**
+
 - **Script**: `scripts/check-file-naming.py`
 - **Purpose**: Validates file names match language-specific conventions
 - **Scope**: All source files
@@ -490,14 +526,18 @@ The pre-commit system includes several automated checks:
 When pre-commit hooks fail, follow this workflow:
 
 #### 1. **Review Violations**
+
 The hooks provide detailed output showing:
+
 - Specific files with violations
 - Line numbers (when applicable)
 - Expected vs. actual naming patterns
 - Suggested fixes
 
 #### 2. **Automatic Fixes**
+
 For many violations, use the automated fix script:
+
 ```bash
 # Preview fixes (dry run)
 python3 scripts/fix-naming.py --dry-run --priority
@@ -507,13 +547,17 @@ python3 scripts/fix-naming.py --apply --priority
 ```
 
 #### 3. **Manual Fixes**
+
 For complex violations or syntax errors:
+
 - Fix prohibited terms manually using provided suggestions
 - Correct file names according to conventions
 - Resolve syntax errors that prevent AST parsing
 
 #### 4. **Batch Renaming**
+
 For large-scale file renaming:
+
 ```bash
 # Plan renames (dry run)
 python3 scripts/batch-rename.py --python-only
@@ -525,20 +569,26 @@ python3 scripts/integrated-refactor-pipeline.py --apply --language python
 ### Troubleshooting Pre-commit Issues
 
 #### **Python Path Issues**
+
 If hooks fail with "Python not found":
+
 ```bash
 # Ensure python3 is in PATH or update hook configuration
 which python3
 ```
 
 #### **Permission Issues**
+
 If scripts aren't executable:
+
 ```bash
 chmod +x scripts/*.py
 ```
 
 #### **Hook Installation Issues**
+
 If pre-commit fails to install:
+
 ```bash
 # Clean and reinstall
 pre-commit clean
@@ -546,7 +596,9 @@ pre-commit install
 ```
 
 #### **Dependency Issues**
+
 If hooks fail due to missing dependencies:
+
 ```bash
 # Install project dependencies
 pip install -r requirements.txt
@@ -558,6 +610,7 @@ pip install -r requirements-dev.txt
 ### Bypassing Hooks (Emergency Only)
 
 In rare cases where you need to commit despite hook failures:
+
 ```bash
 # Skip all hooks (use sparingly)
 git commit --no-verify -m "Emergency commit"
@@ -571,13 +624,17 @@ SKIP=enhanced-naming-check git commit -m "Skip naming check"
 ### IDE Integration
 
 #### **VS Code Integration**
+
 The `.vscode/settings.json` includes:
+
 - ESLint configuration for TypeScript naming rules
 - Python formatting settings aligned with conventions
 - File association patterns for naming validation
 
 #### **Editor Configuration**
+
 The `.editorconfig` file enforces:
+
 - Consistent indentation
 - File encoding (UTF-8)
 - Line ending normalization
@@ -586,25 +643,30 @@ The `.editorconfig` file enforces:
 ### Naming Convention Quick Reference
 
 #### **File Naming**
+
 - **Python**: `kebab-case.py` (e.g., `agent-manager.py`)
 - **TypeScript Components**: `PascalCase.tsx` (e.g., `AgentList.tsx`)
 - **TypeScript Utilities**: `camelCase.ts` (e.g., `apiUtils.ts`)
 - **Configuration**: `kebab-case.json` (e.g., `test-config.json`)
 
 #### **Code Naming**
+
 - **Classes**: `PascalCase` (e.g., `AgentManager`)
 - **Functions/Methods**: `snake_case` (Python) / `camelCase` (TypeScript)
 - **Variables**: `snake_case` (Python) / `camelCase` (TypeScript)
 - **Constants**: `UPPER_SNAKE_CASE` (e.g., `MAX_AGENTS`)
 
 #### **Prohibited Terms**
+
 ❌ **Don't Use**: `PlayerAgent`, `NPCAgent`, `spawn`, `GameWorld`, `CogniticNet`
 ✅ **Use Instead**: `ExplorerAgent`, `AutonomousAgent`, `initialize`, `Environment`, `FreeAgentics`
 
 ### Advanced Workflow Tools
 
 #### **AST-Based Refactoring**
+
 For complex refactoring with automated reference updates:
+
 ```bash
 # Complete refactoring pipeline
 python3 scripts/integrated-refactor-pipeline.py --apply
@@ -614,13 +676,17 @@ python3 scripts/ast-refactor-enhanced.py --apply --add-mapping old_file.py new_f
 ```
 
 #### **Complexity Analysis**
+
 Before major refactoring:
+
 ```bash
 python3 scripts/audit-naming.py > naming-violations.json
 ```
 
 #### **Git Integration**
+
 All renaming scripts preserve git history:
+
 - Use `git mv` when possible
 - Maintain file tracking across renames
 - Generate atomic commits for clean history

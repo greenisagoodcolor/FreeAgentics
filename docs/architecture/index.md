@@ -21,22 +21,22 @@ FreeAgentics follows a Clean Architecture approach with distinct layers:
 
 ## Architecture Documentation
 
-| Document | Description |
-|----------|-------------|
-| [Architecture Diagrams](diagrams.md) | Visual representations of the system architecture using Mermaid |
-| [Dependency Validation Guide](dependency-validation-guide.md) | Guide for validating architectural dependencies |
-| [Developer Quick Reference](developer-quick-reference.md) | Quick reference for developers working with the architecture |
+| Document                                                      | Description                                                     |
+| ------------------------------------------------------------- | --------------------------------------------------------------- |
+| [Architecture Diagrams](diagrams.md)                          | Visual representations of the system architecture using Mermaid |
+| [Dependency Validation Guide](dependency-validation-guide.md) | Guide for validating architectural dependencies                 |
+| [Developer Quick Reference](developer-quick-reference.md)     | Quick reference for developers working with the architecture    |
 
 ## Architecture Decision Records (ADRs)
 
 Architecture Decision Records document the architectural decisions made during the development of FreeAgentics.
 
-| ADR | Description |
-|-----|-------------|
-| [ADR-001: Migration Structure](decisions/001-migration-structure.md) | Initial migration structure from legacy codebase |
-| [ADR-002: Canonical Directory Structure](decisions/002-canonical-directory-structure.md) | Definition of the canonical directory structure |
-| [ADR-003: Dependency Rules](decisions/003-dependency-rules.md) | Rules governing dependencies between components |
-| [ADR-004: Naming Conventions](decisions/004-naming-conventions.md) | Naming conventions for files, classes, and other components |
+| ADR                                                                                      | Description                                                 |
+| ---------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| [ADR-001: Migration Structure](decisions/001-migration-structure.md)                     | Initial migration structure from legacy codebase            |
+| [ADR-002: Canonical Directory Structure](decisions/002-canonical-directory-structure.md) | Definition of the canonical directory structure             |
+| [ADR-003: Dependency Rules](decisions/003-dependency-rules.md)                           | Rules governing dependencies between components             |
+| [ADR-004: Naming Conventions](decisions/004-naming-conventions.md)                       | Naming conventions for files, classes, and other components |
 
 ## Key Architectural Principles
 

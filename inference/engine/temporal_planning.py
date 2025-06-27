@@ -63,15 +63,15 @@ class TreeNode:
         self._is_terminal = False
 
     def add_child(self, child: "TreeNode") -> None:
-        ."""Add child node."""
+        """Add child node"""
         self.children.append(child)
 
     def is_leaf(self) -> bool:
-        ."""Check if node is a leaf."""
+        """Check if node is a leaf"""
         return len(self.children) == 0
 
     def is_fully_expanded(self, num_actions: int) -> bool:
-        ."""Check if all actions have been tried."""
+        """Check if all actions have been tried"""
         return len(self.children) == num_actions
 
     def best_child(self, exploration_constant: float = 1.0) -> "TreeNode":
@@ -514,8 +514,7 @@ class TrajectorySampling(TemporalPlanner):
             total_value += discount * -G.item()
             discount *= self.config.discount_factor
             if isinstance(generative_model, DiscreteGenerativeModel):
-                next_beliefs = (
-                    generative_model.B[:, :, action] @ current_beliefs)
+                next_beliefs = generative_model.B[:, :, action] @ current_beliefs
             else:
                 next_beliefs = current_beliefs
 

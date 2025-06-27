@@ -1,4 +1,4 @@
-."""
+"""
 Hardware Compatibility Testing
 
 Tests deployment packages on different hardware platforms to ensure
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 class TestStatus(Enum):
-    """Test execution status."""
+    """Test execution status"""
 
     PENDING = "pending"
     RUNNING = "running"
@@ -37,7 +37,7 @@ class TestStatus(Enum):
 
 @dataclass
 class HardwareProfile:
-    """Hardware profile information."""
+    """Hardware profile information"""
 
     name: str
     architecture: str
@@ -54,7 +54,7 @@ class HardwareProfile:
 
 @dataclass
 class CompatibilityTest:
-    """Hardware compatibility test."""
+    """Hardware compatibility test"""
 
     name: str
     description: str
@@ -65,7 +65,7 @@ class CompatibilityTest:
 
 @dataclass
 class TestResult:
-    """Test execution result."""
+    """Test execution result"""
 
     test_name: str
     status: TestStatus
@@ -76,10 +76,10 @@ class TestResult:
 
 
 class HardwareDetector:
-    """Detects current hardware configuration."""
+    """Detects current hardware configuration"""
 
     def detect_hardware(self) -> HardwareProfile:
-        """Detect current hardware profile."""
+        """Detect current hardware profile"""
         # Basic system info
         arch = platform.machine()
         cpu_count = psutil.cpu_count(logical=False)
@@ -102,8 +102,7 @@ class HardwareDetector:
         python_version = sys.version.split()[0]
 
         # Determine profile name
-        profile_name = (
-            self._determine_profile_name(arch, ram_gb, gpu_available))
+        profile_name = self._determine_profile_name(arch, ram_gb, gpu_available)
 
         return HardwareProfile(
             name=profile_name,
@@ -120,7 +119,7 @@ class HardwareDetector:
         )
 
     def _get_cpu_model(self) -> str:
-        """Get CPU model name."""
+        """Get CPU model name"""
         try:
             if platform.system() == "Darwin":
                 # macOS
@@ -139,8 +138,7 @@ class HardwareDetector:
             elif platform.system() == "Windows":
                 # Windows
                 result = subprocess.run(
-                    ["wmic", "cpu", "get", "name"], capture_output=True,
-                        text=True
+                    ["wmic", "cpu", "get", "name"], capture_output=True, text=True
                 )
                 lines = result.stdout.strip().split("\n")
                 if len(lines) > 1:
@@ -151,7 +149,7 @@ class HardwareDetector:
         return "Unknown CPU"
 
     def _detect_gpu(self) -> tuple[bool, Optional[str]]:
-        """Detect GPU availability and model."""
+        """Detect GPU availability and model"""
         try:
             # Try nvidia-smi for NVIDIA GPUs
             result = subprocess.run(
@@ -180,9 +178,8 @@ class HardwareDetector:
 
         return False, None
 
-    def _determine_profile_name(self, arch: str, ram_gb: float,
-        gpu_available: bool) -> str:
-        """Determine profile name based on hardware."""
+    def _determine_profile_name(self, arch: str, ram_gb: float, gpu_available: bool) -> str:
+        """Determine profile name based on hardware"""
         if arch == "arm64" or arch == "aarch64":
             if ram_gb <= 2:
                 return "raspberry_pi"
@@ -207,12 +204,12 @@ class CompatibilityTester:
     """
 
     def __init__(self) -> None:
-        """Initialize compatibility tester."""
+        """Initialize compatibility tester"""
         self.detector = HardwareDetector()
         self.tests = self._create_test_suite()
 
     def _create_test_suite(self) -> List[CompatibilityTest]:
-        """Create test suite."""
+        """Create test suite"""
         return [
             CompatibilityTest(
                 name="cpu_performance",
@@ -301,8 +298,7 @@ class CompatibilityTester:
                             test_name=test.name,
                             status=TestStatus.SKIPPED,
                             duration=0,
-                            message= (
-                                f"Skipped: requires {', '.join(test.required_features)}",)
+                            message=(f"Skipped: requires {', '.join(test.required_features)}",),
                         )
                     )
                     continue
@@ -335,7 +331,7 @@ class CompatibilityTester:
         package_dir: Path,
         hardware_profile: HardwareProfile,
     ) -> TestResult:
-        """Run a single test with timeout."""
+        """Run a single test with timeout"""
         logger.info(f"Running test: {test.name}")
 
         result_queue = queue.Queue()
@@ -343,8 +339,7 @@ class CompatibilityTester:
         def test_wrapper() -> None:
             try:
                 start_time = time.time()
-                success, message, details = (
-                    test.test_function(package_dir, hardware_profile))
+                success, message, details = test.test_function(package_dir, hardware_profile)
                 duration = time.time() - start_time
 
                 status = TestStatus.PASSED if success else TestStatus.FAILED
@@ -394,7 +389,7 @@ class CompatibilityTester:
     def _test_cpu_performance(
         self, package_dir: Path, hardware_profile: HardwareProfile
     ) -> tuple[bool, str, dict]:
-        """Test CPU performance."""
+        """Test CPU performance"""
         import numpy as np
 
         # Simple CPU benchmark
@@ -413,8 +408,7 @@ class CompatibilityTester:
             result = np.sum(c)
 
         duration = time.time() - start_time
-        ops_per_second = (
-            (iterations * size * size * size * 2) / duration / 1e9  # GFLOPS)
+        ops_per_second = (iterations * size * size * size * 2) / duration / 1e9  # GFLOPS
 
         # Determine if performance is acceptable
         min_gflops = {
@@ -440,7 +434,7 @@ class CompatibilityTester:
     def _test_memory_allocation(
         self, package_dir: Path, hardware_profile: HardwareProfile
     ) -> tuple[bool, str, dict]:
-        """Test memory allocation."""
+        """Test memory allocation"""
         # Test allocating different amounts of memory
         test_sizes_mb = [10, 50, 100, 500]
         max_allocatable = 0
@@ -488,7 +482,7 @@ class CompatibilityTester:
     def _test_disk_io(
         self, package_dir: Path, hardware_profile: HardwareProfile
     ) -> tuple[bool, str, dict]:
-        """Test disk I/O performance."""
+        """Test disk I/O performance"""
         test_file = package_dir / "io_test.tmp"
         file_size_mb = 100
 
@@ -521,8 +515,7 @@ class CompatibilityTester:
             min_write_speed = 10  # MB/s
             min_read_speed = 20  # MB/s
 
-            passed = (
-                write_speed >= min_write_speed and read_speed >= min_read_speed)
+            passed = write_speed >= min_write_speed and read_speed >= min_read_speed
 
             return (
                 passed,
@@ -535,8 +528,7 @@ class CompatibilityTester:
             )
 
         except Exception as e:
-            return (False, f"Disk I/O test failed: {str(e)}",
-                {"error": str(e)})
+            return (False, f"Disk I/O test failed: {str(e)}", {"error": str(e)})
         finally:
             if test_file.exists():
                 test_file.unlink()
@@ -544,7 +536,7 @@ class CompatibilityTester:
     def _test_python_packages(
         self, package_dir: Path, hardware_profile: HardwareProfile
     ) -> tuple[bool, str, dict]:
-        """Test Python package compatibility."""
+        """Test Python package compatibility"""
         requirements_file = package_dir / "requirements.txt"
 
         if not requirements_file.exists():
@@ -561,8 +553,7 @@ class CompatibilityTester:
             for req in requirements:
                 if req and not req.startswith("#"):
                     # Extract package name
-                    package_name = (
-                        req.split("==")[0].split(">=")[0].split("[")[0])
+                    package_name = req.split("==")[0].split(">=")[0].split("[")[0]
 
                     # Try to import
                     try:
@@ -593,7 +584,7 @@ class CompatibilityTester:
     def _test_network(
         self, package_dir: Path, hardware_profile: HardwareProfile
     ) -> tuple[bool, str, dict]:
-        """Test network connectivity."""
+        """Test network connectivity"""
         try:
             import socket
 
@@ -614,8 +605,7 @@ class CompatibilityTester:
             if result == 0:
                 return (
                     True,
-                    f"Network OK (DNS: {dns_time*1000:.0f}ms,
-                        Connect: {connect_time*1000:.0f}ms)",
+                    f"Network OK (DNS: {dns_time*1000:.0f}ms, Connect: {connect_time*1000:.0f}ms)",
                     {
                         "dns_time_ms": dns_time * 1000,
                         "connect_time_ms": connect_time * 1000,
@@ -630,7 +620,7 @@ class CompatibilityTester:
     def _test_gpu(
         self, package_dir: Path, hardware_profile: HardwareProfile
     ) -> tuple[bool, str, dict]:
-        """Test GPU availability and functionality."""
+        """Test GPU availability and functionality"""
         if not hardware_profile.gpu_available:
             return (False, "No GPU detected", {"gpu_available": False})
 
@@ -643,8 +633,7 @@ class CompatibilityTester:
                 import torch
 
                 cuda_available = torch.cuda.is_available()
-                device_count = (
-                    torch.cuda.device_count() if cuda_available else 0)
+                device_count = torch.cuda.device_count() if cuda_available else 0
                 gpu_tests.append(
                     {
                         "framework": "pytorch",
@@ -709,7 +698,7 @@ class CompatibilityTester:
     def _test_agent_startup(
         self, package_dir: Path, hardware_profile: HardwareProfile
     ) -> tuple[bool, str, dict]:
-        """Test agent startup."""
+        """Test agent startup"""
         run_script = package_dir / "run.sh"
 
         if not run_script.exists():
@@ -763,8 +752,7 @@ class CompatibilityTester:
 
                 return (
                     True,
-                    f"Agent started successfully in {time.time() -
-                        start_time:.1f}s",
+                    f"Agent started successfully in {time.time() - start_time:.1f}s",
                     {"startup_time": time.time() - start_time},
                 )
             else:
@@ -775,13 +763,12 @@ class CompatibilityTester:
                 return (False, "Agent startup timeout", {"timeout": startup_timeout})
 
         except Exception as e:
-            return (False, f"Agent startup test failed: {str(e)}",
-                {"error": str(e)})
+            return (False, f"Agent startup test failed: {str(e)}", {"error": str(e)})
 
     def _test_resource_limits(
         self, package_dir: Path, hardware_profile: HardwareProfile
     ) -> tuple[bool, str, dict]:
-        """Test resource limits and constraints."""
+        """Test resource limits and constraints"""
         # Check if system has resource limits
         try:
             import resource
@@ -822,8 +809,7 @@ class CompatibilityTester:
                 {"platform": platform.system()},
             )
         except Exception as e:
-            return (False, f"Resource limit test failed: {str(e)}",
-                {"error": str(e)})
+            return (False, f"Resource limit test failed: {str(e)}", {"error": str(e)})
 
 
 def test_hardware_compatibility(package_path: str) -> bool:
@@ -857,8 +843,7 @@ def test_hardware_compatibility(package_path: str) -> bool:
 
     # Print test results
     for test_result in results["test_results"]:
-        icon = (
-            {"passed": "✓", "failed": "✗", "skipped": "○", "timeout": "⏱"}.get()
+        icon = {"passed": "✓", "failed": "✗", "skipped": "○", "timeout": "⏱"}.get(
             test_result["status"], "?"
         )
 

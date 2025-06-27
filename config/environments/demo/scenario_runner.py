@@ -19,17 +19,16 @@ from psycopg2.extras import RealDictCursor
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 
 class ScenarioRunner:
-    """Runs predefined demo scenarios."""
+    """Runs predefined demo scenarios"""
 
     def __init__(self) -> None:
-        """Initialize scenario runner."""
+        """Initialize scenario runner"""
         self.db_url = os.environ.get("DATABASE_URL")
         self.redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379")
         interval_env = os.environ.get("SCENARIO_INTERVAL", "300")
@@ -46,7 +45,7 @@ class ScenarioRunner:
         self.current_scenario = None
 
     def load_scenarios(self) -> List[Dict[str, Any]]:
-        """Load active scenarios from database."""
+        """Load active scenarios from database"""
         with self.db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
             if self.active_scenarios and self.active_scenarios[0]:
                 # Load specific scenarios
@@ -72,7 +71,7 @@ class ScenarioRunner:
             return cursor.fetchall()
 
     def get_agents_by_class(self, agent_class: str) -> List[Dict[str, Any]]:
-        """Get agents of a specific class."""
+        """Get agents of a specific class"""
         with self.db_conn.cursor(cursor_factory=RealDictCursor) as cursor:
             cursor.execute(
                 """
@@ -85,7 +84,7 @@ class ScenarioRunner:
             return cursor.fetchall()
 
     async def run_explorer_discovery(self, scenario: Dict[str, Any]):
-        """Run explorer resource discovery scenario."""
+        """Run explorer resource discovery scenario"""
         logger.info("Starting Explorer Discovery scenario")
 
         # Get explorer agents
@@ -128,8 +127,7 @@ class ScenarioRunner:
             # Simulate resource discovery
             if random.random() > 0.3:
                 resources = random.choice(
-                    ["abundant food", "fresh water", "rare metals",
-                        "ancient artifacts"]
+                    ["abundant food", "fresh water", "rare metals", "ancient artifacts"]
                 )
                 self.broadcast_scenario_event(
                     {
@@ -174,7 +172,7 @@ class ScenarioRunner:
         self.log_scenario_completion(scenario["id"], explorer["id"])
 
     async def run_merchant_trade(self, scenario: Dict[str, Any]):
-        """Run merchant trading scenario."""
+        """Run merchant trading scenario"""
         logger.info("Starting Merchant Trade scenario")
 
         # Get merchant agents
@@ -191,8 +189,7 @@ class ScenarioRunner:
                 "scenario": "merchant_trade",
                 "phase": "start",
                 "agents": [merchant1["name"], merchant2["name"]],
-                "message": f"Trading session begins between {merchant1['name']} and
-                    {merchant2['name']}",
+                "message": f"Trading session begins between {merchant1['name']} and {merchant2['name']}",
             }
         )
 
@@ -262,7 +259,7 @@ class ScenarioRunner:
         self.log_scenario_completion(scenario["id"], merchant1["id"])
 
     async def run_scholar_research(self, scenario: Dict[str, Any]):
-        """Run scholar research scenario."""
+        """Run scholar research scenario"""
         logger.info("Starting Scholar Research scenario")
 
         # Get scholar agents
@@ -346,7 +343,7 @@ class ScenarioRunner:
         self.log_scenario_completion(scenario["id"], scholar["id"])
 
     async def run_guardian_patrol(self, scenario: Dict[str, Any]):
-        """Run guardian patrol scenario."""
+        """Run guardian patrol scenario"""
         logger.info("Starting Guardian Patrol scenario")
 
         # Get guardian agents
@@ -369,8 +366,7 @@ class ScenarioRunner:
 
         # Phase 1: Perimeter establishment
         await asyncio.sleep(2)
-        checkpoints = (
-            ["North Gate", "East Tower", "South Bridge", "West Outpost"])
+        checkpoints = ["North Gate", "East Tower", "South Bridge", "West Outpost"]
 
         for checkpoint in checkpoints:
             self.broadcast_scenario_event(
@@ -407,8 +403,7 @@ class ScenarioRunner:
                     "scenario": "guardian_patrol",
                     "phase": "response",
                     "agent": guardian["name"],
-                    "message": f"{guardian['name']} investigates and
-                        neutralizes the threat",
+                    "message": f"{guardian['name']} investigates and neutralizes the threat",
                     "outcome": "success",
                 }
             )
@@ -432,7 +427,7 @@ class ScenarioRunner:
         self.log_scenario_completion(scenario["id"], guardian["id"])
 
     async def run_multi_agent_collaboration(self, scenario: Dict[str, Any]):
-        """Run multi-agent collaboration scenario."""
+        """Run multi-agent collaboration scenario"""
         logger.info("Starting Multi-Agent Collaboration scenario")
 
         # Get one agent of each class
@@ -454,8 +449,7 @@ class ScenarioRunner:
                 "scenario": "multi_agent_collaboration",
                 "phase": "start",
                 "team": team_names,
-                "message": f"Team forms for complex mission: {',
-                    '.join(team_names)}",
+                "message": f"Team forms for complex mission: {', '.join(team_names)}",
             }
         )
 
@@ -530,7 +524,7 @@ class ScenarioRunner:
         self.log_scenario_completion(scenario["id"], team[0]["id"])
 
     def broadcast_scenario_event(self, event: Dict[str, Any]):
-        """Broadcast scenario event via Redis."""
+        """Broadcast scenario event via Redis"""
         event["timestamp"] = datetime.utcnow().isoformat()
         event["type"] = "scenario"
 
@@ -540,8 +534,7 @@ class ScenarioRunner:
 
             # Store in recent scenarios
             self.redis_client.lpush("demo:recent_scenarios", json.dumps(event))
-            self.redis_client.ltrim("demo:recent_scenarios", 0,
-                49)  # Keep last 50
+            self.redis_client.ltrim("demo:recent_scenarios", 0, 49)  # Keep last 50
 
             logger.info(f"Scenario event: {event.get('message', 'Unknown')}")
 
@@ -549,7 +542,7 @@ class ScenarioRunner:
             logger.error(f"Failed to broadcast scenario event: {e}")
 
     def update_agent_experience(self, agent_id: str, experience_type: str) -> None:
-        """Update agent experience from scenario."""
+        """Update agent experience from scenario"""
         try:
             with self.db_conn.cursor() as cursor:
                 updates = {
@@ -558,24 +551,20 @@ class ScenarioRunner:
                         "pattern_count = LEAST(pattern_count + 1, 100)",
                     ],
                     "trade": [
-                        "successful_interactions = successful_interactions +
-                            1",
+                        "successful_interactions = successful_interactions + 1",
                         "total_interactions = total_interactions + 1",
                     ],
                     "research": [
                         "knowledge_items_shared = knowledge_items_shared + 3",
-                        "avg_pattern_confidence = (
-                            LEAST(avg_pattern_confidence + 0.02, 0.95)",)
+                        "avg_pattern_confidence = LEAST(avg_pattern_confidence + 0.02, 0.95)",
                     ],
                     "patrol": [
                         "successful_goals = successful_goals + 1",
                         "total_goals_attempted = total_goals_attempted + 1",
                     ],
                     "collaboration": [
-                        "unique_collaborators = LEAST(unique_collaborators + 1,
-                            10)",
-                        "successful_interactions = successful_interactions +
-                            2",
+                        "unique_collaborators = LEAST(unique_collaborators + 1, 10)",
+                        "successful_interactions = successful_interactions + 2",
                     ],
                 }
 
@@ -594,7 +583,7 @@ class ScenarioRunner:
             self.db_conn.rollback()
 
     def log_scenario_completion(self, scenario_id: str, agent_id: str) -> None:
-        """Log scenario completion."""
+        """Log scenario completion"""
         try:
             with self.db_conn.cursor() as cursor:
                 # Update scenario
@@ -625,7 +614,7 @@ class ScenarioRunner:
             self.db_conn.rollback()
 
     async def run_scenario_loop(self):
-        """Main scenario execution loop."""
+        """Main scenario execution loop"""
         logger.info(f"Starting scenario runner with interval: {self.scenario_interval}s")
 
         # Load scenarios
@@ -673,14 +662,14 @@ class ScenarioRunner:
                 await asyncio.sleep(10)
 
     def cleanup(self):
-        """Clean up resources."""
+        """Clean up resources"""
         self.running = False
         self.db_conn.close()
         self.redis_client.close()
 
 
 async def main():
-    """Main entry point."""
+    """Main entry point"""
     runner = ScenarioRunner()
 
     try:

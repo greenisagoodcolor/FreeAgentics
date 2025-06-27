@@ -28,7 +28,7 @@ Performance Optimization Module for GNN Processing
 This module provides various optimization techniques to improve the performance
 of GNN processing operations including memory optimization, hardware acceleration,
 caching, and parallel processing.
-."""
+"""
 logger = get_logger().logger
 
 
@@ -92,8 +92,7 @@ class MemoryOptimizer:
     def _enable_gradient_checkpointing(self, model: nn.Module) -> None:
         """Enable gradient checkpointing for specific layers"""
 
-        def checkpoint_wrapper(module: nn.Module, *args: Any,
-            **kwargs: Any) -> Any:
+        def checkpoint_wrapper(module: nn.Module, *args: Any, **kwargs: Any) -> Any:
             if module.training:
                 return checkpoint(module._forward_impl, *args, **kwargs)
             else:
@@ -475,7 +474,7 @@ class PerformanceProfiler:
         Initialize profiler.
         Args:
             config: Optimization configuration
-        ."""
+        """
         self.config = config
         self.profiles = defaultdict(list)
         self._profiler = None

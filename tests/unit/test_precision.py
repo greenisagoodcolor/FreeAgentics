@@ -2,7 +2,6 @@
 Module for FreeAgentics Active Inference implementation.
 """
 
-
 import pytest
 import torch
 
@@ -17,7 +16,7 @@ from inference.engine.precision import (
 
 
 class TestPrecisionConfig:
-    .."""Test PrecisionConfig dataclass.."""
+    """Test PrecisionConfig dataclass"""
 
     def test_default_config(self) -> None:
         """Test default configuration values"""
@@ -38,7 +37,7 @@ class TestPrecisionConfig:
         assert config.dtype == torch.float32
 
     def test_custom_config(self) -> None:
-        ."""Test custom configuration."""
+        """Test custom configuration"""
         config = PrecisionConfig(
             learning_rate=0.1,
             min_precision=0.01,
@@ -52,7 +51,7 @@ class TestPrecisionConfig:
 
 
 class TestGradientPrecisionOptimizer:
-    .."""Test gradient-based precision optimization.."""
+    """Test gradient-based precision optimization"""
 
     def setup_method(self) -> None:
         """Set up test environment"""
@@ -60,7 +59,7 @@ class TestGradientPrecisionOptimizer:
         self.optimizer = GradientPrecisionOptimizer(self.config, num_modalities=2)
 
     def test_initialization(self) -> None:
-        ."""Test optimizer initialization."""
+        """Test optimizer initialization"""
         assert self.optimizer.num_modalities == 2
         assert self.optimizer.log_precision.shape == (2,)
         # Check initial precision
@@ -68,7 +67,7 @@ class TestGradientPrecisionOptimizer:
         assert torch.allclose(precision, torch.tensor([1.0, 1.0]))
 
     def test_precision_optimization(self) -> None:
-        ."""Test basic precision optimization."""
+        """Test basic precision optimization"""
         # High errors should increase precision
         high_errors = torch.randn(10, 2) * 5.0
         precision1 = self.optimizer.optimize_precision(high_errors)
@@ -82,14 +81,14 @@ class TestGradientPrecisionOptimizer:
         assert torch.all(precision1 <= self.config.max_precision)
 
     def test_single_observation_optimization(self) -> None:
-        ."""Test optimization with single observation."""
+        """Test optimization with single observation"""
         error = torch.tensor([1.0, 0.5])
         precision = self.optimizer.optimize_precision(error)
         assert precision.shape == (2,)
         assert torch.all(precision > 0)
 
     def test_volatility_estimation(self) -> None:
-        ."""Test volatility estimation."""
+        """Test volatility estimation"""
         # Add consistent errors
         for _ in range(5):
             errors = torch.ones(1, 2)
@@ -104,7 +103,7 @@ class TestGradientPrecisionOptimizer:
         assert torch.all(volatility2 > volatility1)
 
     def test_volatility_adaptation(self) -> None:
-        ."""Test adaptation to volatility."""
+        """Test adaptation to volatility"""
         # Create high volatility scenario
         for i in range(20):
             errors = torch.randn(1, 2) * (5.0 if i % 2 == 0 else 0.1)
@@ -119,7 +118,7 @@ class TestGradientPrecisionOptimizer:
         assert not torch.allclose(precision_before, precision_after)
 
     def test_gradient_clipping(self) -> None:
-        ."""Test gradient clipping."""
+        """Test gradient clipping"""
         # Create extreme errors
         extreme_errors = torch.ones(1, 2) * 1000.0
         # Optimize (should not explode due to clipping)
@@ -129,7 +128,7 @@ class TestGradientPrecisionOptimizer:
 
 
 class TestHierarchicalPrecisionOptimizer:
-    .."""Test hierarchical precision optimization.."""
+    """Test hierarchical precision optimization"""
 
     def setup_method(self) -> None:
         """Set up test environment"""
@@ -138,7 +137,7 @@ class TestHierarchicalPrecisionOptimizer:
         self.optimizer = HierarchicalPrecisionOptimizer(self.config, self.level_dims)
 
     def test_initialization(self) -> None:
-        ."""Test hierarchical initialization."""
+        """Test hierarchical initialization"""
         assert self.optimizer.num_levels == 3
         assert len(self.optimizer.level_precisions) == 3
         assert len(self.optimizer.coupling_weights) == 2
@@ -147,7 +146,7 @@ class TestHierarchicalPrecisionOptimizer:
             assert self.optimizer.level_precisions[i].shape == (dim,)
 
     def test_hierarchical_optimization(self) -> None:
-        ."""Test optimization across levels."""
+        """Test optimization across levels"""
         # Create errors for each level
         errors = [
             torch.randn(5, 3),  # Level 0
@@ -161,7 +160,7 @@ class TestHierarchicalPrecisionOptimizer:
             assert torch.all(p > 0)
 
     def test_level_coupling(self) -> None:
-        ."""Test inter-level coupling."""
+        """Test inter-level coupling"""
         # High errors at top level
         errors = [
             torch.randn(5, 3) * 0.1,  # Low errors at level 0
@@ -173,7 +172,7 @@ class TestHierarchicalPrecisionOptimizer:
         assert all(torch.all(p > 0) for p in precisions)
 
     def test_volatility_per_level(self) -> None:
-        ."""Test volatility estimation per level."""
+        """Test volatility estimation per level"""
         error_history = []
         # Generate variable error patterns
         for t in range(15):
@@ -196,7 +195,7 @@ class TestHierarchicalPrecisionOptimizer:
 
 
 class TestMetaLearningPrecisionOptimizer:
-    .."""Test meta-learning precision optimization.."""
+    """Test meta-learning precision optimization"""
 
     def setup_method(self) -> None:
         """Set up test environment"""
@@ -206,7 +205,7 @@ class TestMetaLearningPrecisionOptimizer:
         )
 
     def test_initialization(self) -> None:
-        ."""Test meta-learning initialization."""
+        """Test meta-learning initialization"""
         assert self.optimizer.input_dim == 3
         assert self.optimizer.hidden_dim == 32
         assert self.optimizer.num_modalities == 2
@@ -214,7 +213,7 @@ class TestMetaLearningPrecisionOptimizer:
         assert hasattr(self.optimizer, "base_precision")
 
     def test_feature_extraction(self) -> None:
-        ."""Test feature extraction."""
+        """Test feature extraction"""
         errors = torch.randn(10, 2)
         context = torch.randn(3)
         features = self.optimizer.extract_features(errors, context)
@@ -222,7 +221,7 @@ class TestMetaLearningPrecisionOptimizer:
         assert features.shape[0] == (6 + self.optimizer.input_dim)  # 6 error stats + context
 
     def test_precision_optimization_with_context(self) -> None:
-        ."""Test optimization with context."""
+        """Test optimization with context"""
         errors = torch.randn(10, 2)
         context = torch.tensor([1.0, 0.0, 0.5])
         precision = self.optimizer.optimize_precision(errors, context)
@@ -230,7 +229,7 @@ class TestMetaLearningPrecisionOptimizer:
         assert torch.all(precision > 0)
 
     def test_context_buffer(self) -> None:
-        ."""Test context buffer management."""
+        """Test context buffer management"""
         # Fill buffer
         for i in range(150):
             errors = torch.randn(5, 2)
@@ -239,7 +238,7 @@ class TestMetaLearningPrecisionOptimizer:
         assert len(self.optimizer.context_buffer) == self.optimizer.max_context_size
 
     def test_meta_update(self) -> None:
-        ."""Test meta-learning update."""
+        """Test meta-learning update"""
         # Generate some context
         for _ in range(20):
             errors = torch.randn(5, 2)
@@ -252,7 +251,7 @@ class TestMetaLearningPrecisionOptimizer:
         assert not torch.allclose(weights_before, self.optimizer.meta_network[0].weight.data)
 
     def test_volatility_from_buffer(self) -> None:
-        ."""Test volatility estimation from context buffer."""
+        """Test volatility estimation from context buffer"""
         # Add variable errors
         for i in range(20):
             errors = torch.randn(5, 2) * (1.0 if i % 3 == 0 else 0.1)
@@ -263,7 +262,7 @@ class TestMetaLearningPrecisionOptimizer:
 
 
 class TestAdaptivePrecisionController:
-    .."""Test adaptive precision controller.."""
+    """Test adaptive precision controller"""
 
     def setup_method(self) -> None:
         """Set up test environment"""
@@ -271,14 +270,14 @@ class TestAdaptivePrecisionController:
         self.controller = AdaptivePrecisionController(self.config, num_modalities=2, context_dim=4)
 
     def test_initialization(self) -> None:
-        ."""Test controller initialization."""
+        """Test controller initialization"""
         assert self.controller.num_modalities == 2
         assert self.controller.context_dim == 4
         assert hasattr(self.controller, "gradient_optimizer")
         assert hasattr(self.controller, "meta_optimizer")
 
     def test_optimization_with_strategy(self) -> None:
-        ."""Test optimization with different strategies."""
+        """Test optimization with different strategies"""
         errors = torch.randn(10, 2)
         context = torch.randn(4)
         # Test gradient strategy
@@ -292,7 +291,7 @@ class TestAdaptivePrecisionController:
         assert not torch.allclose(precision1, precision2)
 
     def test_strategy_evaluation(self) -> None:
-        ."""Test strategy evaluation."""
+        """Test strategy evaluation"""
         # Generate some data
         for _ in range(20):
             errors = torch.randn(5, 2)
@@ -305,7 +304,7 @@ class TestAdaptivePrecisionController:
         assert self.controller.strategy_performance["meta"] > 0
 
     def test_volatility_estimate(self) -> None:
-        ."""Test volatility estimation."""
+        """Test volatility estimation"""
         for _ in range(15):
             errors = torch.randn(5, 2)
             self.controller.optimize(errors)
@@ -313,7 +312,7 @@ class TestAdaptivePrecisionController:
         assert volatility.shape == (2,)
 
     def test_precision_statistics(self) -> None:
-        ."""Test precision statistics."""
+        """Test precision statistics"""
         for _ in range(10):
             self.controller.optimize(torch.randn(5, 2))
         stats = self.controller.get_precision_stats()
@@ -324,7 +323,7 @@ class TestAdaptivePrecisionController:
 
 
 class TestPrecisionFactory:
-    .."""Test precision optimizer factory.."""
+    """Test precision optimizer factory"""
 
     def test_create_gradient_optimizer(self) -> None:
         """Test creating gradient optimizer"""
@@ -332,27 +331,27 @@ class TestPrecisionFactory:
         assert isinstance(optimizer, GradientPrecisionOptimizer)
 
     def test_create_hierarchical_optimizer(self) -> None:
-        ."""Test creating hierarchical optimizer."""
+        """Test creating hierarchical optimizer"""
         optimizer = create_precision_optimizer("hierarchical", level_dims=[2, 2])
         assert isinstance(optimizer, HierarchicalPrecisionOptimizer)
 
     def test_create_meta_optimizer(self) -> None:
-        ."""Test creating meta-learning optimizer."""
+        """Test creating meta-learning optimizer"""
         optimizer = create_precision_optimizer("meta", input_dim=4, hidden_dim=16, num_modalities=2)
         assert isinstance(optimizer, MetaLearningPrecisionOptimizer)
 
     def test_create_adaptive_controller(self) -> None:
-        ."""Test creating adaptive controller."""
+        """Test creating adaptive controller"""
         controller = create_precision_optimizer("adaptive", num_modalities=2, context_dim=4)
         assert isinstance(controller, AdaptivePrecisionController)
 
     def test_invalid_optimizer_type(self) -> None:
-        ."""Test invalid optimizer type."""
+        """Test invalid optimizer type"""
         with pytest.raises(ValueError):
             create_precision_optimizer("invalid_type")
 
     def test_custom_config(self) -> None:
-        ."""Test creation with custom config."""
+        """Test creation with custom config"""
         config = PrecisionConfig(learning_rate=0.5)
         optimizer = create_precision_optimizer("gradient", config=config, num_modalities=2)
         assert optimizer.config.learning_rate == 0.5

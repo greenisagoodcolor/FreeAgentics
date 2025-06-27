@@ -177,25 +177,25 @@ class AgentFactory(IAgentFactory):
             pass
 
     def get_supported_types(self) -> List[str]:
-        ."""Get list of supported agent types."""
+        """Get list of supported agent types"""
         return list(self._agent_types.keys())
 
     def register_type(self, agent_type: str, factory_func: Callable[..., BaseAgent]) -> None:
-        ."""Register a new agent type with its factory function."""
+        """Register a new agent type with its factory function"""
         self._agent_types[agent_type] = factory_func
         self.logger.info(f"Registered agent type: {agent_type}")
 
     def set_default_config(self, agent_type: str, config: Dict[str, Any]) -> None:
-        ."""Set default configuration for an agent type."""
+        """Set default configuration for an agent type"""
         self._default_configs[agent_type] = config
 
     def get_default_config(self, agent_type: str) -> Dict[str, Any]:
-        ."""Get default configuration for an agent type."""
+        """Get default configuration for an agent type"""
         return self._default_configs.get(agent_type, {})
 
     # Agent creation methods
     def _create_basic_agent(self, **kwargs) -> BaseAgent:
-        ."""Create a basic agent."""
+        """Create a basic agent"""
         return create_agent(agent_type="basic", **kwargs)
 
     def _create_explorer_agent(self, **kwargs) -> BaseAgent:
@@ -285,17 +285,17 @@ class AgentRegistry(IAgentRegistry):
             self.logger.info(f"Unregistered agent: {agent_id}")
 
     def get_agent(self, agent_id: str) -> Optional[BaseAgent]:
-        ."""Get an agent by ID."""
+        """Get an agent by ID"""
         with self._lock:
             return self._agents.get(agent_id)
 
     def get_all_agents(self) -> List[BaseAgent]:
-        ."""Get all registered agents."""
+        """Get all registered agents"""
         with self._lock:
             return list(self._agents.values())
 
     def find_agents_by_type(self, agent_type: str) -> List[BaseAgent]:
-        ."""Find agents by type."""
+        """Find agents by type"""
         with self._lock:
             return list(self._agents_by_type.get(agent_type, []))
 
@@ -316,12 +316,12 @@ class AgentRegistry(IAgentRegistry):
             return nearby_agents
 
     def get_agent_count(self) -> int:
-        ."""Get total number of registered agents."""
+        """Get total number of registered agents"""
         with self._lock:
             return len(self._agents)
 
     def get_agent_count_by_type(self) -> Dict[str, int]:
-        ."""Get agent count by type."""
+        """Get agent count by type"""
         with self._lock:
             return {agent_type: len(agents) for agent_type, agents in self._agents_by_type.items()}
 
@@ -343,16 +343,16 @@ class AgentRegistry(IAgentRegistry):
                 handler.on_agent_moved(agent.data, old_position, new_position)
 
     def add_event_handler(self, handler: IAgentEventHandler) -> None:
-        ."""Add an event handler."""
+        """Add an event handler"""
         self._event_handlers.append(handler)
 
     def remove_event_handler(self, handler: IAgentEventHandler) -> None:
-        ."""Remove an event handler."""
+        """Remove an event handler"""
         if handler in self._event_handlers:
             self._event_handlers.remove(handler)
 
     def _update_spatial_index(self, agent: BaseAgent) -> None:
-        ."""Update agent in spatial index."""
+        """Update agent in spatial index"""
         cell = self._get_spatial_cell(agent.data.position)
         if agent not in self._spatial_index[cell]:
             self._spatial_index[cell].append(agent)
@@ -367,7 +367,7 @@ class AgentRegistry(IAgentRegistry):
             del self._spatial_index[cell]
 
     def _get_spatial_cell(self, position: Position) -> tuple:
-        ."""Get spatial grid cell for a position."""
+        """Get spatial grid cell for a position"""
         cell_x = int(position.x // self._spatial_resolution)
         cell_y = int(position.y // self._spatial_resolution)
         return (cell_x, cell_y)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-."""
+"""
 Basic Active Inference Example using PyMDP
 
 This script demonstrates the core concepts of Active Inference using a simple
@@ -28,7 +28,7 @@ from inference.engine.pymdp_policy_selector import PyMDPPolicySelector
 
 
 class SimpleGridWorld:
-    """Simple 2D grid world environment for Active Inference demonstration."""
+    """Simple 2D grid world environment for Active Inference demonstration"""
 
     def __init__(self, size: int = 4) -> None:
         self.size = size
@@ -46,7 +46,7 @@ class SimpleGridWorld:
         self.walls = {5, 6, 9, 10}  # Some walls in 4x4 grid
 
     def get_observation(self) -> int:
-        """Get observation at current position."""
+        """Get observation at current position"""
         if self.agent_pos in self.walls:
             return 1  # wall
         elif self.agent_pos == self.reward_pos:
@@ -55,7 +55,7 @@ class SimpleGridWorld:
             return 0  # empty
 
     def step(self, action: int) -> tuple[int, bool]:
-        """Take action and return (observation, done)."""
+        """Take action and return (observation, done)"""
         # Convert action to movement
         row, col = divmod(self.agent_pos, self.size)
 
@@ -80,13 +80,13 @@ class SimpleGridWorld:
         return observation, done
 
     def reset(self) -> None:
-        """Reset environment."""
+        """Reset environment"""
         self.agent_pos = 0
         return self.get_observation()
 
 
 def create_grid_world_model(env: SimpleGridWorld) -> DiscreteGenerativeModel:
-    """Create Active Inference model for grid world."""
+    """Create Active Inference model for grid world"""
 
     dims = ModelDimensions(
         num_states=env.num_states,
@@ -161,7 +161,7 @@ def create_grid_world_model(env: SimpleGridWorld) -> DiscreteGenerativeModel:
 def run_active_inference_episode(
     env: SimpleGridWorld, model: DiscreteGenerativeModel, max_steps: int = 20
 ) -> tuple[list[int], list[torch.Tensor], list[int]]:
-    """Run one episode of Active Inference navigation."""
+    """Run one episode of Active Inference navigation"""
 
     # Set up inference
     inference_config = InferenceConfig(num_iterations=10, convergence_threshold=1e-4)
@@ -208,7 +208,7 @@ def run_active_inference_episode(
 
 
 def visualize_beliefs(beliefs: List[torch.Tensor], env: SimpleGridWorld):
-    """Visualize belief evolution over time."""
+    """Visualize belief evolution over time"""
 
     num_steps = len(beliefs)
     fig, axes = plt.subplots(2, 3, figsize=(15, 10))
@@ -248,7 +248,7 @@ def visualize_beliefs(beliefs: List[torch.Tensor], env: SimpleGridWorld):
 def plot_free_energy(
     beliefs: List[torch.Tensor], observations: List[int], model: DiscreteGenerativeModel
 ):
-    """Plot free energy over time."""
+    """Plot free energy over time"""
 
     inference = VariationalMessagePassing(InferenceConfig())
     free_energies = []
@@ -268,7 +268,7 @@ def plot_free_energy(
 
 
 def main():
-    """Main function demonstrating Active Inference."""
+    """Main function demonstrating Active Inference"""
 
     print("=== Active Inference Grid World Example ===\n")
 

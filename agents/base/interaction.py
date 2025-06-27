@@ -17,8 +17,7 @@ from .data_model import Agent, Position
 Agent Interaction System
 This module provides mechanisms for agents to interact with other agents and the environment,
 including communication protocols, resource exchange, and conflict resolution.
-."""
-
+"""
 logger = logging.getLogger(__name__)
 
 
@@ -74,7 +73,7 @@ class Message:
     response_deadline: Optional[datetime] = None
 
     def is_broadcast(self) -> bool:
-        ."""Check if this is a broadcast message."""
+        """Check if this is a broadcast message"""
         return self.receiver_id is None
 
 
@@ -91,7 +90,7 @@ class InteractionRequest:
     timeout: float = 30.0
 
     def is_expired(self) -> bool:
-        ."""Check if the request has timed out."""
+        """Check if the request has timed out"""
         return (datetime.now() - self.timestamp).total_seconds() > self.timeout
 
 
@@ -337,7 +336,7 @@ class InteractionSystem:
         }
 
     def register_agent(self, agent: Agent) -> None:
-        ."""Register an agent with the interaction system."""
+        """Register an agent with the interaction system"""
         with self._lock:
             self.registered_agents[agent.agent_id] = agent
             logger.info(f"Agent registered: {agent.agent_id}")
@@ -352,7 +351,7 @@ class InteractionSystem:
     def register_interaction_callback(
         self, interaction_type: InteractionType, callback: Callable
     ) -> None:
-        ."""Register a callback for specific interaction types."""
+        """Register a callback for specific interaction types"""
         with self._lock:
             self.interaction_callbacks[interaction_type].append(callback)
 

@@ -1,4 +1,4 @@
-."""
+"""
 Coalition Formation Monitoring Integration
 
 This module provides the integration layer between coalition formation algorithms
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class CoalitionMonitoringEvent:
-    """Standardized event for coalition formation monitoring."""
+    """Standardized event for coalition formation monitoring"""
 
     event_type: str
     coalition_id: Optional[str] = None
@@ -34,7 +34,7 @@ class CoalitionMonitoringEvent:
 
 
 class CoalitionFormationMonitor:
-    """Monitors coalition formation processes and provides real-time events."""
+    """Monitors coalition formation processes and provides real-time events"""
 
     def __init__(self, formation_engine: Optional[CoalitionFormationEngine] = None) -> None:
         self.formation_engine = formation_engine or CoalitionFormationEngine()
@@ -42,12 +42,12 @@ class CoalitionFormationMonitor:
         self.active_formations: Dict[str, Dict[str, Any]] = {}
 
     def register_event_handler(self, handler: Callable[[CoalitionMonitoringEvent], None]) -> None:
-        """Register a handler for coalition formation events."""
+        """Register a handler for coalition formation events"""
         self.event_handlers.append(handler)
         logger.info(f"Registered coalition formation event handler")
 
     def _emit_event(self, event: CoalitionMonitoringEvent):
-        """Emit an event to all registered handlers."""
+        """Emit an event to all registered handlers"""
         for handler in self.event_handlers:
             try:
                 handler(event)
@@ -56,6 +56,6 @@ class CoalitionFormationMonitor:
 
 
 def create_coalition_monitoring_system():
-    """Factory function to create complete coalition monitoring system."""
+    """Factory function to create complete coalition monitoring system"""
     monitor = CoalitionFormationMonitor()
     return monitor

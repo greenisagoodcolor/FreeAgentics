@@ -106,7 +106,8 @@ body {
 }
 
 @keyframes gradient {
-  0%, 100% {
+  0%,
+  100% {
     background-size: 200% 200%;
     background-position: left center;
   }
@@ -165,7 +166,8 @@ button:active {
 
 /* Pulse animation for badges */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

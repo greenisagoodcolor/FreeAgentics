@@ -5,8 +5,7 @@ This module provides the Explorer agent type and related exploration functionali
 including mapping, discovery systems, and specialized exploration behaviors.
 """
 
-from .explorer import (  # Main agent class; Explorer-specific enums and
-    data classes; Specialized behaviors; Factory functions
+from .explorer import (  # Main agent class, enums, behaviors, and factory functions
     AdvancedExplorationBehavior,
     Discovery,
     DiscoveryType,

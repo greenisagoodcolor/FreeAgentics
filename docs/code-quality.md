@@ -299,14 +299,12 @@ npm run test:ci
 ### GitHub Actions Workflows
 
 1. **CI Pipeline** (`.github/workflows/ci.yml`)
-
    - Runs on all PRs and pushes
    - Executes all quality checks
    - Generates coverage reports
    - Posts status comments
 
 2. **Code Quality** (`.github/workflows/code-quality.yml`)
-
    - Deep code analysis
    - Bundle size checks
    - Security scanning

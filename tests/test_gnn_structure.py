@@ -19,14 +19,14 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
 class TestGNNStructure(unittest.TestCase):
-    """Test that the repository follows GNN-based structure."""
+    """Test that the repository follows GNN-based structure"""
 
     def setUp(self) -> None:
-        """Set up test environment."""
+        """Set up test environment"""
         self.root_dir = Path(__file__).parent.parent
 
     def test_directory_structure_exists(self) -> None:
-        """Test that all required directories exist."""
+        """Test that all required directories exist"""
         required_dirs = [
             "docs",
             "agents",
@@ -46,7 +46,7 @@ class TestGNNStructure(unittest.TestCase):
             self.assertTrue(full_path.exists(), f"Required directory '{dir_path}' does not exist")
 
     def test_documentation_files_exist(self) -> None:
-        """Test that key documentation files exist."""
+        """Test that key documentation files exist"""
         required_docs = [
             "README.md",
             "docs/active-inference/active-inference-guide.md",
@@ -60,7 +60,7 @@ class TestGNNStructure(unittest.TestCase):
             )
 
     def test_main_pipeline_exists(self) -> None:
-        """Test that simulation engine exists as main orchestrator."""
+        """Test that simulation engine exists as main orchestrator"""
         main_path = self.root_dir / "world" / "simulation" / "engine.py"
         self.assertTrue(main_path.exists(), "Simulation engine 'engine.py' does not exist")
         # Check for key simulation components
@@ -69,13 +69,13 @@ class TestGNNStructure(unittest.TestCase):
             self.assertIn("SimulationEngine", content)
 
     def test_gnn_models_exist(self) -> None:
-        """Test that GNN model documentation exists."""
+        """Test that GNN model documentation exists"""
         # Check for GNN documentation instead of model files
         gnn_docs = self.root_dir / "docs" / "gnn"
         self.assertTrue(gnn_docs.exists(), "GNN documentation directory does not exist")
 
     def test_active_inference_components_exist(self) -> None:
-        """Test that Active Inference components exist."""
+        """Test that Active Inference components exist"""
         inference_dir = self.root_dir / "inference"
         self.assertTrue(inference_dir.exists(), "Inference directory does not exist")
         # Check for key inference components
@@ -83,7 +83,7 @@ class TestGNNStructure(unittest.TestCase):
         self.assertTrue(engine_path.exists(), "Inference engine directory does not exist")
 
     def test_knowledge_modules_can_be_imported(self) -> None:
-        """Test that knowledge modules can be imported."""
+        """Test that knowledge modules can be imported"""
         try:
             # Import and test basic functionality
             # Test basic instantiation
@@ -93,7 +93,7 @@ class TestGNNStructure(unittest.TestCase):
             self.fail(f"Failed to import knowledge modules: {e}")
 
     def test_no_scattered_files(self) -> None:
-        """Test that there are no unexpected Python files in root."""
+        """Test that there are no unexpected Python files in root"""
         root_files = list(self.root_dir.glob("*.py"))
         allowed_root_files = [
             "setup.py",
@@ -103,8 +103,7 @@ class TestGNNStructure(unittest.TestCase):
             "fix_docstrings.py",
             "fix_triple_quotes.py",
         ]
-        unexpected_files = (
-            [f for f in root_files if f.name not in allowed_root_files])
+        unexpected_files = [f for f in root_files if f.name not in allowed_root_files]
         self.assertEqual(
             len(unexpected_files),
             0,
@@ -112,7 +111,7 @@ class TestGNNStructure(unittest.TestCase):
         )
 
     def test_clean_separation_of_concerns(self) -> None:
-        """Test that GNN models are properly documented."""
+        """Test that GNN models are properly documented"""
         # Check for GNN model documentation instead of model files
         gnn_docs_dir = self.root_dir / "docs" / "gnn"
         self.assertTrue(gnn_docs_dir.exists(), "GNN models documentation directory should exist")
@@ -121,7 +120,7 @@ class TestGNNStructure(unittest.TestCase):
         self.assertTrue(model_format_doc.exists(), "GNN model format documentation should exist")
 
     def test_architecture_screams_active_inference(self) -> None:
-        """Test that the architecture clearly shows this is an Active Inference platform."""
+        """Test that the architecture clearly shows this is an Active Inference platform"""
         ai_indicators = [
             self.root_dir / "agents" / "active_inference",
             self.root_dir / "docs" / "active-inference" / "active-inference-guide.md",
@@ -141,15 +140,15 @@ class TestGNNStructure(unittest.TestCase):
 
 
 class TestGNNModelParsing(unittest.TestCase):
-    """Test GNN model parsing and validation."""
+    """Test GNN model parsing and validation"""
 
     def setUp(self) -> None:
-        """Set up test environment."""
+        """Set up test environment"""
         self.root_dir = Path(__file__).parent.parent
         sys.path.insert(0, str(self.root_dir))
 
     def test_gnn_parser_imports(self) -> None:
-        """Test that GNN parser can be imported."""
+        """Test that GNN parser can be imported"""
         try:
             # These imports will be used when we actually test them
             # Test basic instantiation
@@ -160,15 +159,15 @@ class TestGNNModelParsing(unittest.TestCase):
 
 
 class TestPipelineIntegration(unittest.TestCase):
-    """Test integration between pipeline components."""
+    """Test integration between pipeline components"""
 
     def setUp(self) -> None:
-        """Set up test environment."""
+        """Set up test environment"""
         self.root_dir = Path(__file__).parent.parent
         sys.path.insert(0, str(self.root_dir))
 
     def test_agent_components_can_be_imported(self) -> None:
-        """Test that agent components can be imported."""
+        """Test that agent components can be imported"""
         try:
             # These imports will be used when we actually test them
             # Test basic functionality exists

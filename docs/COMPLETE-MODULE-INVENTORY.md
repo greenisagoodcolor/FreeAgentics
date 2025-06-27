@@ -11,6 +11,7 @@ Last Updated: 2025-06-26
 ### 1. **AGENTS MODULE** (`agents/`)
 
 #### **Core Agent Framework** (`agents/base/`)
+
 - **`agent.py`**: Base Agent class - handles lifecycle, state, actions
 - **`agent_factory.py`**: Factory pattern for creating different agent types
 - **`agent_template.py`**: Template system for reusable agent configurations
@@ -18,6 +19,7 @@ Last Updated: 2025-06-26
 - **`interfaces.py`**: Protocol definitions for agent contracts
 
 #### **Agent Capabilities** (`agents/base/`)
+
 - **`decision_making.py`**: Decision systems (utility-based, goal-oriented, reactive, hybrid, active inference)
 - **`perception.py`**: Sensory input processing, stimulus detection, percept generation
 - **`movement.py`**: Movement controllers, path planning, spatial navigation
@@ -27,6 +29,7 @@ Last Updated: 2025-06-26
 - **`behaviors.py`**: Behavior trees, action selection, behavioral patterns
 
 #### **Advanced Systems** (`agents/base/`)
+
 - **`active_inference_integration.py`**: PyMDP integration for Active Inference
 - **`belief_synchronization.py`**: Multi-agent belief alignment
 - **`epistemic_value_engine.py`**: Information gain calculations, exploration vs exploitation
@@ -37,32 +40,36 @@ Last Updated: 2025-06-26
 - **`world_integration.py`**: World interaction interfaces
 
 #### **Active Inference** (`agents/active_inference/`)
+
 - **`generative_model.py`**: Generative models for Active Inference
 - **`precision.py`**: Precision weighting and attention mechanisms
 
-#### **Agent Types** 
+#### **Agent Types**
+
 - **Explorer** (`agents/explorer/`): Discovery-focused agents
   - `explorer.py`: Main explorer implementation
   - `explorer_behavior.py`: Exploration strategies
-  
+
 - **Guardian** (`agents/guardian/`): Protective/defensive agents
   - `guardian.py`: Guardian implementation
   - `guardian_behavior.py`: Protection strategies
-  
+
 - **Merchant** (`agents/merchant/`): Trading/economic agents
   - `merchant.py`: Merchant implementation
   - `merchant_behavior.py`: Trading strategies
-  
+
 - **Scholar** (`agents/scholar/`): Knowledge-focused agents
   - `scholar.py`: Scholar implementation
   - `scholar_behavior.py`: Learning strategies
 
 #### **Templates** (`agents/templates/`)
+
 - **`base_template.py`**: Base template structure
 - **`explorer_template.py`**: Explorer-specific template
 - **`pymdp_integration.py`**: PyMDP template integration
 
 #### **Testing Framework** (`agents/testing/`)
+
 - **`agent_test_framework.py`**: Comprehensive agent testing utilities
 
 ---
@@ -70,11 +77,13 @@ Last Updated: 2025-06-26
 ### 2. **COALITIONS MODULE** (`coalitions/`)
 
 #### **Coalition Core** (`coalitions/coalition/`)
+
 - **`coalition_models.py`**: Data models (Coalition, CoalitionMember, CoalitionGoal)
 - **`coalition_criteria.py`**: Formation criteria and triggers
 - **`business_opportunities.py`**: Business opportunity detection and validation
 
 #### **Formation Algorithms** (`coalitions/formation/`)
+
 - **`coalition_formation_algorithms.py`**: Multiple formation strategies
   - Active Inference-based formation
   - Capability-based matching
@@ -88,10 +97,12 @@ Last Updated: 2025-06-26
 - **`monitoring_integration.py`**: Real-time coalition monitoring
 
 #### **Contracts** (`coalitions/contracts/`)
+
 - **`coalition_contract.py`**: Smart contract implementations
 - **`resource_sharing.py`**: Resource sharing agreements
 
 #### **Readiness Assessment** (`coalitions/readiness/`)
+
 - **`readiness_evaluator.py`**: Overall readiness scoring
 - **`technical_readiness_validator.py`**: Technical capability validation
 - **`business_readiness_assessor.py`**: Business viability checks
@@ -99,6 +110,7 @@ Last Updated: 2025-06-26
 - **`comprehensive_readiness_integrator.py`**: Integrated readiness assessment
 
 #### **Deployment** (`coalitions/deployment/`)
+
 - **`deployment_manifest.py`**: Deployment configuration
 - **`edge_packager.py`**: Edge device packaging
 
@@ -107,6 +119,7 @@ Last Updated: 2025-06-26
 ### 3. **INFERENCE MODULE** (`inference/`)
 
 #### **Core Engine** (`inference/engine/`)
+
 - **`active_inference.py`**: Main Active Inference implementation
   - Variational Message Passing
   - Gradient Descent methods
@@ -118,6 +131,7 @@ Last Updated: 2025-06-26
 - **`precision.py`**: Precision matrices and attention
 
 #### **Advanced Features** (`inference/engine/`)
+
 - **`hierarchical_inference.py`**: Multi-level inference
 - **`temporal_planning.py`**: Time-based planning
 - **`active_learning.py`**: Learning from experience
@@ -128,10 +142,12 @@ Last Updated: 2025-06-26
 - **`belief_visualization_interface.py`**: Visualization APIs
 
 #### **PyMDP Integration** (`inference/engine/`)
+
 - **`pymdp_generative_model.py`**: PyMDP model wrapper
 - **`pymdp_policy_selector.py`**: PyMDP policy interface
 
 #### **Graph Neural Networks** (`inference/gnn/`)
+
 - **`model.py`**: Core GNN model architecture
 - **`layers.py`**: GNN layer implementations (GCN, GAT, SAGE, GIN)
 - **`parser.py`**: Natural language to GNN parsing
@@ -140,6 +156,7 @@ Last Updated: 2025-06-26
 - **`executor.py`**: Model execution engine
 
 #### **GNN Infrastructure** (`inference/gnn/`)
+
 - **`feature_extractor.py`**: Feature extraction pipelines
 - **`edge_processor.py`**: Edge feature processing
 - **`batch_processor.py`**: Batch processing utilities
@@ -151,6 +168,7 @@ Last Updated: 2025-06-26
 - **`alerting.py`**: Alert management system
 
 #### **LLM Integration** (`inference/llm/`)
+
 - **`provider_interface.py`**: Abstract LLM provider interface
 - **`local_llm_manager.py`**: Local LLM management
 - **`ollama_integration.py`**: Ollama model integration
@@ -163,6 +181,7 @@ Last Updated: 2025-06-26
 ### 4. **INFRASTRUCTURE MODULE** (`infrastructure/`)
 
 #### **Database** (`infrastructure/database/`)
+
 - **`models.py`**: SQLAlchemy ORM models
 - **`connection.py`**: Database connection management
 - **`seed.py`**: Database seeding utilities
@@ -170,16 +189,19 @@ Last Updated: 2025-06-26
 - **`alembic/`**: Database migrations
 
 #### **Hardware Abstraction** (`infrastructure/hardware/`)
+
 - **`hal_core.py`**: Hardware abstraction layer
 - **`device_discovery.py`**: Device detection and enumeration
 
 #### **Safety Systems** (`infrastructure/safety/`)
+
 - **`safety_protocols.py`**: Core safety protocol definitions
 - **`markov_blanket_verification.py`**: Boundary verification
 - **`boundary_monitoring_service.py`**: Real-time boundary monitoring
 - **`risk_mitigation_metrics.py`**: Risk analysis and metrics
 
 #### **Export & Deployment** (`infrastructure/export/`)
+
 - **`export_builder.py`**: Export package builder
 - **`experiment_export.py`**: Experiment state export
 - **`coalition_packaging.py`**: Coalition deployment packages
@@ -189,6 +211,7 @@ Last Updated: 2025-06-26
 - **`deployment_scripts.py`**: Deployment automation
 
 #### **Deployment Validation** (`infrastructure/deployment/`)
+
 - **`deployment_verification.py`**: Deployment health checks
 - **`export_validator.py`**: Export package validation
 - **`hardware_compatibility.py`**: Hardware compatibility testing
@@ -196,6 +219,7 @@ Last Updated: 2025-06-26
 ---
 
 ### 5. **KNOWLEDGE MODULE** (`knowledge/`)
+
 - **`knowledge_graph.py`**: Knowledge graph implementation
   - Node and edge management
   - Graph queries and traversal
@@ -206,20 +230,24 @@ Last Updated: 2025-06-26
 ### 6. **WORLD MODULE** (`world/`)
 
 #### **Spatial Systems** (`world/grid/`)
+
 - **`hex_world.py`**: Hexagonal grid implementation
 - **`spatial_index.py`**: Spatial indexing and queries
 
-#### **Core World** 
+#### **Core World**
+
 - **`h3_world.py`**: H3 hexagonal hierarchical spatial index
 - **`grid_position.py`**: Position management
 
 #### **Simulation** (`world/simulation/`)
+
 - **`engine.py`**: Main simulation engine
   - World state management
   - Agent orchestration
   - Event processing
 
 #### **Spatial API** (`world/spatial/`)
+
 - **`spatial_api.py`**: RESTful spatial query API
 
 ---
@@ -227,9 +255,11 @@ Last Updated: 2025-06-26
 ### 7. **API MODULE** (`api/`)
 
 #### **GraphQL** (`api/graphql/`)
+
 - **`schema.py`**: GraphQL schema definitions
 
 #### **WebSocket** (`api/websocket/`)
+
 - **`real_time_updates.py`**: Real-time state streaming
 - **`coalition_monitoring.py`**: Coalition event streaming
 - **`markov_blanket_monitoring.py`**: Boundary monitoring streams
@@ -241,6 +271,7 @@ Last Updated: 2025-06-26
 ### 1. **APPLICATION STRUCTURE** (`web/app/`)
 
 #### **Pages**
+
 - **`page.tsx`**: Landing page
 - **`agents/page.tsx`**: Agent management interface
 - **`world/page.tsx`**: World visualization
@@ -250,6 +281,7 @@ Last Updated: 2025-06-26
 - **`active-inference-demo/page.tsx`**: Active Inference visualization
 
 #### **Dashboard** (`web/app/(dashboard)/`)
+
 - **`dashboard/page.tsx`**: Main dashboard
 - **`conversation-orchestration/page.tsx`**: Conversation control panel
 - **`layout.tsx`**: Dashboard layout wrapper
@@ -259,6 +291,7 @@ Last Updated: 2025-06-26
 ### 2. **COMPONENTS** (`web/components/`)
 
 #### **Core UI Components** (`web/components/ui/`)
+
 - **`button.tsx`**: Button component with variants
 - **`badge.tsx`**: Status badges
 - **`card.tsx`**: Card containers
@@ -303,6 +336,7 @@ Last Updated: 2025-06-26
 - **`toggle.tsx`**: Toggle buttons
 
 #### **Agent Components**
+
 - **`agent-card.tsx`**: Agent display card
 - **`agent-details.tsx`**: Detailed agent view
 - **`agent-list.tsx`**: Agent list view
@@ -317,6 +351,7 @@ Last Updated: 2025-06-26
 - **`backend-agent-list.tsx`**: Backend-connected agent list
 
 #### **Active Inference Visualizations**
+
 - **`active-inference-dashboard.tsx`**: Main Active Inference dashboard
 - **`belief-state-visualization.tsx`**: Belief state display
 - **`belief-state-mathematical-display.tsx`**: Mathematical belief representation
@@ -329,6 +364,7 @@ Last Updated: 2025-06-26
 - **`precision-matrix-viz.tsx`**: Precision matrix visualization
 
 #### **World & Spatial Components**
+
 - **`world-visualization.tsx`**: Main world display
 - **`backend-grid-world.tsx`**: Grid world visualization
 - **`hex-grid.tsx`**: Hexagonal grid display
@@ -337,6 +373,7 @@ Last Updated: 2025-06-26
 - **`resource-heatmap.tsx`**: Resource distribution map
 
 #### **Conversation Components** (`web/components/conversation/`)
+
 - **`conversation-dashboard.tsx`**: Conversation management
 - **`optimized-conversation-dashboard.tsx`**: Performance-optimized version
 - **`virtualized-message-list.tsx`**: Virtualized message rendering
@@ -345,6 +382,7 @@ Last Updated: 2025-06-26
 - **`message-queue-visualization.tsx`**: Message queue display
 
 #### **Conversation Orchestration** (`web/components/conversation-orchestration/`)
+
 - **`advanced-controls.tsx`**: Advanced orchestration controls
 - **`change-history.tsx`**: Configuration change history
 - **`preset-selector.tsx`**: Conversation presets
@@ -353,17 +391,20 @@ Last Updated: 2025-06-26
 - **`timing-controls.tsx`**: Timing and delay controls
 
 #### **Knowledge Components**
+
 - **`knowledge-graph-viz.tsx`**: Knowledge graph visualization
 - **`knowledge-graph-editor.tsx`**: Graph editing interface
 - **`knowledge-search.tsx`**: Knowledge search
 
 #### **Coalition Components**
+
 - **`coalition-dashboard.tsx`**: Coalition overview
 - **`coalition-formation-viz.tsx`**: Formation visualization
 - **`coalition-list.tsx`**: Coalition listing
 - **`coalition-metrics.tsx`**: Coalition performance metrics
 
 #### **Experiment Components**
+
 - **`experiment-card.tsx`**: Experiment display
 - **`experiment-controls.tsx`**: Experiment controls
 - **`experiment-dashboard.tsx`**: Experiment management
@@ -373,6 +414,7 @@ Last Updated: 2025-06-26
 - **`experiment-timeline.tsx`**: Experiment history
 
 #### **Monitoring Components**
+
 - **`monitoring-dashboard.tsx`**: System monitoring
 - **`readiness-panel.tsx`**: Readiness indicators
 - **`performance-monitor.tsx`**: Performance metrics
@@ -380,6 +422,7 @@ Last Updated: 2025-06-26
 - **`network-status.tsx`**: Network connectivity
 
 #### **Other Components**
+
 - **`ErrorBoundary.tsx`**: Error handling wrapper
 - **`themeprovider.tsx`**: Theme management
 - **`simulation-controls.tsx`**: Simulation control panel
@@ -392,16 +435,19 @@ Last Updated: 2025-06-26
 ### 3. **HOOKS** (`web/hooks/`)
 
 #### **WebSocket Hooks**
+
 - **`useConversationWebSocket.ts`**: Conversation real-time updates
 - **`useKnowledgeGraphWebSocket.ts`**: Knowledge graph updates
 - **`useMarkovBlanketWebSocket.ts`**: Markov blanket monitoring
 
 #### **State Management Hooks**
+
 - **`useAgent.ts`**: Agent state management
 - **`useWorld.ts`**: World state management
 - **`useExperiment.ts`**: Experiment state
 
 #### **Utility Hooks**
+
 - **`useDebounce.ts`**: Input debouncing
 - **`useAutoScroll.ts`**: Auto-scrolling behavior
 - **`useLocalStorage.ts`**: Local storage persistence
@@ -410,18 +456,21 @@ Last Updated: 2025-06-26
 - **`useToast.ts`**: Toast notifications
 
 #### **Feature Hooks**
+
 - **`useAutonomousconversations.ts`**: Autonomous conversation management
 - **`useConversationorchestrator.ts`**: Conversation orchestration
 
 ---
 
 ### 4. **CONTEXTS** (`web/contexts/`)
+
 - **`is-sending-context.tsx`**: Message sending state
 - **`llm-context.tsx`**: LLM provider context
 
 ---
 
 ### 5. **LIB** (`lib/`)
+
 - **`api-key-storage.ts`**: API key management
 - **`audit-logger.ts`**: Audit trail logging
 - **`auth-middleware.ts`**: Authentication middleware
@@ -433,6 +482,7 @@ Last Updated: 2025-06-26
 ---
 
 ### 6. **TYPES** (`web/types/`)
+
 - **`agents.ts`**: Agent type definitions
 - **`beliefs.ts`**: Belief state types
 
@@ -441,6 +491,7 @@ Last Updated: 2025-06-26
 ### 7. **API ROUTES** (`api/rest/`)
 
 #### **Agent Routes** (`agents/`)
+
 - **`route.ts`**: Agent CRUD operations
 - **`agentid/route.ts`**: Individual agent operations
 - **`agentid/commands/route.ts`**: Agent command execution
@@ -451,6 +502,7 @@ Last Updated: 2025-06-26
 - **`agentid/state/route.ts`**: State management
 
 #### **Other API Routes**
+
 - **`experiments/`**: Experiment management
 - **`gnn/`**: GNN model operations
 - **`knowledge/`**: Knowledge graph API
@@ -463,18 +515,21 @@ Last Updated: 2025-06-26
 ## 🔄 Integration Points
 
 ### **Backend ↔ Frontend Communication**
+
 1. **REST API**: TypeScript routes → Python handlers
 2. **GraphQL**: Apollo Client → GraphQL schema
 3. **WebSocket**: Real-time bidirectional updates
 4. **File Export/Import**: JSON/Binary data exchange
 
 ### **Key Data Flows**
+
 1. **Agent Creation**: UI → API → Agent Factory → Database
 2. **Simulation**: Engine → World State → WebSocket → UI Updates
 3. **Active Inference**: Belief Updates → GNN → Visualization
 4. **Coalition Formation**: Algorithm → Monitoring → UI Events
 
 ### **State Management**
+
 - **Backend**: SQLAlchemy ORM, In-memory caches
 - **Frontend**: React hooks, Context API, Local storage
 - **Real-time**: WebSocket event streams
@@ -484,6 +539,7 @@ Last Updated: 2025-06-26
 ## 📊 Functionality Coverage
 
 ### **✅ Implemented**
+
 - Complete agent lifecycle management
 - Active Inference with PyMDP integration
 - Multi-agent coalition formation
@@ -494,12 +550,14 @@ Last Updated: 2025-06-26
 - Export/deployment system
 
 ### **🔧 Partially Implemented**
+
 - LLM integration (local models ready, cloud providers pending)
 - Advanced coalition contracts
 - Full edge deployment pipeline
 - Performance optimization (basic optimization done)
 
 ### **📋 Architecture Ready (Not Implemented)**
+
 - Distributed simulation
 - Multi-region deployment
 - Advanced learning algorithms
@@ -507,4 +565,4 @@ Last Updated: 2025-06-26
 
 ---
 
-This comprehensive inventory shows a sophisticated multi-agent AI platform with strong mathematical foundations, real-time visualization, and production-ready infrastructure. The modular architecture allows for easy extension and integration of new capabilities. 
+This comprehensive inventory shows a sophisticated multi-agent AI platform with strong mathematical foundations, real-time visualization, and production-ready infrastructure. The modular architecture allows for easy extension and integration of new capabilities.

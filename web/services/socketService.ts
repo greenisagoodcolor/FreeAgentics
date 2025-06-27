@@ -1,5 +1,5 @@
-import { io, Socket } from 'socket.io-client';
-import { store } from '@/store';
+import { io, Socket } from "socket.io-client";
+import { store } from "@/store";
 import {
   connectionEstablished,
   connectionLost,
@@ -7,20 +7,17 @@ import {
   updateLatency,
   incrementReconnectAttempt,
   addConnectionError,
-} from '@/store/slices/connectionSlice';
+} from "@/store/slices/connectionSlice";
 import {
   addMessage,
   setTypingIndicators,
-} from '@/store/slices/conversationSlice';
-import {
-  updateAgentStatus,
-  setTypingAgents,
-} from '@/store/slices/agentSlice';
+} from "@/store/slices/conversationSlice";
+import { updateAgentStatus, setTypingAgents } from "@/store/slices/agentSlice";
 import {
   addKnowledgeNode,
   addKnowledgeEdge,
   updateAgentKnowledge,
-} from '@/store/slices/knowledgeSlice';
+} from "@/store/slices/knowledgeSlice";
 
 // Socket event types
 export interface SocketEvents {
@@ -32,42 +29,56 @@ export interface SocketEvents {
   reconnect_attempt: (attemptNumber: number) => void;
   reconnect_error: (error: Error) => void;
   reconnect_failed: () => void;
-  
+
   // Custom events
-  'connection:established': (data: { connectionId: string; serverTime: number }) => void;
-  'ping:response': (data: { latency: number; serverTime: number }) => void;
-  
+  "connection:established": (data: {
+    connectionId: string;
+    serverTime: number;
+  }) => void;
+  "ping:response": (data: { latency: number; serverTime: number }) => void;
+
   // Agent events
-  'agent:status': (data: { agentId: string; status: string }) => void;
-  'agent:typing': (data: { conversationId: string; agentIds: string[] }) => void;
-  'agent:created': (data: { agent: any }) => void;
-  'agent:updated': (data: { agentId: string; updates: any }) => void;
-  
+  "agent:status": (data: { agentId: string; status: string }) => void;
+  "agent:typing": (data: {
+    conversationId: string;
+    agentIds: string[];
+  }) => void;
+  "agent:created": (data: { agent: any }) => void;
+  "agent:updated": (data: { agentId: string; updates: any }) => void;
+
   // Message events
-  'message:new': (data: { message: any }) => void;
-  'message:queued': (data: { messageId: string; conversationId: string }) => void;
-  'message:delivered': (data: { messageId: string }) => void;
-  'message:failed': (data: { messageId: string; error: string }) => void;
-  
+  "message:new": (data: { message: any }) => void;
+  "message:queued": (data: {
+    messageId: string;
+    conversationId: string;
+  }) => void;
+  "message:delivered": (data: { messageId: string }) => void;
+  "message:failed": (data: { messageId: string; error: string }) => void;
+
   // Knowledge events
-  'knowledge:node:added': (data: { node: any }) => void;
-  'knowledge:edge:added': (data: { edge: any }) => void;
-  'knowledge:agent:update': (data: { agentId: string; nodeIds: string[]; operation: 'add' | 'remove' }) => void;
-  
+  "knowledge:node:added": (data: { node: any }) => void;
+  "knowledge:edge:added": (data: { edge: any }) => void;
+  "knowledge:agent:update": (data: {
+    agentId: string;
+    nodeIds: string[];
+    operation: "add" | "remove";
+  }) => void;
+
   // Analytics events
-  'analytics:update': (data: { metrics: any }) => void;
-  'analytics:snapshot': (data: { snapshot: any }) => void;
+  "analytics:update": (data: { metrics: any }) => void;
+  "analytics:snapshot": (data: { snapshot: any }) => void;
 }
 
 class SocketService {
   private socket: Socket | null = null;
   private reconnectTimer: NodeJS.Timeout | null = null;
   private pingInterval: NodeJS.Timeout | null = null;
-  private connectionUrl: string = '';
+  private connectionUrl: string = "";
 
   constructor() {
     // Initialize with environment variable or default
-    this.connectionUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:8000';
+    this.connectionUrl =
+      process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:8000";
   }
 
   connect(url?: string): void {
@@ -76,16 +87,16 @@ class SocketService {
     }
 
     if (this.socket?.connected) {
-      console.log('Socket already connected');
+      console.log("Socket already connected");
       return;
     }
 
     // Update connection status
-    store.dispatch(setWebSocketStatus('connecting'));
+    store.dispatch(setWebSocketStatus("connecting"));
 
     // Create socket connection
     this.socket = io(this.connectionUrl, {
-      transports: ['websocket', 'polling'],
+      transports: ["websocket", "polling"],
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
@@ -102,76 +113,82 @@ class SocketService {
     if (!this.socket) return;
 
     // Connection events
-    this.socket.on('connect', () => {
-      console.log('Socket connected');
-      store.dispatch(setWebSocketStatus('connected'));
-      
+    this.socket.on("connect", () => {
+      console.log("Socket connected");
+      store.dispatch(setWebSocketStatus("connected"));
+
       // Request connection info
-      this.socket?.emit('connection:request', {
+      this.socket?.emit("connection:request", {
         clientTime: Date.now(),
       });
     });
 
-    this.socket.on('disconnect', (reason) => {
-      console.log('Socket disconnected:', reason);
-      store.dispatch(connectionLost({ type: 'websocket', error: reason }));
+    this.socket.on("disconnect", (reason) => {
+      console.log("Socket disconnected:", reason);
+      store.dispatch(connectionLost({ type: "websocket", error: reason }));
       this.stopPingInterval();
     });
 
-    this.socket.on('connect_error', (error) => {
-      console.error('Socket connection error:', error);
-      store.dispatch(addConnectionError({
-        type: 'websocket',
-        message: error.message,
-      }));
+    this.socket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+      store.dispatch(
+        addConnectionError({
+          type: "websocket",
+          message: error.message,
+        }),
+      );
     });
 
-    this.socket.on('reconnect_attempt', (attemptNumber) => {
-      console.log('Reconnection attempt:', attemptNumber);
+    this.socket.on("reconnect_attempt", (attemptNumber) => {
+      console.log("Reconnection attempt:", attemptNumber);
       store.dispatch(incrementReconnectAttempt());
     });
 
     // Custom events
-    this.socket.on('connection:established', (data) => {
-      store.dispatch(connectionEstablished({
-        connectionId: data.connectionId,
-        socketUrl: this.connectionUrl,
-        apiUrl: this.connectionUrl.replace(/:\d+$/, ':8000'), // Assume API on same host
-      }));
+    this.socket.on("connection:established", (data) => {
+      store.dispatch(
+        connectionEstablished({
+          connectionId: data.connectionId,
+          socketUrl: this.connectionUrl,
+          apiUrl: this.connectionUrl.replace(/:\d+$/, ":8000"), // Assume API on same host
+        }),
+      );
     });
 
-    this.socket.on('ping:response', (data) => {
+    this.socket.on("ping:response", (data) => {
       store.dispatch(updateLatency(data.latency));
     });
 
     // Agent events
-    this.socket.on('agent:status', (data) => {
-      store.dispatch(updateAgentStatus({
-        agentId: data.agentId,
-        status: data.status as any,
-      }));
+    this.socket.on("agent:status", (data) => {
+      store.dispatch(
+        updateAgentStatus({
+          agentId: data.agentId,
+          status: data.status as any,
+        }),
+      );
     });
 
-    this.socket.on('agent:typing', (data) => {
+    this.socket.on("agent:typing", (data) => {
       store.dispatch(setTypingAgents(data.agentIds));
       store.dispatch(setTypingIndicators(data));
     });
 
     // Message events
-    this.socket.on('message:new', (data) => {
+    this.socket.on("message:new", (data) => {
       store.dispatch(addMessage(data.message));
     });
 
     // Knowledge events
-    this.socket.on('knowledge:node:added', (data) => {
+    this.socket.on("knowledge:node:added", (data) => {
       store.dispatch(addKnowledgeNode(data.node));
     });
 
-    this.socket.on('knowledge:edge:added', (data) => {
+    this.socket.on("knowledge:edge:added", (data) => {
       store.dispatch(addKnowledgeEdge(data.edge));
     });
 
-    this.socket.on('knowledge:agent:update', (data) => {
+    this.socket.on("knowledge:agent:update", (data) => {
       store.dispatch(updateAgentKnowledge(data));
     });
   }
@@ -180,7 +197,7 @@ class SocketService {
     this.pingInterval = setInterval(() => {
       if (this.socket?.connected) {
         const startTime = Date.now();
-        this.socket.emit('ping', { clientTime: startTime });
+        this.socket.emit("ping", { clientTime: startTime });
       }
     }, 30000); // Every 30 seconds
   }
@@ -194,7 +211,7 @@ class SocketService {
 
   disconnect(): void {
     this.stopPingInterval();
-    
+
     if (this.socket) {
       this.socket.disconnect();
       this.socket = null;
@@ -212,7 +229,7 @@ class SocketService {
 
   // Specific emit methods for type safety
   sendMessage(conversationId: string, content: string, agentId: string): void {
-    this.emit('message:send', {
+    this.emit("message:send", {
       conversationId,
       content,
       agentId,
@@ -221,7 +238,7 @@ class SocketService {
   }
 
   createAgent(templateId: string, name?: string): void {
-    this.emit('agent:create', {
+    this.emit("agent:create", {
       templateId,
       name,
       timestamp: Date.now(),
@@ -229,7 +246,7 @@ class SocketService {
   }
 
   updateAgentParameters(agentId: string, parameters: any): void {
-    this.emit('agent:update:parameters', {
+    this.emit("agent:update:parameters", {
       agentId,
       parameters,
       timestamp: Date.now(),
@@ -237,7 +254,7 @@ class SocketService {
   }
 
   startConversation(type: string, participants: string[]): void {
-    this.emit('conversation:start', {
+    this.emit("conversation:start", {
       type,
       participants,
       timestamp: Date.now(),
@@ -245,19 +262,19 @@ class SocketService {
   }
 
   subscribeToAgent(agentId: string): void {
-    this.emit('agent:subscribe', { agentId });
+    this.emit("agent:subscribe", { agentId });
   }
 
   unsubscribeFromAgent(agentId: string): void {
-    this.emit('agent:unsubscribe', { agentId });
+    this.emit("agent:unsubscribe", { agentId });
   }
 
   subscribeToConversation(conversationId: string): void {
-    this.emit('conversation:subscribe', { conversationId });
+    this.emit("conversation:subscribe", { conversationId });
   }
 
   unsubscribeFromConversation(conversationId: string): void {
-    this.emit('conversation:unsubscribe', { conversationId });
+    this.emit("conversation:unsubscribe", { conversationId });
   }
 
   // Singleton instance
@@ -271,4 +288,4 @@ class SocketService {
   }
 }
 
-export const socketService = SocketService.getInstance(); 
+export const socketService = SocketService.getInstance();

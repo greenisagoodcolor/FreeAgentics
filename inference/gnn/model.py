@@ -28,7 +28,7 @@ class GMNModel:
 
 @dataclass
 class GNNModel:
-    """Represents a parsed GNN model."""
+    """Represents a parsed GNN model"""
 
     name: str = ""
     state_space: Dict[str, Any] = field(default_factory=dict)

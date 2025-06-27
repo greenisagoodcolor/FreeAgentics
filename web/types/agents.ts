@@ -7,4 +7,4 @@ export interface Agent {
   name: string;
   class: string;
   avatar?: string;
-} 
+}

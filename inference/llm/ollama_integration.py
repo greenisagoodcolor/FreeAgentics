@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class OllamaModel:
-    """Ollama model information."""
+    """Ollama model information"""
 
     name: str
     size: int  # Size in bytes
@@ -33,12 +33,12 @@ class OllamaModel:
 
     @property
     def size_gb(self) -> float:
-        """Get size in GB."""
+        """Get size in GB"""
         return self.size / (1024**3)
 
     @property
     def quantization(self) -> str:
-        """Extract quantization from model name."""
+        """Extract quantization from model name"""
         name_lower = self.name.lower()
         if "q3" in name_lower:
             return "q3"
@@ -63,12 +63,12 @@ class OllamaManager:
     """
 
     def __init__(self, host: str = "http://localhost:11434") -> None:
-        """Initialize Ollama manager."""
+        """Initialize Ollama manager"""
         self.host = host
         self.api_base = f"{host}/api"
 
     async def is_installed(self) -> bool:
-        """Check if Ollama is installed and running."""
+        """Check if Ollama is installed and running"""
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(f"{self.api_base}/tags", timeout=2) as response:
@@ -77,7 +77,7 @@ class OllamaManager:
             return False
 
     async def install_ollama(self) -> bool:
-        """Install Ollama if not present."""
+        """Install Ollama if not present"""
         if await self.is_installed():
             logger.info("Ollama is already installed and running")
             return True
@@ -121,7 +121,7 @@ class OllamaManager:
             return False
 
     async def list_models(self) -> List[OllamaModel]:
-        """List available models."""
+        """List available models"""
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(f"{self.api_base}/tags") as response:
@@ -185,7 +185,7 @@ class OllamaManager:
             return False
 
     async def delete_model(self, model_name: str) -> bool:
-        """Delete a model."""
+        """Delete a model"""
         try:
             async with aiohttp.ClientSession() as session:
                 data = {"name": model_name}
@@ -232,7 +232,7 @@ class OllamaManager:
             raise
 
     async def create_embedding(self, model: str, prompt: str) -> List[float]:
-        """Create embedding for text."""
+        """Create embedding for text"""
         data = {"model": model, "prompt": prompt}
         try:
             async with aiohttp.ClientSession() as session:
@@ -261,8 +261,7 @@ class OllamaManager:
             # Model: (min_ram_gb, size_gb, use_cases)
             "tinyllama:latest": (2, 0.6, ["general", "chat"]),
             "phi:latest": (4, 1.6, ["general", "code"]),
-            "mistral:7b-instruct-q4_K_M": (6, 4.1, ["general", "chat",
-                "code"]),
+            "mistral:7b-instruct-q4_K_M": (6, 4.1, ["general", "chat", "code"]),
             "llama2:7b-q4_K_M": (6, 3.8, ["general", "chat"]),
             "llama2:13b-q4_K_M": (10, 7.4, ["general", "chat", "code"]),
             "codellama:7b-q4_K_M": (6, 3.8, ["code"]),
@@ -399,7 +398,7 @@ Assistant: \"\"\"
 
 
 class OllamaAgentAdapter:
-    """Adapts Ollama for FreeAgentics agent use."""
+    """Adapts Ollama for FreeAgentics agent use"""
 
     def __init__(self, model_name: str, agent_class: str) -> None:
         """
@@ -418,29 +417,29 @@ class OllamaAgentAdapter:
 - Map territories and identify patterns
 - Share discoveries with other agents
 - Optimize exploration paths
-Be curious, thorough, and collaborative.""",
+Be curious, thorough, and collaborative""",
             "merchant": """You are a Merchant agent in FreeAgentics. Your role is to:
 - Identify trading opportunities
 - Negotiate fair exchanges
 - Manage resources efficiently
 - Build trading relationships
-Be fair, strategic, and profit-oriented.""",
+Be fair, strategic, and profit-oriented""",
             "scholar": """You are a Scholar agent in FreeAgentics. Your role is to:
 - Analyze data and extract patterns
 - Formulate theories and hypotheses
 - Share knowledge with the community
 - Advance collective understanding
-Be analytical, precise, and educational.""",
+Be analytical, precise, and educational""",
             "guardian": """You are a Guardian agent in FreeAgentics. Your role is to:
 - Protect assigned territories
 - Detect and respond to threats
 - Coordinate security measures
 - Maintain order and safety
-Be vigilant, protective, and responsive.""",
+Be vigilant, protective, and responsive""",
         }
 
     async def setup_agent_model(self) -> bool:
-        """Setup customized model for agent."""
+        """Setup customized model for agent"""
         # Create custom model for agent
         system_prompt = self.system_prompts.get(
             self.agent_class,

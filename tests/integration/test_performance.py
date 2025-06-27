@@ -1,4 +1,5 @@
-"""Tests system performance, scalability, and resource usage."""
+"""Tests system performance, scalability, and resource usage"""
+
 import asyncio
 import gc
 import json
@@ -20,16 +21,16 @@ from world.simulation.engine import SimulationEngine
 
 
 class TestPerformanceMetrics:
-    """Test performance metrics and benchmarks."""
+    """Test performance metrics and benchmarks"""
 
     @pytest.fixture
     def performance_logger(self):
-        """Create performance logger."""
+        """Create performance logger"""
         return PerformanceLogger()
 
     @pytest.mark.asyncio
     async def test_agent_creation_performance(self, performance_logger):
-        """Test agent creation performance."""
+        """Test agent creation performance"""
         agent_counts = [10, 50, 100, 500, 1000]
         creation_times = []
         for count in agent_counts:
@@ -58,7 +59,7 @@ class TestPerformanceMetrics:
 
     @pytest.mark.asyncio
     async def test_world_generation_performance(self, performance_logger):
-        """Test world generation performance."""
+        """Test world generation performance"""
         resolutions = [4, 5, 6, 7]
         generation_times = []
         cell_counts = []
@@ -74,7 +75,7 @@ class TestPerformanceMetrics:
             cell_counts.append(len(cells))
             for cell in cells[:1000]:
                 # Skip terrain setting if method doesn't exist
-                if hasattr(world, 'set_terrain'):
+                if hasattr(world, "set_terrain"):
                     terrain_types = list(TerrainType)
                     selected_terrain = np.random.choice(len(terrain_types))
                     world.set_terrain(cell, terrain_types[selected_terrain])
@@ -92,17 +93,15 @@ class TestPerformanceMetrics:
                     "resolution": resolution,
                     "cell_count": len(cells),
                     "generation_time": generation_time,
-                    "time_per_cell": (generation_time /
-                                      min(1000, len(cells))),
+                    "time_per_cell": (generation_time / min(1000, len(cells))),
                 },
             )
-        time_per_cell = [t / min(1000, c) for t, c in
-                         zip(generation_times, cell_counts)]
+        time_per_cell = [t / min(1000, c) for t, c in zip(generation_times, cell_counts)]
         assert max(time_per_cell) < min(time_per_cell) * 3
 
     @pytest.mark.asyncio
     async def test_pathfinding_performance(self, performance_logger):
-        """Test pathfinding algorithm performance."""
+        """Test pathfinding algorithm performance"""
         world = H3World(resolution=6)
         path_test_cases = [
             (5, "short"),
@@ -122,8 +121,7 @@ class TestPerformanceMetrics:
                     start, end = None, None
                 start_time = time.time()
                 # Simulate pathfinding with simple calculation
-                path = ([start, end] if hasattr(world, 'find_path')
-                        else None)
+                path = [start, end] if hasattr(world, "find_path") else None
                 path_time = time.time() - start_time
                 if path:
                     times.append(path_time)
@@ -153,7 +151,7 @@ class TestPerformanceMetrics:
 
     @pytest.mark.asyncio
     async def test_message_system_throughput(self, performance_logger):
-        """Test message system throughput."""
+        """Test message system throughput"""
         message_system = MessageSystem()
         agents = []
         for i in range(20):
@@ -187,14 +185,13 @@ class TestPerformanceMetrics:
             await asyncio.sleep(0.5)
             for agent in agents:
                 # Use available message retrieval method or simulate
-                if hasattr(agent, 'get_recent_messages'):
+                if hasattr(agent, "get_recent_messages"):
                     recent = agent.get_recent_messages(limit=1000)
                     messages_received += len(recent)
                 else:
                     messages_received += 0  # Simulate for testing
             throughput = messages_received / duration
-            delivery_rate = (messages_received / messages_sent
-                             if messages_sent > 0 else 0)
+            delivery_rate = messages_received / messages_sent if messages_sent > 0 else 0
             performance_logger.log(
                 "message_throughput",
                 {
@@ -209,7 +206,7 @@ class TestPerformanceMetrics:
 
     @pytest.mark.asyncio
     async def test_knowledge_graph_operations(self, performance_logger):
-        """Test knowledge graph operation performance."""
+        """Test knowledge graph operation performance"""
         knowledge_graph = KnowledgeGraph()
         node_counts = [100, 1000, 10000]
         for count in node_counts:
@@ -227,8 +224,7 @@ class TestPerformanceMetrics:
                 node2 = f"node_{np.random.randint(count)}"
                 if node1 != node2:
                     knowledge_graph.add_edge(
-                        node1, node2, edge_type="related",
-                        weight=np.random.random()
+                        node1, node2, edge_type="related", weight=np.random.random()
                     )
             edge_time = time.time() - edge_start_time
             query_times = []
@@ -254,7 +250,7 @@ class TestPerformanceMetrics:
 
     @pytest.mark.asyncio
     async def test_simulation_cycle_performance(self, performance_logger):
-        """Test full simulation cycle performance."""
+        """Test full simulation cycle performance"""
         configurations = [
             {"agents": 10, "world_size": 50},
             {"agents": 50, "world_size": 100},
@@ -301,11 +297,11 @@ class TestPerformanceMetrics:
 
 
 class TestScalabilityLimits:
-    """Test system scalability limits."""
+    """Test system scalability limits"""
 
     @pytest.mark.asyncio
     async def test_maximum_agent_capacity(self):
-        """Test maximum number of agents system can handle."""
+        """Test maximum number of agents system can handle"""
         max_agents_found = 0
         test_counts = [100, 500, 1000, 2000, 5000]
         for count in test_counts:
@@ -332,7 +328,7 @@ class TestScalabilityLimits:
 
     @pytest.mark.asyncio
     async def test_concurrent_operations(self):
-        """Test system under concurrent load."""
+        """Test system under concurrent load"""
         engine = SimulationEngine(
             {
                 "world": {"resolution": 5, "size": 100},
@@ -373,11 +369,11 @@ class TestScalabilityLimits:
 
 
 class TestMemoryAndResourceUsage:
-    """Test memory and resource usage patterns."""
+    """Test memory and resource usage patterns"""
 
     @pytest.mark.asyncio
     async def test_memory_leak_detection(self):
-        """Test for memory leaks during extended operation."""
+        """Test for memory leaks during extended operation"""
         engine = SimulationEngine(
             {
                 "world": {"resolution": 5, "size": 50},
@@ -394,15 +390,14 @@ class TestMemoryAndResourceUsage:
             if i % 5 == 0:
                 memory_mb = process.memory_info().rss / 1024 / 1024
                 memory_samples.append(memory_mb)
-        growth_rate = np.polyfit(range(len(memory_samples)),
-                                 memory_samples, 1)[0]
+        growth_rate = np.polyfit(range(len(memory_samples)), memory_samples, 1)[0]
         assert growth_rate < 1.0
         total_growth = memory_samples[-1] - memory_samples[0]
         assert total_growth < 50
 
     @pytest.mark.asyncio
     async def test_resource_cleanup(self):
-        """Test proper resource cleanup."""
+        """Test proper resource cleanup"""
         initial_memory = psutil.Process().memory_info().rss / 1024 / 1024
         for _ in range(5):
             engine = SimulationEngine(
@@ -425,30 +420,30 @@ class TestMemoryAndResourceUsage:
 
 
 class PerformanceLogger:
-    """Logger for performance metrics."""
+    """Logger for performance metrics"""
 
     def __init__(self) -> None:
-        """Initialize performance logger."""
+        """Initialize performance logger"""
         self.metrics = {}
         self.output_dir = Path("performance_results")
         self.output_dir.mkdir(exist_ok=True)
 
     def log(self, category: str, data: Dict[str, Any]) -> None:
-        """Log performance metrics."""
+        """Log performance metrics"""
         if category not in self.metrics:
             self.metrics[category] = []
         data["timestamp"] = time.time()
         self.metrics[category].append(data)
 
     def save_results(self) -> None:
-        """Save performance results."""
+        """Save performance results"""
         output_file = self.output_dir / f"performance_{int(time.time())}.json"
         with open(output_file, "w") as f:
             json.dump(self.metrics, f, indent=2)
         print(f"Performance results saved to: {output_file}")
 
     def generate_report(self):
-        """Generate performance report with visualizations."""
+        """Generate performance report with visualizations"""
         for category, data in self.metrics.items():
             if not data:
                 continue
@@ -476,6 +471,5 @@ class PerformanceLogger:
 
 
 def run_performance_tests():
-    """Run all performance tests."""
-    pytest.main([__file__, "-v", "--asyncio-mode=auto", "-k",
-                 "performance"])
+    """Run all performance tests"""
+    pytest.main([__file__, "-v", "--asyncio-mode=auto", "-k", "performance"])

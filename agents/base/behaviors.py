@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 Agent Behavior System for FreeAgentics
 This module provides the behavior management system for agents, including
 behavior trees, concrete behavior implementations, and behavior composition patterns.
-."""
+"""
 
 
 class BehaviorPriority(Enum):
@@ -114,21 +114,19 @@ class BaseBehavior(IAgentBehavior):
         return modifier
 
     def get_energy_cost(self, agent: Agent, context: Dict[str, Any]) -> float:
-        ."""Get the energy cost for executing this behavior."""
+        """Get the energy cost for executing this behavior"""
         return 1.0  # Default energy cost
 
-    def _can_execute_custom(self, agent: Agent, context: Dict[str,
-        Any]) -> bool:
-        ."""Custom execution check - override in subclasses."""
+    def _can_execute_custom(self, agent: Agent, context: Dict[str, Any]) -> bool:
+        """Custom execution check - override in subclasses"""
         return True
 
-    def _execute_custom(self, agent: Agent, context: Dict[str, Any]) -> Dict[str,
-        Any]:
-        ."""Custom execution logic - override in subclasses."""
+    def _execute_custom(self, agent: Agent, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Custom execution logic - override in subclasses"""
         return {"success": True, "behavior": self.name}
 
     def _get_priority_modifier(self, agent: Agent, context: Dict[str, Any]) -> float:
-        ."""Get dynamic priority modifier - override in subclasses."""
+        """Get dynamic priority modifier - override in subclasses"""
         return 1.0
 
 
@@ -194,8 +192,7 @@ class GoalSeekingBehavior(BaseBehavior):
             {AgentCapability.MOVEMENT, AgentCapability.PLANNING},
         )
 
-    def _can_execute_custom(self, agent: Agent, context: Dict[str,
-        Any]) -> bool:
+    def _can_execute_custom(self, agent: Agent, context: Dict[str, Any]) -> bool:
         # Can execute if agent has active goals
         return len(agent.goals) > 0 and agent.select_next_goal() is not None
 
@@ -238,8 +235,7 @@ class GoalSeekingBehavior(BaseBehavior):
                 current_pos.z,
             )
             # Update goal progress
-            goal.progress = (
-                min(1.0, 1.0 - (distance - move_distance) / distance))
+            goal.progress = min(1.0, 1.0 - (distance - move_distance) / distance)
             action = Action(
                 action_type=ActionType.MOVE,
                 target_position=new_position,
@@ -282,8 +278,7 @@ class SocialInteractionBehavior(BaseBehavior):
         world_interface = context.get("world_interface")
         if not world_interface:
             return False
-        nearby_objects = (
-            world_interface.get_nearby_objects(agent.position, self.interaction_radius))
+        nearby_objects = world_interface.get_nearby_objects(agent.position, self.interaction_radius)
         nearby_agents = [obj for obj in nearby_objects if obj.get("type") == "agent"]
         return len(nearby_agents) > 0
 
@@ -488,7 +483,7 @@ class BehaviorTreeManager(IBehaviorTree):
             self.add_behavior(behavior)
 
     def add_behavior(self, behavior: IAgentBehavior) -> None:
-        ."""Add a behavior to the tree."""
+        """Add a behavior to the tree"""
         if behavior not in self.behaviors:
             self.behaviors.append(behavior)
 

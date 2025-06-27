@@ -1,5 +1,4 @@
-."""
-
+"""
 LLMProvider Interface for Multi-Provider Management
 Provides unified interface for managing multiple LLM providers with advanced features
 including usage tracking, health monitoring, and secure credential handling.
@@ -22,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class ProviderType(Enum):
-    """Supported LLM provider types."""
+    """Supported LLM provider types"""
 
     OPENAI = "openai"
     ANTHROPIC = "anthropic"
@@ -36,7 +35,7 @@ class ProviderType(Enum):
 
 
 class ProviderStatus(Enum):
-    """Provider health status."""
+    """Provider health status"""
 
     HEALTHY = "healthy"
     DEGRADED = "degraded"
@@ -47,7 +46,7 @@ class ProviderStatus(Enum):
 
 
 class ModelCapability(Enum):
-    """Model capabilities."""
+    """Model capabilities"""
 
     TEXT_GENERATION = "text_generation"
     CHAT_COMPLETION = "chat_completion"
@@ -61,7 +60,7 @@ class ModelCapability(Enum):
 
 @dataclass
 class ProviderCredentials:
-    """Secure credentials for LLM providers."""
+    """Secure credentials for LLM providers"""
 
     api_key: Optional[str] = None
     organization_id: Optional[str] = None
@@ -72,13 +71,13 @@ class ProviderCredentials:
     encrypted_credential_id: Optional[str] = None
 
     def is_complete(self) -> bool:
-        """Check if credentials are complete for the provider."""
+        """Check if credentials are complete for the provider"""
         return bool(self.api_key or self.encrypted_credential_id)
 
 
 @dataclass
 class ModelInfo:
-    """Information about an available model."""
+    """Information about an available model"""
 
     id: str
     name: str
@@ -96,7 +95,7 @@ class ModelInfo:
 
 @dataclass
 class UsageMetrics:
-    """Usage tracking metrics for a provider."""
+    """Usage tracking metrics for a provider"""
 
     total_requests: int = 0
     successful_requests: int = 0
@@ -118,7 +117,7 @@ class UsageMetrics:
         cost: float,
         error_type: Optional[str] = None,
     ) -> None:
-        """Update metrics with new request data."""
+        """Update metrics with new request data"""
         self.total_requests += 1
         self.total_input_tokens += input_tokens
         self.total_output_tokens += output_tokens
@@ -146,7 +145,7 @@ class UsageMetrics:
 
 @dataclass
 class HealthCheckResult:
-    """Result of provider health check."""
+    """Result of provider health check"""
 
     status: ProviderStatus
     latency_ms: float
@@ -158,7 +157,7 @@ class HealthCheckResult:
 
 @dataclass
 class GenerationRequest:
-    """Request for text generation."""
+    """Request for text generation"""
 
     model: str
     messages: List[Dict[str, str]]  # Chat format: [{"role": "user", "content": "..."}]
@@ -175,7 +174,7 @@ class GenerationRequest:
 
 @dataclass
 class GenerationResponse:
-    """Response from text generation."""
+    """Response from text generation"""
 
     text: str
     model: str
@@ -190,69 +189,69 @@ class GenerationResponse:
 
 
 class ILLMProvider(ABC):
-    """Abstract interface for LLM providers."""
+    """Abstract interface for LLM providers"""
 
     @abstractmethod
     def get_provider_type(self) -> ProviderType:
-        """Get the provider type."""
+        """Get the provider type"""
         pass
 
     @abstractmethod
     def configure(self, credentials: ProviderCredentials, **kwargs: Any) -> bool:
-        """Configure the provider with credentials and settings."""
+        """Configure the provider with credentials and settings"""
         pass
 
     @abstractmethod
     def test_connection(self) -> HealthCheckResult:
-        """Test connection to the provider."""
+        """Test connection to the provider"""
         pass
 
     @abstractmethod
     def get_available_models(self) -> List[ModelInfo]:
-        """Get list of available models."""
+        """Get list of available models"""
         pass
 
     @abstractmethod
     def generate(self, request: GenerationRequest) -> GenerationResponse:
-        """Generate text using the provider."""
+        """Generate text using the provider"""
         pass
 
     @abstractmethod
     def estimate_cost(self, request: GenerationRequest) -> float:
-        """Estimate cost for a generation request."""
+        """Estimate cost for a generation request"""
         pass
 
     @abstractmethod
     def get_usage_metrics(self) -> UsageMetrics:
-        """Get current usage metrics."""
+        """Get current usage metrics"""
         pass
 
     @abstractmethod
     def reset_usage_metrics(self) -> None:
-        """Reset usage metrics."""
+        """Reset usage metrics"""
         pass
 
     @abstractmethod
     def get_rate_limits(self) -> Dict[str, Any]:
-        """Get current rate limit information."""
+        """Get current rate limit information"""
         pass
 
     @abstractmethod
     def supports_streaming(self) -> bool:
-        """Check if provider supports streaming."""
+        """Check if provider supports streaming"""
         pass
 
     @abstractmethod
     def supports_function_calling(self) -> bool:
-        """Check if provider supports function calling."""
+        """Check if provider supports function calling"""
         pass
 
 
 class BaseProvider(ILLMProvider):
-    """Base implementation with common functionality."""
+    """Base implementation with common functionality"""
 
     def __init__(self, provider_type: ProviderType) -> None:
-        """Initialize."""
+        """Initialize"""
         self.provider_type = provider_type
         self.credentials: Optional[ProviderCredentials] = None
         self.usage_metrics = UsageMetrics()
@@ -264,7 +263,7 @@ class BaseProvider(ILLMProvider):
         return self.provider_type
 
     def configure(self, credentials: ProviderCredentials, **kwargs: Any) -> bool:
-        """Configure the provider with credentials and settings."""
+        """Configure the provider with credentials and settings"""
         if not credentials.is_complete():
             logger.error(f"Incomplete credentials for {self.provider_type}")
             return False
@@ -283,7 +282,7 @@ class BaseProvider(ILLMProvider):
         self.usage_metrics = UsageMetrics()
 
     def _should_perform_health_check(self) -> bool:
-        """Check if health check is needed."""
+        """Check if health check is needed"""
         if not self._last_health_check:
             return True
 
@@ -297,7 +296,7 @@ class BaseProvider(ILLMProvider):
         success: bool,
         error_type: Optional[str] = None,
     ) -> None:
-        """Update usage metrics with request/response data."""
+        """Update usage metrics with request/response data"""
         self.usage_metrics.update_request(
             success=success,
             input_tokens=response.input_tokens,
@@ -309,16 +308,16 @@ class BaseProvider(ILLMProvider):
 
 
 class ProviderRegistry:
-    """Registry for managing multiple LLM providers."""
+    """Registry for managing multiple LLM providers"""
 
     def __init__(self) -> None:
-        """Initialize."""
+        """Initialize"""
         self._providers: Dict[ProviderType, ILLMProvider] = {}
         self._provider_priorities: List[ProviderType] = []
         self._health_check_cache: Dict[ProviderType, HealthCheckResult] = {}
 
     def register_provider(self, provider: ILLMProvider, priority: int = 100) -> None:
-        """Register a provider with given priority (lower = higher priority)."""
+        """Register a provider with given priority (lower = higher priority)"""
         provider_type = provider.get_provider_type()
         self._providers[provider_type] = provider
 
@@ -338,15 +337,15 @@ class ProviderRegistry:
         logger.info(f"Registered provider {provider_type} with priority {priority}")
 
     def get_provider(self, provider_type: ProviderType) -> Optional[ILLMProvider]:
-        """Get provider by type."""
+        """Get provider by type"""
         return self._providers.get(provider_type)
 
     def get_providers_by_priority(self) -> List[ILLMProvider]:
-        """Get providers ordered by priority."""
+        """Get providers ordered by priority"""
         return [self._providers[pt] for pt in self._provider_priorities if pt in self._providers]
 
     def get_healthy_providers(self) -> List[ILLMProvider]:
-        """Get only healthy providers."""
+        """Get only healthy providers"""
         healthy = []
         for provider in self.get_providers_by_priority():
             health = provider.test_connection()
@@ -355,7 +354,7 @@ class ProviderRegistry:
         return healthy
 
     def reorder_providers(self, new_order: List[ProviderType]) -> None:
-        """Reorder provider priority."""
+        """Reorder provider priority"""
         # Validate all providers exist
         for provider_type in new_order:
             if provider_type not in self._providers:
@@ -365,7 +364,7 @@ class ProviderRegistry:
         logger.info(f"Reordered providers: {[pt.value for pt in new_order]}")
 
     def remove_provider(self, provider_type: ProviderType) -> None:
-        """Remove a provider from the registry."""
+        """Remove a provider from the registry"""
         if provider_type in self._providers:
             del self._providers[provider_type]
         if provider_type in self._provider_priorities:
@@ -374,16 +373,16 @@ class ProviderRegistry:
 
 
 class ProviderManager:
-    """High-level manager for LLM provider operations."""
+    """High-level manager for LLM provider operations"""
 
     def __init__(self, config_path: Optional[Path] = None) -> None:
-        """Initialize."""
+        """Initialize"""
         self.registry = ProviderRegistry()
         self._config_path = config_path
         self._load_configuration()
 
     def _load_configuration(self) -> None:
-        """Load provider configuration from file."""
+        """Load provider configuration from file"""
         if not self._config_path or not self._config_path.exists():
             return
 
@@ -402,7 +401,7 @@ class ProviderManager:
             logger.error(f"Failed to load provider configuration: {e}")
 
     def generate_with_fallback(self, request: GenerationRequest) -> GenerationResponse:
-        """Generate with automatic provider fallback."""
+        """Generate with automatic provider fallback"""
         last_error = None
 
         for provider in self.registry.get_healthy_providers():
@@ -422,14 +421,14 @@ class ProviderManager:
             raise Exception("No healthy providers available")
 
     def get_all_usage_metrics(self) -> Dict[ProviderType, UsageMetrics]:
-        """Get usage metrics for all providers."""
+        """Get usage metrics for all providers"""
         return {
             provider_type: provider.get_usage_metrics()
             for provider_type, provider in self.registry._providers.items()
         }
 
     def perform_health_checks(self) -> Dict[ProviderType, HealthCheckResult]:
-        """Perform health checks on all providers."""
+        """Perform health checks on all providers"""
         results = {}
         for provider_type, provider in self.registry._providers.items():
             try:
@@ -445,7 +444,7 @@ class ProviderManager:
     def get_provider_recommendations(
         self, request: GenerationRequest
     ) -> List[Tuple[ILLMProvider, float]]:
-        """Get provider recommendations with confidence scores."""
+        """Get provider recommendations with confidence scores"""
         recommendations = []
 
         for provider in self.registry.get_healthy_providers():

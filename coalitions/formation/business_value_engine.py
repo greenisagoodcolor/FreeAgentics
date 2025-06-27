@@ -1,4 +1,4 @@
-."""
+"""
 Business Value Calculation Engine for Coalition Formation
 
 This module implements transparent calculation of coalition business value metrics
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class BusinessMetricType(Enum):
-    """Types of business value metrics calculated."""
+    """Types of business value metrics calculated"""
 
     SYNERGY = "synergy"
     RISK_REDUCTION = "risk_reduction"
@@ -32,7 +32,7 @@ class BusinessMetricType(Enum):
 
 @dataclass
 class BusinessValueMetrics:
-    """Comprehensive business value metrics for a coalition."""
+    """Comprehensive business value metrics for a coalition"""
 
     synergy_score: float = 0.0
     risk_reduction: float = 0.0
@@ -55,7 +55,7 @@ class BusinessValueCalculationEngine:
     """
 
     def __init__(self) -> None:
-        """Initialize."""
+        """Initialize"""
         self.metric_weights = {
             BusinessMetricType.SYNERGY: 0.25,
             BusinessMetricType.RISK_REDUCTION: 0.20,
@@ -140,8 +140,7 @@ class BusinessValueCalculationEngine:
 
             logger.info(
                 f"Calculated business value for coalition {coalition.coalition_id}: "
-                f"total= (
-                    {metrics.total_value:.3f}, confidence={metrics.confidence_level:.3f}")
+                f"total={metrics.total_value:.3f}, confidence={metrics.confidence_level:.3f}"
             )
 
         except Exception as e:
@@ -189,8 +188,7 @@ class BusinessValueCalculationEngine:
 
         unique_capabilities = len(all_capabilities)
         total_individual_capabilities = sum(len(p.capabilities) for p in agent_profiles)
-        complementarity_ratio = (
-            unique_capabilities / max(1, total_individual_capabilities))
+        complementarity_ratio = unique_capabilities / max(1, total_individual_capabilities)
         complementarity_bonus = complementarity_ratio * 20.0
 
         # Resource diversity bonus
@@ -254,8 +252,7 @@ class BusinessValueCalculationEngine:
             # Calculate standard deviation (some variance is good for risk management)
             mean_reliability = sum(reliabilities) / len(reliabilities)
             variance = sum((r - mean_reliability) ** 2 for r in reliabilities) / len(reliabilities)
-            reliability_diversity = (
-                min(1.0, variance * 4.0)  # Scale appropriately)
+            reliability_diversity = min(1.0, variance * 4.0)  # Scale appropriately
         else:
             reliability_diversity = 0.0
 
@@ -360,8 +357,7 @@ class BusinessValueCalculationEngine:
                 avg_resource_amount = sum(total_resources.values()) / len(total_resources)
 
                 diversity_score = min(1.0, resource_types / 5.0)  # Assume 5 types is good
-                sufficiency_score = (
-                    min(1.0, avg_resource_amount / 10.0)  # Assume 10 is sufficient)
+                sufficiency_score = min(1.0, avg_resource_amount / 10.0)  # Assume 10 is sufficient
 
                 resource_balance = (diversity_score + sufficiency_score) / 2.0
 
@@ -395,7 +391,7 @@ class BusinessValueCalculationEngine:
     def _calculate_operational_efficiency(
         self, coalition: Coalition, agent_profiles: List[AgentProfile]
     ) -> float:
-        """Calculate operational efficiency based on resource utilization."""
+        """Calculate operational efficiency based on resource utilization"""
         if not agent_profiles:
             return 0.0
 
@@ -415,7 +411,7 @@ class BusinessValueCalculationEngine:
     def _calculate_innovation_potential(
         self, coalition: Coalition, agent_profiles: List[AgentProfile]
     ) -> float:
-        """Calculate innovation potential from capability diversity."""
+        """Calculate innovation potential from capability diversity"""
         if not agent_profiles:
             return 0.0
 
@@ -430,7 +426,7 @@ class BusinessValueCalculationEngine:
         return innovation_score
 
     def _calculate_total_value(self, metrics: BusinessValueMetrics) -> float:
-        """Calculate total business value as weighted sum of all metrics."""
+        """Calculate total business value as weighted sum of all metrics"""
         total = (
             metrics.synergy_score * self.metric_weights[BusinessMetricType.SYNERGY]
             + metrics.risk_reduction * self.metric_weights[BusinessMetricType.RISK_REDUCTION]
@@ -448,7 +444,7 @@ class BusinessValueCalculationEngine:
     def _calculate_confidence(
         self, formation_result: FormationResult, agent_profiles: List[AgentProfile]
     ) -> float:
-        """Calculate confidence level in the business value calculation."""
+        """Calculate confidence level in the business value calculation"""
         confidence_factors = []
 
         # Data completeness
@@ -475,11 +471,11 @@ class BusinessValueCalculationEngine:
             return 0.0
 
     def get_calculation_history(self, limit: int = 100) -> List[BusinessValueMetrics]:
-        """Get recent business value calculations."""
+        """Get recent business value calculations"""
         return self.calculation_history[-limit:]
 
     def export_metrics_for_investors(self, metrics: BusinessValueMetrics) -> Dict[str, Any]:
-        """Export metrics in investor-friendly format."""
+        """Export metrics in investor-friendly format"""
         return {
             "executive_summary": {
                 "total_business_value": f"{metrics.total_value:.1%}",
@@ -504,7 +500,7 @@ class BusinessValueCalculationEngine:
         }
 
     def _identify_key_strengths(self, metrics: BusinessValueMetrics) -> List[str]:
-        """Identify the top strengths of the coalition."""
+        """Identify the top strengths of the coalition"""
         metric_scores = [
             ("Synergy", metrics.synergy_score),
             ("Risk Reduction", metrics.risk_reduction),

@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    optimizePackageImports: ['@reduxjs/toolkit', 'react-redux'],
+    optimizePackageImports: ["@reduxjs/toolkit", "react-redux"],
   },
   webpack: (config, { isServer }) => {
     // Fix for Redux Toolkit module resolution issues
@@ -17,13 +17,13 @@ const nextConfig = {
     // Optimize Redux Toolkit imports
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@reduxjs/toolkit': require.resolve('@reduxjs/toolkit'),
-      'react-redux': require.resolve('react-redux'),
+      "@reduxjs/toolkit": require.resolve("@reduxjs/toolkit"),
+      "react-redux": require.resolve("react-redux"),
     };
 
     return config;
   },
-  transpilePackages: ['@reduxjs/toolkit', 'react-redux'],
+  transpilePackages: ["@reduxjs/toolkit", "react-redux"],
 };
 
 module.exports = nextConfig;

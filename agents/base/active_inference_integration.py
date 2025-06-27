@@ -320,7 +320,7 @@ class ActionMapper:
         return np.array([0.0, 0.0, 0.0])
 
     def _find_interaction_target(self, agent: Agent) -> Optional[str]:
-        ."""Find suitable interaction target."""
+        """Find suitable interaction target"""
         return None
 
 
@@ -394,10 +394,7 @@ class ActiveInferenceIntegration:
             feature_dim=int(self.config.num_observations),
         )
         # Create belief updater with correct signature
-        self.belief_updater = create_belief_updater(
-            "standard",
-            BeliefUpdateConfig()
-        )
+        self.belief_updater = create_belief_updater("standard", BeliefUpdateConfig())
 
     def update(self, dt: float) -> None:
         """Main update method called each timestep"""
@@ -519,7 +516,7 @@ class ActiveInferenceIntegration:
         return confidence > self.config.action_selection_threshold
 
     def _execute_action(self, action: Action):
-        ."""Execute the selected action."""
+        """Execute the selected action"""
         logger.debug(f"Executing action: {action.action_type}")
         self.decision_system.execute_action(self.agent.agent_id, action)
 
@@ -564,8 +561,7 @@ class ActiveInferenceIntegration:
             else:
                 belief_array = np.array(self.current_belief)
             belief_state_list = belief_array.tolist()
-            belief_entropy_val = (
-                -np.sum(belief_array * np.log(belief_array + 1e-10)))
+            belief_entropy_val = -np.sum(belief_array * np.log(belief_array + 1e-10))
         return {
             "belief_state": belief_state_list,
             "last_observation": (

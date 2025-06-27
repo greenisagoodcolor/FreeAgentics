@@ -13,13 +13,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.nn import MessagePassing  # type: ignore[import-untyped]
-from torch_geometric.utils import (
-    add_self_loops,
-    degree  # type: ignore[import-untyped])
+from torch_geometric.utils import degree  # type: ignore[import-untyped]
+from torch_geometric.utils import add_self_loops
 
 
 class AggregationType(Enum):
-    """Aggregation types for GNN layers."""
+    """Aggregation types for GNN layers"""
 
     SUM = "sum"
     MEAN = "mean"
@@ -28,27 +27,33 @@ class AggregationType(Enum):
 
 
 class LayerConfig:
-    """Configuration for GNN layers."""
+    """Configuration for GNN layers"""
 
     def __init__(
         self,
         in_channels: int,
         out_channels: int,
-        aggregation: AggregationType = AggregationType.SUM,
+        heads: int = 1,
+        aggregation: AggregationType = AggregationType.MEAN,
         dropout: float = 0.0,
         bias: bool = True,
-        activation: Optional[str] = None,
+        normalize: bool = True,
+        activation: Optional[str] = "relu",
+        residual: bool = False,
     ) -> None:
         self.in_channels = in_channels
         self.out_channels = out_channels
+        self.heads = heads
         self.aggregation = aggregation
         self.dropout = dropout
         self.bias = bias
+        self.normalize = normalize
         self.activation = activation
+        self.residual = residual
 
 
 class GCNLayer(MessagePassing):
-    """Graph Convolutional Network layer implementation."""
+    """Graph Convolutional Network layer implementation"""
 
     def __init__(
         self,
@@ -72,11 +77,11 @@ class GCNLayer(MessagePassing):
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
-        """Reset layer parameters."""
+        """Reset layer parameters"""
         self.lin.reset_parameters()
 
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
-        """Forward pass through GCN layer."""
+        """Forward pass through GCN layer"""
         # Add self-loops to the adjacency matrix
         if self.normalize:
             edge_index, _ = add_self_loops(edge_index, num_nodes=x.size(0))
@@ -92,18 +97,17 @@ class GCNLayer(MessagePassing):
             deg_inv_sqrt[deg_inv_sqrt == float("inf")] = 0
             norm = deg_inv_sqrt[row] * deg_inv_sqrt[col]
 
-            return self.propagate(edge_index, x= (
-                x, norm=norm)  # type: ignore[no-any-return])
+            return self.propagate(edge_index, x=x, norm=norm)  # type: ignore[no-any-return]
         else:
             return self.propagate(edge_index, x=x)  # type: ignore[no-any-return]
 
     def message(self, x_j: torch.Tensor, norm: Optional[torch.Tensor] = None) -> torch.Tensor:
-        """Construct messages from neighbors."""
+        """Construct messages from neighbors"""
         return norm.view(-1, 1) * x_j if norm is not None else x_j
 
 
 class GATLayer(MessagePassing):
-    """Graph Attention Network layer implementation."""
+    """Graph Attention Network layer implementation"""
 
     def __init__(
         self,
@@ -137,14 +141,14 @@ class GATLayer(MessagePassing):
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
-        """Reset layer parameters."""
+        """Reset layer parameters"""
         nn.init.xavier_uniform_(self.lin.weight)
         nn.init.xavier_uniform_(self.att)
         if self.bias is not None:
             nn.init.constant_(self.bias, 0)
 
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
-        """Forward pass through GAT layer."""
+        """Forward pass through GAT layer"""
         H, C = self.heads, self.out_channels
 
         # Linear transformation and reshape
@@ -158,7 +162,7 @@ class GATLayer(MessagePassing):
     def message(
         self, x_i: torch.Tensor, x_j: torch.Tensor, edge_index_i: torch.Tensor
     ) -> torch.Tensor:
-        """Construct attention-weighted messages."""
+        """Construct attention-weighted messages"""
         # Concatenate node features
         alpha = torch.cat([x_i, x_j], dim=-1)  # [E, H, 2*C]
 
@@ -173,7 +177,7 @@ class GATLayer(MessagePassing):
         return x_j * alpha.unsqueeze(-1)
 
     def update(self, aggr_out: torch.Tensor) -> torch.Tensor:
-        """Update node embeddings."""
+        """Update node embeddings"""
         if self.concat:
             aggr_out = aggr_out.view(-1, self.heads * self.out_channels)
         else:
@@ -186,7 +190,7 @@ class GATLayer(MessagePassing):
 
 
 class GNNStack(nn.Module):
-    """Stack of GNN layers."""
+    """Stack of GNN layers"""
 
     def __init__(
         self,
@@ -222,7 +226,7 @@ class GNNStack(nn.Module):
             self.layers.append(layer)
 
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
-        """Forward pass through the GNN stack."""
+        """Forward pass through the GNN stack"""
         for i, layer in enumerate(self.layers):
             x = layer(x, edge_index)
 
@@ -240,19 +244,19 @@ class GNNStack(nn.Module):
 
 
 def global_add_pool(x: torch.Tensor, batch: torch.Tensor) -> torch.Tensor:
-    """Global add pooling."""
+    """Global add pooling"""
     size = int(batch.max().item() + 1)
     return scatter_add(x, batch, dim=0, dim_size=size)
 
 
 def global_mean_pool(x: torch.Tensor, batch: torch.Tensor) -> torch.Tensor:
-    """Global mean pooling."""
+    """Global mean pooling"""
     size = int(batch.max().item() + 1)
     return scatter_mean(x, batch, dim=0, dim_size=size)
 
 
 def global_max_pool(x: torch.Tensor, batch: torch.Tensor) -> torch.Tensor:
-    """Global max pooling."""
+    """Global max pooling"""
     size = int(batch.max().item() + 1)
     return scatter_max(x, batch, dim=0, dim_size=size)[0]
 
@@ -263,7 +267,7 @@ def scatter_add(
     dim: int = -1,
     dim_size: Optional[int] = None,
 ) -> torch.Tensor:
-    """Scatter add operation."""
+    """Scatter add operation"""
     size = list(src.size())
     if dim_size is not None:
         size[dim] = dim_size
@@ -273,8 +277,7 @@ def scatter_add(
         size[dim] = int(index.max()) + 1
     out = torch.zeros(size, dtype=src.dtype, device=src.device)
     # Reshape index for scatter_add_
-    index = (
-        index.view(-1, 1).expand_as(src) if src.dim() > 1 and index.dim() == 1 else index)
+    index = index.view(-1, 1).expand_as(src) if src.dim() > 1 and index.dim() == 1 else index
     return out.scatter_add_(dim, index, src)
 
 
@@ -284,7 +287,7 @@ def scatter_mean(
     dim: int = -1,
     dim_size: Optional[int] = None,
 ) -> torch.Tensor:
-    """Scatter mean operation."""
+    """Scatter mean operation"""
     out = scatter_add(src, index, dim, dim_size)
     count = scatter_add(torch.ones_like(src), index, dim, dim_size)
     return out / count.clamp(min=1)
@@ -296,7 +299,7 @@ def scatter_max(
     dim: int = -1,
     dim_size: Optional[int] = None,
 ) -> tuple[torch.Tensor, torch.Tensor]:
-    """Scatter max operation."""
+    """Scatter max operation"""
     size = list(src.size())
     if dim_size is not None:
         size[dim] = dim_size
@@ -310,11 +313,10 @@ def scatter_max(
 
 
 class SAGELayer(MessagePassing):
-    """GraphSAGE layer implementation."""
+    """GraphSAGE layer implementation"""
 
     def __init__(
-        self, in_channels: int, out_channels: int, aggregation: str = "mean",
-            bias: bool = True
+        self, in_channels: int, out_channels: int, aggregation: str = "mean", bias: bool = True
     ) -> None:
         """
         Initialize SAGE layer.
@@ -337,7 +339,7 @@ class SAGELayer(MessagePassing):
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
-        """Reset parameters."""
+        """Reset parameters"""
         self.lin_self.reset_parameters()
         self.lin_neighbor.reset_parameters()
 
@@ -364,13 +366,12 @@ class SAGELayer(MessagePassing):
         return out  # type: ignore[no-any-return]
 
     def message(self, x_j: torch.Tensor) -> torch.Tensor:
-        """Create messages from neighbors."""
+        """Create messages from neighbors"""
 
         return self.lin_neighbor(x_j)  # type: ignore[no-any-return]
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self.in_channels},
-            {self.out_channels})"
+        return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
 
 
 class GINLayer(MessagePassing):
@@ -412,13 +413,13 @@ class GINLayer(MessagePassing):
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
-        """Reset parameters."""
+        """Reset parameters"""
         self.eps.data.fill_(self.eps_init)
         if hasattr(self.neural_net, "reset_parameters"):
             self.neural_net.reset_parameters()  # type: ignore[operator]
 
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
-        """Forward pass."""
+        """Forward pass"""
         # Add self-loops
         edge_index, _ = add_self_loops(edge_index, num_nodes=x.size(0))
 
@@ -431,13 +432,12 @@ class GINLayer(MessagePassing):
         return out  # type: ignore[no-any-return]
 
     def message(self, x_j: torch.Tensor) -> torch.Tensor:
-        """Create messages from neighbors."""
+        """Create messages from neighbors"""
 
         return x_j
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self.in_channels},
-            {self.out_channels})"
+        return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
 
 
 class EdgeConvLayer(MessagePassing):
@@ -471,7 +471,7 @@ class EdgeConvLayer(MessagePassing):
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
-        """Reset parameters."""
+        """Reset parameters"""
         if hasattr(self.neural_net, "reset_parameters"):
             self.neural_net.reset_parameters()  # type: ignore[operator]
         else:
@@ -480,19 +480,18 @@ class EdgeConvLayer(MessagePassing):
                     module.reset_parameters()  # type: ignore[operator]
 
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
-        """Forward pass."""
+        """Forward pass"""
 
         return self.propagate(edge_index, x=x)  # type: ignore[no-any-return]
 
     def message(self, x_i: torch.Tensor, x_j: torch.Tensor) -> torch.Tensor:
-        """Create messages using edge features."""
+        """Create messages using edge features"""
         # Concatenate source and target node features
         edge_features = torch.cat([x_i, x_j - x_i], dim=-1)
         return self.neural_net(edge_features)  # type: ignore[no-any-return]
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self.in_channels},
-            {self.out_channels})"
+        return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
 
 
 class ResGNNLayer(nn.Module):
@@ -516,21 +515,19 @@ class ResGNNLayer(nn.Module):
 
         # Residual connection
         if in_channels != out_channels:
-            self.residual: nn.Module = (
-                nn.Linear(in_channels, out_channels, bias=False))
+            self.residual: nn.Module = nn.Linear(in_channels, out_channels, bias=False)
         else:
             self.residual = nn.Identity()
 
     def forward(self, x: torch.Tensor, *args: Any, **kwargs: Any) -> torch.Tensor:
-        """Forward pass with residual connection."""
+        """Forward pass with residual connection"""
         identity = self.residual(x)
         out = self.layer(x, *args, **kwargs)
         out = self.dropout(out)
         return out + identity  # type: ignore[no-any-return]
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self.in_channels},
-            {self.out_channels})"
+        return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
 
 
 # Example usage

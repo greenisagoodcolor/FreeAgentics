@@ -1,5 +1,4 @@
-."""
-
+"""
 Spatial Computing Module for FreeAgentics
 This module provides comprehensive spatial operations using H3 hexagonal grid system.
 Includes pathfinding, resource distribution, visibility calculations, and

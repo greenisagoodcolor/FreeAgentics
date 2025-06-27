@@ -13,18 +13,21 @@
 ## 📚 Documentation Structure
 
 ### **For Users & Product Managers**
+
 - **[User Guide](USER-GUIDE.md)** - Creating agents, coalitions, and simulations
 - **[Quick Start](QUICKSTART.md)** - Essential setup and first steps
 - **[Troubleshooting](TROUBLESHOOTING.md)** - Common issues and solutions
 - **[Glossary](GLOSSARY.md)** - Terminology and definitions
 
-### **For Developers & Contributors**  
+### **For Developers & Contributors**
+
 - **[Developer Guide](DEVELOPER-GUIDE.md)** - Development setup, testing, and contribution guidelines
 - **[API Reference](API-REFERENCE.md)** - REST API, WebSocket, and SDK documentation
 - **[Architecture](ARCHITECTURE.md)** - System design and technical architecture
 - **[Deployment](DEPLOYMENT.md)** - Production deployment and operations
 
 ### **For Technical Leaders & Architects**
+
 - **[Architecture Decision Records](adr/)** - Historical technical decisions and rationale
 - **[Architecture Overview](ARCHITECTURE.md)** - System design, patterns, and principles
 - **[Expert Committee Reviews](AGENTS.md)** - Technical validation and committee decisions
@@ -34,6 +37,7 @@
 FreeAgentics is a **production-ready platform** for creating **autonomous AI agents** that operate using **Active Inference** - a mathematical framework for intelligent behavior based on cognitive science research.
 
 ### **Key Features**
+
 - ✅ **True Agent Autonomy** - No scripted behaviors, all actions emerge from Active Inference principles
 - ✅ **Multi-Agent Coordination** - Agents form coalitions and coordinate dynamically
 - ✅ **Mathematical Rigor** - Based on peer-reviewed cognitive science (pymdp framework)
@@ -42,8 +46,9 @@ FreeAgentics is a **production-ready platform** for creating **autonomous AI age
 - ✅ **Edge Deployment** - Runs efficiently on resource-constrained hardware
 
 ### **Use Cases**
+
 - **Research Platforms** - Cognitive science and AI research
-- **Simulation Systems** - Complex scenario modeling and analysis  
+- **Simulation Systems** - Complex scenario modeling and analysis
 - **Autonomous Systems** - Robotics and intelligent automation
 - **Game Development** - NPCs with genuine intelligence and emergent behavior
 - **Business Intelligence** - Multi-agent data analysis and decision support
@@ -54,7 +59,7 @@ Unlike chatbots or scripted AI, FreeAgentics agents implement **Active Inference
 
 1. **Maintain probabilistic beliefs** about the world state
 2. **Minimize free energy** (surprise about observations)
-3. **Plan actions** to achieve preferred outcomes  
+3. **Plan actions** to achieve preferred outcomes
 4. **Update beliefs** through Bayesian inference
 
 This creates **truly autonomous behavior** that adapts and learns without explicit programming.
@@ -73,6 +78,7 @@ FreeAgentics Architecture
 ```
 
 ### **Core Components**
+
 - **Inference Engine**: Mathematical Active Inference implementation
 - **Agent Framework**: Template-based agent creation and management
 - **Coalition System**: Dynamic multi-agent coordination
@@ -86,7 +92,7 @@ FreeAgentics Architecture
 from freeagentics import Agent, World
 
 # Create an autonomous explorer agent
-explorer = Agent.create("Explorer", 
+explorer = Agent.create("Explorer",
                        name="Scout",
                        personality={'curiosity': 0.8})
 
@@ -105,7 +111,7 @@ for step in range(100):
 FreeAgentics development follows **Expert Committee Review Protocol** with validation from:
 
 - **Robert C. Martin** - Clean Architecture and software engineering principles
-- **Rich Hickey** - Simplicity and functional design principles  
+- **Rich Hickey** - Simplicity and functional design principles
 - **Kent Beck** - Test-driven development and quality assurance
 - **Conor Heins** - Active Inference and pymdp mathematical framework
 - **Alexander Tschantz** - Deep Active Inference and multi-agent systems
@@ -122,6 +128,7 @@ All major features undergo rigorous expert review before release.
 **Investment Grade**: Technical due diligence complete
 
 ### **Recent Achievements**
+
 - ✅ **Pure pymdp Integration** - 100% mathematically correct Active Inference
 - ✅ **837+ Critical Issues Resolved** - Production code quality achieved
 - ✅ **Expert Committee Validation** - Unanimous approval for core systems
@@ -139,18 +146,21 @@ All major features undergo rigorous expert review before release.
 ## 🔗 Quick Navigation
 
 ### **Essential Links**
+
 - [GitHub Repository](https://github.com/your-org/freeagentics)
-- [Live Demo](https://demo.freeagentics.ai) 
+- [Live Demo](https://demo.freeagentics.ai)
 - [API Documentation](API-REFERENCE.md)
 - [Community Discord](https://discord.gg/freeagentics)
 
 ### **Developer Resources**
+
 - [Contributing Guidelines](DEVELOPER-GUIDE.md#contributing)
 - [Development Setup](DEVELOPER-GUIDE.md#setup)
 - [Code Quality Standards](DEVELOPER-GUIDE.md#quality)
 - [Release Process](DEVELOPER-GUIDE.md#releases)
 
 ### **Integration Guides**
+
 - [REST API Integration](API-REFERENCE.md#rest-api)
 - [WebSocket Real-time API](API-REFERENCE.md#websocket)
 - [Python SDK](API-REFERENCE.md#python-sdk)
@@ -158,7 +168,7 @@ All major features undergo rigorous expert review before release.
 
 ## 🎯 Next Steps
 
-1. **New Users**: Start with [Quick Start Guide](QUICKSTART.md) 
+1. **New Users**: Start with [Quick Start Guide](QUICKSTART.md)
 2. **Developers**: Review [Developer Guide](DEVELOPER-GUIDE.md)
 3. **Integrators**: Explore [API Reference](API-REFERENCE.md)
 4. **Architects**: Study [Architecture Documentation](ARCHITECTURE.md)
@@ -177,4 +187,4 @@ All major features undergo rigorous expert review before release.
 
 ---
 
-*This documentation structure represents the collaborative expertise of the FreeAgentics Expert Committee, optimized for user experience and maintainability.*
+_This documentation structure represents the collaborative expertise of the FreeAgentics Expert Committee, optimized for user experience and maintainability._

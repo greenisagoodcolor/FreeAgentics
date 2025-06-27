@@ -68,7 +68,12 @@ export default function AgentBeliefVisualizer({
   // Group beliefs by confidence level
   const beliefsByConfidence = beliefs.reduce(
     (acc, belief) => {
-      const level = belief.confidence >= 0.8 ? "high" : belief.confidence >= 0.5 ? "medium" : "low";
+      const level =
+        belief.confidence >= 0.8
+          ? "high"
+          : belief.confidence >= 0.5
+            ? "medium"
+            : "low";
       if (!acc[level]) acc[level] = [];
       acc[level].push(belief);
       return acc;
@@ -104,19 +109,26 @@ export default function AgentBeliefVisualizer({
           <div>
             <h3 className="text-sm font-medium mb-3">Confidence Levels</h3>
             <div className="space-y-2">
-              {Object.entries(avgConfidenceByLevel).map(([level, confidence]) => {
-                const Icon = level === "high" ? Lightbulb : level === "medium" ? Eye : AlertCircle;
-                return (
-                  <div key={level} className="flex items-center gap-3">
-                    <Icon className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm capitalize w-24">{level}</span>
-                    <Progress value={confidence * 100} className="flex-1" />
-                    <span className="text-sm text-muted-foreground w-12 text-right">
-                      {(confidence * 100).toFixed(0)}%
-                    </span>
-                  </div>
-                );
-              })}
+              {Object.entries(avgConfidenceByLevel).map(
+                ([level, confidence]) => {
+                  const Icon =
+                    level === "high"
+                      ? Lightbulb
+                      : level === "medium"
+                        ? Eye
+                        : AlertCircle;
+                  return (
+                    <div key={level} className="flex items-center gap-3">
+                      <Icon className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm capitalize w-24">{level}</span>
+                      <Progress value={confidence * 100} className="flex-1" />
+                      <span className="text-sm text-muted-foreground w-12 text-right">
+                        {(confidence * 100).toFixed(0)}%
+                      </span>
+                    </div>
+                  );
+                },
+              )}
             </div>
           </div>
 
@@ -124,38 +136,51 @@ export default function AgentBeliefVisualizer({
           <div>
             <h3 className="text-sm font-medium mb-3">Belief Details</h3>
             <Accordion type="single" collapsible className="w-full">
-              {Object.entries(beliefsByConfidence).map(([level, levelBeliefs]) => (
-                <AccordionItem key={level} value={level}>
-                  <AccordionTrigger className="hover:no-underline">
-                    <div className="flex items-center gap-2">
-                      <Badge
-                        variant="secondary"
-                        className={level === "high" ? "bg-green-500" : level === "medium" ? "bg-yellow-500" : "bg-red-500"}
-                      >
-                        {levelBeliefs.length}
-                      </Badge>
-                      <span className="capitalize">{level} Confidence Beliefs</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <div className="space-y-3 pt-2">
-                      {levelBeliefs.map((belief) => (
-                        <div key={belief.id} className="border rounded-lg p-3">
-                          <p className="text-sm mb-2">{belief.content}</p>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs text-muted-foreground">
-                                Confidence:{" "}
-                                {(belief.confidence * 100).toFixed(0)}%
-                              </span>
+              {Object.entries(beliefsByConfidence).map(
+                ([level, levelBeliefs]) => (
+                  <AccordionItem key={level} value={level}>
+                    <AccordionTrigger className="hover:no-underline">
+                      <div className="flex items-center gap-2">
+                        <Badge
+                          variant="secondary"
+                          className={
+                            level === "high"
+                              ? "bg-green-500"
+                              : level === "medium"
+                                ? "bg-yellow-500"
+                                : "bg-red-500"
+                          }
+                        >
+                          {levelBeliefs.length}
+                        </Badge>
+                        <span className="capitalize">
+                          {level} Confidence Beliefs
+                        </span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-3 pt-2">
+                        {levelBeliefs.map((belief) => (
+                          <div
+                            key={belief.id}
+                            className="border rounded-lg p-3"
+                          >
+                            <p className="text-sm mb-2">{belief.content}</p>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground">
+                                  Confidence:{" "}
+                                  {(belief.confidence * 100).toFixed(0)}%
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ),
+              )}
             </Accordion>
           </div>
 
@@ -168,7 +193,9 @@ export default function AgentBeliefVisualizer({
                 <div className="text-sm font-medium">{memory.id}</div>
                 <div className="text-xs text-muted-foreground mt-2">Type</div>
                 <div className="text-sm">{memory.type}</div>
-                <div className="text-xs text-muted-foreground mt-2">Content</div>
+                <div className="text-xs text-muted-foreground mt-2">
+                  Content
+                </div>
                 <div className="text-sm">{memory.content}</div>
               </Card>
             </div>

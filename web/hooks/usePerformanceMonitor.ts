@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from "react";
 
 export interface PerformanceMetrics {
   renderTime: number;
@@ -36,7 +36,7 @@ const defaultThresholds: PerformanceThresholds = {
   slowRenderThreshold: 16, // 60 FPS = 16.67ms per frame
   memoryWarningThreshold: 50, // 50MB
   reRenderWarningThreshold: 5, // 5 re-renders per second
-  cacheHitRateMinimum: 80 // 80% cache hit rate
+  cacheHitRateMinimum: 80, // 80% cache hit rate
 };
 
 export function usePerformanceMonitor(options: UsePerformanceMonitorOptions) {
@@ -48,11 +48,11 @@ export function usePerformanceMonitor(options: UsePerformanceMonitorOptions) {
     trackCacheHits = true,
     onSlowRender,
     onMemoryWarning,
-    onOptimizationSuggestion
+    onOptimizationSuggestion,
   } = options;
 
   const finalThresholds = { ...defaultThresholds, ...thresholds };
-  
+
   const [metrics, setMetrics] = useState<PerformanceMetrics>({
     renderTime: 0,
     componentMounts: 0,
@@ -62,7 +62,7 @@ export function usePerformanceMonitor(options: UsePerformanceMonitorOptions) {
     averageRenderTime: 0,
     slowRenders: 0,
     cacheHitRate: 100,
-    optimizationSuggestions: []
+    optimizationSuggestions: [],
   });
 
   const renderStartTime = useRef<number>(0);
@@ -77,11 +77,11 @@ export function usePerformanceMonitor(options: UsePerformanceMonitorOptions) {
   // Track component mount
   useEffect(() => {
     if (!enabled) return;
-    
+
     mountTime.current = performance.now();
-    setMetrics(prev => ({
+    setMetrics((prev) => ({
       ...prev,
-      componentMounts: prev.componentMounts + 1
+      componentMounts: prev.componentMounts + 1,
     }));
 
     return () => {
@@ -96,13 +96,13 @@ export function usePerformanceMonitor(options: UsePerformanceMonitorOptions) {
     if (!enabled || !trackMemory) return;
 
     const checkMemory = () => {
-      if ('memory' in performance) {
+      if ("memory" in performance) {
         const memInfo = (performance as any).memory;
         const usageInMB = memInfo.usedJSHeapSize / (1024 * 1024);
-        
-        setMetrics(prev => ({
+
+        setMetrics((prev) => ({
           ...prev,
-          memoryUsage: usageInMB
+          memoryUsage: usageInMB,
         }));
 
         if (usageInMB > finalThresholds.memoryWarningThreshold) {
@@ -119,7 +119,12 @@ export function usePerformanceMonitor(options: UsePerformanceMonitorOptions) {
         clearInterval(memoryCheckInterval.current);
       }
     };
-  }, [enabled, trackMemory, finalThresholds.memoryWarningThreshold, onMemoryWarning]);
+  }, [
+    enabled,
+    trackMemory,
+    finalThresholds.memoryWarningThreshold,
+    onMemoryWarning,
+  ]);
 
   // Render performance tracking
   const startRender = useCallback(() => {
@@ -132,13 +137,15 @@ export function usePerformanceMonitor(options: UsePerformanceMonitorOptions) {
 
     const renderTime = performance.now() - renderStartTime.current;
     renderTimes.current.push(renderTime);
-    
+
     // Keep only last 100 render times for average calculation
     if (renderTimes.current.length > 100) {
       renderTimes.current.shift();
     }
 
-    const averageRenderTime = renderTimes.current.reduce((sum, time) => sum + time, 0) / renderTimes.current.length;
+    const averageRenderTime =
+      renderTimes.current.reduce((sum, time) => sum + time, 0) /
+      renderTimes.current.length;
     const isSlowRender = renderTime > finalThresholds.slowRenderThreshold;
 
     // Track re-renders
@@ -150,13 +157,13 @@ export function usePerformanceMonitor(options: UsePerformanceMonitorOptions) {
     }
     lastReRenderTime.current = now;
 
-    setMetrics(prev => ({
+    setMetrics((prev) => ({
       ...prev,
       renderTime,
       lastRenderTime: renderTime,
       averageRenderTime,
       reRenders: prev.reRenders + 1,
-      slowRenders: prev.slowRenders + (isSlowRender ? 1 : 0)
+      slowRenders: prev.slowRenders + (isSlowRender ? 1 : 0),
     }));
 
     if (isSlowRender) {
@@ -167,44 +174,57 @@ export function usePerformanceMonitor(options: UsePerformanceMonitorOptions) {
   }, [enabled, finalThresholds.slowRenderThreshold, onSlowRender]);
 
   // Cache performance tracking
-  const trackCacheRequest = useCallback((isHit: boolean = false) => {
-    if (!enabled || !trackCacheHits) return;
+  const trackCacheRequest = useCallback(
+    (isHit: boolean = false) => {
+      if (!enabled || !trackCacheHits) return;
 
-    cacheRequests.current++;
-    if (isHit) {
-      cacheHits.current++;
-    }
+      cacheRequests.current++;
+      if (isHit) {
+        cacheHits.current++;
+      }
 
-    const hitRate = (cacheHits.current / cacheRequests.current) * 100;
-    
-    setMetrics(prev => ({
-      ...prev,
-      cacheHitRate: hitRate
-    }));
-  }, [enabled, trackCacheHits]);
+      const hitRate = (cacheHits.current / cacheRequests.current) * 100;
+
+      setMetrics((prev) => ({
+        ...prev,
+        cacheHitRate: hitRate,
+      }));
+    },
+    [enabled, trackCacheHits],
+  );
 
   // Generate optimization suggestions
   const generateOptimizationSuggestions = useCallback(() => {
     const suggestions: string[] = [];
 
     if (metrics.averageRenderTime > finalThresholds.slowRenderThreshold) {
-      suggestions.push(`Consider memoizing ${componentName} - average render time is ${metrics.averageRenderTime.toFixed(2)}ms`);
+      suggestions.push(
+        `Consider memoizing ${componentName} - average render time is ${metrics.averageRenderTime.toFixed(2)}ms`,
+      );
     }
 
     if (reRenderCount.current > finalThresholds.reRenderWarningThreshold) {
-      suggestions.push(`High re-render frequency detected in ${componentName} - consider optimizing dependencies`);
+      suggestions.push(
+        `High re-render frequency detected in ${componentName} - consider optimizing dependencies`,
+      );
     }
 
     if (metrics.memoryUsage > finalThresholds.memoryWarningThreshold) {
-      suggestions.push(`High memory usage detected (${metrics.memoryUsage.toFixed(2)}MB) - check for memory leaks`);
+      suggestions.push(
+        `High memory usage detected (${metrics.memoryUsage.toFixed(2)}MB) - check for memory leaks`,
+      );
     }
 
     if (metrics.cacheHitRate < finalThresholds.cacheHitRateMinimum) {
-      suggestions.push(`Low cache hit rate (${metrics.cacheHitRate.toFixed(1)}%) - optimize caching strategy`);
+      suggestions.push(
+        `Low cache hit rate (${metrics.cacheHitRate.toFixed(1)}%) - optimize caching strategy`,
+      );
     }
 
     if (metrics.slowRenders > 5) {
-      suggestions.push(`${metrics.slowRenders} slow renders detected - consider code splitting or virtualization`);
+      suggestions.push(
+        `${metrics.slowRenders} slow renders detected - consider code splitting or virtualization`,
+      );
     }
 
     return suggestions;
@@ -215,28 +235,38 @@ export function usePerformanceMonitor(options: UsePerformanceMonitorOptions) {
     if (!enabled) return;
 
     const suggestions = generateOptimizationSuggestions();
-    if (suggestions.length !== metrics.optimizationSuggestions.length ||
-        suggestions.some((s, i) => s !== metrics.optimizationSuggestions[i])) {
-      setMetrics(prev => ({
+    if (
+      suggestions.length !== metrics.optimizationSuggestions.length ||
+      suggestions.some((s, i) => s !== metrics.optimizationSuggestions[i])
+    ) {
+      setMetrics((prev) => ({
         ...prev,
-        optimizationSuggestions: suggestions
+        optimizationSuggestions: suggestions,
       }));
-      
+
       if (suggestions.length > 0) {
         onOptimizationSuggestion?.(suggestions);
       }
     }
-  }, [enabled, generateOptimizationSuggestions, metrics.optimizationSuggestions, onOptimizationSuggestion]);
+  }, [
+    enabled,
+    generateOptimizationSuggestions,
+    metrics.optimizationSuggestions,
+    onOptimizationSuggestion,
+  ]);
 
   // Performance profiler hooks
-  const profileRender = useCallback((renderFn: () => void) => {
-    startRender();
-    try {
-      renderFn();
-    } finally {
-      endRender();
-    }
-  }, [startRender, endRender]);
+  const profileRender = useCallback(
+    (renderFn: () => void) => {
+      startRender();
+      try {
+        renderFn();
+      } finally {
+        endRender();
+      }
+    },
+    [startRender, endRender],
+  );
 
   // Get performance report
   const getPerformanceReport = useCallback(() => {
@@ -251,7 +281,12 @@ export function usePerformanceMonitor(options: UsePerformanceMonitorOptions) {
     };
 
     return report;
-  }, [componentName, metrics, finalThresholds, generateOptimizationSuggestions]);
+  }, [
+    componentName,
+    metrics,
+    finalThresholds,
+    generateOptimizationSuggestions,
+  ]);
 
   // Calculate overall health score (0-100)
   const calculateHealthScore = useCallback(() => {
@@ -259,19 +294,31 @@ export function usePerformanceMonitor(options: UsePerformanceMonitorOptions) {
 
     // Deduct points for performance issues
     if (metrics.averageRenderTime > finalThresholds.slowRenderThreshold) {
-      score -= Math.min(30, (metrics.averageRenderTime - finalThresholds.slowRenderThreshold) * 2);
+      score -= Math.min(
+        30,
+        (metrics.averageRenderTime - finalThresholds.slowRenderThreshold) * 2,
+      );
     }
 
     if (metrics.memoryUsage > finalThresholds.memoryWarningThreshold) {
-      score -= Math.min(25, (metrics.memoryUsage - finalThresholds.memoryWarningThreshold) * 0.5);
+      score -= Math.min(
+        25,
+        (metrics.memoryUsage - finalThresholds.memoryWarningThreshold) * 0.5,
+      );
     }
 
     if (metrics.cacheHitRate < finalThresholds.cacheHitRateMinimum) {
-      score -= Math.min(20, (finalThresholds.cacheHitRateMinimum - metrics.cacheHitRate) * 0.5);
+      score -= Math.min(
+        20,
+        (finalThresholds.cacheHitRateMinimum - metrics.cacheHitRate) * 0.5,
+      );
     }
 
     if (reRenderCount.current > finalThresholds.reRenderWarningThreshold) {
-      score -= Math.min(15, (reRenderCount.current - finalThresholds.reRenderWarningThreshold) * 3);
+      score -= Math.min(
+        15,
+        (reRenderCount.current - finalThresholds.reRenderWarningThreshold) * 3,
+      );
     }
 
     if (metrics.slowRenders > 0) {
@@ -287,7 +334,7 @@ export function usePerformanceMonitor(options: UsePerformanceMonitorOptions) {
     reRenderCount.current = 0;
     cacheRequests.current = 0;
     cacheHits.current = 0;
-    
+
     setMetrics({
       renderTime: 0,
       componentMounts: 0,
@@ -297,7 +344,7 @@ export function usePerformanceMonitor(options: UsePerformanceMonitorOptions) {
       averageRenderTime: 0,
       slowRenders: 0,
       cacheHitRate: 100,
-      optimizationSuggestions: []
+      optimizationSuggestions: [],
     });
   }, []);
 
@@ -310,6 +357,6 @@ export function usePerformanceMonitor(options: UsePerformanceMonitorOptions) {
     getPerformanceReport,
     resetMetrics,
     healthScore: calculateHealthScore(),
-    isEnabled: enabled
+    isEnabled: enabled,
   };
-} 
+}

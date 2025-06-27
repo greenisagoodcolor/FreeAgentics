@@ -18,29 +18,24 @@ The database consists of the following main tables:
 ### Core Tables
 
 1. **agents** - AI agents in the system
-
    - Stores agent configuration, state, beliefs
    - Tracks location, energy, and experience
    - Supports different agent types (explorer, merchant, guardian, etc.)
 
 2. **conversations** - Communication between agents
-
    - Supports direct, group, broadcast, and system conversations
    - Stores metadata and context
 
 3. **messages** - Individual messages in conversations
-
    - Links to conversations and sender agents
    - Supports different message types
 
 4. **knowledge_graphs** - Agent knowledge storage
-
    - Stores nodes and edges as JSON
    - Supports personal, shared, and global knowledge types
    - Access control via public flag and access lists
 
 5. **coalitions** - Multi-agent collaborations
-
    - Tracks coalition goals, rules, and status
    - Manages shared value pools
 
@@ -262,13 +257,11 @@ knowledge = KnowledgeGraph(
 ### Common Issues
 
 1. **Connection Refused**
-
    - Check PostgreSQL is running
    - Verify DATABASE_URL is correct
    - Check firewall/network settings
 
 2. **Role Does Not Exist**
-
    - Create PostgreSQL user:
 
      ```sql
@@ -277,7 +270,6 @@ knowledge = KnowledgeGraph(
      ```
 
 3. **Migration Conflicts**
-
    - Check current status: `alembic current`
    - Resolve conflicts in alembic_version table
    - Use `alembic stamp head` to mark as current

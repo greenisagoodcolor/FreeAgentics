@@ -42,16 +42,16 @@ except ImportError:
     PyMDPAgent = _FallbackPyMDPAgent
 
     def softmax(x, axis=0):
-        """Fallback softmax implementation."""
+        """Fallback softmax implementation"""
         exp_x = np.exp(x - np.max(x, axis=axis, keepdims=True))
         return exp_x / np.sum(exp_x, axis=axis, keepdims=True)
 
     def kl_divergence(p, q):
-        """Fallback KL divergence implementation."""
+        """Fallback KL divergence implementation"""
         return np.sum(p * np.log((p + 1e-16) / (q + 1e-16)))
 
     def entropy(p):
-        """Fallback entropy implementation."""
+        """Fallback entropy implementation"""
         return -np.sum(p * np.log(p + 1e-16))
 
 
@@ -61,7 +61,7 @@ from ..base.data_model import Position
 
 
 class TemplateCategory(Enum):
-    """Agent template categories with specific cognitive profiles."""
+    """Agent template categories with specific cognitive profiles"""
 
     EXPLORER = "explorer"  # High epistemic value, low exploitation
     MERCHANT = "merchant"  # Resource optimization, risk assessment
@@ -93,7 +93,7 @@ class BeliefState:
     confidence: float  # H[q(s)] - entropy measure
 
     def __post_init__(self) -> None:
-        """Validate mathematical constraints on belief state."""
+        """Validate mathematical constraints on belief state"""
         # Validate belief normalization
         belief_sum = np.sum(self.beliefs)
         if not np.isclose(belief_sum, 1.0, atol=1e-10):
@@ -106,8 +106,7 @@ class BeliefState:
         # Validate confidence bounds
         max_entropy = np.log(len(self.beliefs))
         if not (0 <= self.confidence <= max_entropy):
-            raise ValueError(
-                f"Confidence must be in [0, {max_entropy}], got {self.confidence}")
+            raise ValueError(f"Confidence must be in [0, {max_entropy}], got {self.confidence}")
 
     @classmethod
     def create_uniform(
@@ -117,7 +116,7 @@ class BeliefState:
         preferences: Optional[NDArray[np.float64]] = None,
         timestamp: Optional[float] = None,
     ) -> "BeliefState":
-        """Create uniform belief state for initialization."""
+        """Create uniform belief state for initialization"""
         import time
 
         beliefs = np.ones(num_states) / num_states
@@ -137,9 +136,8 @@ class BeliefState:
             confidence=confidence,
         )
 
-    def update_beliefs(self,
-                       new_beliefs: NDArray[np.float64]) -> "BeliefState":
-        """Create new belief state with updated beliefs (immutable)."""
+    def update_beliefs(self, new_beliefs: NDArray[np.float64]) -> "BeliefState":
+        """Create new belief state with updated beliefs (immutable)"""
         import time
 
         # Normalize beliefs to ensure probability constraint
@@ -185,17 +183,15 @@ class GenerativeModelParams:
     precision_state: float = 1.0  # α - state transition precision
 
     def validate_mathematical_constraints(self) -> None:
-        """Validate generative model mathematical constraints."""
+        """Validate generative model mathematical constraints"""
         # Validate A matrix (observation model)
         if not np.allclose(np.sum(self.A, axis=0), 1.0):
-            raise ValueError(
-                "A matrix columns must sum to 1 (stochastic observation model)")
+            raise ValueError("A matrix columns must sum to 1 (stochastic observation model)")
 
         # Validate B tensor (transition models)
         for policy_idx in range(self.B.shape[2]):
             if not np.allclose(np.sum(self.B[:, :, policy_idx], axis=0), 1.0):
-                raise ValueError(
-                    f"B[:,:,{policy_idx}] must be stochastic")
+                raise ValueError(f"B[:,:,{policy_idx}] must be stochastic")
 
         # Validate D vector (prior)
         if not np.isclose(np.sum(self.D), 1.0):
@@ -213,7 +209,7 @@ class GenerativeModelParams:
 
 @dataclass
 class TemplateConfig:
-    """Configuration for agent template instantiation."""
+    """Configuration for agent template instantiation"""
 
     template_id: str
     category: TemplateCategory
@@ -250,12 +246,12 @@ class TemplateInterface(ABC):
 
     @abstractmethod
     def get_template_id(self) -> str:
-        """Return unique template identifier."""
+        """Return unique template identifier"""
         pass
 
     @abstractmethod
     def get_category(self) -> TemplateCategory:
-        """Return template category."""
+        """Return template category"""
         pass
 
     @abstractmethod
@@ -311,7 +307,7 @@ class TemplateInterface(ABC):
 
     @abstractmethod
     def get_behavioral_description(self) -> str:
-        """Return human-readable description of template behavior."""
+        """Return human-readable description of template behavior"""
         pass
 
 
@@ -341,11 +337,11 @@ class ActiveInferenceTemplate(TemplateInterface):
             warnings.warn("pymdp library not available - using fallback implementations")
 
     def get_template_id(self) -> str:
-        """Return template identifier."""
+        """Return template identifier"""
         return self.template_id
 
     def get_category(self) -> TemplateCategory:
-        """Return template category."""
+        """Return template category"""
         return self.category
 
     def create_agent_data(
@@ -434,8 +430,7 @@ class ActiveInferenceTemplate(TemplateInterface):
         pass  # Base implementation - no additional constraints
 
     def compute_free_energy(
-        self, beliefs: BeliefState, observations: NDArray[np.float64],
-            model: GenerativeModelParams
+        self, beliefs: BeliefState, observations: NDArray[np.float64], model: GenerativeModelParams
     ) -> float:
         """
         Compute variational free energy F = D_KL[q(s)||P(s)] - E_q[ln P(o|s)].
@@ -455,13 +450,11 @@ class ActiveInferenceTemplate(TemplateInterface):
         # For discrete observations, this is the inner product
         if len(observations.shape) == 1:  # Single observation
             obs_idx = int(np.argmax(observations))
-            expected_ll = (
-                np.dot(beliefs.beliefs, np.log(model.A[obs_idx, :] + 1e-16)))
+            expected_ll = np.dot(beliefs.beliefs, np.log(model.A[obs_idx, :] + 1e-16))
         else:  # Observation distribution
             expected_ll = np.sum(
                 [
-                    observations[o] * np.dot(beliefs.beliefs, np.log(model.A[o,
-                        :] + 1e-16))
+                    observations[o] * np.dot(beliefs.beliefs, np.log(model.A[o, :] + 1e-16))
                     for o in range(len(observations))
                 ]
             )
@@ -474,22 +467,22 @@ class ActiveInferenceTemplate(TemplateInterface):
     @abstractmethod
     def create_generative_model(self, config: TemplateConfig) -> GenerativeModelParams:
         """Create template-specific generative model (implemented by
-        subclasses)."""
+        subclasses)"""
         pass
 
     @abstractmethod
     def initialize_beliefs(self, config: TemplateConfig) -> BeliefState:
-        """Initialize template-specific beliefs (implemented by subclasses)."""
+        """Initialize template-specific beliefs (implemented by subclasses)"""
         pass
 
     @abstractmethod
     def compute_epistemic_value(
         self, beliefs: BeliefState, observations: NDArray[np.float64]
     ) -> float:
-        """Compute epistemic value (implemented by subclasses)."""
+        """Compute epistemic value (implemented by subclasses)"""
         pass
 
     @abstractmethod
     def get_behavioral_description(self) -> str:
-        """Get behavioral description (implemented by subclasses)."""
+        """Get behavioral description (implemented by subclasses)"""
         pass

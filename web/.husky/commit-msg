@@ -11,4 +11,4 @@ echo "📝 Validating commit message format..."
 # Use commitlint for conventional commit validation
 npx --no-install commitlint --edit "$1"
 
-echo "✅ Commit message validation passed!" 
+echo "✅ Commit message validation passed!"

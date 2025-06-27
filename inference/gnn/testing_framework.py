@@ -21,7 +21,7 @@ from .parser import GMNParser
 Validation and Testing Framework for GNN Processing
 This module provides comprehensive validation mechanisms and testing utilities
 to ensure correctness of GNN processing operations.
-."""
+"""
 logger = logging.getLogger(__name__)
 
 
@@ -456,8 +456,7 @@ class GNNTestSuite:
 
     def _test_feature_extractor(self, results: Dict[str, Any]) -> None:
         """Test feature extractor"""
-        component_results: Dict[str, Any] = {"passed": 0, "failed": 0,
-            "errors": []}
+        component_results: Dict[str, Any] = {"passed": 0, "failed": 0, "errors": []}
         try:
             feature_configs = [
                 FeatureConfig(name="feat1", type=FeatureType.NUMERICAL),
@@ -544,8 +543,7 @@ class GNNTestSuite:
         """
         Run integration tests for a given model.
         """
-        results: Dict[str, Any] = (
-            {"passed": 0, "failed": 0, "errors": [], "performance": {}})
+        results: Dict[str, Any] = {"passed": 0, "failed": 0, "errors": [], "performance": {}}
         validator = GNNValidator()
         start_time = time.time()
         try:

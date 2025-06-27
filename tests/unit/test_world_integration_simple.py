@@ -50,17 +50,17 @@ class MockH3World:
         self.cells = {}
 
     def get_cell(self, hex_id: str):
-        ."""Get a mock cell."""
+        """Get a mock cell"""
         if hex_id not in self.cells:
             self.cells[hex_id] = MockHexCell(hex_id)
         return self.cells[hex_id]
 
     def get_neighbors(self, hex_id: str):
-        ."""Get mock neighbors."""
+        """Get mock neighbors"""
         return [MockHexCell(f"{hex_id}_neighbor_{i}") for i in range(3)]
 
     def get_visible_cells(self, hex_id: str):
-        ."""Get mock visible cells."""
+        """Get mock visible cells"""
         return [MockHexCell(f"{hex_id}_visible_{i}") for i in range(5)]
 
 
@@ -79,10 +79,10 @@ class MockHexCell:
 
 
 class TestWorldEventSystem(unittest.TestCase):
-    ."""Test the world event system."""
+    """Test the world event system"""
 
     def set_up(self) -> None:
-        ."""Set up test fixtures."""
+        """Set up test fixtures"""
         self.event_system = WorldEventSystem()
         self.test_events = []
 
@@ -126,10 +126,10 @@ class TestWorldEventSystem(unittest.TestCase):
 
 
 class TestAgentWorldManager(unittest.TestCase):
-    ."""Test the main agent world manager."""
+    """Test the main agent world manager"""
 
     def set_up(self) -> None:
-        ."""Set up test fixtures."""
+        """Set up test fixtures"""
         self.world = MockH3World()
         self.manager = AgentWorldManager(self.world)
 
@@ -193,7 +193,7 @@ class TestAgentWorldManager(unittest.TestCase):
 
 
 class TestWorldIntegrationDataStructures(unittest.TestCase):
-    ."""Test world integration data structures."""
+    """Test world integration data structures"""
 
     def test_world_event_creation(self) -> None:
         """Test WorldEvent creation and attributes"""

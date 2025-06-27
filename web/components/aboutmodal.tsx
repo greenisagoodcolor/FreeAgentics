@@ -109,10 +109,10 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
               arising from the use of this software.
             </p>
             <p>
-              This application is provided &quot;as is&quot; without warranty of any kind,
-              either expressed or implied, including, but not limited to, the
-              implied warranties of merchantability and fitness for a particular
-              purpose.
+              This application is provided &quot;as is&quot; without warranty of
+              any kind, either expressed or implied, including, but not limited
+              to, the implied warranties of merchantability and fitness for a
+              particular purpose.
             </p>
           </div>
         </CardContent>

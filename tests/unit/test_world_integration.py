@@ -44,17 +44,17 @@ class MockH3World:
         self.cells = {}
 
     def get_cell(self, hex_id: str):
-        ."""Get a mock cell."""
+        """Get a mock cell"""
         if hex_id not in self.cells:
             self.cells[hex_id] = MockHexCell(hex_id)
         return self.cells[hex_id]
 
     def get_neighbors(self, hex_id: str):
-        ."""Get mock neighbors."""
+        """Get mock neighbors"""
         return [MockHexCell(f"{hex_id}_neighbor_{i}") for i in range(3)]
 
     def get_visible_cells(self, hex_id: str):
-        ."""Get mock visible cells."""
+        """Get mock visible cells"""
         return [MockHexCell(f"{hex_id}_visible_{i}") for i in range(5)]
 
 
@@ -73,10 +73,10 @@ class MockHexCell:
 
 
 class TestWorldEventSystem(unittest.TestCase):
-    ."""Test the world event system."""
+    """Test the world event system"""
 
     def set_up(self) -> None:
-        ."""Set up test fixtures."""
+        """Set up test fixtures"""
         self.event_system = WorldEventSystem()
         self.test_events = []
 
@@ -131,10 +131,10 @@ class TestWorldEventSystem(unittest.TestCase):
 
 
 class TestAgentWorldManager(unittest.TestCase):
-    ."""Test the main agent world manager."""
+    """Test the main agent world manager"""
 
     def set_up(self) -> None:
-        ."""Set up test fixtures."""
+        """Set up test fixtures"""
         self.world = MockH3World()
         self.manager = AgentWorldManager(self.world)
 
@@ -173,7 +173,7 @@ class TestAgentWorldManager(unittest.TestCase):
         self.assertGreater(len(perception.movement_options), 0)
 
     def test_perceive_environment_invalid_agent(self) -> None:
-        ."""Test perception for non-existent agent."""
+        """Test perception for non-existent agent"""
         perception = self.manager.perceive_environment("invalid_agent")
         self.assertIsNone(perception)
 
@@ -281,7 +281,7 @@ class TestAgentWorldManager(unittest.TestCase):
         self.assertIn("Insufficient energy", result.message)
 
     def test_get_agent_energy(self) -> None:
-        ."""Test getting agent energy."""
+        """Test getting agent energy"""
         self.manager.place_agent("agent1", "hex_123")
         energy = self.manager.get_agent_energy("agent1")
         self.assertEqual(energy, 100.0)
@@ -294,7 +294,7 @@ class TestAgentWorldManager(unittest.TestCase):
         self.assertEqual(self.manager.agent_energy["agent1"], 80.0)
 
     def test_restore_agent_energy_cap(self) -> None:
-        ."""Test energy restoration with cap."""
+        """Test energy restoration with cap"""
         self.manager.place_agent("agent1", "hex_123")
         self.manager.restore_agent_energy("agent1", 50.0)  # Over 100
         self.assertEqual(self.manager.agent_energy["agent1"], 100.0)  # Capped
@@ -319,7 +319,7 @@ class TestAgentWorldManager(unittest.TestCase):
 
 
 class TestWorldIntegrationInterfaces(unittest.TestCase):
-    ."""Test the world integration interfaces."""
+    """Test the world integration interfaces"""
 
     def test_perception_interface_compliance(self) -> None:
         """Test that AgentWorldManager implements perception interface"""
@@ -357,7 +357,7 @@ class TestWorldIntegrationInterfaces(unittest.TestCase):
 
 
 class TestWorldIntegrationDataStructures(unittest.TestCase):
-    ."""Test world integration data structures."""
+    """Test world integration data structures"""
 
     def test_world_event_creation(self) -> None:
         """Test WorldEvent creation and attributes"""

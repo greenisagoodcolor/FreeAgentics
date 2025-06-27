@@ -222,11 +222,13 @@ To ensure comprehensive validation of documentation against all three ADRs, foll
 ### Directory Structure Issue
 
 **Issue**: API documentation file found in the wrong location:
+
 ```
 docs/guides/api-usage.md
 ```
 
 **Fix**: Move the file to the correct location:
+
 ```bash
 mkdir -p docs/api
 mv docs/guides/api-usage.md docs/api/usage.md
@@ -235,6 +237,7 @@ mv docs/guides/api-usage.md docs/api/usage.md
 ### Dependency Rule Issue
 
 **Issue**: Documentation example shows Core Domain importing from Interface layer:
+
 ```python
 # Example in docs/tutorials/creating-an-agent.md
 from api.rest.endpoints import AgentEndpoint  # Violates dependency rule
@@ -244,6 +247,7 @@ class ExplorerAgent(BaseAgent):
 ```
 
 **Fix**: Update the example to follow dependency rules:
+
 ```python
 # Corrected example
 from agents.base.agent_interface import AgentInterface  # Follows dependency rules
@@ -255,11 +259,13 @@ class ExplorerAgent(BaseAgent):
 ### Naming Convention Issue
 
 **Issue**: Documentation uses prohibited gaming terminology:
+
 ```markdown
 When you spawn a new agent, it will appear in the GameWorld...
 ```
 
 **Fix**: Update the text to use approved terminology:
+
 ```markdown
 When you initialize a new agent, it will appear in the Environment...
 ```

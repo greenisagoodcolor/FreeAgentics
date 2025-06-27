@@ -1,4 +1,4 @@
-."""
+"""
 Hardware Export Package Builder
 
 Creates deployment packages containing agent's GNN model, compressed knowledge graph,
@@ -22,15 +22,14 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class HardwareTarget:
-    """Hardware target configuration."""
+    """Hardware target configuration"""
 
     name: str
     platform: str  # raspberrypi, mac, jetson, etc.
     cpu_arch: str  # arm64, x86_64, etc.
     ram_gb: int
     storage_gb: int
-    accelerators: List[str] = (
-        field(default_factory=list)  # coral_tpu, cuda, etc.)
+    accelerators: List[str] = field(default_factory=list)  # coral_tpu, cuda, etc.
 
     # LLM configuration
     llm_model: str = "llama2-7b-q4_K_M"
@@ -42,7 +41,7 @@ class HardwareTarget:
     max_cpu_percent: int = 80
 
     def __post_init__(self):
-        """Set default max memory based on RAM if not specified."""
+        """Set default max memory based on RAM if not specified"""
         if self.max_memory_mb == 0:
             # Use 75% of available RAM
             self.max_memory_mb = int(self.ram_gb * 1024 * 0.75)
@@ -81,7 +80,7 @@ HARDWARE_TARGETS = {
 
 @dataclass
 class ExportPackage:
-    """Export package metadata and contents."""
+    """Export package metadata and contents"""
 
     package_id: str
     agent_id: str
@@ -104,7 +103,7 @@ class ExportPackage:
     checksums: Dict[str, str] = field(default_factory=dict)
 
     def to_manifest(self) -> Dict[str, Any]:
-        """Generate manifest for the package."""
+        """Generate manifest for the package"""
         return {
             "package_id": self.package_id,
             "agent_id": self.agent_id,
@@ -160,7 +159,7 @@ class ExportPackageBuilder:
     """
 
     def __init__(self, output_dir: Path) -> None:
-        """Initialize builder with output directory."""
+        """Initialize builder with output directory"""
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -194,14 +193,12 @@ class ExportPackageBuilder:
             config_dir = build_dir / "config"
             scripts_dir = build_dir / "scripts"
 
-            for dir_path in [model_dir, knowledge_dir, config_dir,
-                scripts_dir]:
+            for dir_path in [model_dir, knowledge_dir, config_dir, scripts_dir]:
                 dir_path.mkdir(parents=True)
 
             # Export components
             model_size = self._export_model(agent, model_dir, target)
-            knowledge_size = (
-                self._export_knowledge(agent, knowledge_dir, target))
+            knowledge_size = self._export_knowledge(agent, knowledge_dir, target)
             self._export_config(agent, config_dir, target, readiness_score)
             self._generate_scripts(scripts_dir, target)
 
@@ -214,8 +211,7 @@ class ExportPackageBuilder:
 
             # Calculate compression ratio
             original_size = model_size + knowledge_size
-            compression_ratio = (
-                original_size / total_size if total_size > 0 else 1.0)
+            compression_ratio = original_size / total_size if total_size > 0 else 1.0
 
             # Create package metadata
             package = ExportPackage(
@@ -247,13 +243,13 @@ class ExportPackageBuilder:
             return package
 
     def _generate_package_id(self, agent_id: str, target: HardwareTarget) -> str:
-        """Generate unique package ID."""
+        """Generate unique package ID"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         target_id = target.platform.lower()
         return f"{agent_id}_{target_id}_{timestamp}"
 
     def _export_model(self, agent, model_dir: Path, target: HardwareTarget) -> float:
-        """Export and compress GNN model."""
+        """Export and compress GNN model"""
         logger.info("Exporting GNN model...")
 
         # Get model data
@@ -284,13 +280,12 @@ class ExportPackageBuilder:
         return size_mb
 
     def _export_knowledge(self, agent, knowledge_dir: Path, target: HardwareTarget) -> float:
-        """Export and compress knowledge graph."""
+        """Export and compress knowledge graph"""
         logger.info("Exporting knowledge graph...")
 
         # Prune knowledge based on target constraints
         if target.storage_gb < 32:
-            knowledge_data = (
-                self._prune_knowledge(agent.knowledge_graph, max_items=10000))
+            knowledge_data = self._prune_knowledge(agent.knowledge_graph, max_items=10000)
         else:
             knowledge_data = {
                 "experiences": [
@@ -327,7 +322,7 @@ class ExportPackageBuilder:
         target: HardwareTarget,
         readiness_score: Optional[Any] = None,
     ):
-        """Export configuration files."""
+        """Export configuration files"""
         logger.info("Exporting configuration...")
 
         # Agent configuration
@@ -335,8 +330,7 @@ class ExportPackageBuilder:
             "agent_id": agent.id,
             "agent_class": agent.agent_class,
             "personality": agent.personality,
-            "created_at": (agent.created_at.isoformat() if hasattr(agent,
-                "created_at") else None),
+            "created_at": (agent.created_at.isoformat() if hasattr(agent, "created_at") else None),
             "readiness": readiness_score.to_dict() if readiness_score else None,
         }
 
@@ -383,7 +377,7 @@ class ExportPackageBuilder:
             json.dump(runtime_config, f, indent=2)
 
     def _generate_scripts(self, scripts_dir: Path, target: HardwareTarget):
-        """Generate deployment scripts for target platform."""
+        """Generate deployment scripts for target platform"""
         logger.info(f"Generating deployment scripts for {target.platform}...")
 
         # Install script
@@ -426,7 +420,7 @@ class ExportPackageBuilder:
             f.write(readme_content)
 
     def _quantize_model(self, model_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Apply quantization to reduce model size for low-memory devices."""
+        """Apply quantization to reduce model size for low-memory devices"""
         # Simplified quantization - in practice would use proper quantization
         if "gnn_model" in model_data:
             gnn = model_data["gnn_model"]
@@ -443,9 +437,8 @@ class ExportPackageBuilder:
 
         return model_data
 
-    def _prune_knowledge(self, knowledge_graph, max_items: int = 10000) -> Dict[str,
-        Any]:
-        """Prune knowledge graph to fit storage constraints."""
+    def _prune_knowledge(self, knowledge_graph, max_items: int = 10000) -> Dict[str, Any]:
+        """Prune knowledge graph to fit storage constraints"""
         # Keep most recent and high-confidence items
         experiences = sorted(
             knowledge_graph.experiences,
@@ -454,8 +447,7 @@ class ExportPackageBuilder:
         )[: max_items // 2]
 
         patterns = sorted(
-            knowledge_graph.patterns.values(), key=lambda p: p.confidence,
-                reverse=True
+            knowledge_graph.patterns.values(), key=lambda p: p.confidence, reverse=True
         )[: max_items // 4]
 
         # Keep relationships for retained items
@@ -473,7 +465,7 @@ class ExportPackageBuilder:
         }
 
     def _calculate_checksums(self, build_dir: Path) -> Dict[str, str]:
-        """Calculate SHA256 checksums for package contents."""
+        """Calculate SHA256 checksums for package contents"""
         checksums = {}
 
         for component in ["model", "knowledge", "config", "scripts"]:
@@ -492,7 +484,7 @@ class ExportPackageBuilder:
         return checksums
 
     def _create_archive(self, build_dir: Path, output_path: Path) -> float:
-        """Create compressed tar.gz archive."""
+        """Create compressed tar.gz archive"""
         with tarfile.open(output_path, "w:gz") as tar:
             tar.add(build_dir, arcname=build_dir.name)
 
@@ -500,7 +492,7 @@ class ExportPackageBuilder:
         return output_path.stat().st_size / (1024 * 1024)
 
     def _generate_install_script(self, target: HardwareTarget) -> str:
-        """Generate installation script for target platform."""
+        """Generate installation script for target platform"""
         script = f"""#!/bin/bash
 # FreeAgentics Agent Installation Script
 # Target: {target.name}
@@ -655,7 +647,7 @@ main "$@"
         return script
 
     def _generate_run_script(self, target: HardwareTarget) -> str:
-        """Generate run script for the agent."""
+        """Generate run script for the agent"""
         script = f"""#!/bin/bash
 # FreeAgentics Agent Run Script
 # Target: {target.name}
@@ -706,7 +698,7 @@ python -m freeagentics_agent \\
         return script
 
     def _generate_systemd_service(self, target: HardwareTarget) -> str:
-        """Generate systemd service file."""
+        """Generate systemd service file"""
         return f"""[Unit]
 Description=FreeAgentics Agent
 After=network.target
@@ -732,7 +724,7 @@ WantedBy=multi-user.target
 """
 
     def _generate_launchd_plist(self, target: HardwareTarget) -> str:
-        """Generate launchd plist for macOS."""
+        """Generate launchd plist for macOS"""
         return """<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -770,7 +762,7 @@ WantedBy=multi-user.target
 """
 
     def _generate_update_script(self, target: HardwareTarget) -> str:
-        """Generate update script."""
+        """Generate update script"""
         return """#!/bin/bash
 # FreeAgentics Agent Update Script
 
@@ -828,7 +820,7 @@ fi
 """
 
     def _generate_readme(self, target: HardwareTarget) -> str:
-        """Generate README for the deployment package."""
+        """Generate README for the deployment package"""
         return f"""# FreeAgentics Agent Deployment Package
 
 This package contains a FreeAgentics agent configured for deployment on **{target.name}**.

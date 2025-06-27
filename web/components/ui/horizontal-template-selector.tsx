@@ -1,10 +1,24 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Brain, Compass, Shield, BookOpen, CheckCircle2 } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Brain,
+  Compass,
+  Shield,
+  BookOpen,
+  CheckCircle2,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Template interface matching our backend Active Inference templates
@@ -35,7 +49,8 @@ const AGENT_TEMPLATES: AgentTemplate[] = [
   {
     id: "explorer",
     name: "Explorer Agent",
-    description: "Epistemic value maximization for environment exploration and discovery",
+    description:
+      "Epistemic value maximization for environment exploration and discovery",
     icon: <Compass className="h-6 w-6" />,
     category: "explorer",
     complexity: "beginner",
@@ -45,9 +60,19 @@ const AGENT_TEMPLATES: AgentTemplate[] = [
       actionSpaces: 8,
       defaultPrecision: { sensory: 16.0, policy: 16.0, state: 1.0 },
     },
-    capabilities: ["Spatial navigation", "Environment mapping", "Resource discovery", "Uncertainty reduction"],
-    useCases: ["Territory mapping", "Resource scouting", "Environment analysis"],
-    expertRecommendation: "Ideal for newcomers to Active Inference - clear epistemic objectives",
+    capabilities: [
+      "Spatial navigation",
+      "Environment mapping",
+      "Resource discovery",
+      "Uncertainty reduction",
+    ],
+    useCases: [
+      "Territory mapping",
+      "Resource scouting",
+      "Environment analysis",
+    ],
+    expertRecommendation:
+      "Ideal for newcomers to Active Inference - clear epistemic objectives",
   },
   {
     id: "guardian",
@@ -62,7 +87,12 @@ const AGENT_TEMPLATES: AgentTemplate[] = [
       actionSpaces: 12,
       defaultPrecision: { sensory: 32.0, policy: 24.0, state: 2.0 },
     },
-    capabilities: ["Threat detection", "Risk assessment", "Protective behavior", "Multi-agent coordination"],
+    capabilities: [
+      "Threat detection",
+      "Risk assessment",
+      "Protective behavior",
+      "Multi-agent coordination",
+    ],
     useCases: ["Coalition protection", "Territory defense", "Risk monitoring"],
   },
   {
@@ -78,9 +108,15 @@ const AGENT_TEMPLATES: AgentTemplate[] = [
       actionSpaces: 16,
       defaultPrecision: { sensory: 64.0, policy: 32.0, state: 4.0 },
     },
-    capabilities: ["Economic modeling", "Resource valuation", "Trading strategies", "Market analysis"],
+    capabilities: [
+      "Economic modeling",
+      "Resource valuation",
+      "Trading strategies",
+      "Market analysis",
+    ],
     useCases: ["Resource trading", "Economic planning", "Market optimization"],
-    expertRecommendation: "Requires strong understanding of multi-agent economic dynamics",
+    expertRecommendation:
+      "Requires strong understanding of multi-agent economic dynamics",
   },
   {
     id: "scholar",
@@ -95,8 +131,17 @@ const AGENT_TEMPLATES: AgentTemplate[] = [
       actionSpaces: 10,
       defaultPrecision: { sensory: 128.0, policy: 64.0, state: 8.0 },
     },
-    capabilities: ["Information synthesis", "Knowledge graphs", "Pattern recognition", "Research coordination"],
-    useCases: ["Research coordination", "Information analysis", "Knowledge management"],
+    capabilities: [
+      "Information synthesis",
+      "Knowledge graphs",
+      "Pattern recognition",
+      "Research coordination",
+    ],
+    useCases: [
+      "Research coordination",
+      "Information analysis",
+      "Knowledge management",
+    ],
   },
 ];
 
@@ -134,7 +179,8 @@ export function HorizontalTemplateSelector({
 
   const updateScrollButtons = () => {
     if (scrollContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      const { scrollLeft, scrollWidth, clientWidth } =
+        scrollContainerRef.current;
       setCanScrollLeft(scrollLeft > 0);
       setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
     }
@@ -187,7 +233,7 @@ export function HorizontalTemplateSelector({
               size="icon"
               className={cn(
                 "absolute left-0 top-1/2 z-10 -translate-y-1/2 -translate-x-1/2 rounded-full shadow-lg",
-                !canScrollLeft && "opacity-50 cursor-not-allowed"
+                !canScrollLeft && "opacity-50 cursor-not-allowed",
               )}
               onClick={scrollLeft}
               disabled={!canScrollLeft}
@@ -195,13 +241,13 @@ export function HorizontalTemplateSelector({
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            
+
             <Button
               variant="outline"
               size="icon"
               className={cn(
                 "absolute right-0 top-1/2 z-10 -translate-y-1/2 translate-x-1/2 rounded-full shadow-lg",
-                !canScrollRight && "opacity-50 cursor-not-allowed"
+                !canScrollRight && "opacity-50 cursor-not-allowed",
               )}
               onClick={scrollRight}
               disabled={!canScrollRight}
@@ -232,7 +278,7 @@ export function HorizontalTemplateSelector({
                 className={cn(
                   "flex-none w-80 cursor-pointer transition-all duration-200 hover:shadow-lg",
                   "snap-start",
-                  isSelected && "ring-2 ring-primary bg-primary/5"
+                  isSelected && "ring-2 ring-primary bg-primary/5",
                 )}
                 onClick={() => onTemplateSelect(template)}
                 role="option"
@@ -245,7 +291,9 @@ export function HorizontalTemplateSelector({
                         {template.icon}
                       </div>
                       <div>
-                        <CardTitle className="text-lg">{template.name}</CardTitle>
+                        <CardTitle className="text-lg">
+                          {template.name}
+                        </CardTitle>
                         <div className="flex items-center space-x-2 mt-1">
                           <Badge
                             variant="outline"
@@ -290,7 +338,11 @@ export function HorizontalTemplateSelector({
                     </h4>
                     <div className="flex flex-wrap gap-1">
                       {template.capabilities.slice(0, 2).map((capability) => (
-                        <Badge key={capability} variant="secondary" className="text-xs">
+                        <Badge
+                          key={capability}
+                          variant="secondary"
+                          className="text-xs"
+                        >
                           {capability}
                         </Badge>
                       ))}
@@ -335,7 +387,7 @@ export function HorizontalTemplateSelector({
             key={index}
             className={cn(
               "h-1.5 w-6 rounded-full transition-colors",
-              index === 0 ? "bg-primary" : "bg-muted"
+              index === 0 ? "bg-primary" : "bg-muted",
             )}
           />
         ))}

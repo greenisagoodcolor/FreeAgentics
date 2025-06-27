@@ -1,4 +1,4 @@
-."""
+"""
 Hardware Configuration Management
 
 Manages hardware-specific configurations and optimizations for different deployment targets.
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class HardwareCapabilities:
-    """Detected hardware capabilities."""
+    """Detected hardware capabilities"""
 
     cpu_model: str
     cpu_cores: int
@@ -34,7 +34,7 @@ class HardwareCapabilities:
     accelerators: List[str] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary."""
+        """Convert to dictionary"""
         return {
             "cpu": {
                 "model": self.cpu_model,
@@ -60,7 +60,7 @@ class HardwareCapabilities:
 
 @dataclass
 class OptimizationProfile:
-    """Hardware-specific optimization settings."""
+    """Hardware-specific optimization settings"""
 
     name: str
     description: str
@@ -90,7 +90,7 @@ class OptimizationProfile:
     power_mode: str = "balanced"  # performance, balanced, efficiency
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary."""
+        """Convert to dictionary"""
         return {
             "name": self.name,
             "description": self.description,
@@ -113,11 +113,11 @@ class OptimizationProfile:
 
 
 class HardwareDetector:
-    """Detects hardware capabilities of the system."""
+    """Detects hardware capabilities of the system"""
 
     @staticmethod
     def detect_capabilities() -> HardwareCapabilities:
-        """Detect current system hardware capabilities."""
+        """Detect current system hardware capabilities"""
         caps = HardwareCapabilities(
             cpu_model=platform.processor() or "Unknown",
             cpu_cores=psutil.cpu_count(logical=False) or 1,
@@ -166,7 +166,7 @@ class HardwareDetector:
 
     @staticmethod
     def _detect_gpu() -> tuple[bool, Optional[str], Optional[float]]:
-        """Detect GPU availability and model."""
+        """Detect GPU availability and model"""
         # Try NVIDIA
         try:
             result = subprocess.run(
@@ -218,11 +218,10 @@ class HardwareDetector:
 
     @staticmethod
     def _detect_tpu() -> bool:
-        """Detect Coral TPU availability."""
+        """Detect Coral TPU availability"""
         try:
             # Check for Coral USB accelerator
-            result = (
-                subprocess.run(["lsusb"], capture_output=True, text=True, check=True))
+            result = subprocess.run(["lsusb"], capture_output=True, text=True, check=True)
             if "Google" in result.stdout and "Coral" in result.stdout:
                 return True
 
@@ -237,7 +236,7 @@ class HardwareDetector:
 
     @staticmethod
     def _is_raspberry_pi() -> bool:
-        """Check if running on Raspberry Pi."""
+        """Check if running on Raspberry Pi"""
         try:
             with open("/proc/device-tree/model") as f:
                 model = f.read()
@@ -247,7 +246,7 @@ class HardwareDetector:
 
     @staticmethod
     def _is_jetson() -> bool:
-        """Check if running on NVIDIA Jetson."""
+        """Check if running on NVIDIA Jetson"""
         try:
             with open("/proc/device-tree/model") as f:
                 model = f.read()
@@ -257,10 +256,10 @@ class HardwareDetector:
 
 
 class HardwareOptimizer:
-    """Generates optimal configurations for specific hardware."""
+    """Generates optimal configurations for specific hardware"""
 
     def __init__(self) -> None:
-        """Initialize optimizer with predefined profiles."""
+        """Initialize optimizer with predefined profiles"""
         self.profiles = {
             "raspberry_pi_4b": self._raspberry_pi_profile(),
             "jetson_nano": self._jetson_nano_profile(),
@@ -271,7 +270,7 @@ class HardwareOptimizer:
         }
 
     def get_optimal_profile(self, capabilities: HardwareCapabilities) -> OptimizationProfile:
-        """Get optimal profile based on detected capabilities."""
+        """Get optimal profile based on detected capabilities"""
         # Check for specific hardware
         if self._is_raspberry_pi_hardware(capabilities):
             return self.profiles["raspberry_pi_4b"]
@@ -291,24 +290,22 @@ class HardwareOptimizer:
     def customize_profile(
         self, base_profile: OptimizationProfile, capabilities: HardwareCapabilities
     ) -> OptimizationProfile:
-        """Customize profile based on actual capabilities."""
+        """Customize profile based on actual capabilities"""
         profile = OptimizationProfile(
             name=f"{base_profile.name}_custom",
             description=f"Customized {base_profile.description}",
-            cpu_threads= (
-                min(base_profile.cpu_threads, capabilities.cpu_threads),)
+            cpu_threads=min(base_profile.cpu_threads, capabilities.cpu_threads),
             memory_limit_mb=int(
                 min(
                     base_profile.memory_limit_mb,
                     capabilities.ram_available_gb * 1024 * 0.8,
-                        # Use 80% of available
+                    # Use 80% of available
                 )
             ),
             batch_size=base_profile.batch_size,
             use_mixed_precision=base_profile.use_mixed_precision,
             quantization_bits=base_profile.quantization_bits,
-            inference_threads= (
-                min(base_profile.inference_threads, capabilities.cpu_threads // 2),)
+            inference_threads=min(base_profile.inference_threads, capabilities.cpu_threads // 2),
             inference_timeout_ms=base_profile.inference_timeout_ms,
             power_mode=base_profile.power_mode,
         )
@@ -327,7 +324,7 @@ class HardwareOptimizer:
         return profile
 
     def _raspberry_pi_profile(self) -> OptimizationProfile:
-        """Profile for Raspberry Pi 4B."""
+        """Profile for Raspberry Pi 4B"""
         return OptimizationProfile(
             name="raspberry_pi_4b",
             description="Optimized for Raspberry Pi 4B with 8GB RAM",
@@ -344,7 +341,7 @@ class HardwareOptimizer:
         )
 
     def _jetson_nano_profile(self) -> OptimizationProfile:
-        """Profile for NVIDIA Jetson Nano."""
+        """Profile for NVIDIA Jetson Nano"""
         return OptimizationProfile(
             name="jetson_nano",
             description="Optimized for Jetson Nano with CUDA",
@@ -360,7 +357,7 @@ class HardwareOptimizer:
         )
 
     def _mac_mini_profile(self) -> OptimizationProfile:
-        """Profile for Mac Mini M2."""
+        """Profile for Mac Mini M2"""
         return OptimizationProfile(
             name="mac_mini_m2",
             description="Optimized for Mac Mini M2 with Metal",
@@ -376,7 +373,7 @@ class HardwareOptimizer:
         )
 
     def _generic_low_profile(self) -> OptimizationProfile:
-        """Generic profile for low-end hardware."""
+        """Generic profile for low-end hardware"""
         return OptimizationProfile(
             name="generic_low",
             description="Generic profile for low-resource systems",
@@ -392,7 +389,7 @@ class HardwareOptimizer:
         )
 
     def _generic_mid_profile(self) -> OptimizationProfile:
-        """Generic profile for mid-range hardware."""
+        """Generic profile for mid-range hardware"""
         return OptimizationProfile(
             name="generic_mid",
             description="Generic profile for mid-range systems",
@@ -408,7 +405,7 @@ class HardwareOptimizer:
         )
 
     def _generic_high_profile(self) -> OptimizationProfile:
-        """Generic profile for high-end hardware."""
+        """Generic profile for high-end hardware"""
         return OptimizationProfile(
             name="generic_high",
             description="Generic profile for high-performance systems",
@@ -424,7 +421,7 @@ class HardwareOptimizer:
         )
 
     def _is_raspberry_pi_hardware(self, caps: HardwareCapabilities) -> bool:
-        """Check if capabilities match Raspberry Pi."""
+        """Check if capabilities match Raspberry Pi"""
         return (
             "arm" in platform.machine().lower()
             and caps.cpu_cores == 4
@@ -433,7 +430,7 @@ class HardwareOptimizer:
         )
 
     def _is_jetson_hardware(self, caps: HardwareCapabilities) -> bool:
-        """Check if capabilities match Jetson."""
+        """Check if capabilities match Jetson"""
         return (
             "aarch64" in platform.machine().lower()
             and "cuda" in caps.accelerators
@@ -441,12 +438,12 @@ class HardwareOptimizer:
         )
 
     def _is_mac_hardware(self, caps: HardwareCapabilities) -> bool:
-        """Check if capabilities match Mac."""
+        """Check if capabilities match Mac"""
         return platform.system() == "Darwin" and "metal" in caps.accelerators
 
 
 class RuntimeConfigurator:
-    """Generates runtime configurations for deployment."""
+    """Generates runtime configurations for deployment"""
 
     @staticmethod
     def generate_runtime_config(
@@ -454,7 +451,7 @@ class RuntimeConfigurator:
         capabilities: HardwareCapabilities,
         agent_config: Dict[str, Any],
     ) -> Dict[str, Any]:
-        """Generate complete runtime configuration."""
+        """Generate complete runtime configuration"""
         config = {
             "version": "1.0.0",
             "agent": agent_config,
@@ -551,7 +548,7 @@ class RuntimeConfigurator:
 
     @staticmethod
     def validate_config(config: Dict[str, Any], capabilities: HardwareCapabilities) -> List[str]:
-        """Validate runtime configuration against hardware capabilities."""
+        """Validate runtime configuration against hardware capabilities"""
         warnings = []
 
         # Check memory limits

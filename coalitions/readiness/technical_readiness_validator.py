@@ -1,4 +1,4 @@
-."""
+"""
 Technical Readiness Validation for Edge Deployment
 
 Comprehensive assessment system that validates coalition technical readiness for edge deployment,
@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 
 class ReadinessLevel(Enum):
-    """Technical readiness levels for edge deployment."""
+    """Technical readiness levels for edge deployment"""
 
     NOT_READY = "not_ready"
     BASIC_READY = "basic_ready"
@@ -46,7 +46,7 @@ class ReadinessLevel(Enum):
 
 
 class EdgePlatform(Enum):
-    """Supported edge deployment platforms."""
+    """Supported edge deployment platforms"""
 
     RASPBERRY_PI = "raspberry_pi"
     JETSON_NANO = "jetson_nano"
@@ -61,7 +61,7 @@ class EdgePlatform(Enum):
 
 @dataclass
 class ResourceRequirements:
-    """Resource requirements for coalition deployment."""
+    """Resource requirements for coalition deployment"""
 
     min_cpu_cores: int
     min_ram_gb: float
@@ -89,7 +89,7 @@ class ResourceRequirements:
 
 @dataclass
 class PerformanceBenchmark:
-    """Performance benchmark results."""
+    """Performance benchmark results"""
 
     benchmark_name: str
     metric_name: str
@@ -106,7 +106,7 @@ class PerformanceBenchmark:
 
 @dataclass
 class TechnicalReadinessReport:
-    """Comprehensive technical readiness assessment report."""
+    """Comprehensive technical readiness assessment report"""
 
     coalition_id: str
     platform: EdgePlatform
@@ -159,7 +159,7 @@ class TechnicalReadinessReport:
 
 
 class EdgePerformanceBenchmarker:
-    """Specialized benchmarking for edge deployment scenarios."""
+    """Specialized benchmarking for edge deployment scenarios"""
 
     def __init__(self) -> None:
         self.benchmarks = {
@@ -176,7 +176,7 @@ class EdgePerformanceBenchmarker:
     async def run_benchmarks(
         self, coalition_config: Dict[str, Any], requirements: ResourceRequirements
     ) -> List[PerformanceBenchmark]:
-        """Run all edge deployment benchmarks."""
+        """Run all edge deployment benchmarks"""
         results = []
 
         logger.info("Starting edge deployment performance benchmarks")
@@ -211,7 +211,7 @@ class EdgePerformanceBenchmarker:
     async def _benchmark_agent_startup(
         self, coalition_config: Dict[str, Any], requirements: ResourceRequirements
     ) -> PerformanceBenchmark:
-        """Benchmark agent startup time."""
+        """Benchmark agent startup time"""
         baseline_startup_ms = 5000.0  # 5 seconds baseline
 
         # Simulate agent startup (in real implementation, would start actual agent)
@@ -240,7 +240,7 @@ class EdgePerformanceBenchmarker:
     async def _benchmark_memory_footprint(
         self, coalition_config: Dict[str, Any], requirements: ResourceRequirements
     ) -> PerformanceBenchmark:
-        """Benchmark memory footprint of coalition agents."""
+        """Benchmark memory footprint of coalition agents"""
         process = psutil.Process()
         initial_memory = process.memory_info().rss / (1024 * 1024)  # MB
 
@@ -272,7 +272,7 @@ class EdgePerformanceBenchmarker:
     async def _benchmark_inference_latency(
         self, coalition_config: Dict[str, Any], requirements: ResourceRequirements
     ) -> PerformanceBenchmark:
-        """Benchmark inference latency for agent decision making."""
+        """Benchmark inference latency for agent decision making"""
         baseline_inference_ms = 100.0  # 100ms baseline
 
         # Simulate inference workload
@@ -304,7 +304,7 @@ class EdgePerformanceBenchmarker:
     async def _benchmark_concurrent_agents(
         self, coalition_config: Dict[str, Any], requirements: ResourceRequirements
     ) -> PerformanceBenchmark:
-        """Benchmark concurrent agent handling capacity."""
+        """Benchmark concurrent agent handling capacity"""
         baseline_concurrent_agents = 10.0
 
         # Test concurrent task handling
@@ -341,7 +341,7 @@ class EdgePerformanceBenchmarker:
     async def _benchmark_network_throughput(
         self, coalition_config: Dict[str, Any], requirements: ResourceRequirements
     ) -> PerformanceBenchmark:
-        """Benchmark network throughput for agent communication."""
+        """Benchmark network throughput for agent communication"""
         baseline_throughput_mbps = 100.0
 
         # Get network interface statistics
@@ -381,7 +381,7 @@ class EdgePerformanceBenchmarker:
     async def _benchmark_storage_io(
         self, coalition_config: Dict[str, Any], requirements: ResourceRequirements
     ) -> PerformanceBenchmark:
-        """Benchmark storage I/O performance."""
+        """Benchmark storage I/O performance"""
         baseline_io_mbps = 50.0  # 50 MB/s baseline
 
         # Test file I/O performance
@@ -422,7 +422,7 @@ class EdgePerformanceBenchmarker:
     async def _benchmark_power_consumption(
         self, coalition_config: Dict[str, Any], requirements: ResourceRequirements
     ) -> PerformanceBenchmark:
-        """Benchmark power consumption (estimated)."""
+        """Benchmark power consumption (estimated)"""
         baseline_power_watts = 15.0  # 15W baseline
 
         # Estimate power consumption based on CPU usage
@@ -441,8 +441,7 @@ class EdgePerformanceBenchmarker:
         estimated_power = baseline_power_watts * (cpu_percent_avg / 100.0) * 1.5
 
         performance_ratio = baseline_power_watts / estimated_power
-        passed = (
-            not requirements.max_power_watts or estimated_power <= requirements.max_power_watts)
+        passed = not requirements.max_power_watts or estimated_power <= requirements.max_power_watts
 
         return PerformanceBenchmark(
             benchmark_name="power_consumption",
@@ -457,7 +456,7 @@ class EdgePerformanceBenchmarker:
     async def _benchmark_thermal_stability(
         self, coalition_config: Dict[str, Any], requirements: ResourceRequirements
     ) -> PerformanceBenchmark:
-        """Benchmark thermal stability under load."""
+        """Benchmark thermal stability under load"""
         baseline_temp_celsius = 65.0  # 65°C baseline
 
         try:
@@ -539,7 +538,7 @@ class TechnicalReadinessValidator:
         logger.info("Technical readiness validator initialized")
 
     def _initialize_platform_requirements(self) -> Dict[EdgePlatform, ResourceRequirements]:
-        """Initialize platform-specific resource requirements."""
+        """Initialize platform-specific resource requirements"""
         return {
             EdgePlatform.RASPBERRY_PI: ResourceRequirements(
                 min_cpu_cores=4,
@@ -703,7 +702,7 @@ class TechnicalReadinessValidator:
             raise
 
     def _determine_target_platform(self, hardware_profile: HardwareProfile) -> EdgePlatform:
-        """Determine target platform based on hardware profile."""
+        """Determine target platform based on hardware profile"""
         arch = hardware_profile.architecture.lower()
         name = hardware_profile.name.lower()
 
@@ -728,7 +727,7 @@ class TechnicalReadinessValidator:
     async def _run_compatibility_tests(
         self, coalition_config: Dict[str, Any], hardware_profile: HardwareProfile
     ) -> List[TestResult]:
-        """Run hardware compatibility tests."""
+        """Run hardware compatibility tests"""
         logger.info("Running hardware compatibility tests")
 
         # Create a temporary package directory for testing
@@ -771,22 +770,19 @@ class TechnicalReadinessValidator:
         compatibility_results: List[TestResult],
         performance_benchmarks: List[PerformanceBenchmark],
     ) -> Dict[str, float]:
-        """Calculate comprehensive readiness scores."""
+        """Calculate comprehensive readiness scores"""
 
         # Hardware score (0-100)
         hardware_score = self._calculate_hardware_score(hardware_profile, requirements)
 
         # Compatibility score (0-100)
-        compatibility_score = (
-            self._calculate_compatibility_score(compatibility_results))
+        compatibility_score = self._calculate_compatibility_score(compatibility_results)
 
         # Performance score (0-100)
-        performance_score = (
-            self._calculate_performance_score(performance_benchmarks))
+        performance_score = self._calculate_performance_score(performance_benchmarks)
 
         # Resource score (0-100)
-        resource_score = (
-            self._calculate_resource_score(hardware_profile, requirements))
+        resource_score = self._calculate_resource_score(hardware_profile, requirements)
 
         # Overall score (weighted average)
         overall_score = (
@@ -807,7 +803,7 @@ class TechnicalReadinessValidator:
     def _calculate_hardware_score(
         self, hardware_profile: HardwareProfile, requirements: ResourceRequirements
     ) -> float:
-        """Calculate hardware adequacy score."""
+        """Calculate hardware adequacy score"""
         score = 100.0
 
         # CPU cores check
@@ -836,7 +832,7 @@ class TechnicalReadinessValidator:
         return max(0.0, score)
 
     def _calculate_compatibility_score(self, compatibility_results: List[TestResult]) -> float:
-        """Calculate compatibility test score."""
+        """Calculate compatibility test score"""
         if not compatibility_results:
             return 50.0  # Default if no tests run
 
@@ -848,7 +844,7 @@ class TechnicalReadinessValidator:
     def _calculate_performance_score(
         self, performance_benchmarks: List[PerformanceBenchmark]
     ) -> float:
-        """Calculate performance benchmark score."""
+        """Calculate performance benchmark score"""
         if not performance_benchmarks:
             return 50.0  # Default if no benchmarks run
 
@@ -884,7 +880,7 @@ class TechnicalReadinessValidator:
     def _calculate_resource_score(
         self, hardware_profile: HardwareProfile, requirements: ResourceRequirements
     ) -> float:
-        """Calculate resource adequacy score."""
+        """Calculate resource adequacy score"""
         score = 100.0
 
         # CPU utilization headroom
@@ -902,8 +898,7 @@ class TechnicalReadinessValidator:
             score += min(10.0, (memory_ratio - 2.0) * 5)  # Bonus for excess capacity
 
         # Storage headroom
-        storage_ratio = (
-            hardware_profile.storage_gb / requirements.min_storage_gb)
+        storage_ratio = hardware_profile.storage_gb / requirements.min_storage_gb
         if storage_ratio < 1.0:
             score -= (1.0 - storage_ratio) * 25
 
@@ -916,7 +911,7 @@ class TechnicalReadinessValidator:
         compatibility_results: List[TestResult],
         performance_benchmarks: List[PerformanceBenchmark],
     ) -> Tuple[List[str], List[str]]:
-        """Analyze issues and generate recommendations."""
+        """Analyze issues and generate recommendations"""
         issues = []
         recommendations = []
 
@@ -960,8 +955,7 @@ class TechnicalReadinessValidator:
                 issues.append(f"Performance benchmark failed: {benchmark.benchmark_name}")
 
                 if benchmark.benchmark_name == "agent_startup_time":
-                    recommendations.append("Optimize agent initialization and
-                        model loading")
+                    recommendations.append("Optimize agent initialization and model loading")
                 elif benchmark.benchmark_name == "memory_footprint":
                     recommendations.append("Reduce memory usage or increase available RAM")
                 elif benchmark.benchmark_name == "inference_latency":
@@ -969,8 +963,7 @@ class TechnicalReadinessValidator:
                         "Optimize inference pipeline or enable hardware acceleration"
                     )
                 elif benchmark.benchmark_name == "concurrent_agents":
-                    recommendations.append("Optimize resource sharing and
-                        concurrency handling")
+                    recommendations.append("Optimize resource sharing and concurrency handling")
 
         # General recommendations
         if not issues:
@@ -981,7 +974,7 @@ class TechnicalReadinessValidator:
         return issues, recommendations
 
     def _determine_readiness_level(self, overall_score: float) -> ReadinessLevel:
-        """Determine readiness level based on overall score."""
+        """Determine readiness level based on overall score"""
         if overall_score >= 90.0:
             return ReadinessLevel.ENTERPRISE_READY
         elif overall_score >= 80.0:
@@ -992,7 +985,7 @@ class TechnicalReadinessValidator:
             return ReadinessLevel.NOT_READY
 
     def save_report(self, report: TechnicalReadinessReport, output_path: Path) -> None:
-        """Save technical readiness report to file."""
+        """Save technical readiness report to file"""
         report_data = report.to_dict()
 
         with open(output_path, "w") as f:
@@ -1001,7 +994,7 @@ class TechnicalReadinessValidator:
         logger.info(f"Technical readiness report saved to {output_path}")
 
     def generate_summary_report(self, reports: List[TechnicalReadinessReport]) -> Dict[str, Any]:
-        """Generate summary report from multiple assessments."""
+        """Generate summary report from multiple assessments"""
         if not reports:
             return {}
 

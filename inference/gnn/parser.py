@@ -15,7 +15,7 @@ GMN Parser Module
 This module implements the parser for .gmn.md (Generative Model Notation Markdown) files.
 It extracts model definitions, validates syntax, and produces an Abstract Syntax Tree (AST)
 for further processing.
-."""
+"""
 # Configure logging
 logger = logging.getLogger(__name__)
 
@@ -272,7 +272,7 @@ class GMNParser:
                         self.metadata[key] = value
 
     def _extract_gmn_block(self, content_lines: List[str]) -> tuple[Optional[str], int]:
-        """Extracts content from a GMN code block and returns it and the number of lines consumed."""
+        """Extracts content from a GMN code block and returns it and the number of lines consumed"""
         try:
             start_index = content_lines.index("```gmn")
             # Look for the end of the block *after* the start
@@ -324,7 +324,7 @@ class GMNBlockParser:
         self.current_token = tokens[0] if tokens else None
 
     def parse(self) -> Dict[str, Any]:
-        ."""Parse the token stream into a dictionary."""
+        """Parse the token stream into a dictionary"""
         return self._parse_object()
 
     def _advance(self) -> None:

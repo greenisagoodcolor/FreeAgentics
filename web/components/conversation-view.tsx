@@ -7,7 +7,10 @@ interface ConversationViewProps {
   isLive: boolean;
 }
 
-export function ConversationView({ conversationId, isLive }: ConversationViewProps) {
+export function ConversationView({
+  conversationId,
+  isLive,
+}: ConversationViewProps) {
   return (
     <Card className="w-full h-full p-6">
       <h2 className="text-2xl font-semibold mb-4">

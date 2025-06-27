@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class InferenceConfig:
-    """Configuration for Active Inference algorithms."""
+    """Configuration for Active Inference algorithms"""
 
     algorithm: str = "variational_message_passing"
     num_iterations: int = 16
@@ -30,10 +30,10 @@ class InferenceConfig:
 
 
 class InferenceAlgorithm(ABC):
-    """Abstract base class for Active Inference algorithms."""
+    """Abstract base class for Active Inference algorithms"""
 
     def __init__(self, config: InferenceConfig) -> None:
-        """Initialize the inference algorithm with configuration."""
+        """Initialize the inference algorithm with configuration"""
         self.config = config
         self.device = torch.device(
             "cuda" if config.use_gpu and torch.cuda.is_available() else "cpu"
@@ -46,15 +46,15 @@ class InferenceAlgorithm(ABC):
         generative_model: GenerativeModel,
         prior_beliefs: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
-        """Infer hidden states given observations."""
+        """Infer hidden states given observations"""
         pass
 
 
 class VariationalMessagePassing(InferenceAlgorithm):
-    """Variational Message Passing for Active Inference."""
+    """Variational Message Passing for Active Inference"""
 
     def __init__(self, config: InferenceConfig) -> None:
-        """Initialize the Variational Message Passing algorithm."""
+        """Initialize the Variational Message Passing algorithm"""
         super().__init__(config)
 
     def infer_states(
@@ -64,31 +64,24 @@ class VariationalMessagePassing(InferenceAlgorithm):
         prior_beliefs: Optional[torch.Tensor] = None,
         prior: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
-        """Infer states using variational message passing."""
+        """Infer states using variational message passing"""
         # Support both parameter names for backward compatibility
-        belief = prior_beliefs or prior
+        belief = prior_beliefs if prior_beliefs is not None else prior
         if belief is not None:
             return belief
         else:
             num_states = getattr(generative_model, "dims", None)
             if num_states and hasattr(num_states, "num_states"):
-                return (
-                    torch.ones(num_states.num_states) /
-                    num_states.num_states
-                )
+                return torch.ones(num_states.num_states) / num_states.num_states
             else:
                 return torch.ones(4) / 4
 
 
 class BeliefPropagation(InferenceAlgorithm):
-    """Belief Propagation for Active Inference."""
+    """Belief Propagation for Active Inference"""
 
-    def __init__(
-        self,
-        config: InferenceConfig,
-        num_particles: Optional[int] = None
-    ) -> None:
-        """Initialize the Belief Propagation algorithm."""
+    def __init__(self, config: InferenceConfig, num_particles: Optional[int] = None) -> None:
+        """Initialize the Belief Propagation algorithm"""
         super().__init__(config)
         # Accept num_particles for backward compatibility but don't use it
         self.num_particles = num_particles
@@ -100,9 +93,9 @@ class BeliefPropagation(InferenceAlgorithm):
         prior_beliefs: Optional[torch.Tensor] = None,
         prior: Optional[torch.Tensor] = None,
     ):
-        """Infer states using belief propagation."""
+        """Infer states using belief propagation"""
         # Support both parameter names for backward compatibility
-        belief = prior_beliefs or prior
+        belief = prior_beliefs if prior_beliefs is not None else prior
 
         if belief is not None:
             state_dim = belief.shape[0]
@@ -135,10 +128,10 @@ class BeliefPropagation(InferenceAlgorithm):
 
 
 class GradientDescentInference(InferenceAlgorithm):
-    """Gradient-based inference for Active Inference."""
+    """Gradient-based inference for Active Inference"""
 
     def __init__(self, config: InferenceConfig) -> None:
-        """Initialize the Gradient Descent Inference algorithm."""
+        """Initialize the Gradient Descent Inference algorithm"""
         super().__init__(config)
 
     def infer_states(
@@ -147,25 +140,22 @@ class GradientDescentInference(InferenceAlgorithm):
         generative_model: GenerativeModel,
         prior_beliefs: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
-        """Infer states using gradient descent."""
+        """Infer states using gradient descent"""
         if prior_beliefs is not None:
             return prior_beliefs
         else:
             num_states = getattr(generative_model, "dims", None)
             if num_states and hasattr(num_states, "num_states"):
-                return (
-                    torch.ones(num_states.num_states) /
-                    num_states.num_states
-                )
+                return torch.ones(num_states.num_states) / num_states.num_states
             else:
                 return torch.ones(4) / 4
 
 
 class NaturalGradientInference(InferenceAlgorithm):
-    """Natural Gradient Inference for Active Inference."""
+    """Natural Gradient Inference for Active Inference"""
 
     def __init__(self, config: InferenceConfig) -> None:
-        """Initialize the Natural Gradient Inference algorithm."""
+        """Initialize the Natural Gradient Inference algorithm"""
         super().__init__(config)
 
     def infer_states(
@@ -174,25 +164,22 @@ class NaturalGradientInference(InferenceAlgorithm):
         generative_model: GenerativeModel,
         prior_beliefs: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
-        """Infer states using natural gradient."""
+        """Infer states using natural gradient"""
         if prior_beliefs is not None:
             return prior_beliefs
         else:
             num_states = getattr(generative_model, "dims", None)
             if num_states and hasattr(num_states, "num_states"):
-                return (
-                    torch.ones(num_states.num_states) /
-                    num_states.num_states
-                )
+                return torch.ones(num_states.num_states) / num_states.num_states
             else:
                 return torch.ones(4) / 4
 
 
 class ExpectationMaximization(InferenceAlgorithm):
-    """Expectation Maximization for Active Inference."""
+    """Expectation Maximization for Active Inference"""
 
     def __init__(self, config: InferenceConfig) -> None:
-        """Initialize the Expectation Maximization algorithm."""
+        """Initialize the Expectation Maximization algorithm"""
         super().__init__(config)
 
     def infer_states(
@@ -201,27 +188,22 @@ class ExpectationMaximization(InferenceAlgorithm):
         generative_model: GenerativeModel,
         prior_beliefs: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
-        """Infer states using EM."""
+        """Infer states using EM"""
         if prior_beliefs is not None:
             return prior_beliefs
         else:
             num_states = getattr(generative_model, "dims", None)
             if num_states and hasattr(num_states, "num_states"):
-                return (
-                    torch.ones(num_states.num_states) /
-                    num_states.num_states
-                )
+                return torch.ones(num_states.num_states) / num_states.num_states
             else:
                 return torch.ones(4) / 4
 
 
 class ParticleFilterInference(InferenceAlgorithm):
-    """Particle Filter Inference for Active Inference."""
+    """Particle Filter Inference for Active Inference"""
 
-    def __init__(
-        self, config: InferenceConfig, num_particles: int = 100
-    ) -> None:
-        """Initialize the Particle Filter Inference algorithm."""
+    def __init__(self, config: InferenceConfig, num_particles: int = 100) -> None:
+        """Initialize the Particle Filter Inference algorithm"""
         super().__init__(config)
         self.num_particles = num_particles
 
@@ -233,9 +215,9 @@ class ParticleFilterInference(InferenceAlgorithm):
         prior: Optional[torch.Tensor] = None,
         return_particles: bool = False,
     ):
-        """Infer states using particle filter."""
+        """Infer states using particle filter"""
         # Support both parameter names for backward compatibility
-        belief = prior_beliefs or prior
+        belief = prior_beliefs if prior_beliefs is not None else prior
 
         if belief is not None:
             state_dim = belief.shape[0]
@@ -269,7 +251,7 @@ class ParticleFilterInference(InferenceAlgorithm):
 def create_inference_algorithm(
     algorithm_type: str, config: Optional[InferenceConfig] = None, **kwargs
 ) -> InferenceAlgorithm:
-    """Create inference algorithms from type specification."""
+    """Create inference algorithms from type specification"""
     if config is None:
         config = InferenceConfig()
 

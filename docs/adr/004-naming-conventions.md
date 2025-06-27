@@ -184,12 +184,14 @@ This approach maintains **both** the professional kebab-case aesthetic for non-i
 ## Revision History
 
 **Version 1.1** (2025-06-21): Critical Python naming correction
+
 - Added architectural rationale for Python file naming exceptions
 - Corrected "kebab-case for all Python files" to differentiated naming
 - Distinguished modules (snake_case) vs scripts (kebab-case) vs tests (kebab-case)
 - Updated implementation phases and next steps
 
 **Version 1.0** (2025-06-18): Initial naming convention establishment
+
 - Established baseline naming standards across all languages
 - Replaced gaming terminology with professional terms
 - Implemented initial tooling and audit processes

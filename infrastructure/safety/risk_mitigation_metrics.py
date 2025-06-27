@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 class MetricType(Enum):
-    ."""Types of risk mitigation metrics."""
+    """Types of risk mitigation metrics"""
 
     VIOLATION_FREQUENCY = "violation_frequency"
     MEAN_TIME_TO_DETECTION = "mean_time_to_detection"
@@ -43,7 +43,7 @@ class MetricType(Enum):
 
 @dataclass
 class RiskMetric:
-    ."""Individual risk mitigation metric."""
+    """Individual risk mitigation metric"""
 
     metric_type: MetricType
     value: float
@@ -54,13 +54,12 @@ class RiskMetric:
     measurement_period: timedelta
     last_updated: datetime = field(default_factory=datetime.now)
 
-    @property
     def is_significant(self, alpha: float = 0.05) -> bool:
-        ."""Check if improvement is statistically significant."""
+        """Check if improvement is statistically significant"""
         return self.statistical_significance < alpha
 
     def to_dict(self) -> Dict[str, Any]:
-        ."""Convert to dictionary for reporting."""
+        """Convert to dictionary for reporting"""
         return {
             "metric_type": self.metric_type.value,
             "value": self.value,
@@ -76,7 +75,7 @@ class RiskMetric:
 
 @dataclass
 class RiskMitigationReport:
-    ."""Comprehensive risk mitigation effectiveness report."""
+    """Comprehensive risk mitigation effectiveness report"""
 
     report_id: str
     reporting_period: Tuple[datetime, datetime]
@@ -92,7 +91,7 @@ class RiskMitigationReport:
 
 
 class RiskMitigationAnalyzer:
-    ."""
+    """
     Analyzes and quantifies the effectiveness of risk mitigation strategies
     implemented through Markov blanket enforcement.
 
@@ -133,19 +132,19 @@ class RiskMitigationAnalyzer:
         logger.info("Risk mitigation analyzer initialized")
 
     def add_violation_record(self, violation: BoundaryViolation) -> None:
-        ."""Add a violation record for analysis."""
+        """Add a violation record for analysis"""
         self.violation_history.append(violation)
 
     def add_integrity_measurement(self, timestamp: datetime, integrity_score: float) -> None:
-        ."""Record boundary integrity measurement."""
+        """Record boundary integrity measurement"""
         self.integrity_measurements.append((timestamp, integrity_score))
 
     def add_detection_time(self, detection_time: timedelta) -> None:
-        ."""Record time to detect a violation."""
+        """Record time to detect a violation"""
         self.detection_times.append(detection_time)
 
     def add_resolution_time(self, resolution_time: timedelta) -> None:
-        ."""Record time to resolve a violation."""
+        """Record time to resolve a violation"""
         self.resolution_times.append(resolution_time)
 
     def calculate_violation_frequency(
@@ -175,8 +174,7 @@ class RiskMitigationAnalyzer:
         # Get baseline violations
         if baseline_period is None:
             baseline_end = current_period[0]
-            baseline_start = (
-                baseline_end - timedelta(days=self.baseline_period_days))
+            baseline_start = baseline_end - timedelta(days=self.baseline_period_days)
             baseline_period = (baseline_start, baseline_end)
 
         baseline_violations = [
@@ -189,8 +187,7 @@ class RiskMitigationAnalyzer:
 
         # Calculate improvement
         if baseline_rate > 0:
-            improvement_pct = (
-                ((baseline_rate - current_rate) / baseline_rate) * 100)
+            improvement_pct = ((baseline_rate - current_rate) / baseline_rate) * 100
         else:
             improvement_pct = 0.0 if current_rate == 0 else -100.0
 
@@ -209,8 +206,7 @@ class RiskMitigationAnalyzer:
                 (1 - self.confidence_level) / 2, 2 * len(current_violations)
             ) / (2 * current_days)
             ci_upper = stats.chi2.ppf(
-                (1 + self.confidence_level) / 2, 2 * (len(current_violations) +
-                    1)
+                (1 + self.confidence_level) / 2, 2 * (len(current_violations) + 1)
             ) / (2 * current_days)
         else:
             ci_lower, ci_upper = 0.0, 3.0 / current_days
@@ -266,8 +262,7 @@ class RiskMitigationAnalyzer:
         # Confidence interval
         if len(current_times) > 1:
             se = stats.sem([t.total_seconds() for t in current_times])
-            ci_margin = (
-                se * stats.t.ppf((1 + self.confidence_level) / 2, len(current_times) - 1))
+            ci_margin = se * stats.t.ppf((1 + self.confidence_level) / 2, len(current_times) - 1)
             ci_lower = max(0, current_mttd - ci_margin)
             ci_upper = current_mttd + ci_margin
         else:
@@ -297,15 +292,12 @@ class RiskMitigationAnalyzer:
             )
 
         # Sort by timestamp
-        sorted_measurements = (
-            sorted(self.integrity_measurements, key=lambda x: x[0]))
+        sorted_measurements = sorted(self.integrity_measurements, key=lambda x: x[0])
 
         # Current period (most recent quarter)
         quarter_point = 3 * len(sorted_measurements) // 4
-        current_measurements = (
-            [m[1] for m in sorted_measurements[quarter_point:]])
-        baseline_measurements = (
-            [m[1] for m in sorted_measurements[:quarter_point]])
+        current_measurements = [m[1] for m in sorted_measurements[quarter_point:]]
+        baseline_measurements = [m[1] for m in sorted_measurements[:quarter_point]]
 
         # Calculate means
         current_integrity = np.mean(current_measurements)
@@ -319,13 +311,11 @@ class RiskMitigationAnalyzer:
         )
 
         # Statistical test
-        _, p_value = (
-            stats.ttest_ind(baseline_measurements, current_measurements))
+        _, p_value = stats.ttest_ind(baseline_measurements, current_measurements)
 
         # Confidence interval
         se = stats.sem(current_measurements)
-        ci_margin = (
-            se * stats.t.ppf((1 + self.confidence_level) / 2, len(current_measurements) - 1))
+        ci_margin = se * stats.t.ppf((1 + self.confidence_level) / 2, len(current_measurements) - 1)
         ci_lower = max(0, min(1, current_integrity - ci_margin))
         ci_upper = min(1, current_integrity + ci_margin)
 
@@ -372,8 +362,7 @@ class RiskMitigationAnalyzer:
 
         # Calculate baseline risk
         baseline_end = current_period[0]
-        baseline_start = (
-            baseline_end - timedelta(days=self.baseline_period_days))
+        baseline_start = baseline_end - timedelta(days=self.baseline_period_days)
         baseline_violations = [
             v for v in self.violation_history if baseline_start <= v.timestamp <= baseline_end
         ]
@@ -396,17 +385,13 @@ class RiskMitigationAnalyzer:
             bootstrap_scores = []
             for _ in range(1000):
                 sample_violations = np.random.choice(
-                    current_violations, size=len(current_violations),
-                        replace=True
+                    current_violations, size=len(current_violations), replace=True
                 )
-                sample_risk = (
-                    sum(self.risk_weights.get(v.severity, 1.0) for v in sample_violations))
+                sample_risk = sum(self.risk_weights.get(v.severity, 1.0) for v in sample_violations)
                 bootstrap_scores.append(sample_risk / period_days)
 
-            ci_lower = (
-                np.percentile(bootstrap_scores, (1 - self.confidence_level) * 50))
-            ci_upper = (
-                np.percentile(bootstrap_scores, (1 + self.confidence_level) * 50))
+            ci_lower = np.percentile(bootstrap_scores, (1 - self.confidence_level) * 50)
+            ci_upper = np.percentile(bootstrap_scores, (1 + self.confidence_level) * 50)
         else:
             ci_lower, ci_upper = 0.0, 0.0
 
@@ -469,18 +454,15 @@ class RiskMitigationAnalyzer:
         ]
 
         baseline_end = current_period[0]
-        baseline_start = (
-            baseline_end - timedelta(days=self.baseline_period_days))
+        baseline_start = baseline_end - timedelta(days=self.baseline_period_days)
         baseline_violations = [
             v for v in self.violation_history if baseline_start <= v.timestamp <= baseline_end
         ]
 
         # Calculate prevented incidents
         baseline_rate = len(baseline_violations) / self.baseline_period_days
-        expected_violations = (
-            baseline_rate * (current_period[1] - current_period[0]).days)
-        prevented_violations = (
-            max(0, expected_violations - len(current_violations)))
+        expected_violations = baseline_rate * (current_period[1] - current_period[0]).days
+        prevented_violations = max(0, expected_violations - len(current_violations))
 
         # Calculate cost savings
         cost_savings = prevented_violations * incident_cost
@@ -500,8 +482,7 @@ class RiskMitigationAnalyzer:
             value=cost_benefit_ratio,
             baseline_value=1.0,  # Break-even point
             improvement_percentage=roi * 100,
-            confidence_interval= (
-                (cost_benefit_ratio * 0.8, cost_benefit_ratio * 1.2),  # Simplified)
+            confidence_interval=(cost_benefit_ratio * 0.8, cost_benefit_ratio * 1.2),  # Simplified
             statistical_significance=0.05 if cost_benefit_ratio > 1.5 else 0.5,
             measurement_period=current_period[1] - current_period[0],
         )
@@ -539,8 +520,7 @@ class RiskMitigationAnalyzer:
         metrics.append(integrity_metric)
 
         # Risk reduction score
-        risk_score_metric = (
-            self.calculate_risk_reduction_score(reporting_period))
+        risk_score_metric = self.calculate_risk_reduction_score(reporting_period)
         metrics.append(risk_score_metric)
 
         # Cost effectiveness
@@ -554,8 +534,7 @@ class RiskMitigationAnalyzer:
         baseline_risk_score = risk_score_metric.baseline_value
         risk_reduction_percentage = risk_score_metric.improvement_percentage
 
-        # Regulatory compliance score (based on boundary integrity and
-            violation frequency)
+        # Regulatory compliance score (based on boundary integrity and violation frequency)
         compliance_score = (
             integrity_metric.value * 0.5  # 50% weight on integrity
             + (1 - min(1, frequency_metric.value)) * 0.3  # 30% weight on low violations
@@ -585,12 +564,10 @@ class RiskMitigationAnalyzer:
         )
 
     def _generate_executive_summary(
-        self, metrics: List[RiskMetric], risk_reduction_pct: float,
-            compliance_score: float
+        self, metrics: List[RiskMetric], risk_reduction_pct: float, compliance_score: float
     ) -> str:
-        ."""Generate executive summary for the report."""
-        significant_improvements = (
-            sum(1 for m in metrics if m.is_significant()))
+        """Generate executive summary for the report"""
+        significant_improvements = sum(1 for m in metrics if m.is_significant())
 
         summary = f"""
 Risk Mitigation Effectiveness Summary:
@@ -650,8 +627,7 @@ effective in reducing safety violations while maintaining system performance.
 
         return recommendations
 
-    def export_metrics_for_investors(self, report: RiskMitigationReport) -> Dict[str,
-        Any]:
+    def export_metrics_for_investors(self, report: RiskMitigationReport) -> Dict[str, Any]:
         """Export metrics in investor-friendly format"""
         return {
             "executive_summary": report.executive_summary,

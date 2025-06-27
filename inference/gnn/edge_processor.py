@@ -11,22 +11,20 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 import scipy.sparse as sp  # type: ignore[import-untyped]
 import torch
-from sklearn.preprocessing import (
-    MinMaxScaler,
-    StandardScaler  # type: ignore[import-untyped])
+from sklearn.preprocessing import MinMaxScaler  # type: ignore[import-untyped]
+from sklearn.preprocessing import StandardScaler  # type: ignore[import-untyped]
 
-"""
-Edge Feature Processing Module
-This module implements edge feature extraction, normalization, and representation
-for GNN processing. It handles directed/undirected edges, weighted relationships,
-and various edge attributes.
-."""
 # Configure logging
 logger = logging.getLogger(__name__)
 
+"""
+This module implements edge processing for GNN feature extraction and normalization.
+It handles various edge relationships, directed/undirected processing, and weighted attributes.
+"""
+
 
 class EdgeType(Enum):
-    ."""Types of edges in the graph."""
+    """Types of edges in the graph"""
 
     DIRECTED = "directed"
     UNDIRECTED = "undirected"
@@ -97,7 +95,7 @@ class EdgeProcessor:
         Initialize the edge processor.
         Args:
             config: Edge processing configuration
-        ."""
+        """
         self.config = config
         self.scalers: Dict[str, Any] = {}
         self.edge_type_mapping: Dict[str, int] = {}
@@ -154,7 +152,7 @@ class EdgeProcessor:
         )
 
     def _convert_edge_type(self, edges: List[Edge]) -> List[Edge]:
-        ."""Convert edges based on configured edge type."""
+        """Convert edges based on configured edge type"""
         if self.config.edge_type == EdgeType.UNDIRECTED:
             return self._make_undirected(edges)
         elif self.config.edge_type == EdgeType.BIDIRECTIONAL:
@@ -433,8 +431,7 @@ class EdgeProcessor:
     ) -> tuple[torch.Tensor, Optional[torch.Tensor], torch.Tensor]:
         """Sample edges based on configured strategy"""
         if self.config.edge_sampling_strategy == "random":
-            return self._random_sample_edges(edge_index, edge_attr, edge_weight,
-                num_nodes)
+            return self._random_sample_edges(edge_index, edge_attr, edge_weight, num_nodes)
         elif self.config.edge_sampling_strategy == "importance":
             return self._importance_sample_edges(edge_index, edge_attr, edge_weight, num_nodes)
         elif self.config.edge_sampling_strategy == "topk":
@@ -545,7 +542,7 @@ class EdgeProcessor:
         return edge_index, edge_attr, edge_weight
 
     def _has_self_loops(self, edge_index: torch.Tensor) -> bool:
-        ."""Check if edge index contains self-loops."""
+        """Check if edge index contains self-loops"""
         return bool(torch.any(edge_index[0] == edge_index[1]).item())
 
     def _create_empty_batch(self, num_nodes: int) -> EdgeBatch:
@@ -576,12 +573,12 @@ class EdgeProcessor:
         )
         # Create sparse matrix
         adj_matrix = sp.csr_matrix(
-            (weights, (edge_index[0], edge_index[1])), shape=(num_nodes,
-                num_nodes)
+            (weights, (edge_index[0], edge_index[1])), shape=(num_nodes, num_nodes)
         )
         return adj_matrix
 
     def compute_edge_statistics(self, edge_batch: EdgeBatch, num_nodes: int) -> Dict[str, Any]:
+        """Compute statistics about the edge batch"""
         # Compute statistics about the edge batch
         edge_index = edge_batch.edge_index
         # Degree statistics

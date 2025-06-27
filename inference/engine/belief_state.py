@@ -4,6 +4,7 @@ BeliefState Module for Active Inference.
 This module implements core data structures for representing and managing
 agent beliefs about hidden states in Active Inference systems.
 """
+
 import json
 import logging
 import pickle
@@ -14,12 +15,13 @@ from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 import torch
+
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class BeliefStateConfig:
-    """Configuration for belief state management."""
+    """Configuration for belief state management"""
 
     use_gpu: bool = True
     dtype: torch.dtype = torch.float32
@@ -40,7 +42,7 @@ class BeliefState(ABC):
     """
 
     def __init__(self, config: BeliefStateConfig) -> None:
-        """Initialize the belief state with configuration."""
+        """Initialize the belief state with configuration"""
         self.config = config
         self.device = torch.device(
             "cuda" if config.use_gpu and torch.cuda.is_available() else "cpu"
@@ -50,43 +52,42 @@ class BeliefState(ABC):
 
     @abstractmethod
     def get_beliefs(self) -> torch.Tensor:
-        """Get current belief distribution."""
+        """Get current belief distribution"""
         pass
 
     @abstractmethod
     def set_beliefs(self, beliefs: torch.Tensor) -> None:
-        """Set belief distribution."""
+        """Set belief distribution"""
         pass
 
     @abstractmethod
-    def update_beliefs(self, evidence: torch.Tensor,
-                       update_method: str = "bayes") -> "BeliefState":
-        """Update beliefs given evidence."""
+    def update_beliefs(self, evidence: torch.Tensor, update_method: str = "bayes") -> "BeliefState":
+        """Update beliefs given evidence"""
         pass
 
     @abstractmethod
     def entropy(self) -> torch.Tensor:
-        """Compute entropy of belief distribution."""
+        """Compute entropy of belief distribution"""
         pass
 
     @abstractmethod
     def most_likely_state(self) -> int:
-        """Get index of most likely state."""
+        """Get index of most likely state"""
         pass
 
     @abstractmethod
     def clone(self) -> "BeliefState":
-        """Create deep copy of belief state."""
+        """Create deep copy of belief state"""
         pass
 
     @abstractmethod
     def to_dict(self) -> Dict[str, Any]:
-        """Serialize to dictionary."""
+        """Serialize to dictionary"""
         pass
 
     @abstractmethod
     def from_dict(self, data: Dict[str, Any]) -> "BeliefState":
-        """Deserialize from dictionary."""
+        """Deserialize from dictionary"""
         pass
 
 
@@ -103,18 +104,17 @@ class DiscreteBeliefState(BeliefState):
         config: BeliefStateConfig,
         initial_beliefs: Optional[torch.Tensor] = None,
     ) -> None:
-        """Initialize discrete belief state."""
+        """Initialize discrete belief state"""
         super().__init__(config)
         self.num_states = num_states
         # Initialize belief distribution
         if initial_beliefs is not None:
-            self.beliefs = initial_beliefs.to(
-                self.device, dtype=config.dtype)
+            self.beliefs = initial_beliefs.to(self.device, dtype=config.dtype)
         else:
             # Uniform prior
-            self.beliefs = (torch.ones(num_states, device=self.device,
-                                       dtype=config.dtype) /
-                            num_states)
+            self.beliefs = (
+                torch.ones(num_states, device=self.device, dtype=config.dtype) / num_states
+            )
         # History tracking
         self.belief_history: List[torch.Tensor] = []
         self.entropy_history: List[float] = []
@@ -127,15 +127,15 @@ class DiscreteBeliefState(BeliefState):
         self._validate_beliefs()
 
     def get_beliefs(self) -> torch.Tensor:
-        """Get current belief distribution."""
+        """Get current belief distribution"""
         return self.beliefs.clone()
 
     def set_beliefs(self, beliefs: torch.Tensor) -> None:
-        """Set belief distribution with validation."""
+        """Set belief distribution with validation"""
         if beliefs.shape != self.beliefs.shape:
             raise ValueError(
-                f"Belief shape {beliefs.shape} doesn't match expected "
-                f"{self.beliefs.shape}")
+                f"Belief shape {beliefs.shape} doesn't match expected " f"{self.beliefs.shape}"
+            )
         self.beliefs = beliefs.to(self.device, dtype=self.config.dtype)
         if self.config.normalize_on_update:
             self._normalize()
@@ -143,8 +143,8 @@ class DiscreteBeliefState(BeliefState):
         self._update_metadata()
 
     def update_beliefs(
-            self, evidence: torch.Tensor,
-            update_method: str = "bayes") -> "DiscreteBeliefState":
+        self, evidence: torch.Tensor, update_method: str = "bayes"
+    ) -> "DiscreteBeliefState":
         """
         Update beliefs given evidence using specified method.
 
@@ -169,7 +169,7 @@ class DiscreteBeliefState(BeliefState):
         return self
 
     def _bayesian_update(self, likelihood: torch.Tensor) -> None:
-        """Bayesian belief update."""
+        """Bayesian belief update"""
         if likelihood.dim() == 0:
             # Single observation index
             obs_likelihood = torch.zeros_like(self.beliefs)
@@ -180,9 +180,8 @@ class DiscreteBeliefState(BeliefState):
         if self.config.normalize_on_update:
             self._normalize()
 
-    def _linear_update(self, evidence: torch.Tensor,
-                       alpha: float = 0.1) -> None:
-        """Linear interpolation update."""
+    def _linear_update(self, evidence: torch.Tensor, alpha: float = 0.1) -> None:
+        """Linear interpolation update"""
         if evidence.dim() == 0:
             target = torch.zeros_like(self.beliefs)
             target[evidence.long()] = 1.0
@@ -191,9 +190,8 @@ class DiscreteBeliefState(BeliefState):
         if self.config.normalize_on_update:
             self._normalize()
 
-    def _momentum_update(self, evidence: torch.Tensor,
-                         momentum: float = 0.9) -> None:
-        """Momentum-based update with history."""
+    def _momentum_update(self, evidence: torch.Tensor, momentum: float = 0.9) -> None:
+        """Momentum-based update with history"""
         if len(self.belief_history) > 0:
             velocity = self.beliefs - self.belief_history[-1]
             self._bayesian_update(evidence)
@@ -204,7 +202,7 @@ class DiscreteBeliefState(BeliefState):
             self._normalize()
 
     def _normalize(self) -> None:
-        """Normalize belief distribution to sum to 1."""
+        """Normalize belief distribution to sum to 1"""
         belief_sum = self.beliefs.sum()
         if belief_sum > self.config.eps:
             self.beliefs = self.beliefs / belief_sum
@@ -213,7 +211,7 @@ class DiscreteBeliefState(BeliefState):
             self.beliefs = torch.ones_like(self.beliefs) / self.num_states
 
     def _validate_beliefs(self) -> None:
-        """Validate belief distribution properties."""
+        """Validate belief distribution properties"""
         # Check for NaN or Inf
         if torch.isnan(self.beliefs).any() or torch.isinf(self.beliefs).any():
             raise ValueError("Beliefs contain NaN or Inf values")
@@ -224,13 +222,11 @@ class DiscreteBeliefState(BeliefState):
         # Check normalization
         belief_sum = self.beliefs.sum()
         if abs(belief_sum - 1.0) > 1e-3:
-            logger.warning(
-                f"Beliefs not normalized (sum={belief_sum:.6f}), "
-                f"normalizing")
+            logger.warning(f"Beliefs not normalized (sum={belief_sum:.6f}), " f"normalizing")
             self._normalize()
 
     def _add_to_history(self) -> None:
-        """Add current beliefs to history."""
+        """Add current beliefs to history"""
         if len(self.belief_history) >= self.config.max_history_length:
             self.belief_history.pop(0)
             self.entropy_history.pop(0)
@@ -238,39 +234,37 @@ class DiscreteBeliefState(BeliefState):
         self.entropy_history.append(self.entropy().item())
 
     def _update_metadata(self) -> None:
-        """Update metadata based on current beliefs."""
+        """Update metadata based on current beliefs"""
         entropy = self.entropy().item()
         max_prob = torch.max(self.beliefs).item()
         # Confidence score based on entropy and max probability
-        self.metadata["confidence_score"] = (
-            max_prob * (1 - entropy / np.log(self.num_states)))
+        self.metadata["confidence_score"] = max_prob * (1 - entropy / np.log(self.num_states))
 
     def entropy(self) -> torch.Tensor:
-        """Compute Shannon entropy of belief distribution."""
+        """Compute Shannon entropy of belief distribution"""
         log_beliefs = torch.log(self.beliefs + self.config.eps)
         return -torch.sum(self.beliefs * log_beliefs)
 
     def kl_divergence(self, other: "DiscreteBeliefState") -> torch.Tensor:
-        """Compute KL divergence from this belief to another."""
+        """Compute KL divergence from this belief to another"""
         if other.num_states != self.num_states:
-            raise ValueError(
-                "Cannot compute KL divergence between different state spaces")
-        log_ratio = (torch.log(self.beliefs + self.config.eps) -
-                     torch.log(other.beliefs + self.config.eps))
+            raise ValueError("Cannot compute KL divergence between different state spaces")
+        log_ratio = torch.log(self.beliefs + self.config.eps) - torch.log(
+            other.beliefs + self.config.eps
+        )
         return torch.sum(self.beliefs * log_ratio)
 
     def most_likely_state(self) -> int:
-        """Get index of most likely state."""
+        """Get index of most likely state"""
         return int(torch.argmax(self.beliefs).item())
 
-    def get_top_k_states(
-            self, k: int) -> tuple[torch.Tensor, torch.Tensor]:
-        """Get top k most likely states and their probabilities."""
+    def get_top_k_states(self, k: int) -> tuple[torch.Tensor, torch.Tensor]:
+        """Get top k most likely states and their probabilities"""
         probs, indices = torch.topk(self.beliefs, k=min(k, self.num_states))
         return indices, probs
 
     def sample_state(self, temperature: float = 1.0) -> int:
-        """Sample state according to belief distribution."""
+        """Sample state according to belief distribution"""
         if temperature != 1.0:
             # Apply temperature scaling
             scaled_beliefs = self.beliefs ** (1.0 / temperature)
@@ -280,16 +274,17 @@ class DiscreteBeliefState(BeliefState):
         return int(torch.multinomial(scaled_beliefs, 1).item())
 
     def reset_to_uniform(self) -> None:
-        """Reset beliefs to uniform distribution."""
+        """Reset beliefs to uniform distribution"""
         self.beliefs = (
-            torch.ones(self.num_states, device=self.device,
-                       dtype=self.config.dtype) / self.num_states)
+            torch.ones(self.num_states, device=self.device, dtype=self.config.dtype)
+            / self.num_states
+        )
         self.update_count = 0
         self.belief_history.clear()
         self.entropy_history.clear()
 
     def compress(self) -> "DiscreteBeliefState":
-        """Apply compression to reduce memory usage."""
+        """Apply compression to reduce memory usage"""
         if not self.config.compression_enabled:
             return self
         # Zero out very small probabilities
@@ -301,24 +296,22 @@ class DiscreteBeliefState(BeliefState):
         return self
 
     def clone(self) -> "DiscreteBeliefState":
-        """Create deep copy of belief state."""
+        """Create deep copy of belief state"""
         new_belief = DiscreteBeliefState(
-            num_states=self.num_states, config=self.config,
-            initial_beliefs=self.beliefs.clone())
+            num_states=self.num_states, config=self.config, initial_beliefs=self.beliefs.clone()
+        )
         # Copy metadata
         new_belief.metadata = self.metadata.copy()
         new_belief.update_count = self.update_count
         new_belief.creation_time = self.creation_time
         # Copy history (up to limit)
         history_limit = min(len(self.belief_history), 10)
-        new_belief.belief_history = [
-            b.clone() for b in self.belief_history[-history_limit:]]
-        new_belief.entropy_history = (
-            self.entropy_history[-history_limit:])
+        new_belief.belief_history = [b.clone() for b in self.belief_history[-history_limit:]]
+        new_belief.entropy_history = self.entropy_history[-history_limit:]
         return new_belief
 
     def to_dict(self) -> Dict[str, Any]:
-        """Serialize to dictionary."""
+        """Serialize to dictionary"""
         return {
             "type": "DiscreteBeliefState",
             "num_states": self.num_states,
@@ -338,14 +331,14 @@ class DiscreteBeliefState(BeliefState):
         }
 
     def from_dict(self, data: Dict[str, Any]) -> "DiscreteBeliefState":
-        """Deserialize from dictionary."""
+        """Deserialize from dictionary"""
         # Reconstruct config
         config = BeliefStateConfig(**data["config"])
         # Create belief state
         beliefs = torch.tensor(data["beliefs"], dtype=config.dtype)
         new_belief = DiscreteBeliefState(
-            num_states=data["num_states"], config=config,
-            initial_beliefs=beliefs)
+            num_states=data["num_states"], config=config, initial_beliefs=beliefs
+        )
         # Restore metadata
         new_belief.metadata = data["metadata"]
         new_belief.update_count = data["update_count"]
@@ -353,7 +346,7 @@ class DiscreteBeliefState(BeliefState):
         return new_belief
 
     def save(self, filepath: Union[str, Path]) -> None:
-        """Save belief state to file."""
+        """Save belief state to file"""
         filepath = Path(filepath)
         if filepath.suffix == ".json":
             with open(filepath, "w") as f:
@@ -366,7 +359,7 @@ class DiscreteBeliefState(BeliefState):
 
     @classmethod
     def load(cls, filepath: Union[str, Path]) -> "DiscreteBeliefState":
-        """Load belief state from file."""
+        """Load belief state from file"""
         filepath = Path(filepath)
         if filepath.suffix == ".json":
             with open(filepath) as f:
@@ -377,14 +370,13 @@ class DiscreteBeliefState(BeliefState):
             with open(filepath, "rb") as f:
                 loaded_obj = pickle.load(f)
                 if not isinstance(loaded_obj, cls):
-                    raise TypeError(f"Expected {cls.__name__}, got "
-                                    f"{type(loaded_obj).__name__}")
+                    raise TypeError(f"Expected {cls.__name__}, got " f"{type(loaded_obj).__name__}")
                 return loaded_obj
         else:
             raise ValueError(f"Unsupported file format: {filepath.suffix}")
 
     def __repr__(self) -> str:
-        """Return string representation of discrete belief state."""
+        """Return string representation of discrete belief state"""
         entropy = self.entropy().item()
         most_likely = self.most_likely_state()
         confidence = self.metadata["confidence_score"]
@@ -404,23 +396,25 @@ class ContinuousBeliefState(BeliefState):
     Represents beliefs as multivariate Gaussian with mean and covariance.
     """
 
-    def __init__(self, state_dim: int, config: BeliefStateConfig,
-                 initial_mean: Optional[torch.Tensor] = None,
-                 initial_cov: Optional[torch.Tensor] = None) -> None:
-        """Initialize continuous belief state."""
+    def __init__(
+        self,
+        state_dim: int,
+        config: BeliefStateConfig,
+        initial_mean: Optional[torch.Tensor] = None,
+        initial_cov: Optional[torch.Tensor] = None,
+    ) -> None:
+        """Initialize continuous belief state"""
         super().__init__(config)
         self.state_dim = state_dim
         # Initialize Gaussian parameters
         if initial_mean is not None:
             self.mean = initial_mean.to(self.device, dtype=config.dtype)
         else:
-            self.mean = torch.zeros(state_dim, device=self.device,
-                                    dtype=config.dtype)
+            self.mean = torch.zeros(state_dim, device=self.device, dtype=config.dtype)
         if initial_cov is not None:
             self.cov = initial_cov.to(self.device, dtype=config.dtype)
         else:
-            self.cov = torch.eye(state_dim, device=self.device,
-                                 dtype=config.dtype)
+            self.cov = torch.eye(state_dim, device=self.device, dtype=config.dtype)
         # For numerical stability
         self.log_var = torch.log(torch.diag(self.cov))
         # History and metadata
@@ -439,9 +433,8 @@ class ContinuousBeliefState(BeliefState):
         """
         return torch.cat([self.mean, self.log_var])
 
-    def set_beliefs(self, beliefs: Union[
-            torch.Tensor, tuple[torch.Tensor, torch.Tensor]]) -> None:
-        """Set belief parameters."""
+    def set_beliefs(self, beliefs: Union[torch.Tensor, tuple[torch.Tensor, torch.Tensor]]) -> None:
+        """Set belief parameters"""
         if isinstance(beliefs, tuple):
             mean, cov = beliefs
             self.mean = mean.to(self.device, dtype=self.config.dtype)
@@ -453,26 +446,31 @@ class ContinuousBeliefState(BeliefState):
         self._update_metadata()
 
     def update_beliefs(
-            self, evidence: torch.Tensor,
-            update_method: str = "bayes") -> "ContinuousBeliefState":
+        self,
+        evidence: Union[torch.Tensor, tuple[torch.Tensor, torch.Tensor]],
+        update_method: str = "bayes",
+    ) -> "ContinuousBeliefState":
         """
         Update Gaussian belief with evidence.
 
         Args:
-            evidence: Evidence tensor (split into observation and covariance)
+            evidence: Evidence tensor or tuple of (observation, covariance)
             update_method: 'bayes', 'kalman', 'variational'
         """
         self._add_to_history()
-        # Split evidence tensor into observation and covariance components
-        if evidence.dim() == 1:
+        # Handle both tensor and tuple evidence inputs
+        if isinstance(evidence, tuple):
+            obs, obs_cov = evidence
+        elif evidence.dim() == 1:
             obs = evidence[: self.state_dim]
-            obs_cov = (torch.eye(self.state_dim, device=self.device) *
-                       0.1)
+            obs_cov = torch.eye(self.state_dim, device=self.device) * 0.1
         else:
-            obs = (evidence[0] if evidence.shape[0] >= 1
-                   else torch.zeros(self.state_dim, device=self.device))
-            obs_cov = (torch.eye(self.state_dim, device=self.device) *
-                       0.1)
+            obs = (
+                evidence[0]
+                if evidence.shape[0] >= 1
+                else torch.zeros(self.state_dim, device=self.device)
+            )
+            obs_cov = torch.eye(self.state_dim, device=self.device) * 0.1
 
         evidence_tuple = (obs, obs_cov)
         if update_method == "bayes":
@@ -486,18 +484,17 @@ class ContinuousBeliefState(BeliefState):
         self.update_count += 1
         return self
 
-    def _gaussian_bayesian_update(
-            self, evidence: tuple[torch.Tensor, torch.Tensor]) -> None:
-        """Perform standard Gaussian Bayesian update."""
+    def _gaussian_bayesian_update(self, evidence: tuple[torch.Tensor, torch.Tensor]) -> None:
+        """Perform standard Gaussian Bayesian update"""
         obs, obs_cov = evidence
         # Bayesian update for Gaussian
         # posterior_cov^{-1} = prior_cov^{-1} + obs_cov^{-1}
         cov_inv = torch.inverse(
-            self.cov + self.config.eps *
-            torch.eye(self.state_dim, device=self.device))
+            self.cov + self.config.eps * torch.eye(self.state_dim, device=self.device)
+        )
         obs_cov_inv = torch.inverse(
-            obs_cov + self.config.eps *
-            torch.eye(self.state_dim, device=self.device))
+            obs_cov + self.config.eps * torch.eye(self.state_dim, device=self.device)
+        )
         posterior_cov_inv = cov_inv + obs_cov_inv
         self.cov = torch.inverse(posterior_cov_inv)
         # posterior_mean = posterior_cov *
@@ -505,9 +502,8 @@ class ContinuousBeliefState(BeliefState):
         self.mean = self.cov @ (cov_inv @ self.mean + obs_cov_inv @ obs)
         self.log_var = torch.log(torch.diag(self.cov) + self.config.eps)
 
-    def _kalman_update(
-            self, evidence: tuple[torch.Tensor, torch.Tensor]) -> None:
-        """Kalman filter update."""
+    def _kalman_update(self, evidence: tuple[torch.Tensor, torch.Tensor]) -> None:
+        """Kalman filter update"""
         obs, obs_cov = evidence
         # Kalman gain
         S = self.cov + obs_cov  # Innovation covariance
@@ -515,31 +511,30 @@ class ContinuousBeliefState(BeliefState):
         # Update
         innovation = obs - self.mean
         self.mean = self.mean + K @ innovation
-        self.cov = ((torch.eye(self.state_dim, device=self.device) - K) @
-                    self.cov)
+        self.cov = (torch.eye(self.state_dim, device=self.device) - K) @ self.cov
         self.log_var = torch.log(torch.diag(self.cov) + self.config.eps)
 
-    def _variational_update(
-            self, evidence: tuple[torch.Tensor, torch.Tensor]) -> None:
-        """Perform variational Bayes update with regularization."""
+    def _variational_update(self, evidence: tuple[torch.Tensor, torch.Tensor]) -> None:
+        """Perform variational Bayes update with regularization"""
         obs, obs_cov = evidence
         # Add entropy regularization to covariance
-        reg_cov = (self.cov + self.config.entropy_regularization *
-                   torch.eye(self.state_dim, device=self.device))
+        reg_cov = self.cov + self.config.entropy_regularization * torch.eye(
+            self.state_dim, device=self.device
+        )
         # Standard Bayesian update with regularized covariance
         cov_inv = torch.inverse(
-            reg_cov + self.config.eps *
-            torch.eye(self.state_dim, device=self.device))
+            reg_cov + self.config.eps * torch.eye(self.state_dim, device=self.device)
+        )
         obs_cov_inv = torch.inverse(
-            obs_cov + self.config.eps *
-            torch.eye(self.state_dim, device=self.device))
+            obs_cov + self.config.eps * torch.eye(self.state_dim, device=self.device)
+        )
         posterior_cov_inv = cov_inv + obs_cov_inv
         self.cov = torch.inverse(posterior_cov_inv)
         self.mean = self.cov @ (cov_inv @ self.mean + obs_cov_inv @ obs)
         self.log_var = torch.log(torch.diag(self.cov) + self.config.eps)
 
     def _add_to_history(self) -> None:
-        """Add current state to history."""
+        """Add current state to history"""
         if len(self.mean_history) >= self.config.max_history_length:
             self.mean_history.pop(0)
             self.cov_history.pop(0)
@@ -547,31 +542,30 @@ class ContinuousBeliefState(BeliefState):
         self.cov_history.append(self.cov.clone())
 
     def _update_metadata(self) -> None:
-        """Update metadata."""
+        """Update metadata"""
         self.metadata["determinant"] = torch.det(self.cov).item()
         self.metadata["trace"] = torch.trace(self.cov).item()
 
     def entropy(self) -> torch.Tensor:
-        """Compute differential entropy of Gaussian."""
+        """Compute differential entropy of Gaussian"""
         # H = 0.5 * log((2π)^d * |Σ|)
         det_cov = torch.det(self.cov)
         entropy_val = 0.5 * (
-            self.state_dim * np.log(2 * np.pi) +
-            torch.log(det_cov + self.config.eps))
-        return torch.tensor(entropy_val, device=self.device,
-                            dtype=self.config.dtype)
+            self.state_dim * np.log(2 * np.pi) + torch.log(det_cov + self.config.eps)
+        )
+        return torch.tensor(entropy_val, device=self.device, dtype=self.config.dtype)
 
-    def most_likely_state(self) -> int:
-        """Get most likely state (argmax of mean for compatibility)."""
-        return int(torch.argmax(self.mean).item())
+    def most_likely_state(self) -> torch.Tensor:
+        """Get most likely state (mean for continuous distributions)"""
+        return self.mean.clone()
 
     def sample_state(self, num_samples: int = 1) -> torch.Tensor:
-        """Sample states from Gaussian belief."""
+        """Sample states from Gaussian belief"""
         dist = torch.distributions.MultivariateNormal(self.mean, self.cov)
         return dist.sample((num_samples,))
 
     def clone(self) -> "ContinuousBeliefState":
-        """Create deep copy."""
+        """Create deep copy"""
         new_belief = ContinuousBeliefState(
             state_dim=self.state_dim,
             config=self.config,
@@ -583,7 +577,7 @@ class ContinuousBeliefState(BeliefState):
         return new_belief
 
     def to_dict(self) -> Dict[str, Any]:
-        """Serialize to dictionary."""
+        """Serialize to dictionary"""
         return {
             "type": "ContinuousBeliefState",
             "state_dim": self.state_dim,
@@ -599,26 +593,27 @@ class ContinuousBeliefState(BeliefState):
         }
 
     def from_dict(self, data: Dict[str, Any]) -> "ContinuousBeliefState":
-        """Deserialize from dictionary."""
+        """Deserialize from dictionary"""
         config = BeliefStateConfig(**data["config"])
         mean = torch.tensor(data["mean"], dtype=config.dtype)
         cov = torch.tensor(data["cov"], dtype=config.dtype)
         new_belief = ContinuousBeliefState(
-            state_dim=data["state_dim"], config=config,
-            initial_mean=mean, initial_cov=cov)
+            state_dim=data["state_dim"], config=config, initial_mean=mean, initial_cov=cov
+        )
         new_belief.metadata = data["metadata"]
         new_belief.update_count = data["update_count"]
         return new_belief
 
     def __repr__(self) -> str:
-        """Return string representation of continuous belief state."""
+        """Return string representation of continuous belief state"""
         entropy = self.entropy().item()
         det = self.metadata["determinant"]
         return (
             f"ContinuousBeliefState(dim={self.state_dim}, "
             f"entropy={entropy:.3f}, "
             f"det={det:.3f}, "
-            f"updates={self.update_count})")
+            f"updates={self.update_count})"
+        )
 
 
 # Factory functions for easy creation
@@ -627,7 +622,7 @@ def create_discrete_belief_state(
     config: Optional[BeliefStateConfig] = None,
     initial_beliefs: Optional[torch.Tensor] = None,
 ) -> DiscreteBeliefState:
-    """Create discrete belief state with optional configuration."""
+    """Create discrete belief state with optional configuration"""
     if config is None:
         config = BeliefStateConfig()
     return DiscreteBeliefState(num_states, config, initial_beliefs)
@@ -639,7 +634,7 @@ def create_continuous_belief_state(
     initial_mean: Optional[torch.Tensor] = None,
     initial_cov: Optional[torch.Tensor] = None,
 ) -> ContinuousBeliefState:
-    """Create continuous belief state with optional configuration."""
+    """Create continuous belief state with optional configuration"""
     if config is None:
         config = BeliefStateConfig()
     return ContinuousBeliefState(state_dim, config, initial_mean, initial_cov)

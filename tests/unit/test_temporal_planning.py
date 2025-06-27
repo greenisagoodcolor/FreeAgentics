@@ -2,7 +2,6 @@
 Module for FreeAgentics Active Inference implementation.
 """
 
-
 import numpy as np
 import pytest
 import torch
@@ -27,7 +26,7 @@ from inference.engine.temporal_planning import (
 
 
 class TestPlanningConfig:
-    .."""Test PlanningConfig dataclass.."""
+    """Test PlanningConfig dataclass"""
 
     def test_default_config(self) -> None:
         """Test default configuration values"""
@@ -50,7 +49,7 @@ class TestPlanningConfig:
         assert config.enable_caching is True
 
     def test_custom_config(self) -> None:
-        ."""Test custom configuration."""
+        """Test custom configuration"""
         config = PlanningConfig(
             planning_horizon=20, num_simulations=200, discount_factor=0.9, use_gpu=False
         )
@@ -61,7 +60,7 @@ class TestPlanningConfig:
 
 
 class TestTreeNode:
-    .."""Test TreeNode class.."""
+    """Test TreeNode class"""
 
     def test_node_creation(self) -> None:
         """Test creating tree nodes"""
@@ -77,7 +76,7 @@ class TestTreeNode:
         assert node.expected_free_energy == float("inf")
 
     def test_node_relationships(self) -> None:
-        ."""Test parent-child relationships."""
+        """Test parent-child relationships"""
         root = TreeNode(torch.tensor([1.0, 0.0]), depth=0)
         child1 = TreeNode(torch.tensor([0.7, 0.3]), action=0, parent=root, depth=1)
         child2 = TreeNode(torch.tensor([0.3, 0.7]), action=1, parent=root, depth=1)
@@ -90,7 +89,7 @@ class TestTreeNode:
         assert child2.parent == root
 
     def test_node_properties(self) -> None:
-        ."""Test node properties."""
+        """Test node properties"""
         root = TreeNode(torch.tensor([1.0, 0.0]))
         child = TreeNode(torch.tensor([0.5, 0.5]), action=0, parent=root)
         root.add_child(child)
@@ -100,7 +99,7 @@ class TestTreeNode:
         assert root.is_fully_expanded(2) is False
 
     def test_best_child_selection(self) -> None:
-        ."""Test UCB1 child selection."""
+        """Test UCB1 child selection"""
         root = TreeNode(torch.tensor([1.0, 0.0]))
         root.visits = 10
         # Create children with different statistics
@@ -120,7 +119,7 @@ class TestTreeNode:
         assert best in [child1, child2]
 
     def test_node_hashing(self) -> None:
-        ."""Test node hashing for caching."""
+        """Test node hashing for caching"""
         state = torch.tensor([0.5, 0.5])
         node1 = TreeNode(state, action=1, depth=2)
         node2 = TreeNode(state, action=1, depth=2)
@@ -132,7 +131,7 @@ class TestTreeNode:
 
 
 class TestMonteCarloTreeSearch:
-    .."""Test MCTS planner.."""
+    """Test MCTS planner"""
 
     def setup_method(self) -> None:
         """Set up test environment"""
@@ -161,7 +160,7 @@ class TestMonteCarloTreeSearch:
         self.planner = MonteCarloTreeSearch(self.config, self.policy_selector, self.inference)
 
     def test_mcts_planning(self) -> None:
-        ."""Test basic MCTS planning."""
+        """Test basic MCTS planning"""
         beliefs = torch.tensor([1.0, 0.0, 0.0])
         policy, value = self.planner.plan(beliefs, self.model)
         assert isinstance(policy.actions, torch.Tensor)
@@ -169,7 +168,7 @@ class TestMonteCarloTreeSearch:
         assert isinstance(value, float)
 
     def test_tree_expansion(self) -> None:
-        ."""Test tree expansion in MCTS."""
+        """Test tree expansion in MCTS"""
         root = TreeNode(torch.tensor([1.0, 0.0, 0.0]), depth=0)
         # Expand should add a child
         child = self.planner._expand(root, self.model)
@@ -179,7 +178,7 @@ class TestMonteCarloTreeSearch:
         assert child.depth == 1
 
     def test_simulation_rollout(self) -> None:
-        ."""Test simulation phase."""
+        """Test simulation phase"""
         node = TreeNode(torch.tensor([0.33, 0.33, 0.34]), depth=1)
         value = self.planner._simulate(node, self.model)
         assert isinstance(value, float)
@@ -187,7 +186,7 @@ class TestMonteCarloTreeSearch:
         assert not np.isinf(value)
 
     def test_backpropagation(self) -> None:
-        ."""Test value backpropagation."""
+        """Test value backpropagation"""
         root = TreeNode(torch.tensor([1.0, 0.0, 0.0]), depth=0)
         child = TreeNode(torch.tensor([0.0, 1.0, 0.0]), action=1, parent=root, depth=1)
         root.add_child(child)
@@ -200,11 +199,10 @@ class TestMonteCarloTreeSearch:
         assert root.value == value
 
     def test_policy_extraction(self) -> None:
-        ."""Test extracting policy from tree."""
+        """Test extracting policy from tree"""
         # Build a simple tree
         root = TreeNode(torch.tensor([1.0, 0.0, 0.0]), depth=0)
-        child1 = (
-            TreeNode(torch.tensor([0.0, 1.0, 0.0]), action=1, parent=root, depth=1))
+        child1 = TreeNode(torch.tensor([0.0, 1.0, 0.0]), action=1, parent=root, depth=1)
         child1.visits = 10
         child2 = TreeNode(torch.tensor([1.0, 0.0, 0.0]), action=0, parent=root, depth=1)
         child2.visits = 5
@@ -219,7 +217,7 @@ class TestMonteCarloTreeSearch:
         assert policy[0].item() == 1  # child1 has more visits
 
     def test_node_limit(self) -> None:
-        ."""Test node count limit."""
+        """Test node count limit"""
         self.config.max_nodes = 10
         self.planner = MonteCarloTreeSearch(self.config, self.policy_selector, self.inference)
         beliefs = torch.tensor([0.33, 0.33, 0.34])
@@ -228,7 +226,7 @@ class TestMonteCarloTreeSearch:
 
 
 class TestBeamSearchPlanner:
-    .."""Test beam search planner.."""
+    """Test beam search planner"""
 
     def setup_method(self) -> None:
         """Set up test environment"""
@@ -240,8 +238,7 @@ class TestBeamSearchPlanner:
         inf_config = InferenceConfig(use_gpu=False)
         self.inference = VariationalMessagePassing(inf_config)
         policy_config = PolicyConfig(use_gpu=False)
-        self.policy_selector = (
-            DiscreteExpectedFreeEnergy(policy_config, self.inference))
+        self.policy_selector = DiscreteExpectedFreeEnergy(policy_config, self.inference)
         # Create planner
         self.config = PlanningConfig(planning_horizon=3, beam_width=5, use_gpu=False)
         self.planner = BeamSearchPlanner(self.config, self.policy_selector, self.inference)
@@ -278,7 +275,7 @@ class TestBeamSearchPlanner:
 
 
 class TestAStarPlanner:
-    ."""Test A* planner."""
+    """Test A* planner"""
 
     def setup_method(self) -> None:
         """Set up test environment"""
@@ -290,8 +287,7 @@ class TestAStarPlanner:
         inf_config = InferenceConfig(use_gpu=False)
         self.inference = VariationalMessagePassing(inf_config)
         policy_config = PolicyConfig(use_gpu=False)
-        self.policy_selector = (
-            DiscreteExpectedFreeEnergy(policy_config, self.inference))
+        self.policy_selector = DiscreteExpectedFreeEnergy(policy_config, self.inference)
         # Create planner
         self.config = PlanningConfig(planning_horizon=3, max_nodes=100, use_gpu=False)
         self.planner = AStarPlanner(self.config, self.policy_selector, self.inference)
@@ -336,7 +332,7 @@ class TestAStarPlanner:
 
 
 class TestTrajectorySampling:
-    ."""Test trajectory sampling planner."""
+    """Test trajectory sampling planner"""
 
     def setup_method(self) -> None:
         """Set up test environment"""
@@ -348,14 +344,13 @@ class TestTrajectorySampling:
         inf_config = InferenceConfig(use_gpu=False)
         self.inference = VariationalMessagePassing(inf_config)
         policy_config = PolicyConfig(use_gpu=False)
-        self.policy_selector = (
-            DiscreteExpectedFreeEnergy(policy_config, self.inference))
+        self.policy_selector = DiscreteExpectedFreeEnergy(policy_config, self.inference)
         # Create planner
         self.config = PlanningConfig(planning_horizon=3, num_trajectories=10, use_gpu=False)
         self.planner = TrajectorySampling(self.config, self.policy_selector, self.inference)
 
     def test_trajectory_sampling(self) -> None:
-        ."""Test basic trajectory sampling."""
+        """Test basic trajectory sampling"""
         beliefs = torch.tensor([1.0, 0.0, 0.0])
         policy, value = self.planner.plan(beliefs, self.model)
         assert isinstance(policy.actions, torch.Tensor)
@@ -399,7 +394,7 @@ class TestTrajectorySampling:
 
 
 class TestAdaptiveHorizonPlanner:
-    ."""Test adaptive horizon planner."""
+    """Test adaptive horizon planner"""
 
     def setup_method(self) -> None:
         """Set up test environment"""
@@ -411,8 +406,7 @@ class TestAdaptiveHorizonPlanner:
         inf_config = InferenceConfig(use_gpu=False)
         self.inference = VariationalMessagePassing(inf_config)
         policy_config = PolicyConfig(use_gpu=False)
-        self.policy_selector = (
-            DiscreteExpectedFreeEnergy(policy_config, self.inference))
+        self.policy_selector = DiscreteExpectedFreeEnergy(policy_config, self.inference)
         # Create base planner
         planning_config = PlanningConfig(planning_horizon=5, num_simulations=10, use_gpu=False)
         base_planner = MonteCarloTreeSearch(planning_config, self.policy_selector, self.inference)
@@ -422,7 +416,7 @@ class TestAdaptiveHorizonPlanner:
         )
 
     def test_adaptive_planning(self) -> None:
-        ."""Test basic adaptive planning."""
+        """Test basic adaptive planning"""
         beliefs = torch.tensor([1.0, 0.0, 0.0])
         policy, value = self.planner.plan(beliefs, self.model)
         assert isinstance(policy.actions, torch.Tensor)
@@ -466,38 +460,38 @@ class TestTemporalPlannerFactory:
         }
 
     def test_create_mcts_planner(self) -> None:
-        ."""Test MCTS planner creation."""
+        """Test MCTS planner creation"""
         planner = create_temporal_planner("mcts", **self.kwargs)
         assert isinstance(planner, MonteCarloTreeSearch)
 
     def test_create_beam_planner(self) -> None:
-        ."""Test beam search planner creation."""
+        """Test beam search planner creation"""
         planner = create_temporal_planner("beam", **self.kwargs)
         assert isinstance(planner, BeamSearchPlanner)
 
     def test_create_astar_planner(self) -> None:
-        ."""Test A* planner creation."""
+        """Test A* planner creation"""
         planner = create_temporal_planner("astar", **self.kwargs)
         assert isinstance(planner, AStarPlanner)
 
     def test_create_sampling_planner(self) -> None:
-        ."""Test trajectory sampling planner creation."""
+        """Test trajectory sampling planner creation"""
         planner = create_temporal_planner("sampling", **self.kwargs)
         assert isinstance(planner, TrajectorySampling)
 
     def test_create_adaptive_planner(self) -> None:
-        ."""Test adaptive planner creation."""
+        """Test adaptive planner creation"""
         planner = create_temporal_planner("adaptive", base_planner_type="mcts", **self.kwargs)
         assert isinstance(planner, AdaptiveHorizonPlanner)
         assert isinstance(planner.base_planner, MonteCarloTreeSearch)
 
     def test_invalid_planner_type(self) -> None:
-        ."""Test invalid planner type."""
+        """Test invalid planner type"""
         with pytest.raises(ValueError):
             create_temporal_planner("invalid", **self.kwargs)
 
     def test_missing_components(self) -> None:
-        ."""Test missing required components."""
+        """Test missing required components"""
         with pytest.raises(ValueError):
             create_temporal_planner("mcts")  # Missing policy_selector and inference
 

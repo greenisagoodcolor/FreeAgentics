@@ -16,7 +16,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
@@ -34,7 +40,7 @@ const MatrixConfigSchema = z.object({
     stochastic: z.boolean().default(true),
     sparsity: z.number().min(0).max(1).default(0.1),
   }),
-  
+
   // B matrix (observation model) - must be stochastic
   bMatrix: z.object({
     observations: z.number().min(2).max(256),
@@ -49,7 +55,7 @@ const PrecisionSchema = z.object({
   sensoryPrecision: z.number().min(0.1).max(256).default(16),
   policyPrecision: z.number().min(0.1).max(256).default(16),
   statePrecision: z.number().min(0.1).max(256).default(1),
-  
+
   // Learning rates
   beliefLearningRate: z.number().min(0.001).max(1.0).default(0.1),
   policyLearningRate: z.number().min(0.001).max(1.0).default(0.05),
@@ -59,35 +65,37 @@ const AgentConfigurationSchema = z.object({
   // Basic agent properties
   name: z.string().min(1).max(100),
   description: z.string().max(500).optional(),
-  
+
   // Mathematical configuration
   mathematics: z.object({
     matrices: MatrixConfigSchema,
     precision: PrecisionSchema,
-    
+
     // Prior beliefs (must sum to 1)
     priorBeliefs: z.array(z.number().min(0).max(1)).optional(),
-    
+
     // Time horizon for planning
     planningHorizon: z.number().min(1).max(100).default(5),
-    
+
     // Advanced options
     useHierarchical: z.boolean().default(false),
     enableLearning: z.boolean().default(true),
     memoryCapacity: z.number().min(100).max(100000).default(10000),
   }),
-  
+
   // Environment configuration
   environment: z.object({
-    initialPosition: z.object({
-      x: z.number(),
-      y: z.number(),
-      z: z.number().default(0),
-    }).optional(),
+    initialPosition: z
+      .object({
+        x: z.number(),
+        y: z.number(),
+        z: z.number().default(0),
+      })
+      .optional(),
     energyLevel: z.number().min(0).max(100).default(100),
     tags: z.array(z.string()).default([]),
   }),
-  
+
   // Advanced configuration
   advanced: z.object({
     enableDebugMode: z.boolean().default(false),
@@ -137,9 +145,12 @@ export function AgentConfigurationForm({
           },
         },
         precision: {
-          sensoryPrecision: template.mathematicalFoundation.defaultPrecision.sensory,
-          policyPrecision: template.mathematicalFoundation.defaultPrecision.policy,
-          statePrecision: template.mathematicalFoundation.defaultPrecision.state,
+          sensoryPrecision:
+            template.mathematicalFoundation.defaultPrecision.sensory,
+          policyPrecision:
+            template.mathematicalFoundation.defaultPrecision.policy,
+          statePrecision:
+            template.mathematicalFoundation.defaultPrecision.state,
           beliefLearningRate: 0.1,
           policyLearningRate: 0.05,
         },
@@ -167,30 +178,34 @@ export function AgentConfigurationForm({
   // Validate mathematical constraints
   useEffect(() => {
     const issues: string[] = [];
-    
+
     if (mathematicsData) {
       // Check matrix dimensions compatibility
       const aRows = mathematicsData.matrices?.aMatrix.rows;
       const aCols = mathematicsData.matrices?.aMatrix.cols;
       const bStates = mathematicsData.matrices?.bMatrix.states;
-      
+
       if (aRows !== aCols) {
-        issues.push("A matrix must be square (rows = columns) for valid transitions");
+        issues.push(
+          "A matrix must be square (rows = columns) for valid transitions",
+        );
       }
-      
+
       if (aRows !== bStates) {
         issues.push("A matrix dimensions must match B matrix state space");
       }
-      
+
       // Check precision parameters
       const sensoryPrec = mathematicsData.precision?.sensoryPrecision;
       const policyPrec = mathematicsData.precision?.policyPrecision;
-      
+
       if (sensoryPrec && policyPrec && sensoryPrec > policyPrec * 10) {
-        issues.push("Very high sensory precision relative to policy precision may cause instability");
+        issues.push(
+          "Very high sensory precision relative to policy precision may cause instability",
+        );
       }
     }
-    
+
     setValidationIssues(issues);
   }, [mathematicsData]);
 
@@ -199,7 +214,7 @@ export function AgentConfigurationForm({
     if (validationIssues.length > 0) {
       console.warn("Submitting with validation issues:", validationIssues);
     }
-    
+
     onSubmit(data);
   };
 
@@ -217,7 +232,9 @@ export function AgentConfigurationForm({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold">Configure {template.name}</h2>
+                <h2 className="text-2xl font-bold">
+                  Configure {template.name}
+                </h2>
                 <p className="text-muted-foreground">
                   Set up mathematical parameters and agent properties
                 </p>
@@ -261,10 +278,14 @@ export function AgentConfigurationForm({
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
                 <div className="space-y-1">
-                  <p className="font-semibold">Mathematical Validation Issues:</p>
+                  <p className="font-semibold">
+                    Mathematical Validation Issues:
+                  </p>
                   <ul className="list-disc list-inside">
                     {validationIssues.map((issue, index) => (
-                      <li key={index} className="text-sm">{issue}</li>
+                      <li key={index} className="text-sm">
+                        {issue}
+                      </li>
                     ))}
                   </ul>
                 </div>
@@ -294,7 +315,8 @@ export function AgentConfigurationForm({
               <CardHeader>
                 <CardTitle>Basic Configuration</CardTitle>
                 <CardDescription>
-                  Set up the agent&apos;s name, description, and initial environment
+                  Set up the agent&apos;s name, description, and initial
+                  environment
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -345,7 +367,9 @@ export function AgentConfigurationForm({
                             type="number"
                             placeholder="0"
                             {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -364,7 +388,9 @@ export function AgentConfigurationForm({
                             type="number"
                             placeholder="0"
                             {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -378,7 +404,9 @@ export function AgentConfigurationForm({
                   name="environment.energyLevel"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Initial Energy Level: {field.value}%</FormLabel>
+                      <FormLabel>
+                        Initial Energy Level: {field.value}%
+                      </FormLabel>
                       <FormControl>
                         <Slider
                           min={0}
@@ -408,7 +436,8 @@ export function AgentConfigurationForm({
                 <CardHeader>
                   <CardTitle>Precision Parameters</CardTitle>
                   <CardDescription>
-                    Control the agent&apos;s confidence in sensory observations, policies, and state estimates
+                    Control the agent&apos;s confidence in sensory observations,
+                    policies, and state estimates
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -417,7 +446,9 @@ export function AgentConfigurationForm({
                     name="mathematics.precision.sensoryPrecision"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Sensory Precision (γ): {field.value.toFixed(1)}</FormLabel>
+                        <FormLabel>
+                          Sensory Precision (γ): {field.value.toFixed(1)}
+                        </FormLabel>
                         <FormControl>
                           <Slider
                             min={0.1}
@@ -429,7 +460,8 @@ export function AgentConfigurationForm({
                           />
                         </FormControl>
                         <FormDescription>
-                          Higher values increase confidence in sensory observations
+                          Higher values increase confidence in sensory
+                          observations
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -441,7 +473,9 @@ export function AgentConfigurationForm({
                     name="mathematics.precision.policyPrecision"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Policy Precision (β): {field.value.toFixed(1)}</FormLabel>
+                        <FormLabel>
+                          Policy Precision (β): {field.value.toFixed(1)}
+                        </FormLabel>
                         <FormControl>
                           <Slider
                             min={0.1}
@@ -465,7 +499,9 @@ export function AgentConfigurationForm({
                     name="mathematics.precision.statePrecision"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>State Precision (α): {field.value.toFixed(1)}</FormLabel>
+                        <FormLabel>
+                          State Precision (α): {field.value.toFixed(1)}
+                        </FormLabel>
                         <FormControl>
                           <Slider
                             min={0.1}
@@ -491,7 +527,8 @@ export function AgentConfigurationForm({
                 <CardHeader>
                   <CardTitle>Generative Model Configuration</CardTitle>
                   <CardDescription>
-                    Configure the A and B matrices for the agent&apos;s generative model
+                    Configure the A and B matrices for the agent&apos;s
+                    generative model
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -508,7 +545,9 @@ export function AgentConfigurationForm({
                               min={2}
                               max={1024}
                               {...field}
-                              onChange={(e) => field.onChange(Number(e.target.value))}
+                              onChange={(e) =>
+                                field.onChange(Number(e.target.value))
+                              }
                             />
                           </FormControl>
                           <FormDescription>
@@ -531,7 +570,9 @@ export function AgentConfigurationForm({
                               min={2}
                               max={256}
                               {...field}
-                              onChange={(e) => field.onChange(Number(e.target.value))}
+                              onChange={(e) =>
+                                field.onChange(Number(e.target.value))
+                              }
                             />
                           </FormControl>
                           <FormDescription>
@@ -548,7 +589,9 @@ export function AgentConfigurationForm({
                     name="mathematics.planningHorizon"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Planning Horizon: {field.value} steps</FormLabel>
+                        <FormLabel>
+                          Planning Horizon: {field.value} steps
+                        </FormLabel>
                         <FormControl>
                           <Slider
                             min={1}
@@ -589,7 +632,8 @@ export function AgentConfigurationForm({
                       <div className="space-y-0.5">
                         <FormLabel>Hierarchical Active Inference</FormLabel>
                         <FormDescription>
-                          Enable hierarchical belief updating for complex environments
+                          Enable hierarchical belief updating for complex
+                          environments
                         </FormDescription>
                       </div>
                       <FormControl>
@@ -610,7 +654,8 @@ export function AgentConfigurationForm({
                       <div className="space-y-0.5">
                         <FormLabel>Enable Learning</FormLabel>
                         <FormDescription>
-                          Allow the agent to update its generative model parameters
+                          Allow the agent to update its generative model
+                          parameters
                         </FormDescription>
                       </div>
                       <FormControl>
@@ -631,7 +676,8 @@ export function AgentConfigurationForm({
                       <div className="space-y-0.5">
                         <FormLabel>Debug Mode</FormLabel>
                         <FormDescription>
-                          Enable detailed logging of belief updates and policy selection
+                          Enable detailed logging of belief updates and policy
+                          selection
                         </FormDescription>
                       </div>
                       <FormControl>
@@ -649,7 +695,9 @@ export function AgentConfigurationForm({
                   name="mathematics.memoryCapacity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Memory Capacity: {field.value.toLocaleString()} items</FormLabel>
+                      <FormLabel>
+                        Memory Capacity: {field.value.toLocaleString()} items
+                      </FormLabel>
                       <FormControl>
                         <Slider
                           min={100}
@@ -691,4 +739,4 @@ export function AgentConfigurationForm({
 }
 
 export { AgentConfigurationSchema };
-export type { AgentConfigurationData }; 
+export type { AgentConfigurationData };

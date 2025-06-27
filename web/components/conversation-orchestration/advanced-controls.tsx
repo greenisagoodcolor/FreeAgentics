@@ -1,9 +1,9 @@
 "use client";
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ConversationPreset } from '@/lib/types';
-import { Settings } from 'lucide-react';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ConversationPreset } from "@/lib/types";
+import { Settings } from "lucide-react";
 
 interface AdvancedControlsProps {
   preset: ConversationPreset | null;
@@ -14,7 +14,7 @@ interface AdvancedControlsProps {
 export function AdvancedControls({
   preset,
   onUpdate,
-  className = ""
+  className = "",
 }: AdvancedControlsProps) {
   return (
     <Card className={className}>
@@ -31,4 +31,4 @@ export function AdvancedControls({
       </CardContent>
     </Card>
   );
-} 
+}

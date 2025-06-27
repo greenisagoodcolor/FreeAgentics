@@ -1,4 +1,4 @@
-."""
+"""
 Expert Committee Business Intelligence and Safety Validation Framework
 
 Implements the mandatory review and validation system by Multi-Agent and
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class ExpertDomain(Enum):
-    """Expert committee domains for validation."""
+    """Expert committee domains for validation"""
 
     MULTI_AGENT_SYSTEMS = "multi_agent_systems"
     SOFTWARE_ARCHITECTURE = "software_architecture"
@@ -29,7 +29,7 @@ class ExpertDomain(Enum):
 
 
 class ValidationStatus(Enum):
-    """Status of validation process."""
+    """Status of validation process"""
 
     PENDING = "pending"
     IN_REVIEW = "in_review"
@@ -41,7 +41,7 @@ class ValidationStatus(Enum):
 
 @dataclass
 class ExpertProfile:
-    """Profile of an expert committee member."""
+    """Profile of an expert committee member"""
 
     expert_id: str
     name: str
@@ -54,7 +54,7 @@ class ExpertProfile:
 
 @dataclass
 class ValidationCriteria:
-    """Criteria for expert validation."""
+    """Criteria for expert validation"""
 
     domain: ExpertDomain
     checklist_items: List[str] = field(default_factory=list)
@@ -65,7 +65,7 @@ class ValidationCriteria:
 
 @dataclass
 class ValidationResult:
-    """Result from expert validation."""
+    """Result from expert validation"""
 
     expert_id: str
     domain: ExpertDomain
@@ -87,7 +87,7 @@ class ValidationResult:
 
 @dataclass
 class CommitteeReview:
-    """Complete committee review session."""
+    """Complete committee review session"""
 
     review_id: str
     coalition_id: str
@@ -111,14 +111,14 @@ class ExpertCommitteeValidation:
     """
 
     def __init__(self) -> None:
-        """Initialize."""
+        """Initialize"""
         self.experts = self._initialize_expert_committee()
         self.validation_criteria = self._define_validation_criteria()
         self.review_history: List[CommitteeReview] = []
         self.active_reviews: Dict[str, CommitteeReview] = {}
 
     def _initialize_expert_committee(self) -> Dict[str, ExpertProfile]:
-        """Initialize the expert committee as specified in task requirements."""
+        """Initialize the expert committee as specified in task requirements"""
         return {
             "harrison_chase": ExpertProfile(
                 expert_id="harrison_chase",
@@ -157,8 +157,7 @@ class ExpertCommitteeValidation:
                 name="Robert Martin",
                 domain=ExpertDomain.SOFTWARE_ARCHITECTURE,
                 credentials=["Clean Architecture", "SOLID Principles", "Uncle Bob"],
-                validation_authority= (
-                    ["architecture_design", "clean_code", "dependency_management"],)
+                validation_authority=["architecture_design", "clean_code", "dependency_management"],
                 active=True,
             ),
             "rich_hickey": ExpertProfile(
@@ -166,8 +165,7 @@ class ExpertCommitteeValidation:
                 name="Rich Hickey",
                 domain=ExpertDomain.SOFTWARE_ARCHITECTURE,
                 credentials=["Clojure Creator", "Functional Architecture Expert"],
-                validation_authority= (
-                    ["functional_design", "immutability", "data_orientation"],)
+                validation_authority=["functional_design", "immutability", "data_orientation"],
                 active=True,
             ),
             "kent_beck": ExpertProfile(
@@ -181,7 +179,7 @@ class ExpertCommitteeValidation:
         }
 
     def _define_validation_criteria(self) -> Dict[ExpertDomain, ValidationCriteria]:
-        """Define validation criteria for each expert domain."""
+        """Define validation criteria for each expert domain"""
         return {
             ExpertDomain.MULTI_AGENT_SYSTEMS: ValidationCriteria(
                 domain=ExpertDomain.MULTI_AGENT_SYSTEMS,
@@ -305,7 +303,7 @@ class ExpertCommitteeValidation:
         return review_id
 
     def _assign_experts_to_review(self, review_id: str, review_type: str):
-        """Assign appropriate experts to review based on type."""
+        """Assign appropriate experts to review based on type"""
         review = self.active_reviews[review_id]
 
         if review_type == "full":
@@ -408,7 +406,7 @@ class ExpertCommitteeValidation:
         business_model: Dict[str, Any],
         system_artifacts: Dict[str, Any],
     ) -> ValidationResult:
-        """Simulate individual expert review."""
+        """Simulate individual expert review"""
 
         # Base score based on expert domain and artifact quality
         if expert.domain == ExpertDomain.MULTI_AGENT_SYSTEMS:
@@ -444,7 +442,7 @@ class ExpertCommitteeValidation:
         )
 
     def _evaluate_multi_agent_aspects(self, business_model: Dict, artifacts: Dict) -> float:
-        """Evaluate multi-agent system implementation quality."""
+        """Evaluate multi-agent system implementation quality"""
         score = 0.0
 
         # Check if coalition formation logic is present
@@ -468,7 +466,7 @@ class ExpertCommitteeValidation:
         return min(1.0, score)
 
     def _evaluate_architecture_aspects(self, business_model: Dict, artifacts: Dict) -> float:
-        """Evaluate software architecture quality."""
+        """Evaluate software architecture quality"""
         score = 0.8  # Assume good architecture based on ADR compliance
 
         # Check for proper separation of concerns
@@ -481,7 +479,7 @@ class ExpertCommitteeValidation:
         return min(1.0, score)
 
     def _evaluate_business_intelligence(self, business_model: Dict) -> float:
-        """Evaluate business intelligence and investor readiness."""
+        """Evaluate business intelligence and investor readiness"""
         score = 0.0
 
         # Check executive summary quality
@@ -508,11 +506,11 @@ class ExpertCommitteeValidation:
         return min(1.0, score)
 
     def _evaluate_safety_aspects(self, artifacts: Dict) -> float:
-        """Evaluate safety protocol implementation."""
+        """Evaluate safety protocol implementation"""
         return 0.85  # Assume good safety based on careful implementation
 
     def _generate_expert_recommendations(self, domain: ExpertDomain, score: float) -> List[str]:
-        """Generate expert recommendations based on domain and score."""
+        """Generate expert recommendations based on domain and score"""
         base_recommendations = {
             ExpertDomain.MULTI_AGENT_SYSTEMS: [
                 "Consider adding more detailed agent interaction protocols",
@@ -550,7 +548,7 @@ class ExpertCommitteeValidation:
         return recommendations[:3]  # Return top 3 recommendations
 
     def _identify_expert_concerns(self, domain: ExpertDomain, score: float) -> List[str]:
-        """Identify expert concerns based on domain and score."""
+        """Identify expert concerns based on domain and score"""
         if score >= 0.85:
             return []  # No major concerns
 
@@ -576,7 +574,7 @@ class ExpertCommitteeValidation:
         return concerns.get(domain, [])[:2]  # Return top 2 concerns
 
     def get_review_status(self, review_id: str) -> Optional[CommitteeReview]:
-        """Get current status of a review."""
+        """Get current status of a review"""
         if review_id in self.active_reviews:
             return self.active_reviews[review_id]
 
@@ -588,7 +586,7 @@ class ExpertCommitteeValidation:
         return None
 
     def get_validation_summary(self, coalition_id: str) -> Dict[str, Any]:
-        """Get validation summary for a coalition."""
+        """Get validation summary for a coalition"""
         relevant_reviews = [
             review for review in self.review_history if review.coalition_id == coalition_id
         ]
@@ -691,8 +689,7 @@ class ExpertCommitteeValidation:
 
             for criterion, required_score in criteria.items():
                 # Simulate validation score (in practice, would be actual validation)
-                actual_score = (
-                    min(required_score + np.random.normal(0, 0.02), 1.0))
+                actual_score = min(required_score + np.random.normal(0, 0.02), 1.0)
                 actual_score = max(actual_score, 0.0)
 
                 passes = actual_score >= required_score
@@ -769,7 +766,7 @@ class ExpertCommitteeValidation:
         return validation_result
 
     def _get_assigned_expert(self, criterion: str, assignments: Dict[str, List[str]]) -> str:
-        """Get the assigned expert for a specific criterion."""
+        """Get the assigned expert for a specific criterion"""
         criterion_mapping = {
             "bayesian_update_accuracy": "active_inference_theory",
             "numerical_precision_tracking": "mathematical_foundations",
@@ -804,7 +801,7 @@ class ExpertCommitteeValidation:
     def _generate_task_37_review_assignments(
         self, assignments: Dict[str, List[str]]
     ) -> Dict[str, Any]:
-        """Generate comprehensive review assignments for Task 37."""
+        """Generate comprehensive review assignments for Task 37"""
         return {
             "conor_heins": {
                 "role": "Active Inference Theory Lead",

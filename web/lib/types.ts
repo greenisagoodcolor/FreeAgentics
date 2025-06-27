@@ -193,7 +193,7 @@ export interface KnowledgeNode {
   title: string;
   type: 'concept' | 'fact' | 'belief' | 'agent' | 'entity' | 'relationship' | 'pattern';
   content?: string;
-  
+
   // Positioning and physics
   x: number;
   y: number;
@@ -201,43 +201,43 @@ export interface KnowledgeNode {
   vy?: number; // velocity y for physics simulation
   fx?: number | null; // fixed position x (for pinned nodes)
   fy?: number | null; // fixed position y (for pinned nodes)
-  
+
   // Visual properties
   radius: number;
   color: string;
   opacity?: number;
   strokeColor?: string;
   strokeWidth?: number;
-  
+
   // Agent association
   agentId?: string;
   agentIds?: string[]; // for shared knowledge
   ownerType: 'individual' | 'collective' | 'shared';
-  
+
   // Knowledge properties
   confidence: number; // 0.0 to 1.0
   importance: number; // 0.0 to 1.0
   lastUpdated: Date;
   createdAt: Date;
   accessCount?: number;
-  
+
   // Belief-specific properties
   supporting_evidence?: string[];
   contradicting_evidence?: string[];
   belief_strength?: number;
-  
+
   // Metadata
   tags?: string[];
   category?: string;
   source?: string;
   verified?: boolean;
-  
+
   // Interaction state
   isSelected?: boolean;
   isHovered?: boolean;
   isPinned?: boolean;
   isVisible?: boolean;
-  
+
   // Additional data for extensions
   metadata?: Record<string, any>;
 }
@@ -246,32 +246,32 @@ export interface KnowledgeEdge {
   id: string;
   source: string; // source node id
   target: string; // target node id
-  
+
   // Relationship properties
   type: 'supports' | 'contradicts' | 'relates_to' | 'causes' | 'prevents' | 'similar_to' | 'derived_from' | 'contains' | 'depends_on';
   strength: number; // 0.0 to 1.0
   confidence: number; // 0.0 to 1.0
   bidirectional?: boolean;
-  
+
   // Visual properties
   color: string;
   width?: number;
   opacity?: number;
   style?: 'solid' | 'dashed' | 'dotted';
-  
+
   // Temporal properties
   createdAt: Date;
   lastUpdated: Date;
-  
+
   // Agent context
   agentId?: string; // which agent created this relationship
   agentIds?: string[]; // agents that recognize this relationship
-  
+
   // Interaction state
   isSelected?: boolean;
   isHovered?: boolean;
   isVisible?: boolean;
-  
+
   // Additional data
   metadata?: Record<string, any>;
 }
@@ -295,34 +295,34 @@ export interface KnowledgeGraph {
   name: string;
   description?: string;
   layers: KnowledgeGraphLayer[];
-  
+
   // Graph-level metadata
   createdAt: Date;
   lastUpdated: Date;
   version: string;
-  
+
   // Display settings
   layout: 'force-directed' | 'hierarchical' | 'circular' | 'grid';
   renderer: 'd3' | 'threejs' | 'auto';
-  
+
   // Performance settings
   maxNodes: number;
   lodEnabled: boolean;
   clusteringEnabled: boolean;
-  
+
   // Filter state
   filters: KnowledgeGraphFilters;
-  
+
   // Interaction state
   selectedNodes: string[];
   selectedEdges: string[];
   hoveredNode?: string;
   hoveredEdge?: string;
-  
+
   // View state
   zoom: number;
   pan: { x: number; y: number };
-  
+
   metadata?: Record<string, any>;
 }
 
@@ -335,14 +335,14 @@ export interface KnowledgeGraphFilters {
   timeRange?: [Date, Date];
   agentIds: string[];
   tags: string[];
-  
+
   // Edge filters
   edgeTypes: string[];
   strengthRange: [number, number];
-  
+
   // Text search
   searchQuery?: string;
-  
+
   // Visual filters
   showOnlyConnected: boolean;
   hideIsolatedNodes: boolean;
@@ -356,17 +356,17 @@ export interface KnowledgeGraphUpdate {
   layerId?: string;
   agentId?: string;
   timestamp: Date;
-  
+
   // Update data
   node?: KnowledgeNode;
   edge?: KnowledgeEdge;
   nodes?: KnowledgeNode[];
   edges?: KnowledgeEdge[];
-  
+
   // Change details
   changes?: Record<string, any>;
   previousValue?: any;
-  
+
   metadata?: Record<string, any>;
 }
 
@@ -375,21 +375,21 @@ export interface KnowledgeGraphMetrics {
   nodeCount: number;
   edgeCount: number;
   layerCount: number;
-  
+
   // Performance metrics
   renderTime: number;
   frameRate: number;
   memoryUsage?: number;
-  
+
   // Graph analytics
   averageConnectivity: number;
   clusteringCoefficient: number;
   centralityScores: Record<string, number>;
-  
+
   // User interaction metrics
   interactionCount: number;
   lastInteraction: Date;
-  
+
   timestamp: Date;
 }
 
@@ -400,21 +400,21 @@ export interface KnowledgeGraphExport {
   includeFilters: boolean;
   resolution?: number; // for raster formats
   quality?: number; // 0.0 to 1.0
-  
+
   // Layer selection
   layerIds?: string[];
   includeAllLayers: boolean;
-  
+
   // Node/edge selection
   nodeIds?: string[];
   edgeIds?: string[];
   includeAllElements: boolean;
-  
+
   // Visual settings
   backgroundColor?: string;
   includeLabels: boolean;
   labelFontSize?: number;
-  
+
   metadata?: Record<string, any>;
 }
 
@@ -429,7 +429,7 @@ export interface ConversationPreset {
   createdAt: string;
   updatedAt: string;
   createdBy: string;
-  
+
   // Response Dynamics Parameters
   responseDynamics: {
     // Turn-taking behavior
@@ -440,7 +440,7 @@ export interface ConversationPreset {
       mentionResponseProbability: number; // 0.0-1.0, higher chance when mentioned
       conversationStarterResponseRate: number; // 0.0-1.0, response rate to conversation starters
     };
-    
+
     // Agent selection dynamics
     agentSelection: {
       autoSelectRespondents: boolean;
@@ -449,7 +449,7 @@ export interface ConversationPreset {
       expertiseWeight: number; // 0.0-1.0, weight given to domain expertise
       maxSpeakersPerTurn: number; // 1-10
     };
-    
+
     // Response generation parameters
     responseGeneration: {
       maxKnowledgeEntries: number; // 0-50
@@ -460,7 +460,7 @@ export interface ConversationPreset {
       coherenceWeight: number; // 0.0-1.0, weight for maintaining conversation coherence
     };
   };
-  
+
   // Timing Controls
   timingControls: {
     // Response delays
@@ -475,7 +475,7 @@ export interface ConversationPreset {
         conversationPace: boolean; // adapt to conversation speed
       };
     };
-    
+
     // Conversation flow
     conversationFlow: {
       maxAutonomousMessages: number; // 5-100
@@ -484,7 +484,7 @@ export interface ConversationPreset {
       turnTimeoutDuration: number; // milliseconds
       pauseBetweenTurns: number; // milliseconds
     };
-    
+
     // Real-time controls
     realTimeControls: {
       enableTypingIndicators: boolean;
@@ -493,7 +493,7 @@ export interface ConversationPreset {
       ghostMessageDuration: number; // milliseconds
     };
   };
-  
+
   // Advanced Parameters (Expert Mode)
   advancedParameters: {
     // Conversation dynamics
@@ -503,7 +503,7 @@ export interface ConversationPreset {
       semanticCoherenceThreshold: number; // 0.0-1.0
       emotionalToneConsistency: number; // 0.0-1.0
     };
-    
+
     // Agent behavior modifiers
     agentBehavior: {
       personalityInfluence: number; // 0.0-1.0
@@ -511,7 +511,7 @@ export interface ConversationPreset {
       randomnessInjection: number; // 0.0-1.0
       memoryRetentionFactor: number; // 0.0-1.0
     };
-    
+
     // Quality controls
     qualityControls: {
       minimumResponseQuality: number; // 0.0-1.0
@@ -519,7 +519,7 @@ export interface ConversationPreset {
       relevanceThreshold: number; // 0.0-1.0
       factualAccuracyWeight: number; // 0.0-1.0
     };
-    
+
     // Performance optimization
     performanceOptimization: {
       enableCaching: boolean;
@@ -528,7 +528,7 @@ export interface ConversationPreset {
       resourceThrottling: boolean;
     };
   };
-  
+
   // A/B Testing Configuration
   abTestingConfig?: {
     enabled: boolean;
@@ -538,7 +538,7 @@ export interface ConversationPreset {
     sampleSize: number;
     confidenceLevel: number; // 0.90, 0.95, 0.99
   };
-  
+
   // Safety and Validation
   safetyConstraints: {
     enableSafetyChecks: boolean;
@@ -551,7 +551,7 @@ export interface ConversationPreset {
     };
     emergencyStopConditions: string[];
   };
-  
+
   // Monitoring and Analytics
   monitoring: {
     enableMetrics: boolean;

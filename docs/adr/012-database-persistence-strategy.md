@@ -1,12 +1,15 @@
 # ADR-012: Database and Persistence Strategy
 
 ## Status
+
 Accepted
 
 ## Context
+
 FreeAgentics requires a robust persistence strategy to handle agent state, coalition data, world simulations, and business intelligence. The system must support high-frequency updates, complex queries, real-time analytics, and horizontal scaling while maintaining data consistency and performance.
 
 ## Decision
+
 We will implement a polyglot persistence architecture using PostgreSQL as the primary operational database, Redis for caching and real-time data, and InfluxDB for time-series metrics, with clear data modeling patterns for each storage type.
 
 ## Persistence Architecture
@@ -14,6 +17,7 @@ We will implement a polyglot persistence architecture using PostgreSQL as the pr
 ### 1. Primary Database: PostgreSQL
 
 #### Core Data Models
+
 ```sql
 -- agents/models.sql
 CREATE TABLE agents (
@@ -86,6 +90,7 @@ CREATE INDEX idx_coalition_members_agent ON coalition_members(agent_id);
 ```
 
 #### Data Access Layer
+
 ```python
 # infrastructure/database/repositories/agent_repository.py
 from sqlalchemy.orm import Session
@@ -168,6 +173,7 @@ class AgentRepository:
 ### 2. Caching Layer: Redis
 
 #### Cache Strategy
+
 ```python
 # infrastructure/cache/redis_cache.py
 import redis.asyncio as redis
@@ -236,6 +242,7 @@ class AgentCache:
 ```
 
 #### Real-time Updates
+
 ```python
 # infrastructure/cache/real_time_updates.py
 class RealTimeUpdates:
@@ -280,6 +287,7 @@ class RealTimeUpdates:
 ### 3. Time-Series Database: InfluxDB
 
 #### Metrics Storage
+
 ```python
 # infrastructure/metrics/influx_metrics.py
 from influxdb_client import InfluxDBClient, Point
@@ -374,6 +382,7 @@ class MetricsCollector:
 ### 4. Data Migration and Versioning
 
 #### Schema Management
+
 ```python
 # infrastructure/database/migrations/migration_manager.py
 from alembic import command
@@ -406,6 +415,7 @@ class MigrationManager:
 ```
 
 #### Data Backup Strategy
+
 ```python
 # infrastructure/backup/backup_manager.py
 import asyncio
@@ -469,6 +479,7 @@ class BackupManager:
 ### 5. Performance Optimization
 
 #### Database Optimization
+
 ```sql
 -- Performance indexes and optimizations
 CREATE INDEX CONCURRENTLY idx_agents_composite
@@ -493,6 +504,7 @@ FOR VALUES FROM ('2024-01-01') TO ('2024-02-01');
 ```
 
 #### Query Optimization
+
 ```python
 # infrastructure/database/query_optimizer.py
 class QueryOptimizer:
@@ -554,17 +566,20 @@ class QueryOptimizer:
 ## Architectural Compliance
 
 ### Directory Structure (ADR-002)
+
 - Database models in `infrastructure/database/models/`
 - Repositories in `infrastructure/database/repositories/`
 - Migrations in `infrastructure/database/migrations/`
 - Cache layer in `infrastructure/cache/`
 
 ### Dependency Rules (ADR-003)
+
 - Core domain entities are persistence-agnostic
 - Infrastructure layer implements persistence interfaces
 - No database dependencies in domain layer
 
 ### Naming Conventions (ADR-004)
+
 - Database tables use snake_case: `coalition_members`
 - Repository classes use PascalCase: `AgentRepository`
 - Cache keys use colon notation: `agent:beliefs:id`
@@ -572,12 +587,14 @@ class QueryOptimizer:
 ## Performance Targets
 
 ### Database Performance
+
 - **Query Response Time**: <100ms for 95% of queries
 - **Write Throughput**: 1,000+ agent updates per second
 - **Concurrent Connections**: Support 500+ simultaneous connections
 - **Data Retention**: 1 year of historical data with efficient queries
 
 ### Cache Performance
+
 - **Cache Hit Rate**: >90% for frequently accessed data
 - **Cache Response Time**: <10ms for Redis operations
 - **Real-time Updates**: <100ms latency for pub/sub messages
@@ -585,12 +602,14 @@ class QueryOptimizer:
 ## Testing Strategy
 
 ### Database Testing
+
 - **Unit Tests**: Repository and model testing
 - **Integration Tests**: Full database flow testing
 - **Performance Tests**: Load testing with realistic data volumes
 - **Migration Tests**: Schema migration validation
 
 ### Data Integrity Testing
+
 - **Consistency Tests**: Multi-table transaction validation
 - **Backup/Recovery Tests**: Disaster recovery validation
 - **Encryption Tests**: Data security validation
@@ -598,18 +617,21 @@ class QueryOptimizer:
 ## Consequences
 
 ### Positive
+
 - Scalable persistence supporting growth
 - Optimized for agent and coalition use cases
 - Real-time capabilities with caching
 - Comprehensive backup and recovery
 
 ### Negative
+
 - Increased infrastructure complexity
 - Multiple database technologies to maintain
 - Performance tuning requirements
 - Backup storage costs
 
 ### Risks and Mitigations
+
 - **Risk**: Database performance degradation under load
   - **Mitigation**: Performance monitoring and query optimization
 - **Risk**: Data loss during failures
@@ -618,6 +640,7 @@ class QueryOptimizer:
   - **Mitigation**: Cache invalidation patterns and TTL management
 
 ## Related Decisions
+
 - ADR-002: Canonical Directory Structure
 - ADR-003: Dependency Rules
 - ADR-009: Performance and Optimization Strategy

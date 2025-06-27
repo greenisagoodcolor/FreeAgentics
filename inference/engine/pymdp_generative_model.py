@@ -9,10 +9,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from .generative_model import (
-    DiscreteGenerativeModel,
-    ModelDimensions,
-    ModelParameters)
+from .generative_model import DiscreteGenerativeModel, ModelDimensions, ModelParameters
 
 """\npymdp-Compatible Generative Model Implementation
 
@@ -97,7 +94,7 @@ class PyMDPGenerativeModel:
         return D
 
     def set_A_matrix(self, A: Union[np.ndarray, torch.Tensor]) -> None:
-        """Set observation model matrix from external source."""
+        """Set observation model matrix from external source"""
         if isinstance(A, torch.Tensor):
             A = A.detach().cpu().numpy()
         assert A.shape == (
@@ -111,7 +108,7 @@ class PyMDPGenerativeModel:
         self.A = A / A.sum(axis=0, keepdims=True)
 
     def set_B_matrix(self, B: Union[np.ndarray, torch.Tensor]) -> None:
-        """Set transition model matrix from external source."""
+        """Set transition model matrix from external source"""
         if isinstance(B, torch.Tensor):
             B = B.detach().cpu().numpy()
         assert B.shape == (
@@ -128,7 +125,7 @@ class PyMDPGenerativeModel:
             self.B[:, :, a] = B[:, :, a] / B[:, :, a].sum(axis=0, keepdims=True)
 
     def set_C_matrix(self, C: Union[np.ndarray, torch.Tensor]) -> None:
-        """Set preference matrix from external source."""
+        """Set preference matrix from external source"""
         if isinstance(C, torch.Tensor):
             C = C.detach().cpu().numpy()
         if C.ndim == 1:
@@ -144,7 +141,7 @@ class PyMDPGenerativeModel:
         self.C = C
 
     def set_D_matrix(self, D: Union[np.ndarray, torch.Tensor]) -> None:
-        """Set initial state prior from external source."""
+        """Set initial state prior from external source"""
 
         if isinstance(D, torch.Tensor):
             D = D.detach().cpu().numpy()
@@ -209,33 +206,33 @@ class PyMDPGenerativeModelAdapter:
             raise ValueError(f"Unsupported model type: {type(base_model)}")
 
     def observation_model(self, states: Union[np.ndarray, torch.Tensor]) -> np.ndarray:
-        """Compute observations using pymdp format."""
+        """Compute observations using pymdp format"""
         if isinstance(states, torch.Tensor):
             states = states.detach().cpu().numpy()
         # A @ states gives observation probabilities
         return self.pymdp_model.A @ states
 
     def transition_model(self, states: Union[np.ndarray, torch.Tensor], action: int) -> np.ndarray:
-        """Compute state transitions using pymdp format."""
+        """Compute state transitions using pymdp format"""
         if isinstance(states, torch.Tensor):
             states = states.detach().cpu().numpy()
         # B[:, :, action] @ states gives next state probabilities
         return self.pymdp_model.B[:, :, action] @ states
 
     def get_preferences(self, timestep: int = 0) -> np.ndarray:
-        """Get preferences for given timestep."""
+        """Get preferences for given timestep"""
         if timestep >= self.pymdp_model.C.shape[1]:
             timestep = -1  # Use last timestep
         return self.pymdp_model.C[:, timestep]
 
     def get_initial_prior(self) -> np.ndarray:
-        """Get initial state prior."""
+        """Get initial state prior"""
         return self.pymdp_model.D
 
     def get_pymdp_matrices(
         self,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-        """Get matrices for pymdp.Agent creation."""
+        """Get matrices for pymdp.Agent creation"""
         return self.pymdp_model.get_pymdp_matrices()
 
 

@@ -1,27 +1,30 @@
 "use client";
 
-import React, { memo, useCallback, useMemo, useRef, useEffect, useState } from "react";
+import React, {
+  memo,
+  useCallback,
+  useMemo,
+  useRef,
+  useEffect,
+  useState,
+} from "react";
 import { FixedSizeList as List, ListChildComponentProps } from "react-window";
 import { format } from "date-fns";
-import { 
-  Avatar, 
-  AvatarFallback, 
-  AvatarImage 
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { Message, Agent, ConversationThread } from "@/lib/types";
-import { 
-  CornerDownRight, 
-  MessageSquare, 
-  Clock, 
-  User, 
+import {
+  CornerDownRight,
+  MessageSquare,
+  Clock,
+  User,
   Bot,
   AlertCircle,
   CheckCircle,
@@ -31,7 +34,7 @@ import {
   ThumbsUp,
   ThumbsDown,
   Reply,
-  MoreHorizontal
+  MoreHorizontal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -74,30 +77,33 @@ const MessageItem = memo<MessageItemProps>(({ index, style, data }) => {
     onReaction,
     showMetadata,
     showThreads,
-    typingAgents = {}
+    typingAgents = {},
   } = data;
 
   const message = messages[index];
   if (!message) return null;
 
   // Find the agent who sent this message
-  const sender = agents.find(agent => agent.id === message.senderId);
-  
+  const sender = agents.find((agent) => agent.id === message.senderId);
+
   // Determine if this is a system message
-  const isSystemMessage = message.metadata?.isSystemMessage || message.senderId === 'system';
-  
+  const isSystemMessage =
+    message.metadata?.isSystemMessage || message.senderId === "system";
+
   // Get thread information
-  const messageThread = threads?.find(thread => 
-    thread.id === message.metadata?.threadId
+  const messageThread = threads?.find(
+    (thread) => thread.id === message.metadata?.threadId,
   );
-  
+
   // Check if this message is being responded to
-  const isBeingRespondedTo = message.metadata?.respondingTo && 
-    Object.values(typingAgents).some(agent => agent.messageId === message.id);
+  const isBeingRespondedTo =
+    message.metadata?.respondingTo &&
+    Object.values(typingAgents).some((agent) => agent.messageId === message.id);
 
   // Get the parent message if this is a reply
-  const parentMessage = message.metadata?.respondingTo ? 
-    messages.find(m => m.id === message.metadata?.respondingTo) : null;
+  const parentMessage = message.metadata?.respondingTo
+    ? messages.find((m) => m.id === message.metadata?.respondingTo)
+    : null;
 
   // Calculate message depth for thread visualization
   const threadDepth = calculateThreadDepth(message, messages);
@@ -125,7 +131,7 @@ const MessageItem = memo<MessageItemProps>(({ index, style, data }) => {
               {message.content}
               {showMetadata && message.timestamp && (
                 <span className="ml-2 text-xs">
-                  {format(new Date(message.timestamp), 'HH:mm:ss')}
+                  {format(new Date(message.timestamp), "HH:mm:ss")}
                 </span>
               )}
             </div>
@@ -136,11 +142,14 @@ const MessageItem = memo<MessageItemProps>(({ index, style, data }) => {
   }
 
   return (
-    <div style={style} className="px-4 py-2 hover:bg-muted/20 transition-colors">
-      <div 
+    <div
+      style={style}
+      className="px-4 py-2 hover:bg-muted/20 transition-colors"
+    >
+      <div
         className={cn(
           "group cursor-pointer",
-          threadDepth > 0 && "ml-8 border-l-2 border-muted pl-4"
+          threadDepth > 0 && "ml-8 border-l-2 border-muted pl-4",
         )}
         onClick={handleMessageClick}
       >
@@ -148,7 +157,9 @@ const MessageItem = memo<MessageItemProps>(({ index, style, data }) => {
         {showThreads && parentMessage && (
           <div className="flex items-center text-xs text-muted-foreground mb-2">
             <CornerDownRight className="w-3 h-3 mr-1" />
-            <span>Replying to: {parentMessage.content.substring(0, 30)}...</span>
+            <span>
+              Replying to: {parentMessage.content.substring(0, 30)}...
+            </span>
           </div>
         )}
 
@@ -156,10 +167,16 @@ const MessageItem = memo<MessageItemProps>(({ index, style, data }) => {
           {/* Avatar */}
           <Avatar className="w-8 h-8 flex-shrink-0">
             <AvatarImage src={sender?.avatar} />
-            <AvatarFallback style={{ backgroundColor: sender?.color || '#666' }}>
-              {sender ? sender.name.charAt(0).toUpperCase() : 
-               message.senderId === 'user' ? <User className="w-4 h-4" /> : 
-               <Bot className="w-4 h-4" />}
+            <AvatarFallback
+              style={{ backgroundColor: sender?.color || "#666" }}
+            >
+              {sender ? (
+                sender.name.charAt(0).toUpperCase()
+              ) : message.senderId === "user" ? (
+                <User className="w-4 h-4" />
+              ) : (
+                <Bot className="w-4 h-4" />
+              )}
             </AvatarFallback>
           </Avatar>
 
@@ -167,17 +184,17 @@ const MessageItem = memo<MessageItemProps>(({ index, style, data }) => {
             {/* Message header */}
             <div className="flex items-center gap-2 mb-1">
               <span className="font-semibold text-sm">
-                {sender?.name || 
-                 (message.senderId === 'user' ? 'You' : message.senderId)}
+                {sender?.name ||
+                  (message.senderId === "user" ? "You" : message.senderId)}
               </span>
-              
+
               {/* Agent type badge */}
               {message.metadata?.agentType && (
                 <Badge variant="outline" className="text-xs">
                   {message.metadata.agentType}
                 </Badge>
               )}
-              
+
               {/* AI generated badge */}
               {message.metadata?.isGeneratedByLLM && (
                 <Badge variant="secondary" className="text-xs">
@@ -185,19 +202,19 @@ const MessageItem = memo<MessageItemProps>(({ index, style, data }) => {
                   AI
                 </Badge>
               )}
-              
+
               {/* Message type badge */}
-              {message.metadata?.type && message.metadata.type !== 'agent' && (
+              {message.metadata?.type && message.metadata.type !== "agent" && (
                 <Badge variant="outline" className="text-xs">
                   {message.metadata.type}
                 </Badge>
               )}
-              
+
               {/* Timestamp */}
               <span className="text-xs text-muted-foreground">
-                {format(new Date(message.timestamp), 'HH:mm:ss')}
+                {format(new Date(message.timestamp), "HH:mm:ss")}
               </span>
-              
+
               {/* Thread indicator */}
               {showThreads && messageThread && (
                 <TooltipProvider>
@@ -206,8 +223,10 @@ const MessageItem = memo<MessageItemProps>(({ index, style, data }) => {
                       <Hash className="w-3 h-3 text-muted-foreground" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Thread: {messageThread.topic || 'Untitled'}</p>
-                      <p className="text-xs">{messageThread.messageCount} messages</p>
+                      <p>Thread: {messageThread.topic || "Untitled"}</p>
+                      <p className="text-xs">
+                        {messageThread.messageCount} messages
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -215,9 +234,7 @@ const MessageItem = memo<MessageItemProps>(({ index, style, data }) => {
             </div>
 
             {/* Message content */}
-            <div className="text-sm mb-2">
-              {message.content}
-            </div>
+            <div className="text-sm mb-2">{message.content}</div>
 
             {/* Message metadata */}
             {showMetadata && (
@@ -228,7 +245,7 @@ const MessageItem = memo<MessageItemProps>(({ index, style, data }) => {
                     Confidence: {Math.round(message.metadata.confidence * 100)}%
                   </span>
                 )}
-                
+
                 {/* Processing time */}
                 {message.metadata?.processingTime && (
                   <span>
@@ -236,54 +253,62 @@ const MessageItem = memo<MessageItemProps>(({ index, style, data }) => {
                     {message.metadata.processingTime}ms
                   </span>
                 )}
-                
+
                 {/* Delivery status */}
                 {message.metadata?.deliveryStatus && (
                   <span className="flex items-center gap-1">
-                    {message.metadata.deliveryStatus === 'delivered' && (
+                    {message.metadata.deliveryStatus === "delivered" && (
                       <CheckCircle className="w-3 h-3 text-green-500" />
                     )}
-                    {message.metadata.deliveryStatus === 'failed' && (
+                    {message.metadata.deliveryStatus === "failed" && (
                       <XCircle className="w-3 h-3 text-red-500" />
                     )}
-                    {message.metadata.deliveryStatus === 'pending' && (
+                    {message.metadata.deliveryStatus === "pending" && (
                       <Loader2 className="w-3 h-3 animate-spin text-yellow-500" />
                     )}
                     {message.metadata.deliveryStatus}
                   </span>
                 )}
-                
+
                 {/* Topics */}
-                {message.metadata?.topics && message.metadata.topics.length > 0 && (
-                  <div className="flex gap-1">
-                    {message.metadata.topics.slice(0, 3).map((topic: string) => (
-                      <Badge key={topic} variant="outline" className="text-xs">
-                        {topic}
-                      </Badge>
-                    ))}
-                    {message.metadata.topics.length > 3 && (
-                      <span>+{message.metadata.topics.length - 3} more</span>
-                    )}
-                  </div>
-                )}
+                {message.metadata?.topics &&
+                  message.metadata.topics.length > 0 && (
+                    <div className="flex gap-1">
+                      {message.metadata.topics
+                        .slice(0, 3)
+                        .map((topic: string) => (
+                          <Badge
+                            key={topic}
+                            variant="outline"
+                            className="text-xs"
+                          >
+                            {topic}
+                          </Badge>
+                        ))}
+                      {message.metadata.topics.length > 3 && (
+                        <span>+{message.metadata.topics.length - 3} more</span>
+                      )}
+                    </div>
+                  )}
               </div>
             )}
 
             {/* Reactions */}
-            {message.metadata?.reactions && message.metadata.reactions.length > 0 && (
-              <div className="flex gap-1 mt-2">
-                {message.metadata.reactions.map((reaction: any) => (
-                  <Badge 
-                    key={`${reaction.agentId}-${reaction.type}`} 
-                    variant="outline" 
-                    className="text-xs cursor-pointer hover:bg-muted"
-                    onClick={() => handleReaction(reaction.type)}
-                  >
-                    {reaction.type} {reaction.agentId}
-                  </Badge>
-                ))}
-              </div>
-            )}
+            {message.metadata?.reactions &&
+              message.metadata.reactions.length > 0 && (
+                <div className="flex gap-1 mt-2">
+                  {message.metadata.reactions.map((reaction: any) => (
+                    <Badge
+                      key={`${reaction.agentId}-${reaction.type}`}
+                      variant="outline"
+                      className="text-xs cursor-pointer hover:bg-muted"
+                      onClick={() => handleReaction(reaction.type)}
+                    >
+                      {reaction.type} {reaction.agentId}
+                    </Badge>
+                  ))}
+                </div>
+              )}
 
             {/* Response indicator */}
             {isBeingRespondedTo && (
@@ -304,30 +329,26 @@ const MessageItem = memo<MessageItemProps>(({ index, style, data }) => {
                 <Reply className="w-3 h-3 mr-1" />
                 Reply
               </Button>
-              
+
               <Button
                 variant="ghost"
                 size="sm"
                 className="h-6 px-2 text-xs"
-                onClick={() => handleReaction('👍')}
+                onClick={() => handleReaction("👍")}
               >
                 <ThumbsUp className="w-3 h-3" />
               </Button>
-              
+
               <Button
                 variant="ghost"
                 size="sm"
                 className="h-6 px-2 text-xs"
-                onClick={() => handleReaction('👎')}
+                onClick={() => handleReaction("👎")}
               >
                 <ThumbsDown className="w-3 h-3" />
               </Button>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 px-2 text-xs"
-              >
+
+              <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
                 <MoreHorizontal className="w-3 h-3" />
               </Button>
             </div>
@@ -338,163 +359,175 @@ const MessageItem = memo<MessageItemProps>(({ index, style, data }) => {
   );
 });
 
-MessageItem.displayName = 'MessageItem';
+MessageItem.displayName = "MessageItem";
 
 // Helper function to calculate thread depth
 function calculateThreadDepth(message: Message, messages: Message[]): number {
   let depth = 0;
   let currentMessage = message;
-  
+
   while (currentMessage.metadata?.parentMessageId) {
-    const parent = messages.find(m => m.id === currentMessage.metadata?.parentMessageId);
+    const parent = messages.find(
+      (m) => m.id === currentMessage.metadata?.parentMessageId,
+    );
     if (!parent) break;
     depth++;
     currentMessage = parent;
     if (depth > 10) break; // Prevent infinite loops
   }
-  
+
   return depth;
 }
 
-export const VirtualizedMessageList = memo<VirtualizedMessageListProps>(({
-  messages,
-  agents,
-  threads,
-  height,
-  onMessageClick,
-  onReply,
-  onReaction,
-  showMetadata = true,
-  showThreads = true,
-  showTypingIndicators = true,
-  typingAgents = {},
-  className
-}) => {
-  const listRef = useRef<List>(null);
-  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
+export const VirtualizedMessageList = memo<VirtualizedMessageListProps>(
+  ({
+    messages,
+    agents,
+    threads,
+    height,
+    onMessageClick,
+    onReply,
+    onReaction,
+    showMetadata = true,
+    showThreads = true,
+    showTypingIndicators = true,
+    typingAgents = {},
+    className,
+  }) => {
+    const listRef = useRef<List>(null);
+    const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
 
-  // Auto-scroll to bottom when new messages arrive
-  useEffect(() => {
-    if (shouldAutoScroll && listRef.current) {
-      listRef.current.scrollToItem(messages.length - 1, 'end');
-    }
-  }, [messages.length, shouldAutoScroll]);
-
-  // Handle scroll to detect if user is at bottom
-  const handleScroll = useCallback(({ scrollTop, clientHeight, scrollHeight }: any) => {
-    const isNearBottom = scrollTop + clientHeight >= scrollHeight - 50;
-    setShouldAutoScroll(isNearBottom);
-  }, []);
-
-  // Create typing indicator messages
-  const typingMessages = useMemo(() => {
-    return Object.entries(typingAgents).map(([agentId, info]) => ({
-      id: `typing-${agentId}`,
-      content: info.text || '...',
-      senderId: agentId,
-      timestamp: new Date(),
-      metadata: {
-        isTyping: true,
-        type: 'typing' as const,
-        respondingTo: info.messageId
+    // Auto-scroll to bottom when new messages arrive
+    useEffect(() => {
+      if (shouldAutoScroll && listRef.current) {
+        listRef.current.scrollToItem(messages.length - 1, "end");
       }
-    })) as Message[];
-  }, [typingAgents]);
+    }, [messages.length, shouldAutoScroll]);
 
-  // Combine messages with typing indicators
-  const allMessages = useMemo(() => {
-    const combined = [...messages];
-    if (showTypingIndicators) {
-      combined.push(...typingMessages);
-    }
-    return combined;
-  }, [messages, typingMessages, showTypingIndicators]);
+    // Handle scroll to detect if user is at bottom
+    const handleScroll = useCallback(
+      ({ scrollTop, clientHeight, scrollHeight }: any) => {
+        const isNearBottom = scrollTop + clientHeight >= scrollHeight - 50;
+        setShouldAutoScroll(isNearBottom);
+      },
+      [],
+    );
 
-  const itemData = useMemo(() => ({
-    messages: allMessages,
-    agents,
-    threads,
-    onMessageClick,
-    onReply,
-    onReaction,
-    showMetadata,
-    showThreads,
-    typingAgents
-  }), [
-    allMessages,
-    agents,
-    threads,
-    onMessageClick,
-    onReply,
-    onReaction,
-    showMetadata,
-    showThreads,
-    typingAgents
-  ]);
+    // Create typing indicator messages
+    const typingMessages = useMemo(() => {
+      return Object.entries(typingAgents).map(([agentId, info]) => ({
+        id: `typing-${agentId}`,
+        content: info.text || "...",
+        senderId: agentId,
+        timestamp: new Date(),
+        metadata: {
+          isTyping: true,
+          type: "typing" as const,
+          respondingTo: info.messageId,
+        },
+      })) as Message[];
+    }, [typingAgents]);
 
-  // Estimate item size based on content
-  const estimateItemSize = useCallback(() => {
-    // Base size for avatar and padding
-    let baseSize = 60;
-    
-    // Add size for metadata
-    if (showMetadata) baseSize += 20;
-    
-    // Add size for thread indicators
-    if (showThreads) baseSize += 10;
-    
-    return baseSize;
-  }, [showMetadata, showThreads]);
+    // Combine messages with typing indicators
+    const allMessages = useMemo(() => {
+      const combined = [...messages];
+      if (showTypingIndicators) {
+        combined.push(...typingMessages);
+      }
+      return combined;
+    }, [messages, typingMessages, showTypingIndicators]);
 
-  const itemSize = estimateItemSize();
+    const itemData = useMemo(
+      () => ({
+        messages: allMessages,
+        agents,
+        threads,
+        onMessageClick,
+        onReply,
+        onReaction,
+        showMetadata,
+        showThreads,
+        typingAgents,
+      }),
+      [
+        allMessages,
+        agents,
+        threads,
+        onMessageClick,
+        onReply,
+        onReaction,
+        showMetadata,
+        showThreads,
+        typingAgents,
+      ],
+    );
 
-  if (allMessages.length === 0) {
-    return (
-      <div className={cn("flex items-center justify-center h-full", className)}>
-        <div className="text-center text-muted-foreground">
-          <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-50" />
-          <p>No messages yet</p>
-          <p className="text-sm">Start a conversation to see messages here</p>
+    // Estimate item size based on content
+    const estimateItemSize = useCallback(() => {
+      // Base size for avatar and padding
+      let baseSize = 60;
+
+      // Add size for metadata
+      if (showMetadata) baseSize += 20;
+
+      // Add size for thread indicators
+      if (showThreads) baseSize += 10;
+
+      return baseSize;
+    }, [showMetadata, showThreads]);
+
+    const itemSize = estimateItemSize();
+
+    if (allMessages.length === 0) {
+      return (
+        <div
+          className={cn("flex items-center justify-center h-full", className)}
+        >
+          <div className="text-center text-muted-foreground">
+            <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-50" />
+            <p>No messages yet</p>
+            <p className="text-sm">Start a conversation to see messages here</p>
+          </div>
         </div>
+      );
+    }
+
+    return (
+      <div className={cn("relative", className)}>
+        <List
+          ref={listRef}
+          height={height}
+          width="100%"
+          itemCount={allMessages.length}
+          itemSize={itemSize}
+          itemData={itemData}
+          onScroll={handleScroll}
+          overscanCount={5}
+          className="scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
+        >
+          {MessageItem}
+        </List>
+
+        {/* Scroll to bottom button */}
+        {!shouldAutoScroll && (
+          <div className="absolute bottom-4 right-4">
+            <Button
+              variant="outline"
+              size="sm"
+              className="shadow-lg"
+              onClick={() => {
+                setShouldAutoScroll(true);
+                listRef.current?.scrollToItem(allMessages.length - 1, "end");
+              }}
+            >
+              <CornerDownRight className="w-4 h-4 mr-1" />
+              Jump to bottom
+            </Button>
+          </div>
+        )}
       </div>
     );
-  }
+  },
+);
 
-  return (
-    <div className={cn("relative", className)}>
-      <List
-        ref={listRef}
-        height={height}
-        width="100%"
-        itemCount={allMessages.length}
-        itemSize={itemSize}
-        itemData={itemData}
-        onScroll={handleScroll}
-        overscanCount={5}
-        className="scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
-      >
-        {MessageItem}
-      </List>
-      
-      {/* Scroll to bottom button */}
-      {!shouldAutoScroll && (
-        <div className="absolute bottom-4 right-4">
-          <Button
-            variant="outline"
-            size="sm"
-            className="shadow-lg"
-            onClick={() => {
-              setShouldAutoScroll(true);
-              listRef.current?.scrollToItem(allMessages.length - 1, 'end');
-            }}
-          >
-            <CornerDownRight className="w-4 h-4 mr-1" />
-            Jump to bottom
-          </Button>
-        </div>
-      )}
-    </div>
-  );
-});
-
-VirtualizedMessageList.displayName = 'VirtualizedMessageList'; 
+VirtualizedMessageList.displayName = "VirtualizedMessageList";

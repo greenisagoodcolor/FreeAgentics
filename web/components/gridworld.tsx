@@ -57,24 +57,27 @@ export default function GridWorld({
     setResizeStartY(e.clientY);
   };
 
-  const handleResizeMove = useCallback((e: MouseEvent) => {
-    if (!isResizing || !containerRef.current) return;
+  const handleResizeMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isResizing || !containerRef.current) return;
 
-    const containerRect = containerRef.current.getBoundingClientRect();
-    const containerHeight = containerRect.height;
-    const mouseY = e.clientY - containerRect.top;
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const containerHeight = containerRect.height;
+      const mouseY = e.clientY - containerRect.top;
 
-    // Calculate new height percentage with constraints
-    const newHeightPercentage = Math.min(
-      Math.max(
-        (mouseY / containerHeight) * 100,
-        20, // Minimum 20%
-      ),
-      80, // Maximum 80%
-    );
+      // Calculate new height percentage with constraints
+      const newHeightPercentage = Math.min(
+        Math.max(
+          (mouseY / containerHeight) * 100,
+          20, // Minimum 20%
+        ),
+        80, // Maximum 80%
+      );
 
-    setGridWorldHeight(newHeightPercentage);
-  }, [isResizing]);
+      setGridWorldHeight(newHeightPercentage);
+    },
+    [isResizing],
+  );
 
   const handleResizeEnd = () => {
     setIsResizing(false);

@@ -1,12 +1,15 @@
 # ADR-011: Security and Authentication Architecture
 
 ## Status
+
 Accepted
 
 ## Context
+
 FreeAgentics requires a robust security framework to protect agent data, coalition information, and business intelligence. The system must support multi-tenant deployments, secure API access, and protect against common security vulnerabilities while maintaining performance and usability.
 
 ## Decision
+
 We will implement a comprehensive security architecture based on defense-in-depth principles, zero-trust networking, and industry-standard authentication and authorization mechanisms.
 
 ## Security Architecture Components
@@ -14,12 +17,14 @@ We will implement a comprehensive security architecture based on defense-in-dept
 ### 1. Authentication Strategy
 
 #### Multi-Factor Authentication
+
 - **Primary**: OAuth 2.0/OpenID Connect integration
 - **Secondary**: API key-based authentication for services
 - **Emergency**: Admin bypass with audit logging
 - **Biometric**: Future support for biometric authentication
 
 #### Token Management
+
 ```python
 # Authentication token structure
 {
@@ -38,12 +43,14 @@ We will implement a comprehensive security architecture based on defense-in-dept
 ### 2. Authorization Framework
 
 #### Role-Based Access Control (RBAC)
+
 - **Admin**: Full system access, user management
 - **Developer**: Agent creation, simulation management
 - **Observer**: Read-only access to agents and coalitions
 - **Service**: Limited API access for automated systems
 
 #### Permission Model
+
 ```python
 # permissions.py
 PERMISSIONS = {
@@ -73,12 +80,14 @@ PERMISSIONS = {
 ### 3. Data Protection Strategy
 
 #### Encryption Standards
+
 - **In Transit**: TLS 1.3 for all communications
 - **At Rest**: AES-256 encryption for sensitive data
 - **In Memory**: Secure memory handling for secrets
 - **Key Management**: Hardware Security Module (HSM) integration
 
 #### Data Classification
+
 ```python
 # data_classification.py
 class DataClassification(Enum):
@@ -119,12 +128,14 @@ class EncryptionPolicy:
 ### 4. API Security
 
 #### Request Validation
+
 - **Input Sanitization**: SQL injection prevention
 - **Schema Validation**: Strict API request validation
 - **Rate Limiting**: Prevent abuse and DoS attacks
 - **CORS Policy**: Controlled cross-origin access
 
 #### Security Headers
+
 ```python
 # security_middleware.py
 SECURITY_HEADERS = {
@@ -140,12 +151,14 @@ SECURITY_HEADERS = {
 ### 5. Coalition Security
 
 #### Business Data Protection
+
 - **Multi-tenant Isolation**: Strict data separation
 - **Coalition Encryption**: End-to-end encryption for coalition communications
 - **Business Intelligence Protection**: Secure handling of competitive data
 - **Member Access Control**: Coalition-level permission management
 
 #### Secure Coalition Formation
+
 ```python
 # coalition_security.py
 class SecureCoalitionManager:
@@ -192,12 +205,14 @@ class SecureCoalitionManager:
 ### 6. Network Security
 
 #### Zero-Trust Architecture
+
 - **Network Segmentation**: Isolated security zones
 - **Micro-segmentation**: Container-level isolation
 - **VPN Integration**: Secure remote access
 - **Firewall Rules**: Restrictive default policies
 
 #### DDoS Protection
+
 - **Rate Limiting**: Request throttling
 - **Geo-blocking**: Geographic access controls
 - **Traffic Analysis**: Anomaly detection
@@ -206,6 +221,7 @@ class SecureCoalitionManager:
 ### 7. Monitoring and Incident Response
 
 #### Security Monitoring
+
 ```python
 # security_monitor.py
 class SecurityMonitor:
@@ -241,6 +257,7 @@ class SecurityMonitor:
 ```
 
 #### Incident Response Plan
+
 1. **Detection**: Automated threat detection
 2. **Containment**: Immediate threat isolation
 3. **Investigation**: Forensic analysis
@@ -250,12 +267,14 @@ class SecurityMonitor:
 ### 8. Compliance and Auditing
 
 #### Audit Logging
+
 - **Comprehensive Logging**: All security-relevant events
 - **Immutable Logs**: Tamper-proof audit trail
 - **Centralized Storage**: SIEM integration
 - **Retention Policy**: Configurable retention periods
 
 #### Compliance Support
+
 - **GDPR**: Data protection and privacy rights
 - **SOC 2**: Security controls and procedures
 - **ISO 27001**: Information security management
@@ -264,6 +283,7 @@ class SecurityMonitor:
 ## Security Implementation
 
 ### Authentication Flow
+
 ```python
 # auth_flow.py
 async def authenticate_request(request: Request) -> Optional[User]:
@@ -294,6 +314,7 @@ async def authenticate_request(request: Request) -> Optional[User]:
 ```
 
 ### Data Encryption
+
 ```python
 # encryption.py
 class DataEncryption:
@@ -326,16 +347,19 @@ class DataEncryption:
 ## Architectural Compliance
 
 ### Directory Structure (ADR-002)
+
 - Security components in `infrastructure/security/`
 - Authentication in `infrastructure/auth/`
 - Encryption utilities in `infrastructure/crypto/`
 
 ### Dependency Rules (ADR-003)
+
 - Core domain has no security dependencies
 - Security implementations in infrastructure layer
 - Security interfaces defined in domain layer
 
 ### Naming Conventions (ADR-004)
+
 - Security classes use `Secure` prefix: `SecureCoalitionManager`
 - Auth classes use `Auth` prefix: `AuthMiddleware`
 - Crypto classes use `Crypto` prefix: `CryptoManager`
@@ -343,12 +367,14 @@ class DataEncryption:
 ## Performance Considerations
 
 ### Security vs Performance Balance
+
 - **Caching**: Secure session caching with Redis
 - **Async Operations**: Non-blocking security checks
 - **Connection Pooling**: Efficient database connections
 - **Optimized Encryption**: Hardware acceleration when available
 
 ### Monitoring Overhead
+
 - **Lightweight Logging**: Minimal performance impact
 - **Batch Processing**: Group security events
 - **Sampling**: Statistical monitoring for high-volume operations
@@ -356,12 +382,14 @@ class DataEncryption:
 ## Testing Strategy
 
 ### Security Testing
+
 - **Penetration Testing**: Regular security assessments
 - **Vulnerability Scanning**: Automated security scans
 - **Authentication Testing**: Multi-factor auth flow testing
 - **Authorization Testing**: Permission boundary validation
 
 ### Compliance Testing
+
 - **Audit Trail Validation**: Log integrity verification
 - **Data Protection Testing**: Encryption/decryption validation
 - **Access Control Testing**: Permission matrix validation
@@ -369,18 +397,21 @@ class DataEncryption:
 ## Consequences
 
 ### Positive
+
 - Strong protection against common attacks
 - Regulatory compliance support
 - Multi-tenant security isolation
 - Comprehensive audit capabilities
 
 ### Negative
+
 - Increased system complexity
 - Performance overhead from security operations
 - Additional infrastructure requirements
 - Ongoing security maintenance
 
 ### Risks and Mitigations
+
 - **Risk**: Security vulnerabilities in third-party dependencies
   - **Mitigation**: Regular dependency scanning and updates
 - **Risk**: Performance degradation from encryption
@@ -389,6 +420,7 @@ class DataEncryption:
   - **Mitigation**: Single sign-on and streamlined user flows
 
 ## Related Decisions
+
 - ADR-002: Canonical Directory Structure
 - ADR-003: Dependency Rules
 - ADR-008: API and Interface Layer Architecture

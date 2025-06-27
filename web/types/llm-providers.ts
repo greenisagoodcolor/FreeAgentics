@@ -109,18 +109,22 @@ export interface HealthIncident {
 }
 
 export class CredentialCrypto {
-  static async encryptCredentials(credentials: CredentialFormData): Promise<EncryptionResult> {
+  static async encryptCredentials(
+    credentials: CredentialFormData,
+  ): Promise<EncryptionResult> {
     // This would be implemented with actual encryption logic
     const timestamp = Date.now();
     return {
       encryptedData: btoa(JSON.stringify(credentials)),
       keyId: `key_${timestamp}`,
       algorithm: "AES-256-GCM",
-      timestamp
+      timestamp,
     };
   }
 
-  static async decryptCredentials(encrypted: EncryptionResult): Promise<CredentialFormData> {
+  static async decryptCredentials(
+    encrypted: EncryptionResult,
+  ): Promise<CredentialFormData> {
     // This would be implemented with actual decryption logic
     return JSON.parse(atob(encrypted.encryptedData));
   }

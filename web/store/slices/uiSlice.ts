@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface PanelState {
   isOpen: boolean;
@@ -13,10 +13,10 @@ interface UIState {
     center: PanelState;
     right: PanelState;
   };
-  activeView: 'dashboard' | 'analytics' | 'settings' | 'export';
+  activeView: "dashboard" | "analytics" | "settings" | "export";
   isFullscreen: boolean;
   isSidebarCollapsed: boolean;
-  theme: 'dark' | 'light';
+  theme: "dark" | "light";
   showPerformanceMonitor: boolean;
   expandedSections: Record<string, boolean>;
   modalStack: string[]; // Track open modals
@@ -47,10 +47,10 @@ const initialState: UIState = {
       maxSize: 40,
     },
   },
-  activeView: 'dashboard',
+  activeView: "dashboard",
   isFullscreen: false,
   isSidebarCollapsed: false,
-  theme: 'dark',
+  theme: "dark",
   showPerformanceMonitor: false,
   expandedSections: {
     agentTemplates: true,
@@ -66,26 +66,35 @@ const initialState: UIState = {
 };
 
 const uiSlice = createSlice({
-  name: 'ui',
+  name: "ui",
   initialState,
   reducers: {
     // Panel management
-    togglePanel: (state, action: PayloadAction<'left' | 'center' | 'right'>) => {
+    togglePanel: (
+      state,
+      action: PayloadAction<"left" | "center" | "right">,
+    ) => {
       const panel = state.panels[action.payload];
       panel.isOpen = !panel.isOpen;
     },
 
-    resizePanel: (state, action: PayloadAction<{
-      panel: 'left' | 'center' | 'right';
-      size: number;
-    }>) => {
+    resizePanel: (
+      state,
+      action: PayloadAction<{
+        panel: "left" | "center" | "right";
+        size: number;
+      }>,
+    ) => {
       const { panel, size } = action.payload;
       const panelState = state.panels[panel];
-      panelState.size = Math.max(panelState.minSize, Math.min(panelState.maxSize, size));
+      panelState.size = Math.max(
+        panelState.minSize,
+        Math.min(panelState.maxSize, size),
+      );
     },
 
     // View management
-    setActiveView: (state, action: PayloadAction<UIState['activeView']>) => {
+    setActiveView: (state, action: PayloadAction<UIState["activeView"]>) => {
       state.activeView = action.payload;
     },
 
@@ -98,7 +107,7 @@ const uiSlice = createSlice({
     },
 
     // Theme
-    setTheme: (state, action: PayloadAction<'dark' | 'light'>) => {
+    setTheme: (state, action: PayloadAction<"dark" | "light">) => {
       state.theme = action.payload;
     },
 
@@ -113,7 +122,10 @@ const uiSlice = createSlice({
       state.expandedSections[section] = !state.expandedSections[section];
     },
 
-    setExpandedSections: (state, action: PayloadAction<Record<string, boolean>>) => {
+    setExpandedSections: (
+      state,
+      action: PayloadAction<Record<string, boolean>>,
+    ) => {
       state.expandedSections = action.payload;
     },
 
@@ -125,7 +137,7 @@ const uiSlice = createSlice({
     },
 
     closeModal: (state, action: PayloadAction<string>) => {
-      state.modalStack = state.modalStack.filter(id => id !== action.payload);
+      state.modalStack = state.modalStack.filter((id) => id !== action.payload);
     },
 
     closeAllModals: (state) => {
@@ -142,15 +154,18 @@ const uiSlice = createSlice({
     },
 
     // Batch updates for layout
-    updateLayout: (state, action: PayloadAction<{
-      panels?: Partial<UIState['panels']>;
-      activeView?: UIState['activeView'];
-    }>) => {
+    updateLayout: (
+      state,
+      action: PayloadAction<{
+        panels?: Partial<UIState["panels"]>;
+        activeView?: UIState["activeView"];
+      }>,
+    ) => {
       if (action.payload.panels) {
         Object.entries(action.payload.panels).forEach(([key, value]) => {
-          if (state.panels[key as keyof UIState['panels']] && value) {
-            state.panels[key as keyof UIState['panels']] = {
-              ...state.panels[key as keyof UIState['panels']],
+          if (state.panels[key as keyof UIState["panels"]] && value) {
+            state.panels[key as keyof UIState["panels"]] = {
+              ...state.panels[key as keyof UIState["panels"]],
               ...value,
             };
           }
@@ -189,4 +204,4 @@ export const {
   resetLayout,
 } = uiSlice.actions;
 
-export default uiSlice.reducer; 
+export default uiSlice.reducer;

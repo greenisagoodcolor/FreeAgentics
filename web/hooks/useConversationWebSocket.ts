@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from 'react';
-import type { Message, Conversation } from '@/lib/types';
+import { useEffect, useRef, useState, useCallback } from "react";
+import type { Message, Conversation } from "@/lib/types";
 
 interface ConversationEvent {
   type: string;
@@ -39,7 +39,7 @@ interface ConversationWebSocketState {
 }
 
 export function useConversationWebSocket(
-  options: UseConversationWebSocketOptions = {}
+  options: UseConversationWebSocketOptions = {},
 ) {
   const {
     autoConnect = true,
@@ -48,7 +48,7 @@ export function useConversationWebSocket(
     onEvent,
     onError,
     onConnect,
-    onDisconnect
+    onDisconnect,
   } = options;
 
   const wsRef = useRef<WebSocket | null>(null);
@@ -62,116 +62,128 @@ export function useConversationWebSocket(
     isConnecting: false,
     error: null,
     lastEventTime: null,
-    connectionStats: null
+    connectionStats: null,
   });
 
   // Get WebSocket URL
   const getWebSocketUrl = useCallback(() => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const host = window.location.host;
     return `${protocol}//${host}/api/ws/conversations`;
   }, []);
 
   // Handle incoming messages
-  const handleMessage = useCallback((event: MessageEvent) => {
-    try {
-      const data = JSON.parse(event.data);
-      
-      setState(prev => ({
-        ...prev,
-        lastEventTime: new Date(),
-        error: null
-      }));
+  const handleMessage = useCallback(
+    (event: MessageEvent) => {
+      try {
+        const data = JSON.parse(event.data);
 
-      // Handle different message types
-      switch (data.type) {
-        case 'connection_established':
-          console.log('WebSocket connection established:', data.client_id);
-          setState(prev => ({ ...prev, isConnected: true, isConnecting: false }));
-          onConnect?.();
-          break;
+        setState((prev) => ({
+          ...prev,
+          lastEventTime: new Date(),
+          error: null,
+        }));
 
-        case 'pong':
-          // Handle ping/pong for connection health
-          break;
+        // Handle different message types
+        switch (data.type) {
+          case "connection_established":
+            console.log("WebSocket connection established:", data.client_id);
+            setState((prev) => ({
+              ...prev,
+              isConnected: true,
+              isConnecting: false,
+            }));
+            onConnect?.();
+            break;
 
-        case 'subscription_updated':
-          console.log('Subscription updated:', data.subscription);
-          break;
+          case "pong":
+            // Handle ping/pong for connection health
+            break;
 
-        case 'connection_stats':
-          setState(prev => ({ ...prev, connectionStats: data.stats }));
-          break;
+          case "subscription_updated":
+            console.log("Subscription updated:", data.subscription);
+            break;
 
-        case 'error':
-          console.error('WebSocket error:', data.message);
-          setState(prev => ({ ...prev, error: data.message }));
-          break;
+          case "connection_stats":
+            setState((prev) => ({ ...prev, connectionStats: data.stats }));
+            break;
 
-        // Conversation events
-        case 'message_created':
-        case 'message_updated':
-        case 'message_deleted':
-        case 'conversation_started':
-        case 'conversation_ended':
-        case 'agent_typing':
-        case 'agent_stopped_typing':
-        case 'agent_joined':
-        case 'agent_left':
-        case 'message_queue_updated':
-          onEvent?.(data as ConversationEvent);
-          break;
+          case "error":
+            console.error("WebSocket error:", data.message);
+            setState((prev) => ({ ...prev, error: data.message }));
+            break;
 
-        default:
-          console.log('Unknown WebSocket message type:', data.type);
+          // Conversation events
+          case "message_created":
+          case "message_updated":
+          case "message_deleted":
+          case "conversation_started":
+          case "conversation_ended":
+          case "agent_typing":
+          case "agent_stopped_typing":
+          case "agent_joined":
+          case "agent_left":
+          case "message_queue_updated":
+            onEvent?.(data as ConversationEvent);
+            break;
+
+          default:
+            console.log("Unknown WebSocket message type:", data.type);
+        }
+      } catch (error) {
+        console.error("Error parsing WebSocket message:", error);
+        setState((prev) => ({ ...prev, error: "Failed to parse message" }));
       }
-    } catch (error) {
-      console.error('Error parsing WebSocket message:', error);
-      setState(prev => ({ ...prev, error: 'Failed to parse message' }));
-    }
-  }, [onEvent, onConnect]);
+    },
+    [onEvent, onConnect],
+  );
 
   // Handle connection errors
-  const handleError = useCallback((event: Event) => {
-    console.error('WebSocket error:', event);
-    setState(prev => ({ 
-      ...prev, 
-      error: 'Connection error',
-      isConnected: false,
-      isConnecting: false 
-    }));
-    onError?.(event);
-  }, [onError]);
+  const handleError = useCallback(
+    (event: Event) => {
+      console.error("WebSocket error:", event);
+      setState((prev) => ({
+        ...prev,
+        error: "Connection error",
+        isConnected: false,
+        isConnecting: false,
+      }));
+      onError?.(event);
+    },
+    [onError],
+  );
 
   // Handle connection close
   const handleClose = useCallback(() => {
-    console.log('WebSocket connection closed');
-    setState(prev => ({ 
-      ...prev, 
-      isConnected: false, 
-      isConnecting: false 
+    console.log("WebSocket connection closed");
+    setState((prev) => ({
+      ...prev,
+      isConnected: false,
+      isConnecting: false,
     }));
-    
+
     // Clear ping interval
     if (pingIntervalRef.current) {
       clearInterval(pingIntervalRef.current);
       pingIntervalRef.current = null;
     }
-    
+
     onDisconnect?.();
-    
+
     // Attempt to reconnect if we haven't exceeded max attempts
     if (reconnectAttemptsRef.current < maxReconnectAttempts) {
       reconnectAttemptsRef.current++;
-      console.log(`Attempting to reconnect (${reconnectAttemptsRef.current}/${maxReconnectAttempts})...`);
-      
+      console.log(
+        `Attempting to reconnect (${reconnectAttemptsRef.current}/${maxReconnectAttempts})...`,
+      );
+
       reconnectTimeoutRef.current = setTimeout(() => {
         connect();
       }, reconnectInterval);
     } else {
-      setState(prev => ({ 
-        ...prev, 
-        error: 'Max reconnection attempts exceeded' 
+      setState((prev) => ({
+        ...prev,
+        error: "Max reconnection attempts exceeded",
       }));
     }
   }, [onDisconnect, maxReconnectAttempts, reconnectInterval]);
@@ -182,32 +194,31 @@ export function useConversationWebSocket(
       return; // Already connected
     }
 
-    setState(prev => ({ ...prev, isConnecting: true, error: null }));
+    setState((prev) => ({ ...prev, isConnecting: true, error: null }));
 
     try {
       const url = getWebSocketUrl();
       wsRef.current = new WebSocket(url);
 
       wsRef.current.onopen = () => {
-        console.log('WebSocket connected');
+        console.log("WebSocket connected");
         reconnectAttemptsRef.current = 0; // Reset reconnect attempts
-        
+
         // Set up ping interval to keep connection alive
         pingIntervalRef.current = setInterval(() => {
-          send({ type: 'ping' });
+          send({ type: "ping" });
         }, 30000); // Ping every 30 seconds
       };
 
       wsRef.current.onmessage = handleMessage;
       wsRef.current.onerror = handleError;
       wsRef.current.onclose = handleClose;
-
     } catch (error) {
-      console.error('Failed to create WebSocket connection:', error);
-      setState(prev => ({ 
-        ...prev, 
-        error: 'Failed to create connection',
-        isConnecting: false 
+      console.error("Failed to create WebSocket connection:", error);
+      setState((prev) => ({
+        ...prev,
+        error: "Failed to create connection",
+        isConnecting: false,
       }));
     }
   }, [getWebSocketUrl, handleMessage, handleError, handleClose]);
@@ -229,10 +240,10 @@ export function useConversationWebSocket(
       wsRef.current = null;
     }
 
-    setState(prev => ({ 
-      ...prev, 
-      isConnected: false, 
-      isConnecting: false 
+    setState((prev) => ({
+      ...prev,
+      isConnected: false,
+      isConnecting: false,
     }));
   }, []);
 
@@ -242,41 +253,50 @@ export function useConversationWebSocket(
       wsRef.current.send(JSON.stringify(message));
       return true;
     } else {
-      console.warn('WebSocket not connected, cannot send message:', message);
+      console.warn("WebSocket not connected, cannot send message:", message);
       return false;
     }
   }, []);
 
   // Subscribe to conversation updates
-  const subscribe = useCallback((subscription: ConversationSubscription) => {
-    subscriptionRef.current = { ...subscriptionRef.current, ...subscription };
-    return send({
-      type: 'subscribe',
-      subscription: subscriptionRef.current
-    });
-  }, [send]);
+  const subscribe = useCallback(
+    (subscription: ConversationSubscription) => {
+      subscriptionRef.current = { ...subscriptionRef.current, ...subscription };
+      return send({
+        type: "subscribe",
+        subscription: subscriptionRef.current,
+      });
+    },
+    [send],
+  );
 
   // Update typing status
-  const setTyping = useCallback((conversationId: string, agentId: string, isTyping: boolean) => {
-    return send({
-      type: 'set_typing',
-      conversation_id: conversationId,
-      agent_id: agentId,
-      is_typing: isTyping
-    });
-  }, [send]);
+  const setTyping = useCallback(
+    (conversationId: string, agentId: string, isTyping: boolean) => {
+      return send({
+        type: "set_typing",
+        conversation_id: conversationId,
+        agent_id: agentId,
+        is_typing: isTyping,
+      });
+    },
+    [send],
+  );
 
   // Get typing status
-  const getTypingStatus = useCallback((conversationId: string) => {
-    return send({
-      type: 'get_typing_status',
-      conversation_id: conversationId
-    });
-  }, [send]);
+  const getTypingStatus = useCallback(
+    (conversationId: string) => {
+      return send({
+        type: "get_typing_status",
+        conversation_id: conversationId,
+      });
+    },
+    [send],
+  );
 
   // Get connection stats
   const getStats = useCallback(() => {
-    return send({ type: 'get_stats' });
+    return send({ type: "get_stats" });
   }, [send]);
 
   // Auto-connect on mount
@@ -295,14 +315,14 @@ export function useConversationWebSocket(
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden && !state.isConnected && !state.isConnecting) {
-        console.log('Tab became visible, attempting to reconnect...');
+        console.log("Tab became visible, attempting to reconnect...");
         connect();
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [state.isConnected, state.isConnecting, connect]);
 
@@ -325,6 +345,6 @@ export function useConversationWebSocket(
 
     // Connection info
     reconnectAttempts: reconnectAttemptsRef.current,
-    maxReconnectAttempts
+    maxReconnectAttempts,
   };
-} 
+}

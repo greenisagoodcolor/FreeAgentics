@@ -1,8 +1,8 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface ConnectionStatus {
-  websocket: 'connecting' | 'connected' | 'disconnected' | 'error';
-  api: 'connecting' | 'connected' | 'disconnected' | 'error';
+  websocket: "connecting" | "connected" | "disconnected" | "error";
+  api: "connecting" | "connected" | "disconnected" | "error";
   lastPing: number | null;
   latency: number | null;
   reconnectAttempts: number;
@@ -10,7 +10,7 @@ export interface ConnectionStatus {
 }
 
 export interface ConnectionError {
-  type: 'websocket' | 'api';
+  type: "websocket" | "api";
   message: string;
   timestamp: number;
   code?: string;
@@ -30,8 +30,8 @@ interface ConnectionState {
 
 const initialState: ConnectionState = {
   status: {
-    websocket: 'disconnected',
-    api: 'disconnected',
+    websocket: "disconnected",
+    api: "disconnected",
     lastPing: null,
     latency: null,
     reconnectAttempts: 0,
@@ -48,53 +48,62 @@ const initialState: ConnectionState = {
 };
 
 const connectionSlice = createSlice({
-  name: 'connection',
+  name: "connection",
   initialState,
   reducers: {
     // WebSocket connection management
-    setWebSocketStatus: (state, action: PayloadAction<ConnectionStatus['websocket']>) => {
+    setWebSocketStatus: (
+      state,
+      action: PayloadAction<ConnectionStatus["websocket"]>,
+    ) => {
       state.status.websocket = action.payload;
-      
-      if (action.payload === 'connected') {
+
+      if (action.payload === "connected") {
         state.status.reconnectAttempts = 0;
         state.isReconnecting = false;
-      } else if (action.payload === 'disconnected' && state.autoReconnect) {
+      } else if (action.payload === "disconnected" && state.autoReconnect) {
         state.isReconnecting = true;
       }
     },
 
     // API connection management
-    setApiStatus: (state, action: PayloadAction<ConnectionStatus['api']>) => {
+    setApiStatus: (state, action: PayloadAction<ConnectionStatus["api"]>) => {
       state.status.api = action.payload;
     },
 
     // Connection established
-    connectionEstablished: (state, action: PayloadAction<{
-      connectionId: string;
-      socketUrl: string;
-      apiUrl: string;
-    }>) => {
+    connectionEstablished: (
+      state,
+      action: PayloadAction<{
+        connectionId: string;
+        socketUrl: string;
+        apiUrl: string;
+      }>,
+    ) => {
       const { connectionId, socketUrl, apiUrl } = action.payload;
       state.connectionId = connectionId;
       state.socketUrl = socketUrl;
       state.apiUrl = apiUrl;
-      state.status.websocket = 'connected';
-      state.status.api = 'connected';
+      state.status.websocket = "connected";
+      state.status.api = "connected";
       state.isReconnecting = false;
       state.status.reconnectAttempts = 0;
     },
 
     // Connection lost
-    connectionLost: (state, action: PayloadAction<{
-      type: 'websocket' | 'api';
-      error?: string;
-    }>) => {
+    connectionLost: (
+      state,
+      action: PayloadAction<{
+        type: "websocket" | "api";
+        error?: string;
+      }>,
+    ) => {
       const { type, error } = action.payload;
-      
-      if (type === 'websocket') {
-        state.status.websocket = 'disconnected';
+
+      if (type === "websocket") {
+        state.status.websocket = "disconnected";
       } else {
-        state.status.api = 'disconnected';
+        state.status.api = "disconnected";
       }
 
       if (error) {
@@ -105,7 +114,10 @@ const connectionSlice = createSlice({
         });
       }
 
-      if (state.autoReconnect && state.status.reconnectAttempts < state.status.maxReconnectAttempts) {
+      if (
+        state.autoReconnect &&
+        state.status.reconnectAttempts < state.status.maxReconnectAttempts
+      ) {
         state.isReconnecting = true;
       }
     },
@@ -119,15 +131,15 @@ const connectionSlice = createSlice({
     // Reconnection attempt
     incrementReconnectAttempt: (state) => {
       state.status.reconnectAttempts += 1;
-      
+
       if (state.status.reconnectAttempts >= state.status.maxReconnectAttempts) {
         state.isReconnecting = false;
-        state.status.websocket = 'error';
+        state.status.websocket = "error";
       } else {
         // Exponential backoff
         state.reconnectDelay = Math.min(
           state.reconnectDelay * 2,
-          30000 // Max 30 seconds
+          30000, // Max 30 seconds
         );
       }
     },
@@ -145,7 +157,10 @@ const connectionSlice = createSlice({
     },
 
     // Add error
-    addConnectionError: (state, action: PayloadAction<Omit<ConnectionError, 'timestamp'>>) => {
+    addConnectionError: (
+      state,
+      action: PayloadAction<Omit<ConnectionError, "timestamp">>,
+    ) => {
       state.errors.push({
         ...action.payload,
         timestamp: Date.now(),
@@ -163,10 +178,13 @@ const connectionSlice = createSlice({
     },
 
     // Update connection URLs
-    updateConnectionUrls: (state, action: PayloadAction<{
-      socketUrl?: string;
-      apiUrl?: string;
-    }>) => {
+    updateConnectionUrls: (
+      state,
+      action: PayloadAction<{
+        socketUrl?: string;
+        apiUrl?: string;
+      }>,
+    ) => {
       if (action.payload.socketUrl) {
         state.socketUrl = action.payload.socketUrl;
       }
@@ -182,8 +200,8 @@ const connectionSlice = createSlice({
 
     // Force reconnect
     forceReconnect: (state) => {
-      state.status.websocket = 'disconnected';
-      state.status.api = 'disconnected';
+      state.status.websocket = "disconnected";
+      state.status.api = "disconnected";
       state.isReconnecting = true;
       state.status.reconnectAttempts = 0;
       state.reconnectDelay = 1000;
@@ -191,8 +209,8 @@ const connectionSlice = createSlice({
 
     // Complete disconnect
     disconnect: (state) => {
-      state.status.websocket = 'disconnected';
-      state.status.api = 'disconnected';
+      state.status.websocket = "disconnected";
+      state.status.api = "disconnected";
       state.connectionId = null;
       state.isReconnecting = false;
       state.autoReconnect = false;
@@ -217,4 +235,4 @@ export const {
   disconnect,
 } = connectionSlice.actions;
 
-export default connectionSlice.reducer; 
+export default connectionSlice.reducer;

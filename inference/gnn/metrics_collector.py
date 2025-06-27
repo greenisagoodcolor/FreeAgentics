@@ -19,7 +19,7 @@ from .monitoring import get_logger
 Metrics Collection System for GNN Processing
 This module provides comprehensive metrics collection and aggregation
 for GNN processing operations.
-."""
+"""
 logger = get_logger().logger
 
 
@@ -86,7 +86,7 @@ class MetricsDatabase:
         Initialize metrics database.
         Args:
             db_path: Path to SQLite database file
-        ."""
+        """
         self.db_path = db_path
         self._lock = threading.Lock()
         self._init_database()
@@ -452,8 +452,7 @@ class MetricsCollector:
             },
         }
         daily_stats = self.db.get_aggregated_stats(start_time, end_time, "day")
-        hourly_stats = (
-            self.db.get_aggregated_stats(start_time, end_time, "hour"))
+        hourly_stats = self.db.get_aggregated_stats(start_time, end_time, "hour")
         report["daily_statistics"] = daily_stats
         report["hourly_statistics"] = hourly_stats
         report["real_time_stats"] = self.get_real_time_stats()

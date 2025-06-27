@@ -1,4 +1,4 @@
-."""
+"""
 Coalition Monitoring WebSocket Endpoint
 
 Implements real-time WebSocket monitoring for coalition formation events

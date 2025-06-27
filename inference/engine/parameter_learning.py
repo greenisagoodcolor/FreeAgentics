@@ -66,11 +66,11 @@ class ExperienceBuffer:
         self.max_size = max_size
 
     def add(self, experience: Experience) -> None:
-        ."""Add experience to buffer."""
+        """Add experience to buffer"""
         self.buffer.append(experience)
 
     def sample(self, batch_size: int) -> List[Experience]:
-        ."""Sample batch of experiences."""
+        """Sample batch of experiences"""
         indices = np.random.choice(len(self.buffer), batch_size, replace=False)
         return [self.buffer[i] for i in indices]
 
@@ -96,7 +96,7 @@ class ParameterLearner(ABC):
     def update_parameters(
         self, experiences: List[Experience], generative_model: GenerativeModel
     ) -> Dict[str, float]:
-        ."""Update model parameters from experiences."""
+        """Update model parameters from experiences"""
         pass
 
     @abstractmethod
@@ -189,8 +189,7 @@ class DiscreteParameterLearner(ParameterLearner):
                 # For one-hot vectors, find the index of the 1
                 next_state_idx = torch.argmax(exp.next_state)
             # Ensure all indices are scalar tensors
-            state_idx = (
-                state_idx.item() if hasattr(state_idx, "item") else state_idx)
+            state_idx = state_idx.item() if hasattr(state_idx, "item") else state_idx
             obs_idx = obs_idx.item() if hasattr(obs_idx, "item") else obs_idx
             action_idx = action_idx.item() if hasattr(action_idx, "item") else action_idx
             next_state_idx = (
@@ -269,12 +268,12 @@ class DiscreteParameterLearner(ParameterLearner):
             return alpha / alpha.sum()
 
     def _compute_entropy(self, probs: torch.Tensor) -> torch.Tensor:
-        ."""Compute entropy of probability distribution."""
+        """Compute entropy of probability distribution"""
         safe_probs = probs + self.config.eps
         return -torch.sum(safe_probs * torch.log(safe_probs), dim=0)
 
     def _decay_learning_rates(self) -> None:
-        ."""Apply learning rate decay."""
+        """Apply learning rate decay"""
         self.lr_A = max(self.lr_A * self.config.decay_rate, self.config.min_learning_rate)
         self.lr_B = max(self.lr_B * self.config.decay_rate, self.config.min_learning_rate)
         self.lr_D = max(self.lr_D * self.config.decay_rate, self.config.min_learning_rate)
@@ -463,8 +462,7 @@ class OnlineParameterLearner:
         ):
             experiences = self.replay_buffer.sample(self.config.batch_size)
         else:
-            experiences = (
-                [self.replay_buffer.buffer[-1]] if self.replay_buffer else [])
+            experiences = [self.replay_buffer.buffer[-1]] if self.replay_buffer else []
         if experiences:
             metrics = self.parameter_learner.update_parameters(experiences, self.generative_model)
             metrics["total_experiences"] = self.total_experiences

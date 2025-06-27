@@ -10,6 +10,7 @@
 ## Context and Problem Statement
 
 FreeAgentics is a complex multi-agent system with Active Inference cognitive engines, coalition formation mechanisms, and emergent behaviors. Traditional testing approaches are insufficient for validating systems where:
+
 - Agent behaviors emerge from mathematical principles rather than explicit programming
 - Coalition formation involves multi-agent negotiation and game theory
 - Active Inference calculations must maintain mathematical invariants
@@ -32,6 +33,7 @@ The testing strategy must provide confidence in mathematical correctness, emerge
 ## Considered Options
 
 ### Option 1: Traditional Unit Testing Only
+
 - **Pros**:
   - Simple to implement
   - Fast execution
@@ -44,6 +46,7 @@ The testing strategy must provide confidence in mathematical correctness, emerge
 - **Implementation Effort**: Low
 
 ### Option 2: Comprehensive Test Pyramid (Unit, Integration, E2E)
+
 - **Pros**:
   - Good coverage across layers
   - Industry standard approach
@@ -55,6 +58,7 @@ The testing strategy must provide confidence in mathematical correctness, emerge
 - **Implementation Effort**: Medium
 
 ### Option 3: Property-Based + Behavior-Driven + Performance Testing
+
 - **Pros**:
   - Mathematical property verification
   - Emergent behavior validation
@@ -68,6 +72,7 @@ The testing strategy must provide confidence in mathematical correctness, emerge
 - **Implementation Effort**: High
 
 ### Option 4: Simulation-Based Testing Only
+
 - **Pros**:
   - Realistic scenarios
   - Emergent behavior coverage
@@ -86,6 +91,7 @@ The testing strategy must provide confidence in mathematical correctness, emerge
 ### Implementation Strategy
 
 1. **Multi-Layer Testing Architecture**:
+
    ```
    Tests/
    ├── unit/              # Fast, isolated component tests

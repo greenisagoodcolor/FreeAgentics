@@ -2,7 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +31,7 @@ import {
   Clock,
   Filter,
   FileText,
-  Info
+  Info,
 } from "lucide-react";
 
 interface ExperimentExport {
@@ -54,12 +61,13 @@ const mockExports: ExperimentExport[] = [
     totalConversations: 12,
     totalMessages: 156,
     totalKnowledgeNodes: 48,
-    fileSizeMb: 2.4
+    fileSizeMb: 2.4,
   },
   {
     id: "exp_e5f6g7h8",
     name: "Knowledge Transfer Study",
-    description: "Experiment studying knowledge transfer between agents with different belief systems",
+    description:
+      "Experiment studying knowledge transfer between agents with different belief systems",
     createdAt: "2025-06-15T09:45:00Z",
     createdBy: "admin@example.com",
     components: ["Agents", "Conversations", "Knowledge Graphs"],
@@ -67,7 +75,7 @@ const mockExports: ExperimentExport[] = [
     totalConversations: 8,
     totalMessages: 97,
     totalKnowledgeNodes: 32,
-    fileSizeMb: 1.8
+    fileSizeMb: 1.8,
   },
   {
     id: "exp_i9j0k1l2",
@@ -80,8 +88,8 @@ const mockExports: ExperimentExport[] = [
     totalConversations: 0,
     totalMessages: 0,
     totalKnowledgeNodes: 15,
-    fileSizeMb: 3.2
-  }
+    fileSizeMb: 3.2,
+  },
 ];
 
 // Mock data for agents
@@ -89,32 +97,47 @@ const mockAgents = [
   { id: "agent_001", name: "Explorer Agent", type: "explorer" },
   { id: "agent_002", name: "Guardian Agent", type: "guardian" },
   { id: "agent_003", name: "Merchant Agent", type: "merchant" },
-  { id: "agent_004", name: "Scholar Agent", type: "scholar" }
+  { id: "agent_004", name: "Scholar Agent", type: "scholar" },
 ];
 
 // Mock data for conversations
 const mockConversations = [
-  { id: "conv_001", participants: ["agent_001", "agent_002"], messageCount: 24 },
-  { id: "conv_002", participants: ["agent_001", "agent_003", "agent_004"], messageCount: 36 },
-  { id: "conv_003", participants: ["agent_002", "agent_004"], messageCount: 18 }
+  {
+    id: "conv_001",
+    participants: ["agent_001", "agent_002"],
+    messageCount: 24,
+  },
+  {
+    id: "conv_002",
+    participants: ["agent_001", "agent_003", "agent_004"],
+    messageCount: 36,
+  },
+  {
+    id: "conv_003",
+    participants: ["agent_002", "agent_004"],
+    messageCount: 18,
+  },
 ];
 
 export default function ExperimentsPage() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredExports, setFilteredExports] = useState<ExperimentExport[]>(mockExports);
+  const [filteredExports, setFilteredExports] =
+    useState<ExperimentExport[]>(mockExports);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isSharingModalOpen, setIsSharingModalOpen] = useState(false);
-  const [selectedExperiment, setSelectedExperiment] = useState<ExperimentExport | null>(null);
+  const [selectedExperiment, setSelectedExperiment] =
+    useState<ExperimentExport | null>(null);
   const [activeTab, setActiveTab] = useState("exports");
 
   useEffect(() => {
     // Filter exports based on search query
-    const filtered = mockExports.filter(exp => 
-      exp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      exp.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      exp.id.toLowerCase().includes(searchQuery.toLowerCase())
+    const filtered = mockExports.filter(
+      (exp) =>
+        exp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        exp.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        exp.id.toLowerCase().includes(searchQuery.toLowerCase()),
     );
     setFilteredExports(filtered);
   }, [searchQuery]);
@@ -149,10 +172,10 @@ export default function ExperimentsPage() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
@@ -160,9 +183,12 @@ export default function ExperimentsPage() {
     <div className="container mx-auto py-8 max-w-7xl">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Experiment Management</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Experiment Management
+          </h1>
           <p className="text-muted-foreground mt-1">
-            Export, import, and manage experiment states for reproducible research
+            Export, import, and manage experiment states for reproducible
+            research
           </p>
         </div>
         <div className="flex gap-3">
@@ -177,7 +203,11 @@ export default function ExperimentsPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="exports" className="space-y-6" onValueChange={setActiveTab}>
+      <Tabs
+        defaultValue="exports"
+        className="space-y-6"
+        onValueChange={setActiveTab}
+      >
         <div className="flex justify-between items-center">
           <TabsList>
             <TabsTrigger value="exports">Exports</TabsTrigger>
@@ -202,7 +232,9 @@ export default function ExperimentsPage() {
               <Package className="h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-medium">No exports found</h3>
               <p className="text-sm text-muted-foreground mt-1 mb-6">
-                {searchQuery ? "No exports match your search query." : "You haven't created any exports yet."}
+                {searchQuery
+                  ? "No exports match your search query."
+                  : "You haven't created any exports yet."}
               </p>
               {!searchQuery && (
                 <Button onClick={() => setIsExportModalOpen(true)}>
@@ -219,7 +251,9 @@ export default function ExperimentsPage() {
                     <div className="flex justify-between items-start">
                       <div>
                         <CardTitle>{exp.name}</CardTitle>
-                        <CardDescription className="mt-1">{exp.description}</CardDescription>
+                        <CardDescription className="mt-1">
+                          {exp.description}
+                        </CardDescription>
                       </div>
                       <Badge variant="outline" className="ml-2 text-xs">
                         {exp.components.length} components
@@ -230,57 +264,99 @@ export default function ExperimentsPage() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{formatDate(exp.createdAt)}</span>
+                        <span className="text-sm">
+                          {formatDate(exp.createdAt)}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{exp.createdBy.split('@')[0]}</span>
+                        <span className="text-sm">
+                          {exp.createdBy.split("@")[0]}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <FileJson className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{exp.fileSizeMb.toFixed(1)} MB</span>
+                        <span className="text-sm">
+                          {exp.fileSizeMb.toFixed(1)} MB
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Info className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">ID: {exp.id.substring(0, 8)}</span>
+                        <span className="text-sm">
+                          ID: {exp.id.substring(0, 8)}
+                        </span>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-4 gap-3 text-center">
                       <div className="bg-primary/5 rounded-md p-2">
-                        <div className="text-lg font-semibold">{exp.totalAgents}</div>
-                        <div className="text-xs text-muted-foreground">Agents</div>
+                        <div className="text-lg font-semibold">
+                          {exp.totalAgents}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Agents
+                        </div>
                       </div>
                       <div className="bg-primary/5 rounded-md p-2">
-                        <div className="text-lg font-semibold">{exp.totalConversations}</div>
-                        <div className="text-xs text-muted-foreground">Conversations</div>
+                        <div className="text-lg font-semibold">
+                          {exp.totalConversations}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Conversations
+                        </div>
                       </div>
                       <div className="bg-primary/5 rounded-md p-2">
-                        <div className="text-lg font-semibold">{exp.totalMessages}</div>
-                        <div className="text-xs text-muted-foreground">Messages</div>
+                        <div className="text-lg font-semibold">
+                          {exp.totalMessages}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Messages
+                        </div>
                       </div>
                       <div className="bg-primary/5 rounded-md p-2">
-                        <div className="text-lg font-semibold">{exp.totalKnowledgeNodes}</div>
-                        <div className="text-xs text-muted-foreground">Knowledge Nodes</div>
+                        <div className="text-lg font-semibold">
+                          {exp.totalKnowledgeNodes}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Knowledge Nodes
+                        </div>
                       </div>
                     </div>
                   </CardContent>
                   <CardFooter className="flex justify-between pt-2">
                     <div className="flex gap-1">
                       {exp.components.map((component, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
+                        <Badge
+                          key={index}
+                          variant="secondary"
+                          className="text-xs"
+                        >
                           {component}
                         </Badge>
                       ))}
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="ghost" size="icon" title="Delete export" onClick={() => handleDeleteExport(exp.id)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Delete export"
+                        onClick={() => handleDeleteExport(exp.id)}
+                      >
                         <Trash2 className="h-4 w-4 text-muted-foreground" />
                       </Button>
-                      <Button variant="ghost" size="icon" title="Share export" onClick={() => handleShareExport(exp)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Share export"
+                        onClick={() => handleShareExport(exp)}
+                      >
                         <Share2 className="h-4 w-4 text-muted-foreground" />
                       </Button>
-                      <Button variant="ghost" size="icon" title="Download export">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Download export"
+                      >
                         <DownloadIcon className="h-4 w-4 text-muted-foreground" />
                       </Button>
                     </div>
@@ -296,7 +372,8 @@ export default function ExperimentsPage() {
             <Upload className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium">No imported experiments</h3>
             <p className="text-sm text-muted-foreground mt-1 mb-6">
-              Import an experiment to reproduce research or collaborate with others.
+              Import an experiment to reproduce research or collaborate with
+              others.
             </p>
             <Button onClick={() => setIsImportModalOpen(true)}>
               <Upload className="mr-2 h-4 w-4" />
@@ -312,9 +389,7 @@ export default function ExperimentsPage() {
             <p className="text-sm text-muted-foreground mt-1 mb-6">
               Templates help you quickly set up standardized experiments.
             </p>
-            <Button disabled>
-              Create Template
-            </Button>
+            <Button disabled>Create Template</Button>
             <p className="text-xs text-muted-foreground mt-4">
               Coming soon in a future update
             </p>

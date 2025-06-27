@@ -15,7 +15,7 @@ Resource and Business Model Mechanics
 This module provides comprehensive resource management, economic transactions,
 and business logic for agent interactions including markets, trade protocols,
 and resource production/consumption systems.
-."""
+"""
 logger = logging.getLogger(__name__)
 
 
@@ -82,7 +82,7 @@ class ResourceUnit:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     def get_effective_value(self) -> float:
-        ."""Calculate effective value considering quality and durability."""
+        """Calculate effective value considering quality and durability"""
         return self.quantity * self.quality * self.durability
 
     def degrade(self, rate: float = 0.01) -> None:
@@ -162,7 +162,7 @@ class TradeOffer:
     additional_terms: Dict[str, Any] = field(default_factory=dict)
 
     def is_valid(self) -> bool:
-        ."""Check if offer is still valid."""
+        """Check if offer is still valid"""
         return datetime.now(timezone.utc) < self.expiration
 
     def calculate_value_ratio(self, market_prices: Dict[ResourceType, MarketPrice]) -> float:
@@ -196,40 +196,40 @@ class Transaction:
 
 
 class IResourceProvider(ABC):
-    ."""Interface for entities that can provide resources."""
+    """Interface for entities that can provide resources"""
 
     @abstractmethod
     def get_available_resources(self) -> Dict[ResourceType, float]:
-        ."""Get currently available resources."""
+        """Get currently available resources"""
         pass
 
     @abstractmethod
     def can_provide(self, resource_type: ResourceType, amount: float) -> bool:
-        ."""Check if can provide specified amount of resource."""
+        """Check if can provide specified amount of resource"""
         pass
 
     @abstractmethod
     def provide_resource(self, resource_type: ResourceType, amount: float) -> bool:
-        ."""Provide specified amount of resource."""
+        """Provide specified amount of resource"""
         pass
 
 
 class IResourceConsumer(ABC):
-    ."""Interface for entities that can consume resources."""
+    """Interface for entities that can consume resources"""
 
     @abstractmethod
     def get_resource_needs(self) -> Dict[ResourceType, float]:
-        ."""Get current resource needs."""
+        """Get current resource needs"""
         pass
 
     @abstractmethod
     def can_consume(self, resource_type: ResourceType, amount: float) -> bool:
-        ."""Check if can consume specified amount of resource."""
+        """Check if can consume specified amount of resource"""
         pass
 
     @abstractmethod
     def consume_resource(self, resource_type: ResourceType, amount: float) -> bool:
-        ."""Consume specified amount of resource."""
+        """Consume specified amount of resource"""
         pass
 
 
@@ -293,13 +293,13 @@ class ResourceInventory:
         return removed_units
 
     def get_total_amount(self, resource_type: ResourceType) -> float:
-        ."""Get total amount of a resource type."""
+        """Get total amount of a resource type"""
         if resource_type not in self.resources:
             return 0.0
         return sum(unit.quantity for unit in self.resources[resource_type])
 
     def get_available_amount(self, resource_type: ResourceType) -> float:
-        ."""Get available amount (total minus reserved)."""
+        """Get available amount (total minus reserved)"""
         total = self.get_total_amount(resource_type)
         reserved = self.reserved.get(resource_type, 0.0)
         return max(0.0, total - reserved)
@@ -312,7 +312,7 @@ class ResourceInventory:
         return True
 
     def release_reservation(self, resource_type: ResourceType, amount: float) -> None:
-        ."""Release reserved resources."""
+        """Release reserved resources"""
         current_reserved = self.reserved.get(resource_type, 0.0)
         self.reserved[resource_type] = max(0.0, current_reserved - amount)
 
@@ -537,17 +537,17 @@ class ResourceBusinessManager:
         self.trade_relationships: Dict[str, Dict[str, float]] = {}  # Trust levels between agents
 
     def create_market(self, market_id: str, location: Optional[str] = None) -> Market:
-        ."""Create a new market."""
+        """Create a new market"""
         market = Market(market_id, location)
         self.markets[market_id] = market
         return market
 
     def get_market(self, market_id: str) -> Optional[Market]:
-        ."""Get market by ID."""
+        """Get market by ID"""
         return self.markets.get(market_id)
 
     def create_inventory(self, agent_id: str, capacity: float = 1000.0) -> ResourceInventory:
-        ."""Create inventory for an agent."""
+        """Create inventory for an agent"""
         inventory = ResourceInventory(agent_id, capacity)
         self.inventories[agent_id] = inventory
         return inventory
@@ -628,7 +628,7 @@ class ResourceBusinessManager:
         self.trade_relationships[agent2][agent1] = new_trust
 
     def get_trust_level(self, agent1: str, agent2: str) -> float:
-        ."""Get trust level between two agents."""
+        """Get trust level between two agents"""
         if agent1 in self.trade_relationships:
             return self.trade_relationships[agent1].get(agent2, 0.5)
         return 0.5
@@ -645,8 +645,7 @@ class ResourceBusinessManager:
         """Get summary of the entire resource/business system"""
         return {
             "markets": {
-                market_id: market.get_market_summary() for market_id,
-                    market in self.markets.items()
+                market_id: market.get_market_summary() for market_id, market in self.markets.items()
             },
             "total_agents": len(self.inventories),
             "total_trade_relationships": sum(
@@ -668,7 +667,7 @@ class ResourceBusinessManager:
 
 # Factory functions
 def create_resource_business_manager() -> ResourceBusinessManager:
-    ."""Create a new resource business manager."""
+    """Create a new resource business manager"""
     return ResourceBusinessManager()
 
 

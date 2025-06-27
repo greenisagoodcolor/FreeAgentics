@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-."""
+"""
 Active Inference with Graph Neural Network Integration Example
 
 This script demonstrates how to integrate Graph Neural Networks (GNNs) with
@@ -36,10 +36,10 @@ from inference.engine.pymdp_policy_selector import PyMDPPolicySelector
 
 
 class GraphEnvironment:
-    """Graph-based environment where agent navigates between nodes."""
+    """Graph-based environment where agent navigates between nodes"""
 
     def __init__(self, num_nodes: int = 10, edge_prob: float = 0.3) -> None:
-        """Initialize."""
+        """Initialize"""
         self.num_nodes = num_nodes
         self.current_node = 0
         self.goal_node = num_nodes - 1
@@ -49,21 +49,20 @@ class GraphEnvironment:
         self.adjacency_matrix = nx.adjacency_matrix(self.graph).todense()
 
         # Node features (random for demonstration)
-        self.node_features = (
-            torch.randn(num_nodes, 4)  # 4-dimensional features)
+        self.node_features = torch.randn(num_nodes, 4)  # 4-dimensional features
 
         # Mark goal node with special feature
         self.node_features[self.goal_node, -1] = 2.0  # Goal marker
 
     def _generate_graph(self, num_nodes: int, edge_prob: float) -> nx.Graph:
-        """Generate a connected random graph."""
+        """Generate a connected random graph"""
         while True:
             G = nx.erdos_renyi_graph(num_nodes, edge_prob)
             if nx.is_connected(G):
                 return G
 
     def get_graph_observation(self) -> Data:
-        """Get current graph observation as PyTorch Geometric Data object."""
+        """Get current graph observation as PyTorch Geometric Data object"""
         # Create edge index
         edges = list(self.graph.edges())
         edge_index = torch.tensor(edges, dtype=torch.long).t().contiguous()
@@ -78,11 +77,11 @@ class GraphEnvironment:
         return Data(x=node_features, edge_index=edge_index)
 
     def get_neighbors(self) -> List[int]:
-        """Get neighboring nodes of current position."""
+        """Get neighboring nodes of current position"""
         return list(self.graph.neighbors(self.current_node))
 
     def step(self, target_node: int) -> tuple[int, bool]:
-        """Move to target node if it's a neighbor."""
+        """Move to target node if it's a neighbor"""
         if target_node in self.get_neighbors():
             self.current_node = target_node
 
@@ -93,12 +92,12 @@ class GraphEnvironment:
         return observation, done
 
     def reset(self) -> None:
-        """Reset environment."""
+        """Reset environment"""
         self.current_node = 0
         return self.current_node
 
     def visualize(self, agent_path: Optional[List[int]] = None):
-        """Visualize the graph with agent path."""
+        """Visualize the graph with agent path"""
         plt.figure(figsize=(10, 8))
 
         pos = nx.spring_layout(self.graph, seed=42)
@@ -111,17 +110,14 @@ class GraphEnvironment:
             node_colors[self.current_node] = "orange"  # Current position
 
         nx.draw(
-            self.graph, pos, node_color= (
-                node_colors, with_labels=True, node_size=500, font_size=10)
+            self.graph, pos, node_color=node_colors, with_labels=True, node_size=500, font_size=10
         )
 
         # Draw agent path if provided
         if agent_path and len(agent_path) > 1:
-            path_edges = (
-                [(agent_path[i], agent_path[i + 1]) for i in range(len(agent_path) - 1)])
+            path_edges = [(agent_path[i], agent_path[i + 1]) for i in range(len(agent_path) - 1)]
             nx.draw_networkx_edges(
-                self.graph, pos, edgelist= (
-                    path_edges, edge_color="red", width=3, alpha=0.7)
+                self.graph, pos, edgelist=path_edges, edge_color="red", width=3, alpha=0.7
             )
 
         plt.title("Graph Environment\n(Green=Start, Red=Goal, Orange=Current)")
@@ -130,10 +126,9 @@ class GraphEnvironment:
 
 
 class GraphGNN(nn.Module):
-    """Simple Graph Neural Network for processing graph observations."""
+    """Simple Graph Neural Network for processing graph observations"""
 
-    def __init__(self, input_dim: int = (
-        4, hidden_dim: int = 32, output_dim: int = 16) -> None:)
+    def __init__(self, input_dim: int = 4, hidden_dim: int = 32, output_dim: int = 16) -> None:
         super().__init__()
         self.conv1 = GCNConv(input_dim, hidden_dim)
         self.conv2 = GCNConv(hidden_dim, hidden_dim)
@@ -143,7 +138,7 @@ class GraphGNN(nn.Module):
     def forward(
         self, x: torch.Tensor, edge_index: torch.Tensor, batch: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
-        """Forward pass through GNN."""
+        """Forward pass through GNN"""
         # Node-level processing
         x = F.relu(self.conv1(x, edge_index))
         x = self.dropout(x)
@@ -163,7 +158,7 @@ class GraphGNN(nn.Module):
 
 
 class GraphActiveInferenceAgent:
-    """Active Inference agent that processes graph observations via GNN."""
+    """Active Inference agent that processes graph observations via GNN"""
 
     def __init__(self, env: GraphEnvironment) -> None:
         self.env = env
@@ -178,13 +173,11 @@ class GraphActiveInferenceAgent:
         self.model = self._create_model()
 
         # Set up inference
-        self.inference_config = (
-            InferenceConfig(num_iterations=10, convergence_threshold=1e-4))
+        self.inference_config = InferenceConfig(num_iterations=10, convergence_threshold=1e-4)
         self.inference = VariationalMessagePassing(self.inference_config)
 
         # Set up policy selection
-        self.policy_config = (
-            PolicyConfig(precision=2.0, planning_horizon=2, exploration_bonus=0.2))
+        self.policy_config = PolicyConfig(precision=2.0, planning_horizon=2, exploration_bonus=0.2)
         self.policy_selector = PyMDPPolicySelector(self.policy_config)
 
         # GNN-Active Inference adapter
@@ -194,13 +187,12 @@ class GraphActiveInferenceAgent:
         self.belief = self.model.D.clone()
 
     def _create_model(self) -> DiscreteGenerativeModel:
-        """Create generative model for graph navigation."""
+        """Create generative model for graph navigation"""
 
         dims = ModelDimensions(
             num_states=self.env.num_nodes,
             num_observations=self.env.num_nodes,  # Observe current node
-            num_actions= (
-                self.env.num_nodes,  # Move to any node (filtered by environment))
+            num_actions=self.env.num_nodes,  # Move to any node (filtered by environment)
         )
 
         params = ModelParameters(use_gpu=torch.cuda.is_available())
@@ -211,8 +203,7 @@ class GraphActiveInferenceAgent:
         model.A = A
 
         # Transition model based on graph connectivity
-        B = (
-            torch.zeros(self.env.num_nodes, self.env.num_nodes, self.env.num_nodes))
+        B = torch.zeros(self.env.num_nodes, self.env.num_nodes, self.env.num_nodes)
 
         for state in range(self.env.num_nodes):
             neighbors = list(self.env.graph.neighbors(state))
@@ -240,20 +231,18 @@ class GraphActiveInferenceAgent:
         return model
 
     def perceive(self, graph_obs: Data) -> torch.Tensor:
-        """Process graph observation and update beliefs."""
+        """Process graph observation and update beliefs"""
 
         # Extract GNN features
         with torch.no_grad():
-            gnn_features = (
-                self.gnn_adapter.process_graph_observation(graph_obs))
+            gnn_features = self.gnn_adapter.process_graph_observation(graph_obs)
 
         # Get discrete observation (current node)
         current_node = self.env.current_node
         obs_tensor = torch.tensor(current_node, dtype=torch.long)
 
         # Update beliefs using standard Active Inference
-        self.belief = (
-            self.inference.infer_states(obs_tensor, self.model, self.belief))
+        self.belief = self.inference.infer_states(obs_tensor, self.model, self.belief)
 
         # Enhance beliefs with GNN features (simple mixing)
         gnn_influence = torch.softmax(gnn_features.squeeze(), dim=0)
@@ -263,14 +252,13 @@ class GraphActiveInferenceAgent:
         return self.belief
 
     def act(self) -> int:
-        """Select action based on current beliefs."""
+        """Select action based on current beliefs"""
 
         # Get valid actions (neighboring nodes)
         valid_actions = self.env.get_neighbors()
 
         # Evaluate policies
-        action_probs = (
-            self.policy_selector.evaluate_policies(self.belief, self.model))
+        action_probs = self.policy_selector.evaluate_policies(self.belief, self.model)
 
         # Filter to valid actions only
         valid_probs = torch.zeros_like(action_probs)
@@ -295,14 +283,14 @@ class GraphActiveInferenceAgent:
         return action
 
     def reset(self) -> None:
-        """Reset agent for new episode."""
+        """Reset agent for new episode"""
         self.belief = self.model.D.clone()
 
 
 def run_gnn_active_inference_episode(
     env: GraphEnvironment, agent: GraphActiveInferenceAgent, max_steps: int = 20
 ) -> tuple[list[int], list[torch.Tensor]]:
-    """Run episode with GNN-enhanced Active Inference."""
+    """Run episode with GNN-enhanced Active Inference"""
 
     # Reset
     current_node = env.reset()
@@ -335,8 +323,7 @@ def run_gnn_active_inference_episode(
 
         print(
             f"Step {step}: Node {env.current_node}, Action {action}, "
-            f"Belief_entropy= (
-                {belief_entropy:.3f}, Most_likely={most_likely_state}")
+            f"Belief_entropy={belief_entropy:.3f}, Most_likely={most_likely_state}"
         )
 
         if done:
@@ -347,7 +334,7 @@ def run_gnn_active_inference_episode(
 
 
 def visualize_belief_evolution(beliefs: List[torch.Tensor], env: GraphEnvironment):
-    """Visualize how beliefs evolve over time."""
+    """Visualize how beliefs evolve over time"""
 
     num_steps = min(len(beliefs), 6)
     fig, axes = plt.subplots(2, 3, figsize=(15, 10))
@@ -370,10 +357,8 @@ def visualize_belief_evolution(beliefs: List[torch.Tensor], env: GraphEnvironmen
         ax.set_ylim(0, 1)
 
         # Add text annotations
-        ax.axvline(x= (
-            0, color="green", linestyle="--", alpha=0.5, label="Start"))
-        ax.axvline(x= (
-            env.goal_node, color="red", linestyle="--", alpha=0.5, label="Goal"))
+        ax.axvline(x=0, color="green", linestyle="--", alpha=0.5, label="Start")
+        ax.axvline(x=env.goal_node, color="red", linestyle="--", alpha=0.5, label="Goal")
 
     plt.tight_layout()
     plt.suptitle("Belief Evolution During GNN-Enhanced Navigation", y=1.02)
@@ -381,7 +366,7 @@ def visualize_belief_evolution(beliefs: List[torch.Tensor], env: GraphEnvironmen
 
 
 def compare_inference_methods(env: GraphEnvironment) -> dict:
-    """Compare standard vs GNN-enhanced Active Inference."""
+    """Compare standard vs GNN-enhanced Active Inference"""
 
     results = {
         "standard": {"steps": [], "success": []},
@@ -401,8 +386,7 @@ def compare_inference_methods(env: GraphEnvironment) -> dict:
         # Remove GNN influence for standard comparison
         standard_agent.gnn_influence = 0.0
 
-        path, _ = (
-            run_gnn_active_inference_episode(env, standard_agent, max_steps=15))
+        path, _ = run_gnn_active_inference_episode(env, standard_agent, max_steps=15)
         success = env.current_node == env.goal_node
 
         results["standard"]["steps"].append(len(path) - 1)
@@ -414,8 +398,7 @@ def compare_inference_methods(env: GraphEnvironment) -> dict:
         env.reset()
         gnn_agent = GraphActiveInferenceAgent(env)
 
-        path, _ = (
-            run_gnn_active_inference_episode(env, gnn_agent, max_steps=15))
+        path, _ = run_gnn_active_inference_episode(env, gnn_agent, max_steps=15)
         success = env.current_node == env.goal_node
 
         results["gnn_enhanced"]["steps"].append(len(path) - 1)
@@ -428,7 +411,7 @@ def compare_inference_methods(env: GraphEnvironment) -> dict:
 
 
 def plot_comparison_results(results: dict):
-    """Plot comparison between standard and GNN-enhanced methods."""
+    """Plot comparison between standard and GNN-enhanced methods"""
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
 
@@ -447,10 +430,8 @@ def plot_comparison_results(results: dict):
     ax1.set_ylim(0, 1)
 
     # Add value labels
-    ax1.text(0, standard_success + 0.02, f"{standard_success:.2f}", ha="center",
-        va="bottom")
-    ax1.text(1, gnn_success + 0.02, f"{gnn_success:.2f}", ha="center",
-        va="bottom")
+    ax1.text(0, standard_success + 0.02, f"{standard_success:.2f}", ha="center", va="bottom")
+    ax1.text(1, gnn_success + 0.02, f"{gnn_success:.2f}", ha="center", va="bottom")
 
     # Steps comparison (for successful episodes only)
     standard_steps = [
@@ -460,14 +441,12 @@ def plot_comparison_results(results: dict):
     ]
     gnn_steps = [
         s
-        for s, success in zip(results["gnn_enhanced"]["steps"],
-            results["gnn_enhanced"]["success"])
+        for s, success in zip(results["gnn_enhanced"]["steps"], results["gnn_enhanced"]["success"])
         if success
     ]
 
     if standard_steps and gnn_steps:
-        ax2.boxplot([standard_steps, gnn_steps], labels=["Standard",
-            "GNN-Enhanced"])
+        ax2.boxplot([standard_steps, gnn_steps], labels=["Standard", "GNN-Enhanced"])
         ax2.set_ylabel("Steps to Goal")
         ax2.set_title("Efficiency Comparison\n(Successful Episodes Only)")
 
@@ -476,7 +455,7 @@ def plot_comparison_results(results: dict):
 
 
 def main():
-    """Main function demonstrating GNN-Active Inference integration."""
+    """Main function demonstrating GNN-Active Inference integration"""
 
     print("=== Active Inference with GNN Integration Example ===\n")
 

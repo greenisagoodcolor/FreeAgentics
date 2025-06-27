@@ -1,33 +1,53 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
-import { Switch } from './ui/switch';
-import { Label } from './ui/label';
-import { Input } from './ui/input';
-import { Textarea } from './ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { ScrollArea } from './ui/scroll-area';
-import { Separator } from './ui/separator';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Slider } from './ui/slider';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { Checkbox } from './ui/checkbox';
-import { Calendar } from './ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { 
-  Settings, 
-  Save, 
-  Download, 
-  Upload, 
-  History, 
-  AlertTriangle, 
-  CheckCircle2, 
-  X, 
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
+import { Switch } from "./ui/switch";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { ScrollArea } from "./ui/scroll-area";
+import { Separator } from "./ui/separator";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { Slider } from "./ui/slider";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./ui/table";
+import { Checkbox } from "./ui/checkbox";
+import { Calendar } from "./ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import {
+  Settings,
+  Save,
+  Download,
+  Upload,
+  History,
+  AlertTriangle,
+  CheckCircle2,
+  X,
   Filter,
   Search,
   Calendar as CalendarIcon,
@@ -38,23 +58,23 @@ import {
   Edit,
   Trash2,
   RotateCcw,
-  ExternalLink
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
+  ExternalLink,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 // Import existing components and utilities
-import { AgentTemplate, AGENT_TEMPLATES } from './ui/agent-template-selector';
-import { 
-  auditLogger, 
-  AuditLogEntry, 
-  AuditLogFilter, 
+import { AgentTemplate, AGENT_TEMPLATES } from "./ui/agent-template-selector";
+import {
+  auditLogger,
+  AuditLogEntry,
+  AuditLogFilter,
   AuditLogStats,
   ExportOptions,
   logBoundaryEdit,
   logTemplateSelection,
-  logThresholdChange
-} from '@/lib/audit-logger';
+  logThresholdChange,
+} from "@/lib/audit-logger";
 
 // Boundary configuration interfaces
 export interface BoundaryConfiguration {
@@ -137,8 +157,10 @@ interface MarkovBlanketConfigurationUIProps {
   enableExport?: boolean;
 }
 
-export const MarkovBlanketConfigurationUI: React.FC<MarkovBlanketConfigurationUIProps> = ({
-  agentId = 'default',
+export const MarkovBlanketConfigurationUI: React.FC<
+  MarkovBlanketConfigurationUIProps
+> = ({
+  agentId = "default",
   initialConfiguration,
   onConfigurationChange,
   onSave,
@@ -146,47 +168,50 @@ export const MarkovBlanketConfigurationUI: React.FC<MarkovBlanketConfigurationUI
   readOnly = false,
   showAuditLog = true,
   showTemplateSelector = true,
-  enableExport = true
+  enableExport = true,
 }) => {
   // Configuration state
   const [configuration, setConfiguration] = useState<BoundaryConfiguration>(
-    initialConfiguration || getDefaultConfiguration(agentId)
+    initialConfiguration || getDefaultConfiguration(agentId),
   );
-  const [selectedTemplate, setSelectedTemplate] = useState<AgentTemplate | null>(null);
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<AgentTemplate | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  
+
   // Audit log state
   const [auditEntries, setAuditEntries] = useState<AuditLogEntry[]>([]);
   const [auditStats, setAuditStats] = useState<AuditLogStats | null>(null);
   const [auditFilter, setAuditFilter] = useState<AuditLogFilter>({
     agentId,
-    limit: 50
+    limit: 50,
   });
   const [isLoadingAudit, setIsLoadingAudit] = useState(false);
-  
+
   // UI state
-  const [activeTab, setActiveTab] = useState('boundaries');
+  const [activeTab, setActiveTab] = useState("boundaries");
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
-  const [selectedAuditEntries, setSelectedAuditEntries] = useState<string[]>([]);
-  const [auditSearchText, setAuditSearchText] = useState('');
+  const [selectedAuditEntries, setSelectedAuditEntries] = useState<string[]>(
+    [],
+  );
+  const [auditSearchText, setAuditSearchText] = useState("");
   const [dateRange, setDateRange] = useState<{ start?: Date; end?: Date }>({});
 
   // Load audit log data
   const loadAuditData = useCallback(async () => {
     if (!showAuditLog) return;
-    
+
     setIsLoadingAudit(true);
     try {
       const [entries, stats] = await Promise.all([
         auditLogger.getEntries(auditFilter),
-        auditLogger.getStats()
+        auditLogger.getStats(),
       ]);
       setAuditEntries(entries);
       setAuditStats(stats);
     } catch (error) {
-      console.error('Failed to load audit data:', error);
+      console.error("Failed to load audit data:", error);
     } finally {
       setIsLoadingAudit(false);
     }
@@ -197,149 +222,157 @@ export const MarkovBlanketConfigurationUI: React.FC<MarkovBlanketConfigurationUI
   }, [loadAuditData]);
 
   // Handle configuration changes
-  const handleConfigurationChange = useCallback((
-    path: string, 
-    value: any, 
-    logChange: boolean = true
-  ) => {
-    if (readOnly) return;
-    
-    setConfiguration(prev => {
-      const newConfig = { ...prev };
-      const keys = path.split('.');
-      let current: any = newConfig;
-      
-      // Navigate to the parent of the target property
-      for (let i = 0; i < keys.length - 1; i++) {
-        if (!current[keys[i]]) {
-          current[keys[i]] = {};
+  const handleConfigurationChange = useCallback(
+    (path: string, value: any, logChange: boolean = true) => {
+      if (readOnly) return;
+
+      setConfiguration((prev) => {
+        const newConfig = { ...prev };
+        const keys = path.split(".");
+        let current: any = newConfig;
+
+        // Navigate to the parent of the target property
+        for (let i = 0; i < keys.length - 1; i++) {
+          if (!current[keys[i]]) {
+            current[keys[i]] = {};
+          }
+          current = current[keys[i]];
         }
-        current = current[keys[i]];
-      }
-      
-      const oldValue = current[keys[keys.length - 1]];
-      current[keys[keys.length - 1]] = value;
-      
-      // Update metadata
-      newConfig.metadata.updatedAt = new Date().toISOString();
-      newConfig.metadata.version += 1;
-      
-      // Log the change if requested
-      if (logChange && oldValue !== value) {
-        const description = `Updated ${path} from ${JSON.stringify(oldValue)} to ${JSON.stringify(value)}`;
-        logBoundaryEdit(agentId, path, oldValue, value, description)
-          .then(() => loadAuditData())
-          .catch(console.error);
-      }
-      
-      setHasUnsavedChanges(true);
-      onConfigurationChange?.(newConfig);
-      return newConfig;
-    });
-  }, [agentId, readOnly, onConfigurationChange, loadAuditData]);
+
+        const oldValue = current[keys[keys.length - 1]];
+        current[keys[keys.length - 1]] = value;
+
+        // Update metadata
+        newConfig.metadata.updatedAt = new Date().toISOString();
+        newConfig.metadata.version += 1;
+
+        // Log the change if requested
+        if (logChange && oldValue !== value) {
+          const description = `Updated ${path} from ${JSON.stringify(oldValue)} to ${JSON.stringify(value)}`;
+          logBoundaryEdit(agentId, path, oldValue, value, description)
+            .then(() => loadAuditData())
+            .catch(console.error);
+        }
+
+        setHasUnsavedChanges(true);
+        onConfigurationChange?.(newConfig);
+        return newConfig;
+      });
+    },
+    [agentId, readOnly, onConfigurationChange, loadAuditData],
+  );
 
   // Handle template selection
-  const handleTemplateSelection = useCallback(async (template: AgentTemplate) => {
-    if (readOnly) return;
-    
-    setSelectedTemplate(template);
-    
-    // Apply template configuration
-    const templateConfig = createConfigurationFromTemplate(template, agentId);
-    setConfiguration(templateConfig);
-    setHasUnsavedChanges(true);
-    
-    // Log template selection
-    try {
-      await logTemplateSelection(
-        agentId,
-        template.id,
-        template,
-        `Applied ${template.name} template to agent ${agentId}`
-      );
-      await loadAuditData();
-    } catch (error) {
-      console.error('Failed to log template selection:', error);
-    }
-    
-    onConfigurationChange?.(templateConfig);
-  }, [agentId, readOnly, onConfigurationChange, loadAuditData]);
+  const handleTemplateSelection = useCallback(
+    async (template: AgentTemplate) => {
+      if (readOnly) return;
+
+      setSelectedTemplate(template);
+
+      // Apply template configuration
+      const templateConfig = createConfigurationFromTemplate(template, agentId);
+      setConfiguration(templateConfig);
+      setHasUnsavedChanges(true);
+
+      // Log template selection
+      try {
+        await logTemplateSelection(
+          agentId,
+          template.id,
+          template,
+          `Applied ${template.name} template to agent ${agentId}`,
+        );
+        await loadAuditData();
+      } catch (error) {
+        console.error("Failed to log template selection:", error);
+      }
+
+      onConfigurationChange?.(templateConfig);
+    },
+    [agentId, readOnly, onConfigurationChange, loadAuditData],
+  );
 
   // Handle save
   const handleSave = useCallback(async () => {
     if (readOnly || !onSave) return;
-    
+
     setIsSaving(true);
     try {
       await onSave(configuration);
       setHasUnsavedChanges(false);
-      
+
       // Log save operation
       await auditLogger.logChange(
-        'configuration_update',
-        'agent',
+        "configuration_update",
+        "agent",
         agentId,
         `Saved configuration for agent ${agentId}`,
         { after: configuration },
         { agentId },
-        { riskLevel: 'medium', requiresApproval: true }
+        { riskLevel: "medium", requiresApproval: true },
       );
-      
+
       await loadAuditData();
     } catch (error) {
-      console.error('Failed to save configuration:', error);
+      console.error("Failed to save configuration:", error);
     } finally {
       setIsSaving(false);
     }
   }, [configuration, agentId, onSave, readOnly, loadAuditData]);
 
   // Handle audit log export
-  const handleExportAuditLog = useCallback(async (options: ExportOptions) => {
-    try {
-      const blob = await auditLogger.exportData({
-        ...options,
-        filters: auditFilter
-      });
-      
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `audit-log-${agentId}-${format(new Date(), 'yyyy-MM-dd')}.${options.format}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      // Log export operation
-      await auditLogger.logChange(
-        'export_data',
-        'system',
-        `audit_log_${agentId}`,
-        `Exported audit log for agent ${agentId} in ${options.format} format`,
-        { after: { format: options.format, entryCount: auditEntries.length } },
-        { agentId },
-        { riskLevel: 'medium' }
-      );
-      
-      setIsExportDialogOpen(false);
-    } catch (error) {
-      console.error('Failed to export audit log:', error);
-    }
-  }, [auditFilter, agentId, auditEntries.length]);
+  const handleExportAuditLog = useCallback(
+    async (options: ExportOptions) => {
+      try {
+        const blob = await auditLogger.exportData({
+          ...options,
+          filters: auditFilter,
+        });
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `audit-log-${agentId}-${format(new Date(), "yyyy-MM-dd")}.${options.format}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        // Log export operation
+        await auditLogger.logChange(
+          "export_data",
+          "system",
+          `audit_log_${agentId}`,
+          `Exported audit log for agent ${agentId} in ${options.format} format`,
+          {
+            after: { format: options.format, entryCount: auditEntries.length },
+          },
+          { agentId },
+          { riskLevel: "medium" },
+        );
+
+        setIsExportDialogOpen(false);
+      } catch (error) {
+        console.error("Failed to export audit log:", error);
+      }
+    },
+    [auditFilter, agentId, auditEntries.length],
+  );
 
   // Filtered audit entries for display
   const filteredAuditEntries = useMemo(() => {
     let filtered = auditEntries;
-    
+
     if (auditSearchText) {
       const searchLower = auditSearchText.toLowerCase();
-      filtered = filtered.filter(entry =>
-        entry.description.toLowerCase().includes(searchLower) ||
-        entry.operationType.toLowerCase().includes(searchLower) ||
-        entry.entityId.toLowerCase().includes(searchLower)
+      filtered = filtered.filter(
+        (entry) =>
+          entry.description.toLowerCase().includes(searchLower) ||
+          entry.operationType.toLowerCase().includes(searchLower) ||
+          entry.entityId.toLowerCase().includes(searchLower),
       );
     }
-    
+
     return filtered;
   }, [auditEntries, auditSearchText]);
 
@@ -353,36 +386,49 @@ export const MarkovBlanketConfigurationUI: React.FC<MarkovBlanketConfigurationUI
             Configure agent boundaries, select templates, and review audit logs
           </p>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           {hasUnsavedChanges && (
-            <Badge variant="outline" className="text-orange-600 border-orange-200">
+            <Badge
+              variant="outline"
+              className="text-orange-600 border-orange-200"
+            >
               Unsaved Changes
             </Badge>
           )}
-          
+
           {!readOnly && (
-            <Button 
-              onClick={handleSave} 
+            <Button
+              onClick={handleSave}
               disabled={!hasUnsavedChanges || isSaving}
               className="flex items-center space-x-2"
             >
               <Save className="h-4 w-4" />
-              <span>{isSaving ? 'Saving...' : 'Save Configuration'}</span>
+              <span>{isSaving ? "Saving..." : "Save Configuration"}</span>
             </Button>
           )}
         </div>
       </div>
 
       {/* Main tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-4"
+      >
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="boundaries" className="flex items-center space-x-2">
+          <TabsTrigger
+            value="boundaries"
+            className="flex items-center space-x-2"
+          >
             <Settings className="h-4 w-4" />
             <span>Boundaries</span>
           </TabsTrigger>
           {showTemplateSelector && (
-            <TabsTrigger value="templates" className="flex items-center space-x-2">
+            <TabsTrigger
+              value="templates"
+              className="flex items-center space-x-2"
+            >
               <FileText className="h-4 w-4" />
               <span>Templates</span>
             </TabsTrigger>
@@ -393,7 +439,10 @@ export const MarkovBlanketConfigurationUI: React.FC<MarkovBlanketConfigurationUI
               <span>Audit Log</span>
             </TabsTrigger>
           )}
-          <TabsTrigger value="compliance" className="flex items-center space-x-2">
+          <TabsTrigger
+            value="compliance"
+            className="flex items-center space-x-2"
+          >
             <Shield className="h-4 w-4" />
             <span>Compliance</span>
           </TabsTrigger>
@@ -466,66 +515,66 @@ export const MarkovBlanketConfigurationUI: React.FC<MarkovBlanketConfigurationUI
 function getDefaultConfiguration(agentId: string): BoundaryConfiguration {
   return {
     agentId,
-    templateId: 'default',
+    templateId: "default",
     dimensions: {
       internal: {
         threshold: 0.8,
         precision: 16.0,
         adaptiveScaling: true,
-        mathematicalConstraints: ['stochastic_matrix', 'probability_simplex']
+        mathematicalConstraints: ["stochastic_matrix", "probability_simplex"],
       },
       sensory: {
         threshold: 0.8,
         precision: 16.0,
         modalityWeights: { visual: 0.4, auditory: 0.3, tactile: 0.3 },
-        noiseFiltering: true
+        noiseFiltering: true,
       },
       active: {
         threshold: 0.8,
         precision: 16.0,
         actionSpaceSize: 8,
-        policyConstraints: ['action_bounds', 'energy_conservation']
+        policyConstraints: ["action_bounds", "energy_conservation"],
       },
       external: {
         threshold: 0.8,
         precision: 16.0,
         environmentComplexity: 0.5,
-        boundaryRigidity: 0.7
-      }
+        boundaryRigidity: 0.7,
+      },
     },
     monitoring: {
       enabled: true,
       alertThresholds: {
         warning: 0.7,
-        critical: 0.5
+        critical: 0.5,
       },
       violationHandling: {
         autoMitigation: false,
-        escalationRules: ['notify_admin', 'log_violation'],
-        notificationChannels: ['dashboard', 'email']
-      }
+        escalationRules: ["notify_admin", "log_violation"],
+        notificationChannels: ["dashboard", "email"],
+      },
     },
     compliance: {
-      framework: 'ADR-011',
+      framework: "ADR-011",
       auditingEnabled: true,
       retentionPeriod: 365,
-      encryptionRequired: true
+      encryptionRequired: true,
     },
     metadata: {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       version: 1,
-      tags: []
-    }
+      tags: [],
+    },
   };
 }
 
 function createConfigurationFromTemplate(
-  template: AgentTemplate, 
-  agentId: string
+  template: AgentTemplate,
+  agentId: string,
 ): BoundaryConfiguration {
   const defaultConfig = getDefaultConfiguration(agentId);
-  
+
   return {
     ...defaultConfig,
     templateId: template.id,
@@ -533,22 +582,22 @@ function createConfigurationFromTemplate(
       ...defaultConfig.dimensions,
       internal: {
         ...defaultConfig.dimensions.internal,
-        precision: template.mathematicalFoundation.defaultPrecision.state
+        precision: template.mathematicalFoundation.defaultPrecision.state,
       },
       sensory: {
         ...defaultConfig.dimensions.sensory,
-        precision: template.mathematicalFoundation.defaultPrecision.sensory
+        precision: template.mathematicalFoundation.defaultPrecision.sensory,
       },
       active: {
         ...defaultConfig.dimensions.active,
         precision: template.mathematicalFoundation.defaultPrecision.policy,
-        actionSpaceSize: template.mathematicalFoundation.actionSpaces
-      }
+        actionSpaceSize: template.mathematicalFoundation.actionSpaces,
+      },
     },
     metadata: {
       ...defaultConfig.metadata,
-      description: `Configuration based on ${template.name} template`
-    }
+      description: `Configuration based on ${template.name} template`,
+    },
   };
 }
 
@@ -559,7 +608,13 @@ const BoundaryConfigurationPanel: React.FC<{
   readOnly: boolean;
   showAdvanced: boolean;
   onShowAdvancedChange: (show: boolean) => void;
-}> = ({ configuration, onChange, readOnly, showAdvanced, onShowAdvancedChange }) => {
+}> = ({
+  configuration,
+  onChange,
+  readOnly,
+  showAdvanced,
+  onShowAdvancedChange,
+}) => {
   return (
     <div className="space-y-6">
       {/* Advanced settings toggle */}
@@ -587,7 +642,7 @@ const BoundaryConfigurationPanel: React.FC<{
                 <Label>Threshold</Label>
                 <Slider
                   value={[config.threshold]}
-                  onValueChange={([value]) => 
+                  onValueChange={([value]) =>
                     onChange(`dimensions.${dimension}.threshold`, value)
                   }
                   min={0}
@@ -606,8 +661,11 @@ const BoundaryConfigurationPanel: React.FC<{
                 <Input
                   type="number"
                   value={config.precision}
-                  onChange={(e) => 
-                    onChange(`dimensions.${dimension}.precision`, parseFloat(e.target.value))
+                  onChange={(e) =>
+                    onChange(
+                      `dimensions.${dimension}.precision`,
+                      parseFloat(e.target.value),
+                    )
                   }
                   disabled={readOnly}
                   min={0.1}
@@ -620,16 +678,26 @@ const BoundaryConfigurationPanel: React.FC<{
             {showAdvanced && (
               <div className="space-y-4 pt-4 border-t">
                 {/* Dimension-specific advanced settings */}
-                {dimension === 'sensory' && (
+                {dimension === "sensory" && (
                   <div className="space-y-2">
                     <Label>Modality Weights</Label>
-                    {Object.entries('modalityWeights' in config ? config.modalityWeights || {} : {}).map(([modality, weight]) => (
-                      <div key={modality} className="flex items-center space-x-2">
+                    {Object.entries(
+                      "modalityWeights" in config
+                        ? config.modalityWeights || {}
+                        : {},
+                    ).map(([modality, weight]) => (
+                      <div
+                        key={modality}
+                        className="flex items-center space-x-2"
+                      >
                         <Label className="capitalize w-20">{modality}</Label>
                         <Slider
                           value={[weight as number]}
-                          onValueChange={([value]) => 
-                            onChange(`dimensions.${dimension}.modalityWeights.${modality}`, value)
+                          onValueChange={([value]) =>
+                            onChange(
+                              `dimensions.${dimension}.modalityWeights.${modality}`,
+                              value,
+                            )
                           }
                           min={0}
                           max={1}
@@ -637,20 +705,27 @@ const BoundaryConfigurationPanel: React.FC<{
                           disabled={readOnly}
                           className="flex-1"
                         />
-                        <span className="text-sm w-12">{(weight as number).toFixed(2)}</span>
+                        <span className="text-sm w-12">
+                          {(weight as number).toFixed(2)}
+                        </span>
                       </div>
                     ))}
                   </div>
                 )}
 
-                {dimension === 'active' && (
+                {dimension === "active" && (
                   <div className="space-y-2">
                     <Label>Action Space Size</Label>
                     <Input
                       type="number"
-                      value={'actionSpaceSize' in config ? config.actionSpaceSize : 8}
-                      onChange={(e) => 
-                        onChange(`dimensions.${dimension}.actionSpaceSize`, parseInt(e.target.value))
+                      value={
+                        "actionSpaceSize" in config ? config.actionSpaceSize : 8
+                      }
+                      onChange={(e) =>
+                        onChange(
+                          `dimensions.${dimension}.actionSpaceSize`,
+                          parseInt(e.target.value),
+                        )
                       }
                       disabled={readOnly}
                       min={1}
@@ -677,18 +752,19 @@ const TemplateSelectionPanel: React.FC<{
       <div>
         <h3 className="text-lg font-semibold">Available Templates</h3>
         <p className="text-muted-foreground">
-          Select a validated template to apply predefined boundary configurations
+          Select a validated template to apply predefined boundary
+          configurations
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {AGENT_TEMPLATES.map((template) => (
-          <Card 
+          <Card
             key={template.id}
             className={cn(
               "cursor-pointer transition-colors",
               selectedTemplate?.id === template.id && "ring-2 ring-primary",
-              readOnly && "opacity-50 cursor-not-allowed"
+              readOnly && "opacity-50 cursor-not-allowed",
             )}
             onClick={() => !readOnly && onTemplateSelect(template)}
           >
@@ -705,26 +781,31 @@ const TemplateSelectionPanel: React.FC<{
               <p className="text-sm text-muted-foreground mb-4">
                 {template.description}
               </p>
-              
+
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div>
-                  <span className="font-medium">States:</span> {template.mathematicalFoundation.beliefsStates}
+                  <span className="font-medium">States:</span>{" "}
+                  {template.mathematicalFoundation.beliefsStates}
                 </div>
                 <div>
-                  <span className="font-medium">Actions:</span> {template.mathematicalFoundation.actionSpaces}
+                  <span className="font-medium">Actions:</span>{" "}
+                  {template.mathematicalFoundation.actionSpaces}
                 </div>
                 <div>
-                  <span className="font-medium">Modalities:</span> {template.mathematicalFoundation.observationModalities}
+                  <span className="font-medium">Modalities:</span>{" "}
+                  {template.mathematicalFoundation.observationModalities}
                 </div>
                 <div>
-                  <span className="font-medium">Precision:</span> {template.mathematicalFoundation.defaultPrecision.sensory}
+                  <span className="font-medium">Precision:</span>{" "}
+                  {template.mathematicalFoundation.defaultPrecision.sensory}
                 </div>
               </div>
 
               {template.expertRecommendation && (
                 <div className="mt-4 p-2 bg-blue-50 border border-blue-200 rounded-lg">
                   <p className="text-xs text-blue-800">
-                    <span className="font-semibold">Expert:</span> {template.expertRecommendation}
+                    <span className="font-semibold">Expert:</span>{" "}
+                    {template.expertRecommendation}
                   </p>
                 </div>
               )}
@@ -748,18 +829,18 @@ const AuditLogPanel: React.FC<{
   isLoading: boolean;
   onExport?: (options: ExportOptions) => void;
   onRefresh: () => void;
-}> = ({ 
-  entries, 
-  stats, 
-  filter, 
-  onFilterChange, 
-  searchText, 
+}> = ({
+  entries,
+  stats,
+  filter,
+  onFilterChange,
+  searchText,
   onSearchTextChange,
   selectedEntries,
   onSelectedEntriesChange,
-  isLoading, 
+  isLoading,
   onExport,
-  onRefresh 
+  onRefresh,
 }) => {
   return (
     <div className="space-y-6">
@@ -777,7 +858,9 @@ const AuditLogPanel: React.FC<{
               <div className="text-2xl font-bold text-orange-600">
                 {stats.complianceMetrics.totalHighRiskOperations}
               </div>
-              <div className="text-sm text-muted-foreground">High Risk Operations</div>
+              <div className="text-sm text-muted-foreground">
+                High Risk Operations
+              </div>
             </CardContent>
           </Card>
           <Card>
@@ -785,7 +868,9 @@ const AuditLogPanel: React.FC<{
               <div className="text-2xl font-bold text-red-600">
                 {stats.complianceMetrics.pendingApprovals}
               </div>
-              <div className="text-sm text-muted-foreground">Pending Approvals</div>
+              <div className="text-sm text-muted-foreground">
+                Pending Approvals
+              </div>
             </CardContent>
           </Card>
           <Card>
@@ -793,7 +878,9 @@ const AuditLogPanel: React.FC<{
               <div className="text-2xl font-bold text-green-600">
                 {stats.complianceMetrics.integrityViolations}
               </div>
-              <div className="text-sm text-muted-foreground">Integrity Violations</div>
+              <div className="text-sm text-muted-foreground">
+                Integrity Violations
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -812,17 +899,22 @@ const AuditLogPanel: React.FC<{
             />
           </div>
         </div>
-        
+
         <Button variant="outline" onClick={onRefresh} disabled={isLoading}>
           <RotateCcw className={cn("h-4 w-4", isLoading && "animate-spin")} />
         </Button>
-        
+
         {onExport && (
-          <Button variant="outline" onClick={() => onExport({
-            format: 'csv',
-            includeMetadata: true,
-            includeIntegrityData: true
-          })}>
+          <Button
+            variant="outline"
+            onClick={() =>
+              onExport({
+                format: "csv",
+                includeMetadata: true,
+                includeIntegrityData: true,
+              })
+            }
+          >
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
@@ -837,10 +929,13 @@ const AuditLogPanel: React.FC<{
               <TableRow>
                 <TableHead className="w-12">
                   <Checkbox
-                    checked={selectedEntries.length === entries.length && entries.length > 0}
+                    checked={
+                      selectedEntries.length === entries.length &&
+                      entries.length > 0
+                    }
                     onCheckedChange={(checked) => {
                       if (checked) {
-                        onSelectedEntriesChange(entries.map(e => e.id));
+                        onSelectedEntriesChange(entries.map((e) => e.id));
                       } else {
                         onSelectedEntriesChange([]);
                       }
@@ -864,15 +959,20 @@ const AuditLogPanel: React.FC<{
                       checked={selectedEntries.includes(entry.id)}
                       onCheckedChange={(checked) => {
                         if (checked) {
-                          onSelectedEntriesChange([...selectedEntries, entry.id]);
+                          onSelectedEntriesChange([
+                            ...selectedEntries,
+                            entry.id,
+                          ]);
                         } else {
-                          onSelectedEntriesChange(selectedEntries.filter(id => id !== entry.id));
+                          onSelectedEntriesChange(
+                            selectedEntries.filter((id) => id !== entry.id),
+                          );
                         }
                       }}
                     />
                   </TableCell>
                   <TableCell className="text-sm">
-                    {format(new Date(entry.timestamp), 'MMM dd, yyyy HH:mm:ss')}
+                    {format(new Date(entry.timestamp), "MMM dd, yyyy HH:mm:ss")}
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">{entry.operationType}</Badge>
@@ -880,18 +980,27 @@ const AuditLogPanel: React.FC<{
                   <TableCell>
                     <div className="text-sm">
                       <div className="font-medium">{entry.entityType}</div>
-                      <div className="text-muted-foreground">{entry.entityId}</div>
+                      <div className="text-muted-foreground">
+                        {entry.entityId}
+                      </div>
                     </div>
                   </TableCell>
-                  <TableCell className="max-w-xs truncate" title={entry.description}>
+                  <TableCell
+                    className="max-w-xs truncate"
+                    title={entry.description}
+                  >
                     {entry.description}
                   </TableCell>
                   <TableCell>
-                    <Badge 
+                    <Badge
                       variant={
-                        entry.compliance.riskLevel === 'critical' ? 'destructive' :
-                        entry.compliance.riskLevel === 'high' ? 'destructive' :
-                        entry.compliance.riskLevel === 'medium' ? 'secondary' : 'outline'
+                        entry.compliance.riskLevel === "critical"
+                          ? "destructive"
+                          : entry.compliance.riskLevel === "high"
+                            ? "destructive"
+                            : entry.compliance.riskLevel === "medium"
+                              ? "secondary"
+                              : "outline"
                       }
                     >
                       {entry.compliance.riskLevel}
@@ -944,7 +1053,9 @@ const CompliancePanel: React.FC<{
               <Label>Compliance Framework</Label>
               <Select
                 value={configuration.compliance.framework}
-                onValueChange={(value) => onChange('compliance.framework', value)}
+                onValueChange={(value) =>
+                  onChange("compliance.framework", value)
+                }
                 disabled={readOnly}
               >
                 <SelectTrigger>
@@ -964,7 +1075,12 @@ const CompliancePanel: React.FC<{
               <Input
                 type="number"
                 value={configuration.compliance.retentionPeriod}
-                onChange={(e) => onChange('compliance.retentionPeriod', parseInt(e.target.value))}
+                onChange={(e) =>
+                  onChange(
+                    "compliance.retentionPeriod",
+                    parseInt(e.target.value),
+                  )
+                }
                 disabled={readOnly}
                 min={30}
                 max={2555} // 7 years
@@ -976,7 +1092,9 @@ const CompliancePanel: React.FC<{
             <div className="flex items-center space-x-2">
               <Switch
                 checked={configuration.compliance.auditingEnabled}
-                onCheckedChange={(checked) => onChange('compliance.auditingEnabled', checked)}
+                onCheckedChange={(checked) =>
+                  onChange("compliance.auditingEnabled", checked)
+                }
                 disabled={readOnly}
               />
               <Label>Enable Audit Logging</Label>
@@ -985,7 +1103,9 @@ const CompliancePanel: React.FC<{
             <div className="flex items-center space-x-2">
               <Switch
                 checked={configuration.compliance.encryptionRequired}
-                onCheckedChange={(checked) => onChange('compliance.encryptionRequired', checked)}
+                onCheckedChange={(checked) =>
+                  onChange("compliance.encryptionRequired", checked)
+                }
                 disabled={readOnly}
               />
               <Label>Require Encryption</Label>
@@ -1002,30 +1122,41 @@ const CompliancePanel: React.FC<{
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <div className="text-sm text-muted-foreground">High Risk Operations</div>
+                <div className="text-sm text-muted-foreground">
+                  High Risk Operations
+                </div>
                 <div className="text-2xl font-bold text-orange-600">
                   {auditStats.complianceMetrics.totalHighRiskOperations}
                 </div>
               </div>
-              
+
               <div className="space-y-2">
-                <div className="text-sm text-muted-foreground">Pending Approvals</div>
+                <div className="text-sm text-muted-foreground">
+                  Pending Approvals
+                </div>
                 <div className="text-2xl font-bold text-red-600">
                   {auditStats.complianceMetrics.pendingApprovals}
                 </div>
               </div>
-              
+
               <div className="space-y-2">
-                <div className="text-sm text-muted-foreground">Integrity Violations</div>
+                <div className="text-sm text-muted-foreground">
+                  Integrity Violations
+                </div>
                 <div className="text-2xl font-bold text-red-600">
                   {auditStats.complianceMetrics.integrityViolations}
                 </div>
               </div>
-              
+
               <div className="space-y-2">
-                <div className="text-sm text-muted-foreground">Avg Operation Duration</div>
+                <div className="text-sm text-muted-foreground">
+                  Avg Operation Duration
+                </div>
                 <div className="text-2xl font-bold">
-                  {auditStats.complianceMetrics.averageOperationDuration.toFixed(1)}ms
+                  {auditStats.complianceMetrics.averageOperationDuration.toFixed(
+                    1,
+                  )}
+                  ms
                 </div>
               </div>
             </div>
@@ -1042,17 +1173,17 @@ const ExportDialog: React.FC<{
   onExport: (options: ExportOptions) => void;
   entryCount: number;
 }> = ({ isOpen, onClose, onExport, entryCount }) => {
-  const [format, setFormat] = useState<'json' | 'csv' | 'pdf' | 'xlsx'>('csv');
+  const [format, setFormat] = useState<"json" | "csv" | "pdf" | "xlsx">("csv");
   const [includeMetadata, setIncludeMetadata] = useState(true);
   const [includeIntegrityData, setIncludeIntegrityData] = useState(false);
-  const [reportTitle, setReportTitle] = useState('Audit Log Report');
+  const [reportTitle, setReportTitle] = useState("Audit Log Report");
 
   const handleExport = () => {
     onExport({
       format,
       includeMetadata,
       includeIntegrityData,
-      reportTitle
+      reportTitle,
     });
   };
 
@@ -1069,7 +1200,10 @@ const ExportDialog: React.FC<{
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>Export Format</Label>
-            <Select value={format} onValueChange={(value: any) => setFormat(value)}>
+            <Select
+              value={format}
+              onValueChange={(value: any) => setFormat(value)}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -1095,7 +1229,9 @@ const ExportDialog: React.FC<{
             <div className="flex items-center space-x-2">
               <Checkbox
                 checked={includeMetadata}
-                onCheckedChange={(checked) => setIncludeMetadata(checked === true)}
+                onCheckedChange={(checked) =>
+                  setIncludeMetadata(checked === true)
+                }
               />
               <Label>Include Metadata</Label>
             </div>
@@ -1103,7 +1239,9 @@ const ExportDialog: React.FC<{
             <div className="flex items-center space-x-2">
               <Checkbox
                 checked={includeIntegrityData}
-                onCheckedChange={(checked) => setIncludeIntegrityData(checked === true)}
+                onCheckedChange={(checked) =>
+                  setIncludeIntegrityData(checked === true)
+                }
               />
               <Label>Include Integrity Data</Label>
             </div>

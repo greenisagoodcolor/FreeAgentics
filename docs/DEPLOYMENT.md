@@ -3,13 +3,16 @@
 ## Pre-Demo Setup
 
 ### 1. Start the Application
+
 ```bash
 cd /Users/matthewmoroney/builds/FreeAgentics/web
 npm run dev
 ```
+
 The app will start at `http://localhost:3000`
 
 ### 2. Ensure Clean State
+
 - Clear browser cache if needed
 - Have multiple browser tabs ready for different views
 
@@ -36,7 +39,7 @@ The app will start at `http://localhost:3000`
      - Free Energy landscape visualization
      - Shannon entropy calculations
      - Precision parameters (γ, β, α)
-   
+
    **Demo Script**:
    - "This demonstrates our implementation of Active Inference theory"
    - "Watch how agents minimize free energy in real-time"
@@ -51,7 +54,7 @@ The app will start at `http://localhost:3000`
      - Show template selection (Explorer, Merchant, Scholar, Guardian)
      - Demonstrate mathematical parameter configuration
      - Show real-time validation of stochastic matrices
-   
+
    **Key Points**:
    - "Templates provide pre-configured mathematical models"
    - "All probability constraints are validated in real-time"
@@ -68,7 +71,7 @@ The app will start at `http://localhost:3000`
    - Create a new conversation with multiple agents
    - Show how agents communicate and reason
    - Demonstrate emergent behaviors
-   
+
    **Demo Points**:
    - "Agents use Active Inference to decide when and how to communicate"
    - "Watch the belief states update as they exchange information"
@@ -85,7 +88,7 @@ The app will start at `http://localhost:3000`
    - Show the hexagonal grid world (H3 system)
    - Demonstrate agent movement and spatial reasoning
    - Show resource distribution and environmental factors
-   
+
    **Key Features**:
    - "Agents navigate using Active Inference principles"
    - "Spatial decisions minimize expected free energy"
@@ -105,13 +108,15 @@ The app will start at `http://localhost:3000`
 
 ## Key Talking Points Throughout Demo
 
-### Technical Differentiators:
+### Technical Differentiators
+
 1. **Mathematical Rigor**: "Unlike chatbots, our agents use formal Active Inference theory"
 2. **Real Implementation**: "Not a wrapper - actual implementation of peer-reviewed algorithms"
 3. **Production Ready**: "Enterprise-grade UI with comprehensive error handling"
 4. **Scalable**: "Designed for thousands of agents with efficient state management"
 
-### Business Value:
+### Business Value
+
 1. **Research Platform**: "Used for cognitive science and AI research"
 2. **Simulation**: "Test complex scenarios before real-world deployment"
 3. **Emergent Intelligence**: "Behaviors emerge from principles, not programming"
@@ -133,15 +138,18 @@ A: "Robotics, autonomous systems, financial modeling, social simulations, and co
 
 ## Troubleshooting
 
-### If TypeScript errors appear:
+### If TypeScript errors appear
+
 - The 3 compilation errors have been fixed
 - If new ones appear, focus on the working features
 
-### If Python backend isn't running:
+### If Python backend isn't running
+
 - The frontend can still demonstrate UI and mathematical concepts
 - Mention "backend API being optimized for performance"
 
-### Performance issues:
+### Performance issues
+
 - Reduce number of active agents
 - Use Chrome for best D3.js performance
 - Close other browser tabs
@@ -154,6 +162,7 @@ A: "Robotics, autonomous systems, financial modeling, social simulations, and co
 4. Schedule follow-up for deeper technical dive
 
 ## Quick Commands Reference
+
 ```bash
 # Start development server
 npm run dev

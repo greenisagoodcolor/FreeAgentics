@@ -25,7 +25,7 @@ from .seed import seed_demo_data, seed_development_data
 
 
 def get_db_config():
-    """Extract database configuration from DATABASE_URL."""
+    """Extract database configuration from DATABASE_URL"""
     url_parts = DATABASE_URL.replace("postgresql://", "").split("@")
     user_pass = url_parts[0].split(":")
     host_port_db = url_parts[1].split("/")
@@ -41,14 +41,14 @@ def get_db_config():
 
 @click.group()
 def cli():
-    """FreeAgentics database management commands."""
+    """FreeAgentics database management commands"""
     pass
 
 
 @cli.command()
 @click.option("--force", is_flag=True, help="Force create (drop if exists)")
 def create_db(force):
-    """Create the database."""
+    """Create the database"""
     config = get_db_config()
     conn = psycopg2.connect(
         host=config["host"],
@@ -74,10 +74,9 @@ def create_db(force):
 
 
 @cli.command()
-@click.confirmation_option(prompt= (
-    "Are you sure you want to drop the database?"))
+@click.confirmation_option(prompt="Are you sure you want to drop the database?")
 def drop_db():
-    """Drop the database."""
+    """Drop the database"""
     config = get_db_config()
     conn = psycopg2.connect(
         host=config["host"],
@@ -99,7 +98,7 @@ def drop_db():
 
 @cli.command()
 def migrate():
-    """Run database migrations."""
+    """Run database migrations"""
     click.echo("Running database migrations...")
     alembic_cfg = Config(Path(__file__).parent / "alembic.ini")
     command.upgrade(alembic_cfg, "head")
@@ -107,10 +106,9 @@ def migrate():
 
 
 @cli.command()
-@click.option("--revision", default= (
-    "base", help="Target revision (default: base)"))
+@click.option("--revision", default="base", help="Target revision (default: base)")
 def rollback(revision):
-    """Rollback database migrations."""
+    """Rollback database migrations"""
     click.echo(f"Rolling back to revision: {revision}...")
     alembic_cfg = Config(Path(__file__).parent / "alembic.ini")
     command.downgrade(alembic_cfg, revision)
@@ -119,16 +117,15 @@ def rollback(revision):
 
 @cli.command()
 def status():
-    """Show current migration status."""
+    """Show current migration status"""
     alembic_cfg = Config(Path(__file__).parent / "alembic.ini")
     command.current(alembic_cfg, verbose=True)
 
 
 @cli.command()
-@click.option("--env", type= (
-    click.Choice(["development", "demo", "test"]), default="development"))
+@click.option("--env", type=click.Choice(["development", "demo", "test"]), default="development")
 def seed(env):
-    """Seed the database with test data."""
+    """Seed the database with test data"""
     click.echo(f"Seeding database for {env} environment...")
     if env == "development":
         seed_development_data()
@@ -141,7 +138,7 @@ def seed(env):
 
 @cli.command()
 def check():
-    """Check database connection and health."""
+    """Check database connection and health"""
     click.echo("Checking database connection...")
     try:
         with engine.connect() as conn:
@@ -150,22 +147,18 @@ def check():
             click.echo(f"✓ Connected to PostgreSQL: {version}")
             result = conn.execute(
                 text(
-                    "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = (
-                        'public' AND table_name = 'alembic_version')")
+                    "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'alembic_version')"
                 )
             )
             has_migrations = result.scalar()
             if has_migrations:
-                result = (
-                    conn.execute(text("SELECT version_num FROM alembic_version")))
+                result = conn.execute(text("SELECT version_num FROM alembic_version"))
                 current_version = result.scalar()
                 click.echo(f"✓ Migrations applied. Current version: {current_version}")
             else:
                 click.echo("✗ No migrations applied yet. Run 'python manage.py migrate'")
             result = conn.execute(
-                text(
-                    "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'"
-                )
+                text("SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public'")
             )
             table_count = result.scalar()
             click.echo(f"✓ Database has {table_count} tables")
@@ -176,7 +169,7 @@ def check():
 
 @cli.command()
 def init():
-    """Initialize database (create + migrate + seed)."""
+    """Initialize database (create + migrate + seed)"""
     click.echo("Initializing database...")
     ctx = click.get_current_context()
     ctx.invoke(create_db, force=True)

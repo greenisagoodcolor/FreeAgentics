@@ -1,9 +1,9 @@
 # FreeAgentics Product Requirements Document
 ## Revolutionary Multi-Agent Active Inference Research Platform
 
-**Version**: 2.0 (Post-Committee Extensive Debate)  
-**Date**: 2025-06-26  
-**Authority**: Expert Committee Consensus  
+**Version**: 2.0 (Post-Committee Extensive Debate)
+**Date**: 2025-06-26
+**Authority**: Expert Committee Consensus
 
 ---
 
@@ -21,7 +21,7 @@ After extensive debate involving technical architecture, AI/ML, and domain exper
 FreeAgentics is a **mathematically-rigorous, real-time multi-agent Active Inference research platform** that enables researchers to orchestrate, monitor, and analyze **true autonomous AI agents** using:
 
 - **PyMDP-based Active Inference** with real belief state calculations
-- **GNN model generation** from natural language specifications  
+- **GNN model generation** from natural language specifications
 - **Multi-agent coalition formation** with business value optimization
 - **Real-time knowledge graph evolution** driven by epistemic uncertainty reduction
 - **Hardware deployment pipelines** for edge AI systems
@@ -125,7 +125,7 @@ class GNNModelGenerator:
     def generate_pymdp_model(self, graph: GraphStructure) -> GenerativeModel
     def validate_mathematical_consistency(self, model: GenerativeModel) -> bool
 
-# Existing: inference/gnn/model_mapper.py  
+# Existing: inference/gnn/model_mapper.py
 class ModelMapper:
     def map_to_pymdp_format(self, gnn_model: GNNModel) -> PyMDPModel
 ```
@@ -171,7 +171,7 @@ class CoalitionFormationEngine:
 # Existing: coalitions/readiness/comprehensive_readiness_integrator.py
 class ReadinessIntegrator:
     def evaluate_technical_readiness(self) -> TechnicalScore
-    def evaluate_business_readiness(self) -> BusinessScore  
+    def evaluate_business_readiness(self) -> BusinessScore
     def evaluate_safety_compliance(self) -> SafetyScore
 ```
 
@@ -187,7 +187,7 @@ class ReadinessIntegrator:
 # Existing: infrastructure/export/export_builder.py
 class CoalitionExportBuilder:
     def package_coalition(self, coalition: Coalition) -> DeploymentPackage
-    def optimize_for_hardware(self, package: DeploymentPackage, 
+    def optimize_for_hardware(self, package: DeploymentPackage,
                              hardware: HardwareSpec) -> OptimizedPackage
     def generate_docker_container(self, package: OptimizedPackage) -> DockerImage
 
@@ -210,7 +210,7 @@ class DeploymentVerifier:
 - **Frustrations**: Simplified simulators that don't show actual cognitive processes
 - **Goals**: Understand emergence, validate theories, publish discoveries
 
-#### **Secondary: Multi-Agent Systems Engineer** 
+#### **Secondary: Multi-Agent Systems Engineer**
 - **Needs**: Coalition optimization, deployment readiness, business metrics
 - **Frustrations**: Academic tools without production pathways
 - **Goals**: Build deployable agent systems, optimize performance, ensure reliability
@@ -256,7 +256,7 @@ class DeploymentVerifier:
   <ResizablePanel defaultSize={25}>
     <GoalProcessingPanel /> {/* New: Goal input + agent creation */}
   </ResizablePanel>
-  <ResizablePanel defaultSize={50}>  
+  <ResizablePanel defaultSize={50}>
     <ActiveInferenceVisualization /> {/* Existing: Real-time belief states */}
   </ResizablePanel>
   <ResizablePanel defaultSize={25}>
@@ -345,14 +345,14 @@ class GNNModelService:
 @router.websocket("/ws/active-inference")
 async def active_inference_websocket():
     # Real-time belief state streaming
-    
-# Existing: api/websocket/coalition_monitoring.py  
+
+# Existing: api/websocket/coalition_monitoring.py
 @router.websocket("/ws/coalitions")
 async def coalition_formation_websocket():
     # Coalition formation event streaming
 
 # Existing: api/websocket/markov_blanket_monitoring.py
-@router.websocket("/ws/markov-blanket")  
+@router.websocket("/ws/markov-blanket")
 async def boundary_monitoring_websocket():
     # Safety boundary monitoring
 ```
@@ -409,7 +409,7 @@ interface CoalitionFormationEvent {
 
 #### **Sprint 1.1: Goal Processing Pipeline**
 - **Integrate**: `inference/llm/provider_interface.py` → Goal interpretation
-- **Build**: Goal input UI with context matrix visualization  
+- **Build**: Goal input UI with context matrix visualization
 - **Connect**: LLM goal processing → Agent factory → PyMDP initialization
 - **Test**: End-to-end goal → agent creation flow
 
@@ -525,7 +525,7 @@ interface CoalitionFormationEvent {
 #### **Risk**: PyMDP integration complexity
 **Mitigation**: Existing `inference/engine/active_inference.py` provides proven integration patterns. Incremental testing with mathematical validation.
 
-#### **Risk**: Real-time performance with complex calculations  
+#### **Risk**: Real-time performance with complex calculations
 **Mitigation**: Existing performance optimization patterns in `web/hooks/usePerformanceMonitor.ts` and WebSocket streaming architecture.
 
 #### **Risk**: GNN model generation reliability
@@ -557,7 +557,7 @@ interface CoalitionFormationEvent {
 - **Model Generation Success**: >95% GNN model generation success rate
 - **Coalition Formation Accuracy**: >90% successful coalition value predictions
 
-### **User Experience Metrics**  
+### **User Experience Metrics**
 - **Demo Completion Rate**: >95% of demonstrations complete successfully
 - **User Engagement**: >8/10 user satisfaction with mathematical rigor
 - **Learning Curve**: Users understand Active Inference concepts within 10 minutes
@@ -592,7 +592,7 @@ interface CoalitionFormationEvent {
 This PRD represents a **paradigm shift** from building simple chat interfaces to showcasing **revolutionary Active Inference capabilities**. By leveraging the sophisticated existing codebase, FreeAgentics will demonstrate:
 
 1. **True Autonomous Intelligence**: PyMDP-based agents that minimize free energy
-2. **Cognitive Architecture Evolution**: Agents redesigning their own models via GNN generation  
+2. **Cognitive Architecture Evolution**: Agents redesigning their own models via GNN generation
 3. **Collective Intelligence Emergence**: Mathematical proof of knowledge evolution
 4. **Production-Ready Deployment**: Complete research-to-edge pipeline
 
@@ -602,7 +602,7 @@ This PRD represents a **paradigm shift** from building simple chat interfaces to
 
 ---
 
-**Implementation Authority**: Expert Committee Unanimous Approval  
-**Timeline**: 8 weeks to revolutionary demonstration  
-**Resources**: Full-stack team + AI/ML specialists + domain experts  
+**Implementation Authority**: Expert Committee Unanimous Approval
+**Timeline**: 8 weeks to revolutionary demonstration
+**Resources**: Full-stack team + AI/ML specialists + domain experts
 **Success Criteria**: Industry recognition as breakthrough Active Inference platform

@@ -28,8 +28,7 @@ from .layers import (
 Graph-to-Model Mapping System
 This module implements a mapping system that connects graph input structures to
 appropriate model architectures based on graph properties and heuristics.
-."""
-
+"""
 logger = logging.getLogger(__name__)
 
 

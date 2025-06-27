@@ -15,41 +15,41 @@
         }
     </style>
 </head>
-    
+
 <body>
 <div class='wrapper'>
     <div class='pad1'>
         <h1><a href="../../../index.html">All files</a> / <a href="index.html">app/(dashboard)/conversation-orchestration</a> page.tsx</h1>
         <div class='clearfix'>
-            
+
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
                 <span class='fraction'>0/90</span>
             </div>
-        
-            
+
+
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
                 <span class='fraction'>0/36</span>
             </div>
-        
-            
+
+
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
                 <span class='fraction'>0/28</span>
             </div>
-        
-            
+
+
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
                 <span class='fraction'>0/78</span>
             </div>
-        
-            
+
+
         </div>
         <p class="quiet">
             Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
@@ -1331,13 +1331,13 @@ import { Badge } from <span class="cstat-no" title="statement not covered" >'@/c
 import { Tabs, TabsContent, TabsList, TabsTrigger } from <span class="cstat-no" title="statement not covered" >'@/components/ui/tabs';</span>
 import { Alert, AlertDescription, AlertTitle } from <span class="cstat-no" title="statement not covered" >'@/components/ui/alert';</span>
 import { Label } from <span class="cstat-no" title="statement not covered" >'@/components/ui/label';</span>
-import { 
-  Settings, 
-  Play, 
-  Pause, 
-  RotateCcw, 
-  Save, 
-  Upload, 
+import {
+  Settings,
+  Play,
+  Pause,
+  RotateCcw,
+  Save,
+  Upload,
   Download,
   AlertTriangle,
   CheckCircle,
@@ -1348,10 +1348,10 @@ import {
   Users,
   Brain
 } from <span class="cstat-no" title="statement not covered" >'lucide-react';</span>
-import { 
-  ConversationPreset, 
+import {
+  ConversationPreset,
   ConversationOrchestrationState,
-  ConversationPresetValidation 
+  ConversationPresetValidation
 } from '@/lib/types';
 import { ConversationPresetValidator } from <span class="cstat-no" title="statement not covered" >'@/lib/conversation-preset-validator';</span>
 import PresetSelector from <span class="cstat-no" title="statement not covered" >'@/components/conversation-orchestration/preset-selector';</span>
@@ -1399,7 +1399,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
       createdAt: now,
       updatedAt: now,
       createdBy: 'user',
-      
+
       // Default values with overrides from partial
       responseDynamics: {
         turnTaking: {
@@ -1429,7 +1429,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
         },
         ...partial.responseDynamics
       },
-      
+
       timingControls: {
         responseDelay: {
           type: 'range',
@@ -1460,7 +1460,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
         },
         ...partial.timingControls
       },
-      
+
       advancedParameters: {
         conversationDynamics: {
           topicDriftAllowance: 0.3,
@@ -1492,7 +1492,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
         },
         ...partial.advancedParameters
       },
-      
+
       safetyConstraints: {
         enableSafetyChecks: true,
         maxResponseLength: 2000,
@@ -1505,7 +1505,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
         emergencyStopConditions: ['high_error_rate', 'quality_degradation', 'rate_limit_exceeded'],
         ...partial.safetyConstraints
       },
-      
+
       monitoring: {
         enableMetrics: true,
         trackPerformance: true,
@@ -1518,7 +1518,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
         },
         ...partial.monitoring
       },
-      
+
       ...partial
     };
   };
@@ -1532,7 +1532,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
       // In production, this would load from API
       const defaultPresets = <span class="cstat-no" title="statement not covered" >ConversationPresetValidator.getDefaultPresets();</span>
       const balancedPreset = <span class="cstat-no" title="statement not covered" >createCompletePreset(defaultPresets.balanced!, 'balanced');</span>
-      
+
 <span class="cstat-no" title="statement not covered" >      setState(<span class="fstat-no" title="function not covered" >prev =&gt; (<span class="cstat-no" title="statement not covered" >{</span></span></span>
         ...prev,
         currentPreset: balancedPreset,
@@ -1561,7 +1561,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
         }));
       }
     };
-    
+
 <span class="cstat-no" title="statement not covered" >    validatePreset();</span>
   }, [debouncedPreset]);
 &nbsp;
@@ -1571,13 +1571,13 @@ export default function <span class="cstat-no" title="statement not covered" ><s
   const updatePreset = <span class="cstat-no" title="statement not covered" >useCallback(<span class="fstat-no" title="function not covered" >(u</span>pdates: Partial&lt;ConversationPreset&gt;) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    setState(<span class="fstat-no" title="function not covered" >prev =&gt; {</span></span>
 <span class="cstat-no" title="statement not covered" >      <span class="missing-if-branch" title="if path not taken" >I</span>if (!prev.currentPreset) <span class="cstat-no" title="statement not covered" >return prev;</span></span>
-      
+
       const updatedPreset = <span class="cstat-no" title="statement not covered" >{</span>
         ...prev.currentPreset,
         ...updates,
         updatedAt: new Date().toISOString()
       };
-      
+
 <span class="cstat-no" title="statement not covered" >      return {</span>
         ...prev,
         currentPreset: updatedPreset,
@@ -1591,17 +1591,17 @@ export default function <span class="cstat-no" title="statement not covered" ><s
    */
   const savePreset = <span class="cstat-no" title="statement not covered" >useCallback(<span class="fstat-no" title="function not covered" >async () =&gt; {</span></span>
 <span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (!state.currentPreset) <span class="cstat-no" title="statement not covered" >return;</span></span>
-    
+
 <span class="cstat-no" title="statement not covered" >    setIsLoading(true);</span>
 <span class="cstat-no" title="statement not covered" >    try {</span>
       // In production, this would save to API
 <span class="cstat-no" title="statement not covered" >      console.log('Saving preset:', state.currentPreset);</span>
-      
+
 <span class="cstat-no" title="statement not covered" >      setState(<span class="fstat-no" title="function not covered" >prev =&gt; (<span class="cstat-no" title="statement not covered" >{</span></span></span>
         ...prev,
         hasUnsavedChanges: false
       }));
-      
+
 <span class="cstat-no" title="statement not covered" >      setSuccessMessage('Preset saved successfully');</span>
 <span class="cstat-no" title="statement not covered" >      setTimeout(<span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >s</span>etSuccessMessage(null), 3</span>000);</span>
     } catch (err) {
@@ -1643,15 +1643,15 @@ export default function <span class="cstat-no" title="statement not covered" ><s
    */
   const getValidationStatus = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >() =&gt; {</span></span>
 <span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (!state.validationResult) <span class="cstat-no" title="statement not covered" >return { color: 'gray', icon: Settings };</span></span>
-    
+
 <span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (!state.validationResult.isValid) {</span>
 <span class="cstat-no" title="statement not covered" >      return { color: 'red', icon: AlertTriangle };</span>
     }
-    
+
 <span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (state.validationResult.warnings.length &gt; 0) {</span>
 <span class="cstat-no" title="statement not covered" >      return { color: 'yellow', icon: AlertTriangle };</span>
     }
-    
+
 <span class="cstat-no" title="statement not covered" >    return { color: 'green', icon: CheckCircle };</span>
   };
 &nbsp;
@@ -1667,7 +1667,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
             Fine-tune conversation parameters and dynamics in real-time
           &lt;/p&gt;
         &lt;/div&gt;
-        
+
         &lt;div className="flex items-center gap-4"&gt;
           {/* Advanced Mode Toggle */}
           &lt;div className="flex items-center gap-2"&gt;
@@ -1678,7 +1678,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
               onCheckedChange={toggleAdvancedMode}
             /&gt;
           &lt;/div&gt;
-          
+
           {/* Preview Mode Toggle */}
           &lt;div className="flex items-center gap-2"&gt;
             &lt;Label htmlFor="preview-mode"&gt;Preview Mode&lt;/Label&gt;
@@ -1701,13 +1701,13 @@ export default function <span class="cstat-no" title="statement not covered" ><s
         &lt;div className="flex items-center gap-4"&gt;
           {/* Validation Status */}
           &lt;div className="flex items-center gap-2"&gt;
-            &lt;validationStatus.icon 
+            &lt;validationStatus.icon
               className={`h-5 w-5 ${
                 validationStatus.color === 'red' ? 'text-red-500' :
                 validationStatus.color === 'yellow' ? 'text-yellow-500' :
                 validationStatus.color === 'green' ? 'text-green-500' :
                 'text-muted-foreground'
-              }`} 
+              }`}
             /&gt;
             &lt;span className="text-sm font-medium"&gt;
               {state.validationResult?.isValid ? 'Valid Configuration' : 'Invalid Configuration'}
@@ -1718,14 +1718,14 @@ export default function <span class="cstat-no" title="statement not covered" ><s
               &lt;/Badge&gt;
             )}
           &lt;/div&gt;
-          
+
           {/* Unsaved Changes Indicator */}
           {<span class="branch-0 cbranch-no" title="branch not covered" >state.hasUnsavedChanges </span>&amp;&amp; (
             &lt;Badge variant="outline" className="text-orange-600"&gt;
               Unsaved Changes
             &lt;/Badge&gt;
           )}
-          
+
           {/* Current Preset */}
           {<span class="branch-0 cbranch-no" title="branch not covered" >state.currentPreset </span>&amp;&amp; (
             &lt;div className="flex items-center gap-2"&gt;
@@ -1734,7 +1734,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
             &lt;/div&gt;
           )}
         &lt;/div&gt;
-        
+
         {/* Action Buttons */}
         &lt;div className="flex items-center gap-2"&gt;
           &lt;Button
@@ -1746,7 +1746,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
             &lt;RotateCcw className="h-4 w-4 mr-2" /&gt;
             Reset
           &lt;/Button&gt;
-          
+
           &lt;Button
             variant="outline"
             size="sm"
@@ -1755,7 +1755,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
             &lt;Upload className="h-4 w-4 mr-2" /&gt;
             Import
           &lt;/Button&gt;
-          
+
           &lt;Button
             variant="outline"
             size="sm"
@@ -1764,7 +1764,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
             &lt;Download className="h-4 w-4 mr-2" /&gt;
             Export
           &lt;/Button&gt;
-          
+
           &lt;Button
             onClick={savePreset}
             disabled={isLoading || !state.hasUnsavedChanges}
@@ -1784,7 +1784,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
           &lt;AlertDescription&gt;{error}&lt;/AlertDescription&gt;
         &lt;/Alert&gt;
       )}
-      
+
       {<span class="branch-0 cbranch-no" title="branch not covered" >successMessage &amp;&amp; (</span>
         &lt;Alert className="mb-6"&gt;
           &lt;CheckCircle className="h-4 w-4" /&gt;
@@ -1802,7 +1802,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
               &lt;AlertDescription&gt;{error}&lt;/AlertDescription&gt;
             &lt;/Alert&gt;
           ))}
-          
+
           {state.validationResult.warnings.map(<span class="fstat-no" title="function not covered" >(w</span>arning, index) =&gt; (
 <span class="cstat-no" title="statement not covered" >            &lt;Alert key={`warning-${index}`}&gt;</span>
               &lt;AlertTriangle className="h-4 w-4" /&gt;
@@ -1824,7 +1824,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
               {<span class="branch-0 cbranch-no" title="branch not covered" >state.isAdvancedMode </span>&amp;&amp; &lt;TabsTrigger value="advanced"&gt;Advanced&lt;/TabsTrigger&gt;}
               &lt;TabsTrigger value="history"&gt;History&lt;/TabsTrigger&gt;
             &lt;/TabsList&gt;
-            
+
             &lt;TabsContent value="presets" className="space-y-4"&gt;
               &lt;PresetSelector
                 currentPreset={state.currentPreset}
@@ -1847,7 +1847,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
                 }}
               /&gt;
             &lt;/TabsContent&gt;
-            
+
             &lt;TabsContent value="response" className="space-y-4"&gt;
               {<span class="branch-0 cbranch-no" title="branch not covered" >state.currentPreset </span>&amp;&amp; (
                 &lt;ResponseDynamicsControls
@@ -1856,7 +1856,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
                 /&gt;
               )}
             &lt;/TabsContent&gt;
-            
+
             &lt;TabsContent value="timing" className="space-y-4"&gt;
               {<span class="branch-0 cbranch-no" title="branch not covered" >state.currentPreset </span>&amp;&amp; (
                 &lt;TimingControls
@@ -1865,7 +1865,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
                 /&gt;
               )}
             &lt;/TabsContent&gt;
-            
+
             {<span class="branch-0 cbranch-no" title="branch not covered" >state.isAdvancedMode </span>&amp;&amp; (
               &lt;TabsContent value="advanced" className="space-y-4"&gt;
                 {<span class="branch-0 cbranch-no" title="branch not covered" >state.currentPreset </span>&amp;&amp; (
@@ -1876,7 +1876,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
                 )}
               &lt;/TabsContent&gt;
             )}
-            
+
             &lt;TabsContent value="history" className="space-y-4"&gt;
               &lt;ChangeHistory
                 history={state.history}
@@ -1884,7 +1884,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
             &lt;/TabsContent&gt;
           &lt;/Tabs&gt;
         &lt;/div&gt;
-        
+
         {/* Real-time Preview */}
         &lt;div className="space-y-6"&gt;
           {<span class="branch-0 cbranch-no" title="branch not covered" >state.currentPreset </span>&amp;&amp; (
@@ -1902,7 +1902,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
               }}
             /&gt;
           )}
-          
+
           {/* Quick Stats */}
           &lt;Card&gt;
             &lt;CardHeader&gt;
@@ -1920,21 +1920,21 @@ export default function <span class="cstat-no" title="statement not covered" ><s
                       {state.currentPreset.responseDynamics.turnTaking.maxConcurrentResponses}
                     &lt;/Badge&gt;
                   &lt;/div&gt;
-                  
+
                   &lt;div className="flex items-center justify-between"&gt;
                     &lt;span className="text-sm text-muted-foreground"&gt;Response Threshold&lt;/span&gt;
                     &lt;Badge variant="outline"&gt;
                       {(state.currentPreset.responseDynamics.turnTaking.responseThreshold * 100).toFixed(0)}%
                     &lt;/Badge&gt;
                   &lt;/div&gt;
-                  
+
                   &lt;div className="flex items-center justify-between"&gt;
                     &lt;span className="text-sm text-muted-foreground"&gt;Max Messages&lt;/span&gt;
                     &lt;Badge variant="outline"&gt;
                       {state.currentPreset.timingControls.conversationFlow.maxAutonomousMessages}
                     &lt;/Badge&gt;
                   &lt;/div&gt;
-                  
+
                   &lt;div className="flex items-center justify-between"&gt;
                     &lt;span className="text-sm text-muted-foreground"&gt;Delay Range&lt;/span&gt;
                     &lt;Badge variant="outline"&gt;
@@ -1957,7 +1957,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-06-26T20:02:48.859Z
+                at 2025-06-27T06:10:32.756Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>
@@ -1969,4 +1969,3 @@ export default function <span class="cstat-no" title="statement not covered" ><s
         <script src="../../../block-navigation.js"></script>
     </body>
 </html>
-    

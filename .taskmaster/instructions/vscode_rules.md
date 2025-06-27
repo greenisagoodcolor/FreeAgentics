@@ -5,17 +5,18 @@ alwaysApply: true
 ---
 
 # **Required Rule Structure:**
-  ```markdown
-  ---
-  description: Clear, one-line description of what the rule enforces
-  globs: path/to/files/*.ext, other/path/**/*
-  alwaysApply: boolean
-  ---
 
-  - **Main Points in Bold**
-    - Sub-points with details
-    - Examples and explanations
-  ```
+```markdown
+---
+description: Clear, one-line description of what the rule enforces
+globs: path/to/files/*.ext, other/path/**/*
+alwaysApply: boolean
+---
+
+- **Main Points in Bold**
+  - Sub-points with details
+  - Examples and explanations
+```
 
 - **File References:**
   - Use `[filename](mdc:path/to/file)` ([filename](mdc:filename)) to reference files
@@ -24,6 +25,7 @@ alwaysApply: true
 
 - **Code Examples:**
   - Use language-specific code blocks
+
   ```typescript
   // ✅ DO: Show good examples
   const goodExample = true;

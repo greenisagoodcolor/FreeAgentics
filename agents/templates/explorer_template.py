@@ -46,9 +46,8 @@ class ExplorerTemplate(ActiveInferenceTemplate):
     """
 
     def __init__(self) -> None:
-        """Initialize Explorer template."""
-        super().__init__(template_id= (
-            "explorer_v1", category=TemplateCategory.EXPLORER))
+        """Initialize Explorer template"""
+        super().__init__(template_id="explorer_v1", category=TemplateCategory.EXPLORER)
 
         # Explorer-specific parameters
         self.epistemic_bonus = 0.8  # High information seeking
@@ -106,8 +105,7 @@ class ExplorerTemplate(ActiveInferenceTemplate):
 
                     # Small probability of staying or random transition
                     transition_matrix[s, s] = 0.1
-                    remaining_prob = (
-                        0.1 / (num_states - 2) if num_states > 2 else 0)
+                    remaining_prob = 0.1 / (num_states - 2) if num_states > 2 else 0
                     for s_prime in range(num_states):
                         if s_prime != s and s_prime != next_state:
                             transition_matrix[s_prime, s] = remaining_prob
@@ -198,8 +196,7 @@ class ExplorerTemplate(ActiveInferenceTemplate):
 
                 # This is a simplified computation - in practice would use
                 # the full observation model from the generative model
-                likelihood = (
-                    np.ones(len(beliefs.beliefs))  # Uniform likelihood)
+                likelihood = np.ones(len(beliefs.beliefs))  # Uniform likelihood
                 likelihood[o % len(beliefs.beliefs)] *= 2.0  # Slight bias
 
                 posterior = beliefs.beliefs * likelihood
@@ -220,7 +217,7 @@ class ExplorerTemplate(ActiveInferenceTemplate):
         return float(epistemic_value)
 
     def get_behavioral_description(self) -> str:
-        """Return description of explorer behavior."""
+        """Return description of explorer behavior"""
         return (
             "Explorer Agent: Maximizes information gain through curiosity-driven "
             "exploration. Seeks novel observations, reduces uncertainty, and "
@@ -246,8 +243,7 @@ class ExplorerTemplate(ActiveInferenceTemplate):
             import warnings
 
             warnings.warn(
-                "Explorer template: C vector has low variance -
-                    " "may not encourage exploration"
+                "Explorer template: C vector has low variance - " "may not encourage exploration"
             )
 
         # Check transition model allows exploration

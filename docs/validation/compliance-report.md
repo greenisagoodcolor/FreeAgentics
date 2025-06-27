@@ -19,6 +19,7 @@ The validation identified **7 categories of issues** that need to be addressed t
 ### ADR-002: Canonical Directory Structure Validation
 
 #### Issue 1: Documentation Files Outside of docs/ Directory
+
 - **Severity**: High
 - **Finding**: 392 documentation files were found outside the `docs/` directory.
 - **Impact**: Violates the canonical directory structure, making documentation harder to find and maintain.
@@ -28,6 +29,7 @@ The validation identified **7 categories of issues** that need to be addressed t
   - Create symbolic links from the original locations to the new locations if necessary.
 
 #### Issue 2: API Documentation Files Outside of docs/api/ Directory
+
 - **Severity**: Medium
 - **Finding**: 2 API documentation files were found outside the `docs/api/` directory:
   - `./docs/active-inference/api-reference.md`
@@ -40,6 +42,7 @@ The validation identified **7 categories of issues** that need to be addressed t
 ### ADR-003: Dependency Rules Validation
 
 #### Issue 3: Core Domain Importing from Interface or Infrastructure Layers
+
 - **Severity**: High
 - **Finding**: Multiple examples in documentation show Core Domain components importing from Interface or Infrastructure layers.
 - **Impact**: Promotes incorrect architectural patterns that violate the dependency rules.
@@ -51,6 +54,7 @@ The validation identified **7 categories of issues** that need to be addressed t
 ### ADR-004: Naming Conventions Validation
 
 #### Issue 4: Documentation Files Not Following Kebab-Case Convention
+
 - **Severity**: Medium
 - **Finding**: 59 documentation files do not follow the kebab-case naming convention.
 - **Impact**: Inconsistent naming makes the documentation harder to navigate and maintain.
@@ -60,6 +64,7 @@ The validation identified **7 categories of issues** that need to be addressed t
   - Consider using a script to automate this process.
 
 #### Issue 5: Use of Prohibited Terms
+
 - **Severity**: Medium
 - **Finding**: Several prohibited terms (gaming terminology) were found in the documentation:
   - `PlayerAgent`: 7 instances
@@ -73,6 +78,7 @@ The validation identified **7 categories of issues** that need to be addressed t
   - Update any actual code examples or explanations that use these terms.
 
 #### Issue 6: Python Classes Not Using PascalCase
+
 - **Severity**: Medium
 - **Finding**: 12 instances of Python classes not using PascalCase were found in code examples.
 - **Impact**: Inconsistent naming in code examples can lead to confusion and poor coding practices.
@@ -81,6 +87,7 @@ The validation identified **7 categories of issues** that need to be addressed t
   - Ensure that abstract classes and data classes also follow this convention.
 
 #### Issue 7: TypeScript Components Not Using PascalCase
+
 - **Severity**: Low
 - **Finding**: 2 instances of TypeScript components not using PascalCase were found in code examples.
 - **Impact**: Inconsistent naming in code examples can lead to confusion and poor coding practices.
@@ -91,6 +98,7 @@ The validation identified **7 categories of issues** that need to be addressed t
 ## Remediation Plan
 
 ### Immediate Actions (High Priority)
+
 1. **Fix Core Domain Import Examples**:
    - Review all code examples in documentation that show Core Domain components importing from Interface or Infrastructure layers.
    - Update these examples to follow the dependency rules or clearly mark them as anti-patterns.
@@ -100,6 +108,7 @@ The validation identified **7 categories of issues** that need to be addressed t
    - Create symbolic links if necessary to maintain backward compatibility.
 
 ### Short-Term Actions (Medium Priority)
+
 1. **Rename Documentation Files**:
    - Create a script to rename all documentation files to follow kebab-case convention.
    - Update all references to these files in other documentation.
@@ -113,6 +122,7 @@ The validation identified **7 categories of issues** that need to be addressed t
    - Update all TypeScript component definitions in code examples to use PascalCase.
 
 ### Long-Term Actions (Low Priority)
+
 1. **Documentation Structure Cleanup**:
    - Review and reorganize the documentation structure to fully comply with ADR-002.
    - Consider creating a documentation style guide to ensure future compliance.

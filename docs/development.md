@@ -32,12 +32,14 @@ Before starting development, ensure you have the following installed:
 ### Initial Setup
 
 1. **Clone the Repository**
+
    ```bash
    git clone https://github.com/yourusername/freeagentics.git
    cd freeagentics
    ```
 
 2. **Set Up Environment Variables**
+
    ```bash
    # Use the setup script for interactive configuration
    cd environments
@@ -49,6 +51,7 @@ Before starting development, ensure you have the following installed:
    ```
 
 3. **Install Dependencies**
+
    ```bash
    # Frontend dependencies
    npm install
@@ -61,6 +64,7 @@ Before starting development, ensure you have the following installed:
    ```
 
 4. **Initialize the Database**
+
    ```bash
    # Using the setup script
    ./scripts/setup-database.sh
@@ -71,6 +75,7 @@ Before starting development, ensure you have the following installed:
    ```
 
 5. **Verify Installation**
+
    ```bash
    # Run basic tests
    npm test
@@ -119,6 +124,7 @@ We follow a modified GitFlow workflow:
    - `release/*` - Release preparation
 
 2. **Feature Development**
+
    ```bash
    # Create feature branch
    git checkout -b feature/your-feature-name develop
@@ -146,6 +152,7 @@ We follow a modified GitFlow workflow:
 ### Daily Development Cycle
 
 1. **Start Your Day**
+
    ```bash
    # Pull latest changes
    git pull origin develop
@@ -157,6 +164,7 @@ We follow a modified GitFlow workflow:
    ```
 
 2. **Check System Status**
+
    ```bash
    # Verify all services are running
    docker-compose ps
@@ -175,6 +183,7 @@ We follow a modified GitFlow workflow:
    - Run linters before committing
 
 4. **Before Committing**
+
    ```bash
    # Run tests
    npm test
@@ -220,6 +229,7 @@ docker-compose -f environments/development/docker-compose.yml build --no-cache
    - Use `docker volume prune` to clean unused volumes
 
 2. **Network Debugging**
+
    ```bash
    # List networks
    docker network ls
@@ -229,6 +239,7 @@ docker-compose -f environments/development/docker-compose.yml build --no-cache
    ```
 
 3. **Container Resources**
+
    ```bash
    # Monitor resource usage
    docker stats
@@ -239,18 +250,21 @@ docker-compose -f environments/development/docker-compose.yml build --no-cache
 ### Working with Migrations
 
 1. **Create a New Migration**
+
    ```bash
    cd src/database
    alembic revision -m "Add new field to agents"
    ```
 
 2. **Auto-generate Migration**
+
    ```bash
    # After modifying models.py
    alembic revision --autogenerate -m "Auto migration for model changes"
    ```
 
 3. **Apply Migrations**
+
    ```bash
    # Upgrade to latest
    alembic upgrade head
@@ -293,6 +307,7 @@ npm start
 ### Component Development
 
 1. **Creating Components**
+
    ```typescript
    // app/components/MyComponent.tsx
    'use client';
@@ -317,6 +332,7 @@ npm start
    ```
 
 2. **Using Shadcn/UI Components**
+
    ```bash
    # Add a new component
    npx shadcn-ui@latest add button
@@ -339,6 +355,7 @@ python src/main.py
 ### API Development
 
 1. **Creating New Endpoints**
+
    ```python
    from fastapi import APIRouter, Depends
    from sqlalchemy.orm import Session
@@ -374,6 +391,7 @@ pytest --cov=src tests/
 ### Linting and Formatting
 
 1. **Python (Black, Flake8, MyPy)**
+
    ```bash
    # Format code
    black src/ tests/
@@ -386,6 +404,7 @@ pytest --cov=src tests/
    ```
 
 2. **TypeScript/JavaScript (ESLint, Prettier)**
+
    ```bash
    # Lint code
    npm run lint
@@ -407,6 +426,7 @@ pytest --cov=src tests/
    - Use `debugger` statements or breakpoints
 
 2. **VS Code Debugging**
+
    ```json
    // .vscode/launch.json
    {
@@ -425,6 +445,7 @@ pytest --cov=src tests/
 ### Backend Debugging
 
 1. **Python Debugging**
+
    ```python
    # Using debugger
    import pdb
@@ -432,6 +453,7 @@ pytest --cov=src tests/
    ```
 
 2. **Logging**
+
    ```python
    import logging
 
@@ -444,6 +466,7 @@ pytest --cov=src tests/
 ### Common Issues
 
 1. **Database Connection Issues**
+
    ```bash
    # Check PostgreSQL is running
    docker-compose ps postgres
@@ -453,12 +476,14 @@ pytest --cov=src tests/
    ```
 
 2. **Module Import Errors**
+
    ```bash
    # Ensure PYTHONPATH is set
    export PYTHONPATH="${PYTHONPATH}:${PWD}"
    ```
 
 3. **Docker Issues**
+
    ```bash
    # Clean rebuild
    docker-compose down -v
@@ -467,6 +492,7 @@ pytest --cov=src tests/
    ```
 
 4. **Frontend Build Issues**
+
    ```bash
    # Clear cache
    rm -rf .next node_modules
@@ -492,11 +518,13 @@ pytest --cov=src tests/
 ## Pre-Commit Hook Standards
 
 ### ✅ **Operational Status**
+
 All pre-commit hooks have been **restored to full operational status** as of Task #31 completion.
 
 ### 🛠️ **Hook Configuration**
 
 #### **Working Hooks (All Passing)**
+
 - **black**: Code formatting with 100-character line length
 - **isort**: Import sorting with black compatibility
 - **pyupgrade**: Python syntax modernization (Python 3.9+)
@@ -508,6 +536,7 @@ All pre-commit hooks have been **restored to full operational status** as of Tas
 - **check-docstring-first**: Docstring positioning validation
 
 #### **Active Quality Hooks (Finding Real Issues)**
+
 - **flake8**: Code style enforcement (100 char line length, complexity ≤10)
 - **mypy**: Type checking with comprehensive configuration
 - **pydocstyle**: Documentation style (Google convention)
@@ -517,12 +546,14 @@ All pre-commit hooks have been **restored to full operational status** as of Tas
 ### 🔧 **Critical Fixes Implemented**
 
 #### **1. Syntax Error Resolution**
+
 - **File**: `inference/gnn/alerting.py`
 - **Issue**: Missing opening triple quotes in module docstring
 - **Fix**: Added proper docstring delimiter
 - **Impact**: Restored pyupgrade hook functionality
 
 #### **2. Large File Exclusions**
+
 - **Updated**: `.gitignore` with comprehensive exclusions
 - **Added**: `web/.next/`, `web/out/`, `web/build/`, `web/dist/`
 - **Added**: `mypy_reports/`, `bandit-report.json`, `.DS_Store`
@@ -530,12 +561,14 @@ All pre-commit hooks have been **restored to full operational status** as of Tas
 - **Impact**: Restored check-added-large-files hook functionality
 
 #### **3. MyPy Configuration**
+
 - **Updated**: `.pre-commit-config.yaml` mypy configuration
 - **Changed**: `--config-file=mypy.ini` → `--config-file=pyproject.toml`
 - **Added**: `numpy` to additional_dependencies
 - **Impact**: Restored mypy hook functionality with proper type checking
 
 #### **4. Module Documentation**
+
 - **Fixed**: D100 (Missing docstring in public module) errors
 - **Files**: `agents/base/data_model.py`, `agents/base/interfaces.py`
 - **Method**: Moved module docstrings to file beginning (before imports)
@@ -544,6 +577,7 @@ All pre-commit hooks have been **restored to full operational status** as of Tas
 ### 🚀 **Enforcement Mechanisms**
 
 #### **1. Pre-Commit Installation**
+
 ```bash
 # Install hooks in repository
 pre-commit install --install-hooks
@@ -556,17 +590,21 @@ pre-commit run --all-files
 ```
 
 #### **2. MyPy Execution Standard**
+
 **ALWAYS use this command format for mypy testing:**
+
 ```bash
 mypy --verbose --show-traceback --show-error-context --show-column-numbers --show-error-codes --pretty --show-absolute-path your_file.py
 ```
 
 #### **3. Quality Gate Enforcement**
+
 - **Threshold**: 2000 flake8 violations (currently 2011)
 - **Status**: Monitored via quality-gates hook
 - **Action**: Reduce violations systematically
 
 #### **4. File Standards**
+
 - **Line Length**: 100 characters (flake8, black)
 - **Import Sorting**: isort with black profile
 - **Type Hints**: Required for new code (mypy enforced)
@@ -575,12 +613,14 @@ mypy --verbose --show-traceback --show-error-context --show-column-numbers --sho
 ### 📝 **Developer Workflow Updates**
 
 #### **Before Committing (Enhanced)**
+
 1. Run formatting: `pre-commit run black isort --all-files`
 2. Check types: `mypy --verbose --show-traceback --show-error-context --show-column-numbers --show-error-codes --pretty --show-absolute-path your_file.py`
 3. Test hooks: `pre-commit run --files changed_file.py`
 4. Review quality gates: Check violations don't exceed threshold
 
 #### **Handling Hook Failures**
+
 1. **Never use `--no-verify`** (bypasses quality checks)
 2. **Fix issues systematically** rather than suppressing
 3. **Infrastructure issues**: Contact development team
@@ -589,11 +629,13 @@ mypy --verbose --show-traceback --show-error-context --show-column-numbers --sho
 ### 🔍 **Monitoring and Maintenance**
 
 #### **Regular Checks**
+
 - **Weekly**: `pre-commit validate-config`
 - **Monthly**: `pre-commit autoupdate` (update hook versions)
 - **Quarterly**: Review quality gate thresholds
 
 #### **Issue Resolution Priority**
+
 - **Syntax Errors**: Critical priority (blocks other hooks)
 - **Configuration Issues**: High priority (affects infrastructure)
 - **Code Quality**: Medium priority (systematic improvement)
@@ -601,6 +643,7 @@ mypy --verbose --show-traceback --show-error-context --show-column-numbers --sho
 ---
 
 For more detailed information, see:
+
 - [Database Documentation](src/database/README.md)
 - [Environment Configuration](environments/README.md)
 - [API Documentation](doc/api/rest_api.md)
@@ -609,4 +652,4 @@ For more detailed information, see:
 - **[ADR-003: Dependency Rules](architecture/decisions/003-dependency-rules.md)**
 - **[ADR-004: Naming Conventions](architecture/decisions/004-naming-conventions.md)**
 
-*Pre-Commit Standards Last Updated: Task #31 Completion*
+_Pre-Commit Standards Last Updated: Task #31 Completion_

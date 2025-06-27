@@ -1,5 +1,4 @@
-."""
-
+"""
 Agent Movement and Perception System
 Handles agent navigation and sensory systems in the hexagonal world.
 """
@@ -18,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class Direction(Enum):
-    """Six hexagonal movement directions."""
+    """Six hexagonal movement directions"""
 
     NORTH = 0
     NORTHEAST = 1
@@ -30,7 +29,7 @@ class Direction(Enum):
 
 @dataclass
 class Observation:
-    """Agent's observation of the environment."""
+    """Agent's observation of the environment"""
 
     current_cell: HexCell
     visible_cells: List[HexCell]
@@ -40,7 +39,7 @@ class Observation:
     timestamp: float
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary for agent processing."""
+        """Convert to dictionary for agent processing"""
         return {
             "location": {
                 "hex_id": self.current_cell.hex_id,
@@ -55,8 +54,7 @@ class Observation:
                         "hex_id": cell.hex_id,
                         "biome": cell.biome.value,
                         "terrain": cell.terrain.value,
-                        "distance": h3.grid_distance(self.current_cell.hex_id,
-                            cell.hex_id),
+                        "distance": h3.grid_distance(self.current_cell.hex_id, cell.hex_id),
                         "resources": cell.resources,
                     }
                     for cell in self.visible_cells
@@ -134,7 +132,7 @@ class MovementPerceptionSystem:
     def _calculate_direction(
         self, from_lat: float, from_lng: float, to_lat: float, to_lng: float
     ) -> Direction:
-        """Calculate hexagonal direction from one position to another."""
+        """Calculate hexagonal direction from one position to another"""
         # Calculate bearing
         lat1, lng1 = math.radians(from_lat), math.radians(from_lng)
         lat2, lng2 = math.radians(to_lat), math.radians(to_lng)
@@ -142,8 +140,7 @@ class MovementPerceptionSystem:
         dlng = lng2 - lng1
 
         y = math.sin(dlng) * math.cos(lat2)
-        x = (
-            math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(dlng))
+        x = math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(dlng)
 
         bearing = math.degrees(math.atan2(y, x))
         bearing = (bearing + 360) % 360
@@ -154,8 +151,7 @@ class MovementPerceptionSystem:
 
         return Direction(sector)
 
-    def can_move_to(self, from_hex: str, to_hex: str) -> tuple[bool,
-        Optional[str]]:
+    def can_move_to(self, from_hex: str, to_hex: str) -> tuple[bool, Optional[str]]:
         """
         Check if movement from one hex to another is valid.
 
@@ -242,8 +238,7 @@ class MovementPerceptionSystem:
         visible_cells = self.world.get_visible_cells(agent_position)
 
         # Filter by line of sight
-        visible_cells = (
-            self._apply_line_of_sight(agent_position, visible_cells))
+        visible_cells = self._apply_line_of_sight(agent_position, visible_cells)
 
         # Detect nearby agents
         nearby_agents = []
@@ -257,8 +252,7 @@ class MovementPerceptionSystem:
                             "id": agent.get("id"),
                             "position": agent.get("position"),
                             "class": agent.get("class", "unknown"),
-                            "visible_action": agent.get("current_action",
-                                "idle"),
+                            "visible_action": agent.get("current_action", "idle"),
                         }
                     )
 
@@ -328,8 +322,7 @@ class MovementPerceptionSystem:
                 # Add observer height (assume 2m)
                 effective_observer_elevation = observer_elevation + 2
 
-                if intermediate_cell.elevation > expected_elevation +
-                    10:  # 10m tolerance
+                if intermediate_cell.elevation > expected_elevation + 10:  # 10m tolerance
                     blocked = True
                     break
 
@@ -473,8 +466,7 @@ class MovementPerceptionSystem:
                 variety_score = 1.0
 
             # Combined score
-            total_score = (
-                distance_score * 0.4 + resource_score * 0.4 + variety_score * 0.2)
+            total_score = distance_score * 0.4 + resource_score * 0.4 + variety_score * 0.2
 
             cell_scores.append((total_score, cell.hex_id))
 
@@ -490,8 +482,7 @@ if __name__ == "__main__":
     # Create a test world
     from ..world.h3_world import H3World
 
-    world = (
-        H3World(center_lat=37.7749, center_lng=-122.4194, resolution=7, num_rings=5, seed=42))
+    world = H3World(center_lat=37.7749, center_lng=-122.4194, resolution=7, num_rings=5, seed=42)
 
     # Create movement system
     movement_system = MovementPerceptionSystem(world)

@@ -163,19 +163,16 @@ Let's create your first agent! We'll create a simple Explorer agent.
 ### Using the Web Interface
 
 1. **Navigate to Agent Creator**
-
    - Click "Agents" in the navigation bar
    - Click "Create New Agent" button
 
 2. **Configure Basic Information**
-
    - **Name**: "Explorer Alpha"
    - **Class**: Select "Explorer"
    - **Starting Position**: Leave as default or click on the map
 
 3. **Set Personality Traits**
    Use the sliders to set:
-
    - **Openness**: 80 (high curiosity)
    - **Conscientiousness**: 70 (organized exploration)
    - **Extraversion**: 60 (moderate social interaction)
@@ -183,7 +180,6 @@ Let's create your first agent! We'll create a simple Explorer agent.
    - **Neuroticism**: 30 (stable under pressure)
 
 4. **Generate Backstory** (Optional)
-
    - Click "Generate Backstory"
    - The AI will create a unique history for your agent
 
@@ -229,12 +225,10 @@ print(f"Created agent: {agent['id']}")
 ### Quick Start Simulation
 
 1. **Access Simulation Control**
-
    - Go to the main dashboard
    - Click "Start Simulation" button
 
 2. **Configure Simulation**
-
    - **Speed**: 1x (real-time) to 10x (fast)
    - **Duration**: Set cycles or run indefinitely
    - **Auto-pause**: Enable for specific events
@@ -400,13 +394,11 @@ Access via "World" → "Edit Mode":
 ### Tutorials
 
 1. **[Creating Custom Agents](agent_creator_guide.md)**
-
    - Advanced personality configuration
    - Custom GNN models
    - Behavioral scripting
 
 2. **[World Building](world_building_guide.md)**
-
    - Designing environments
    - Resource economics
    - Environmental challenges

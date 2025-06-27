@@ -48,4 +48,3 @@ Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytes
 ### Description: Pass integration and end-to-end tests before completing this task and moving to the next. Reference the PRD for acceptance criteria and committee review.
 ### Details:
 All code must meet PRD requirements and be reviewed by the expert committee. Ensure all tests (mypy, tsc, jest, pytest, flake8, ESLint) pass and integration/end-to-end tests are green before closing the task.
-

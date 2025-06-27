@@ -4,17 +4,17 @@
 module.exports = {
   // Basic formatting
   semi: true,
-  trailingComma: 'es5',
+  trailingComma: "es5",
   singleQuote: true,
   printWidth: 100,
   tabWidth: 2,
   useTabs: false,
 
   // JavaScript/TypeScript specific
-  quoteProps: 'as-needed',
+  quoteProps: "as-needed",
   bracketSpacing: true,
   bracketSameLine: false,
-  arrowParens: 'avoid',
+  arrowParens: "avoid",
 
   // React/JSX specific
   jsxSingleQuote: true,
@@ -23,42 +23,42 @@ module.exports = {
   // File extensions to format
   overrides: [
     {
-      files: '*.{js,jsx,ts,tsx}',
+      files: "*.{js,jsx,ts,tsx}",
       options: {
-        parser: 'typescript',
+        parser: "typescript",
       },
     },
     {
-      files: '*.json',
+      files: "*.json",
       options: {
-        parser: 'json',
+        parser: "json",
         printWidth: 120,
       },
     },
     {
-      files: '*.md',
+      files: "*.md",
       options: {
-        parser: 'markdown',
+        parser: "markdown",
         printWidth: 80,
-        proseWrap: 'always',
+        proseWrap: "always",
       },
     },
     {
-      files: '*.yml',
+      files: "*.yml",
       options: {
-        parser: 'yaml',
+        parser: "yaml",
         printWidth: 120,
       },
     },
     {
-      files: '*.yaml',
+      files: "*.yaml",
       options: {
-        parser: 'yaml',
+        parser: "yaml",
         printWidth: 120,
       },
     },
   ],
 
   // Files to ignore
-  ignorePath: '.prettierignore',
+  ignorePath: ".prettierignore",
 };

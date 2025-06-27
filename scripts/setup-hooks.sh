@@ -91,7 +91,7 @@ echo -e "${YELLOW}🔧 Setting up pre-commit hooks...${NC}"
 pre-commit install --install-hooks
 print_status "Pre-commit hooks installed"
 
-# Install commit-msg hook  
+# Install commit-msg hook
 pre-commit install --hook-type commit-msg
 print_status "Commit message validation installed"
 
@@ -141,4 +141,4 @@ echo "  - Kent Beck: Incremental improvement and testing"
 echo "  - Rich Hickey: Simplicity and correctness"
 echo "  - Conor Heins: Mathematical rigor and type safety"
 echo ""
-echo -e "${BLUE}Ready for development with automated quality gates! 🚀${NC}" 
+echo -e "${BLUE}Ready for development with automated quality gates! 🚀${NC}"

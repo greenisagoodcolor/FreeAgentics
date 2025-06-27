@@ -19,7 +19,7 @@ from numpy.typing import NDArray
 
 
 class AgentStatus(Enum):
-    ."""Possible agent states."""
+    """Possible agent states"""
 
     IDLE = "idle"
     MOVING = "moving"
@@ -31,7 +31,7 @@ class AgentStatus(Enum):
 
 
 class AgentClass(Enum):
-    ."""Defines the class of the agent."""
+    """Defines the class of the agent"""
 
     EXPLORER = "explorer"
     MERCHANT = "merchant"
@@ -40,7 +40,7 @@ class AgentClass(Enum):
 
 
 class PersonalityTraits(Enum):
-    ."""Big Five personality traits for agents."""
+    """Big Five personality traits for agents"""
 
     OPENNESS = "openness"
     CONSCIENTIOUSNESS = "conscientiousness"
@@ -50,7 +50,7 @@ class PersonalityTraits(Enum):
 
 
 class AgentCapability(Enum):
-    ."""Agent capabilities that can be enabled/disabled."""
+    """Agent capabilities that can be enabled/disabled"""
 
     MOVEMENT = "movement"
     PERCEPTION = "perception"
@@ -63,7 +63,7 @@ class AgentCapability(Enum):
 
 
 class ActionType(Enum):
-    ."""Types of actions agents can perform."""
+    """Types of actions agents can perform"""
 
     MOVE = "move"
     COMMUNICATE = "communicate"
@@ -79,26 +79,26 @@ class ActionType(Enum):
 
 @dataclass
 class Position:
-    ."""3D position in the environment."""
+    """3D position in the environment"""
 
     x: float
     y: float
     z: float = 0.0
 
     def to_array(self) -> NDArray[np.float64]:
-        ."""Convert to numpy array."""
+        """Convert to numpy array"""
         return np.array([self.x, self.y, self.z])
 
     def distance_to(self, other: "Position") -> float:
-        ."""Calculate Euclidean distance to another position."""
+        """Calculate Euclidean distance to another position"""
         return float(np.linalg.norm(self.to_array() - other.to_array()))
 
     def __hash__(self) -> int:
-        ."""Make Position hashable for use as dictionary key."""
+        """Make Position hashable for use as dictionary key"""
         return hash((self.x, self.y, self.z))
 
     def __eq__(self, other: object) -> bool:
-        ."""Equality comparison for Position."""
+        """Equality comparison for Position"""
         if not isinstance(other, Position):
             return False
         return self.x == other.x and self.y == other.y and self.z == other.z
@@ -106,7 +106,7 @@ class Position:
 
 @dataclass
 class Action:
-    ."""Action that an agent can perform."""
+    """Action that an agent can perform"""
 
     action_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     action_type: ActionType = ActionType.WAIT
@@ -120,11 +120,11 @@ class Action:
     created_at: datetime = field(default_factory=datetime.now)
 
     def can_execute(self, agent: "Agent") -> bool:
-        ."""Check if the agent can execute this action."""
+        """Check if the agent can execute this action"""
         return agent.resources.has_sufficient_energy(self.energy_cost)
 
     def to_dict(self) -> Dict[str, Any]:
-        ."""Convert action to dictionary."""
+        """Convert action to dictionary"""
         return {
             "action_id": self.action_id,
             "action_type": self.action_type.value,
@@ -148,7 +148,7 @@ class Action:
 
 @dataclass
 class Orientation:
-    ."""Agent orientation using quaternion representation."""
+    """Agent orientation using quaternion representation"""
 
     w: float = 1.0
     x: float = 0.0
@@ -156,19 +156,17 @@ class Orientation:
     z: float = 0.0
 
     def to_euler(self) -> Tuple[float, float, float]:
-        ."""Convert quaternion to Euler angles (roll, pitch, yaw)."""
+        """Convert quaternion to Euler angles (roll, pitch, yaw)"""
         # Conversion formula
-        roll = (
-            np.arctan2(2 * (self.w * self.x + self.y * self.z), 1 - 2 * (self.x**2 + self.y**2)))
+        roll = np.arctan2(2 * (self.w * self.x + self.y * self.z), 1 - 2 * (self.x**2 + self.y**2))
         pitch = np.arcsin(2 * (self.w * self.y - self.z * self.x))
-        yaw = (
-            np.arctan2(2 * (self.w * self.z + self.x * self.y), 1 - 2 * (self.y**2 + self.z**2)))
+        yaw = np.arctan2(2 * (self.w * self.z + self.x * self.y), 1 - 2 * (self.y**2 + self.z**2))
         return roll, pitch, yaw
 
 
 @dataclass
 class AgentPersonality:
-    ."""Agent personality based on Big Five model."""
+    """Agent personality based on Big Five model"""
 
     openness: float = 0.5  # 0.0 to 1.0
     conscientiousness: float = 0.5
@@ -177,7 +175,7 @@ class AgentPersonality:
     neuroticism: float = 0.5
 
     def to_vector(self) -> NDArray[np.float64]:
-        ."""Convert personality to vector for GNN processing."""
+        """Convert personality to vector for GNN processing"""
         return np.array(
             [
                 self.openness,
@@ -189,7 +187,7 @@ class AgentPersonality:
         )
 
     def validate(self) -> bool:
-        ."""Validate that all traits are within valid range."""
+        """Validate that all traits are within valid range"""
         traits = [
             self.openness,
             self.conscientiousness,
@@ -202,7 +200,7 @@ class AgentPersonality:
 
 @dataclass
 class AgentResources:
-    ."""Agent resource management."""
+    """Agent resource management"""
 
     energy: float = 100.0
     health: float = 100.0
@@ -210,11 +208,11 @@ class AgentResources:
     memory_used: float = 0.0
 
     def has_sufficient_energy(self, required: float) -> bool:
-        .."""Check if agent has enough energy for an action.."""
+        """Check if agent has enough energy for an action."""
         return self.energy >= required
 
     def consume_energy(self, amount: float) -> None:
-        ."""Consume energy, ensuring it doesn't go negative."""
+        """Consume energy, ensuring it doesn't go negative"""
         self.energy = max(0.0, self.energy - amount)
 
     def restore_energy(self, amount: float) -> None:
@@ -224,7 +222,7 @@ class AgentResources:
 
 @dataclass
 class SocialRelationship:
-    ."""Relationship between agents."""
+    """Relationship between agents"""
 
     target_agent_id: str
     relationship_type: str  # friend, enemy, neutral, ally, etc.
@@ -233,13 +231,13 @@ class SocialRelationship:
     last_interaction: Optional[datetime] = None
 
     def update_trust(self, delta: float) -> None:
-        ."""Update trust level, keeping it within bounds."""
+        """Update trust level, keeping it within bounds"""
         self.trust_level = max(0.0, min(1.0, self.trust_level + delta))
 
 
 @dataclass
 class AgentGoal:
-    ."""Individual agent goal."""
+    """Individual agent goal"""
 
     goal_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     description: str = ""
@@ -251,7 +249,7 @@ class AgentGoal:
     progress: float = 0.0  # 0.0 to 1.0
 
     def is_expired(self) -> bool:
-        ."""Check if goal has passed its deadline."""
+        """Check if goal has passed its deadline"""
         if self.deadline is None:
             return False
         return datetime.now() > self.deadline
@@ -259,7 +257,7 @@ class AgentGoal:
 
 @dataclass
 class Agent:
-    ."""Core agent data model."""
+    """Core agent data model"""
 
     # Unique identification
     agent_id: str = field(default_factory=lambda: str(uuid.uuid4()))
@@ -302,23 +300,23 @@ class Agent:
     generative_model_params: Dict[str, Any] = field(default_factory=dict)
 
     def has_capability(self, capability: AgentCapability) -> bool:
-        .."""Check if agent has a specific capability.."""
+        """Check if agent has a specific capability."""
         return capability in self.capabilities
 
     def add_capability(self, capability: AgentCapability) -> None:
-        ."""Add a new capability to the agent."""
+        """Add a new capability to the agent"""
         self.capabilities.add(capability)
 
     def remove_capability(self, capability: AgentCapability) -> None:
-        ."""Remove a capability from the agent."""
+        """Remove a capability from the agent"""
         self.capabilities.discard(capability)
 
     def add_relationship(self, relationship: SocialRelationship) -> None:
-        ."""Add or update a social relationship."""
+        """Add or update a social relationship"""
         self.relationships[relationship.target_agent_id] = relationship
 
     def get_relationship(self, agent_id: str) -> Optional[SocialRelationship]:
-        ."""Get relationship with another agent."""
+        """Get relationship with another agent"""
         return self.relationships.get(agent_id)
 
     def add_goal(self, goal: AgentGoal) -> None:
@@ -328,17 +326,16 @@ class Agent:
         self.goals.sort(key=lambda g: g.priority, reverse=True)
 
     def select_next_goal(self) -> Optional[AgentGoal]:
-        ."""Select the next goal to pursue."""
+        """Select the next goal to pursue"""
         # Filter out completed and expired goals
-        active_goals = (
-            [g for g in self.goals if not g.completed and not g.is_expired()])
+        active_goals = [g for g in self.goals if not g.completed and not g.is_expired()]
         if active_goals:
             self.current_goal = active_goals[0]
             return self.current_goal
         return None
 
     def add_to_memory(self, experience: Dict[str, Any], is_important: bool = False) -> None:
-        ."""Add an experience to memory."""
+        """Add an experience to memory"""
         timestamped_experience = {
             "timestamp": datetime.now(),
             "experience": experience,
@@ -355,12 +352,12 @@ class Agent:
                 self.short_term_memory = self.short_term_memory[-50:]
 
     def update_position(self, new_position: Position) -> None:
-        .."""Update agent position and timestamp.."""
+        """Update agent position and timestamp."""
         self.position = new_position
         self.last_updated = datetime.now()
 
     def update_status(self, new_status: AgentStatus) -> None:
-        ."""Update agent status."""
+        """Update agent status"""
         self.status = new_status
         self.last_updated = datetime.now()
 
@@ -427,7 +424,7 @@ class Agent:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Agent":
-        ."""Create agent from dictionary."""
+        """Create agent from dictionary"""
         agent = cls()
         # Basic properties
         agent.agent_id = data.get("agent_id", agent.agent_id)
@@ -444,8 +441,7 @@ class Agent:
         if "status" in data:
             agent.status = AgentStatus(data["status"])
         if "capabilities" in data:
-            agent.capabilities = (
-                {AgentCapability(cap) for cap in data["capabilities"]})
+            agent.capabilities = {AgentCapability(cap) for cap in data["capabilities"]}
         # Personality
         if "personality" in data:
             agent.personality = AgentPersonality(**data["personality"])
@@ -468,8 +464,7 @@ class Agent:
             for agent_id, rel_data in data["relationships"].items():
                 last_interaction = None
                 if rel_data.get("last_interaction"):
-                    last_interaction = (
-                        datetime.fromisoformat(rel_data["last_interaction"]))
+                    last_interaction = datetime.fromisoformat(rel_data["last_interaction"])
                 relationship = SocialRelationship(
                     target_agent_id=rel_data["target_agent_id"],
                     relationship_type=rel_data["relationship_type"],
@@ -490,7 +485,7 @@ class Agent:
 
 @dataclass
 class Experience:
-    """Experience data structure for agent learning and memory systems."""
+    """Experience data structure for agent learning and memory systems"""
 
     state: Dict[str, Any]
     action: "Action"
@@ -503,7 +498,7 @@ class Experience:
 # Extension classes for specialized agent types
 @dataclass
 class SpecializedAgent(Agent):
-    ."""Base class for specialized agent types."""
+    """Base class for specialized agent types"""
 
     specialization: str = "none"
     specialized_capabilities: Set[str] = field(default_factory=set)
@@ -544,8 +539,7 @@ class SocialAgent(SpecializedAgent):
     # Social-specific properties
     influence_radius: float = 10.0
     reputation: float = 0.5  # 0.0 to 1.0
-    communication_style: str = (
-        "neutral"  # neutral, aggressive, passive, assertive)
+    communication_style: str = "neutral"  # neutral, aggressive, passive, assertive
     social_network_size: int = 0
 
     def __post_init__(self) -> None:

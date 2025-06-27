@@ -1,4 +1,4 @@
-."""
+"""
 Deployment Verification
 
 Verifies that deployed agents are functioning correctly on target hardware.
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 class HealthStatus(Enum):
-    """Health check status."""
+    """Health check status"""
 
     HEALTHY = "healthy"
     DEGRADED = "degraded"
@@ -32,7 +32,7 @@ class HealthStatus(Enum):
 
 
 class ServiceStatus(Enum):
-    """Service status."""
+    """Service status"""
 
     RUNNING = "running"
     STOPPED = "stopped"
@@ -43,7 +43,7 @@ class ServiceStatus(Enum):
 
 @dataclass
 class HealthCheck:
-    """Health check configuration."""
+    """Health check configuration"""
 
     name: str
     endpoint: str
@@ -56,7 +56,7 @@ class HealthCheck:
 
 @dataclass
 class ServiceInfo:
-    """Service information."""
+    """Service information"""
 
     name: str
     pid: Optional[int] = None
@@ -72,7 +72,7 @@ class ServiceInfo:
 
 @dataclass
 class DeploymentConfig:
-    """Deployment configuration."""
+    """Deployment configuration"""
 
     agent_name: str
     base_url: str
@@ -90,7 +90,7 @@ class HealthMonitor:
     """
 
     def __init__(self, config: DeploymentConfig) -> None:
-        """Initialize health monitor."""
+        """Initialize health monitor"""
         self.config = config
         self.running = False
         self.health_history = []
@@ -121,7 +121,7 @@ class HealthMonitor:
     async def _perform_health_check(
         self, session: aiohttp.ClientSession, check: HealthCheck
     ) -> bool:
-        """Perform a single health check."""
+        """Perform a single health check"""
         url = f"{self.config.base_url}{check.endpoint}"
 
         for attempt in range(check.retries):
@@ -164,8 +164,7 @@ class HealthMonitor:
                 status = await self.check_health()
 
                 # Record history
-                self.health_history.append({"timestamp": time.time(),
-                    "status": status.value})
+                self.health_history.append({"timestamp": time.time(), "status": status.value})
 
                 # Keep history bounded
                 if len(self.health_history) > self.max_history:
@@ -185,11 +184,11 @@ class HealthMonitor:
                 await asyncio.sleep(10)
 
     def stop_monitoring(self):
-        """Stop continuous monitoring."""
+        """Stop continuous monitoring"""
         self.running = False
 
     def get_health_metrics(self) -> Dict[str, Any]:
-        """Get health metrics."""
+        """Get health metrics"""
         if not self.health_history:
             return {
                 "status": HealthStatus.UNKNOWN.value,
@@ -221,12 +220,11 @@ class ServiceManager:
     """
 
     def __init__(self, config: DeploymentConfig) -> None:
-        """Initialize service manager."""
+        """Initialize service manager"""
         self.config = config
         self.service_info = ServiceInfo(name=config.agent_name)
 
-    def start_service(self, command: List[str], env: Optional[Dict[str,
-        str]] = None) -> bool:
+    def start_service(self, command: List[str], env: Optional[Dict[str, str]] = None) -> bool:
         """
         Start the agent service.
 
@@ -291,7 +289,7 @@ class ServiceManager:
             return False
 
     def stop_service(self) -> bool:
-        """Stop the agent service."""
+        """Stop the agent service"""
         if not self.is_running():
             logger.warning(f"Service {self.config.agent_name} not running")
             return True
@@ -334,9 +332,8 @@ class ServiceManager:
             self.service_info.errors.append(str(e))
             return False
 
-    def restart_service(self, command: List[str], env: Optional[Dict[str,
-        str]] = None) -> bool:
-        """Restart the agent service."""
+    def restart_service(self, command: List[str], env: Optional[Dict[str, str]] = None) -> bool:
+        """Restart the agent service"""
         logger.info(f"Restarting service {self.config.agent_name}")
 
         if self.is_running():
@@ -349,7 +346,7 @@ class ServiceManager:
         return self.start_service(command, env)
 
     def is_running(self) -> bool:
-        """Check if service is running."""
+        """Check if service is running"""
         if not self.service_info.pid:
             return False
 
@@ -363,7 +360,7 @@ class ServiceManager:
             return False
 
     def get_service_metrics(self) -> Dict[str, Any]:
-        """Get service metrics."""
+        """Get service metrics"""
         if not self.is_running():
             return {
                 "status": self.service_info.status.value,
@@ -376,8 +373,7 @@ class ServiceManager:
             process = psutil.Process(self.service_info.pid)
 
             # Update metrics
-            self.service_info.memory_mb = (
-                process.memory_info().rss / (1024 * 1024))
+            self.service_info.memory_mb = process.memory_info().rss / (1024 * 1024)
             self.service_info.cpu_percent = process.cpu_percent(interval=1)
             self.service_info.uptime = time.time() - process.create_time()
 
@@ -402,7 +398,7 @@ class FunctionalTester:
     """
 
     def __init__(self, base_url: str) -> None:
-        """Initialize functional tester."""
+        """Initialize functional tester"""
         self.base_url = base_url
 
     async def run_tests(self) -> Dict[str, Any]:
@@ -441,9 +437,8 @@ class FunctionalTester:
             },
         }
 
-    async def _test_agent_info(self, session: aiohttp.ClientSession) -> Dict[str,
-        Any]:
-        """Test agent info endpoint."""
+    async def _test_agent_info(self, session: aiohttp.ClientSession) -> Dict[str, Any]:
+        """Test agent info endpoint"""
         test_name = "agent_info"
 
         try:
@@ -456,8 +451,7 @@ class FunctionalTester:
 
                     # Validate response structure
                     required_fields = ["id", "name", "class", "status"]
-                    missing_fields = (
-                        [f for f in required_fields if f not in data])
+                    missing_fields = [f for f in required_fields if f not in data]
 
                     if missing_fields:
                         return {
@@ -486,9 +480,8 @@ class FunctionalTester:
                 "message": f"Test failed: {str(e)}",
             }
 
-    async def _test_movement(self, session: aiohttp.ClientSession) -> Dict[str,
-        Any]:
-        """Test agent movement."""
+    async def _test_movement(self, session: aiohttp.ClientSession) -> Dict[str, Any]:
+        """Test agent movement"""
         test_name = "movement"
 
         try:
@@ -506,8 +499,7 @@ class FunctionalTester:
             # Attempt movement
             move_data = {"direction": "north", "distance": 1}
 
-            async with session.post(f"{self.base_url}/api/agent/move",
-                json=move_data) as response:
+            async with session.post(f"{self.base_url}/api/agent/move", json=move_data) as response:
                 if response.status == 200:
                     new_pos = await response.json()
 
@@ -539,9 +531,8 @@ class FunctionalTester:
                 "message": f"Test failed: {str(e)}",
             }
 
-    async def _test_perception(self, session: aiohttp.ClientSession) -> Dict[str,
-        Any]:
-        """Test agent perception."""
+    async def _test_perception(self, session: aiohttp.ClientSession) -> Dict[str, Any]:
+        """Test agent perception"""
         test_name = "perception"
 
         try:
@@ -577,9 +568,8 @@ class FunctionalTester:
                 "message": f"Test failed: {str(e)}",
             }
 
-    async def _test_communication(self, session: aiohttp.ClientSession) -> Dict[str,
-        Any]:
-        """Test agent communication."""
+    async def _test_communication(self, session: aiohttp.ClientSession) -> Dict[str, Any]:
+        """Test agent communication"""
         test_name = "communication"
 
         try:
@@ -623,9 +613,8 @@ class FunctionalTester:
                 "message": f"Test failed: {str(e)}",
             }
 
-    async def _test_decision_making(self, session: aiohttp.ClientSession) -> Dict[str,
-        Any]:
-        """Test agent decision making."""
+    async def _test_decision_making(self, session: aiohttp.ClientSession) -> Dict[str, Any]:
+        """Test agent decision making"""
         test_name = "decision_making"
 
         try:
@@ -676,7 +665,7 @@ class DeploymentVerifier:
     """
 
     def __init__(self, deployment_dir: Path) -> None:
-        """Initialize deployment verifier."""
+        """Initialize deployment verifier"""
         self.deployment_dir = deployment_dir
         self.config = self._load_config()
 
@@ -685,7 +674,7 @@ class DeploymentVerifier:
         self.functional_tester = FunctionalTester(self.config.base_url)
 
     def _load_config(self) -> DeploymentConfig:
-        """Load deployment configuration."""
+        """Load deployment configuration"""
         config_file = self.deployment_dir / "deployment_config.json"
 
         if config_file.exists():
@@ -707,8 +696,7 @@ class DeploymentVerifier:
             }
 
         # Create health check objects
-        health_checks = (
-            [HealthCheck(**hc) for hc in config_data.get("health_checks", [])])
+        health_checks = [HealthCheck(**hc) for hc in config_data.get("health_checks", [])]
 
         return DeploymentConfig(
             agent_name=config_data.get("agent_name", "agent"),
@@ -779,8 +767,7 @@ class DeploymentVerifier:
         results["checks"]["resources"] = resource_usage
 
         # Generate overall status
-        results["overall_status"] = (
-            self._determine_overall_status(results["checks"]))
+        results["overall_status"] = self._determine_overall_status(results["checks"])
 
         # Save results
         results_file = self.deployment_dir / "verification_results.json"
@@ -790,7 +777,7 @@ class DeploymentVerifier:
         return results
 
     def _check_logs(self) -> Dict[str, Any]:
-        """Check logs for errors."""
+        """Check logs for errors"""
         if not self.config.log_file.exists():
             return {"checked": False, "reason": "Log file not found"}
 
@@ -823,7 +810,7 @@ class DeploymentVerifier:
             return {"checked": False, "error": str(e)}
 
     def _check_resources(self) -> Dict[str, Any]:
-        """Check system resource usage."""
+        """Check system resource usage"""
         try:
             cpu_percent = psutil.cpu_percent(interval=1)
             memory = psutil.virtual_memory()
@@ -841,7 +828,7 @@ class DeploymentVerifier:
             return {"error": str(e)}
 
     def _determine_overall_status(self, checks: Dict[str, Any]) -> str:
-        """Determine overall deployment status."""
+        """Determine overall deployment status"""
         # Service must be running
         if not checks.get("service", {}).get("running"):
             return "failed"
@@ -865,8 +852,7 @@ class DeploymentVerifier:
 
         # Check resource usage
         resources = checks.get("resources", {})
-        if resources.get("cpu_percent", 0) > 90 or resources.get("memory_percent",
-            0) > 90:
+        if resources.get("cpu_percent", 0) > 90 or resources.get("memory_percent", 0) > 90:
             return "degraded"
 
         return "healthy"

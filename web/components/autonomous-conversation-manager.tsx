@@ -54,27 +54,28 @@ export default function AutonomousConversationManager({
   }, [conversation]);
 
   // Function to generate a conversation starter message using the LLM
-  const generateConversationStarter = useCallback(async (
-    firstAgent: Agent,
-    participants: Agent[],
-    topic?: string,
-  ): Promise<string> => {
-    if (!llmClient) {
-      logger.error(
-        "Cannot generate conversation starter: LLM client not available",
-      );
-      return fallbackStarterMessage(firstAgent, topic);
-    }
+  const generateConversationStarter = useCallback(
+    async (
+      firstAgent: Agent,
+      participants: Agent[],
+      topic?: string,
+    ): Promise<string> => {
+      if (!llmClient) {
+        logger.error(
+          "Cannot generate conversation starter: LLM client not available",
+        );
+        return fallbackStarterMessage(firstAgent, topic);
+      }
 
-    // Collect all agents' information
-    const agentInfos = participants.map((agent) => ({
-      name: agent.name,
-      biography: agent.biography,
-      isStarter: agent.id === firstAgent.id,
-    }));
+      // Collect all agents' information
+      const agentInfos = participants.map((agent) => ({
+        name: agent.name,
+        biography: agent.biography,
+        isStarter: agent.id === firstAgent.id,
+      }));
 
-    // Create a system prompt that explains what we want
-    const systemPrompt = `You are helping to start a conversation between AI agents.
+      // Create a system prompt that explains what we want
+      const systemPrompt = `You are helping to start a conversation between AI agents.
 Generate a conversation starter message from the perspective of ${firstAgent.name}.
 The message should:
 1. Be prefixed with "${firstAgent.name}: " (include the colon and space)
@@ -87,8 +88,8 @@ The message should:
 
 IMPORTANT: Always start with "${firstAgent.name}: " followed by the message.`;
 
-    // Create a user prompt with agent information
-    const userPrompt = `Agents in conversation:
+      // Create a user prompt with agent information
+      const userPrompt = `Agents in conversation:
 ${agentInfos.map((info) => `- ${info.name}: ${info.biography}`).join("\n")}
 
 ${topic ? `Conversation topic: ${topic}` : "No specific topic provided, but suggest something relevant to the agents' backgrounds."}
@@ -96,38 +97,40 @@ ${topic ? `Conversation topic: ${topic}` : "No specific topic provided, but sugg
 Write a conversation starter message from ${firstAgent.name}'s perspective that will engage the other agents.
 Remember to start with "${firstAgent.name}: " followed by the message.`;
 
-    try {
-      logger.log("Generating conversation starter message", {
-        firstAgent: firstAgent.name,
-        participantCount: participants.length,
-        topic,
-      });
+      try {
+        logger.log("Generating conversation starter message", {
+          firstAgent: firstAgent.name,
+          participantCount: participants.length,
+          topic,
+        });
 
-      // Generate the starter message
-      const response = await llmClient.generateResponse(
-        systemPrompt,
-        userPrompt,
-      );
+        // Generate the starter message
+        const response = await llmClient.generateResponse(
+          systemPrompt,
+          userPrompt,
+        );
 
-      // Ensure the response starts with the agent name
-      let formattedResponse = response.trim();
-      const expectedPrefix = `${firstAgent.name}:`;
+        // Ensure the response starts with the agent name
+        let formattedResponse = response.trim();
+        const expectedPrefix = `${firstAgent.name}:`;
 
-      if (!formattedResponse.startsWith(expectedPrefix)) {
-        formattedResponse = `${expectedPrefix} ${formattedResponse}`;
-        logger.log("Added missing agent name prefix to starter message");
+        if (!formattedResponse.startsWith(expectedPrefix)) {
+          formattedResponse = `${expectedPrefix} ${formattedResponse}`;
+          logger.log("Added missing agent name prefix to starter message");
+        }
+
+        logger.log("Successfully generated conversation starter", {
+          messagePreview: formattedResponse.substring(0, 50) + "...",
+        });
+
+        return formattedResponse;
+      } catch (error) {
+        logger.error("Error generating conversation starter:", error);
+        return fallbackStarterMessage(firstAgent, topic);
       }
-
-      logger.log("Successfully generated conversation starter", {
-        messagePreview: formattedResponse.substring(0, 50) + "...",
-      });
-
-      return formattedResponse;
-    } catch (error) {
-      logger.error("Error generating conversation starter:", error);
-      return fallbackStarterMessage(firstAgent, topic);
-    }
-  }, [llmClient]);
+    },
+    [llmClient],
+  );
 
   // Fallback message in case LLM generation fails
   function fallbackStarterMessage(agent: Agent, topic?: string): string {
@@ -237,7 +240,14 @@ Remember to start with "${firstAgent.name}: " followed by the message.`;
       logger.log("Conversation already has messages, marking as initialized");
       hasInitializedRef.current = true;
     }
-  }, [conversation, agents, onSendMessage, processNewMessage, llmClient, generateConversationStarter]);
+  }, [
+    conversation,
+    agents,
+    onSendMessage,
+    processNewMessage,
+    llmClient,
+    generateConversationStarter,
+  ]);
 
   // Add a new effect to monitor conversation progress and ensure it reaches minimum message count
   useEffect(() => {

@@ -1,21 +1,27 @@
 "use client";
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Slider } from '@/components/ui/slider';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { ConversationPreset } from '@/lib/types';
-import { 
-  Users, 
-  Target, 
-  Brain, 
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { ConversationPreset } from "@/lib/types";
+import {
+  Users,
+  Target,
+  Brain,
   Shuffle,
   MessageSquare,
-  Sparkles
-} from 'lucide-react';
+  Sparkles,
+} from "lucide-react";
 
 interface ResponseDynamicsControlsProps {
   preset: ConversationPreset | null;
@@ -26,7 +32,7 @@ interface ResponseDynamicsControlsProps {
 export function ResponseDynamicsControls({
   preset,
   onUpdate,
-  className = ""
+  className = "",
 }: ResponseDynamicsControlsProps) {
   if (!preset) {
     return (
@@ -45,45 +51,51 @@ export function ResponseDynamicsControls({
   /**
    * Update turn-taking settings
    */
-  const updateTurnTaking = (updates: Partial<typeof responseDynamics.turnTaking>) => {
+  const updateTurnTaking = (
+    updates: Partial<typeof responseDynamics.turnTaking>,
+  ) => {
     onUpdate({
       responseDynamics: {
         ...responseDynamics,
         turnTaking: {
           ...responseDynamics.turnTaking,
-          ...updates
-        }
-      }
+          ...updates,
+        },
+      },
     });
   };
 
   /**
    * Update agent selection settings
    */
-  const updateAgentSelection = (updates: Partial<typeof responseDynamics.agentSelection>) => {
+  const updateAgentSelection = (
+    updates: Partial<typeof responseDynamics.agentSelection>,
+  ) => {
     onUpdate({
       responseDynamics: {
         ...responseDynamics,
         agentSelection: {
           ...responseDynamics.agentSelection,
-          ...updates
-        }
-      }
+          ...updates,
+        },
+      },
     });
   };
 
   /**
    * Update response generation settings
    */
-  const updateResponseGeneration = (updates: Partial<typeof responseDynamics.responseGeneration>) => {
+  const updateResponseGeneration = (
+    updates: Partial<typeof responseDynamics.responseGeneration>,
+  ) => {
     onUpdate({
       responseDynamics: {
         ...responseDynamics,
         responseGeneration: {
           ...responseDynamics.responseGeneration,
-          ...updates
-        }
-      }
+          ...updates,
+        },
+      },
     });
   };
 
@@ -102,7 +114,7 @@ export function ResponseDynamicsControls({
             <MessageSquare className="h-4 w-4" />
             <Label className="font-medium">Turn-Taking Behavior</Label>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -119,7 +131,9 @@ export function ResponseDynamicsControls({
               <div className="px-3">
                 <Slider
                   value={[responseDynamics.turnTaking.maxConcurrentResponses]}
-                  onValueChange={(value) => updateTurnTaking({ maxConcurrentResponses: value[0] })}
+                  onValueChange={(value) =>
+                    updateTurnTaking({ maxConcurrentResponses: value[0] })
+                  }
                   min={1}
                   max={5}
                   step={1}
@@ -127,7 +141,9 @@ export function ResponseDynamicsControls({
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
                   <span>1</span>
-                  <span>{responseDynamics.turnTaking.maxConcurrentResponses}</span>
+                  <span>
+                    {responseDynamics.turnTaking.maxConcurrentResponses}
+                  </span>
                   <span>5</span>
                 </div>
               </div>
@@ -138,7 +154,9 @@ export function ResponseDynamicsControls({
               <div className="px-3">
                 <Slider
                   value={[responseDynamics.turnTaking.responseThreshold]}
-                  onValueChange={(value) => updateTurnTaking({ responseThreshold: value[0] })}
+                  onValueChange={(value) =>
+                    updateTurnTaking({ responseThreshold: value[0] })
+                  }
                   min={0.1}
                   max={1.0}
                   step={0.1}
@@ -146,7 +164,9 @@ export function ResponseDynamicsControls({
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
                   <span>0.1</span>
-                  <span>{responseDynamics.turnTaking.responseThreshold.toFixed(1)}</span>
+                  <span>
+                    {responseDynamics.turnTaking.responseThreshold.toFixed(1)}
+                  </span>
                   <span>1.0</span>
                 </div>
               </div>
@@ -156,8 +176,12 @@ export function ResponseDynamicsControls({
               <Label>Mention Response Rate</Label>
               <div className="px-3">
                 <Slider
-                  value={[responseDynamics.turnTaking.mentionResponseProbability]}
-                  onValueChange={(value) => updateTurnTaking({ mentionResponseProbability: value[0] })}
+                  value={[
+                    responseDynamics.turnTaking.mentionResponseProbability,
+                  ]}
+                  onValueChange={(value) =>
+                    updateTurnTaking({ mentionResponseProbability: value[0] })
+                  }
                   min={0.1}
                   max={1.0}
                   step={0.1}
@@ -165,7 +189,11 @@ export function ResponseDynamicsControls({
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
                   <span>0.1</span>
-                  <span>{responseDynamics.turnTaking.mentionResponseProbability.toFixed(1)}</span>
+                  <span>
+                    {responseDynamics.turnTaking.mentionResponseProbability.toFixed(
+                      1,
+                    )}
+                  </span>
                   <span>1.0</span>
                 </div>
               </div>
@@ -179,14 +207,16 @@ export function ResponseDynamicsControls({
             <Target className="h-4 w-4" />
             <Label className="font-medium">Agent Selection</Label>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label>Auto-Select Respondents</Label>
                 <Switch
-                  checked={responseDynamics.agentSelection.autoSelectRespondents}
-                  onCheckedChange={(autoSelectRespondents) => 
+                  checked={
+                    responseDynamics.agentSelection.autoSelectRespondents
+                  }
+                  onCheckedChange={(autoSelectRespondents) =>
                     updateAgentSelection({ autoSelectRespondents })
                   }
                 />
@@ -197,7 +227,7 @@ export function ResponseDynamicsControls({
               <Label>Selection Strategy</Label>
               <Select
                 value={responseDynamics.agentSelection.selectionStrategy}
-                onValueChange={(selectionStrategy: any) => 
+                onValueChange={(selectionStrategy: any) =>
                   updateAgentSelection({ selectionStrategy })
                 }
               >
@@ -207,8 +237,12 @@ export function ResponseDynamicsControls({
                 <SelectContent>
                   <SelectItem value="random">Random</SelectItem>
                   <SelectItem value="round_robin">Round Robin</SelectItem>
-                  <SelectItem value="expertise_based">Expertise Based</SelectItem>
-                  <SelectItem value="engagement_based">Engagement Based</SelectItem>
+                  <SelectItem value="expertise_based">
+                    Expertise Based
+                  </SelectItem>
+                  <SelectItem value="engagement_based">
+                    Engagement Based
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -218,7 +252,9 @@ export function ResponseDynamicsControls({
               <div className="px-3">
                 <Slider
                   value={[responseDynamics.agentSelection.diversityBonus]}
-                  onValueChange={(value) => updateAgentSelection({ diversityBonus: value[0] })}
+                  onValueChange={(value) =>
+                    updateAgentSelection({ diversityBonus: value[0] })
+                  }
                   min={0.0}
                   max={1.0}
                   step={0.1}
@@ -226,7 +262,9 @@ export function ResponseDynamicsControls({
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
                   <span>0.0</span>
-                  <span>{responseDynamics.agentSelection.diversityBonus.toFixed(1)}</span>
+                  <span>
+                    {responseDynamics.agentSelection.diversityBonus.toFixed(1)}
+                  </span>
                   <span>1.0</span>
                 </div>
               </div>
@@ -237,7 +275,9 @@ export function ResponseDynamicsControls({
               <div className="px-3">
                 <Slider
                   value={[responseDynamics.agentSelection.expertiseWeight]}
-                  onValueChange={(value) => updateAgentSelection({ expertiseWeight: value[0] })}
+                  onValueChange={(value) =>
+                    updateAgentSelection({ expertiseWeight: value[0] })
+                  }
                   min={0.0}
                   max={1.0}
                   step={0.1}
@@ -245,7 +285,9 @@ export function ResponseDynamicsControls({
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
                   <span>0.0</span>
-                  <span>{responseDynamics.agentSelection.expertiseWeight.toFixed(1)}</span>
+                  <span>
+                    {responseDynamics.agentSelection.expertiseWeight.toFixed(1)}
+                  </span>
                   <span>1.0</span>
                 </div>
               </div>
@@ -259,14 +301,16 @@ export function ResponseDynamicsControls({
             <Brain className="h-4 w-4" />
             <Label className="font-medium">Response Generation</Label>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label>Include Agent Knowledge</Label>
                 <Switch
-                  checked={responseDynamics.responseGeneration.includeAgentKnowledge}
-                  onCheckedChange={(includeAgentKnowledge) => 
+                  checked={
+                    responseDynamics.responseGeneration.includeAgentKnowledge
+                  }
+                  onCheckedChange={(includeAgentKnowledge) =>
                     updateResponseGeneration({ includeAgentKnowledge })
                   }
                 />
@@ -278,7 +322,7 @@ export function ResponseDynamicsControls({
                 <Label>Stream Response</Label>
                 <Switch
                   checked={responseDynamics.responseGeneration.streamResponse}
-                  onCheckedChange={(streamResponse) => 
+                  onCheckedChange={(streamResponse) =>
                     updateResponseGeneration({ streamResponse })
                   }
                 />
@@ -289,8 +333,12 @@ export function ResponseDynamicsControls({
               <Label>Max Knowledge Entries</Label>
               <div className="px-3">
                 <Slider
-                  value={[responseDynamics.responseGeneration.maxKnowledgeEntries]}
-                  onValueChange={(value) => updateResponseGeneration({ maxKnowledgeEntries: value[0] })}
+                  value={[
+                    responseDynamics.responseGeneration.maxKnowledgeEntries,
+                  ]}
+                  onValueChange={(value) =>
+                    updateResponseGeneration({ maxKnowledgeEntries: value[0] })
+                  }
                   min={0}
                   max={50}
                   step={5}
@@ -298,7 +346,9 @@ export function ResponseDynamicsControls({
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
                   <span>0</span>
-                  <span>{responseDynamics.responseGeneration.maxKnowledgeEntries}</span>
+                  <span>
+                    {responseDynamics.responseGeneration.maxKnowledgeEntries}
+                  </span>
                   <span>50</span>
                 </div>
               </div>
@@ -308,7 +358,7 @@ export function ResponseDynamicsControls({
               <Label>Response Length</Label>
               <Select
                 value={responseDynamics.responseGeneration.responseLength}
-                onValueChange={(responseLength: any) => 
+                onValueChange={(responseLength: any) =>
                   updateResponseGeneration({ responseLength })
                 }
               >
@@ -328,7 +378,9 @@ export function ResponseDynamicsControls({
               <div className="px-3">
                 <Slider
                   value={[responseDynamics.responseGeneration.creativityLevel]}
-                  onValueChange={(value) => updateResponseGeneration({ creativityLevel: value[0] })}
+                  onValueChange={(value) =>
+                    updateResponseGeneration({ creativityLevel: value[0] })
+                  }
                   min={0.0}
                   max={1.0}
                   step={0.1}
@@ -336,7 +388,11 @@ export function ResponseDynamicsControls({
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
                   <span>0.0</span>
-                  <span>{responseDynamics.responseGeneration.creativityLevel.toFixed(1)}</span>
+                  <span>
+                    {responseDynamics.responseGeneration.creativityLevel.toFixed(
+                      1,
+                    )}
+                  </span>
                   <span>1.0</span>
                 </div>
               </div>
@@ -347,7 +403,9 @@ export function ResponseDynamicsControls({
               <div className="px-3">
                 <Slider
                   value={[responseDynamics.responseGeneration.coherenceWeight]}
-                  onValueChange={(value) => updateResponseGeneration({ coherenceWeight: value[0] })}
+                  onValueChange={(value) =>
+                    updateResponseGeneration({ coherenceWeight: value[0] })
+                  }
                   min={0.0}
                   max={1.0}
                   step={0.1}
@@ -355,7 +413,11 @@ export function ResponseDynamicsControls({
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
                   <span>0.0</span>
-                  <span>{responseDynamics.responseGeneration.coherenceWeight.toFixed(1)}</span>
+                  <span>
+                    {responseDynamics.responseGeneration.coherenceWeight.toFixed(
+                      1,
+                    )}
+                  </span>
                   <span>1.0</span>
                 </div>
               </div>
@@ -374,20 +436,25 @@ export function ResponseDynamicsControls({
               {responseDynamics.turnTaking.maxConcurrentResponses} Concurrent
             </Badge>
             <Badge variant="outline">
-              {(responseDynamics.turnTaking.responseThreshold * 100).toFixed(0)}% Threshold
+              {(responseDynamics.turnTaking.responseThreshold * 100).toFixed(0)}
+              % Threshold
             </Badge>
             <Badge variant="outline">
-              {responseDynamics.agentSelection.selectionStrategy.replace('_', ' ')}
+              {responseDynamics.agentSelection.selectionStrategy.replace(
+                "_",
+                " ",
+              )}
             </Badge>
             <Badge variant="outline">
               {responseDynamics.responseGeneration.responseLength} Response
             </Badge>
             <Badge variant="outline">
-              {responseDynamics.responseGeneration.maxKnowledgeEntries} Knowledge
+              {responseDynamics.responseGeneration.maxKnowledgeEntries}{" "}
+              Knowledge
             </Badge>
           </div>
         </div>
       </CardContent>
     </Card>
   );
-} 
+}

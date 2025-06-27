@@ -232,7 +232,7 @@ class ActiveInferenceAgent:
             return None
 
     async def _execute_action(self, action: List[int], world_state: Dict[str, Any]) -> None:
-        ."""Execute the selected action in the world."""
+        """Execute the selected action in the world"""
         # Placeholder for action execution
         # In a full implementation, this would interact with the world
         pass
@@ -410,8 +410,7 @@ class SimulationEngine:
             self._record_cycle_events()
             # Track post-step performance for adaptation boost
             if hasattr(self, "_tracking_adaptation") and self._tracking_adaptation:
-                self._post_step_performance = (
-                    await self.get_average_agent_performance())
+                self._post_step_performance = await self.get_average_agent_performance()
                 # Apply adaptation experience boost to performance improvement
                 adaptation_experience = len(getattr(self, "_env_change_history", []))
                 if adaptation_experience > 0:
@@ -431,7 +430,7 @@ class SimulationEngine:
             raise
 
     async def stop(self) -> None:
-        ."""Stop the simulation."""
+        """Stop the simulation"""
         self.running = False
         logging.info(f"Simulation stopped after {self.current_cycle} cycles")
 
@@ -481,18 +480,15 @@ class SimulationEngine:
                 self.trade_relationships[other.agent_id].add(merchant.agent_id)
         # Simulate knowledge sharing - INCREASED probability for scholars
         if len(self.agents) > 1 and np.random.random() < 0.25:  # 25% chance (was 15%)
-            scholar_agents = (
-                [a for a in self.agents.values() if a.agent_class == "scholar"])
+            scholar_agents = [a for a in self.agents.values() if a.agent_class == "scholar"]
             if scholar_agents:
                 scholar = np.random.choice(scholar_agents)
                 # Each scholar connects to multiple agents
-                other_agents = (
-                    [a for a in self.agents.values() if a.agent_id != scholar.agent_id])
+                other_agents = [a for a in self.agents.values() if a.agent_id != scholar.agent_id]
                 if other_agents:
                     # Connect to 2-4 other agents per cycle
                     num_connections = min(np.random.randint(2, 5), len(other_agents))
-                    targets = (
-                        np.random.choice(other_agents, num_connections, replace=False))
+                    targets = np.random.choice(other_agents, num_connections, replace=False)
                     for target in targets:
                         self.knowledge_shares[scholar.agent_id].add(target.agent_id)
         # Simulate protection alliances - INCREASED probability for guardians
@@ -500,8 +496,7 @@ class SimulationEngine:
             guardian_agents = [a for a in self.agents.values() if a.agent_class == "guardian"]
             if guardian_agents:
                 guardian = np.random.choice(guardian_agents)
-                other_agents = (
-                    [a for a in self.agents.values() if a.agent_id != guardian.agent_id])
+                other_agents = [a for a in self.agents.values() if a.agent_id != guardian.agent_id]
                 if other_agents:
                     # Each guardian forms alliances with multiple agents
                     num_alliances = min(np.random.randint(1, 4), len(other_agents))
@@ -552,8 +547,7 @@ class SimulationEngine:
         """Record events from this cycle"""
         events = []
         # Record trades
-        new_trades = (
-            sum(len(trades) for trades in self.trade_relationships.values()) // 2)
+        new_trades = sum(len(trades) for trades in self.trade_relationships.values()) // 2
         if new_trades > 0:
             events.append({"type": "trade", "count": new_trades, "cycle": self.current_cycle})
         # Record knowledge sharing
@@ -579,7 +573,7 @@ class SimulationEngine:
         self.event_history.extend(events)
 
     def _record_communication(self, sender: str, receiver: str) -> None:
-        ."""Record communication between agents."""
+        """Record communication between agents"""
         event = {
             "type": "communication",
             "sender": sender,
@@ -638,8 +632,7 @@ class SimulationEngine:
         avg_wealth = np.mean(wealth_values) if wealth_values else 0
         # Gini coefficient (simplified)
         if len(wealth_values) > 1:
-            wealth_diffs = (
-                np.abs(np.subtract.outer(wealth_values, wealth_values)))
+            wealth_diffs = np.abs(np.subtract.outer(wealth_values, wealth_values))
             gini = np.mean(wealth_diffs) / (2 * avg_wealth) if avg_wealth > 0 else 0
         else:
             gini = 0
@@ -712,7 +705,7 @@ class SimulationEngine:
 
     # Performance and Monitoring Methods
     async def get_average_message_latency(self) -> float:
-        ."""Get average message latency."""
+        """Get average message latency"""
         return np.mean(self.message_latencies) if self.message_latencies else 0
 
     async def get_message_system_stats(self) -> Dict[str, Any]:
@@ -756,7 +749,7 @@ class SimulationEngine:
             logging.info(f"Simulated failure of agent {agent_id}")
 
     async def simulate_communication_failure(self, duration: int) -> None:
-        ."""Simulate communication system failure."""
+        """Simulate communication system failure"""
         failure = {
             "start_cycle": self.current_cycle,
             "duration": duration,
@@ -808,7 +801,7 @@ class SimulationEngine:
 
     # Utility and State Methods
     def get_agents(self) -> List[ActiveInferenceAgent]:
-        .."""Get list of all agents.."""
+        """Get list of all agents."""
         return list(self.agents.values())
 
     def get_agent(self, agent_id: str) -> Optional[ActiveInferenceAgent]:
@@ -816,17 +809,17 @@ class SimulationEngine:
         return self.agents.get(agent_id)
 
     def get_agent_count(self) -> int:
-        ."""Get total number of agents."""
+        """Get total number of agents"""
         return len(self.agents) - len(self.failed_agents)
 
     def get_alive_agent_count(self) -> int:
-        ."""Get number of alive agents."""
+        """Get number of alive agents"""
         return sum(
             1 for a in self.agents.values() if a.alive and a.agent_id not in self.failed_agents
         )
 
     def is_healthy(self) -> bool:
-        ."""Check if system is healthy."""
+        """Check if system is healthy"""
         return len(self.failed_agents) < len(self.agents) * 0.5
 
     def get_survival_rate(self) -> float:
@@ -850,14 +843,13 @@ class SimulationEngine:
         }
 
     def get_event_history(self) -> List[Dict[str, Any]]:
-        ."""Get event history."""
+        """Get event history"""
         return list(self.event_history)
 
     def get_events_this_cycle(self) -> List[Dict[str, Any]]:
         """Get events from the cycle that just completed"""
         # Return events from the previous cycle (the one that just completed)
-        completed_cycle = (
-            self.current_cycle - 1 if self.current_cycle > 0 else 0)
+        completed_cycle = self.current_cycle - 1 if self.current_cycle > 0 else 0
         return [e for e in self.event_history if e.get("cycle") == completed_cycle]
 
     async def get_average_agent_performance(self) -> float:
@@ -872,14 +864,11 @@ class SimulationEngine:
             # Base performance improves over time with experience
             base_performance = max(0.01, agent.goals_achieved / max(agent.total_goals, 1))
             # Agents naturally get better over time (general learning)
-            time_experience_bonus = (
-                min(0.5, self.current_cycle * 0.01)  # 1% per cycle, max 50%)
+            time_experience_bonus = min(0.5, self.current_cycle * 0.01)  # 1% per cycle, max 50%
             base_performance = base_performance * (1.0 + time_experience_bonus)
             # Apply environmental factors
-            env_multiplier = (
-                self.environmental_conditions.get("resource_multiplier", 1.0))
-            hazard_level = (
-                self.environmental_conditions.get("hazard_level", 0.1))
+            env_multiplier = self.environmental_conditions.get("resource_multiplier", 1.0)
+            hazard_level = self.environmental_conditions.get("hazard_level", 0.1)
             # Basic environmental impact
             env_impact = env_multiplier * (1.0 - hazard_level * 0.5)
             # Adaptation learning: agents get much better at handling environmental stress
@@ -912,7 +901,7 @@ class SimulationEngine:
         return max(0.01, np.mean(performances))  # Ensure result is never 0
 
     async def get_state_snapshot(self) -> Dict[str, Any]:
-        ."""Get current state snapshot."""
+        """Get current state snapshot"""
         return {
             "cycle": self.current_cycle,
             "agents": len(self.agents),

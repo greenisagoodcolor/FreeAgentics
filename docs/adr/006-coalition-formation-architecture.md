@@ -12,6 +12,7 @@
 FreeAgentics agents must be able to autonomously form coalitions, negotiate agreements, and operate collaborative businesses. This requires a sophisticated system for evaluating mutual benefit, managing shared resources, coordinating actions, and eventually deploying as independent edge businesses.
 
 The coalition formation system must support:
+
 - Autonomous discovery and evaluation of potential collaboration opportunities
 - Preference-based matching using Active Inference principles
 - Dynamic coalition membership with joining and leaving capabilities
@@ -32,6 +33,7 @@ The coalition formation system must support:
 ## Considered Options
 
 ### Option 1: Centralized Coalition Manager
+
 - **Pros**:
   - Simple to implement and control
   - Global optimization possible
@@ -44,6 +46,7 @@ The coalition formation system must support:
 - **Implementation Effort**: Low
 
 ### Option 2: Market-Based Coalition Formation
+
 - **Pros**:
   - Economically grounded
   - Self-organizing through price signals
@@ -56,6 +59,7 @@ The coalition formation system must support:
 - **Implementation Effort**: High
 
 ### Option 3: Active Inference Preference Matching
+
 - **Pros**:
   - Consistent with agent cognitive architecture
   - Naturally handles uncertainty in partner evaluation
@@ -68,6 +72,7 @@ The coalition formation system must support:
 - **Implementation Effort**: Medium
 
 ### Option 4: Graph-Based Coalition Discovery
+
 - **Pros**:
   - Clear structural representation
   - Efficient algorithms available
@@ -92,6 +97,7 @@ The coalition formation system must support:
    - ContractManager: Manages agreements and profit sharing
 
 2. **Mathematical Foundation**:
+
    ```
    Coalition Value: V(C) = Σ V_i(C) + Synergy(C)
    Where:
@@ -149,6 +155,7 @@ The coalition formation system must support:
 ## Implementation Details
 
 ### Core Components Structure
+
 ```
 coalitions/
 ├── core/
@@ -208,6 +215,7 @@ coalitions/
 ### Business Model Framework
 
 Each coalition implements a business model that defines:
+
 - **Value Creation**: How the coalition generates economic value
 - **Resource Requirements**: What inputs are needed for operation
 - **Capability Matching**: Which agent types contribute specific skills
@@ -217,6 +225,7 @@ Each coalition implements a business model that defines:
 ### Edge Deployment Strategy
 
 Successful coalitions can be packaged for independent edge deployment:
+
 - **Containerization**: Docker containers with all necessary dependencies
 - **Configuration**: Environment-specific deployment parameters
 - **Monitoring**: Health checks and performance monitoring

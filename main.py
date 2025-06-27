@@ -1,4 +1,4 @@
-."""
+"""
 FreeAgentics FastAPI Backend - Main Application Entry Point
 
 Revolutionary Multi-Agent Active Inference Research Platform implementing
@@ -21,8 +21,7 @@ from fastapi.responses import JSONResponse
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers= (
-        [logging.StreamHandler(sys.stdout), logging.FileHandler("freeagentics.log")],)
+    handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler("freeagentics.log")],
 )
 
 logger = logging.getLogger(__name__)
@@ -81,8 +80,7 @@ app = FastAPI(
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins= (
-        ["http://localhost:3000", "http://localhost:3030"],  # Next.js dev/demo)
+    allow_origins=["http://localhost:3000", "http://localhost:3030"],  # Next.js dev/demo
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -92,7 +90,7 @@ app.add_middleware(
 # Global Exception Handler - Clean Architecture Error Management
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-    """Global exception handler following clean architecture principles."""
+    """Global exception handler following clean architecture principles"""
     logger.error(f"Global exception: {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,
@@ -107,7 +105,7 @@ async def global_exception_handler(request: Request, exc: Exception) -> JSONResp
 # Health Check Endpoint - Production Readiness
 @app.get("/health", tags=["system"])
 async def health_check() -> dict:
-    """System health check endpoint for deployment monitoring."""
+    """System health check endpoint for deployment monitoring"""
     return {
         "status": "healthy",
         "service": "freeagentics-api",
@@ -119,7 +117,7 @@ async def health_check() -> dict:
 # Root Endpoint - API Discovery
 @app.get("/", tags=["system"])
 async def root() -> dict:
-    """Root endpoint providing API information and capabilities."""
+    """Root endpoint providing API information and capabilities"""
     return {
         "message": "FreeAgentics Revolutionary Multi-Agent Active Inference API",
         "version": "1.0.0",
@@ -183,12 +181,10 @@ try:
     app.include_router(websocket_router, prefix="/ws", tags=["websockets"])
 
     app.include_router(
-        coalition_ws_router, prefix= (
-            "/ws/coalitions", tags=["websockets", "coalitions"])
+        coalition_ws_router, prefix="/ws/coalitions", tags=["websockets", "coalitions"]
     )
 
-    app.include_router(markov_ws_router, prefix= (
-        "/ws/markov-blanket", tags=["websockets", "safety"]))
+    app.include_router(markov_ws_router, prefix="/ws/markov-blanket", tags=["websockets", "safety"])
 
     logger.info("✅ WebSocket routers registered successfully")
 
@@ -201,5 +197,4 @@ if __name__ == "__main__":
     import uvicorn
 
     logger.info("🔧 Starting development server...")
-    uvicorn.run("main:app", host= (
-        "0.0.0.0", port=8000, reload=True, log_level="info"))
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True, log_level="info")

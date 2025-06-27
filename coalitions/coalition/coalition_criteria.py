@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class FormationTrigger(Enum):
-    """Triggers that can initiate coalition formation."""
+    """Triggers that can initiate coalition formation"""
 
     OPPORTUNITY_DETECTED = "opportunity_detected"
     RESOURCE_SHORTAGE = "resource_shortage"
@@ -29,7 +29,7 @@ class FormationTrigger(Enum):
 
 
 class DissolutionCondition(Enum):
-    """Conditions that can trigger coalition dissolution."""
+    """Conditions that can trigger coalition dissolution"""
 
     GOAL_ACHIEVED = "goal_achieved"
     TIMEOUT = "timeout"
@@ -41,7 +41,7 @@ class DissolutionCondition(Enum):
 
 @dataclass
 class CompatibilityMetric:
-    """Metric for measuring agent compatibility."""
+    """Metric for measuring agent compatibility"""
 
     name: str
     weight: float = 1.0
@@ -59,7 +59,7 @@ class CompatibilityMetric:
 
 
 class GoalAlignmentMetric(CompatibilityMetric):
-    """Measures how well agent goals align."""
+    """Measures how well agent goals align"""
 
     def __init__(self) -> None:
         super().__init__(
@@ -69,7 +69,7 @@ class GoalAlignmentMetric(CompatibilityMetric):
         )
 
     def calculate(self, agent1_profile: Dict[str, Any], agent2_profile: Dict[str, Any]) -> float:
-        """Calculate goal alignment score."""
+        """Calculate goal alignment score"""
         goals1 = set(agent1_profile.get("goals", []))
         goals2 = set(agent2_profile.get("goals", []))
         if not goals1 or not goals2:
@@ -81,7 +81,7 @@ class GoalAlignmentMetric(CompatibilityMetric):
 
 
 class CapabilityComplementarityMetric(CompatibilityMetric):
-    """Measures how well agent capabilities complement each other."""
+    """Measures how well agent capabilities complement each other"""
 
     def __init__(self) -> None:
         super().__init__(
@@ -92,7 +92,7 @@ class CapabilityComplementarityMetric(CompatibilityMetric):
         )
 
     def calculate(self, agent1_profile: Dict[str, Any], agent2_profile: Dict[str, Any]) -> float:
-        """Calculate capability complementarity score."""
+        """Calculate capability complementarity score"""
         caps1 = set(agent1_profile.get("capabilities", []))
         caps2 = set(agent2_profile.get("capabilities", []))
         needs1 = set(agent1_profile.get("capability_gaps", []))
@@ -106,13 +106,13 @@ class CapabilityComplementarityMetric(CompatibilityMetric):
 
 
 class ResourceBalanceMetric(CompatibilityMetric):
-    """Measures resource balance between agents."""
+    """Measures resource balance between agents"""
 
     def __init__(self) -> None:
         super().__init__(name="resource_balance", weight=1.0, threshold=0.3)
 
     def calculate(self, agent1_profile: Dict[str, Any], agent2_profile: Dict[str, Any]) -> float:
-        """Calculate resource balance score."""
+        """Calculate resource balance score"""
         resources1 = agent1_profile.get("resources", {})
         resources2 = agent2_profile.get("resources", {})
         if not resources1 or not resources2:
@@ -131,13 +131,13 @@ class ResourceBalanceMetric(CompatibilityMetric):
 
 
 class TrustMetric(CompatibilityMetric):
-    """Measures trust level between agents based on past interactions."""
+    """Measures trust level between agents based on past interactions"""
 
     def __init__(self) -> None:
         super().__init__(name="trust", weight=1.8, threshold=0.5)
 
     def calculate(self, agent1_profile: Dict[str, Any], agent2_profile: Dict[str, Any]) -> float:
-        """Calculate trust score based on interaction history."""
+        """Calculate trust score based on interaction history"""
         # Get interaction history
         history = agent1_profile.get("interaction_history", {})
         agent2_id = agent2_profile.get("agent_id")
@@ -191,8 +191,7 @@ class CoalitionFormationCriteria:
     )
     # Time constraints
     max_formation_time: timedelta = field(default_factory=lambda: timedelta(minutes=5))
-    min_coalition_duration: timedelta = (
-        field(default_factory=lambda: timedelta(hours=1)))
+    min_coalition_duration: timedelta = field(default_factory=lambda: timedelta(hours=1))
     max_coalition_duration: timedelta = field(default_factory=lambda: timedelta(days=7))
     # Performance thresholds
     min_performance_score: float = 0.3
@@ -204,7 +203,7 @@ class CoalitionFormationCriteria:
     min_participation_rate: float = 0.8  # 80% must vote
 
     def __post_init__(self):
-        """Initialize default compatibility metrics if none provided."""
+        """Initialize default compatibility metrics if none provided"""
         if not self.compatibility_metrics:
             self.compatibility_metrics = [
                 GoalAlignmentMetric(),
@@ -237,7 +236,7 @@ class CoalitionFormationCriteria:
     def is_compatible_pair(
         self, agent1_profile: Dict[str, Any], agent2_profile: Dict[str, Any]
     ) -> bool:
-        """Check if two agents are compatible for coalition formation."""
+        """Check if two agents are compatible for coalition formation"""
 
         overall_score, _ = self.calculate_compatibility(agent1_profile, agent2_profile)
         return overall_score >= self.min_compatibility_score

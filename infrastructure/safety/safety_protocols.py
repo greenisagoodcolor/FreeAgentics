@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class SafetyLevel(Enum):
-    ."""Safety level classifications."""
+    """Safety level classifications"""
 
     CRITICAL = "critical"  # System-threatening violations
     HIGH = "high"  # Agent boundary violations
@@ -25,7 +25,7 @@ class SafetyLevel(Enum):
 
 
 class ViolationType(Enum):
-    ."""Types of safety violations."""
+    """Types of safety violations"""
 
     BOUNDARY_VIOLATION = "boundary_violation"
     INDEPENDENCE_FAILURE = "independence_failure"
@@ -37,7 +37,7 @@ class ViolationType(Enum):
 
 @dataclass
 class SafetyViolation:
-    ."""Generic safety violation record."""
+    """Generic safety violation record"""
 
     violation_id: str
     violation_type: ViolationType
@@ -51,7 +51,7 @@ class SafetyViolation:
     resolution_timestamp: Optional[datetime] = None
 
     def to_dict(self) -> Dict[str, Any]:
-        ."""Convert to dictionary for serialization."""
+        """Convert to dictionary for serialization"""
         return {
             "violation_id": self.violation_id,
             "violation_type": self.violation_type.value,
@@ -70,7 +70,7 @@ class SafetyViolation:
 
 @dataclass
 class SafetyMetrics:
-    ."""Safety metrics for monitoring and reporting."""
+    """Safety metrics for monitoring and reporting"""
 
     total_violations: int = 0
     critical_violations: int = 0
@@ -84,7 +84,7 @@ class SafetyMetrics:
     last_updated: datetime = field(default_factory=datetime.now)
 
     def calculate_safety_score(self) -> float:
-        ."""Calculate overall system safety score."""
+        """Calculate overall system safety score"""
         if self.total_violations == 0:
             return 1.0
 
@@ -99,8 +99,7 @@ class SafetyMetrics:
         max_weighted = self.total_violations * 4
 
         # Higher resolution rate improves score
-        resolution_factor = (
-            self.resolved_violations / max(self.total_violations, 1))
+        resolution_factor = self.resolved_violations / max(self.total_violations, 1)
 
         # Combine violation severity and resolution effectiveness
         safety_score = (
@@ -112,7 +111,7 @@ class SafetyMetrics:
 
 
 class SafetyProtocol:
-    ."""Base class for safety protocols."""
+    """Base class for safety protocols"""
 
     def __init__(
         self, protocol_name: str, severity_threshold: SafetyLevel = SafetyLevel.MEDIUM
@@ -125,15 +124,15 @@ class SafetyProtocol:
         logger.info(f"Initialized safety protocol: {protocol_name}")
 
     def check_violation(self, **kwargs) -> Optional[SafetyViolation]:
-        ."""Check for safety violations - to be implemented by subclasses."""
+        """Check for safety violations - to be implemented by subclasses"""
         raise NotImplementedError("Subclasses must implement check_violation")
 
     def handle_violation(self, violation: SafetyViolation) -> List[str]:
-        ."""Handle detected violation - to be implemented by subclasses."""
+        """Handle detected violation - to be implemented by subclasses"""
         raise NotImplementedError("Subclasses must implement handle_violation")
 
     def get_metrics(self) -> SafetyMetrics:
-        ."""Get safety metrics for this protocol."""
+        """Get safety metrics for this protocol"""
         metrics = SafetyMetrics()
         metrics.total_violations = len(self.violations)
 
@@ -153,25 +152,25 @@ class SafetyProtocol:
         return metrics
 
     def enable(self):
-        ."""Enable the safety protocol."""
+        """Enable the safety protocol"""
         self.enabled = True
         logger.info(f"Enabled safety protocol: {self.protocol_name}")
 
     def disable(self):
-        ."""Disable the safety protocol."""
+        """Disable the safety protocol"""
         self.enabled = False
         logger.warning(f"Disabled safety protocol: {self.protocol_name}")
 
 
 class MarkovBlanketSafetyProtocol(SafetyProtocol):
-    ."""Safety protocol specifically for Markov blanket boundary monitoring."""
+    """Safety protocol specifically for Markov blanket boundary monitoring"""
 
     def __init__(self, independence_threshold: float = 0.05) -> None:
         super().__init__("Markov Blanket Safety", SafetyLevel.HIGH)
         self.independence_threshold = independence_threshold
 
     def check_violation(self, **kwargs) -> Optional[SafetyViolation]:
-        ."""Check for Markov blanket boundary violations."""
+        """Check for Markov blanket boundary violations"""
         if not self.enabled:
             return None
 
@@ -188,10 +187,8 @@ class MarkovBlanketSafetyProtocol(SafetyProtocol):
             violation = SafetyViolation(
                 violation_id=f"mb_{agent_id}_{datetime.now().timestamp()}",
                 violation_type=ViolationType.BOUNDARY_VIOLATION,
-                severity= (
-                    SafetyLevel.HIGH if independence_measure > 0.1 else SafetyLevel.MEDIUM,)
-                description= (
-                    f"Markov blanket boundary violation detected for agent {agent_id}",)
+                severity=SafetyLevel.HIGH if independence_measure > 0.1 else SafetyLevel.MEDIUM,
+                description=f"Markov blanket boundary violation detected for agent {agent_id}",
                 agent_id=agent_id,
                 evidence={
                     "independence_measure": independence_measure,
@@ -207,7 +204,7 @@ class MarkovBlanketSafetyProtocol(SafetyProtocol):
         return None
 
     def handle_violation(self, violation: SafetyViolation) -> List[str]:
-        ."""Handle Markov blanket violation."""
+        """Handle Markov blanket violation"""
         actions = []
 
         if violation.severity in [SafetyLevel.CRITICAL, SafetyLevel.HIGH]:

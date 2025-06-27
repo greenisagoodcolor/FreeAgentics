@@ -14,4 +14,4 @@ echo "========================================"
 echo "📋 Running lint-staged (Expert Committee Standards)..."
 npm run precommit
 
-echo "✅ Frontend pre-commit checks completed!" 
+echo "✅ Frontend pre-commit checks completed!"

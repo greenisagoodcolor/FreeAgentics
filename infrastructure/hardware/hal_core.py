@@ -1,4 +1,4 @@
-."""
+"""
 Core Hardware Abstraction Layer Architecture
 
 Defines the fundamental interfaces and architectural components for hardware abstraction.
@@ -11,20 +11,13 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import (
-    Any,
-    Dict,
-    List,
-    Optional,
-    Protocol,
-    Tuple,
-    runtime_checkable)
+from typing import Any, Dict, List, Optional, Protocol, Tuple, runtime_checkable
 
 logger = logging.getLogger(__name__)
 
 
 class HardwareType(Enum):
-    """Types of hardware components."""
+    """Types of hardware components"""
 
     CPU = "cpu"
     GPU = "gpu"
@@ -38,7 +31,7 @@ class HardwareType(Enum):
 
 
 class OperationStatus(Enum):
-    """Status of hardware operations."""
+    """Status of hardware operations"""
 
     SUCCESS = "success"
     FAILED = "failed"
@@ -50,7 +43,7 @@ class OperationStatus(Enum):
 
 @dataclass
 class DeviceCapabilities:
-    """Represents the capabilities of a hardware device."""
+    """Represents the capabilities of a hardware device"""
 
     device_id: str
     device_type: HardwareType
@@ -77,17 +70,17 @@ class DeviceCapabilities:
     health_status: str = "healthy"
 
     def supports_operation(self, operation: str) -> bool:
-        """Check if device supports a specific operation."""
+        """Check if device supports a specific operation"""
         return operation in self.supported_operations
 
     def has_feature(self, feature: str) -> bool:
-        """Check if device has a specific feature."""
+        """Check if device has a specific feature"""
         return self.features.get(feature, False)
 
 
 @dataclass
 class ResourceConstraints:
-    """Defines resource constraints for operations."""
+    """Defines resource constraints for operations"""
 
     max_memory_mb: int
     max_compute_percent: float = 100.0
@@ -97,7 +90,7 @@ class ResourceConstraints:
     priority: int = 5  # 1-10, higher is more important
 
     def is_within_limits(self, usage: Dict[str, float]) -> bool:
-        """Check if resource usage is within constraints."""
+        """Check if resource usage is within constraints"""
         if usage.get("memory_mb", 0) > self.max_memory_mb:
             return False
         if usage.get("compute_percent", 0) > self.max_compute_percent:
@@ -111,14 +104,14 @@ class ResourceConstraints:
 
 @runtime_checkable
 class HardwareInterface(Protocol):
-    """Protocol defining the interface for hardware operations."""
+    """Protocol defining the interface for hardware operations"""
 
     def initialize(self) -> bool:
-        """Initialize the hardware device."""
+        """Initialize the hardware device"""
         ...
 
     def shutdown(self) -> bool:
-        """Shutdown the hardware device."""
+        """Shutdown the hardware device"""
         ...
 
     def execute_operation(
@@ -127,24 +120,24 @@ class HardwareInterface(Protocol):
         data: Any,
         constraints: Optional[ResourceConstraints] = None,
     ) -> Tuple[OperationStatus, Any]:
-        """Execute an operation on the hardware."""
+        """Execute an operation on the hardware"""
         ...
 
     def get_capabilities(self) -> DeviceCapabilities:
-        """Get device capabilities."""
+        """Get device capabilities"""
         ...
 
     def get_resource_usage(self) -> Dict[str, float]:
-        """Get current resource usage."""
+        """Get current resource usage"""
         ...
 
     def health_check(self) -> Tuple[bool, str]:
-        """Perform health check on the device."""
+        """Perform health check on the device"""
         ...
 
 
 class BaseHardwareAdapter(abc.ABC):
-    """Base class for hardware adapters implementing the HardwareInterface."""
+    """Base class for hardware adapters implementing the HardwareInterface"""
 
     def __init__(self, device_id: str) -> None:
         self.device_id = device_id
@@ -159,12 +152,12 @@ class BaseHardwareAdapter(abc.ABC):
 
     @abc.abstractmethod
     def initialize(self) -> bool:
-        """Initialize the hardware device."""
+        """Initialize the hardware device"""
         pass
 
     @abc.abstractmethod
     def shutdown(self) -> bool:
-        """Shutdown the hardware device."""
+        """Shutdown the hardware device"""
         pass
 
     @abc.abstractmethod
@@ -174,21 +167,21 @@ class BaseHardwareAdapter(abc.ABC):
         data: Any,
         constraints: Optional[ResourceConstraints] = None,
     ) -> Tuple[OperationStatus, Any]:
-        """Execute an operation on the hardware."""
+        """Execute an operation on the hardware"""
         pass
 
     @abc.abstractmethod
     def get_capabilities(self) -> DeviceCapabilities:
-        """Get device capabilities."""
+        """Get device capabilities"""
         pass
 
     def get_resource_usage(self) -> Dict[str, float]:
-        """Get current resource usage."""
+        """Get current resource usage"""
         with self._lock:
             return self._resource_usage.copy()
 
     def health_check(self) -> Tuple[bool, str]:
-        """Perform health check on the device."""
+        """Perform health check on the device"""
         if not self._initialized:
             return False, "Device not initialized"
 
@@ -204,7 +197,7 @@ class BaseHardwareAdapter(abc.ABC):
             return False, f"Health check failed: {str(e)}"
 
     def _update_resource_usage(self, **kwargs):
-        """Update resource usage metrics."""
+        """Update resource usage metrics"""
         with self._lock:
             self._resource_usage.update(kwargs)
 
@@ -219,7 +212,7 @@ class HardwareAbstractionLayer:
     """
 
     def __init__(self) -> None:
-        """Initialize the Hardware Abstraction Layer."""
+        """Initialize the Hardware Abstraction Layer"""
         self._devices: Dict[str, HardwareInterface] = {}
         self._device_registry: Dict[HardwareType, List[str]] = {}
         self._executor = ThreadPoolExecutor(max_workers=10)
@@ -238,7 +231,7 @@ class HardwareAbstractionLayer:
     def register_device(
         self, device_id: str, device: HardwareInterface, device_type: HardwareType
     ) -> bool:
-        """Register a hardware device with the HAL."""
+        """Register a hardware device with the HAL"""
         with self._lock:
             if device_id in self._devices:
                 logger.warning(f"Device {device_id} already registered")
@@ -261,7 +254,7 @@ class HardwareAbstractionLayer:
             return True
 
     def unregister_device(self, device_id: str) -> bool:
-        """Unregister a hardware device."""
+        """Unregister a hardware device"""
         with self._lock:
             if device_id not in self._devices:
                 logger.warning(f"Device {device_id} not found")
@@ -284,11 +277,11 @@ class HardwareAbstractionLayer:
             return True
 
     def get_device(self, device_id: str) -> Optional[HardwareInterface]:
-        """Get a specific device by ID."""
+        """Get a specific device by ID"""
         return self._devices.get(device_id)
 
     def get_devices_by_type(self, device_type: HardwareType) -> List[HardwareInterface]:
-        """Get all devices of a specific type."""
+        """Get all devices of a specific type"""
         device_ids = self._device_registry.get(device_type, [])
         return [self._devices[did] for did in device_ids if did in self._devices]
 
@@ -312,8 +305,7 @@ class HardwareAbstractionLayer:
             if not device:
                 return OperationStatus.NOT_AVAILABLE, f"Device {device_id} not found"
 
-            return self._execute_on_device(device, operation, data,
-                constraints)
+            return self._execute_on_device(device, operation, data, constraints)
 
         # Auto-select device
         device = self._select_best_device(operation, constraints)
@@ -326,11 +318,10 @@ class HardwareAbstractionLayer:
         self, operation: str, constraints: Optional[ResourceConstraints]
     ) -> Optional[HardwareInterface]:
         """Select the best device for an operation based on availability and
-        constraints."""
+        constraints"""
         # Determine device types that can handle the operation
         operation_category = self._categorize_operation(operation)
-        candidate_types = (
-            self._operation_routes.get(operation_category, [HardwareType.CPU]))
+        candidate_types = self._operation_routes.get(operation_category, [HardwareType.CPU])
 
         best_device = None
         best_score = -1
@@ -356,8 +347,7 @@ class HardwareAbstractionLayer:
                         continue
 
                 # Calculate device score
-                score = (
-                    self._calculate_device_score(device, operation, constraints))
+                score = self._calculate_device_score(device, operation, constraints)
 
                 if score > best_score:
                     best_score = score
@@ -371,7 +361,7 @@ class HardwareAbstractionLayer:
         operation: str,
         constraints: Optional[ResourceConstraints],
     ) -> float:
-        """Calculate a score for how suitable a device is for an operation."""
+        """Calculate a score for how suitable a device is for an operation"""
         score = 100.0
 
         caps = device.get_capabilities()
@@ -399,11 +389,10 @@ class HardwareAbstractionLayer:
         data: Any,
         constraints: Optional[ResourceConstraints],
     ) -> Tuple[OperationStatus, Any]:
-        """Execute operation on a specific device."""
+        """Execute operation on a specific device"""
         try:
             # Submit to executor for async execution
-            future = (
-                self._executor.submit(device.execute_operation, operation, data, constraints))
+            future = self._executor.submit(device.execute_operation, operation, data, constraints)
 
             # Wait with timeout
             timeout = constraints.timeout_seconds if constraints else 60.0
@@ -419,26 +408,22 @@ class HardwareAbstractionLayer:
             return OperationStatus.FAILED, str(e)
 
     def _categorize_operation(self, operation: str) -> str:
-        """Categorize an operation for routing."""
+        """Categorize an operation for routing"""
         operation_lower = operation.lower()
 
-        if any(term in operation_lower for term in ["compute", "calculate", "process",
-            "infer"]):
+        if any(term in operation_lower for term in ["compute", "calculate", "process", "infer"]):
             return "compute"
-        elif any(term in operation_lower for term in ["store", "save", "write",
-            "cache"]):
+        elif any(term in operation_lower for term in ["store", "save", "write", "cache"]):
             return "store"
-        elif any(term in operation_lower for term in ["network", "send", "receive",
-            "transfer"]):
+        elif any(term in operation_lower for term in ["network", "send", "receive", "transfer"]):
             return "network"
-        elif any(term in operation_lower for term in ["sense", "measure",
-            "detect"]):
+        elif any(term in operation_lower for term in ["sense", "measure", "detect"]):
             return "sense"
         else:
             return "compute"  # Default to compute
 
     def get_system_status(self) -> Dict[str, Any]:
-        """Get overall system status including all devices."""
+        """Get overall system status including all devices"""
         status = {
             "timestamp": datetime.now().isoformat(),
             "devices": {},
@@ -479,7 +464,7 @@ class HardwareAbstractionLayer:
         return status
 
     def shutdown(self):
-        """Shutdown the HAL and all registered devices."""
+        """Shutdown the HAL and all registered devices"""
         logger.info("Shutting down Hardware Abstraction Layer")
 
         # Shutdown all devices

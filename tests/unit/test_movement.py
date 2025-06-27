@@ -20,7 +20,7 @@ from agents.base.state_manager import AgentStateManager
 
 
 class TestMovementConstraints(unittest.TestCase):
-    ."""Test movement constraints."""
+    """Test movement constraints"""
 
     def test_default_constraints(self) -> None:
         """Test default movement constraints"""
@@ -41,10 +41,10 @@ class TestMovementConstraints(unittest.TestCase):
 
 
 class TestCollisionSystem(unittest.TestCase):
-    ."""Test collision detection system."""
+    """Test collision detection system"""
 
     def setUp(self) -> None:
-        ."""Set up test fixtures."""
+        """Set up test fixtures"""
         self.collision_system = CollisionSystem()
 
     def test_static_obstacle_collision(self) -> None:
@@ -74,10 +74,10 @@ class TestCollisionSystem(unittest.TestCase):
 
 
 class TestPathfindingGrid(unittest.TestCase):
-    ."""Test grid-based pathfinding."""
+    """Test grid-based pathfinding"""
 
     def setUp(self) -> None:
-        ."""Set up test fixtures."""
+        """Set up test fixtures"""
         self.grid = PathfindingGrid(10, 10, 1.0)
 
     def test_coordinate_conversion(self) -> None:
@@ -134,7 +134,7 @@ class TestPathfindingGrid(unittest.TestCase):
 
 
 class TestMovementController(unittest.TestCase):
-    ."""Test the main movement controller."""
+    """Test the main movement controller"""
 
     def setUp(self) -> None:
         """Set up test fixtures"""
@@ -149,7 +149,7 @@ class TestMovementController(unittest.TestCase):
         self.movement_controller.register_agent(self.agent)
 
     def test_agent_registration(self) -> None:
-        ."""Test agent registration with movement controller."""
+        """Test agent registration with movement controller"""
         self.assertIn(self.agent.agent_id, self.movement_controller.movement_states)
         self.assertIn(self.agent.agent_id, self.movement_controller.movement_constraints)
         self.assertIn(self.agent.agent_id, self.collision_system.dynamic_obstacles)
@@ -177,7 +177,7 @@ class TestMovementController(unittest.TestCase):
         self.assertGreater(dx, 0)
 
     def test_movement_modes(self) -> None:
-        ."""Test different movement modes."""
+        """Test different movement modes"""
         self.movement_controller.set_movement_mode(self.agent.agent_id, MovementMode.RUNNING)
         state = self.movement_controller.movement_states[self.agent.agent_id]
         self.assertEqual(state.mode, MovementMode.RUNNING)
@@ -215,7 +215,7 @@ class TestMovementController(unittest.TestCase):
 
 
 class TestSteeringBehaviors(unittest.TestCase):
-    ."""Test steering behaviors."""
+    """Test steering behaviors"""
 
     def test_seek_behavior(self) -> None:
         """Test seek steering behavior"""

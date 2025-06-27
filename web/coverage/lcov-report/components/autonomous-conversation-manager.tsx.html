@@ -15,41 +15,41 @@
         }
     </style>
 </head>
-    
+
 <body>
 <div class='wrapper'>
     <div class='pad1'>
         <h1><a href="../index.html">All files</a> / <a href="index.html">components</a> autonomous-conversation-manager.tsx</h1>
         <div class='clearfix'>
-            
+
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
                 <span class='fraction'>0/112</span>
             </div>
-        
-            
+
+
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
                 <span class='fraction'>0/37</span>
             </div>
-        
-            
+
+
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
                 <span class='fraction'>0/21</span>
             </div>
-        
-            
+
+
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
                 <span class='fraction'>0/107</span>
             </div>
-        
-            
+
+
         </div>
         <p class="quiet">
             Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
@@ -410,7 +410,17 @@
 <a name='L345'></a><a href='#L345'>345</a>
 <a name='L346'></a><a href='#L346'>346</a>
 <a name='L347'></a><a href='#L347'>347</a>
-<a name='L348'></a><a href='#L348'>348</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L348'></a><a href='#L348'>348</a>
+<a name='L349'></a><a href='#L349'>349</a>
+<a name='L350'></a><a href='#L350'>350</a>
+<a name='L351'></a><a href='#L351'>351</a>
+<a name='L352'></a><a href='#L352'>352</a>
+<a name='L353'></a><a href='#L353'>353</a>
+<a name='L354'></a><a href='#L354'>354</a>
+<a name='L355'></a><a href='#L355'>355</a>
+<a name='L356'></a><a href='#L356'>356</a>
+<a name='L357'></a><a href='#L357'>357</a>
+<a name='L358'></a><a href='#L358'>358</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -471,6 +481,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -538,11 +549,13 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -648,6 +661,13 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -813,27 +833,28 @@ export default function <span class="cstat-no" title="statement not covered" ><s
   }, [conversation]);
 &nbsp;
   // Function to generate a conversation starter message using the LLM
-  const generateConversationStarter = <span class="cstat-no" title="statement not covered" >useCallback(<span class="fstat-no" title="function not covered" >async (</span></span>
-    firstAgent: Agent,
-    participants: Agent[],
-    topic?: string,
-  ): Promise&lt;string&gt; =&gt; {
-<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (!llmClient) {</span>
-<span class="cstat-no" title="statement not covered" >      logger.error(</span>
-        "Cannot generate conversation starter: LLM client not available",
-      );
-<span class="cstat-no" title="statement not covered" >      return fallbackStarterMessage(firstAgent, topic);</span>
-    }
+  const generateConversationStarter = <span class="cstat-no" title="statement not covered" >useCallback(</span>
+<span class="fstat-no" title="function not covered" >    async (</span>
+      firstAgent: Agent,
+      participants: Agent[],
+      topic?: string,
+    ): Promise&lt;string&gt; =&gt; {
+<span class="cstat-no" title="statement not covered" >      <span class="missing-if-branch" title="if path not taken" >I</span>if (!llmClient) {</span>
+<span class="cstat-no" title="statement not covered" >        logger.error(</span>
+          "Cannot generate conversation starter: LLM client not available",
+        );
+<span class="cstat-no" title="statement not covered" >        return fallbackStarterMessage(firstAgent, topic);</span>
+      }
 &nbsp;
-    // Collect all agents' information
-    const agentInfos = <span class="cstat-no" title="statement not covered" >participants.map(<span class="fstat-no" title="function not covered" >(a</span>gent) =&gt; (<span class="cstat-no" title="statement not covered" >{</span></span>
-      name: agent.name,
-      biography: agent.biography,
-      isStarter: agent.id === firstAgent.id,
-    }));
+      // Collect all agents' information
+      const agentInfos = <span class="cstat-no" title="statement not covered" >participants.map(<span class="fstat-no" title="function not covered" >(a</span>gent) =&gt; (<span class="cstat-no" title="statement not covered" >{</span></span>
+        name: agent.name,
+        biography: agent.biography,
+        isStarter: agent.id === firstAgent.id,
+      }));
 &nbsp;
-    // Create a system prompt that explains what we want
-    const systemPrompt = <span class="cstat-no" title="statement not covered" >`You are helping to start a conversation between AI agents.</span>
+      // Create a system prompt that explains what we want
+      const systemPrompt = <span class="cstat-no" title="statement not covered" >`You are helping to start a conversation between AI agents.</span>
 Generate a conversation starter message from the perspective of ${firstAgent.name}.
 The message should:
 1. Be prefixed with "${firstAgent.name}: " (include the colon and space)
@@ -846,8 +867,8 @@ The message should:
 &nbsp;
 IMPORTANT: Always start with "${firstAgent.name}: " followed by the message.`;
 &nbsp;
-    // Create a user prompt with agent information
-    const userPrompt = <span class="cstat-no" title="statement not covered" >`Agents in conversation:</span>
+      // Create a user prompt with agent information
+      const userPrompt = <span class="cstat-no" title="statement not covered" >`Agents in conversation:</span>
 ${agentInfos.map(<span class="fstat-no" title="function not covered" >(i</span>nfo) =&gt; <span class="cstat-no" title="statement not covered" >`- ${info.name}: ${info.biography}`)</span>.join("\n")}
 &nbsp;
 ${topic ? `Conversation topic: ${topic}` : "No specific topic provided, but suggest something relevant to the agents' backgrounds."}
@@ -855,38 +876,40 @@ ${topic ? `Conversation topic: ${topic}` : "No specific topic provided, but sugg
 Write a conversation starter message from ${firstAgent.name}'s perspective that will engage the other agents.
 Remember to start with "${firstAgent.name}: " followed by the message.`;
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    try {</span>
-<span class="cstat-no" title="statement not covered" >      logger.log("Generating conversation starter message", {</span>
-        firstAgent: firstAgent.name,
-        participantCount: participants.length,
-        topic,
-      });
+<span class="cstat-no" title="statement not covered" >      try {</span>
+<span class="cstat-no" title="statement not covered" >        logger.log("Generating conversation starter message", {</span>
+          firstAgent: firstAgent.name,
+          participantCount: participants.length,
+          topic,
+        });
 &nbsp;
-      // Generate the starter message
-      const response = <span class="cstat-no" title="statement not covered" >await llmClient.generateResponse(</span>
-        systemPrompt,
-        userPrompt,
-      );
+        // Generate the starter message
+        const response = <span class="cstat-no" title="statement not covered" >await llmClient.generateResponse(</span>
+          systemPrompt,
+          userPrompt,
+        );
 &nbsp;
-      // Ensure the response starts with the agent name
-      let formattedResponse = <span class="cstat-no" title="statement not covered" >response.trim();</span>
-      const expectedPrefix = <span class="cstat-no" title="statement not covered" >`${firstAgent.name}:`;</span>
+        // Ensure the response starts with the agent name
+        let formattedResponse = <span class="cstat-no" title="statement not covered" >response.trim();</span>
+        const expectedPrefix = <span class="cstat-no" title="statement not covered" >`${firstAgent.name}:`;</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >      <span class="missing-if-branch" title="if path not taken" >I</span>if (!formattedResponse.startsWith(expectedPrefix)) {</span>
-<span class="cstat-no" title="statement not covered" >        formattedResponse = `${expectedPrefix} ${formattedResponse}`;</span>
-<span class="cstat-no" title="statement not covered" >        logger.log("Added missing agent name prefix to starter message");</span>
+<span class="cstat-no" title="statement not covered" >        <span class="missing-if-branch" title="if path not taken" >I</span>if (!formattedResponse.startsWith(expectedPrefix)) {</span>
+<span class="cstat-no" title="statement not covered" >          formattedResponse = `${expectedPrefix} ${formattedResponse}`;</span>
+<span class="cstat-no" title="statement not covered" >          logger.log("Added missing agent name prefix to starter message");</span>
+        }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        logger.log("Successfully generated conversation starter", {</span>
+          messagePreview: formattedResponse.substring(0, 50) + "...",
+        });
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        return formattedResponse;</span>
+      } catch (error) {
+<span class="cstat-no" title="statement not covered" >        logger.error("Error generating conversation starter:", error);</span>
+<span class="cstat-no" title="statement not covered" >        return fallbackStarterMessage(firstAgent, topic);</span>
       }
-&nbsp;
-<span class="cstat-no" title="statement not covered" >      logger.log("Successfully generated conversation starter", {</span>
-        messagePreview: formattedResponse.substring(0, 50) + "...",
-      });
-&nbsp;
-<span class="cstat-no" title="statement not covered" >      return formattedResponse;</span>
-    } catch (error) {
-<span class="cstat-no" title="statement not covered" >      logger.error("Error generating conversation starter:", error);</span>
-<span class="cstat-no" title="statement not covered" >      return fallbackStarterMessage(firstAgent, topic);</span>
-    }
-  }, [llmClient]);
+    },
+    [llmClient],
+  );
 &nbsp;
   // Fallback message in case LLM generation fails
   function <span class="fstat-no" title="function not covered" >fallbackStarterMessage(a</span>gent: Agent, topic?: string): string {
@@ -996,7 +1019,14 @@ Remember to start with "${firstAgent.name}: " followed by the message.`;
 <span class="cstat-no" title="statement not covered" >      logger.log("Conversation already has messages, marking as initialized");</span>
 <span class="cstat-no" title="statement not covered" >      hasInitializedRef.current = true;</span>
     }
-  }, [conversation, agents, onSendMessage, processNewMessage, llmClient, generateConversationStarter]);
+  }, [
+    conversation,
+    agents,
+    onSendMessage,
+    processNewMessage,
+    llmClient,
+    generateConversationStarter,
+  ]);
 &nbsp;
   // Add a new effect to monitor conversation progress and ensure it reaches minimum message count
 <span class="cstat-no" title="statement not covered" >  useEffect(<span class="fstat-no" title="function not covered" >() =&gt; {</span></span>
@@ -1111,7 +1141,7 @@ Remember to start with "${firstAgent.name}: " followed by the message.`;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-06-26T20:02:48.859Z
+                at 2025-06-27T07:54:46.448Z
             </div>
         <script src="../prettify.js"></script>
         <script>
@@ -1123,4 +1153,3 @@ Remember to start with "${firstAgent.name}: " followed by the message.`;
         <script src="../block-navigation.js"></script>
     </body>
 </html>
-    

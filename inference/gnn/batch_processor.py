@@ -16,7 +16,7 @@ Batch Processing Module for Graphs
 This module implements efficient batch processing mechanisms for handling
 multiple graphs or subgraphs simultaneously, including padding, masking,
 and memory optimization.
-."""
+"""
 logger = logging.getLogger(__name__)
 
 
@@ -282,8 +282,7 @@ class GraphBatchProcessor:
                 node_features = batched_data.x[node_indices]
             edge_mask = (
                 (batched_data.edge_index[0] >= node_indices[0])
-                & (batched_data.edge_index[0] < node_indices[0] +
-                    len(node_indices))
+                & (batched_data.edge_index[0] < node_indices[0] + len(node_indices))
                 & (batched_data.edge_index[1] >= node_indices[0])
                 & (batched_data.edge_index[1] < node_indices[0] + len(node_indices))
             )

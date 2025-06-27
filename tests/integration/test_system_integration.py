@@ -27,11 +27,11 @@ logger = logging.getLogger(__name__)
 
 
 class TestFullSystemIntegration:
-    """Test full system integration scenarios."""
+    """Test full system integration scenarios"""
 
     @pytest.fixture
     async def simulation_engine(self):
-        """Create simulation engine."""
+        """Create simulation engine"""
         config = {
             "world": {"resolution": 5, "size": 100},
             "agents": {
@@ -51,7 +51,7 @@ class TestFullSystemIntegration:
 
     @pytest.mark.asyncio
     async def test_complete_simulation_lifecycle(self, simulation_engine):
-        """Test complete simulation lifecycle from start to finish."""
+        """Test complete simulation lifecycle from start to finish"""
         engine = simulation_engine
         await engine.start()
         target_cycles = 50
@@ -72,7 +72,7 @@ class TestFullSystemIntegration:
 
     @pytest.mark.asyncio
     async def test_multi_agent_ecosystem_dynamics(self, simulation_engine):
-        """Test ecosystem dynamics with multiple agent types."""
+        """Test ecosystem dynamics with multiple agent types"""
         engine = simulation_engine
         await engine.start()
         ecosystem_metrics = {
@@ -107,7 +107,7 @@ class TestFullSystemIntegration:
 
     @pytest.mark.asyncio
     async def test_emergent_social_structures(self, simulation_engine):
-        """Test emergence of social structures and relationships."""
+        """Test emergence of social structures and relationships"""
         engine = simulation_engine
         await engine.start()
         for _ in range(50):
@@ -142,7 +142,7 @@ class TestFullSystemIntegration:
 
     @pytest.mark.asyncio
     async def test_system_performance_under_load(self):
-        """Test system performance with large number of agents."""
+        """Test system performance with large number of agents"""
         config = {
             "world": {"resolution": 6, "size": 500},
             "agents": {
@@ -191,7 +191,7 @@ class TestFullSystemIntegration:
 
     @pytest.mark.asyncio
     async def test_fault_tolerance_and_recovery(self, simulation_engine):
-        """Test system fault tolerance and recovery."""
+        """Test system fault tolerance and recovery"""
         engine = simulation_engine
         await engine.start()
         for _ in range(10):
@@ -219,7 +219,7 @@ class TestFullSystemIntegration:
 
     @pytest.mark.asyncio
     async def test_learning_and_adaptation(self, simulation_engine):
-        """Test system-wide learning and adaptation."""
+        """Test system-wide learning and adaptation"""
         engine = simulation_engine
         await engine.start()
         pattern_extractor = PatternExtractor()
@@ -233,8 +233,7 @@ class TestFullSystemIntegration:
         for cycle in range(40):
             await engine.step()
             if cycle % 5 == 0:
-                patterns = (
-                    pattern_extractor.extract_patterns(engine.get_event_history()))
+                patterns = pattern_extractor.extract_patterns(engine.get_event_history())
                 metrics = await engine.get_adaptation_metrics()
                 adaptation_metrics["collective_knowledge"].append(metrics["total_knowledge_nodes"])
                 adaptation_metrics["behavior_diversity"].append(metrics["behavior_entropy"])
@@ -253,7 +252,7 @@ class TestFullSystemIntegration:
 
     @pytest.mark.asyncio
     async def test_scalability_limits(self):
-        """Test system scalability limits."""
+        """Test system scalability limits"""
         agent_counts = [10, 50, 100, 200]
         scalability_results = []
         for count in agent_counts:
@@ -293,11 +292,11 @@ class TestFullSystemIntegration:
 
 
 class TestEdgeCasesAndStress:
-    """Test edge cases and stress scenarios."""
+    """Test edge cases and stress scenarios"""
 
     @pytest.mark.asyncio
     async def test_resource_scarcity_scenario(self):
-        """Test system behavior under extreme resource scarcity."""
+        """Test system behavior under extreme resource scarcity"""
         config = {
             "world": {"resolution": 5, "size": 50, "resource_density": 0.1},
             "agents": {"count": 20},
@@ -325,7 +324,7 @@ class TestEdgeCasesAndStress:
 
     @pytest.mark.asyncio
     async def test_information_overload(self):
-        """Test system behavior with information overload."""
+        """Test system behavior with information overload"""
         config = {
             "world": {"resolution": 5, "size": 50},
             "agents": {"count": 10, "communication_rate": 10.0},
@@ -354,7 +353,7 @@ class TestEdgeCasesAndStress:
 
     @pytest.mark.asyncio
     async def test_rapid_environmental_changes(self):
-        """Test adaptation to rapid environmental changes."""
+        """Test adaptation to rapid environmental changes"""
         engine = SimulationEngine(
             {
                 "world": {"resolution": 5, "size": 100},
@@ -385,11 +384,11 @@ class TestEdgeCasesAndStress:
 
 
 class TestExportAndDeployment:
-    """Test export and deployment functionality."""
+    """Test export and deployment functionality"""
 
     @pytest.mark.asyncio
     async def test_agent_export_validation(self):
-        """Test agent export and validation."""
+        """Test agent export and validation"""
         engine = SimulationEngine(
             {
                 "world": {"resolution": 5, "size": 50},
@@ -417,7 +416,7 @@ class TestExportAndDeployment:
 
     @pytest.mark.asyncio
     async def test_multi_agent_deployment_package(self):
-        """Test creating deployment package for multiple agents."""
+        """Test creating deployment package for multiple agents"""
         engine = SimulationEngine(
             {
                 "world": {"resolution": 5, "size": 100},
@@ -444,5 +443,5 @@ class TestExportAndDeployment:
 
 
 def run_system_integration_tests():
-    """Run all system integration tests."""
+    """Run all system integration tests"""
     pytest.main([__file__, "-v", "--asyncio-mode=auto", "-s"])

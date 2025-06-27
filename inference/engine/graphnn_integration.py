@@ -1,6 +1,4 @@
-"""
-Module for FreeAgentics Active Inference implementation.
-"""
+"""Module for FreeAgentics Active Inference implementation."""
 
 import logging
 from abc import ABC, abstractmethod
@@ -11,20 +9,31 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-"""
-Graph Neural Network Integration for Active Inference (GraphNN)
+from ..algorithms.variational_message_passing import VariationalMessagePassing
+from .active_inference import InferenceAlgorithm, InferenceConfig
+from .generative_model import (
+    DiscreteGenerativeModel,
+    GenerativeModel,
+    ModelDimensions,
+    ModelParameters,
+)
+
+"""Graph Neural Network Integration for Active Inference (GraphNN).
+
 This module provides the interface between Graph Neural Networks and
-    Active Inference.
+Active Inference.
 
 IMPORTANT NAMING DISTINCTION:
 - GraphNN = Graph Neural Networks (machine learning concept) - THIS MODULE
-- GNN = (
-    Generalized Notation Notation (mathematical notation standard from Active Inference Institute))
+- GNN = Generalized Notation Notation (mathematical notation standard from
+    Active Inference Institute)
 
-Reference: https://github.com/ActiveInferenceInstitute/GeneralizedNotationNotation
+Reference:
+    https://github.com/ActiveInferenceInstitute/GeneralizedNotationNotation
 
-This module handles the integration of machine learning Graph Neural Networks with Active Inference,
-providing adapters and mappers for translating between graph representations and Active Inference states.
+This module handles the integration of machine learning Graph Neural Networks
+with Active Inference, providing adapters and mappers for translating between
+graph representations and Active Inference states.
 """
 
 logger = logging.getLogger(__name__)
@@ -36,45 +45,47 @@ logger = logging.getLogger(__name__)
 
 # Stub implementations for missing GraphNN layers
 class GCNLayer(nn.Module):
+    """Graph Convolutional Network layer."""
+
     def __init__(self, in_dim: int, out_dim: int) -> None:
+        """Initialize GCN layer."""
         super().__init__()
         self.linear = nn.Linear(in_dim, out_dim)
 
     def forward(self, x: torch.Tensor, edge_index: Optional[torch.Tensor] = None) -> torch.Tensor:
+        """Forward pass through GCN layer."""
         return torch.tensor(self.linear(x))
 
 
 class GATLayer(nn.Module):
+    """Graph Attention Network layer."""
+
     def __init__(self, in_dim: int, out_dim: int) -> None:
+        """Initialize GAT layer."""
         super().__init__()
         self.linear = nn.Linear(in_dim, out_dim)
 
     def forward(self, x: torch.Tensor, edge_index: Optional[torch.Tensor] = None) -> torch.Tensor:
+        """Forward pass through GAT layer."""
         return torch.tensor(self.linear(x))
 
 
 class GraphSAGELayer(nn.Module):
+    """GraphSAGE layer."""
+
     def __init__(self, in_dim: int, out_dim: int) -> None:
+        """Initialize GraphSAGE layer."""
         super().__init__()
         self.linear = nn.Linear(in_dim, out_dim)
 
     def forward(self, x: torch.Tensor, edge_index: Optional[torch.Tensor] = None) -> torch.Tensor:
+        """Forward pass through GraphSAGE layer."""
         return torch.tensor(self.linear(x))
-
-
-from ..algorithms.variational_message_passing import VariationalMessagePassing
-from .active_inference import InferenceAlgorithm, InferenceConfig
-from .generative_model import (
-    DiscreteGenerativeModel,
-    GenerativeModel,
-    ModelDimensions,
-    ModelParameters,
-)
 
 
 @dataclass
 class GraphNNIntegrationConfig:
-    """Configuration for Graph Neural Network integration with Active Inference"""
+    """Configuration for GraphNN integration with Active Inference."""
 
     graphnn_type: str = "gcn"  # gcn, gat, graphsage
     num_layers: int = 3
@@ -92,9 +103,10 @@ class GraphNNIntegrationConfig:
 
 
 class GraphToStateMapper(ABC):
-    """Abstract base class for mapping graph representations to Active Inference states"""
+    """Abstract base class for mapping graph representations to AI states."""
 
     def __init__(self, config: GraphNNIntegrationConfig) -> None:
+        """Initialize graph to state mapper."""
         self.config = config
         self.device = torch.device(
             "cuda" if config.use_gpu and torch.cuda.is_available() else "cpu"
@@ -111,19 +123,20 @@ class GraphToStateMapper(ABC):
     def map_to_observations(
         self, graph_features: torch.Tensor, node_indices: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
-        """Map graph features to observation representation"""
+        """Map graph features to observation representation."""
         pass
 
 
 class DirectGraphMapper(GraphToStateMapper):
-    """
-    Direct mapping from graph features to states/observations.
+    """Direct mapping from graph features to states/observations.
+
     Assumes graph features directly correspond to state dimensions.
     """
 
     def __init__(
         self, config: GraphNNIntegrationConfig, state_dim: int, observation_dim: int
     ) -> None:
+        """Initialize direct graph mapper."""
         super().__init__(config)
         self.state_dim = state_dim
         self.observation_dim = observation_dim
@@ -132,8 +145,7 @@ class DirectGraphMapper(GraphToStateMapper):
         self.obs_projection: Optional[nn.Linear]
 
         if config.output_dim != state_dim:
-            self.state_projection = (
-                nn.Linear(config.output_dim, state_dim).to(self.device))
+            self.state_projection = nn.Linear(config.output_dim, state_dim).to(self.device)
         else:
             self.state_projection = None
         if config.output_dim != observation_dim:
@@ -144,7 +156,7 @@ class DirectGraphMapper(GraphToStateMapper):
     def map_to_states(
         self, graph_features: torch.Tensor, node_indices: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
-        """Direct mapping to states"""
+        """Direct mapping to states."""
         features = graph_features.to(self.device)
         if node_indices is not None:
             features = features[node_indices]
@@ -157,8 +169,7 @@ class DirectGraphMapper(GraphToStateMapper):
     def map_to_observations(
         self, graph_features: torch.Tensor, node_indices: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
-        """Direct mapping to observations"""
-
+        """Direct mapping to observations."""
         features = graph_features.to(self.device)
         if node_indices is not None:
             features = features[node_indices]
@@ -168,14 +179,15 @@ class DirectGraphMapper(GraphToStateMapper):
 
 
 class LearnedGraphMapper(GraphToStateMapper):
-    """
-    Learned mapping from graph features to states/observations.
+    """Learned mapping from graph features to states/observations.
+
     Uses neural networks to learn the transformation.
     """
 
     def __init__(
         self, config: GraphNNIntegrationConfig, state_dim: int, observation_dim: int
     ) -> None:
+        """Initialize learned graph mapper."""
         super().__init__(config)
         self.state_dim = state_dim
         self.observation_dim = observation_dim
@@ -201,7 +213,7 @@ class LearnedGraphMapper(GraphToStateMapper):
     def map_to_states(
         self, graph_features: torch.Tensor, node_indices: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
-        """Learned mapping to states"""
+        """Learned mapping to states."""
         features = graph_features.to(self.device)
         if node_indices is not None:
             features = features[node_indices]
@@ -212,8 +224,7 @@ class LearnedGraphMapper(GraphToStateMapper):
     def map_to_observations(
         self, graph_features: torch.Tensor, node_indices: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
-        """Learned mapping to observations"""
-
+        """Learned mapping to observations."""
         features = graph_features.to(self.device)
         if node_indices is not None:
             features = features[node_indices]
@@ -222,8 +233,8 @@ class LearnedGraphMapper(GraphToStateMapper):
 
 
 class GNNActiveInferenceAdapter:
-    """
-    Main adapter between GNN and Active Inference.
+    """Main adapter between GNN and Active Inference.
+
     Handles the integration of graph neural network outputs with
     Active Inference generative models and inference algorithms.
     """
@@ -235,6 +246,7 @@ class GNNActiveInferenceAdapter:
         generative_model: GenerativeModel,
         inference_algorithm: InferenceAlgorithm,
     ) -> None:
+        """Initialize GNN Active Inference adapter."""
         self.config = config
         self.gnn_model = gnn_model
         self.generative_model = generative_model
@@ -251,8 +263,7 @@ class GNNActiveInferenceAdapter:
         # Type declaration for mapper - both inherit from same base
         self.mapper: Union[DirectGraphMapper, LearnedGraphMapper]
         if config.state_mapping == "direct":
-            self.mapper = (
-                DirectGraphMapper(config, self.state_dim, self.obs_dim))
+            self.mapper = DirectGraphMapper(config, self.state_dim, self.obs_dim)
         elif config.state_mapping == "learned":
             self.mapper = LearnedGraphMapper(config, self.state_dim, self.obs_dim)
         else:
@@ -266,8 +277,8 @@ class GNNActiveInferenceAdapter:
         edge_features: Optional[torch.Tensor] = None,
         batch: Optional[torch.Tensor] = None,
     ) -> Dict[str, torch.Tensor]:
-        """
-        Process graph through GNN and extract features.
+        """Process graph through GNN and extract features.
+
         Args:
             node_features: Node feature matrix [num_nodes x feature_dim]
             edge_index: Edge connectivity [2 x num_edges]
@@ -283,8 +294,7 @@ class GNNActiveInferenceAdapter:
         if batch is not None:
             batch = batch.to(self.device)
         with torch.no_grad():
-            graph_features = (
-                self.gnn_model(node_features, edge_index, edge_features))
+            graph_features = self.gnn_model(node_features, edge_index, edge_features)
         if batch is not None:
             aggregated_features = self.aggregator.aggregate(graph_features, batch)
         else:
@@ -300,15 +310,14 @@ class GNNActiveInferenceAdapter:
         graph_data: Dict[str, torch.Tensor],
         agent_node_indices: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
-        """
-        Convert graph features to belief states for Active Inference.
+        """Convert graph features to belief states for Active Inference.
+
         Args:
             graph_data: Processed graph data from process_graph
             agent_node_indices: Indices of nodes representing agents
         Returns:
             Belief states suitable for Active Inference
         """
-
         if agent_node_indices is None:
             features = graph_data["graph_features"]
         else:
@@ -321,15 +330,14 @@ class GNNActiveInferenceAdapter:
         graph_data: Dict[str, torch.Tensor],
         observation_node_indices: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
-        """
-        Convert graph features to observations for Active Inference.
+        """Convert graph features to observations for Active Inference.
+
         Args:
             graph_data: Processed graph data
             observation_node_indices: Indices of nodes providing observations
         Returns:
             Observations suitable for Active Inference
         """
-
         if observation_node_indices is None:
             features = graph_data["graph_features"]
         else:
@@ -343,8 +351,8 @@ class GNNActiveInferenceAdapter:
         graph_data: Dict[str, torch.Tensor],
         agent_node_indices: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
-        """
-        Update Active Inference beliefs using graph information.
+        """Update Active Inference beliefs using graph information.
+
         Args:
             current_beliefs: Current belief state
             graph_data: Processed graph data
@@ -369,8 +377,8 @@ class GNNActiveInferenceAdapter:
         graph_data: Dict[str, torch.Tensor],
         preferences: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
-        """
-        Compute expected free energy incorporating graph structure.
+        """Compute expected free energy incorporating graph structure.
+
         Args:
             policy: Policy to evaluate
             graph_data: Processed graph data
@@ -378,17 +386,15 @@ class GNNActiveInferenceAdapter:
         Returns:
             Expected free energy
         """
-        beliefs = self.graph_to_beliefs(graph_data)
+        _ = self.graph_to_beliefs(graph_data)
         return torch.tensor(0.0, device=self.device)
 
 
 class GraphFeatureAggregator:
-    """
-
-    Aggregates node features into graph-level representations.
-    """
+    """Aggregates node features into graph-level representations."""
 
     def __init__(self, config: GraphNNIntegrationConfig) -> None:
+        """Initialize feature aggregator."""
         self.config = config
         self.device = torch.device(
             "cuda" if config.use_gpu and torch.cuda.is_available() else "cpu"
@@ -401,8 +407,8 @@ class GraphFeatureAggregator:
             ).to(self.device)
 
     def aggregate(self, node_features: torch.Tensor, batch: torch.Tensor) -> torch.Tensor:
-        """
-        Aggregate node features by batch assignment.
+        """Aggregate node features by batch assignment.
+
         Args:
             node_features: Node features [num_nodes x feature_dim]
             batch: Batch assignment [num_nodes]
@@ -413,38 +419,37 @@ class GraphFeatureAggregator:
         feature_dim = node_features.shape[1]
         aggregated = torch.zeros(num_graphs, feature_dim, device=self.device)
         if self.config.aggregation_method == "mean":
-            for i in range(num_graphs):
-                mask = batch == i
+            for _ in range(num_graphs):
+                mask = batch == _
                 if mask.any():
-                    aggregated[i] = node_features[mask].mean(dim=0)
+                    aggregated[_] = node_features[mask].mean(dim=0)
         elif self.config.aggregation_method == "max":
-            for i in range(num_graphs):
-                mask = batch == i
+            for _ in range(num_graphs):
+                mask = batch == _
                 if mask.any():
-                    aggregated[i] = node_features[mask].max(dim=0)[0]
+                    aggregated[_] = node_features[mask].max(dim=0)[0]
         elif self.config.aggregation_method == "sum":
-            for i in range(num_graphs):
-                mask = batch == i
+            for _ in range(num_graphs):
+                mask = batch == _
                 if mask.any():
-                    aggregated[i] = node_features[mask].sum(dim=0)
+                    aggregated[_] = node_features[mask].sum(dim=0)
         elif self.config.aggregation_method == "attention":
-            for i in range(num_graphs):
-                mask = batch == i
+            for _ in range(num_graphs):
+                mask = batch == _
                 if mask.any():
                     graph_nodes = node_features[mask]
                     attention_weights = F.softmax(self.attention(graph_nodes), dim=0)
-                    aggregated[i] = (attention_weights * graph_nodes).sum(dim=0)
+                    aggregated[_] = (attention_weights * graph_nodes).sum(dim=0)
         return aggregated
 
     def aggregate_single(self, node_features: torch.Tensor) -> torch.Tensor:
-        """
-        Aggregate features for a single graph.
+        """Aggregate features for a single graph.
+
         Args:
             node_features: Node features [num_nodes x feature_dim]
         Returns:
             Aggregated features [1 x feature_dim]
         """
-
         if self.config.aggregation_method == "mean":
             return node_features.mean(dim=0, keepdim=True)
         elif self.config.aggregation_method == "max":
@@ -459,14 +464,15 @@ class GraphFeatureAggregator:
 
 
 class HierarchicalGraphIntegration:
-    """
-    Hierarchical integration of graphs with Active Inference.
+    """Hierarchical integration of graphs with Active Inference.
+
     Processes graphs at multiple scales for hierarchical inference.
     """
 
     def __init__(
         self, config: GraphNNIntegrationConfig, level_configs: List[Dict[str, Any]]
     ) -> None:
+        """Initialize hierarchical graph integration."""
         self.config = config
         self.num_levels = len(level_configs)
         self.device = torch.device(
@@ -480,7 +486,7 @@ class HierarchicalGraphIntegration:
             self.level_adapters.append(None)
 
     def _create_gnn(self, level_config: Dict[str, Any]) -> nn.Module:
-        """Create GNN model for a specific level"""
+        """Create GNN model for a specific level."""
         gnn_type = level_config.get("gnn_type", self.config.graphnn_type)
         num_layers = level_config.get("num_layers", 2)
         hidden_dim = level_config.get("hidden_dim", self.config.hidden_dim)
@@ -513,7 +519,7 @@ class HierarchicalGraphIntegration:
         generative_models: List[GenerativeModel],
         inference_algorithms: List[InferenceAlgorithm],
     ) -> None:
-        """Set generative models and create adapters for each level"""
+        """Set generative models and create adapters for each level."""
         for i, (gen_model, inf_algo) in enumerate(zip(generative_models, inference_algorithms)):
             self.level_adapters[i] = GNNActiveInferenceAdapter(
                 self.config, self.level_gnns[i], gen_model, inf_algo
@@ -522,15 +528,15 @@ class HierarchicalGraphIntegration:
     def process_hierarchical_graph(
         self, graph_data_per_level: List[Dict[str, torch.Tensor]]
     ) -> List[Dict[str, torch.Tensor]]:
-        """
-        Process graphs at each hierarchical level.
+        """Process graphs at each hierarchical level.
+
         Args:
             graph_data_per_level: List of graph data for each level
         Returns:
             Processed features for each level
         """
         processed_levels = []
-        for i, (graph_data, adapter) in enumerate(zip(graph_data_per_level, self.level_adapters)):
+        for _, (graph_data, adapter) in enumerate(zip(graph_data_per_level, self.level_adapters)):
             if adapter is not None:
                 processed = adapter.process_graph(
                     graph_data["node_features"],
@@ -548,8 +554,8 @@ class HierarchicalGraphIntegration:
         current_beliefs: List[torch.Tensor],
         graph_data_per_level: List[Dict[str, torch.Tensor]],
     ) -> List[torch.Tensor]:
-        """
-        Update beliefs hierarchically using graph information.
+        """Update beliefs hierarchically using graph information.
+
         Args:
             current_beliefs: Current beliefs at each level
             graph_data_per_level: Graph data for each level
@@ -576,24 +582,27 @@ class HierarchicalGraphIntegration:
 
 
 class GNNActiveInferenceIntegration:
-    """
-    High-level integration class that can create Active Inference models from GNN specifications.
-    This class provides a convenient interface for creating complete Active Inference systems.
+    """High-level integration class for creating AI models from GNN specs.
+
+    This class provides a convenient interface for creating complete Active
+    Inference systems.
     """
 
     def __init__(self, config: GraphNNIntegrationConfig) -> None:
+        """Initialize GNN Active Inference integration."""
         self.config = config
         self.device = torch.device(
             "cuda" if config.use_gpu and torch.cuda.is_available() else "cpu"
         )
 
     def create_from_gnn_spec(self, gnn_spec: Dict[str, Any]) -> Any:
-        """
-        Create an Active Inference model from a GNN specification.
+        """Create an Active Inference model from a GNN specification.
+
         Args:
             gnn_spec: Dictionary containing model specification with keys:
                 - model_type: 'discrete' or 'continuous'
-                - dimensions: dict with num_states, num_observations, num_actions
+                - dimensions: dict with num_states, num_observations,
+                  num_actions
                 - matrices: dict with A, B, C, D matrices for discrete models
         Returns:
             Object with generative_model and inference attributes
@@ -649,8 +658,8 @@ class GNNActiveInferenceIntegration:
 def create_gnn_adapter(
     adapter_type: str, config: Optional[GraphNNIntegrationConfig] = None, **kwargs
 ) -> Union[GNNActiveInferenceAdapter, HierarchicalGraphIntegration]:
-    """
-    Factory function to create GNN adapters.
+    """Create GNN adapters.
+
     Args:
         adapter_type: Type of adapter ('standard', 'hierarchical')
         config: Integration configuration
@@ -666,7 +675,7 @@ def create_gnn_adapter(
         inference_algorithm = kwargs.get("inference_algorithm")
         if None in [gnn_model, generative_model, inference_algorithm]:
             raise ValueError(
-                "Standard adapter requires gnn_model, generative_model, and inference_algorithm"
+                "Standard adapter requires gnn_model, generative_model, " "and inference_algorithm"
             )
         return GNNActiveInferenceAdapter(config, gnn_model, generative_model, inference_algorithm)
     elif adapter_type == "hierarchical":
@@ -689,7 +698,10 @@ if __name__ == "__main__":
     )
 
     class DummyGNN(nn.Module):
+        """Dummy GNN for testing."""
+
         def __init__(self, input_dim, hidden_dim, output_dim) -> None:
+            """Initialize dummy GNN."""
             super().__init__()
             self.layers = nn.Sequential(
                 nn.Linear(input_dim, hidden_dim),
@@ -703,6 +715,7 @@ if __name__ == "__main__":
             edge_index: torch.Tensor,
             edge_features: Optional[torch.Tensor] = None,
         ) -> torch.Tensor:
+            """Forward pass through dummy GNN."""
             return self.layers(x)
 
     gnn_model = DummyGNN(10, 64, 32)

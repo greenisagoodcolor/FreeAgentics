@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 class QuantizationType(Enum):
-    """Supported quantization types."""
+    """Supported quantization types"""
 
     INT8 = "int8"
     INT4 = "int4"
@@ -35,7 +35,7 @@ class QuantizationType(Enum):
 
 @dataclass
 class QuantizationConfig:
-    """Configuration for model quantization."""
+    """Configuration for model quantization"""
 
     quantization_type: QuantizationType
     calibration_samples: int = 100
@@ -58,7 +58,7 @@ class ModelQuantizer:
     """
 
     def __init__(self, config: QuantizationConfig) -> None:
-        """Initialize model quantizer."""
+        """Initialize model quantizer"""
 
         self.config = config
         self.calibration_data = []
@@ -85,7 +85,7 @@ class ModelQuantizer:
             raise ValueError(f"Unsupported model format: {model_format}")
 
     def _detect_model_format(self, model_path: Path) -> str:
-        """Detect model format from file."""
+        """Detect model format from file"""
         suffix = model_path.suffix.lower()
         if suffix in [".ggml", ".gguf", ".bin"]:
             return "ggml"
@@ -102,7 +102,7 @@ class ModelQuantizer:
             return "unknown"
 
     def _quantize_ggml(self, model_path: Path, output_path: Path) -> Dict[str, Any]:
-        """Quantize GGML format models."""
+        """Quantize GGML format models"""
         # Map quantization types to GGML formats
         quant_map = {
             QuantizationType.INT8: "q8_0",
@@ -139,7 +139,7 @@ class ModelQuantizer:
     def _manual_ggml_quantize(
         self, model_path: Path, output_path: Path, quant_type: str
     ) -> Dict[str, Any]:
-        """Manual GGML quantization implementation."""
+        """Manual GGML quantization implementation"""
         # This is a simplified implementation
         # Real implementation would parse GGML format properly
         logger.info(f"Manual GGML quantization to {quant_type}")
@@ -172,7 +172,7 @@ class ModelQuantizer:
         }
 
     def _quantize_pytorch(self, model_path: Path, output_path: Path) -> Dict[str, Any]:
-        """Quantize PyTorch models."""
+        """Quantize PyTorch models"""
         # Load model
         model = torch.load(model_path, map_location="cpu")
         # Prepare for quantization
@@ -205,11 +205,11 @@ class ModelQuantizer:
             raise ValueError("Invalid PyTorch model format")
 
     def _pytorch_int4_quantize(self, model: torch.nn.Module) -> torch.nn.Module:
-        """Custom INT4 quantization for PyTorch models."""
+        """Custom INT4 quantization for PyTorch models"""
 
         # This is a placeholder - real INT4 quantization is more complex
         class Int4Linear(torch.nn.Module):
-            """INT4 quantized linear layer."""
+            """INT4 quantized linear layer"""
 
             def __init__(self, original_layer) -> None:
                 super().__init__()
@@ -246,7 +246,7 @@ class ModelQuantizer:
         return quantized_model
 
     def _quantize_onnx(self, model_path: Path, output_path: Path) -> Dict[str, Any]:
-        """Quantize ONNX models."""
+        """Quantize ONNX models"""
         try:
             # Perform quantization
             quantize_dynamic(str(model_path), str(output_path), weight_type=QuantType.QInt8)
@@ -307,7 +307,7 @@ class EdgeOptimizer:
     """
 
     def __init__(self) -> None:
-        """Initialize edge optimizer."""
+        """Initialize edge optimizer"""
         self.device_profiles = {
             "raspberry_pi": {
                 "ram_gb": 1,
@@ -388,7 +388,7 @@ class EdgeOptimizer:
         profile: Dict[str, Any],
         output_dir: Path,
     ):
-        """Create deployment package for edge device."""
+        """Create deployment package for edge device"""
         package_dir = output_dir / f"{device_type}_deployment"
         package_dir.mkdir(exist_ok=True)
         # Copy model

@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class OpportunityType(Enum):
-    """Types of business opportunities."""
+    """Types of business opportunities"""
 
     MARKET_GAP = "market_gap"
     RESOURCE_ARBITRAGE = "resource_arbitrage"
@@ -29,7 +29,7 @@ class OpportunityType(Enum):
 
 
 class OpportunityStatus(Enum):
-    """Status of a business opportunity."""
+    """Status of a business opportunity"""
 
     DETECTED = "detected"
     VALIDATING = "validating"
@@ -42,7 +42,7 @@ class OpportunityStatus(Enum):
 
 @dataclass
 class OpportunityMetrics:
-    """Quantifiable metrics for evaluating opportunities."""
+    """Quantifiable metrics for evaluating opportunities"""
 
     potential_value: float  # Estimated monetary value
     success_probability: float  # 0-1 probability of success
@@ -55,19 +55,19 @@ class OpportunityMetrics:
 
     @property
     def expected_value(self) -> float:
-        """Calculate risk-adjusted expected value."""
+        """Calculate risk-adjusted expected value"""
         return self.potential_value * self.success_probability * (1 - self.risk_score)
 
     @property
     def roi_estimate(self) -> float:
-        """Estimate return on investment."""
+        """Estimate return on investment"""
         total_resource_cost = sum(self.resource_requirements.values())
         if total_resource_cost > 0:
             return (self.expected_value - total_resource_cost) / total_resource_cost
         return 0.0
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary for serialization."""
+        """Convert to dictionary for serialization"""
         return {
             "potential_value": self.potential_value,
             "success_probability": self.success_probability,
@@ -84,7 +84,7 @@ class OpportunityMetrics:
 
 @dataclass
 class BusinessOpportunity:
-    """Represents a detected business opportunity."""
+    """Represents a detected business opportunity"""
 
     id: str
     type: OpportunityType
@@ -109,13 +109,13 @@ class BusinessOpportunity:
     committed_agents: set[str] = field(default_factory=set)
 
     def is_expired(self) -> bool:
-        """Check if opportunity has expired."""
+        """Check if opportunity has expired"""
         if self.expires_at:
             return datetime.utcnow() > self.expires_at
         return False
 
     def is_viable(self) -> bool:
-        """Check if opportunity is still viable."""
+        """Check if opportunity is still viable"""
         return (
             self.status in [OpportunityStatus.VALIDATED, OpportunityStatus.IN_PROGRESS]
             and not self.is_expired()
@@ -123,12 +123,12 @@ class BusinessOpportunity:
         )
 
     def add_interested_agent(self, agent_id: str) -> None:
-        """Register agent interest."""
+        """Register agent interest"""
         self.interested_agents.add(agent_id)
         logger.debug(f"Agent {agent_id} interested in opportunity {self.id}")
 
     def commit_agent(self, agent_id: str) -> bool:
-        """Commit an agent to the opportunity."""
+        """Commit an agent to the opportunity"""
         if len(self.committed_agents) >= self.max_agents_allowed:
             return False
         self.committed_agents.add(agent_id)
@@ -140,7 +140,7 @@ class BusinessOpportunity:
         return True
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary for serialization."""
+        """Convert to dictionary for serialization"""
         return {
             "id": self.id,
             "type": self.type.value,
@@ -168,7 +168,7 @@ class OpportunityDetector:
     """
 
     def __init__(self) -> None:
-        """Initialize opportunity detector."""
+        """Initialize opportunity detector"""
         self.detection_patterns = {
             OpportunityType.MARKET_GAP: self._detect_market_gap,
             OpportunityType.RESOURCE_ARBITRAGE: self._detect_resource_arbitrage,
@@ -215,7 +215,7 @@ class OpportunityDetector:
         agent_profiles: List[Dict[str, Any]],
         resource_data: Dict[str, Any],
     ) -> List[BusinessOpportunity]:
-        """Detect market gap opportunities."""
+        """Detect market gap opportunities"""
         opportunities = []
         # Analyze supply-demand imbalances
         demands = market_data.get("demands", {})
@@ -259,7 +259,7 @@ class OpportunityDetector:
         agent_profiles: List[Dict[str, Any]],
         resource_data: Dict[str, Any],
     ) -> List[BusinessOpportunity]:
-        """Detect resource arbitrage opportunities."""
+        """Detect resource arbitrage opportunities"""
         opportunities = []
         # Analyze price differences across locations/markets
         price_by_location = resource_data.get("price_by_location", {})
@@ -310,7 +310,7 @@ class OpportunityDetector:
         agent_profiles: List[Dict[str, Any]],
         resource_data: Dict[str, Any],
     ) -> List[BusinessOpportunity]:
-        """Detect opportunities from synergistic agent capabilities."""
+        """Detect opportunities from synergistic agent capabilities"""
         opportunities = []
         # Analyze agent capability combinations
         for i, agent1 in enumerate(agent_profiles):
@@ -341,8 +341,7 @@ class OpportunityDetector:
                                 value_proposition="Unlock opportunity through capability combination",
                             )
                             # Set metrics based on market data
-                            market_value = (
-                                market_data.get("opportunity_values", {}).get()
+                            market_value = market_data.get("opportunity_values", {}).get(
                                 opp_name, 10000
                             )
                             opp.metrics.potential_value = market_value
@@ -360,7 +359,7 @@ class OpportunityDetector:
         agent_profiles: List[Dict[str, Any]],
         resource_data: Dict[str, Any],
     ) -> List[BusinessOpportunity]:
-        """Detect efficiency improvement opportunities."""
+        """Detect efficiency improvement opportunities"""
         opportunities = []
         # Analyze current inefficiencies
         inefficiencies = market_data.get("inefficiencies", {})
@@ -401,7 +400,7 @@ class OpportunityValidator:
     """
 
     def __init__(self) -> None:
-        """Initialize opportunity validator."""
+        """Initialize opportunity validator"""
         self.validation_checks = [
             self._validate_market_demand,
             self._validate_resource_availability,
@@ -474,7 +473,7 @@ class OpportunityValidator:
         available_agents: List[Dict[str, Any]],
         resource_data: Dict[str, Any],
     ) -> tuple[bool, float, dict[str, Any]]:
-        """Validate market demand exists."""
+        """Validate market demand exists"""
         details = {}
         # Check market size
         if opportunity.metrics.market_size < 1000:
@@ -497,7 +496,7 @@ class OpportunityValidator:
         available_agents: List[Dict[str, Any]],
         resource_data: Dict[str, Any],
     ) -> tuple[bool, float, dict[str, Any]]:
-        """Validate required resources are available."""
+        """Validate required resources are available"""
         details = {"missing_resources": []}
         required = opportunity.metrics.resource_requirements
         available = resource_data.get("total_available", {})
@@ -525,7 +524,7 @@ class OpportunityValidator:
         available_agents: List[Dict[str, Any]],
         resource_data: Dict[str, Any],
     ) -> tuple[bool, float, dict[str, Any]]:
-        """Validate agent capabilities match requirements."""
+        """Validate agent capabilities match requirements"""
         details = {"missing_capabilities": []}
         required_caps = opportunity.required_capabilities
         # Aggregate available capabilities
@@ -554,7 +553,7 @@ class OpportunityValidator:
         available_agents: List[Dict[str, Any]],
         resource_data: Dict[str, Any],
     ) -> tuple[bool, float, dict[str, Any]]:
-        """Validate financial viability."""
+        """Validate financial viability"""
         details = {}
         # Check ROI
         roi = opportunity.metrics.roi_estimate
@@ -577,7 +576,7 @@ class OpportunityValidator:
         available_agents: List[Dict[str, Any]],
         resource_data: Dict[str, Any],
     ) -> tuple[bool, float, dict[str, Any]]:
-        """Validate risk levels are acceptable."""
+        """Validate risk levels are acceptable"""
         details = {}
         risk_score = opportunity.metrics.risk_score
         details["risk_score"] = risk_score

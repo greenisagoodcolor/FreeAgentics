@@ -72,7 +72,7 @@ class PyMDPAgentWrapper:
             self._create_fallback_agent()
 
     def _create_pymdp_agent(self) -> None:
-        """Create official pymdp Agent instance."""
+        """Create official pymdp Agent instance"""
         try:
             # Convert our parameters to pymdp format
             A = [self.model_params.A]  # pymdp expects list of A matrices
@@ -105,7 +105,7 @@ class PyMDPAgentWrapper:
             self._create_fallback_agent()
 
     def _create_fallback_agent(self) -> None:
-        """Create fallback agent when pymdp is not available."""
+        """Create fallback agent when pymdp is not available"""
         self.agent = None
         self.current_beliefs = self.model_params.D.copy()
 
@@ -137,7 +137,7 @@ class PyMDPAgentWrapper:
             return self._fallback_belief_update(observation)
 
     def _pymdp_belief_update(self, observation: Union[int, NDArray[np.float64]]) -> BeliefState:
-        """Perform belief update using official pymdp library."""
+        """Perform belief update using official pymdp library"""
         try:
             # Convert observation to pymdp format
             if isinstance(observation, int):
@@ -183,7 +183,7 @@ class PyMDPAgentWrapper:
             return self._fallback_belief_update(observation)
 
     def _fallback_belief_update(self, observation: Union[int, NDArray[np.float64]]) -> BeliefState:
-        """Fallback Bayesian belief update implementation."""
+        """Fallback Bayesian belief update implementation"""
         # Extract observation likelihood
         if isinstance(observation, int):
             # Single observation: P(o|s) = A[o, :]
@@ -246,7 +246,7 @@ class PyMDPAgentWrapper:
     def _pymdp_free_energy(
         self, beliefs: BeliefState, observation: Union[int, NDArray[np.float64]]
     ) -> float:
-        """Compute free energy using pymdp mathematical operations."""
+        """Compute free energy using pymdp mathematical operations"""
         try:
             # KL divergence from prior: D_KL[q(s)||P(s)]
             kl_prior = kl_divergence(beliefs.beliefs, self.model_params.D)
@@ -278,7 +278,7 @@ class PyMDPAgentWrapper:
     def _fallback_free_energy(
         self, beliefs: BeliefState, observation: Union[int, NDArray[np.float64]]
     ) -> float:
-        """Fallback free energy computation."""
+        """Fallback free energy computation"""
         # KL divergence from prior
         kl_prior = self._fallback_kl_div(beliefs.beliefs, self.model_params.D)
 
@@ -319,7 +319,7 @@ class PyMDPAgentWrapper:
             return self._fallback_policy_inference(beliefs)
 
     def _pymdp_policy_inference(self, beliefs: BeliefState) -> NDArray[np.float64]:
-        """Infer policies using pymdp expected free energy."""
+        """Infer policies using pymdp expected free energy"""
         try:
             # Update agent's internal beliefs
             if hasattr(self.agent, "qs"):
@@ -344,7 +344,7 @@ class PyMDPAgentWrapper:
             return self._fallback_policy_inference(beliefs)
 
     def _fallback_policy_inference(self, beliefs: BeliefState) -> NDArray[np.float64]:
-        """Fallback policy inference using simplified expected free energy."""
+        """Fallback policy inference using simplified expected free energy"""
         # Simplified expected free energy computation
         policy_values = np.zeros(self.config.num_policies)
 

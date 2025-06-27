@@ -47,7 +47,7 @@ class TestDiagnosticConfig:
 
 class TestBeliefTracker:
     def setup_method(self) -> None:
-        ."""Setup for tests."""
+        """Setup for tests"""
         self.config = DiagnosticConfig(save_figures=False)
         self.tracker = BeliefTracker(self.config, num_states=4, state_labels=["A", "B", "C", "D"])
 
@@ -119,7 +119,7 @@ class TestBeliefTracker:
 
 class TestFreeEnergyMonitor:
     def setup_method(self) -> None:
-        ."""Setup for tests."""
+        """Setup for tests"""
         self.config = DiagnosticConfig(save_figures=False)
         self.monitor = FreeEnergyMonitor(self.config)
 
@@ -200,7 +200,7 @@ class TestGradientAnalyzer:
 
 class TestInferenceVisualizer:
     def setup_method(self) -> None:
-        ."""Setup for tests."""
+        """Setup for tests"""
         self.config = DiagnosticConfig(save_figures=False)
         self.visualizer = InferenceVisualizer(self.config)
 
@@ -228,7 +228,7 @@ class TestDiagnosticSuite:
         self.suite = DiagnosticSuite(self.config)
 
     def teardown_method(self):
-        ."""Cleanup after tests."""
+        """Cleanup after tests"""
         shutil.rmtree(self.temp_dir)
 
     def test_create_belief_tracker(self) -> None:

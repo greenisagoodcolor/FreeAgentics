@@ -1,23 +1,28 @@
 # ADR-010: Developer Experience and Tooling Strategy
 
 ## Status
+
 Accepted
 
 ## Context
+
 FreeAgentics aims to democratize autonomous AI agent development by providing an exceptional developer experience. The framework must be approachable for beginners while remaining powerful for experts. This requires comprehensive tooling, clear documentation, intuitive APIs, and smooth development workflows.
 
 ## Decision
+
 We will implement a comprehensive developer experience strategy that prioritizes simplicity, discoverability, and productivity while maintaining the power and flexibility required for advanced use cases.
 
 ## Developer Experience Principles
 
 ### 1. Progressive Disclosure
+
 - Simple start with minimal code
 - Gradual complexity with advanced features discoverable as needed
 - Sensible defaults that work out-of-the-box
 - Expert escape hatches for full customization
 
 ### 2. Discoverability
+
 - IDE integration with type hints and auto-completion
 - Interactive examples with Jupyter notebooks
 - Visual debugging with real-time agent state visualization
@@ -28,6 +33,7 @@ We will implement a comprehensive developer experience strategy that prioritizes
 ### 1. Command Line Interface (CLI)
 
 #### FreeAgentics CLI Tool
+
 ```bash
 # Installation and setup
 $ pip install freeagentics
@@ -58,6 +64,7 @@ $ freeagentics deploy --target edge
 ```
 
 #### CLI Implementation
+
 ```python
 # cli/commands/agent.py
 import click
@@ -100,6 +107,7 @@ def create(name: str, type: str, personality: str):
 ### 2. Development Dashboard
 
 #### Web-based Development Environment
+
 ```typescript
 // web/dashboard/development/page.tsx
 'use client'
@@ -179,6 +187,7 @@ export default function DevelopmentDashboard() {
 ### 3. Interactive Development Environment
 
 #### Jupyter Integration
+
 ```python
 # notebooks/examples/getting_started.ipynb
 """
@@ -230,6 +239,7 @@ def simulate_and_visualize(steps=10):
 ### 4. API Development Tools
 
 #### API Explorer and Playground
+
 ```typescript
 // web/api-playground/page.tsx
 'use client'
@@ -328,6 +338,7 @@ export default function APIPlayground() {
 ### 5. Visual Debugging Tools
 
 #### Agent State Visualizer
+
 ```python
 # tools/debugger/visualizer.py
 import plotly.graph_objects as go
@@ -476,6 +487,7 @@ class AgentDebugger:
 ### 6. Documentation and Learning Resources
 
 #### Documentation Structure
+
 ```
 docs/
 ├── getting-started/
@@ -504,6 +516,7 @@ docs/
 ```
 
 #### Interactive Documentation
+
 ```python
 # docs/interactive/active_inference_demo.py
 """
@@ -597,17 +610,20 @@ The agent uses Active Inference to:
 ## Architectural Compliance
 
 ### Directory Structure (ADR-002)
+
 - CLI tools in `tools/cli/`
 - Web dashboard in `web/dashboard/`
 - Documentation in `docs/`
 - Developer utilities in `tools/dev/`
 
 ### Dependency Rules (ADR-003)
+
 - Developer tools depend on core domain through interfaces
 - No core domain dependencies on development tools
 - Development infrastructure isolated from production code
 
 ### Naming Conventions (ADR-004)
+
 - CLI commands use kebab-case: `freeagentics agent create`
 - Tool files use kebab-case: `development-server.py`
 - Dashboard components use PascalCase: `AgentVisualizer`
@@ -615,24 +631,28 @@ The agent uses Active Inference to:
 ## Implementation Strategy
 
 ### Phase 1: Core Developer Tools
+
 1. Basic CLI with agent/simulation commands
 2. Simple web dashboard
 3. Jupyter notebook examples
 4. API documentation
 
 ### Phase 2: Advanced Tooling
+
 5. Visual debugging tools
 6. Interactive documentation
 7. API playground
 8. Performance profiling tools
 
 ### Phase 3: IDE Integration
+
 9. VS Code extension
 10. TypeScript definitions
 11. Language server protocol
 12. Code generators
 
 ### Phase 4: Community Tools
+
 13. Example gallery
 14. Community contributions
 15. Plugin system
@@ -641,12 +661,14 @@ The agent uses Active Inference to:
 ## Success Metrics
 
 ### Developer Onboarding
+
 - **Time to First Agent**: <5 minutes from install to running agent
 - **Time to First Coalition**: <15 minutes with guided tutorial
 - **Documentation Satisfaction**: >4.5/5 in developer surveys
 - **Example Completion Rate**: >90% for getting started examples
 
 ### Developer Productivity
+
 - **Development Velocity**: Measurable improvement in agent development time
 - **Error Resolution Time**: Built-in debugging reduces troubleshooting time
 - **Feature Discovery**: Developers find and use advanced features naturally
@@ -655,12 +677,14 @@ The agent uses Active Inference to:
 ## Testing Strategy
 
 ### Developer Tool Testing
+
 - CLI command integration tests
 - Web dashboard E2E tests
 - Documentation example verification
 - API playground functionality tests
 
 ### User Experience Testing
+
 - Developer onboarding flow testing
 - Documentation usability studies
 - Tool performance benchmarking
@@ -669,18 +693,21 @@ The agent uses Active Inference to:
 ## Consequences
 
 ### Positive
+
 - Accelerated developer adoption
 - Reduced learning curve for complex concepts
 - Higher developer satisfaction and retention
 - Strong community ecosystem
 
 ### Negative
+
 - Additional maintenance overhead for tools
 - Increased complexity in development pipeline
 - Documentation maintenance requirements
 - Support burden for developer tools
 
 ### Risks and Mitigations
+
 - **Risk**: Tools becoming outdated as core library evolves
   - **Mitigation**: Automated tool testing in CI/CD pipeline
 - **Risk**: Developer tools introducing performance overhead
@@ -689,6 +716,7 @@ The agent uses Active Inference to:
   - **Mitigation**: Documentation as code, automated example testing
 
 ## Related Decisions
+
 - ADR-002: Canonical Directory Structure
 - ADR-003: Dependency Rules
 - ADR-007: Testing Strategy Architecture

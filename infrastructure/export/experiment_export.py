@@ -1,4 +1,4 @@
-."""
+"""
 Experiment State Export System
 
 Implements comprehensive experiment state serialization for reproducible research
@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class ExperimentComponents:
-    """Defines which components to include in experiment export."""
+    """Defines which components to include in experiment export"""
 
     agents: bool = True
     conversations: bool = True
@@ -61,7 +61,7 @@ class ExperimentComponents:
 
 @dataclass
 class ExperimentMetadata:
-    """Metadata about the experiment export."""
+    """Metadata about the experiment export"""
 
     export_id: str
     experiment_name: str
@@ -89,7 +89,7 @@ class ExperimentMetadata:
 
 @dataclass
 class ExperimentState:
-    """Complete experiment state container."""
+    """Complete experiment state container"""
 
     metadata: ExperimentMetadata
     agents: Dict[str, Any] = field(default_factory=dict)
@@ -102,16 +102,16 @@ class ExperimentState:
 
 
 class StateCollector:
-    """Collects state from core domain modules per ADR-002."""
+    """Collects state from core domain modules per ADR-002"""
 
     def __init__(self, db_session: Session) -> None:
-        """Initialize."""
+        """Initialize"""
         self.db_session = db_session
         self.agent_registry = AgentRegistry()
         self.state_manager = AgentStateManager()
 
     async def collect_agent_state(self, agent_ids: Optional[List[str]] = None) -> Dict[str, Any]:
-        """Collect complete agent state from agents module."""
+        """Collect complete agent state from agents module"""
         agents_data = {}
 
         # Build query
@@ -153,7 +153,7 @@ class StateCollector:
         return agents_data
 
     async def _collect_agent_runtime_state(self, agent_instance) -> Dict[str, Any]:
-        """Collect runtime state from active agent instance."""
+        """Collect runtime state from active agent instance"""
         try:
             # Collect state through state manager
             state = self.state_manager.get_agent_state(agent_instance.agent_id)
@@ -173,7 +173,7 @@ class StateCollector:
             return {}
 
     def _collect_ai_state(self, agent_instance) -> Dict[str, Any]:
-        """Collect Active Inference state if available."""
+        """Collect Active Inference state if available"""
         try:
             if hasattr(agent_instance, "active_inference"):
                 ai_module = agent_instance.active_inference
@@ -192,7 +192,7 @@ class StateCollector:
     async def collect_conversation_state(
         self, conversation_ids: Optional[List[str]] = None
     ) -> Dict[str, Any]:
-        """Collect conversation state from database."""
+        """Collect conversation state from database"""
         conversations_data = {}
 
         # Build query
@@ -245,7 +245,7 @@ class StateCollector:
         return conversations_data
 
     async def collect_knowledge_graph_state(self) -> Dict[str, Any]:
-        """Collect knowledge graph state from database."""
+        """Collect knowledge graph state from database"""
         knowledge_graphs_data = {}
 
         knowledge_graphs = self.db_session.query(KnowledgeGraph).all()
@@ -269,7 +269,7 @@ class StateCollector:
         return knowledge_graphs_data
 
     async def collect_coalition_state(self) -> Dict[str, Any]:
-        """Collect coalition state from coalitions module."""
+        """Collect coalition state from coalitions module"""
         coalitions_data = {}
 
         coalitions = self.db_session.query(Coalition).all()
@@ -314,7 +314,7 @@ class StateCollector:
         return coalitions_data
 
     async def collect_inference_state(self) -> Dict[str, Any]:
-        """Collect inference engine state."""
+        """Collect inference engine state"""
         try:
             # This would integrate with the actual inference engine
             # For now, return structured placeholder that can be extended
@@ -330,7 +330,7 @@ class StateCollector:
             return {}
 
     async def collect_world_state(self) -> Dict[str, Any]:
-        """Collect world state from world module."""
+        """Collect world state from world module"""
         try:
             # This would integrate with the actual world state
             return {
@@ -355,7 +355,7 @@ class ExperimentExport:
     """
 
     def __init__(self, export_dir: Path = None) -> None:
-        """Initialize experiment export interface."""
+        """Initialize experiment export interface"""
         if export_dir is None:
             export_dir = Path(".taskmaster/exports")
 
@@ -371,7 +371,7 @@ class ExperimentExport:
         created_by: str = "system",
         components: Optional[ExperimentComponents] = None,
     ) -> str:
-        """Export complete experiment state using real core module data."""
+        """Export complete experiment state using real core module data"""
         if components is None:
             components = ExperimentComponents()  # All components enabled by default
 
@@ -491,7 +491,7 @@ class ExperimentExport:
         return export_id
 
     def list_exports(self) -> List[Dict[str, Any]]:
-        """List all available exports."""
+        """List all available exports"""
         exports = []
 
         for export_path in self.export_dir.glob("experiment_*.json"):
@@ -510,7 +510,7 @@ class ExperimentExport:
         return exports
 
     async def import_experiment_state(self, export_file: Path) -> bool:
-        """Import experiment state from file."""
+        """Import experiment state from file"""
         try:
             with open(export_file, "r") as f:
                 export_data = json.load(f)
@@ -529,7 +529,7 @@ class ExperimentExport:
             return False
 
     def get_export_details(self, export_id: str) -> Optional[Dict[str, Any]]:
-        """Get detailed information about a specific export."""
+        """Get detailed information about a specific export"""
         export_path = self.export_dir / f"experiment_{export_id}.json"
 
         if not export_path.exists():
@@ -555,7 +555,7 @@ class ExperimentExport:
             return None
 
     def delete_export(self, export_id: str) -> bool:
-        """Delete an export file."""
+        """Delete an export file"""
         export_path = self.export_dir / f"experiment_{export_id}.json"
 
         if not export_path.exists():
@@ -571,5 +571,5 @@ class ExperimentExport:
 
 
 def create_experiment_export(export_dir: Path = None) -> ExperimentExport:
-    """Factory function to create ExperimentExport instance."""
+    """Factory function to create ExperimentExport instance"""
     return ExperimentExport(export_dir)

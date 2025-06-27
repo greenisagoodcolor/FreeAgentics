@@ -182,12 +182,10 @@ Python coverage configuration:
    ```
 
 3. **Write Tests for New Code**: Maintain coverage levels
-
    - Add tests alongside new features
    - Update tests when modifying code
 
 4. **Monitor Trends**: Use Codecov to track coverage over time
-
    - Set up notifications for coverage drops
    - Review coverage reports in PRs
 

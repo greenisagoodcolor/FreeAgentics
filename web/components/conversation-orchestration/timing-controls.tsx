@@ -1,21 +1,20 @@
 "use client";
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Slider } from '@/components/ui/slider';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { ConversationPreset } from '@/lib/types';
-import { 
-  Clock, 
-  Timer, 
-  Play,
-  Pause,
-  RotateCcw,
-  Zap
-} from 'lucide-react';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { ConversationPreset } from "@/lib/types";
+import { Clock, Timer, Play, Pause, RotateCcw, Zap } from "lucide-react";
 
 interface TimingControlsProps {
   preset: ConversationPreset | null;
@@ -26,7 +25,7 @@ interface TimingControlsProps {
 export function TimingControls({
   preset,
   onUpdate,
-  className = ""
+  className = "",
 }: TimingControlsProps) {
   if (!preset) {
     return (
@@ -51,9 +50,9 @@ export function TimingControls({
         ...timingControls,
         responseDelay: {
           ...timingControls.responseDelay,
-          ...updates
-        }
-      }
+          ...updates,
+        },
+      },
     });
   };
 
@@ -66,9 +65,9 @@ export function TimingControls({
         ...timingControls,
         conversationFlow: {
           ...timingControls.conversationFlow,
-          ...updates
-        }
-      }
+          ...updates,
+        },
+      },
     });
   };
 
@@ -81,9 +80,9 @@ export function TimingControls({
         ...timingControls,
         realTimeControls: {
           ...timingControls.realTimeControls,
-          ...updates
-        }
-      }
+          ...updates,
+        },
+      },
     });
   };
 
@@ -111,7 +110,7 @@ export function TimingControls({
             <Timer className="h-4 w-4" />
             <Label className="font-medium">Response Delay</Label>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Delay Type</Label>
@@ -130,13 +129,18 @@ export function TimingControls({
               </Select>
             </div>
 
-            {timingControls.responseDelay.type === 'fixed' && (
+            {timingControls.responseDelay.type === "fixed" && (
               <div className="space-y-2">
-                <Label>Fixed Delay ({formatMs(timingControls.responseDelay.fixedDelay)})</Label>
+                <Label>
+                  Fixed Delay (
+                  {formatMs(timingControls.responseDelay.fixedDelay)})
+                </Label>
                 <div className="px-3">
                   <Slider
                     value={[timingControls.responseDelay.fixedDelay]}
-                    onValueChange={(value) => updateResponseDelay({ fixedDelay: value[0] })}
+                    onValueChange={(value) =>
+                      updateResponseDelay({ fixedDelay: value[0] })
+                    }
                     min={100}
                     max={5000}
                     step={100}
@@ -144,21 +148,28 @@ export function TimingControls({
                   />
                   <div className="flex justify-between text-xs text-muted-foreground mt-1">
                     <span>100ms</span>
-                    <span>{formatMs(timingControls.responseDelay.fixedDelay)}</span>
+                    <span>
+                      {formatMs(timingControls.responseDelay.fixedDelay)}
+                    </span>
                     <span>5s</span>
                   </div>
                 </div>
               </div>
             )}
 
-            {timingControls.responseDelay.type === 'range' && (
+            {timingControls.responseDelay.type === "range" && (
               <>
                 <div className="space-y-2">
-                  <Label>Min Delay ({formatMs(timingControls.responseDelay.minDelay)})</Label>
+                  <Label>
+                    Min Delay ({formatMs(timingControls.responseDelay.minDelay)}
+                    )
+                  </Label>
                   <div className="px-3">
                     <Slider
                       value={[timingControls.responseDelay.minDelay]}
-                      onValueChange={(value) => updateResponseDelay({ minDelay: value[0] })}
+                      onValueChange={(value) =>
+                        updateResponseDelay({ minDelay: value[0] })
+                      }
                       min={100}
                       max={timingControls.responseDelay.maxDelay - 100}
                       step={100}
@@ -166,26 +177,39 @@ export function TimingControls({
                     />
                     <div className="flex justify-between text-xs text-muted-foreground mt-1">
                       <span>100ms</span>
-                      <span>{formatMs(timingControls.responseDelay.minDelay)}</span>
-                      <span>{formatMs(timingControls.responseDelay.maxDelay - 100)}</span>
+                      <span>
+                        {formatMs(timingControls.responseDelay.minDelay)}
+                      </span>
+                      <span>
+                        {formatMs(timingControls.responseDelay.maxDelay - 100)}
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Max Delay ({formatMs(timingControls.responseDelay.maxDelay)})</Label>
+                  <Label>
+                    Max Delay ({formatMs(timingControls.responseDelay.maxDelay)}
+                    )
+                  </Label>
                   <div className="px-3">
                     <Slider
                       value={[timingControls.responseDelay.maxDelay]}
-                      onValueChange={(value) => updateResponseDelay({ maxDelay: value[0] })}
+                      onValueChange={(value) =>
+                        updateResponseDelay({ maxDelay: value[0] })
+                      }
                       min={timingControls.responseDelay.minDelay + 100}
                       max={10000}
                       step={100}
                       className="w-full"
                     />
                     <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                      <span>{formatMs(timingControls.responseDelay.minDelay + 100)}</span>
-                      <span>{formatMs(timingControls.responseDelay.maxDelay)}</span>
+                      <span>
+                        {formatMs(timingControls.responseDelay.minDelay + 100)}
+                      </span>
+                      <span>
+                        {formatMs(timingControls.responseDelay.maxDelay)}
+                      </span>
                       <span>10s</span>
                     </div>
                   </div>
@@ -193,20 +217,23 @@ export function TimingControls({
               </>
             )}
 
-            {timingControls.responseDelay.type === 'adaptive' && (
+            {timingControls.responseDelay.type === "adaptive" && (
               <div className="space-y-3">
                 <Label>Adaptive Factors</Label>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label className="text-sm">Message Length</Label>
                     <Switch
-                      checked={timingControls.responseDelay.adaptiveFactors.messageLength}
-                      onCheckedChange={(messageLength) => 
+                      checked={
+                        timingControls.responseDelay.adaptiveFactors
+                          .messageLength
+                      }
+                      onCheckedChange={(messageLength) =>
                         updateResponseDelay({
                           adaptiveFactors: {
                             ...timingControls.responseDelay.adaptiveFactors,
-                            messageLength
-                          }
+                            messageLength,
+                          },
                         })
                       }
                     />
@@ -214,13 +241,16 @@ export function TimingControls({
                   <div className="flex items-center justify-between">
                     <Label className="text-sm">Agent Processing Time</Label>
                     <Switch
-                      checked={timingControls.responseDelay.adaptiveFactors.agentProcessingTime}
-                      onCheckedChange={(agentProcessingTime) => 
+                      checked={
+                        timingControls.responseDelay.adaptiveFactors
+                          .agentProcessingTime
+                      }
+                      onCheckedChange={(agentProcessingTime) =>
                         updateResponseDelay({
                           adaptiveFactors: {
                             ...timingControls.responseDelay.adaptiveFactors,
-                            agentProcessingTime
-                          }
+                            agentProcessingTime,
+                          },
                         })
                       }
                     />
@@ -228,13 +258,16 @@ export function TimingControls({
                   <div className="flex items-center justify-between">
                     <Label className="text-sm">Conversation Pace</Label>
                     <Switch
-                      checked={timingControls.responseDelay.adaptiveFactors.conversationPace}
-                      onCheckedChange={(conversationPace) => 
+                      checked={
+                        timingControls.responseDelay.adaptiveFactors
+                          .conversationPace
+                      }
+                      onCheckedChange={(conversationPace) =>
                         updateResponseDelay({
                           adaptiveFactors: {
                             ...timingControls.responseDelay.adaptiveFactors,
-                            conversationPace
-                          }
+                            conversationPace,
+                          },
                         })
                       }
                     />
@@ -251,14 +284,18 @@ export function TimingControls({
             <Play className="h-4 w-4" />
             <Label className="font-medium">Conversation Flow</Label>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Max Autonomous Messages</Label>
               <div className="px-3">
                 <Slider
-                  value={[timingControls.conversationFlow.maxAutonomousMessages]}
-                  onValueChange={(value) => updateConversationFlow({ maxAutonomousMessages: value[0] })}
+                  value={[
+                    timingControls.conversationFlow.maxAutonomousMessages,
+                  ]}
+                  onValueChange={(value) =>
+                    updateConversationFlow({ maxAutonomousMessages: value[0] })
+                  }
                   min={5}
                   max={100}
                   step={5}
@@ -266,18 +303,30 @@ export function TimingControls({
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
                   <span>5</span>
-                  <span>{timingControls.conversationFlow.maxAutonomousMessages}</span>
+                  <span>
+                    {timingControls.conversationFlow.maxAutonomousMessages}
+                  </span>
                   <span>100</span>
                 </div>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label>Stall Detection Timeout ({formatMs(timingControls.conversationFlow.stallDetectionTimeout)})</Label>
+              <Label>
+                Stall Detection Timeout (
+                {formatMs(
+                  timingControls.conversationFlow.stallDetectionTimeout,
+                )}
+                )
+              </Label>
               <div className="px-3">
                 <Slider
-                  value={[timingControls.conversationFlow.stallDetectionTimeout]}
-                  onValueChange={(value) => updateConversationFlow({ stallDetectionTimeout: value[0] })}
+                  value={[
+                    timingControls.conversationFlow.stallDetectionTimeout,
+                  ]}
+                  onValueChange={(value) =>
+                    updateConversationFlow({ stallDetectionTimeout: value[0] })
+                  }
                   min={1000}
                   max={30000}
                   step={1000}
@@ -285,7 +334,11 @@ export function TimingControls({
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
                   <span>1s</span>
-                  <span>{formatMs(timingControls.conversationFlow.stallDetectionTimeout)}</span>
+                  <span>
+                    {formatMs(
+                      timingControls.conversationFlow.stallDetectionTimeout,
+                    )}
+                  </span>
                   <span>30s</span>
                 </div>
               </div>
@@ -295,7 +348,7 @@ export function TimingControls({
               <Label>Stall Recovery Strategy</Label>
               <Select
                 value={timingControls.conversationFlow.stallRecoveryStrategy}
-                onValueChange={(stallRecoveryStrategy: any) => 
+                onValueChange={(stallRecoveryStrategy: any) =>
                   updateConversationFlow({ stallRecoveryStrategy })
                 }
               >
@@ -303,19 +356,30 @@ export function TimingControls({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="prompt_random">Prompt Random Agent</SelectItem>
-                  <SelectItem value="prompt_expert">Prompt Expert Agent</SelectItem>
-                  <SelectItem value="end_conversation">End Conversation</SelectItem>
+                  <SelectItem value="prompt_random">
+                    Prompt Random Agent
+                  </SelectItem>
+                  <SelectItem value="prompt_expert">
+                    Prompt Expert Agent
+                  </SelectItem>
+                  <SelectItem value="end_conversation">
+                    End Conversation
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label>Turn Timeout ({formatMs(timingControls.conversationFlow.turnTimeoutDuration)})</Label>
+              <Label>
+                Turn Timeout (
+                {formatMs(timingControls.conversationFlow.turnTimeoutDuration)})
+              </Label>
               <div className="px-3">
                 <Slider
                   value={[timingControls.conversationFlow.turnTimeoutDuration]}
-                  onValueChange={(value) => updateConversationFlow({ turnTimeoutDuration: value[0] })}
+                  onValueChange={(value) =>
+                    updateConversationFlow({ turnTimeoutDuration: value[0] })
+                  }
                   min={5000}
                   max={60000}
                   step={5000}
@@ -323,18 +387,27 @@ export function TimingControls({
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
                   <span>5s</span>
-                  <span>{formatMs(timingControls.conversationFlow.turnTimeoutDuration)}</span>
+                  <span>
+                    {formatMs(
+                      timingControls.conversationFlow.turnTimeoutDuration,
+                    )}
+                  </span>
                   <span>60s</span>
                 </div>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label>Pause Between Turns ({formatMs(timingControls.conversationFlow.pauseBetweenTurns)})</Label>
+              <Label>
+                Pause Between Turns (
+                {formatMs(timingControls.conversationFlow.pauseBetweenTurns)})
+              </Label>
               <div className="px-3">
                 <Slider
                   value={[timingControls.conversationFlow.pauseBetweenTurns]}
-                  onValueChange={(value) => updateConversationFlow({ pauseBetweenTurns: value[0] })}
+                  onValueChange={(value) =>
+                    updateConversationFlow({ pauseBetweenTurns: value[0] })
+                  }
                   min={0}
                   max={5000}
                   step={100}
@@ -342,7 +415,11 @@ export function TimingControls({
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
                   <span>0ms</span>
-                  <span>{formatMs(timingControls.conversationFlow.pauseBetweenTurns)}</span>
+                  <span>
+                    {formatMs(
+                      timingControls.conversationFlow.pauseBetweenTurns,
+                    )}
+                  </span>
                   <span>5s</span>
                 </div>
               </div>
@@ -356,14 +433,16 @@ export function TimingControls({
             <Zap className="h-4 w-4" />
             <Label className="font-medium">Real-Time Controls</Label>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label>Enable Typing Indicators</Label>
                 <Switch
-                  checked={timingControls.realTimeControls.enableTypingIndicators}
-                  onCheckedChange={(enableTypingIndicators) => 
+                  checked={
+                    timingControls.realTimeControls.enableTypingIndicators
+                  }
+                  onCheckedChange={(enableTypingIndicators) =>
                     updateRealTimeControls({ enableTypingIndicators })
                   }
                 />
@@ -374,8 +453,10 @@ export function TimingControls({
               <div className="flex items-center justify-between">
                 <Label>Message Preview Enabled</Label>
                 <Switch
-                  checked={timingControls.realTimeControls.messagePreviewEnabled}
-                  onCheckedChange={(messagePreviewEnabled) => 
+                  checked={
+                    timingControls.realTimeControls.messagePreviewEnabled
+                  }
+                  onCheckedChange={(messagePreviewEnabled) =>
                     updateRealTimeControls({ messagePreviewEnabled })
                   }
                 />
@@ -383,11 +464,17 @@ export function TimingControls({
             </div>
 
             <div className="space-y-2">
-              <Label>Typing Indicator Delay ({formatMs(timingControls.realTimeControls.typingIndicatorDelay)})</Label>
+              <Label>
+                Typing Indicator Delay (
+                {formatMs(timingControls.realTimeControls.typingIndicatorDelay)}
+                )
+              </Label>
               <div className="px-3">
                 <Slider
                   value={[timingControls.realTimeControls.typingIndicatorDelay]}
-                  onValueChange={(value) => updateRealTimeControls({ typingIndicatorDelay: value[0] })}
+                  onValueChange={(value) =>
+                    updateRealTimeControls({ typingIndicatorDelay: value[0] })
+                  }
                   min={100}
                   max={2000}
                   step={100}
@@ -395,18 +482,28 @@ export function TimingControls({
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
                   <span>100ms</span>
-                  <span>{formatMs(timingControls.realTimeControls.typingIndicatorDelay)}</span>
+                  <span>
+                    {formatMs(
+                      timingControls.realTimeControls.typingIndicatorDelay,
+                    )}
+                  </span>
                   <span>2s</span>
                 </div>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label>Ghost Message Duration ({formatMs(timingControls.realTimeControls.ghostMessageDuration)})</Label>
+              <Label>
+                Ghost Message Duration (
+                {formatMs(timingControls.realTimeControls.ghostMessageDuration)}
+                )
+              </Label>
               <div className="px-3">
                 <Slider
                   value={[timingControls.realTimeControls.ghostMessageDuration]}
-                  onValueChange={(value) => updateRealTimeControls({ ghostMessageDuration: value[0] })}
+                  onValueChange={(value) =>
+                    updateRealTimeControls({ ghostMessageDuration: value[0] })
+                  }
                   min={1000}
                   max={10000}
                   step={500}
@@ -414,7 +511,11 @@ export function TimingControls({
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
                   <span>1s</span>
-                  <span>{formatMs(timingControls.realTimeControls.ghostMessageDuration)}</span>
+                  <span>
+                    {formatMs(
+                      timingControls.realTimeControls.ghostMessageDuration,
+                    )}
+                  </span>
                   <span>10s</span>
                 </div>
               </div>
@@ -433,10 +534,14 @@ export function TimingControls({
               {timingControls.responseDelay.type} delay
             </Badge>
             <Badge variant="outline">
-              {timingControls.conversationFlow.maxAutonomousMessages} max messages
+              {timingControls.conversationFlow.maxAutonomousMessages} max
+              messages
             </Badge>
             <Badge variant="outline">
-              {timingControls.conversationFlow.stallRecoveryStrategy.replace('_', ' ')}
+              {timingControls.conversationFlow.stallRecoveryStrategy.replace(
+                "_",
+                " ",
+              )}
             </Badge>
             {timingControls.realTimeControls.enableTypingIndicators && (
               <Badge variant="outline">Typing indicators</Badge>
@@ -449,4 +554,4 @@ export function TimingControls({
       </CardContent>
     </Card>
   );
-} 
+}

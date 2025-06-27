@@ -2,7 +2,6 @@
 Module for FreeAgentics Active Inference implementation.
 """
 
-
 import pytest
 import torch
 
@@ -18,7 +17,7 @@ from inference.engine.generative_model import (
 
 
 class TestModelDimensions:
-    .."""Test ModelDimensions dataclass.."""
+    """Test ModelDimensions dataclass"""
 
     def test_basic_dimensions(self) -> None:
         """Test basic dimension initialization"""
@@ -31,7 +30,7 @@ class TestModelDimensions:
         assert dims.time_horizon == 1  # Default
 
     def test_full_dimensions(self) -> None:
-        ."""Test full dimension specification."""
+        """Test full dimension specification"""
         dims = ModelDimensions(
             num_states=20,
             num_observations=15,
@@ -46,7 +45,7 @@ class TestModelDimensions:
 
 
 class TestModelParameters:
-    .."""Test ModelParameters dataclass.."""
+    """Test ModelParameters dataclass"""
 
     def test_default_parameters(self) -> None:
         """Test default parameter values"""
@@ -60,7 +59,7 @@ class TestModelParameters:
         assert params.temperature == 1.0
 
     def test_custom_parameters(self) -> None:
-        ."""Test custom parameter values."""
+        """Test custom parameter values"""
         params = ModelParameters(learning_rate=0.1, use_sparse=True, use_gpu=False, temperature=0.5)
         assert params.learning_rate == 0.1
         assert params.use_sparse is True
@@ -69,7 +68,7 @@ class TestModelParameters:
 
 
 class TestDiscreteGenerativeModel:
-    .."""Test discrete generative model.."""
+    """Test discrete generative model"""
 
     def setup_method(self) -> None:
         """Set up test model"""
@@ -78,7 +77,7 @@ class TestDiscreteGenerativeModel:
         self.model = DiscreteGenerativeModel(self.dims, self.params)
 
     def test_initialization(self) -> None:
-        ."""Test model initialization."""
+        """Test model initialization"""
         # Check dimensions
         assert self.model.A.shape == (4, 5)  # obs x states
         assert self.model.B.shape == (5, 5, 3)  # states x states x actions
@@ -90,7 +89,7 @@ class TestDiscreteGenerativeModel:
         assert torch.allclose(self.model.D.sum(), torch.tensor(1.0))
 
     def test_observation_model(self) -> None:
-        ."""Test observation model computation."""
+        """Test observation model computation"""
         # Single state
         state = torch.tensor([0.2, 0.3, 0.1, 0.3, 0.1])
         obs = self.model.observation_model(state)
@@ -104,7 +103,7 @@ class TestDiscreteGenerativeModel:
         assert torch.allclose(obs_batch.sum(dim=1), torch.ones(10), atol=1e-6)
 
     def test_transition_model(self) -> None:
-        ."""Test transition model computation."""
+        """Test transition model computation"""
         # Single state and action
         state = torch.tensor([0.2, 0.3, 0.1, 0.3, 0.1])
         next_state = self.model.transition_model(state, action=0)
@@ -119,7 +118,7 @@ class TestDiscreteGenerativeModel:
         assert torch.allclose(next_states.sum(dim=1), torch.ones(10), atol=1e-6)
 
     def test_preferences(self) -> None:
-        ."""Test preference setting and retrieval."""
+        """Test preference setting and retrieval"""
         # Set preferences
         prefs = torch.tensor([0.0, 0.0, 10.0, 0.0])  # Prefer observation 2
         self.model.set_preferences(prefs)
@@ -133,7 +132,7 @@ class TestDiscreteGenerativeModel:
         assert torch.allclose(self.model.get_preferences(1), prefs)  # Others unchanged
 
     def test_model_update(self) -> None:
-        ."""Test model parameter updates."""
+        """Test model parameter updates"""
         # Generate fake trajectory
         observations = [torch.tensor(i % 4) for i in range(10)]
         states = [torch.rand(5) for _ in range(10)]
@@ -153,17 +152,16 @@ class TestDiscreteGenerativeModel:
 
 
 class TestContinuousGenerativeModel:
-    .."""Test continuous generative model.."""
+    """Test continuous generative model"""
 
     def setup_method(self) -> None:
         """Set up test model"""
-        self.dims = (
-            ModelDimensions(num_states=4, num_observations=3, num_actions=2))
+        self.dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
         self.params = ModelParameters(use_gpu=False)
         self.model = ContinuousGenerativeModel(self.dims, self.params, hidden_dim=32)
 
     def test_initialization(self) -> None:
-        ."""Test model initialization."""
+        """Test model initialization"""
         # Check network components exist
         assert hasattr(self.model, "obs_net")
         assert hasattr(self.model, "trans_net")
@@ -176,7 +174,7 @@ class TestContinuousGenerativeModel:
         assert self.model.D_log_var.shape == (4,)
 
     def test_observation_model(self) -> None:
-        ."""Test observation model."""
+        """Test observation model"""
         # Single state
         state = torch.randn(4)
         obs_mean, obs_var = self.model.observation_model(state)
@@ -190,7 +188,7 @@ class TestContinuousGenerativeModel:
         assert torch.all(obs_var_batch > 0)
 
     def test_transition_model(self) -> None:
-        ."""Test transition model."""
+        """Test transition model"""
         # Single state and action
         state = torch.randn(4)
         action = torch.tensor([0])
@@ -204,7 +202,7 @@ class TestContinuousGenerativeModel:
         assert next_mean2.shape == (4,)
 
     def test_forward_pass(self) -> None:
-        ."""Test complete forward pass."""
+        """Test complete forward pass"""
         states = torch.randn(5, 4)
         actions = torch.randint(0, 2, (5, 1))
         outputs = self.model.forward(states, actions)
@@ -217,14 +215,13 @@ class TestContinuousGenerativeModel:
 
 
 class TestHierarchicalGenerativeModel:
-    .."""Test hierarchical generative model.."""
+    """Test hierarchical generative model"""
 
     def setup_method(self) -> None:
         """Set up test model"""
         # Define 3-level hierarchy
         self.dims_list = [
-            ModelDimensions(num_states= (
-                8, num_observations=6, num_actions=4),  # Level 0)
+            ModelDimensions(num_states=8, num_observations=6, num_actions=4),  # Level 0
             ModelDimensions(num_states=4, num_observations=3, num_actions=2),  # Level 1
             ModelDimensions(num_states=2, num_observations=2, num_actions=1),  # Level 2
         ]
@@ -270,7 +267,7 @@ class TestHierarchicalGenerativeModel:
 
 
 class TestFactorizedGenerativeModel:
-    ."""Test factorized generative model."""
+    """Test factorized generative model"""
 
     def setup_method(self) -> None:
         """Set up test model"""
@@ -325,7 +322,7 @@ class TestFactorizedGenerativeModel:
 
 
 class TestModelFactory:
-    ."""Test model factory function."""
+    """Test model factory function"""
 
     def test_create_discrete_model(self) -> None:
         """Test discrete model creation"""

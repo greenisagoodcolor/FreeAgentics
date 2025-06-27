@@ -5,7 +5,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/themeprovider";
 import { LLMProvider } from "@/contexts/llm-context";
 import { IsSendingProvider } from "@/contexts/is-sending-context";
-// import { ReduxProvider } from "@/providers/ReduxProvider";
+import { ReduxProvider } from "@/providers/ReduxProvider";
 import NavBar from "@/components/navbar";
 
 const inter = Inter({
@@ -14,7 +14,7 @@ const inter = Inter({
 });
 
 const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"], 
+  subsets: ["latin"],
   variable: "--font-jetbrains-mono",
 });
 
@@ -25,8 +25,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.variable} ${jetbrainsMono.variable} dark bg-[#0A0A0B] text-white`}>
-        {/* <ReduxProvider> */}
+      <body
+        className={`${inter.variable} ${jetbrainsMono.variable} dark bg-[#0A0A0B] text-white`}
+      >
+        <ReduxProvider>
           <ThemeProvider
             attribute="class"
             defaultTheme="dark"
@@ -40,7 +42,7 @@ export default function RootLayout({
               </LLMProvider>
             </IsSendingProvider>
           </ThemeProvider>
-        {/* </ReduxProvider> */}
+        </ReduxProvider>
       </body>
     </html>
   );
@@ -48,6 +50,7 @@ export default function RootLayout({
 
 export const metadata = {
   title: "FreeAgentics - Multi-Agent AI System",
-  description: "AI agents with Active Inference minds forming coalitions and businesses",
+  description:
+    "AI agents with Active Inference minds forming coalitions and businesses",
   generator: "Next.js",
 };

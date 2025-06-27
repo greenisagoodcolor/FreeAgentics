@@ -5,28 +5,37 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
+import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { 
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ConversationSearch, ConversationFilters } from "./conversation-search";
-import { MessageQueueVisualization, QueuedMessage, QueueMetrics } from "./message-queue-visualization";
+import {
+  MessageQueueVisualization,
+  QueuedMessage,
+  QueueMetrics,
+} from "./message-queue-visualization";
 import { VirtualizedMessageList } from "./virtualized-message-list";
 import { useAutoScroll } from "@/hooks/useAutoScroll";
 import { useConversationWebSocket } from "@/hooks/useConversationWebSocket";
-import type { Message, Agent, Conversation, ConversationThread } from "@/lib/types";
-import { 
-  MessageSquare, 
-  Users, 
-  Settings, 
-  Search, 
+import type {
+  Message,
+  Agent,
+  Conversation,
+  ConversationThread,
+} from "@/lib/types";
+import {
+  MessageSquare,
+  Users,
+  Settings,
+  Search,
   Filter,
   Activity,
   BarChart3,
@@ -45,7 +54,7 @@ import {
   AlertTriangle,
   TrendingUp,
   ChevronRight,
-  ChevronDown
+  ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -55,7 +64,11 @@ export interface ConversationDashboardProps {
   agents: Agent[];
   selectedConversationId?: string;
   onConversationSelect: (conversationId: string) => void;
-  onSendMessage?: (conversationId: string, content: string, senderId: string) => void;
+  onSendMessage?: (
+    conversationId: string,
+    content: string,
+    senderId: string,
+  ) => void;
   className?: string;
 }
 
@@ -65,17 +78,17 @@ const generateMockQueue = (): QueuedMessage[] => {
     id: `queue-${i}`,
     conversationId: `conv-${Math.floor(i / 3)}`,
     agentId: `agent-${i % 4}`,
-    type: ['response', 'autonomous', 'tool_call', 'retry'][i % 4] as any,
-    priority: ['low', 'normal', 'high', 'urgent'][i % 4] as any,
-    status: ['queued', 'processing', 'completed', 'failed'][i % 4] as any,
+    type: ["response", "autonomous", "tool_call", "retry"][i % 4] as any,
+    priority: ["low", "normal", "high", "urgent"][i % 4] as any,
+    status: ["queued", "processing", "completed", "failed"][i % 4] as any,
     queuedAt: new Date(Date.now() - Math.random() * 300000),
     progress: i % 4 === 1 ? Math.random() * 100 : undefined,
     estimatedDuration: 2000 + Math.random() * 8000,
     metadata: {
       messageContent: `Sample message content ${i}...`,
-      modelUsed: ['gpt-4', 'claude-3', 'llama-2'][i % 3],
-      confidence: Math.random()
-    }
+      modelUsed: ["gpt-4", "claude-3", "llama-2"][i % 3],
+      confidence: Math.random(),
+    },
   }));
 };
 
@@ -89,8 +102,8 @@ const generateMockMetrics = (): QueueMetrics => ({
   throughputPerMinute: 8.5,
   errorRate: 0.04,
   queuedByPriority: { urgent: 1, high: 2, normal: 2, low: 0 },
-  processingByAgent: { 'agent-1': 2, 'agent-2': 1 },
-  conversationLoad: { 'conv-1': 3, 'conv-2': 2 }
+  processingByAgent: { "agent-1": 2, "agent-2": 1 },
+  conversationLoad: { "conv-1": 3, "conv-2": 2 },
 });
 
 export function ConversationDashboard({
@@ -99,7 +112,7 @@ export function ConversationDashboard({
   selectedConversationId,
   onConversationSelect,
   onSendMessage,
-  className
+  className,
 }: ConversationDashboardProps) {
   const [filters, setFilters] = useState<ConversationFilters>({
     searchQuery: "",
@@ -112,17 +125,19 @@ export function ConversationDashboard({
     hasErrors: false,
     isLive: false,
     threadCount: [0, 10],
-    agentTypes: []
+    agentTypes: [],
   });
 
   const [searchResults, setSearchResults] = useState<any>(null);
-  const [selectedTab, setSelectedTab] = useState<'conversations' | 'queue' | 'analytics'>('conversations');
+  const [selectedTab, setSelectedTab] = useState<
+    "conversations" | "queue" | "analytics"
+  >("conversations");
   const [showAdvancedControls, setShowAdvancedControls] = useState(false);
   const [isQueuePaused, setIsQueuePaused] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     search: true,
     queue: true,
-    controls: false
+    controls: false,
   });
 
   // Mock data
@@ -142,9 +157,9 @@ export function ConversationDashboard({
       enableUserOverride: true,
       overrideTimeout: 10000,
       onScrollStateChange: (enabled, atBottom) => {
-        console.log('Conversation scroll state:', { enabled, atBottom });
-      }
-    }
+        console.log("Conversation scroll state:", { enabled, atBottom });
+      },
+    },
   );
 
   // Auto-scroll for message list
@@ -154,8 +169,8 @@ export function ConversationDashboard({
     {
       threshold: 50,
       enableUserOverride: true,
-      overrideTimeout: 5000
-    }
+      overrideTimeout: 5000,
+    },
   );
 
   // WebSocket connection
@@ -163,25 +178,25 @@ export function ConversationDashboard({
     isConnected,
     isConnecting,
     error: wsError,
-    connectionStats
+    connectionStats,
   } = useConversationWebSocket({
     autoConnect: true,
     onEvent: (event) => {
-      console.log('Dashboard received WebSocket event:', event);
-    }
+      console.log("Dashboard received WebSocket event:", event);
+    },
   });
 
   // Filter conversations
   const filteredConversations = useMemo(() => {
-    return conversations.filter(conversation => {
+    return conversations.filter((conversation) => {
       // Search query
       if (filters.searchQuery) {
         const query = filters.searchQuery.toLowerCase();
-        const matchesContent = conversation.messages?.some(msg => 
-          msg.content.toLowerCase().includes(query)
+        const matchesContent = conversation.messages?.some((msg) =>
+          msg.content.toLowerCase().includes(query),
         );
-        const matchesParticipants = conversation.participants?.some(pid => {
-          const agent = agents.find(a => a.id === pid);
+        const matchesParticipants = conversation.participants?.some((pid) => {
+          const agent = agents.find((a) => a.id === pid);
           return agent?.name.toLowerCase().includes(query);
         });
         if (!matchesContent && !matchesParticipants) return false;
@@ -189,30 +204,34 @@ export function ConversationDashboard({
 
       // Status filter
       if (filters.status.length > 0) {
-        const status = conversation.endTime ? 'completed' : 'active';
+        const status = conversation.endTime ? "completed" : "active";
         if (!filters.status.includes(status)) return false;
       }
 
       // Participants filter
       if (filters.participants.length > 0) {
-        const hasMatchingParticipant = filters.participants.some(pid =>
-          conversation.participants?.includes(pid)
+        const hasMatchingParticipant = filters.participants.some((pid) =>
+          conversation.participants?.includes(pid),
         );
         if (!hasMatchingParticipant) return false;
       }
 
       // Message count filter
       const messageCount = conversation.messages?.length || 0;
-      if (messageCount < filters.messageCountRange[0] || 
-          messageCount > filters.messageCountRange[1]) {
+      if (
+        messageCount < filters.messageCountRange[0] ||
+        messageCount > filters.messageCountRange[1]
+      ) {
         return false;
       }
 
       // Date range filter
       if (filters.dateRange?.from || filters.dateRange?.to) {
         const startTime = new Date(conversation.startTime);
-        if (filters.dateRange.from && startTime < filters.dateRange.from) return false;
-        if (filters.dateRange.to && startTime > filters.dateRange.to) return false;
+        if (filters.dateRange.from && startTime < filters.dateRange.from)
+          return false;
+        if (filters.dateRange.to && startTime > filters.dateRange.to)
+          return false;
       }
 
       return true;
@@ -221,39 +240,43 @@ export function ConversationDashboard({
 
   // Get selected conversation
   const selectedConversation = conversations.find(
-    conv => conv.id === selectedConversationId
+    (conv) => conv.id === selectedConversationId,
   );
 
   // Handle search
-  const handleSearch = useCallback((query: string) => {
-    if (!query.trim()) {
-      setSearchResults(null);
-      return;
-    }
+  const handleSearch = useCallback(
+    (query: string) => {
+      if (!query.trim()) {
+        setSearchResults(null);
+        return;
+      }
 
-    // Mock search results
-    const mockResults = {
-      conversations: conversations.slice(0, 3).map(c => c.id),
-      messages: conversations.slice(0, 2).flatMap(conv =>
-        conv.messages?.slice(0, 2).map(msg => ({
-          conversationId: conv.id,
-          messageId: msg.id,
-          snippet: msg.content.substring(0, 100) + '...'
-        })) || []
-      ),
-      totalResults: 8
-    };
+      // Mock search results
+      const mockResults = {
+        conversations: conversations.slice(0, 3).map((c) => c.id),
+        messages: conversations.slice(0, 2).flatMap(
+          (conv) =>
+            conv.messages?.slice(0, 2).map((msg) => ({
+              conversationId: conv.id,
+              messageId: msg.id,
+              snippet: msg.content.substring(0, 100) + "...",
+            })) || [],
+        ),
+        totalResults: 8,
+      };
 
-    setSearchResults(mockResults);
-  }, [conversations]);
+      setSearchResults(mockResults);
+    },
+    [conversations],
+  );
 
   // Handle queue actions
   const handleCancelMessage = useCallback((messageId: string) => {
-    console.log('Canceling message:', messageId);
+    console.log("Canceling message:", messageId);
   }, []);
 
   const handleRetryMessage = useCallback((messageId: string) => {
-    console.log('Retrying message:', messageId);
+    console.log("Retrying message:", messageId);
   }, []);
 
   const handlePauseQueue = useCallback(() => {
@@ -265,12 +288,15 @@ export function ConversationDashboard({
   }, []);
 
   // Toggle section expansion
-  const toggleSection = useCallback((section: keyof typeof expandedSections) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
-  }, []);
+  const toggleSection = useCallback(
+    (section: keyof typeof expandedSections) => {
+      setExpandedSections((prev) => ({
+        ...prev,
+        [section]: !prev[section],
+      }));
+    },
+    [],
+  );
 
   return (
     <TooltipProvider>
@@ -279,15 +305,25 @@ export function ConversationDashboard({
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-bold">Conversation Dashboard</h1>
-            
+
             {/* Connection Status */}
             <div className="flex items-center gap-2">
-              <div className={cn(
-                "w-2 h-2 rounded-full",
-                isConnected ? "bg-green-500" : isConnecting ? "bg-yellow-500" : "bg-red-500"
-              )} />
+              <div
+                className={cn(
+                  "w-2 h-2 rounded-full",
+                  isConnected
+                    ? "bg-green-500"
+                    : isConnecting
+                      ? "bg-yellow-500"
+                      : "bg-red-500",
+                )}
+              />
               <span className="text-sm text-muted-foreground">
-                {isConnected ? 'Connected' : isConnecting ? 'Connecting...' : 'Disconnected'}
+                {isConnected
+                  ? "Connected"
+                  : isConnecting
+                    ? "Connecting..."
+                    : "Disconnected"}
               </span>
               {connectionStats && (
                 <Badge variant="outline" className="text-xs">
@@ -341,15 +377,16 @@ export function ConversationDashboard({
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => toggleSection('search')}
+                        onClick={() => toggleSection("search")}
                       >
-                        {expandedSections.search ? 
-                          <ChevronDown className="w-4 h-4" /> : 
+                        {expandedSections.search ? (
+                          <ChevronDown className="w-4 h-4" />
+                        ) : (
                           <ChevronRight className="w-4 h-4" />
-                        }
+                        )}
                       </Button>
                     </div>
-                    
+
                     {expandedSections.search && (
                       <ConversationSearch
                         conversations={conversations}
@@ -370,7 +407,7 @@ export function ConversationDashboard({
                       <h3 className="font-semibold">
                         Conversations ({filteredConversations.length})
                       </h3>
-                      
+
                       {/* Auto-scroll controls */}
                       <div className="flex items-center gap-1">
                         <Tooltip>
@@ -378,7 +415,9 @@ export function ConversationDashboard({
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => conversationAutoScroll.scrollToTop()}
+                              onClick={() =>
+                                conversationAutoScroll.scrollToTop()
+                              }
                             >
                               <ArrowUp className="w-4 h-4" />
                             </Button>
@@ -393,7 +432,9 @@ export function ConversationDashboard({
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => conversationAutoScroll.scrollToBottom()}
+                              onClick={() =>
+                                conversationAutoScroll.scrollToBottom()
+                              }
                             >
                               <ArrowDown className="w-4 h-4" />
                             </Button>
@@ -410,20 +451,25 @@ export function ConversationDashboard({
                               size="sm"
                               onClick={conversationAutoScroll.toggleAutoScroll}
                               className={cn(
-                                conversationAutoScroll.state.isAutoScrollEnabled ? 
-                                "text-blue-500" : "text-muted-foreground"
+                                conversationAutoScroll.state.isAutoScrollEnabled
+                                  ? "text-blue-500"
+                                  : "text-muted-foreground",
                               )}
                             >
-                              {conversationAutoScroll.state.isAutoScrollEnabled ? 
-                                <Eye className="w-4 h-4" /> : 
+                              {conversationAutoScroll.state
+                                .isAutoScrollEnabled ? (
+                                <Eye className="w-4 h-4" />
+                              ) : (
                                 <EyeOff className="w-4 h-4" />
-                              }
+                              )}
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
                             <p>
-                              {conversationAutoScroll.state.isAutoScrollEnabled ? 
-                                'Disable' : 'Enable'} auto-scroll
+                              {conversationAutoScroll.state.isAutoScrollEnabled
+                                ? "Disable"
+                                : "Enable"}{" "}
+                              auto-scroll
                             </p>
                           </TooltipContent>
                         </Tooltip>
@@ -431,17 +477,17 @@ export function ConversationDashboard({
                     </div>
 
                     {/* Conversation List */}
-                    <div 
+                    <div
                       ref={conversationListRef}
                       className="space-y-2 max-h-96 overflow-y-auto"
                     >
-                      {filteredConversations.map(conversation => (
+                      {filteredConversations.map((conversation) => (
                         <Card
                           key={conversation.id}
                           className={cn(
                             "cursor-pointer transition-all hover:shadow-md",
-                            selectedConversationId === conversation.id && 
-                            "border-primary bg-primary/5"
+                            selectedConversationId === conversation.id &&
+                              "border-primary bg-primary/5",
                           )}
                           onClick={() => onConversationSelect(conversation.id)}
                         >
@@ -453,26 +499,38 @@ export function ConversationDashboard({
                                   {conversation.id.substring(0, 8)}
                                 </span>
                               </div>
-                              <Badge 
-                                variant={conversation.endTime ? "secondary" : "default"}
+                              <Badge
+                                variant={
+                                  conversation.endTime ? "secondary" : "default"
+                                }
                                 className="text-xs"
                               >
-                                {conversation.endTime ? 'Completed' : 'Active'}
+                                {conversation.endTime ? "Completed" : "Active"}
                               </Badge>
                             </div>
 
                             <div className="text-xs text-muted-foreground space-y-1">
                               <div className="flex items-center gap-1">
                                 <Users className="w-3 h-3" />
-                                <span>{conversation.participants?.length || 0} participants</span>
+                                <span>
+                                  {conversation.participants?.length || 0}{" "}
+                                  participants
+                                </span>
                               </div>
                               <div className="flex items-center gap-1">
                                 <MessageSquare className="w-3 h-3" />
-                                <span>{conversation.messages?.length || 0} messages</span>
+                                <span>
+                                  {conversation.messages?.length || 0} messages
+                                </span>
                               </div>
                               <div className="flex items-center gap-1">
                                 <Clock className="w-3 h-3" />
-                                <span>{format(new Date(conversation.startTime), 'HH:mm')}</span>
+                                <span>
+                                  {format(
+                                    new Date(conversation.startTime),
+                                    "HH:mm",
+                                  )}
+                                </span>
                               </div>
                             </div>
                           </CardContent>
@@ -504,13 +562,17 @@ export function ConversationDashboard({
                         <h3 className="font-semibold">
                           Conversation {selectedConversation.id.substring(0, 8)}
                         </h3>
-                        
+
                         {/* Message controls */}
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className="text-xs">
-                            Progress: {Math.round(messageAutoScroll.state.scrollProgress * 100)}%
+                            Progress:{" "}
+                            {Math.round(
+                              messageAutoScroll.state.scrollProgress * 100,
+                            )}
+                            %
                           </Badge>
-                          
+
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button
@@ -536,9 +598,13 @@ export function ConversationDashboard({
                         messages={selectedConversation.messages || []}
                         agents={agents}
                         height={500}
-                        onMessageClick={(message) => console.log('Message clicked:', message)}
-                        onReply={(message) => console.log('Reply to:', message)}
-                        onReaction={(messageId, type) => console.log('Reaction:', type, messageId)}
+                        onMessageClick={(message) =>
+                          console.log("Message clicked:", message)
+                        }
+                        onReply={(message) => console.log("Reply to:", message)}
+                        onReaction={(messageId, type) =>
+                          console.log("Reaction:", type, messageId)
+                        }
                         className="h-full"
                       />
                     </div>
@@ -547,8 +613,12 @@ export function ConversationDashboard({
                   <div className="flex items-center justify-center h-full">
                     <div className="text-center text-muted-foreground">
                       <MessageSquare className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                      <h3 className="text-lg font-semibold mb-2">No Conversation Selected</h3>
-                      <p>Select a conversation from the list to view messages</p>
+                      <h3 className="text-lg font-semibold mb-2">
+                        No Conversation Selected
+                      </h3>
+                      <p>
+                        Select a conversation from the list to view messages
+                      </p>
                     </div>
                   </div>
                 )}
@@ -559,12 +629,21 @@ export function ConversationDashboard({
 
             {/* Right Panel - Analytics and Queue */}
             <ResizablePanel defaultSize={25} minSize={20}>
-              <Tabs value={selectedTab} onValueChange={(value: any) => setSelectedTab(value)}>
+              <Tabs
+                value={selectedTab}
+                onValueChange={(value: any) => setSelectedTab(value)}
+              >
                 <div className="border-b p-4">
                   <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="conversations" className="text-xs">Stats</TabsTrigger>
-                    <TabsTrigger value="queue" className="text-xs">Queue</TabsTrigger>
-                    <TabsTrigger value="analytics" className="text-xs">Analytics</TabsTrigger>
+                    <TabsTrigger value="conversations" className="text-xs">
+                      Stats
+                    </TabsTrigger>
+                    <TabsTrigger value="queue" className="text-xs">
+                      Queue
+                    </TabsTrigger>
+                    <TabsTrigger value="analytics" className="text-xs">
+                      Analytics
+                    </TabsTrigger>
                   </TabsList>
                 </div>
 
@@ -573,16 +652,22 @@ export function ConversationDashboard({
                     <div className="grid grid-cols-2 gap-2">
                       <Card className="p-3">
                         <div className="text-center">
-                          <div className="text-2xl font-bold">{conversations.length}</div>
-                          <div className="text-xs text-muted-foreground">Total</div>
+                          <div className="text-2xl font-bold">
+                            {conversations.length}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Total
+                          </div>
                         </div>
                       </Card>
                       <Card className="p-3">
                         <div className="text-center">
                           <div className="text-2xl font-bold text-green-500">
-                            {conversations.filter(c => !c.endTime).length}
+                            {conversations.filter((c) => !c.endTime).length}
                           </div>
-                          <div className="text-xs text-muted-foreground">Active</div>
+                          <div className="text-xs text-muted-foreground">
+                            Active
+                          </div>
                         </div>
                       </Card>
                     </div>
@@ -625,7 +710,8 @@ export function ConversationDashboard({
         <div className="border-t px-4 py-2 text-xs text-muted-foreground flex items-center justify-between">
           <div className="flex items-center gap-4">
             <span>
-              {filteredConversations.length} of {conversations.length} conversations shown
+              {filteredConversations.length} of {conversations.length}{" "}
+              conversations shown
             </span>
             {wsError && (
               <span className="text-red-500 flex items-center gap-1">
@@ -634,17 +720,16 @@ export function ConversationDashboard({
               </span>
             )}
           </div>
-          
+
           <div className="flex items-center gap-4">
             <span>
-              Auto-scroll: {messageAutoScroll.state.isAutoScrollEnabled ? 'ON' : 'OFF'}
+              Auto-scroll:{" "}
+              {messageAutoScroll.state.isAutoScrollEnabled ? "ON" : "OFF"}
             </span>
-            <span>
-              Queue: {isQueuePaused ? 'PAUSED' : 'RUNNING'}
-            </span>
+            <span>Queue: {isQueuePaused ? "PAUSED" : "RUNNING"}</span>
           </div>
         </div>
       </div>
     </TooltipProvider>
   );
-} 
+}

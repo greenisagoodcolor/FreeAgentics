@@ -5,6 +5,7 @@ This module implements the core generative model components that define
 the probabilistic relationships between hidden states, observations, and
 actions.
 """
+
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class ModelDimensions:
-    """Dimensions for the generative model components."""
+    """Dimensions for the generative model components"""
 
     num_states: int
     num_observations: int
@@ -32,7 +33,7 @@ class ModelDimensions:
 
 @dataclass
 class ModelParameters:
-    """Hyperparameters for the generative model."""
+    """Hyperparameters for the generative model"""
 
     learning_rate: float = 0.01
     precision_init: float = 1.0
@@ -44,9 +45,9 @@ class ModelParameters:
 
 
 class GenerativeModel(ABC):
-    """
+    """Abstract base class for Active Inference generative models.
 
-    Abstract base class for Active Inference generative models.
+
     Defines the interface for models that specify:
     - p(o|s): Observation model (A matrix/function)
     - p(s'|s, a): Transition model (B tensor/function)
@@ -55,6 +56,7 @@ class GenerativeModel(ABC):
     """
 
     def __init__(self, dimensions: ModelDimensions, parameters: ModelParameters) -> None:
+        """Initialize generative model with dimensions and parameters"""
         self.dims = dimensions
         self.params = parameters
         self.device = torch.device(
@@ -63,29 +65,29 @@ class GenerativeModel(ABC):
 
     @abstractmethod
     def observation_model(self, states: torch.Tensor) -> torch.Tensor:
-        """Compute p(o|s)."""
+        """Compute p(o|s)"""
         pass
 
     @abstractmethod
     def transition_model(self, states: torch.Tensor, actions: torch.Tensor) -> torch.Tensor:
-        """Compute p(s'|s, a)."""
+        """Compute p(s'|s, a)"""
         pass
 
     @abstractmethod
     def get_preferences(self, timestep: Optional[int] = None) -> torch.Tensor:
-        """Get prior preferences p(o|C)."""
+        """Get prior preferences p(o|C)"""
         pass
 
     @abstractmethod
     def get_initial_prior(self) -> torch.Tensor:
-        """Get initial state prior p(s)."""
-
+        """Get initial state prior p(s)"""
         pass
 
 
 class DiscreteGenerativeModel(GenerativeModel):
-    """
-    Discrete state-space generative model using categorical distributions.
+    """Discrete state-space generative model using categorical distributions.
+
+
     Components:
     - A: Observation model matrix [num_obs x num_states]
     - B: Transition model tensor [num_states x num_states x num_actions]
@@ -94,6 +96,7 @@ class DiscreteGenerativeModel(GenerativeModel):
     """
 
     def __init__(self, dimensions: ModelDimensions, parameters: ModelParameters) -> None:
+        """Initialize discrete generative model"""
         super().__init__(dimensions, parameters)
         # Initialize model components
         self.A = nn.Parameter(self._initialize_A(), requires_grad=False)
@@ -103,12 +106,14 @@ class DiscreteGenerativeModel(GenerativeModel):
         # Move to device
         self.to_device(parameters.use_gpu)
         logger.info(
-            f"Initialized discrete generative model with {dimensions.num_states} states, "
-            f"{dimensions.num_observations} observations, {dimensions.num_actions} actions"
+            f"Initialized discrete generative model with "
+            f"{dimensions.num_states} states, "
+            f"{dimensions.num_observations} observations, "
+            f"{dimensions.num_actions} actions"
         )
 
     def _initialize_A(self) -> torch.Tensor:
-        """Initialize observation model with random categorical distributions."""
+        """Initialize observation model with random categorical distributions"""
         if self.params.use_sparse:
             # For sparse initialization, assume mostly diagonal
             A = torch.eye(
@@ -132,7 +137,7 @@ class DiscreteGenerativeModel(GenerativeModel):
         return self._normalize(A, dim=0)
 
     def _initialize_B(self) -> torch.Tensor:
-        """Initialize transition model."""
+        """Initialize transition model"""
         B = torch.zeros(
             self.dims.num_states,
             self.dims.num_states,
@@ -142,10 +147,8 @@ class DiscreteGenerativeModel(GenerativeModel):
         for a in range(self.dims.num_actions):
             if self.params.use_sparse:
                 # Sparse transitions - mostly stay in same state
-                B[:, :, a] = (
-                    0.8 * torch.eye(self.dims.num_states) + 0.2 * torch.rand(
-                        self.dims.num_states, self.dims.num_states
-                    )
+                B[:, :, a] = 0.8 * torch.eye(self.dims.num_states) + 0.2 * torch.rand(
+                    self.dims.num_states, self.dims.num_states
                 )
             else:
                 # Random transitions
@@ -155,25 +158,22 @@ class DiscreteGenerativeModel(GenerativeModel):
         return self._normalize(B, dim=0)
 
     def _initialize_C(self) -> torch.Tensor:
-        """Initialize preferences (log probabilities)."""
+        """Initialize preferences (log probabilities)"""
         # Uniform preferences by default
-        C = torch.zeros(
-            self.dims.num_observations, self.dims.time_horizon, dtype=self.params.dtype
-        )
+        C = torch.zeros(self.dims.num_observations, self.dims.time_horizon, dtype=self.params.dtype)
         return C
 
     def _initialize_D(self) -> torch.Tensor:
-        """Initialize uniform prior over states."""
+        """Initialize uniform prior over states"""
         D = torch.ones(self.dims.num_states, dtype=self.params.dtype) / self.dims.num_states
         return D
 
     def _normalize(self, tensor: torch.Tensor, dim: int) -> torch.Tensor:
-        """Normalize tensor along specified dimension."""
+        """Normalize tensor along specified dimension"""
         return tensor / (tensor.sum(dim=dim, keepdim=True) + self.params.eps)
 
     def to_device(self, use_gpu: bool) -> None:
         """Move all components to specified device"""
-
         device = torch.device("cuda" if use_gpu and torch.cuda.is_available() else "cpu")
         self.A.data = self.A.data.to(device)
         self.B.data = self.B.data.to(device)
@@ -181,9 +181,9 @@ class DiscreteGenerativeModel(GenerativeModel):
         self.D.data = self.D.data.to(device)
 
     def observation_model(self, states: torch.Tensor) -> torch.Tensor:
-        """
+        """Compute observation probabilities given states.
 
-        Compute observation probabilities given states.
+
         Args:
             states: State distribution [batch_size x num_states] or
                 [num_states]
@@ -197,8 +197,9 @@ class DiscreteGenerativeModel(GenerativeModel):
             return states @ self.A.T
 
     def transition_model(self, states: torch.Tensor, actions: torch.Tensor) -> torch.Tensor:
-        """
-        Compute next state probabilities.
+        """Compute next state probabilities.
+
+
         Args:
             states: Current state distribution [batch_size x num_states] or
                 [num_states]
@@ -208,7 +209,7 @@ class DiscreteGenerativeModel(GenerativeModel):
         """
         if not isinstance(actions, torch.Tensor):
             actions = torch.tensor([actions], device=self.device)
-        elif not actions.is_cuda and self.device.type == 'cuda':
+        elif not actions.is_cuda and self.device.type == "cuda":
             actions = actions.to(self.device)
         if states.dim() == 1:
             # Single state distribution
@@ -226,8 +227,7 @@ class DiscreteGenerativeModel(GenerativeModel):
             return next_states
 
     def get_preferences(self, timestep: Optional[int] = None) -> torch.Tensor:
-        """Get prior preferences (C matrix)."""
-
+        """Get prior preferences (C matrix)"""
         if timestep is None:
             return self.C
         else:
@@ -245,17 +245,14 @@ class DiscreteGenerativeModel(GenerativeModel):
         preferences: Union[torch.Tensor, np.ndarray],
         timestep: Optional[int] = None,
     ) -> None:
-        """
-        Set prior preferences.
+        """Set prior preferences.
+
         Args:
             preferences: Preference values (log probabilities)
             timestep: Optional specific timestep to set
         """
-
         if isinstance(preferences, np.ndarray):
-            preferences = torch.tensor(
-                preferences, dtype=self.params.dtype, device=self.device
-            )
+            preferences = torch.tensor(preferences, dtype=self.params.dtype, device=self.device)
         if timestep is None:
             if preferences.dim() == 1:
                 # Set same preferences for all timesteps
@@ -271,8 +268,9 @@ class DiscreteGenerativeModel(GenerativeModel):
         states: List[torch.Tensor],
         actions: List[int],
     ) -> None:
-        """
-        Update model parameters from experience using Bayesian learning.
+        """Update model parameters from experience using Bayesian learning.
+
+
         Args:
             observations: List of observation indices or distributions
             states: List of state distributions
@@ -296,18 +294,17 @@ class DiscreteGenerativeModel(GenerativeModel):
         # Apply updates with learning rate
         self.A.data = (
             1 - self.params.learning_rate
-        ) * self.A.data + self.params.learning_rate * self._normalize(A_counts + 1.0,
-            dim=0)
+        ) * self.A.data + self.params.learning_rate * self._normalize(A_counts + 1.0, dim=0)
         for a in range(self.dims.num_actions):
-            self.B.data[:, :, a] = (
-                (1 - self.params.learning_rate) * self.B.data[:, :, a]
-                + self.params.learning_rate * self._normalize(B_counts[:, :, a] + 1.0, dim=0)
-            )
+            self.B.data[:, :, a] = (1 - self.params.learning_rate) * self.B.data[
+                :, :, a
+            ] + self.params.learning_rate * self._normalize(B_counts[:, :, a] + 1.0, dim=0)
 
 
 class ContinuousGenerativeModel(GenerativeModel, nn.Module):
-    """
-    Continuous state-space generative model using Gaussian distributions.
+    """Continuous state-space generative model using Gaussian distributions.
+
+
     Uses neural networks to parameterize the observation and transition models.
     """
 
@@ -317,6 +314,7 @@ class ContinuousGenerativeModel(GenerativeModel, nn.Module):
         parameters: ModelParameters,
         hidden_dim: int = 128,
     ) -> None:
+        """Initialize continuous generative model"""
         GenerativeModel.__init__(self, dimensions, parameters)
         nn.Module.__init__(self)
         self.hidden_dim = hidden_dim
@@ -330,14 +328,13 @@ class ContinuousGenerativeModel(GenerativeModel, nn.Module):
                 dtype=parameters.dtype,
             )
         )
-        self.D_mean = (
-            nn.Parameter(torch.zeros(dimensions.num_states, dtype=parameters.dtype)))
-        self.D_log_var = (
-            nn.Parameter(torch.zeros(dimensions.num_states, dtype=parameters.dtype)))
+        self.D_mean = nn.Parameter(torch.zeros(dimensions.num_states, dtype=parameters.dtype))
+        self.D_log_var = nn.Parameter(torch.zeros(dimensions.num_states, dtype=parameters.dtype))
         # Move to device
         self.to(self.device)
         logger.info(
-            f"Initialized continuous generative model with {dimensions.num_states}D states, "
+            f"Initialized continuous generative model with "
+            f"{dimensions.num_states}D states, "
             f"{dimensions.num_observations}D observations"
         )
 
@@ -351,12 +348,10 @@ class ContinuousGenerativeModel(GenerativeModel, nn.Module):
             nn.ReLU(),
         )
         self.obs_mean = nn.Linear(self.hidden_dim, self.dims.num_observations)
-        self.obs_log_var = (
-            nn.Parameter(torch.zeros(self.dims.num_observations)))
+        self.obs_log_var = nn.Parameter(torch.zeros(self.dims.num_observations))
         # Transition model: p(s'|s, a)
         self.trans_net = nn.Sequential(
-            nn.Linear(self.dims.num_states + self.dims.num_actions,
-                self.hidden_dim),
+            nn.Linear(self.dims.num_states + self.dims.num_actions, self.hidden_dim),
             nn.ReLU(),
             nn.Linear(self.hidden_dim, self.hidden_dim),
             nn.ReLU(),
@@ -364,10 +359,12 @@ class ContinuousGenerativeModel(GenerativeModel, nn.Module):
         self.trans_mean = nn.Linear(self.hidden_dim, self.dims.num_states)
         self.trans_log_var = nn.Parameter(torch.zeros(self.dims.num_states))
 
-    def observation_model(self, states: torch.Tensor) -> tuple[torch.Tensor,
-        torch.Tensor]:  # type: ignore[override]
-        """
-        Compute observation distribution parameters given states.
+    def observation_model(
+        self, states: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:  # type: ignore[override]
+        """Compute observation distribution parameters given states.
+
+
         Args:
             states: State values [batch_size x num_states] or [num_states]
         Returns:
@@ -390,8 +387,7 @@ class ContinuousGenerativeModel(GenerativeModel, nn.Module):
         if actions.dim() > 1 and actions.shape[-1] == self.dims.num_actions:
             actions_onehot = actions.float()
         elif actions.dim() <= 1:
-            actions_onehot = (
-                F.one_hot(actions.long(), num_classes=self.dims.num_actions).float())
+            actions_onehot = F.one_hot(actions.long(), num_classes=self.dims.num_actions).float()
         else:
             raise ValueError(f"Invalid action shape: {actions.shape}")
         if actions_onehot.dim() == 1:
@@ -423,11 +419,12 @@ class ContinuousGenerativeModel(GenerativeModel, nn.Module):
         """Get initial state prior parameters"""
         return self.D_mean, torch.exp(self.D_log_var)
 
-    def forward(self, states: torch.Tensor, actions: Optional[torch.Tensor] = None) -> Dict[str,
-        torch.Tensor]:
-        """
+    def forward(
+        self, states: torch.Tensor, actions: Optional[torch.Tensor] = None
+    ) -> Dict[str, torch.Tensor]:
+        """Forward pass through the generative model.
 
-        Forward pass through the generative model.
+
         Args:
             states: Current states
             actions: Optional actions for transition
@@ -448,8 +445,9 @@ class ContinuousGenerativeModel(GenerativeModel, nn.Module):
 
 
 class HierarchicalGenerativeModel(DiscreteGenerativeModel):
-    """
-    Hierarchical generative model with multiple levels of abstraction.
+    """Hierarchical generative model with multiple levels of abstraction.
+
+
     Higher levels operate at slower timescales and provide context to lower levels.
     """
 
@@ -459,14 +457,13 @@ class HierarchicalGenerativeModel(DiscreteGenerativeModel):
         parameters: ModelParameters,
         level_connections: Optional[Dict[int, List[int]]] = None,
     ) -> None:
-        """
-        Initialize hierarchical model.
+        """Initialize hierarchical model.
+
         Args:
             dimensions: List of dimensions for each level
             parameters: Model parameters
             level_connections: Dict mapping level index to connected lower levels
         """
-
         # Initialize base level
         super().__init__(dimensions[0], parameters)
         self.num_levels = len(dimensions)
@@ -484,7 +481,8 @@ class HierarchicalGenerativeModel(DiscreteGenerativeModel):
         for upper_idx, lower_indices in self.level_connections.items():
             for lower_idx in lower_indices:
                 if lower_idx < self.num_levels:
-                    # E[lower_state, upper_state]: how upper level influences lower level
+                    # E[lower_state, upper_state]: how upper level
+                    # influences lower level
                     E = torch.rand(
                         dimensions[lower_idx].num_states,
                         dimensions[upper_idx].num_states,
@@ -499,8 +497,9 @@ class HierarchicalGenerativeModel(DiscreteGenerativeModel):
         return self.levels[level]
 
     def hierarchical_observation_model(self, states: List[torch.Tensor]) -> List[torch.Tensor]:
-        """
-        Compute observations for all levels considering hierarchical influence.
+        """Compute observations for all levels considering hierarchical influence.
+
+
         Args:
             states: List of state distributions for each level
         Returns:
@@ -516,7 +515,8 @@ class HierarchicalGenerativeModel(DiscreteGenerativeModel):
                     # Modulate observation based on higher level state
                     E = self.E_matrices[(upper_level, level)]
                     influence = E @ states[upper_level]
-                    # Combine with level observation (multiplicative modulation)
+                    # Combine with level observation
+                    # (multiplicative modulation)
                     level_obs = level_obs * influence.unsqueeze(0)
                     level_obs = self._normalize(level_obs, dim=-1)
             observations.append(level_obs)
@@ -525,9 +525,9 @@ class HierarchicalGenerativeModel(DiscreteGenerativeModel):
     def hierarchical_transition_model(
         self, states: List[torch.Tensor], actions: List[torch.Tensor]
     ) -> List[torch.Tensor]:
-        """
+        """Compute state transitions considering hierarchical influence.
 
-        Compute state transitions considering hierarchical influence.
+
         Args:
             states: List of current state distributions
             actions: List of actions for each level
@@ -537,8 +537,7 @@ class HierarchicalGenerativeModel(DiscreteGenerativeModel):
         next_states = []
         for level in range(self.num_levels):
             # Get base transition
-            next_state = (
-                self.levels[level].transition_model(states[level], actions[level]))
+            next_state = self.levels[level].transition_model(states[level], actions[level])
             # Add influence from higher levels
             for upper_level in range(level):
                 if (upper_level, level) in self.E_matrices:
@@ -552,8 +551,8 @@ class HierarchicalGenerativeModel(DiscreteGenerativeModel):
 
 
 class FactorizedGenerativeModel(DiscreteGenerativeModel):
-    """
-    Factorized generative model where states decompose into independent factors.
+    """Factorized generative model where states decompose into independent factors.
+
     This allows for more efficient inference and learning in high-dimensional spaces.
     """
 
@@ -564,8 +563,9 @@ class FactorizedGenerativeModel(DiscreteGenerativeModel):
         num_actions: int,
         parameters: ModelParameters,
     ) -> None:
-        """
-        Initialize factorized model.
+        """Initialize factorized model.
+
+
         Args:
             factor_dimensions: Number of states for each factor
             num_observations: Total number of observations
@@ -586,20 +586,18 @@ class FactorizedGenerativeModel(DiscreteGenerativeModel):
         # Initialize factor-specific components
         self._initialize_factors()
         logger.info(
-            f"Initialized factorized model with {self.num_factors} factors: {factor_dimensions}"
+            f"Initialized factorized model with {self.num_factors} factors: " f"{factor_dimensions}"
         )
 
     def _initialize_factors(self):
         """Initialize factor-specific transition models"""
         self.factor_B = []
-        for f, dim in enumerate(self.factor_dims):
+        for _, dim in enumerate(self.factor_dims):
             # Each factor has its own transition model
-            B_f = (
-                torch.zeros(dim, dim, self.dims.num_actions, dtype=self.params.dtype))
+            B_f = torch.zeros(dim, dim, self.dims.num_actions, dtype=self.params.dtype)
             for a in range(self.dims.num_actions):
                 # Initialize with mostly independent transitions
-                B_f[:, :, a] = (
-                    0.9 * torch.eye(dim) + 0.1 * torch.rand(dim, dim))
+                B_f[:, :, a] = 0.9 * torch.eye(dim) + 0.1 * torch.rand(dim, dim)
                 B_f[:, :, a] = self._normalize(B_f[:, :, a], dim=0)
             self.factor_B.append(B_f.to(self.device))
 
@@ -667,8 +665,7 @@ def create_generative_model(model_type: str, **kwargs) -> GenerativeModel:
         num_obs = kwargs.get("num_observations")
         num_actions = kwargs.get("num_actions")
         params = kwargs.get("parameters", ModelParameters())
-        return FactorizedGenerativeModel(factor_dims, num_obs, num_actions,
-            params)
+        return FactorizedGenerativeModel(factor_dims, num_obs, num_actions, params)
     else:
         raise ValueError(f"Unknown model type: {model_type}")
 

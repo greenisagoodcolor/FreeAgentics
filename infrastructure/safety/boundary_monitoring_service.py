@@ -25,9 +25,7 @@ from typing import Any, Callable, Dict, List, Optional, Set
 
 import numpy as np
 
-from agents.base.markov_blanket import (
-    BoundaryViolationEvent,
-    MarkovBlanketDimensions)
+from agents.base.markov_blanket import BoundaryViolationEvent, MarkovBlanketDimensions
 from agents.base.markov_blanket import ViolationType as BoundaryViolationType
 from infrastructure.safety.markov_blanket_verification import (
     MarkovBlanketVerificationService,
@@ -45,7 +43,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class MonitoringMetrics:
-    ."""Metrics for monitoring system performance."""
+    """Metrics for monitoring system performance"""
 
     agents_monitored: int = 0
     total_checks: int = 0
@@ -58,7 +56,7 @@ class MonitoringMetrics:
 
 @dataclass
 class AlertConfiguration:
-    ."""Configuration for alert thresholds and escalation."""
+    """Configuration for alert thresholds and escalation"""
 
     independence_threshold: float = 0.05
     integrity_threshold: float = 0.8
@@ -71,7 +69,7 @@ class AlertConfiguration:
 
 @dataclass
 class MonitoringEvent:
-    ."""Real-time monitoring event record."""
+    """Real-time monitoring event record"""
 
     event_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     agent_id: str = ""
@@ -135,8 +133,7 @@ class BoundaryMonitoringService:
         self.monitoring_task: Optional[asyncio.Task] = None
 
         # Event handlers
-        self.violation_handlers: List[Callable[[BoundaryViolationEvent],
-            None]] = []
+        self.violation_handlers: List[Callable[[BoundaryViolationEvent], None]] = []
         self.alert_handlers: List[Callable[[MonitoringEvent], None]] = []
 
         logger.info("Boundary monitoring service initialized")
@@ -181,23 +178,21 @@ class BoundaryMonitoringService:
         logger.info("Boundary monitoring service stopped")
 
     def register_agent(self, agent_id: str) -> None:
-        ."""Register an agent for monitoring."""
+        """Register an agent for monitoring"""
         self.active_agents.add(agent_id)
         logger.debug(f"Registered agent {agent_id} for monitoring")
 
     def unregister_agent(self, agent_id: str):
-        ."""Unregister an agent from monitoring."""
+        """Unregister an agent from monitoring"""
         self.active_agents.discard(agent_id)
         logger.debug(f"Unregistered agent {agent_id} from monitoring")
 
-    def add_violation_handler(self, handler: Callable[[BoundaryViolationEvent],
-        None]) -> None:
-        ."""Add a handler for boundary violations."""
+    def add_violation_handler(self, handler: Callable[[BoundaryViolationEvent], None]) -> None:
+        """Add a handler for boundary violations"""
         self.violation_handlers.append(handler)
 
-    def add_alert_handler(self, handler: Callable[[MonitoringEvent],
-        None]) -> None:
-        ."""Add a handler for monitoring alerts."""
+    def add_alert_handler(self, handler: Callable[[MonitoringEvent], None]) -> None:
+        """Add a handler for monitoring alerts"""
         self.alert_handlers.append(handler)
 
     async def _monitoring_loop(self):
@@ -214,8 +209,7 @@ class BoundaryMonitoringService:
 
                 # Update metrics
                 self.metrics.last_update = datetime.now()
-                self.metrics.system_uptime = (
-                    (datetime.now() - self.start_time).total_seconds())
+                self.metrics.system_uptime = (datetime.now() - self.start_time).total_seconds()
 
                 # Wait for next monitoring cycle
                 await asyncio.sleep(self.monitoring_interval)
@@ -235,12 +229,10 @@ class BoundaryMonitoringService:
                 return
 
             # Perform boundary verification
-            verification_result = (
-                await self._verify_agent_boundary(agent_id, agent_data))
+            verification_result = await self._verify_agent_boundary(agent_id, agent_data)
 
             # Check for violations
-            violations = (
-                await self._detect_violations(agent_id, verification_result))
+            violations = await self._detect_violations(agent_id, verification_result)
 
             # Process any detected violations
             for violation in violations:
@@ -250,24 +242,20 @@ class BoundaryMonitoringService:
             check_duration = time.time() - start_time
             self.metrics.total_checks += 1
             self.metrics.avg_check_duration = (
-                self.metrics.avg_check_duration * (self.metrics.total_checks - 1) +
-                    check_duration
+                self.metrics.avg_check_duration * (self.metrics.total_checks - 1) + check_duration
             ) / self.metrics.total_checks
 
             # Create monitoring event
             event = MonitoringEvent(
                 agent_id=agent_id,
                 event_type="boundary_check",
-                severity= (
-                    SafetyLevel.INFO if not violations else SafetyLevel.HIGH,)
+                severity=(SafetyLevel.INFO if not violations else SafetyLevel.HIGH),
                 data={
                     "check_duration": check_duration,
                     "violations_count": len(violations),
-                    "boundary_integrity": verification_result.get("boundary_integrity",
-                        0.0),
+                    "boundary_integrity": verification_result.get("boundary_integrity", 0.0),
                 },
-                mathematical_evidence= (
-                    verification_result.get("mathematical_proof", ""),)
+                mathematical_evidence=verification_result.get("mathematical_proof", ""),
             )
 
             self.monitoring_events.append(event)
@@ -286,7 +274,7 @@ class BoundaryMonitoringService:
             self.monitoring_events.append(error_event)
 
     async def _get_agent_data(self, agent_id: str) -> Optional[Dict[str, Any]]:
-        ."""Get agent data for monitoring (placeholder for real
+        """Get agent data for monitoring (placeholder for real
         implementation)"""
         # In real implementation, this would fetch from agent manager
         # For now, simulate agent data
@@ -367,8 +355,7 @@ class BoundaryMonitoringService:
         violations = []
 
         boundary_integrity = verification_result.get("boundary_integrity", 0.0)
-        conditional_independence = (
-            verification_result.get("conditional_independence", 1.0))
+        conditional_independence = verification_result.get("conditional_independence", 1.0)
 
         # Check boundary integrity violation
         if boundary_integrity < self.alert_config.integrity_threshold:
@@ -377,8 +364,7 @@ class BoundaryMonitoringService:
                 violation_type=BoundaryViolationType.BOUNDARY_BREACH,
                 independence_measure=boundary_integrity,
                 threshold_violated=self.alert_config.integrity_threshold,
-                severity= (
-                    1.0 if boundary_integrity < self.alert_config.critical_threshold else 0.7,)
+                severity=1.0 if boundary_integrity < self.alert_config.critical_threshold else 0.7,
             )
             violations.append(violation)
 
@@ -416,16 +402,12 @@ class BoundaryMonitoringService:
         # Use safety protocol to handle violation
         mitigation_actions = self.safety_protocol.handle_violation(
             SafetyViolation(
-                violation_id= (
-                    f"boundary_{violation.agent_id}_{violation.timestamp}",)
+                violation_id=f"boundary_{violation.agent_id}_{violation.timestamp}",
                 violation_type=ViolationType.BOUNDARY_VIOLATION,
-                severity= (
-                    SafetyLevel.HIGH if violation.severity > 0.7 else SafetyLevel.MEDIUM,)
-                description= (
-                    f"Boundary violation: {violation.violation_type.value}",)
+                severity=SafetyLevel.HIGH if violation.severity > 0.7 else SafetyLevel.MEDIUM,
+                description=f"Boundary violation: {violation.violation_type.value}",
                 agent_id=violation.agent_id,
-                evidence= (
-                    {"independence_measure": violation.independence_measure},)
+                evidence={"independence_measure": violation.independence_measure},
             )
         )
 
@@ -433,12 +415,9 @@ class BoundaryMonitoringService:
         alert_event = MonitoringEvent(
             agent_id=violation.agent_id,
             event_type="boundary_violation_alert",
-            severity= (
-                SafetyLevel.HIGH if violation.severity > 0.7 else SafetyLevel.MEDIUM,)
-            data= (
-                {"violation": violation.__dict__, "mitigation_actions": mitigation_actions},)
-            mathematical_evidence= (
-                f"Violation type: {violation.violation_type.value}, Severity: {violation.severity}",)
+            severity=SafetyLevel.HIGH if violation.severity > 0.7 else SafetyLevel.MEDIUM,
+            data={"violation": violation.__dict__, "mitigation_actions": mitigation_actions},
+            mathematical_evidence=f"Violation type: {violation.violation_type.value}, Severity: {violation.severity}",
         )
 
         self.monitoring_events.append(alert_event)
@@ -461,7 +440,7 @@ class BoundaryMonitoringService:
     async def _log_audit_trail(
         self, violation: BoundaryViolationEvent, mitigation_actions: List[str]
     ):
-        ."""Log detailed audit trail for compliance (ADR-011)."""
+        """Log detailed audit trail for compliance (ADR-011)"""
         audit_entry = {
             "timestamp": datetime.now().isoformat(),
             "event_type": "boundary_violation",
@@ -481,18 +460,16 @@ class BoundaryMonitoringService:
         logger.info(f"AUDIT: {json.dumps(audit_entry, indent=2)}")
 
     def _generate_mathematical_proof(
-        self, blanket: "MarkovBlanketDimensions", independence_results: List[Dict[str,
-            Any]]
+        self, blanket: "MarkovBlanketDimensions", independence_results: List[Dict[str, Any]]
     ) -> str:
-        ."""Generate mathematical proof text for verification results."""
+        """Generate mathematical proof text for verification results"""
         proofs = []
 
         # Main independence condition
         proofs.append(f"Markov Blanket Verification")
         proofs.append(f"Mathematical Condition: p(μ,η|s,a) = p(μ|s,a)p(η|s,a)")
         proofs.append(
-            f"Dimensions: Internal= (
-                {blanket.internal_dimension}, Sensory={blanket.sensory_dimension}")
+            f"Dimensions: Internal={blanket.internal_dimension}, Sensory={blanket.sensory_dimension}"
         )
         proofs.append(f"Total Dimension: {blanket.get_total_dimension()}")
 
@@ -508,7 +485,7 @@ class BoundaryMonitoringService:
         return "\n".join(proofs)
 
     async def _metrics_collection_loop(self):
-        ."""Periodic metrics collection and reporting."""
+        """Periodic metrics collection and reporting"""
         while self.monitoring_active:
             try:
                 # Update agents monitored count
@@ -517,9 +494,7 @@ class BoundaryMonitoringService:
                 # Log metrics periodically
                 if self.metrics.total_checks % 100 == 0 and self.metrics.total_checks > 0:
                     logger.info(
-                        f"Monitoring metrics: {self.metrics.agents_monitored} agents,
-                            "
-                        f"{self.metrics.total_checks} checks, "
+                        f"Monitoring metrics: {self.metrics.agents_monitored} agents, {self.metrics.total_checks} checks, "
                         f"{self.metrics.violations_detected} violations, "
                         f"{self.metrics.avg_check_duration:.3f}s avg"
                     )
@@ -531,12 +506,11 @@ class BoundaryMonitoringService:
                 await asyncio.sleep(60)
 
     async def _event_processing_loop(self):
-        ."""Process monitoring events and trigger handlers."""
+        """Process monitoring events and trigger handlers"""
         while self.monitoring_active:
             try:
                 # Process unprocessed events
-                unprocessed_events = (
-                    [e for e in self.monitoring_events if not e.processed])
+                unprocessed_events = [e for e in self.monitoring_events if not e.processed]
 
                 for event in unprocessed_events:
                     # Trigger alert handlers
@@ -559,7 +533,7 @@ class BoundaryMonitoringService:
                 await asyncio.sleep(1.0)
 
     def get_monitoring_status(self) -> Dict[str, Any]:
-        ."""Get current monitoring status and metrics."""
+        """Get current monitoring status and metrics"""
         return {
             "monitoring_active": self.monitoring_active,
             "start_time": self.start_time.isoformat(),
@@ -589,11 +563,9 @@ class BoundaryMonitoringService:
         """Get violation history for specific agent"""
         return [v for v in self.violation_history if v.agent_id == agent_id]
 
-    def export_compliance_report(self, agent_id: Optional[str] = None) -> Dict[str,
-        Any]:
+    def export_compliance_report(self, agent_id: Optional[str] = None) -> Dict[str, Any]:
         """Export compliance report for regulatory review"""
-        violations = (
-            self.get_agent_violations(agent_id) if agent_id else self.violation_history)
+        violations = self.get_agent_violations(agent_id) if agent_id else self.violation_history
 
         return {
             "report_timestamp": datetime.now().isoformat(),

@@ -1,5 +1,4 @@
-."""
-
+"""
 Main Agent Class for FreeAgentics
 This module provides the primary Agent class that orchestrates all agent
 components and implements the agent lifecycle, following ADR-002, ADR-003,
@@ -34,10 +33,7 @@ from .interfaces import (
     IMarkovBlanketInterface,
     IWorldInterface,
 )
-from .markov_blanket import (
-    AgentState,
-    BoundaryViolationEvent,
-    MarkovBlanketFactory)
+from .markov_blanket import AgentState, BoundaryViolationEvent, MarkovBlanketFactory
 from .memory import MemorySystem
 from .movement import CollisionSystem, MovementController, PathfindingGrid
 from .perception import PerceptionSystem
@@ -45,7 +41,7 @@ from .state_manager import AgentStateManager
 
 
 class AgentLogger(IAgentLogger):
-    ."""Default logger implementation for agents."""
+    """Default logger implementation for agents"""
 
     def __init__(self, agent_id: str) -> None:
         self.agent_id = agent_id
@@ -65,7 +61,7 @@ class AgentLogger(IAgentLogger):
 
 
 class BaseAgent(IAgentLifecycle):
-    ."""
+    """
     Main Agent class that orchestrates all agent components and provides
     a unified interface for agent behavior and lifecycle management.
     This class follows the composition pattern to integrate various agent
@@ -121,8 +117,7 @@ class BaseAgent(IAgentLifecycle):
                 agent_type = "basic"
             # Convert initial_position to Position object
             if initial_position is not None:
-                position = (
-                    Position(initial_position[0], initial_position[1], 0.0))
+                position = Position(initial_position[0], initial_position[1], 0.0)
             else:
                 position = Position(0.0, 0.0, 0.0)
             # Create AgentData object
@@ -136,8 +131,7 @@ class BaseAgent(IAgentLifecycle):
         elif agent_data is None:
             # No parameters provided, create default AgentData
             agent_data = AgentData(
-                name= (
-                    "Agent", agent_type="basic", position=Position(0.0, 0.0, 0.0))
+                name="Agent", agent_type="basic", position=Position(0.0, 0.0, 0.0)
             )
         # Core data
         self.data = agent_data
@@ -236,15 +230,13 @@ class BaseAgent(IAgentLifecycle):
 
             # Create movement system components
             collision_system = CollisionSystem()
-            pathfinding_grid = (
-                PathfindingGrid(width=100, height=100, cell_size=1.0))
+            pathfinding_grid = PathfindingGrid(width=100, height=100, cell_size=1.0)
             movement_controller = MovementController(
                 state_manager, collision_system, pathfinding_grid
             )
 
             self._components["decision"] = DecisionSystem(
-                state_manager, self._components["perception"],
-                    movement_controller
+                state_manager, self._components["perception"], movement_controller
             )
             self._components["memory"] = MemorySystem(self.data.agent_id)
             self._components["movement"] = movement_controller
@@ -266,10 +258,8 @@ class BaseAgent(IAgentLifecycle):
                 self._components["markov_blanket"] = self.markov_blanket_interface
             else:
                 # Create default MarkovBlanket implementation
-                self._components["markov_blanket"] = (
-                    MarkovBlanketFactory.create_pymdp_blanket()
-                    agent_id= (
-                        self.data.agent_id, num_states=4, num_observations=3, num_actions=2)
+                self._components["markov_blanket"] = MarkovBlanketFactory.create_pymdp_blanket(
+                    agent_id=self.data.agent_id, num_states=4, num_observations=3, num_actions=2
                 )
             # Set up boundary violation handler
             if hasattr(self._components["markov_blanket"], "set_violation_handler"):
@@ -286,12 +276,12 @@ class BaseAgent(IAgentLifecycle):
 
     @property
     def agent_id(self) -> str:
-        ."""Get agent ID."""
+        """Get agent ID"""
         return self.data.agent_id
 
     @property
     def is_running(self) -> bool:
-        ."""Check if agent is running."""
+        """Check if agent is running"""
         return self._is_running
 
     @property
@@ -356,20 +346,18 @@ class BaseAgent(IAgentLifecycle):
             self.logger.log_error(self.data.agent_id, f"Error during agent shutdown: {e}")
 
     def pause(self) -> None:
-        ."""Pause agent execution."""
+        """Pause agent execution"""
         if not self._is_running:
-            self.logger.log_warning(self.data.agent_id, "Cannot pause -
-                agent is not running")
+            self.logger.log_warning(self.data.agent_id, "Cannot pause - agent is not running")
             return
         self._is_paused = True
         self.data.update_status(AgentStatus.IDLE)
         self.logger.log_info(self.data.agent_id, "Agent paused")
 
     def resume(self) -> None:
-        ."""Resume agent execution."""
+        """Resume agent execution"""
         if not self._is_running:
-            self.logger.log_warning(self.data.agent_id, "Cannot resume -
-                agent is not running")
+            self.logger.log_warning(self.data.agent_id, "Cannot resume - agent is not running")
             return
         self._is_paused = False
         self.logger.log_info(self.data.agent_id, "Agent resumed")
@@ -391,15 +379,13 @@ class BaseAgent(IAgentLifecycle):
                         await self._update_cycle()
                     # Calculate sleep time to maintain update rate
                     elapsed = datetime.now() - self._last_update_time
-                    sleep_time = (
-                        max(0, (self._update_interval - elapsed).total_seconds()))
+                    sleep_time = max(0, (self._update_interval - elapsed).total_seconds())
                     if sleep_time > 0:
                         await asyncio.sleep(sleep_time)
                 except asyncio.CancelledError:
                     break
                 except Exception as e:
-                    self.logger.log_error(self.data.agent_id,
-                        f"Error in main loop: {e}")
+                    self.logger.log_error(self.data.agent_id, f"Error in main loop: {e}")
                     self.data.update_status(AgentStatus.ERROR)
                     await asyncio.sleep(1)  # Error recovery delay
 
@@ -424,20 +410,17 @@ class BaseAgent(IAgentLifecycle):
                 if "markov_blanket" in self._components and observations is not None:
                     agent_state = self._create_agent_state()
                     environment_state = observations
-                    self._components["markov_blanket"].update_states(agent_state,
-                        environment_state)
+                    self._components["markov_blanket"].update_states(agent_state, environment_state)
                     # Check for boundary violations
                     await self._check_boundary_integrity()
                 # Update beliefs if Active Inference is available
                 if self.active_inference_interface and observations is not None:
-                    self.active_inference_interface.update_beliefs(self.data,
-                        observations)
+                    self.active_inference_interface.update_beliefs(self.data, observations)
             # Decision phase
             if "behavior_tree" in self._components and "decision" in self._components:
                 context = self._build_decision_context()
                 # Get behavior from behavior tree
-                behavior = (
-                    self._components["behavior_tree"].evaluate(self.data, context))
+                behavior = self._components["behavior_tree"].evaluate(self.data, context)
                 if behavior:
                     # Execute behavior
                     self.data.update_status(AgentStatus.PLANNING)
@@ -453,7 +436,7 @@ class BaseAgent(IAgentLifecycle):
             self.data.update_status(AgentStatus.ERROR)
 
     def _build_decision_context(self) -> Dict[str, Any]:
-        ."""Build context for decision making."""
+        """Build context for decision making"""
         context = {
             "timestamp": datetime.now(),
             "delta_time": (datetime.now() - self._last_update_time).total_seconds(),
@@ -486,8 +469,7 @@ class BaseAgent(IAgentLifecycle):
                         self.data.update_position(new_position)
                         # Notify event handlers
                         for handler in self._event_handlers:
-                            handler.on_agent_moved(self.data, old_position,
-                                new_position)
+                            handler.on_agent_moved(self.data, old_position, new_position)
                 # Add to memory
                 self.data.add_to_memory(
                     {
@@ -502,7 +484,7 @@ class BaseAgent(IAgentLifecycle):
             self.data.update_status(AgentStatus.ERROR)
 
     def add_behavior(self, behavior: IAgentBehavior) -> None:
-        ."""Add a behavior to the agent."""
+        """Add a behavior to the agent"""
         if "behavior_tree" in self._components:
             self._components["behavior_tree"].add_behavior(behavior)
             self.logger.log_info(self.data.agent_id, f"Added behavior: {type(behavior).__name__}")
@@ -514,14 +496,14 @@ class BaseAgent(IAgentLifecycle):
             self.logger.log_info(self.data.agent_id, f"Removed behavior: {type(behavior).__name__}")
 
     def add_plugin(self, plugin: IAgentPlugin) -> None:
-        .."""Add a plugin to the agent.."""
+        """Add a plugin to the agent."""
         self._plugins.append(plugin)
         if self._is_running:
             plugin.initialize(self.data)
         self.logger.log_info(self.data.agent_id, f"Added plugin: {plugin.get_name()}")
 
     def remove_plugin(self, plugin: IAgentPlugin) -> None:
-        ."""Remove a plugin from the agent."""
+        """Remove a plugin from the agent"""
         if plugin in self._plugins:
             if self._is_running:
                 plugin.cleanup(self.data)
@@ -626,7 +608,7 @@ class BaseAgent(IAgentLifecycle):
             self.logger.log_error(self.data.agent_id, f"Error checking boundary integrity: {e}")
 
     def _handle_boundary_violation(self, violation: BoundaryViolationEvent) -> None:
-        ."""Handle boundary violation events."""
+        """Handle boundary violation events"""
         self._boundary_violations.append(violation)
         self.logger.log_warning(
             self.data.agent_id,

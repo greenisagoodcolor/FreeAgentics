@@ -1,7 +1,13 @@
 "use client";
 
 import React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Brain, Zap, Eye, Info } from "lucide-react";
@@ -10,8 +16,26 @@ import { BeliefStateVisualization } from "@/components/ui/belief-state-visualiza
 import { FreeEnergyVisualization } from "@/components/ui/free-energy-visualization";
 
 export default function ActiveInferenceDemoPage() {
-  const explorerStateLabels = ["Explore", "Navigate", "Search", "Rest", "Communicate", "Learn", "Plan", "Execute"];
-  const guardianStateLabels = ["Monitor", "Patrol", "Alert", "Defend", "Coordinate", "Assess", "Report", "Standby"];
+  const explorerStateLabels = [
+    "Explore",
+    "Navigate",
+    "Search",
+    "Rest",
+    "Communicate",
+    "Learn",
+    "Plan",
+    "Execute",
+  ];
+  const guardianStateLabels = [
+    "Monitor",
+    "Patrol",
+    "Alert",
+    "Defend",
+    "Coordinate",
+    "Assess",
+    "Report",
+    "Standby",
+  ];
 
   return (
     <div className="container mx-auto p-6 space-y-8">
@@ -19,11 +43,14 @@ export default function ActiveInferenceDemoPage() {
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3">
           <Brain className="h-8 w-8 text-primary" />
-          <h1 className="text-4xl font-bold">Active Inference Visualization Demo</h1>
+          <h1 className="text-4xl font-bold">
+            Active Inference Visualization Demo
+          </h1>
         </div>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-          Real-time mathematical visualization of Active Inference agents showing belief states, 
-          free energy dynamics, and precision parameters with D3.js
+          Real-time mathematical visualization of Active Inference agents
+          showing belief states, free energy dynamics, and precision parameters
+          with D3.js
         </p>
         <div className="flex items-center justify-center gap-2">
           <Badge variant="outline">D3.js Powered</Badge>
@@ -49,37 +76,67 @@ export default function ActiveInferenceDemoPage() {
         <CardContent>
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-3">
-              <h4 className="font-semibold text-blue-900">Belief State Mathematics</h4>
+              <h4 className="font-semibold text-blue-900">
+                Belief State Mathematics
+              </h4>
               <div className="text-sm space-y-1">
-                <p>• <strong>q(s)</strong>: Belief distribution over hidden states (probability simplex)</p>
-                <p>• <strong>H[q(s)]</strong>: Shannon entropy = -Σ q(s) log q(s)</p>
-                <p>• <strong>Confidence</strong>: 1 - H[q(s)]/log(|S|) (normalized uncertainty)</p>
-                <p>• <strong>Normalization</strong>: Σ q(s) = 1.0 ± 1e-10</p>
+                <p>
+                  • <strong>q(s)</strong>: Belief distribution over hidden
+                  states (probability simplex)
+                </p>
+                <p>
+                  • <strong>H[q(s)]</strong>: Shannon entropy = -Σ q(s) log q(s)
+                </p>
+                <p>
+                  • <strong>Confidence</strong>: 1 - H[q(s)]/log(|S|)
+                  (normalized uncertainty)
+                </p>
+                <p>
+                  • <strong>Normalization</strong>: Σ q(s) = 1.0 ± 1e-10
+                </p>
               </div>
             </div>
-            
+
             <div className="space-y-3">
-              <h4 className="font-semibold text-red-900">Free Energy Mathematics</h4>
+              <h4 className="font-semibold text-red-900">
+                Free Energy Mathematics
+              </h4>
               <div className="text-sm space-y-1">
-                <p>• <strong>F</strong>: Variational Free Energy = Accuracy + Complexity</p>
-                <p>• <strong>Accuracy</strong>: -E<sub>q</sub>[ln p(o|s)] (negative log likelihood)</p>
-                <p>• <strong>Complexity</strong>: D<sub>KL</sub>[q(s)||p(s)] (KL divergence)</p>
-                <p>• <strong>G(π)</strong>: Expected Free Energy for policy π</p>
+                <p>
+                  • <strong>F</strong>: Variational Free Energy = Accuracy +
+                  Complexity
+                </p>
+                <p>
+                  • <strong>Accuracy</strong>: -E<sub>q</sub>[ln p(o|s)]
+                  (negative log likelihood)
+                </p>
+                <p>
+                  • <strong>Complexity</strong>: D<sub>KL</sub>[q(s)||p(s)] (KL
+                  divergence)
+                </p>
+                <p>
+                  • <strong>G(π)</strong>: Expected Free Energy for policy π
+                </p>
               </div>
             </div>
           </div>
-          
+
           <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-            <h4 className="font-semibold text-green-900 mb-2">Precision Parameters</h4>
+            <h4 className="font-semibold text-green-900 mb-2">
+              Precision Parameters
+            </h4>
             <div className="text-sm text-green-800 grid md:grid-cols-3 gap-4">
               <div>
-                <strong>γ (Sensory)</strong>: Inverse variance of sensory noise σ⁻²
+                <strong>γ (Sensory)</strong>: Inverse variance of sensory noise
+                σ⁻²
               </div>
               <div>
-                <strong>β (Policy)</strong>: Temperature parameter in softmax policy selection
+                <strong>β (Policy)</strong>: Temperature parameter in softmax
+                policy selection
               </div>
               <div>
-                <strong>α (State)</strong>: Precision of state transition predictions
+                <strong>α (State)</strong>: Precision of state transition
+                predictions
               </div>
             </div>
           </div>
@@ -124,18 +181,26 @@ export default function ActiveInferenceDemoPage() {
 
       {/* Individual Component Demos */}
       <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-center">Individual Component Demonstrations</h2>
-        
+        <h2 className="text-2xl font-bold text-center">
+          Individual Component Demonstrations
+        </h2>
+
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Standalone Belief State Visualization */}
           <BeliefStateVisualization
             agentId="demo-belief"
-            stateLabels={["State A", "State B", "State C", "State D", "State E"]}
+            stateLabels={[
+              "State A",
+              "State B",
+              "State C",
+              "State D",
+              "State E",
+            ]}
             height={350}
             updateInterval={800}
             isRealTime={true}
           />
-          
+
           {/* Standalone Free Energy Visualization */}
           <FreeEnergyVisualization
             agentId="demo-energy"
@@ -168,7 +233,7 @@ export default function ActiveInferenceDemoPage() {
                 <li>Temporal data windowing and filtering</li>
               </ul>
             </div>
-            
+
             <div className="space-y-3">
               <h4 className="font-semibold">Architecture Compliance</h4>
               <ul className="text-sm space-y-1 list-disc list-inside">
@@ -181,13 +246,17 @@ export default function ActiveInferenceDemoPage() {
               </ul>
             </div>
           </div>
-          
+
           <div className="mt-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
-            <h4 className="font-semibold text-purple-900 mb-2">Expert Review Ready</h4>
+            <h4 className="font-semibold text-purple-900 mb-2">
+              Expert Review Ready
+            </h4>
             <p className="text-sm text-purple-800">
-              These visualizations are mathematically accurate and ready for review by Active Inference experts 
-              including Conor Heins (pymdp), Alexander Tschantz, and architecture experts Robert Martin and Rich Hickey.
-              All mathematical constraints are validated and documented.
+              These visualizations are mathematically accurate and ready for
+              review by Active Inference experts including Conor Heins (pymdp),
+              Alexander Tschantz, and architecture experts Robert Martin and
+              Rich Hickey. All mathematical constraints are validated and
+              documented.
             </p>
           </div>
         </CardContent>
@@ -200,4 +269,4 @@ export default function ActiveInferenceDemoPage() {
       </div>
     </div>
   );
-} 
+}

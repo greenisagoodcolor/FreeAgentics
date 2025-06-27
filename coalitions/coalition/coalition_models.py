@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class CoalitionStatus(Enum):
-    """Status of a coalition."""
+    """Status of a coalition"""
 
     FORMING = "forming"
     ACTIVE = "active"
@@ -27,7 +27,7 @@ class CoalitionStatus(Enum):
 
 
 class CoalitionRole(Enum):
-    """Roles that agents can have within a coalition."""
+    """Roles that agents can have within a coalition"""
 
     LEADER = "leader"
     COORDINATOR = "coordinator"
@@ -37,7 +37,7 @@ class CoalitionRole(Enum):
 
 
 class CoalitionGoalStatus(Enum):
-    """Status of coalition goals."""
+    """Status of coalition goals"""
 
     PROPOSED = "proposed"
     ACCEPTED = "accepted"
@@ -49,7 +49,7 @@ class CoalitionGoalStatus(Enum):
 
 @dataclass
 class CoalitionGoal:
-    """Represents a goal that the coalition is working toward."""
+    """Represents a goal that the coalition is working toward"""
 
     goal_id: str
     title: str
@@ -81,26 +81,26 @@ class CoalitionGoal:
 
     @property
     def progress_percentage(self) -> float:
-        """Get progress as percentage (0-100)."""
+        """Get progress as percentage (0-100)"""
         return min(100.0, self.current_progress * 100.0)
 
     @property
     def is_overdue(self) -> bool:
-        """Check if goal is overdue."""
+        """Check if goal is overdue"""
         if self.deadline:
             return datetime.utcnow() > self.deadline
         return False
 
     @property
     def is_completed(self) -> bool:
-        """Check if goal is successfully completed."""
+        """Check if goal is successfully completed"""
         return (
             self.status == CoalitionGoalStatus.COMPLETED
             and self.current_progress >= self.success_threshold
         )
 
     def add_vote(self, member_id: str, support: bool) -> None:
-        """Add a vote for or against the goal."""
+        """Add a vote for or against the goal"""
         if support:
             self.votes_for.add(member_id)
             self.votes_against.discard(member_id)
@@ -109,14 +109,14 @@ class CoalitionGoal:
             self.votes_for.discard(member_id)
 
     def calculate_consensus(self, total_members: int) -> float:
-        """Calculate consensus level (0-1)."""
+        """Calculate consensus level (0-1)"""
         total_votes = len(self.votes_for) + len(self.votes_against)
         if total_votes == 0:
             return 0.0
         return len(self.votes_for) / total_votes
 
     def update_progress(self, progress: float, member_id: Optional[str] = None) -> None:
-        """Update goal progress."""
+        """Update goal progress"""
         self.current_progress = max(0.0, min(1.0, progress))
         # Auto-update status based on progress
         if self.current_progress >= self.success_threshold:
@@ -127,7 +127,7 @@ class CoalitionGoal:
                 self.status = CoalitionGoalStatus.IN_PROGRESS
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary for serialization."""
+        """Convert to dictionary for serialization"""
         return {
             "goal_id": self.goal_id,
             "title": self.title,
@@ -157,7 +157,7 @@ class CoalitionGoal:
 
 @dataclass
 class CoalitionMember:
-    """Represents a member of a coalition."""
+    """Represents a member of a coalition"""
 
     agent_id: str
     role: CoalitionRole = CoalitionRole.CONTRIBUTOR
@@ -181,12 +181,12 @@ class CoalitionMember:
 
     @property
     def tenure_days(self) -> int:
-        """Get member tenure in days."""
+        """Get member tenure in days"""
         return (datetime.utcnow() - self.joined_at).days
 
     @property
     def success_rate(self) -> float:
-        """Calculate success rate for completed goals."""
+        """Calculate success rate for completed goals"""
         total_goals = self.goals_completed + self.goals_failed
         if total_goals == 0:
             return 1.0
@@ -194,21 +194,21 @@ class CoalitionMember:
 
     @property
     def is_leader(self) -> bool:
-        """Check if member is in a leadership role."""
+        """Check if member is in a leadership role"""
         return self.role in [CoalitionRole.LEADER, CoalitionRole.COORDINATOR]
 
     def update_activity(self) -> None:
-        """Update last activity timestamp."""
+        """Update last activity timestamp"""
         self.last_active = datetime.utcnow()
 
     def signal_departure(self, reason: Optional[str] = None) -> None:
-        """Signal intent to leave coalition."""
+        """Signal intent to leave coalition"""
         self.departure_intent = True
         self.departure_reason = reason
         logger.info(f"Member {self.agent_id} signaled departure: {reason}")
 
     def complete_goal(self, success: bool) -> None:
-        """Record goal completion."""
+        """Record goal completion"""
         if success:
             self.goals_completed += 1
         else:
@@ -218,7 +218,7 @@ class CoalitionMember:
         self.reliability_score = 0.7 * self.reliability_score + 0.3 * recent_success_rate
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary for serialization."""
+        """Convert to dictionary for serialization"""
         return {
             "agent_id": self.agent_id,
             "role": self.role.value,
@@ -284,12 +284,12 @@ class Coalition:
 
     @property
     def member_count(self) -> int:
-        """Get current active member count."""
+        """Get current active member count"""
         return len([m for m in self.members.values() if m.is_active])
 
     @property
     def is_viable(self) -> bool:
-        """Check if coalition meets minimum viability requirements."""
+        """Check if coalition meets minimum viability requirements"""
         active_members = self.member_count
         return self.min_members <= active_members <= self.max_members and self.status in [
             CoalitionStatus.FORMING,
@@ -298,7 +298,7 @@ class Coalition:
 
     @property
     def combined_capabilities(self) -> Set[str]:
-        """Get all capabilities available in the coalition."""
+        """Get all capabilities available in the coalition"""
         capabilities = set()
         for member in self.members.values():
             if member.is_active:
@@ -307,7 +307,7 @@ class Coalition:
 
     @property
     def total_resources(self) -> Dict[str, float]:
-        """Calculate total available resources."""
+        """Calculate total available resources"""
         totals = dict(self.shared_resources)
         for member in self.members.values():
             if member.is_active:
@@ -322,7 +322,7 @@ class Coalition:
         capabilities: Optional[Set[str]] = None,
         resources: Optional[Dict[str, float]] = None,
     ) -> bool:
-        """Add a new member to the coalition."""
+        """Add a new member to the coalition"""
         if self.member_count >= self.max_members:
             logger.warning(f"Cannot add member {agent_id}: coalition at capacity")
             return False
@@ -348,7 +348,7 @@ class Coalition:
         return True
 
     def remove_member(self, agent_id: str, reason: str = "voluntary") -> bool:
-        """Remove a member from the coalition."""
+        """Remove a member from the coalition"""
         if agent_id not in self.members:
             return False
         member = self.members[agent_id]
@@ -365,7 +365,7 @@ class Coalition:
         return True
 
     def add_goal(self, goal: CoalitionGoal) -> None:
-        """Add a goal to the coalition."""
+        """Add a goal to the coalition"""
         self.goals[goal.goal_id] = goal
         # Set as primary goal if it's the first one
         if not self.primary_goal_id:
@@ -373,7 +373,7 @@ class Coalition:
         logger.info(f"Added goal {goal.goal_id} to coalition {self.coalition_id}")
 
     def vote_on_goal(self, goal_id: str, member_id: str, support: bool) -> None:
-        """Record a member's vote on a goal."""
+        """Record a member's vote on a goal"""
         if goal_id not in self.goals or member_id not in self.members:
             return
         goal = self.goals[goal_id]
@@ -391,13 +391,13 @@ class Coalition:
     def update_goal_progress(
         self, goal_id: str, progress: float, member_id: Optional[str] = None
     ) -> None:
-        """Update progress on a coalition goal."""
+        """Update progress on a coalition goal"""
         if goal_id in self.goals:
             self.goals[goal_id].update_progress(progress, member_id)
             self._update_performance_metrics()
 
     def allocate_resources(self, allocation: Dict[str, Dict[str, float]]) -> bool:
-        """Allocate resources for goals or members."""
+        """Allocate resources for goals or members"""
         # Validate allocation doesn't exceed available resources
         total_allocated = {}
         for allocations in allocation.values():
@@ -414,7 +414,7 @@ class Coalition:
         return True
 
     def calculate_member_contributions(self) -> Dict[str, float]:
-        """Calculate contribution scores for all members."""
+        """Calculate contribution scores for all members"""
         contributions = {}
         for member_id, member in self.members.items():
             if not member.is_active:
@@ -438,7 +438,7 @@ class Coalition:
         return contributions
 
     def distribute_value(self, total_value: float) -> Dict[str, float]:
-        """Distribute value among members based on the distribution model."""
+        """Distribute value among members based on the distribution model"""
         if not self.members:
             return {}
         active_members = [m for m in self.members.values() if m.is_active]
@@ -468,7 +468,7 @@ class Coalition:
         return distribution
 
     def _elect_new_leader(self) -> None:
-        """Elect a new leader when current leader leaves."""
+        """Elect a new leader when current leader leaves"""
         candidates = [
             m
             for m in self.members.values()
@@ -486,7 +486,7 @@ class Coalition:
             self.leader_id = None
 
     def _update_performance_metrics(self) -> None:
-        """Update coalition performance metrics."""
+        """Update coalition performance metrics"""
         if not self.goals:
             return
         # Calculate success rate
@@ -515,7 +515,7 @@ class Coalition:
         )
 
     def get_status_summary(self) -> Dict[str, Any]:
-        """Get comprehensive status summary."""
+        """Get comprehensive status summary"""
         active_members = [m for m in self.members.values() if m.is_active]
         return {
             "coalition_id": self.coalition_id,
@@ -547,7 +547,7 @@ class Coalition:
         }
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary for serialization."""
+        """Convert to dictionary for serialization"""
         return {
             "coalition_id": self.coalition_id,
             "name": self.name,

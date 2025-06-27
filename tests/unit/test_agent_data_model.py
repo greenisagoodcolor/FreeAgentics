@@ -24,11 +24,11 @@ from agents.base.data_model import (
 """
 Unit tests for Agent Data Model
 This module contains comprehensive tests for the Agent data model classes.
-."""
+"""
 
 
 class TestPosition(unittest.TestCase):
-    ."""Test Position class."""
+    """Test Position class"""
 
     def test_position_creation(self) -> None:
         """Test position creation with default and custom values"""
@@ -41,7 +41,7 @@ class TestPosition(unittest.TestCase):
         self.assertEqual(pos2.z, 3.0)
 
     def test_position_to_array(self) -> None:
-        ."""Test conversion to numpy array."""
+        """Test conversion to numpy array"""
         pos = Position(1.0, 2.0, 3.0)
         arr = pos.to_array()
         np.testing.assert_array_equal(arr, np.array([1.0, 2.0, 3.0]))
@@ -59,7 +59,7 @@ class TestPosition(unittest.TestCase):
 
 
 class TestOrientation(unittest.TestCase):
-    ."""Test Orientation class."""
+    """Test Orientation class"""
 
     def test_orientation_creation(self) -> None:
         """Test orientation creation with default quaternion"""

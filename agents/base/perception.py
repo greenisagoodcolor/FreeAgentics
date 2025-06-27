@@ -23,7 +23,7 @@ This module provides sensory perception capabilities for agents including:
 - Proximity sensing
 - Environmental awareness
 - Perception filtering and memory
-."""
+"""
 
 
 class PerceptionType(Enum):
@@ -108,15 +108,15 @@ class PerceptionCapabilities:
 
 
 class PerceptionFilter:
-    ."""Base class for perception filters."""
+    """Base class for perception filters"""
 
     def filter(self, percepts: List[Percept], agent: Agent) -> List[Percept]:
-        ."""Filter percepts based on criteria."""
+        """Filter percepts based on criteria"""
         raise NotImplementedError
 
 
 class ImportanceFilter(PerceptionFilter):
-    ."""Filter percepts by importance/relevance."""
+    """Filter percepts by importance/relevance"""
 
     def __init__(self, importance_threshold: float = 0.3) -> None:
         self.importance_threshold = importance_threshold
@@ -144,7 +144,7 @@ class ImportanceFilter(PerceptionFilter):
 
 
 class AttentionFilter(PerceptionFilter):
-    ."""Filter percepts based on attention capacity."""
+    """Filter percepts based on attention capacity"""
 
     def filter(self, percepts: List[Percept], agent: Agent) -> List[Percept]:
         """Keep only the most salient percepts within attention capacity"""
@@ -169,7 +169,7 @@ class PerceptionMemory:
         self.stimulus_history: Dict[str, List[Percept]] = defaultdict(list)
 
     def add_percept(self, percept: Percept) -> None:
-        ."""Add a percept to memory."""
+        """Add a percept to memory"""
         self.memories.append(percept)
         self.stimulus_history[percept.stimulus.stimulus_id].append(percept)
 
@@ -182,7 +182,7 @@ class PerceptionMemory:
         return recent
 
     def get_stimulus_history(self, stimulus_id: str) -> List[Percept]:
-        ."""Get perception history for a specific stimulus."""
+        """Get perception history for a specific stimulus"""
         return self.stimulus_history.get(stimulus_id, [])
 
     def forget_old_memories(self) -> None:
@@ -208,7 +208,7 @@ class SensorSystem:
     def sense(
         self, agent: Agent, stimuli: List[Stimulus], environment: Optional[Any] = None
     ) -> List[Percept]:
-        ."""Sense stimuli from the environment."""
+        """Sense stimuli from the environment"""
         raise NotImplementedError
 
 
@@ -374,13 +374,13 @@ class PerceptionSystem:
         # Note: Agent capabilities stored in system, not on agent instance
 
     def add_stimulus(self, stimulus: Stimulus) -> None:
-        ."""Add a stimulus to the environment."""
+        """Add a stimulus to the environment"""
         self.stimuli.append(stimulus)
         if stimulus.source:
             self.stimulus_sources[stimulus.stimulus_id] = stimulus.source
 
     def remove_stimulus(self, stimulus_id: str) -> None:
-        ."""Remove a stimulus from the environment."""
+        """Remove a stimulus from the environment"""
         self.stimuli = [s for s in self.stimuli if s.stimulus_id != stimulus_id]
         self.stimulus_sources.pop(stimulus_id, None)
 
@@ -418,7 +418,7 @@ class PerceptionSystem:
         return filtered_percepts
 
     def get_perception_memory(self, agent_id: str) -> Optional[PerceptionMemory]:
-        ."""Get perception memory for an agent."""
+        """Get perception memory for an agent"""
         return self.perception_memories.get(agent_id)
 
     def create_agent_stimulus(self, agent: Agent) -> Stimulus:

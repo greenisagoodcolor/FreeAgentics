@@ -1,4 +1,4 @@
-."""
+"""
 Device Discovery Mechanism
 
 Automatically detects and enumerates available hardware devices and
@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 
 class DeviceType(Enum):
-    """Types of discoverable devices."""
+    """Types of discoverable devices"""
 
     CPU = "cpu"
     GPU = "gpu"
@@ -52,7 +52,7 @@ class DeviceType(Enum):
 
 
 class DeviceStatus(Enum):
-    """Status of discovered devices."""
+    """Status of discovered devices"""
 
     AVAILABLE = "available"
     BUSY = "busy"
@@ -63,7 +63,7 @@ class DeviceStatus(Enum):
 
 @dataclass
 class DeviceInfo:
-    """Information about a discovered device."""
+    """Information about a discovered device"""
 
     device_id: str
     device_type: DeviceType
@@ -87,7 +87,7 @@ class DeviceInfo:
     performance_score: float = 0.0
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary representation."""
+        """Convert to dictionary representation"""
         return {
             "device_id": self.device_id,
             "device_type": self.device_type.value,
@@ -110,7 +110,7 @@ class DeviceDiscovery:
     """
 
     def __init__(self) -> None:
-        """Initialize device discovery system."""
+        """Initialize device discovery system"""
         self._devices: Dict[str, DeviceInfo] = {}
         self._discovery_methods: Dict[DeviceType, List[Callable]] = {
             DeviceType.CPU: [self._discover_cpu],
@@ -132,7 +132,7 @@ class DeviceDiscovery:
         logger.info("Device discovery system initialized")
 
     def discover_all(self) -> Dict[str, DeviceInfo]:
-        """Discover all available devices."""
+        """Discover all available devices"""
         logger.info("Starting full device discovery")
 
         discovered_devices = {}
@@ -154,7 +154,7 @@ class DeviceDiscovery:
         return discovered_devices
 
     def discover_type(self, device_type: DeviceType) -> List[DeviceInfo]:
-        """Discover devices of a specific type."""
+        """Discover devices of a specific type"""
         devices = []
 
         methods = self._discovery_methods.get(device_type, [])
@@ -167,7 +167,7 @@ class DeviceDiscovery:
         return devices
 
     def _discover_cpu(self) -> List[DeviceInfo]:
-        """Discover CPU information."""
+        """Discover CPU information"""
         devices = []
 
         try:
@@ -242,7 +242,7 @@ class DeviceDiscovery:
         return devices
 
     def _discover_gpu_nvidia(self) -> List[DeviceInfo]:
-        """Discover NVIDIA GPUs."""
+        """Discover NVIDIA GPUs"""
         devices = []
 
         if platform.system() == "Windows":
@@ -317,7 +317,7 @@ class DeviceDiscovery:
         return devices
 
     def _discover_gpu_amd(self) -> List[DeviceInfo]:
-        """Discover AMD GPUs."""
+        """Discover AMD GPUs"""
         devices: List[DeviceInfo] = []
 
         if platform.system() != "Linux":
@@ -351,7 +351,7 @@ class DeviceDiscovery:
         return devices
 
     def _discover_gpu_intel(self) -> List[DeviceInfo]:
-        """Discover Intel integrated GPUs."""
+        """Discover Intel integrated GPUs"""
         devices = []
 
         # Platform-specific Intel GPU detection
@@ -379,7 +379,7 @@ class DeviceDiscovery:
         return devices
 
     def _discover_memory(self) -> List[DeviceInfo]:
-        """Discover memory information."""
+        """Discover memory information"""
         devices = []
 
         try:
@@ -423,7 +423,7 @@ class DeviceDiscovery:
         return devices
 
     def _discover_storage(self) -> List[DeviceInfo]:
-        """Discover storage devices."""
+        """Discover storage devices"""
         devices = []
 
         try:
@@ -458,7 +458,7 @@ class DeviceDiscovery:
         return devices
 
     def _discover_network(self) -> List[DeviceInfo]:
-        """Discover network interfaces."""
+        """Discover network interfaces"""
         devices = []
 
         try:
@@ -497,7 +497,7 @@ class DeviceDiscovery:
         return devices
 
     def _discover_usb(self) -> List[DeviceInfo]:
-        """Discover USB devices."""
+        """Discover USB devices"""
         devices = []
 
         if platform.system() == "Linux":
@@ -531,7 +531,7 @@ class DeviceDiscovery:
         return devices
 
     def _discover_tpu(self) -> List[DeviceInfo]:
-        """Discover TPU devices (Google Coral, etc)."""
+        """Discover TPU devices (Google Coral, etc)"""
         devices = []
 
         # Check for Coral USB Accelerator
@@ -580,7 +580,7 @@ class DeviceDiscovery:
         return devices
 
     def _get_memory_speed(self) -> int:
-        """Get memory speed in MHz."""
+        """Get memory speed in MHz"""
         if platform.system() == "Linux":
             try:
                 result = subprocess.run(
@@ -599,7 +599,7 @@ class DeviceDiscovery:
         return 0  # Unknown
 
     def _estimate_storage_performance(self, partition) -> float:
-        """Estimate storage device performance score."""
+        """Estimate storage device performance score"""
         score = 100.0  # Base score
 
         # SSD detection heuristics
@@ -619,7 +619,7 @@ class DeviceDiscovery:
         return score
 
     def start_monitoring(self, interval: float = 5.0):
-        """Start monitoring for device changes."""
+        """Start monitoring for device changes"""
         if self._monitoring:
             logger.warning("Device monitoring already active")
             return
@@ -632,14 +632,14 @@ class DeviceDiscovery:
         logger.info(f"Started device monitoring with {interval}s interval")
 
     def stop_monitoring(self) -> None:
-        """Stop device monitoring."""
+        """Stop device monitoring"""
         self._monitoring = False
         if self._monitor_thread is not None:
             self._monitor_thread.join(timeout=5.0)
         logger.info("Stopped device monitoring")
 
     def _monitor_loop(self, interval: float):
-        """Monitor loop for device changes."""
+        """Monitor loop for device changes"""
         previous_devices = self._devices.copy()
 
         while self._monitoring:
@@ -669,11 +669,11 @@ class DeviceDiscovery:
             time.sleep(interval)
 
     def register_callback(self, callback: Callable[[DeviceInfo, str], None]) -> None:
-        """Register callback for device events."""
+        """Register callback for device events"""
         self._callbacks.append(callback)
 
     def _notify_callbacks(self, device: DeviceInfo, event: str):
-        """Notify registered callbacks of device events."""
+        """Notify registered callbacks of device events"""
         for callback in self._callbacks:
             try:
                 callback(device, event)
@@ -681,15 +681,15 @@ class DeviceDiscovery:
                 logger.error(f"Callback error: {str(e)}")
 
     def get_device(self, device_id: str) -> Optional[DeviceInfo]:
-        """Get specific device by ID."""
+        """Get specific device by ID"""
         return self._devices.get(device_id)
 
     def get_devices_by_type(self, device_type: DeviceType) -> List[DeviceInfo]:
-        """Get all devices of specific type."""
+        """Get all devices of specific type"""
         return [d for d in self._devices.values() if d.device_type == device_type]
 
     def export_inventory(self, filepath: str):
-        """Export device inventory to JSON file."""
+        """Export device inventory to JSON file"""
         inventory = {
             "timestamp": datetime.now().isoformat(),
             "platform": {

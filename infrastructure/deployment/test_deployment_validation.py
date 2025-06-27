@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-."""
+"""
 Test script for Deployment Validation
 
 Tests the export validation, hardware compatibility, and deployment verification
@@ -22,14 +22,13 @@ from deployment.hardware_compatibility import CompatibilityTester
 
 # Configure logging
 logging.basicConfig(
-    level= (
-        logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
 
 def create_test_package(package_dir: Path):
-    """Create a test deployment package."""
+    """Create a test deployment package"""
     # Create directory structure
     package_dir.mkdir(parents=True, exist_ok=True)
 
@@ -125,7 +124,7 @@ sys.exit(0)
 
 
 def test_export_validation() -> None:
-    """Test export validation."""
+    """Test export validation"""
     print("\n=== Testing Export Validation ===")
 
     # Create temporary directory
@@ -142,8 +141,7 @@ def test_export_validation() -> None:
 
         # Print results
         for result in results:
-            print(f"  {result.check_name}: {result.status.value} -
-                {result.message}")
+            print(f"  {result.check_name}: {result.status.value} - {result.message}")
 
         # Test with specific platform
         print("\n2. Testing platform-specific validation...")
@@ -159,8 +157,7 @@ def test_export_validation() -> None:
 
             # Show only platform-specific results
             platform_results = [
-                r for r in results if "platform" in r.check_name or
-                    "hardware" in r.check_name
+                r for r in results if "platform" in r.check_name or "hardware" in r.check_name
             ]
 
             for result in platform_results:
@@ -179,7 +176,7 @@ def test_export_validation() -> None:
 
 
 def test_hardware_compatibility() -> None:
-    """Test hardware compatibility."""
+    """Test hardware compatibility"""
     print("\n=== Testing Hardware Compatibility ===")
 
     # Create test package
@@ -206,8 +203,7 @@ def test_hardware_compatibility() -> None:
         # Show test results
         for test_result in results["test_results"]:
             status = test_result["status"]
-            icon = (
-                {"passed": "✓", "failed": "✗", "skipped": "○", "timeout": "⏱"}.get(status, "?"))
+            icon = {"passed": "✓", "failed": "✗", "skipped": "○", "timeout": "⏱"}.get(status, "?")
 
             print(f"  {icon} {test_result['test_name']}: {test_result['message']}")
 
@@ -218,7 +214,7 @@ def test_hardware_compatibility() -> None:
 
 
 async def test_deployment_verification():
-    """Test deployment verification."""
+    """Test deployment verification"""
     print("\n=== Testing Deployment Verification ===")
 
     # Create test deployment
@@ -273,13 +269,10 @@ async def test_deployment_verification():
 
 
 async def test_health_monitoring():
-    """Test health monitoring."""
+    """Test health monitoring"""
     print("\n=== Testing Health Monitoring ===")
 
-    from deployment.deployment_verification import (
-        DeploymentConfig,
-        HealthCheck,
-        HealthMonitor)
+    from deployment.deployment_verification import DeploymentConfig, HealthCheck, HealthMonitor
 
     # Create test configuration
     config = DeploymentConfig(
@@ -315,7 +308,7 @@ async def test_health_monitoring():
 
 
 def test_package_compression() -> None:
-    """Test package compression and extraction."""
+    """Test package compression and extraction"""
     print("\n=== Testing Package Compression ===")
 
     import zipfile
@@ -341,15 +334,14 @@ def test_package_compression() -> None:
         results = validator.validate_package(zip_path)
 
         # Check summary
-        summary = (
-            next((r for r in results if r.check_name == "validation_summary"), None))
+        summary = next((r for r in results if r.check_name == "validation_summary"), None)
         if summary:
             print(f"  Validation: {summary.status.value}")
             print(f"  {summary.message}")
 
 
 async def main():
-    """Run all tests."""
+    """Run all tests"""
     print("=== Deployment Validation Test Suite ===")
 
     # Test export validation

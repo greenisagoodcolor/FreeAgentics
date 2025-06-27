@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 class FormationStrategy(Enum):
-    """Different coalition formation strategies."""
+    """Different coalition formation strategies"""
 
     ACTIVE_INFERENCE = "active_inference"
     CAPABILITY_BASED = "capability_based"
@@ -36,7 +36,7 @@ class FormationStrategy(Enum):
 
 @dataclass
 class AgentProfile:
-    """Profile of an agent available for coalition formation."""
+    """Profile of an agent available for coalition formation"""
 
     agent_id: str
     capabilities: Set[str] = field(default_factory=set)
@@ -58,7 +58,7 @@ class AgentProfile:
 
 @dataclass
 class FormationResult:
-    """Result of a coalition formation attempt."""
+    """Result of a coalition formation attempt"""
 
     coalition: Optional[Coalition]
     success: bool
@@ -103,7 +103,7 @@ class ActiveInferenceFormation:
         return likelihood + prior
 
     def calculate_coalition_beliefs(self, agent_profiles: List[AgentProfile]) -> Dict[str, float]:
-        """Calculate emergent coalition beliefs from member beliefs."""
+        """Calculate emergent coalition beliefs from member beliefs"""
         if not agent_profiles:
             return {}
         coalition_beliefs = {}
@@ -127,7 +127,7 @@ class ActiveInferenceFormation:
     def evaluate_coalition_fit(
         self, agent: AgentProfile, existing_members: List[AgentProfile]
     ) -> float:
-        """Evaluate how well an agent fits with existing coalition members."""
+        """Evaluate how well an agent fits with existing coalition members"""
         if not existing_members:
             return 0.0  # Neutral for first member
         # Calculate current coalition beliefs
@@ -144,7 +144,7 @@ class ActiveInferenceFormation:
         goal: Optional[CoalitionGoal] = None,
         max_size: int = 5,
     ) -> FormationResult:
-        """Form coalition using active inference principles."""
+        """Form coalition using active inference principles"""
         start_time = datetime.utcnow()
         if not agents:
             return FormationResult(
@@ -193,8 +193,7 @@ class ActiveInferenceFormation:
             coalition = Coalition(
                 coalition_id=f"coalition_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
                 name=f"Active Inference Coalition",
-                description= (
-                    "Coalition formed through active inference belief alignment",)
+                description=("Coalition formed through active inference belief alignment",),
             )
             # Add members
             for i, agent in enumerate(selected_agents):
@@ -231,7 +230,7 @@ class ActiveInferenceFormation:
 
 
 class CapabilityBasedFormation:
-    """Coalition formation based on capability complementarity."""
+    """Coalition formation based on capability complementarity"""
 
     def __init__(self, coverage_weight: float = 0.6, redundancy_penalty: float = 0.3) -> None:
         self.coverage_weight = coverage_weight
@@ -240,7 +239,7 @@ class CapabilityBasedFormation:
     def calculate_capability_score(
         self, agents: List[AgentProfile], required_capabilities: Optional[Set[str]] = None
     ) -> float:
-        """Calculate how well a group of agents covers required capabilities."""
+        """Calculate how well a group of agents covers required capabilities"""
         if not agents:
             return 0.0
         # Collect all capabilities
@@ -270,7 +269,7 @@ class CapabilityBasedFormation:
         required_capabilities: Optional[Set[str]] = None,
         max_size: int = 5,
     ) -> FormationResult:
-        """Form coalition by optimizing capability coverage."""
+        """Form coalition by optimizing capability coverage"""
         start_time = datetime.utcnow()
         if not agents:
             return FormationResult(
@@ -342,15 +341,14 @@ class CapabilityBasedFormation:
 
 
 class ResourceOptimizationFormation:
-    """Coalition formation based on resource optimization and efficiency."""
+    """Coalition formation based on resource optimization and efficiency"""
 
-    def __init__(self, efficiency_weight: float = (
-        0.5, balance_weight: float = 0.3) -> None:)
+    def __init__(self, efficiency_weight: float = 0.5, balance_weight: float = 0.3) -> None:
         self.efficiency_weight = efficiency_weight
         self.balance_weight = balance_weight
 
     def calculate_resource_efficiency(self, agents: List[AgentProfile]) -> float:
-        """Calculate resource utilization efficiency."""
+        """Calculate resource utilization efficiency"""
         if not agents:
             return 0.0
         # Total resources available
@@ -380,7 +378,7 @@ class ResourceOptimizationFormation:
         resource_requirements: Optional[Dict[str, float]] = None,
         max_size: int = 5,
     ) -> FormationResult:
-        """Form coalition by optimizing resource allocation."""
+        """Form coalition by optimizing resource allocation"""
         start_time = datetime.utcnow()
         if not agents:
             return FormationResult(
@@ -413,8 +411,7 @@ class ResourceOptimizationFormation:
                     total_resources = {}
                     for agent in test_group:
                         for resource, amount in agent.resources.items():
-                            total_resources[resource] = (
-                                total_resources.get(resource, 0) + amount)
+                            total_resources[resource] = total_resources.get(resource, 0) + amount
                     requirement_bonus = 0.0
                     for resource, required in resource_requirements.items():
                         if resource in total_resources:
@@ -436,8 +433,7 @@ class ResourceOptimizationFormation:
             coalition = Coalition(
                 coalition_id=f"coalition_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
                 name="Resource-Optimized Coalition",
-                description= (
-                    "Coalition formed for optimal resource utilization",)
+                description=("Coalition formed for optimal resource utilization",),
             )
             # Assign roles based on resource contribution
             sorted_agents = sorted(
@@ -487,7 +483,7 @@ class CoalitionFormationEngine:
         self.formation_history: List[FormationResult] = []
 
     def register_strategy(self, strategy: FormationStrategy, implementation: Any) -> None:
-        """Register a custom formation strategy."""
+        """Register a custom formation strategy"""
         self.strategies[strategy] = implementation
 
     def form_coalition(
@@ -569,11 +565,10 @@ class CoalitionFormationEngine:
         )
 
     def get_formation_statistics(self) -> Dict[str, Any]:
-        """Get statistics about coalition formation performance."""
+        """Get statistics about coalition formation performance"""
         if not self.formation_history:
             return {}
-        successful_formations = (
-            [r for r in self.formation_history if r.success])
+        successful_formations = [r for r in self.formation_history if r.success]
         stats = {
             "total_attempts": len(self.formation_history),
             "successful_formations": len(successful_formations),

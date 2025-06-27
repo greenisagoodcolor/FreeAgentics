@@ -174,11 +174,12 @@ _Version: 1.0_
 **Purpose**: Mathematical and neural network inference capabilities
 
 **Structure**:
+
 ```
 inference/
 ├── engine/          # Core Active Inference engine (PyMDP integration)
 ├── gnn/            # GMN System: Mathematical notation for PyMDP models
-│   ├── parser.py   # Parse .gmn.md files to PyMDP models  
+│   ├── parser.py   # Parse .gmn.md files to PyMDP models
 │   ├── executor.py # Execute Active Inference
 │   ├── validator.py# Validate mathematical models
 │   └── layers.py   # Graph Neural Network components (ML)
@@ -187,6 +188,7 @@ inference/
 ```
 
 **Key Distinction**:
+
 - `gnn/`: Contains both **GMN** (Generative Model Notation for PyMDP mathematical models) and **GNN** (Graph Neural Network components for ML)
-- GMN components: parser.py, executor.py, validator.py, generator.py (mathematical)  
+- GMN components: parser.py, executor.py, validator.py, generator.py (mathematical)
 - GNN components: layers.py, feature_extractor.py, model_mapper.py (neural networks)

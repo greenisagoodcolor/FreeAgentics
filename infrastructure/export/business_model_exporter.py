@@ -1,4 +1,4 @@
-."""
+"""
 Coalition Business Model Exporter
 
 Integrates with existing export infrastructure to provide investor-ready
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class BusinessModelExportFormat:
-    """Supported export formats for business models."""
+    """Supported export formats for business models"""
 
     JSON = "json"
     CSV = "csv"
@@ -31,7 +31,7 @@ class BusinessModelExportFormat:
 
 
 class InvestorReportTemplate:
-    """Template for investor presentation format."""
+    """Template for investor presentation format"""
 
     EXECUTIVE_SUMMARY = "executive_summary"
     BUSINESS_METRICS = "business_metrics"
@@ -113,7 +113,7 @@ class CoalitionBusinessModelExporter:
         business_metrics: BusinessValueMetrics,
         coalition_data: Dict[str, Any],
     ) -> Dict[str, Any]:
-        """Prepare comprehensive business model data structure."""
+        """Prepare comprehensive business model data structure"""
 
         # Extract coalition information
         coalition_info = coalition_data.get("coalition", {})
@@ -145,15 +145,13 @@ class CoalitionBusinessModelExporter:
                     "synergy_score": f"{business_metrics.synergy_score:.1%}",
                     "value_creation": self._calculate_value_creation(business_metrics),
                     "capability_complementarity": self._analyze_capability_synergy(agent_profiles),
-                    "methodology": business_metrics.methodology_notes.get("synergy",
-                        ""),
+                    "methodology": business_metrics.methodology_notes.get("synergy", ""),
                 },
                 "risk_management": {
                     "risk_reduction_score": f"{business_metrics.risk_reduction:.1%}",
                     "diversification_analysis": self._analyze_diversification(agent_profiles),
                     "risk_mitigation_strategies": self._identify_risk_mitigations(agent_profiles),
-                    "methodology": business_metrics.methodology_notes.get("risk_reduction",
-                        ""),
+                    "methodology": business_metrics.methodology_notes.get("risk_reduction", ""),
                 },
                 "market_position": {
                     "positioning_score": f"{business_metrics.market_positioning:.1%}",
@@ -161,15 +159,13 @@ class CoalitionBusinessModelExporter:
                         formation_result, agent_profiles
                     ),
                     "market_readiness": self._assess_market_readiness(business_metrics),
-                    "methodology": business_metrics.methodology_notes.get("market_positioning",
-                        ""),
+                    "methodology": business_metrics.methodology_notes.get("market_positioning", ""),
                 },
                 "sustainability": {
                     "sustainability_score": f"{business_metrics.sustainability_score:.1%}",
                     "long_term_viability": self._assess_long_term_viability(business_metrics),
                     "resource_efficiency": self._analyze_resource_efficiency(agent_profiles),
-                    "methodology": business_metrics.methodology_notes.get("sustainability",
-                        ""),
+                    "methodology": business_metrics.methodology_notes.get("sustainability", ""),
                 },
                 "operational_metrics": {
                     "efficiency_score": f"{business_metrics.operational_efficiency:.1%}",
@@ -206,8 +202,7 @@ class CoalitionBusinessModelExporter:
             },
             "risk_assessment": {
                 "overall_risk_level": self._calculate_overall_risk(business_metrics),
-                "key_risk_factors": self._identify_key_risks(agent_profiles,
-                    business_metrics),
+                "key_risk_factors": self._identify_key_risks(agent_profiles, business_metrics),
                 "mitigation_strategies": self._recommend_mitigations(business_metrics),
                 "contingency_plans": self._suggest_contingencies(agent_profiles),
             },
@@ -239,7 +234,7 @@ class CoalitionBusinessModelExporter:
         include_sections: Optional[List[str]],
         template_style: str,
     ) -> Dict[str, Any]:
-        """Generate export file in specified format."""
+        """Generate export file in specified format"""
 
         timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
         coalition_id = business_model["metadata"]["coalition_id"]
@@ -265,7 +260,7 @@ class CoalitionBusinessModelExporter:
     def _export_json(
         self, business_model: Dict[str, Any], coalition_id: str, timestamp: str
     ) -> Dict[str, Any]:
-        """Export as JSON format."""
+        """Export as JSON format"""
         filename = f"coalition_{coalition_id}_business_model_{timestamp}.json"
         file_path = self.output_dir / filename
 
@@ -282,7 +277,7 @@ class CoalitionBusinessModelExporter:
     def _export_csv(
         self, business_model: Dict[str, Any], coalition_id: str, timestamp: str
     ) -> Dict[str, Any]:
-        """Export as CSV format (flattened metrics)."""
+        """Export as CSV format (flattened metrics)"""
         filename = f"coalition_{coalition_id}_metrics_{timestamp}.csv"
         file_path = self.output_dir / filename
 
@@ -292,12 +287,9 @@ class CoalitionBusinessModelExporter:
         # Executive summary
         exec_summary = business_model.get("executive_summary", {})
         csv_data.append(["Coalition Name", exec_summary.get("coalition_name", "")])
-        csv_data.append(["Total Business Value", exec_summary.get("total_business_value",
-            "")])
-        csv_data.append(["Confidence Level", exec_summary.get("confidence_level",
-            "")])
-        csv_data.append(["Investment Readiness", exec_summary.get("investment_readiness",
-            "")])
+        csv_data.append(["Total Business Value", exec_summary.get("total_business_value", "")])
+        csv_data.append(["Confidence Level", exec_summary.get("confidence_level", "")])
+        csv_data.append(["Investment Readiness", exec_summary.get("investment_readiness", "")])
 
         # Business metrics
         business_metrics = business_model.get("business_metrics", {})
@@ -321,7 +313,7 @@ class CoalitionBusinessModelExporter:
     def _export_markdown(
         self, business_model: Dict[str, Any], coalition_id: str, timestamp: str
     ) -> Dict[str, Any]:
-        """Export as Markdown format for documentation."""
+        """Export as Markdown format for documentation"""
         filename = f"coalition_{coalition_id}_business_model_{timestamp}.md"
         file_path = self.output_dir / filename
 
@@ -340,7 +332,7 @@ class CoalitionBusinessModelExporter:
     def _export_placeholder(
         self, business_model: Dict[str, Any], coalition_id: str, timestamp: str, format_type: str
     ) -> Dict[str, Any]:
-        """Placeholder for advanced formats requiring additional libraries."""
+        """Placeholder for advanced formats requiring additional libraries"""
         return {
             "success": False,
             "error": f"Export format {format_type} requires additional dependencies",
@@ -354,7 +346,7 @@ class CoalitionBusinessModelExporter:
 
     # Helper methods for business analysis
     def _identify_key_strengths(self, metrics: BusinessValueMetrics) -> List[str]:
-        """Identify top strengths based on metrics."""
+        """Identify top strengths based on metrics"""
         strengths = []
         if metrics.synergy_score > 0.7:
             strengths.append("Strong capability synergy")
@@ -367,7 +359,7 @@ class CoalitionBusinessModelExporter:
         return strengths
 
     def _assess_investment_readiness(self, metrics: BusinessValueMetrics) -> str:
-        """Assess overall investment readiness."""
+        """Assess overall investment readiness"""
         if metrics.total_value > 0.8 and metrics.confidence_level > 0.7:
             return "HIGH - Ready for investment"
         elif metrics.total_value > 0.6 and metrics.confidence_level > 0.5:
@@ -378,7 +370,7 @@ class CoalitionBusinessModelExporter:
     def _generate_summary_statement(
         self, coalition_info: Dict[str, Any], metrics: BusinessValueMetrics
     ) -> str:
-        """Generate executive summary statement."""
+        """Generate executive summary statement"""
         name = coalition_info.get("name", "Coalition")
         value = metrics.total_value
 
@@ -390,7 +382,7 @@ class CoalitionBusinessModelExporter:
             return f"{name} is in early development stage with potential for future value creation."
 
     def _generate_markdown_content(self, business_model: Dict[str, Any]) -> str:
-        """Generate formatted Markdown content."""
+        """Generate formatted Markdown content"""
         md = []
 
         # Title
@@ -523,8 +515,7 @@ class CoalitionBusinessModelExporter:
         return "Excellent strategic fit" if metrics.total_value > 0.7 else "Good strategic fit"
 
     def _identify_growth_opportunities(self, metrics: BusinessValueMetrics) -> List[str]:
-        return ["Market expansion", "Capability enhancement",
-            "Resource optimization"]
+        return ["Market expansion", "Capability enhancement", "Resource optimization"]
 
     def _calculate_overall_risk(self, metrics: BusinessValueMetrics) -> str:
         risk_score = 1.0 - metrics.risk_reduction
@@ -534,8 +525,7 @@ class CoalitionBusinessModelExporter:
         return ["Market volatility", "Resource constraints", "Coordination challenges"]
 
     def _recommend_mitigations(self, metrics: BusinessValueMetrics) -> List[str]:
-        return ["Diversification strategy", "Contingency planning",
-            "Regular monitoring"]
+        return ["Diversification strategy", "Contingency planning", "Regular monitoring"]
 
     def _suggest_contingencies(self, profiles: List) -> List[str]:
         return ["Backup resource allocation", "Alternative coordination methods", "Exit strategies"]

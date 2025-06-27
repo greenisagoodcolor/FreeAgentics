@@ -62,7 +62,7 @@ class TestEntropyBasedSeeker:
         return (seeker, config, gen_model)
 
     def test_initialization(self, setup_seeker) -> None:
-        ."""Test seeker initialization."""
+        """Test seeker initialization"""
         seeker, config, gen_model = setup_seeker
         assert seeker.config == config
         assert seeker.generative_model == gen_model
@@ -302,8 +302,7 @@ class TestFactoryFunction:
 
     def test_create_planner(self) -> None:
         """Test creating information gain planner"""
-        config = (
-            ActiveLearningConfig(information_metric=InformationMetric.ENTROPY, use_gpu=False))
+        config = ActiveLearningConfig(information_metric=InformationMetric.ENTROPY, use_gpu=False)
         dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
         params = ModelParameters(use_gpu=False)
         gen_model = DiscreteGenerativeModel(dims, params)
@@ -311,7 +310,7 @@ class TestFactoryFunction:
         assert isinstance(planner, InformationGainPlanner)
 
     def test_invalid_learner_type(self) -> None:
-        ."""Test invalid learner type."""
+        """Test invalid learner type"""
         with pytest.raises(ValueError, match="Unknown learner type"):
             create_active_learner("invalid")
 

@@ -23,23 +23,25 @@ cd web && npm install && cd ..
 npm run dev
 ```
 
-Visit **http://localhost:3000** to access the FreeAgentics platform.
+Visit **<http://localhost:3000>** to access the FreeAgentics platform.
 
 ## Create Your First Agent (2 minutes)
 
 ### Option 1: Web Interface
-1. Navigate to http://localhost:3000/agents
+
+1. Navigate to <http://localhost:3000/agents>
 2. Click "Create Agent"
 3. Select "Explorer" template
 4. Adjust personality sliders (curiosity: 0.8, caution: 0.3)
 5. Click "Create Agent"
 
 ### Option 2: Python Code
+
 ```python
 from freeagentics import Agent, World
 
 # Create an autonomous explorer
-explorer = Agent.create("Explorer", 
+explorer = Agent.create("Explorer",
                        name="Scout",
                        personality={'curiosity': 0.8, 'caution': 0.3})
 
@@ -55,14 +57,14 @@ for step in range(50):
 
 ## Watch Your Agent in Action
 
-1. Go to **http://localhost:3000/world** 
+1. Go to **<http://localhost:3000/world>**
 2. See your agent moving autonomously based on Active Inference
-3. Monitor belief states at **http://localhost:3000/active-inference-demo**
+3. Monitor belief states at **<http://localhost:3000/active-inference-demo>**
 
 ## Next Steps
 
 - **Learn More**: [User Guide](USER-GUIDE.md) - Complete feature walkthrough
-- **Develop**: [Developer Guide](DEVELOPER-GUIDE.md) - Setup development environment  
+- **Develop**: [Developer Guide](DEVELOPER-GUIDE.md) - Setup development environment
 - **Deploy**: [Deployment Guide](DEPLOYMENT.md) - Production deployment options
 - **Understand**: [Architecture](ARCHITECTURE.md) - Technical deep dive
 
@@ -76,4 +78,4 @@ For more help, see [Troubleshooting Guide](TROUBLESHOOTING.md).
 
 ---
 
-*You now have autonomous AI agents running! 🎉*
+_You now have autonomous AI agents running! 🎉_

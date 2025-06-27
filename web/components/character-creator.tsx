@@ -15,14 +15,17 @@ interface CharacterCreatorProps {
   onSuccess: (agent: Agent) => void;
 }
 
-export function CharacterCreator({ onClose, onSuccess }: CharacterCreatorProps) {
+export function CharacterCreator({
+  onClose,
+  onSuccess,
+}: CharacterCreatorProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<Agent | null>(null);
 
   const handleAgentCreate = async (
     template: AgentTemplate,
-    configuration: AgentConfigurationData
+    configuration: AgentConfigurationData,
   ) => {
     setIsSubmitting(true);
     setError(null);
@@ -35,9 +38,13 @@ export function CharacterCreator({ onClose, onSuccess }: CharacterCreatorProps) 
         // Convert Active Inference configuration
         activeInference: {
           template: template.category, // Use template category as Active Inference template
-          stateLabels: ['State1', 'State2', 'State3'],
-          numStates: configuration.mathematics?.matrices?.aMatrix?.rows || template.mathematicalFoundation.beliefsStates,
-          numObservations: configuration.mathematics?.matrices?.bMatrix?.observations || template.mathematicalFoundation.observationModalities,
+          stateLabels: ["State1", "State2", "State3"],
+          numStates:
+            configuration.mathematics?.matrices?.aMatrix?.rows ||
+            template.mathematicalFoundation.beliefsStates,
+          numObservations:
+            configuration.mathematics?.matrices?.bMatrix?.observations ||
+            template.mathematicalFoundation.observationModalities,
           numActions: template.mathematicalFoundation.actionSpaces,
           generativeModel: {
             A: [],
@@ -46,9 +53,15 @@ export function CharacterCreator({ onClose, onSuccess }: CharacterCreatorProps) 
             D: [],
           },
           precisionParameters: {
-            sensory: configuration.mathematics?.precision?.sensoryPrecision || template.mathematicalFoundation.defaultPrecision.sensory,
-            policy: configuration.mathematics?.precision?.policyPrecision || template.mathematicalFoundation.defaultPrecision.policy,
-            state: configuration.mathematics?.precision?.statePrecision || template.mathematicalFoundation.defaultPrecision.state,
+            sensory:
+              configuration.mathematics?.precision?.sensoryPrecision ||
+              template.mathematicalFoundation.defaultPrecision.sensory,
+            policy:
+              configuration.mathematics?.precision?.policyPrecision ||
+              template.mathematicalFoundation.defaultPrecision.policy,
+            state:
+              configuration.mathematics?.precision?.statePrecision ||
+              template.mathematicalFoundation.defaultPrecision.state,
           },
           mathematicalConstraints: {
             normalizedBeliefs: true,
@@ -60,12 +73,16 @@ export function CharacterCreator({ onClose, onSuccess }: CharacterCreatorProps) 
         // Add legacy personality mapping for backward compatibility
         personality: undefined,
 
-        capabilities: template.capabilities || ['movement', 'perception', 'communication'],
+        capabilities: template.capabilities || [
+          "movement",
+          "perception",
+          "communication",
+        ],
 
         tags: [
           template.category,
           template.complexity,
-          ...configuration.environment?.tags || []
+          ...(configuration.environment?.tags || []),
         ],
 
         metadata: {
@@ -75,9 +92,9 @@ export function CharacterCreator({ onClose, onSuccess }: CharacterCreatorProps) 
           description: configuration.description,
           mathematicalFoundation: template.mathematicalFoundation,
           createdViaWizard: true,
-          configurationVersion: '1.0',
-          ...configuration.advanced?.customParameters || {}
-        }
+          configurationVersion: "1.0",
+          ...(configuration.advanced?.customParameters || {}),
+        },
       };
 
       // Create agent via API
@@ -89,11 +106,11 @@ export function CharacterCreator({ onClose, onSuccess }: CharacterCreatorProps) 
       setTimeout(() => {
         onSuccess(result.agent);
       }, 1500);
-
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const errorMessage =
+        err instanceof Error ? err.message : "Unknown error occurred";
       setError(errorMessage);
-      console.error('Agent creation failed:', err);
+      console.error("Agent creation failed:", err);
     } finally {
       setIsSubmitting(false);
     }
@@ -109,9 +126,10 @@ export function CharacterCreator({ onClose, onSuccess }: CharacterCreatorProps) 
       const result = await agentsApi.createAgentFromTemplate({
         template: template.category,
         name: `${template.name} ${Date.now()}`,
-        stateLabels: ['Explore', 'Rest', 'Communicate', 'Plan'],
+        stateLabels: ["Explore", "Rest", "Communicate", "Plan"],
         precisionParameters: {
-          sensory: template.mathematicalFoundation.defaultPrecision.sensory || 16,
+          sensory:
+            template.mathematicalFoundation.defaultPrecision.sensory || 16,
           policy: template.mathematicalFoundation.defaultPrecision.policy || 12,
           state: template.mathematicalFoundation.defaultPrecision.state || 2,
         },
@@ -121,7 +139,7 @@ export function CharacterCreator({ onClose, onSuccess }: CharacterCreatorProps) 
           templateName: template.name,
           complexity: template.complexity,
           createdDirectly: true,
-        }
+        },
       });
 
       setSuccess(result.agent);
@@ -129,9 +147,9 @@ export function CharacterCreator({ onClose, onSuccess }: CharacterCreatorProps) 
       setTimeout(() => {
         onSuccess(result.agent);
       }, 1500);
-
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const errorMessage =
+        err instanceof Error ? err.message : "Unknown error occurred";
       setError(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -148,14 +166,20 @@ export function CharacterCreator({ onClose, onSuccess }: CharacterCreatorProps) 
               Agent Created Successfully!
             </h3>
             <p className="text-sm text-green-700 mt-2">
-              <strong>{success.name}</strong> has been created with Active Inference capabilities.
+              <strong>{success.name}</strong> has been created with Active
+              Inference capabilities.
             </p>
             {success.activeInference && (
               <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
                 <div className="text-xs text-green-800 space-y-1">
                   <p>• Template: {success.activeInference.template}</p>
                   <p>• States: {success.activeInference.numStates}</p>
-                  <p>• Precision γ: {success.activeInference.precisionParameters.sensory.toFixed(1)}</p>
+                  <p>
+                    • Precision γ:{" "}
+                    {success.activeInference.precisionParameters.sensory.toFixed(
+                      1,
+                    )}
+                  </p>
                   <p>• Mathematical validation: ✓ Passed</p>
                 </div>
               </div>
@@ -174,7 +198,7 @@ export function CharacterCreator({ onClose, onSuccess }: CharacterCreatorProps) 
           <h2 className="text-2xl font-bold">Create Active Inference Agent</h2>
           <p className="text-muted-foreground mt-1">
             Build a mathematically rigorous agent with real-time visualization
-      </p>
+          </p>
         </div>
         <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
           Cancel
@@ -200,7 +224,8 @@ export function CharacterCreator({ onClose, onSuccess }: CharacterCreatorProps) 
               <div className="text-center">
                 <p className="font-medium">Creating Agent...</p>
                 <p className="text-sm text-muted-foreground">
-                  Validating mathematical parameters and initializing Active Inference systems
+                  Validating mathematical parameters and initializing Active
+                  Inference systems
                 </p>
               </div>
             </div>
@@ -216,14 +241,28 @@ export function CharacterCreator({ onClose, onSuccess }: CharacterCreatorProps) 
 
       {/* Mathematical Information */}
       <Card className="p-4 bg-blue-50 border-blue-200">
-        <h4 className="font-semibold text-blue-900 mb-2">Active Inference Integration</h4>
+        <h4 className="font-semibold text-blue-900 mb-2">
+          Active Inference Integration
+        </h4>
         <div className="text-sm text-blue-800 space-y-1">
-          <p>• <strong>API Validation:</strong> Mathematical constraints verified server-side</p>
-          <p>• <strong>Belief States:</strong> Real-time q(s) distribution with entropy calculation</p>
-          <p>• <strong>Free Energy:</strong> F = Accuracy + Complexity minimization</p>
-          <p>• <strong>pymdp Compatible:</strong> Ready for expert review and production deployment</p>
-      </div>
-    </Card>
+          <p>
+            • <strong>API Validation:</strong> Mathematical constraints verified
+            server-side
+          </p>
+          <p>
+            • <strong>Belief States:</strong> Real-time q(s) distribution with
+            entropy calculation
+          </p>
+          <p>
+            • <strong>Free Energy:</strong> F = Accuracy + Complexity
+            minimization
+          </p>
+          <p>
+            • <strong>pymdp Compatible:</strong> Ready for expert review and
+            production deployment
+          </p>
+        </div>
+      </Card>
     </div>
   );
 }

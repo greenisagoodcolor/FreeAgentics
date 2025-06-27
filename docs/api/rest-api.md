@@ -135,6 +135,7 @@ Response includes full agent data with GNN model:
 Create a new agent with legacy personality system or Active Inference mathematical configuration:
 
 #### Legacy Agent Creation
+
 ```http
 POST /api/agents
 Content-Type: application/json
@@ -154,6 +155,7 @@ Content-Type: application/json
 ```
 
 #### Active Inference Agent Creation
+
 ```http
 POST /api/agents
 Content-Type: application/json
@@ -201,7 +203,7 @@ Response:
 ```json
 {
   "agent": {
-  "id": "agent_456",
+    "id": "agent_456",
     "name": "MathematicalExplorer",
     "status": "idle",
     "activeInference": {
@@ -580,6 +582,7 @@ GET /api/agents/{agent_id}/free-energy
 ```
 
 Query parameters:
+
 - `timeWindow`: Time window in milliseconds (default: 3600000 = 1 hour)
 - `granularity`: Data point granularity (default: 1000ms)
 

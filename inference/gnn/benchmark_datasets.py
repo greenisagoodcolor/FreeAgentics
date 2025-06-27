@@ -17,7 +17,7 @@ from .batch_processor import GraphData
 """
 Benchmark Datasets for GNN Testing
 Provides standard graph datasets for benchmarking and validation.
-."""
+"""
 
 
 @dataclass

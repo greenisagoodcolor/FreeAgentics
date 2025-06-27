@@ -15,7 +15,7 @@ from inference.gnn.feature_extractor import (
 
 
 class TestFeatureConfig:
-    ."""Test FeatureConfig dataclass."""
+    """Test FeatureConfig dataclass"""
 
     def test_default_config(self) -> None:
         """Test default configuration values"""
@@ -46,7 +46,7 @@ class TestFeatureConfig:
 
 
 class TestNodeFeatureExtractor:
-    ."""Test NodeFeatureExtractor class."""
+    """Test NodeFeatureExtractor class"""
 
     def test_initialization(self) -> None:
         """Test extractor initialization"""

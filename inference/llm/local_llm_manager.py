@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 class LocalLLMProvider(Enum):
-    """Supported local LLM providers."""
+    """Supported local LLM providers"""
 
     OLLAMA = "ollama"
     LLAMA_CPP = "llama_cpp"
@@ -35,7 +35,7 @@ class LocalLLMProvider(Enum):
 
 
 class QuantizationLevel(Enum):
-    """Model quantization levels."""
+    """Model quantization levels"""
 
     FULL = "f32"  # Full precision
     HALF = "f16"  # Half precision
@@ -46,7 +46,7 @@ class QuantizationLevel(Enum):
 
 @dataclass
 class LocalLLMConfig:
-    """Configuration for local LLM."""
+    """Configuration for local LLM"""
 
     provider: LocalLLMProvider
     model_name: str
@@ -75,7 +75,7 @@ class LocalLLMConfig:
 
 @dataclass
 class LLMResponse:
-    """Response from local LLM."""
+    """Response from local LLM"""
 
     text: str
     tokens_used: int
@@ -87,35 +87,35 @@ class LLMResponse:
 
 
 class LocalLLMProvider(ABC):
-    """Abstract base class for local LLM providers."""
+    """Abstract base class for local LLM providers"""
 
     @abstractmethod
     def generate(self, prompt: str, **kwargs) -> LLMResponse:
-        """Generate response from prompt."""
+        """Generate response from prompt"""
         pass
 
     @abstractmethod
     def is_available(self) -> bool:
-        """Check if provider is available."""
+        """Check if provider is available"""
         pass
 
     @abstractmethod
     def load_model(self, model_path: Path, config: LocalLLMConfig) -> bool:
-        """Load model into memory."""
+        """Load model into memory"""
         pass
 
 
 class OllamaProvider(LocalLLMProvider):
-    """Ollama integration for local LLM inference."""
+    """Ollama integration for local LLM inference"""
 
     def __init__(self, config: LocalLLMConfig) -> None:
-        """Initialize Ollama provider."""
+        """Initialize Ollama provider"""
         self.config = config
         self.base_url = config.ollama_host
         self.session = requests.Session()
 
     def is_available(self) -> bool:
-        """Check if Ollama is running."""
+        """Check if Ollama is running"""
         try:
             response = self.session.get(f"{self.base_url}/api/tags", timeout=2)
             return response.status_code == 200
@@ -123,7 +123,7 @@ class OllamaProvider(LocalLLMProvider):
             return False
 
     def load_model(self, model_path: Path, config: LocalLLMConfig) -> bool:
-        """Load model in Ollama."""
+        """Load model in Ollama"""
         try:
             # Check if model exists
             response = self.session.get(f"{self.base_url}/api/tags")
@@ -149,7 +149,7 @@ class OllamaProvider(LocalLLMProvider):
             return False
 
     def generate(self, prompt: str, **kwargs) -> LLMResponse:
-        """Generate response using Ollama."""
+        """Generate response using Ollama"""
         start_time = time.time()
         try:
             data = {
@@ -191,21 +191,21 @@ class OllamaProvider(LocalLLMProvider):
 
 
 class LlamaCppProvider(LocalLLMProvider):
-    """llama.cpp integration for local LLM inference."""
+    """llama.cpp integration for local LLM inference"""
 
     def __init__(self, config: LocalLLMConfig) -> None:
-        """Initialize llama.cpp provider."""
+        """Initialize llama.cpp provider"""
         self.config = config
         self.process = None
         self.model_loaded = False
 
     def is_available(self) -> bool:
-        """Check if llama.cpp binary exists."""
+        """Check if llama.cpp binary exists"""
         binary_path = Path(self.config.llama_cpp_binary)
         return binary_path.exists() and binary_path.is_file()
 
     def load_model(self, model_path: Path, config: LocalLLMConfig) -> bool:
-        """Verify model file exists."""
+        """Verify model file exists"""
         if not model_path.exists():
             logger.error(f"Model file not found: {model_path}")
             return False
@@ -214,7 +214,7 @@ class LlamaCppProvider(LocalLLMProvider):
         return True
 
     def generate(self, prompt: str, **kwargs) -> LLMResponse:
-        """Generate response using llama.cpp."""
+        """Generate response using llama.cpp"""
         if not self.model_loaded or not self.config.model_path:
             raise Exception("Model not loaded")
         start_time = time.time()
@@ -277,10 +277,10 @@ class LlamaCppProvider(LocalLLMProvider):
 
 
 class ResponseCache:
-    """Cache for LLM responses."""
+    """Cache for LLM responses"""
 
     def __init__(self, max_size_mb: int = 100) -> None:
-        """Initialize response cache."""
+        """Initialize response cache"""
         self.max_size_bytes = max_size_mb * 1024 * 1024
         self.cache: Dict[str, tuple[LLMResponse, float]] = {}
         self.cache_hits = 0
@@ -288,7 +288,7 @@ class ResponseCache:
         self.lock = threading.Lock()
 
     def _get_cache_key(self, prompt: str, **kwargs) -> str:
-        """Generate cache key from prompt and parameters."""
+        """Generate cache key from prompt and parameters"""
         key_data = {
             "prompt": prompt,
             "temperature": kwargs.get("temperature", 0.7),
@@ -298,7 +298,7 @@ class ResponseCache:
         return hashlib.sha256(key_str.encode()).hexdigest()
 
     def get(self, prompt: str, **kwargs) -> Optional[LLMResponse]:
-        """Get cached response if available."""
+        """Get cached response if available"""
         key = self._get_cache_key(prompt, **kwargs)
         with self.lock:
             if key in self.cache:
@@ -314,7 +314,7 @@ class ResponseCache:
             return None
 
     def put(self, prompt: str, response: LLMResponse, **kwargs):
-        """Cache a response."""
+        """Cache a response"""
         key = self._get_cache_key(prompt, **kwargs)
         with self.lock:
             # Simple size management - remove oldest entries if too large
@@ -324,7 +324,7 @@ class ResponseCache:
             self.cache[key] = (response, time.time())
 
     def get_stats(self) -> Dict[str, Any]:
-        """Get cache statistics."""
+        """Get cache statistics"""
         with self.lock:
             total_requests = self.cache_hits + self.cache_misses
             hit_rate = self.cache_hits / total_requests if total_requests > 0 else 0
@@ -337,10 +337,10 @@ class ResponseCache:
 
 
 class FallbackResponder:
-    """Provides fallback responses when LLM is unavailable."""
+    """Provides fallback responses when LLM is unavailable"""
 
     def __init__(self) -> None:
-        """Initialize fallback responder."""
+        """Initialize fallback responder"""
         self.templates = {
             "greeting": [
                 "Hello! I'm operating in offline mode.",
@@ -380,16 +380,14 @@ class FallbackResponder:
         }
 
     def get_fallback_response(self, prompt: str) -> str:
-        """Generate a fallback response based on prompt content."""
+        """Generate a fallback response based on prompt content"""
         prompt_lower = prompt.lower()
         # Detect intent from prompt
         if any(word in prompt_lower for word in ["hello", "hi", "greet"]):
             category = "greeting"
-        elif any(word in prompt_lower for word in ["explore", "find",
-            "search"]):
+        elif any(word in prompt_lower for word in ["explore", "find", "search"]):
             category = "exploration"
-        elif any(word in prompt_lower for word in ["trade", "exchange", "buy",
-            "sell"]):
+        elif any(word in prompt_lower for word in ["trade", "exchange", "buy", "sell"]):
             category = "trading"
         elif any(word in prompt_lower for word in ["research", "analyze", "study"]):
             category = "research"
@@ -415,7 +413,7 @@ class LocalLLMManager:
     """
 
     def __init__(self, config: LocalLLMConfig) -> None:
-        """Initialize Local LLM Manager."""
+        """Initialize Local LLM Manager"""
         self.config = config
         self.providers: Dict[LocalLLMProvider, LocalLLMProvider] = {}
         self.cache = ResponseCache(config.cache_size_mb)
@@ -425,7 +423,7 @@ class LocalLLMManager:
         self._initialize_providers()
 
     def _initialize_providers(self):
-        """Initialize available providers."""
+        """Initialize available providers"""
         # Try Ollama first
         if self.config.provider == LocalLLMProvider.OLLAMA:
             ollama = OllamaProvider(self.config)
@@ -445,7 +443,7 @@ class LocalLLMManager:
             logger.warning("No local LLM providers available")
 
     def load_model(self, model_path: Optional[Path] = None) -> bool:
-        """Load model for inference."""
+        """Load model for inference"""
         if not self.current_provider:
             logger.error("No provider available to load model")
             return False
@@ -505,7 +503,7 @@ class LocalLLMManager:
         raise Exception("All LLM providers failed and fallback disabled")
 
     def _try_generate(self, provider: LocalLLMProvider, prompt: str, **kwargs) -> LLMResponse:
-        """Try to generate with retries."""
+        """Try to generate with retries"""
         last_error = None
         for attempt in range(self.config.retry_attempts):
             try:
@@ -517,7 +515,7 @@ class LocalLLMManager:
         raise last_error
 
     def get_status(self) -> Dict[str, Any]:
-        """Get status of LLM manager."""
+        """Get status of LLM manager"""
         return {
             "current_provider": (
                 type(self.current_provider).__name__ if self.current_provider else None
