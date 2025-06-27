@@ -194,10 +194,12 @@ class DiscreteGenerativeModel(GenerativeModel):
         """
         if not isinstance(actions, torch.Tensor):
             actions = torch.tensor([actions], device=self.device)
+        else:
+            actions = actions.to(self.device)
         if states.dim() == 1:
             # Single state distribution
             if actions.numel() == 1:
-                return self.B[:, :, actions.item()] @ states
+                return self.B[:, :, int(actions.item())] @ states
             else:
                 raise ValueError("Multiple actions for single state not supported")
         else:
@@ -205,7 +207,7 @@ class DiscreteGenerativeModel(GenerativeModel):
             batch_size = states.shape[0]
             next_states = torch.zeros_like(states)
             for i in range(batch_size):
-                action = actions[i].item() if actions.dim() > 0 else actions.item()
+                action = int(actions[i].item() if actions.dim() > 0 else actions.item())
                 next_states[i] = self.B[:, :, action] @ states[i]
             return next_states
 
@@ -338,7 +340,7 @@ class ContinuousGenerativeModel(GenerativeModel, nn.Module):
         self.trans_mean = nn.Linear(self.hidden_dim, self.dims.num_states)
         self.trans_log_var = nn.Parameter(torch.zeros(self.dims.num_states))
 
-    def observation_model(self, states: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+    def observation_model(self, states: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:  # type: ignore[override]
         """
         Compute observation distribution parameters given states.
         Args:
@@ -356,7 +358,7 @@ class ContinuousGenerativeModel(GenerativeModel, nn.Module):
 
     def transition_model(
         self, states: torch.Tensor, actions: torch.Tensor
-    ) -> tuple[torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor]:  # type: ignore[override]
         """Compute state transition distribution"""
         if states.dim() == 1:
             states = states.unsqueeze(0)

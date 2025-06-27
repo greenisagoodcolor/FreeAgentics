@@ -643,7 +643,8 @@ def create_precision_optimizer(
     elif optimizer_type == "adaptive":
         num_modalities = kwargs.get("num_modalities", 1)
         context_dim = kwargs.get("context_dim", None)
-        return AdaptivePrecisionController(config, num_modalities, context_dim)
+        controller = AdaptivePrecisionController(config, num_modalities, context_dim)
+        return controller  # type: ignore[return-value]
     else:
         raise ValueError(f"Unknown optimizer type: {optimizer_type}")
 

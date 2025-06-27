@@ -1,0 +1,213 @@
+/* FreeAgentics Design System Tokens
+   Following Bloomberg Terminal aesthetic with dark theme
+   As specified in the PRD */
+
+:root {
+  /* Spacing Units */
+  --spacing-unit: 4px;
+  --spacing-xs: 8px;
+  --spacing-sm: 16px;
+  --spacing-md: 24px;
+  --spacing-lg: 32px;
+  --spacing-xl: 48px;
+  --spacing-2xl: 64px;
+
+  /* Border Radius */
+  --radius-input: 4px;
+  --radius-card: 8px;
+  --radius-modal: 12px;
+  --radius-full: 9999px;
+
+  /* Typography */
+  --font-ui: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, 'Liberation Mono', monospace;
+
+  /* Font Sizes */
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 1.875rem;  /* 30px */
+
+  /* Font Weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* Line Heights */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+
+  /* Dark Mode Color Palette (Default) */
+  --bg-primary: #0A0A0B;
+  --bg-secondary: #1A1A1C;
+  --bg-tertiary: #2A2A2C;
+  --bg-elevated: #3A3A3C;
+  
+  --text-primary: #FFFFFF;
+  --text-secondary: #A0A0A0;
+  --text-tertiary: #707070;
+  --text-muted: #505050;
+
+  --border-primary: #2A2A2C;
+  --border-secondary: #3A3A3C;
+  --border-tertiary: #4A4A4C;
+
+  /* Accent Colors */
+  --accent-primary: #4F46E5;      /* Indigo - Primary actions */
+  --accent-primary-hover: #4338CA;
+  --accent-primary-muted: #4F46E520;
+  
+  --success: #10B981;             /* Green - Success states */
+  --success-hover: #059669;
+  --success-muted: #10B98120;
+  
+  --warning: #F59E0B;             /* Amber - Warning states */
+  --warning-hover: #D97706;
+  --warning-muted: #F59E0B20;
+  
+  --error: #EF4444;               /* Red - Error states */
+  --error-hover: #DC2626;
+  --error-muted: #EF444420;
+
+  --info: #3B82F6;                /* Blue - Information */
+  --info-hover: #2563EB;
+  --info-muted: #3B82F620;
+
+  /* Agent Template Colors */
+  --agent-explorer: #10B981;      /* Green */
+  --agent-merchant: #3B82F6;      /* Blue */
+  --agent-scholar: #8B5CF6;       /* Purple */
+  --agent-guardian: #EF4444;      /* Red */
+  --agent-generalist: #F59E0B;    /* Amber */
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* Animations */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+
+  /* Z-index Scale */
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
+  --z-notification: 800;
+
+  /* Component Specific */
+  --panel-min-width: 200px;
+  --panel-max-width: 600px;
+  --sidebar-width: 280px;
+  --sidebar-collapsed: 64px;
+  
+  --header-height: 48px;
+  --stats-bar-height: 32px;
+  
+  --message-avatar-size: 32px;
+  --agent-card-width: 80px;
+  --agent-card-height: 100px;
+
+  /* Grid System */
+  --grid-columns: 12;
+  --grid-gap: 16px;
+  
+  /* Performance Thresholds */
+  --threshold-good: #10B981;
+  --threshold-warning: #F59E0B;
+  --threshold-critical: #EF4444;
+}
+
+/* Utility Classes */
+.font-ui { font-family: var(--font-ui); }
+.font-mono { font-family: var(--font-mono); }
+
+/* Bloomberg Terminal Specific Styles */
+.terminal-glow {
+  text-shadow: 0 0 2px currentColor;
+}
+
+.terminal-border {
+  border: 1px solid var(--border-primary);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.terminal-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-md);
+}
+
+/* Status Indicators */
+.status-active { color: var(--success); }
+.status-idle { color: var(--text-secondary); }
+.status-error { color: var(--error); }
+.status-warning { color: var(--warning); }
+
+/* Agent Status Colors */
+.agent-typing::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--success);
+  border-radius: 50%;
+  animation: pulse 1.5s ease-in-out infinite;
+  margin-right: 4px;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Scrollbar Styling */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-secondary) var(--bg-primary);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border-secondary);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--border-tertiary);
+}
+
+/* Performance Indicators */
+.perf-good { background: var(--threshold-good); }
+.perf-warning { background: var(--threshold-warning); }
+.perf-critical { background: var(--threshold-critical); }
+
+/* Responsive Breakpoints */
+@media (max-width: 640px) { /* Mobile */ }
+@media (min-width: 641px) and (max-width: 1024px) { /* Tablet */ }
+@media (min-width: 1025px) and (max-width: 1440px) { /* Desktop */ }
+@media (min-width: 1441px) { /* Large Desktop */ } 

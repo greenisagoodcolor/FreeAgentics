@@ -58,7 +58,8 @@ class HexCell:
     @property
     def coordinates(self) -> tuple[float, float]:
         """Get lat/lng coordinates of the cell center."""
-        return h3.cell_to_latlng(self.hex_id)
+        result = h3.cell_to_latlng(self.hex_id)
+        return (float(result[0]), float(result[1]))
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization."""
@@ -394,7 +395,7 @@ class H3World:
             world.cells[hex_id] = cell
         return world
 
-    def add_resource(self, hex_id: str, resource_type: str, amount: float) -> None:
+    def add_resource(self, hex_id: str, resource_type: str, amount: float) -> bool:
         """Add resources to a specific cell."""
         if hex_id not in self.cells:
             return False
@@ -419,10 +420,11 @@ if __name__ == "__main__":
     # Get center cell
     center_cell = world.get_cell(world.center_hex)
     print("\nCenter cell:")
-    print(f"  Biome: {center_cell.biome.value}")
-    print(f"  Terrain: {center_cell.terrain.value}")
-    print(f"  Temperature: {center_cell.temperature:.1f}°C")
-    print(f"  Resources: {center_cell.resources}")
+    if center_cell:
+        print(f"  Biome: {center_cell.biome.value}")
+        print(f"  Terrain: {center_cell.terrain.value}")
+        print(f"  Temperature: {center_cell.temperature:.1f}°C")
+        print(f"  Resources: {center_cell.resources}")
     # Get neighbors
     neighbors = world.get_neighbors(world.center_hex)
     print(f"\nFound {len(neighbors)} neighbors")

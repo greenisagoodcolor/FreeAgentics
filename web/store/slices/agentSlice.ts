@@ -1,0 +1,330 @@
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { nanoid } from 'nanoid';
+
+// Types from PRD
+export interface AgentTemplate {
+  id: string;
+  name: string;
+  category: 'researcher' | 'student' | 'expert' | 'generalist' | 'contrarian';
+  defaultBiography: string;
+  defaultKnowledgeDomains: string[];
+  defaultParameters: {
+    responseThreshold: number; // 0-1
+    turnTakingProbability: number; // 0-1
+    conversationEngagement: number; // 0-1
+  };
+  avatarUrl: string;
+  icon: string; // Icon component name
+  color: string;
+}
+
+export interface Agent {
+  id: string;
+  name: string;
+  templateId: string;
+  biography: string;
+  knowledgeDomains: string[];
+  parameters: {
+    responseThreshold: number;
+    turnTakingProbability: number;
+    conversationEngagement: number;
+  };
+  status: 'idle' | 'active' | 'processing' | 'typing' | 'error' | 'offline';
+  avatarUrl: string;
+  color: string;
+  createdAt: number;
+  lastActive: number;
+  position?: { x: number; y: number }; // For spatial grid
+  proximityRadius?: number;
+  inConversation: boolean;
+  autonomyEnabled: boolean;
+  activityMetrics: {
+    messagesCount: number;
+    beliefCount: number;
+    responseTime: number[];
+  };
+}
+
+interface AgentState {
+  agents: Record<string, Agent>;
+  templates: Record<string, AgentTemplate>;
+  selectedAgentId: string | null;
+  typingAgents: string[];
+  agentOrder: string[]; // For drag-and-drop reordering
+}
+
+// Default templates from PRD
+const defaultTemplates: Record<string, AgentTemplate> = {
+  explorer: {
+    id: 'explorer',
+    name: 'Explorer',
+    category: 'researcher',
+    defaultBiography: 'An adventurous agent that discovers new territories and maps unknown environments. Specializes in exploration and discovery.',
+    defaultKnowledgeDomains: ['exploration', 'mapping', 'discovery', 'navigation'],
+    defaultParameters: {
+      responseThreshold: 0.6,
+      turnTakingProbability: 0.7,
+      conversationEngagement: 0.8,
+    },
+    avatarUrl: '/avatars/explorer.svg',
+    icon: 'Search',
+    color: '#10B981',
+  },
+  merchant: {
+    id: 'merchant',
+    name: 'Merchant',
+    category: 'expert',
+    defaultBiography: 'A savvy trader that optimizes resource allocation and market dynamics. Expert in negotiations and value assessment.',
+    defaultKnowledgeDomains: ['trading', 'economics', 'negotiation', 'resource-management'],
+    defaultParameters: {
+      responseThreshold: 0.7,
+      turnTakingProbability: 0.6,
+      conversationEngagement: 0.7,
+    },
+    avatarUrl: '/avatars/merchant.svg',
+    icon: 'ShoppingCart',
+    color: '#3B82F6',
+  },
+  scholar: {
+    id: 'scholar',
+    name: 'Scholar',
+    category: 'student',
+    defaultBiography: 'A learned agent that analyzes patterns and synthesizes knowledge. Dedicated to understanding and teaching.',
+    defaultKnowledgeDomains: ['analysis', 'synthesis', 'education', 'research'],
+    defaultParameters: {
+      responseThreshold: 0.8,
+      turnTakingProbability: 0.5,
+      conversationEngagement: 0.6,
+    },
+    avatarUrl: '/avatars/scholar.svg',
+    icon: 'BookOpen',
+    color: '#8B5CF6',
+  },
+  guardian: {
+    id: 'guardian',
+    name: 'Guardian',
+    category: 'expert',
+    defaultBiography: 'A protective agent that safeguards systems and responds to threats. Specializes in security and defense.',
+    defaultKnowledgeDomains: ['security', 'defense', 'protection', 'threat-analysis'],
+    defaultParameters: {
+      responseThreshold: 0.5,
+      turnTakingProbability: 0.8,
+      conversationEngagement: 0.6,
+    },
+    avatarUrl: '/avatars/guardian.svg',
+    icon: 'Shield',
+    color: '#EF4444',
+  },
+  generalist: {
+    id: 'generalist',
+    name: 'Generalist',
+    category: 'generalist',
+    defaultBiography: 'An adaptable problem solver with broad capabilities. Can handle diverse tasks and situations.',
+    defaultKnowledgeDomains: ['problem-solving', 'adaptation', 'general-knowledge', 'collaboration'],
+    defaultParameters: {
+      responseThreshold: 0.6,
+      turnTakingProbability: 0.6,
+      conversationEngagement: 0.7,
+    },
+    avatarUrl: '/avatars/generalist.svg',
+    icon: 'Brain',
+    color: '#F59E0B',
+  },
+};
+
+const initialState: AgentState = {
+  agents: {},
+  templates: defaultTemplates,
+  selectedAgentId: null,
+  typingAgents: [],
+  agentOrder: [],
+};
+
+const agentSlice = createSlice({
+  name: 'agents',
+  initialState,
+  reducers: {
+    // Create agent from template
+    createAgent: (state, action: PayloadAction<{
+      templateId: string;
+      name?: string;
+      parameterOverrides?: Partial<Agent['parameters']>;
+    }>) => {
+      const { templateId, name, parameterOverrides } = action.payload;
+      const template = state.templates[templateId];
+      if (!template) return;
+
+      const agentId = nanoid();
+      const agentNumber = Object.keys(state.agents).filter(id => 
+        state.agents[id].templateId === templateId
+      ).length + 1;
+
+      const agent: Agent = {
+        id: agentId,
+        name: name || `${template.name} ${agentNumber}`,
+        templateId,
+        biography: template.defaultBiography,
+        knowledgeDomains: [...template.defaultKnowledgeDomains],
+        parameters: {
+          ...template.defaultParameters,
+          ...parameterOverrides,
+        },
+        status: 'idle',
+        avatarUrl: template.avatarUrl,
+        color: template.color,
+        createdAt: Date.now(),
+        lastActive: Date.now(),
+        inConversation: false,
+        autonomyEnabled: false,
+        activityMetrics: {
+          messagesCount: 0,
+          beliefCount: 0,
+          responseTime: [],
+        },
+      };
+
+      state.agents[agentId] = agent;
+      state.agentOrder.push(agentId);
+    },
+
+    // Update agent status
+    updateAgentStatus: (state, action: PayloadAction<{
+      agentId: string;
+      status: Agent['status'];
+    }>) => {
+      const { agentId, status } = action.payload;
+      if (state.agents[agentId]) {
+        state.agents[agentId].status = status;
+        state.agents[agentId].lastActive = Date.now();
+      }
+    },
+
+    // Set typing agents
+    setTypingAgents: (state, action: PayloadAction<string[]>) => {
+      state.typingAgents = action.payload;
+      // Update agent statuses
+      action.payload.forEach(agentId => {
+        if (state.agents[agentId]) {
+          state.agents[agentId].status = 'typing';
+        }
+      });
+    },
+
+    // Select agent
+    selectAgent: (state, action: PayloadAction<string | null>) => {
+      state.selectedAgentId = action.payload;
+    },
+
+    // Update agent position (for spatial grid)
+    updateAgentPosition: (state, action: PayloadAction<{
+      agentId: string;
+      position: { x: number; y: number };
+    }>) => {
+      const { agentId, position } = action.payload;
+      if (state.agents[agentId]) {
+        state.agents[agentId].position = position;
+      }
+    },
+
+    // Update agent parameters
+    updateAgentParameters: (state, action: PayloadAction<{
+      agentId: string;
+      parameters: Partial<Agent['parameters']>;
+    }>) => {
+      const { agentId, parameters } = action.payload;
+      if (state.agents[agentId]) {
+        state.agents[agentId].parameters = {
+          ...state.agents[agentId].parameters,
+          ...parameters,
+        };
+      }
+    },
+
+    // Toggle agent autonomy
+    toggleAgentAutonomy: (state, action: PayloadAction<string>) => {
+      const agentId = action.payload;
+      if (state.agents[agentId]) {
+        state.agents[agentId].autonomyEnabled = !state.agents[agentId].autonomyEnabled;
+      }
+    },
+
+    // Update activity metrics
+    updateActivityMetrics: (state, action: PayloadAction<{
+      agentId: string;
+      metrics: Partial<Agent['activityMetrics']>;
+    }>) => {
+      const { agentId, metrics } = action.payload;
+      if (state.agents[agentId]) {
+        state.agents[agentId].activityMetrics = {
+          ...state.agents[agentId].activityMetrics,
+          ...metrics,
+        };
+      }
+    },
+
+    // Reorder agents (for drag-and-drop)
+    reorderAgents: (state, action: PayloadAction<string[]>) => {
+      state.agentOrder = action.payload;
+    },
+
+    // Delete agent
+    deleteAgent: (state, action: PayloadAction<string>) => {
+      const agentId = action.payload;
+      delete state.agents[agentId];
+      state.agentOrder = state.agentOrder.filter(id => id !== agentId);
+      if (state.selectedAgentId === agentId) {
+        state.selectedAgentId = null;
+      }
+    },
+
+    // Batch create agents (Quick Start)
+    quickStartAgents: (state) => {
+      const templates = ['explorer', 'scholar', 'merchant'];
+      templates.forEach((templateId, index) => {
+        const template = state.templates[templateId];
+        if (!template) return;
+
+        const agentId = nanoid();
+        const agent: Agent = {
+          id: agentId,
+          name: `${template.name} 1`,
+          templateId,
+          biography: template.defaultBiography,
+          knowledgeDomains: [...template.defaultKnowledgeDomains],
+          parameters: { ...template.defaultParameters },
+          status: 'idle',
+          avatarUrl: template.avatarUrl,
+          color: template.color,
+          createdAt: Date.now() + index,
+          lastActive: Date.now() + index,
+          inConversation: false,
+          autonomyEnabled: true,
+          activityMetrics: {
+            messagesCount: 0,
+            beliefCount: 0,
+            responseTime: [],
+          },
+        };
+
+        state.agents[agentId] = agent;
+        state.agentOrder.push(agentId);
+      });
+    },
+  },
+});
+
+export const {
+  createAgent,
+  updateAgentStatus,
+  setTypingAgents,
+  selectAgent,
+  updateAgentPosition,
+  updateAgentParameters,
+  toggleAgentAutonomy,
+  updateActivityMetrics,
+  reorderAgents,
+  deleteAgent,
+  quickStartAgents,
+} = agentSlice.actions;
+
+export default agentSlice.reducer; 

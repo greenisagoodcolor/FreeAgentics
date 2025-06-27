@@ -119,7 +119,7 @@ class DiscreteBeliefState(BeliefState):
         self.belief_history: List[torch.Tensor] = []
         self.entropy_history: List[float] = []
         # Metadata
-        self.metadata = {
+        self.metadata: Dict[str, Any] = {
             "num_states": num_states,
             "last_update_method": None,
             "confidence_score": 0.0,

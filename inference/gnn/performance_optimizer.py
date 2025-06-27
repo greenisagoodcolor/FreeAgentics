@@ -91,7 +91,7 @@ class MemoryOptimizer:
             if module.training:
                 return checkpoint(module._forward_impl, *args, **kwargs)
             else:
-                return module._forward_impl(*args, **kwargs)
+                return module._forward_impl(*args, **kwargs)  # type: ignore[attr-defined]
 
         for name, module in model.named_modules():
             if hasattr(module, "_forward_impl"):
@@ -103,7 +103,7 @@ class MemoryOptimizer:
         """Optimize attention layers for memory efficiency"""
         for module in model.modules():
             if hasattr(module, "attention_dropout"):
-                module.use_flash_attention = True  # type: ignore[attr-defined]
+                module.use_flash_attention = True  # type: ignore[assignment]
 
     @staticmethod
     def optimize_batch_processing(
@@ -321,7 +321,7 @@ class GraphCache:
             except Exception as e:
                 logger.error(f"Failed to save cache: {e}")
 
-    def _add_to_memory_cache(self, key: str, data: Any):
+    def _add_to_memory_cache(self, key: str, data: Any) -> None:
         """Add data to memory cache with size management"""
         size_mb = self._estimate_size_mb(data)
         while (

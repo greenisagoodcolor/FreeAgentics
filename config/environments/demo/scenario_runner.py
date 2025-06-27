@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-FreeAgentics Demo Scenario Runner
+FreeAgentics Demo Scenario Runner.
 
 Executes predefined scenarios for compelling demonstrations.
 """
@@ -11,7 +11,7 @@ import logging
 import os
 import random
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import psycopg2
 import redis
@@ -19,7 +19,8 @@ from psycopg2.extras import RealDictCursor
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,8 @@ class ScenarioRunner:
         """Initialize scenario runner."""
         self.db_url = os.environ.get("DATABASE_URL")
         self.redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379")
-        self.scenario_interval = int(os.environ.get("SCENARIO_INTERVAL", "300"))
+        interval_env = os.environ.get("SCENARIO_INTERVAL", "300")
+        self.scenario_interval = int(interval_env)
         self.active_scenarios = os.environ.get("RUN_SCENARIOS", "").split(",")
 
         # Connect to database

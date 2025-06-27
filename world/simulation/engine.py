@@ -20,7 +20,7 @@ except ImportError:
 try:
     from world.simulation.message_system import MessageSystem
 except ImportError:
-    MessageSystem = None  # type: ignore
+    MessageSystem = None
 
 """
 Advanced Async Simulation Engine for CogniticNet with Active Inference
@@ -39,8 +39,8 @@ try:
 
     PYMDP_AVAILABLE = True
 except ImportError:
-    utils = None  # type: ignore
-    PyMDPAgent = None  # type: ignore
+    utils = None
+    PyMDPAgent = None
     PYMDP_AVAILABLE = False
     logging.warning("pymdp not available - Active Inference features disabled")
 
@@ -182,7 +182,7 @@ class ActiveInferenceAgent:
         try:
             # Get observations from world state
             observation = self._get_observation(world_state)
-            if self.pymdp_agent and observation:
+            if self.pymdp_agent is not None and observation is not None:
                 # Perform Active Inference
                 qs = self.pymdp_agent.infer_states(observation)
                 q_pi, neg_efe = self.pymdp_agent.infer_policies()

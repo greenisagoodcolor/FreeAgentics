@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1750946675634" clover="3.2.0">
-  <project timestamp="1750946675634" name="All files">
-    <metrics statements="9866" coveredstatements="14" conditionals="4292" coveredconditionals="0" methods="2466" coveredmethods="5" elements="16624" coveredelements="19" complexity="0" loc="9866" ncloc="9866" packages="28" files="126" classes="126"/>
+<coverage generated="1750968169093" clover="3.2.0">
+  <project timestamp="1750968169093" name="All files">
+    <metrics statements="9878" coveredstatements="14" conditionals="4298" coveredconditionals="0" methods="2469" coveredmethods="5" elements="16645" coveredelements="19" complexity="0" loc="9878" ncloc="9878" packages="28" files="126" classes="126"/>
     <package name="app">
-      <metrics statements="54" coveredstatements="0" conditionals="41" coveredconditionals="0" methods="21" coveredmethods="0"/>
+      <metrics statements="66" coveredstatements="0" conditionals="47" coveredconditionals="0" methods="24" coveredmethods="0"/>
       <file name="layout.tsx" path="/Users/matthewmoroney/builds/FreeAgentics/web/app/layout.tsx">
         <metrics statements="2" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
         <line num="1" count="0" type="stmt"/>
         <line num="3" count="0" type="stmt"/>
       </file>
       <file name="page.tsx" path="/Users/matthewmoroney/builds/FreeAgentics/web/app/page.tsx">
-        <metrics statements="52" coveredstatements="0" conditionals="41" coveredconditionals="0" methods="20" coveredmethods="0"/>
+        <metrics statements="64" coveredstatements="0" conditionals="47" coveredconditionals="0" methods="23" coveredmethods="0"/>
         <line num="3" count="0" type="stmt"/>
         <line num="4" count="0" type="stmt"/>
         <line num="5" count="0" type="stmt"/>
@@ -28,41 +28,53 @@
         <line num="132" count="0" type="stmt"/>
         <line num="133" count="0" type="stmt"/>
         <line num="134" count="0" type="stmt"/>
-        <line num="137" count="0" type="stmt"/>
+        <line num="135" count="0" type="stmt"/>
         <line num="138" count="0" type="stmt"/>
-        <line num="141" count="0" type="stmt"/>
-        <line num="142" count="0" type="cond" truecount="0" falsecount="1"/>
+        <line num="139" count="0" type="stmt"/>
+        <line num="142" count="0" type="stmt"/>
+        <line num="143" count="0" type="stmt"/>
         <line num="144" count="0" type="stmt"/>
-        <line num="146" count="0" type="cond" truecount="0" falsecount="3"/>
+        <line num="145" count="0" type="stmt"/>
+        <line num="146" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="147" count="0" type="stmt"/>
-        <line num="148" count="0" type="stmt"/>
-        <line num="151" count="0" type="stmt"/>
+        <line num="149" count="0" type="stmt"/>
         <line num="152" count="0" type="stmt"/>
-        <line num="163" count="0" type="stmt"/>
-        <line num="177" count="0" type="stmt"/>
-        <line num="178" count="0" type="stmt"/>
-        <line num="179" count="0" type="stmt"/>
-        <line num="180" count="0" type="stmt"/>
-        <line num="181" count="0" type="stmt"/>
-        <line num="185" count="0" type="cond" truecount="0" falsecount="1"/>
-        <line num="186" count="0" type="stmt"/>
-        <line num="195" count="0" type="stmt"/>
+        <line num="156" count="0" type="stmt"/>
+        <line num="157" count="0" type="stmt"/>
+        <line num="158" count="0" type="stmt"/>
+        <line num="162" count="0" type="stmt"/>
+        <line num="163" count="0" type="cond" truecount="0" falsecount="1"/>
+        <line num="165" count="0" type="stmt"/>
+        <line num="167" count="0" type="cond" truecount="0" falsecount="3"/>
+        <line num="168" count="0" type="stmt"/>
+        <line num="169" count="0" type="stmt"/>
+        <line num="172" count="0" type="stmt"/>
+        <line num="173" count="0" type="stmt"/>
+        <line num="184" count="0" type="stmt"/>
+        <line num="198" count="0" type="stmt"/>
+        <line num="199" count="0" type="stmt"/>
+        <line num="200" count="0" type="stmt"/>
         <line num="201" count="0" type="stmt"/>
-        <line num="205" count="0" type="stmt"/>
-        <line num="206" count="0" type="cond" truecount="0" falsecount="3"/>
+        <line num="202" count="0" type="stmt"/>
+        <line num="206" count="0" type="cond" truecount="0" falsecount="1"/>
         <line num="207" count="0" type="stmt"/>
-        <line num="212" count="0" type="stmt"/>
-        <line num="213" count="0" type="stmt"/>
-        <line num="221" count="0" type="stmt"/>
-        <line num="225" count="0" type="stmt"/>
+        <line num="216" count="0" type="stmt"/>
+        <line num="222" count="0" type="stmt"/>
         <line num="226" count="0" type="stmt"/>
-        <line num="227" count="0" type="stmt"/>
-        <line num="286" count="0" type="stmt"/>
-        <line num="344" count="0" type="stmt"/>
-        <line num="347" count="0" type="stmt"/>
-        <line num="373" count="0" type="stmt"/>
-        <line num="420" count="0" type="stmt"/>
-        <line num="468" count="0" type="stmt"/>
+        <line num="227" count="0" type="cond" truecount="0" falsecount="3"/>
+        <line num="228" count="0" type="stmt"/>
+        <line num="233" count="0" type="stmt"/>
+        <line num="234" count="0" type="stmt"/>
+        <line num="242" count="0" type="stmt"/>
+        <line num="246" count="0" type="stmt"/>
+        <line num="247" count="0" type="stmt"/>
+        <line num="248" count="0" type="stmt"/>
+        <line num="307" count="0" type="stmt"/>
+        <line num="375" count="0" type="stmt"/>
+        <line num="378" count="0" type="stmt"/>
+        <line num="404" count="0" type="stmt"/>
+        <line num="451" count="0" type="stmt"/>
+        <line num="499" count="0" type="stmt"/>
       </file>
     </package>
     <package name="app.(dashboard)">

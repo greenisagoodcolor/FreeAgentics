@@ -348,9 +348,9 @@ class OperationContext:
     def __init__(self, monitor: PerformanceMonitor, operation: str) -> None:
         self.monitor = monitor
         self.operation = operation
-        self.start_time = None
-        self.start_memory = None
-        self.start_cpu_time = None
+        self.start_time: Optional[float] = None
+        self.start_memory: Optional[float] = None
+        self.start_cpu_time: Optional[Any] = None
 
     def __enter__(self) -> "OperationContext":
         self.start_time = time.time()
@@ -363,13 +363,19 @@ class OperationContext:
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         end_time = time.time()
+        if self.start_time is None:
+            return
         duration = end_time - self.start_time
         # Get resource usage
         process = psutil.Process()
         end_memory = process.memory_info().rss / 1024 / 1024
+        if self.start_memory is None:
+            return
         memory_used = end_memory - self.start_memory
         # Calculate CPU usage
         end_cpu_time = process.cpu_times()
+        if self.start_cpu_time is None:
+            return
         cpu_time = (end_cpu_time.user - self.start_cpu_time.user) + (
             end_cpu_time.system - self.start_cpu_time.system
         )
