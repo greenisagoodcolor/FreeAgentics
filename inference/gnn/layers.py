@@ -76,6 +76,11 @@ class GCNLayer(MessagePassing):
 
         self.reset_parameters()
 
+    @property
+    def bias(self) -> Optional[torch.Tensor]:
+        """Access bias parameter from linear layer"""
+        return self.lin.bias
+
     def reset_parameters(self) -> None:
         """Reset layer parameters"""
         self.lin.reset_parameters()
@@ -97,9 +102,9 @@ class GCNLayer(MessagePassing):
             deg_inv_sqrt[deg_inv_sqrt == float("inf")] = 0
             norm = deg_inv_sqrt[row] * deg_inv_sqrt[col]
 
-            return self.propagate(edge_index, x=x, norm=norm)  # type: ignore[no-any-return]
+            return self.propagate(edge_index, size=None, x=x, norm=norm)  # type: ignore[no-any-return]
         else:
-            return self.propagate(edge_index, x=x)  # type: ignore[no-any-return]
+            return self.propagate(edge_index, size=None, x=x)  # type: ignore[no-any-return]
 
     def message(self, x_j: torch.Tensor, norm: Optional[torch.Tensor] = None) -> torch.Tensor:
         """Construct messages from neighbors"""
