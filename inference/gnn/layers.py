@@ -409,9 +409,9 @@ class GINLayer(nn.Module):
         return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
 
 
-class EdgeConvLayer(MessagePassing):
+class EdgeConvLayer(nn.Module):
     """
-    Edge Convolution layer.
+    Edge Convolution layer using PyTorch Geometric.
     Implements dynamic graph CNN using edge features.
     """
 
@@ -423,41 +423,37 @@ class EdgeConvLayer(MessagePassing):
         aggr: str = "max",
         **kwargs: Any,
     ) -> None:
-        super().__init__(aggr=aggr)
+        super().__init__()
 
         self.in_channels = in_channels
         self.out_channels = out_channels
 
         if neural_net is None:
-            self.neural_net: nn.Module = nn.Sequential(
+            neural_net = nn.Sequential(
                 nn.Linear(2 * in_channels, out_channels),
                 nn.ReLU(),
                 nn.Linear(out_channels, out_channels),
             )
-        else:
-            self.neural_net = neural_net
 
-        self.reset_parameters()
+        self.conv = EdgeConv(nn=neural_net, aggr=aggr)
+
+    @property
+    def bias(self) -> Optional[torch.Tensor]:
+        """Access bias parameter from underlying layer"""
+        return getattr(self.conv, 'bias', None)
+
+    @property
+    def lin(self) -> nn.Module:
+        """Access linear layer for compatibility"""
+        return getattr(self.conv, 'nn', self.conv)
 
     def reset_parameters(self) -> None:
         """Reset parameters"""
-        if hasattr(self.neural_net, "reset_parameters"):
-            self.neural_net.reset_parameters()  # type: ignore[operator]
-        else:
-            for module in self.neural_net.modules():
-                if hasattr(module, "reset_parameters"):
-                    module.reset_parameters()  # type: ignore[operator]
+        self.conv.reset_parameters()
 
     def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
         """Forward pass"""
-
-        return self.propagate(edge_index, x=x)  # type: ignore[no-any-return]
-
-    def message(self, x_i: torch.Tensor, x_j: torch.Tensor) -> torch.Tensor:
-        """Create messages using edge features"""
-        # Concatenate source and target node features
-        edge_features = torch.cat([x_i, x_j - x_i], dim=-1)
-        return self.neural_net(edge_features)  # type: ignore[no-any-return]
+        return self.conv(x, edge_index)  # type: ignore[no-any-return]
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.in_channels}, {self.out_channels})"
