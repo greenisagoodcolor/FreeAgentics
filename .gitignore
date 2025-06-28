@@ -88,6 +88,11 @@ dmypy.json
 mypy_reports/
 .ruff_cache/
 
+# Test outputs at root level (should be in tests/reports instead)
+/test-results/
+/playwright-report/
+/.test-reports/
+
 # ==========================================
 # Development & Temporary Files
 # ==========================================

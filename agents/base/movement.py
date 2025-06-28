@@ -126,7 +126,7 @@ class CollisionSystem:
         for obstacle in self.static_obstacles:
             distance = position.distance_to(obstacle["position"])
             penetration = radius + obstacle["radius"] - distance
-            if penetration > 0 and distance < min_distance:
+            if penetration >= 0 and distance < min_distance:
                 min_distance = distance
                 diff = position.to_array() - obstacle["position"].to_array()
                 collision_normal = diff / np.linalg.norm(diff)

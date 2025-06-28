@@ -255,6 +255,8 @@ class AgentWorldManager:
             return False
         old_location = self.agent_locations.get(agent_id)
         self.agent_locations[agent_id] = hex_id
+        # Initialize agent energy if new agent
+        _ = self.agent_energy[agent_id]  # Trigger defaultdict initialization
         # Publish movement event
         event = WorldEvent(
             event_type=EventType.AGENT_MOVED,
@@ -587,11 +589,11 @@ class AgentWorldManager:
     # === Agent State Management ===
     def get_agent_energy(self, agent_id: str) -> float:
         """Get current energy level of an agent"""
-        return self.agent_energy.get(agent_id, 0.0)
+        return self.agent_energy[agent_id]  # Use defaultdict behavior
 
     def restore_agent_energy(self, agent_id: str, amount: float) -> None:
         """Restore energy to an agent"""
-        current = self.agent_energy.get(agent_id, 0.0)
+        current = self.agent_energy[agent_id]  # Use defaultdict behavior
         self.agent_energy[agent_id] = min(100.0, current + amount)
 
     def get_agent_resources(self, agent_id: str) -> Dict[str, float]:
@@ -640,6 +642,8 @@ class AgentWorldManager:
             return False
         old_location = self.agent_locations.get(agent_id)
         self.agent_locations[agent_id] = hex_id
+        # Initialize agent energy if new agent
+        _ = self.agent_energy[agent_id]  # Trigger defaultdict initialization
         # Publish movement event
         event = WorldEvent(
             event_type=EventType.AGENT_MOVED,
@@ -1011,11 +1015,11 @@ class AgentWorldManager:
     # === Agent State Management ===
     def get_agent_energy(self, agent_id: str) -> float:
         """Get current energy level of an agent"""
-        return self.agent_energy.get(agent_id, 0.0)
+        return self.agent_energy[agent_id]  # Use defaultdict behavior
 
     def restore_agent_energy(self, agent_id: str, amount: float) -> None:
         """Restore energy to an agent"""
-        current = self.agent_energy.get(agent_id, 0.0)
+        current = self.agent_energy[agent_id]  # Use defaultdict behavior
         self.agent_energy[agent_id] = min(100.0, current + amount)
 
     def get_agent_resources(self, agent_id: str) -> Dict[str, float]:

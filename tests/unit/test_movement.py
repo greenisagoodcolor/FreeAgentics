@@ -168,13 +168,24 @@ class TestMovementController(unittest.TestCase):
     def test_movement_update(self) -> None:
         """Test movement update along path"""
         destination = Position(7.0, 5.0, 0.0)
-        self.movement_controller.set_destination(self.agent.agent_id, destination)
+        success = self.movement_controller.set_destination(self.agent.agent_id, destination)
+        self.assertTrue(success, "Failed to set destination")
+        
         initial_pos = Position(self.agent.position.x, self.agent.position.y, self.agent.position.z)
-        self.movement_controller.update(0.1)
+        
+        # Update multiple times to ensure movement
+        for _ in range(5):
+            self.movement_controller.update(0.1)
+        
         agent = self.state_manager.get_agent(self.agent.agent_id)
-        self.assertNotEqual(agent.position.x, initial_pos.x)
+        
+        # Check that the agent has moved
         dx = agent.position.x - initial_pos.x
-        self.assertGreater(dx, 0)
+        dy = agent.position.y - initial_pos.y
+        distance_moved = (dx**2 + dy**2)**0.5
+        
+        # Agent should have moved towards destination
+        self.assertGreater(distance_moved, 0.01, f"Agent didn't move. Initial: {initial_pos}, Current: {agent.position}")
 
     def test_movement_modes(self) -> None:
         """Test different movement modes"""

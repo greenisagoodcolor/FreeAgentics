@@ -516,14 +516,7 @@ class MemorySystem:
     def get_relevant_memories(self, context: DecisionContext, limit: int = 5) -> List[Memory]:
         """Get memories relevant to current context"""
         criteria: Dict[str, Any] = {"min_importance": 0.3}
-        context_match = {}
-        if context.current_goal:
-            context_match["goal_id"] = context.current_goal.goal_id
-        threats = context.get_perceived_threats()
-        if threats:
-            context_match["has_threat"] = "true"
-        if context_match:
-            criteria.update({"context_match": context_match})
+        # Don't filter by context in initial retrieval, let relevance calculation handle it
         memories = self.retrieve_memories(criteria, limit * 2)
         relevant = []
         for memory in memories:

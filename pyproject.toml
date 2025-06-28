@@ -128,8 +128,9 @@ disallow_untyped_decorators = false # Common in agents and inference
 # Error Reporting Enhancement
 color_output = true
 error_summary = true
-any_exprs_report = "mypy_reports"
-linecount_report = "mypy_reports"
+# Report directories should be specified via command line for timestamped outputs
+# any_exprs_report = "mypy_reports"  # Use --any-exprs-report on command line
+# linecount_report = "mypy_reports"  # Use --linecount-report on command line
 
 # Module Discovery (ADR-002 Canonical Structure Compliance)
 namespace_packages = true

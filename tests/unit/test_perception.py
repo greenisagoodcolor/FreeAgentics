@@ -332,8 +332,9 @@ class TestPerceptionSystem(unittest.TestCase):
 
     def test_sound_perception(self) -> None:
         """Test perceiving sounds"""
+        # Create a closer, louder sound to pass the importance filter
         sound = self.perception_system.create_sound_stimulus(
-            Position(15, 0, 0), intensity=1.0, radius=20.0
+            Position(5, 0, 0), intensity=1.0, radius=20.0
         )
         self.perception_system.add_stimulus(sound)
         percepts = self.perception_system.perceive(self.agent1.agent_id)

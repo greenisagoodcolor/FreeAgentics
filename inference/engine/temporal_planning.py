@@ -7,7 +7,7 @@ import logging
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
 import numpy as np
 import torch
@@ -74,12 +74,12 @@ class TreeNode:
         """Check if all actions have been tried"""
         return len(self.children) == num_actions
 
-    def best_child(self, exploration_constant: float = 1.0) -> "TreeNode":
+    def best_child(self, exploration_constant: float = 1.0) -> Optional["TreeNode"]:
         """Select best child using UCB1"""
         if not self.children:
             return None
 
-        def ucb1(child):
+        def ucb1(child: "TreeNode") -> float:
             if child.visits == 0:
                 return float("inf")
             exploitation = -child.expected_free_energy
@@ -88,7 +88,7 @@ class TreeNode:
 
         return max(self.children, key=ucb1)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Hash for caching"""
         if self._hash is None:
             self._hash = hash((self.state.numpy().tobytes(), self.action, self.depth))
@@ -178,7 +178,11 @@ class MonteCarloTreeSearch(TemporalPlanner):
             if not node.is_fully_expanded(generative_model.dims.num_actions):
                 return node
             else:
-                node = node.best_child(self.config.exploration_constant)
+                best_child = node.best_child(self.config.exploration_constant)
+                if best_child is not None:
+                    node = best_child
+                else:
+                    return node
         return node
 
     def _expand(self, node: TreeNode, generative_model: GenerativeModel) -> TreeNode:
@@ -231,12 +235,13 @@ class MonteCarloTreeSearch(TemporalPlanner):
                 current_beliefs = generative_model.B[:, :, action] @ current_beliefs
         return -total_G
 
-    def _backpropagate(self, node: TreeNode, value: float):
+    def _backpropagate(self, node: TreeNode, value: float) -> None:
         """Backpropagate value up the tree"""
-        while node is not None:
-            node.visits += 1
-            node.value += value
-            node = node.parent
+        current_node: Optional[TreeNode] = node
+        while current_node is not None:
+            current_node.visits += 1
+            current_node.value += value
+            current_node = current_node.parent
 
     def _extract_policy(self, root: TreeNode) -> Policy:
         """Extract best policy from tree"""
@@ -259,7 +264,8 @@ class MonteCarloTreeSearch(TemporalPlanner):
         discount = 1.0
         for i in range(len(trajectory) - 1):
             if trajectory[i + 1].action is not None:
-                policy = Policy([trajectory[i + 1].action])
+                action = trajectory[i + 1].action
+                policy = Policy([action])
                 G, _, _ = self.policy_selector.compute_expected_free_energy(
                     policy, trajectory[i].state, generative_model, preferences
                 )
@@ -293,9 +299,9 @@ class BeamSearchPlanner(TemporalPlanner):
         """
         Plan using beam search.
         """
-        beam = [(0.0, [], initial_beliefs)]
+        beam: List[Tuple[float, List[int], torch.Tensor]] = [(0.0, [], initial_beliefs)]
         for depth in range(min(self.config.planning_horizon, self.config.max_depth)):
-            new_beam = []
+            new_beam: List[Tuple[float, List[int], torch.Tensor]] = []
             for cost, actions, beliefs in beam:
                 for action in range(generative_model.dims.num_actions):
                     policy = Policy([action])
@@ -333,7 +339,9 @@ class BeamSearchPlanner(TemporalPlanner):
         discount = 1.0
         for i in range(len(trajectory) - 1):
             if trajectory[i + 1].action is not None:
-                policy = Policy([trajectory[i + 1].action])
+                action = trajectory[i + 1].action
+                assert action is not None  # Type hint for mypy
+                policy = Policy([action])
                 G, _, _ = self.policy_selector.compute_expected_free_energy(
                     policy, trajectory[i].state, generative_model, preferences
                 )
@@ -366,8 +374,8 @@ class AStarPlanner(TemporalPlanner):
         """
         Plan using A* search.
         """
-        open_set = [(0.0, 0.0, [], initial_beliefs)]
-        closed_set = set()
+        open_set: List[Tuple[float, float, List[int], torch.Tensor]] = [(0.0, 0.0, [], initial_beliefs)]
+        closed_set: set[int] = set()
         g_scores = defaultdict(lambda: float("inf"))
         g_scores[self._hash_beliefs(initial_beliefs)] = 0.0
         while open_set and len(closed_set) < self.config.max_nodes:
@@ -428,7 +436,7 @@ class AStarPlanner(TemporalPlanner):
                 policy, beliefs, generative_model, preferences
             )
             sample_G.append(G.item())
-        return np.mean(sample_G) if sample_G else 0.0
+        return float(np.mean(sample_G)) if sample_G else 0.0
 
     def evaluate_trajectory(
         self,
@@ -441,7 +449,9 @@ class AStarPlanner(TemporalPlanner):
         discount = 1.0
         for i in range(len(trajectory) - 1):
             if trajectory[i + 1].action is not None:
-                policy = Policy([trajectory[i + 1].action])
+                action = trajectory[i + 1].action
+                assert action is not None  # Type hint for mypy
+                policy = Policy([action])
                 G, _, _ = self.policy_selector.compute_expected_free_energy(
                     policy, trajectory[i].state, generative_model, preferences
                 )
@@ -503,10 +513,11 @@ class TrajectorySampling(TemporalPlanner):
             temp_policy, _ = self.policy_selector.select_policy(
                 current_beliefs, generative_model, preferences
             )
-            if len(temp_policy) > 0:
-                action = temp_policy[0].item()
+            if len(temp_policy.actions) > 0:
+                action_item = temp_policy.actions[0].item()
+                action = int(action_item)  # Ensure it's an int
             else:
-                action = np.random.randint(0, generative_model.dims.num_actions)
+                action = int(np.random.randint(0, generative_model.dims.num_actions))
             policy = Policy([action])
             G, _, _ = self.policy_selector.compute_expected_free_energy(
                 policy, current_beliefs, generative_model, preferences
@@ -533,7 +544,9 @@ class TrajectorySampling(TemporalPlanner):
         discount = 1.0
         for i in range(len(trajectory) - 1):
             if trajectory[i + 1].action is not None:
-                policy = Policy([trajectory[i + 1].action])
+                action = trajectory[i + 1].action
+                assert action is not None  # Type hint for mypy
+                policy = Policy([action])
                 G, _, _ = self.policy_selector.compute_expected_free_energy(
                     policy, trajectory[i].state, generative_model, preferences
                 )
@@ -600,7 +613,7 @@ def create_temporal_planner(
     config: Optional[PlanningConfig] = None,
     policy_selector: Optional[PolicySelector] = None,
     inference_algorithm: Optional[InferenceAlgorithm] = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> TemporalPlanner:
     """Create temporal planner"""
     if config is None:

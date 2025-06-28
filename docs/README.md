@@ -12,12 +12,19 @@
 
 ## 📚 Documentation Structure
 
+> Documentation has been consolidated into six top-level categories for easier navigation:
+>
+> 1. [Overview](overview/README.md)
+> 2. [Architecture](architecture/README.md)
+> 3. [API](api/README.md)
+> 4. [Guides](guides/README.md)
+> 5. [Tutorials](tutorials/README.md)
+> 6. [Examples](examples/README.md)
+
 ### **For Users & Product Managers**
 
 - **[User Guide](USER-GUIDE.md)** - Creating agents, coalitions, and simulations
 - **[Quick Start](QUICKSTART.md)** - Essential setup and first steps
-- **[Troubleshooting](TROUBLESHOOTING.md)** - Common issues and solutions
-- **[Glossary](GLOSSARY.md)** - Terminology and definitions
 
 ### **For Developers & Contributors**
 

@@ -81,7 +81,7 @@ class MockHexCell:
 class TestWorldEventSystem(unittest.TestCase):
     """Test the world event system"""
 
-    def set_up(self) -> None:
+    def setUp(self) -> None:
         """Set up test fixtures"""
         self.event_system = WorldEventSystem()
         self.test_events = []
@@ -128,7 +128,7 @@ class TestWorldEventSystem(unittest.TestCase):
 class TestAgentWorldManager(unittest.TestCase):
     """Test the main agent world manager"""
 
-    def set_up(self) -> None:
+    def setUp(self) -> None:
         """Set up test fixtures"""
         self.world = MockH3World()
         self.manager = AgentWorldManager(self.world)

@@ -71,8 +71,8 @@ class BeliefState(ABC):
         pass
 
     @abstractmethod
-    def most_likely_state(self) -> int:
-        """Get index of most likely state"""
+    def most_likely_state(self) -> Union[int, torch.Tensor]:
+        """Get index of most likely state (int for discrete, Tensor for continuous)"""
         pass
 
     @abstractmethod

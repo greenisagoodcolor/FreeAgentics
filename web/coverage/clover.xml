@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1751106351100" clover="3.2.0">
-  <project timestamp="1751106351100" name="All files">
-    <metrics statements="12027" coveredstatements="25" conditionals="5160" coveredconditionals="5" methods="3093" coveredmethods="2" elements="20280" coveredelements="32" complexity="0" loc="12027" ncloc="12027" packages="35" files="167" classes="167"/>
+<coverage generated="1751115253405" clover="3.2.0">
+  <project timestamp="1751115253405" name="All files">
+    <metrics statements="12029" coveredstatements="25" conditionals="5160" coveredconditionals="5" methods="3093" coveredmethods="2" elements="20282" coveredelements="32" complexity="0" loc="12029" ncloc="12029" packages="35" files="167" classes="167"/>
     <package name="app">
       <metrics statements="41" coveredstatements="19" conditionals="7" coveredconditionals="4" methods="9" coveredmethods="1"/>
       <file name="layout.tsx" path="/Users/matthewmoroney/builds/FreeAgentics/web/app/layout.tsx">
@@ -4438,9 +4438,9 @@
       </file>
     </package>
     <package name="components.dashboard">
-      <metrics statements="846" coveredstatements="0" conditionals="356" coveredconditionals="0" methods="276" coveredmethods="0"/>
+      <metrics statements="848" coveredstatements="0" conditionals="356" coveredconditionals="0" methods="276" coveredmethods="0"/>
       <file name="AccessibilityEnhancements.tsx" path="/Users/matthewmoroney/builds/FreeAgentics/web/components/dashboard/AccessibilityEnhancements.tsx">
-        <metrics statements="143" coveredstatements="0" conditionals="73" coveredconditionals="0" methods="31" coveredmethods="0"/>
+        <metrics statements="144" coveredstatements="0" conditionals="73" coveredconditionals="0" methods="31" coveredmethods="0"/>
         <line num="3" count="0" type="stmt"/>
         <line num="4" count="0" type="stmt"/>
         <line num="20" count="0" type="stmt"/>
@@ -4584,6 +4584,7 @@
         <line num="561" count="0" type="stmt"/>
         <line num="562" count="0" type="stmt"/>
         <line num="565" count="0" type="stmt"/>
+        <line num="574" count="0" type="stmt"/>
       </file>
       <file name="ActiveAgentsList.tsx" path="/Users/matthewmoroney/builds/FreeAgentics/web/components/dashboard/ActiveAgentsList.tsx">
         <metrics statements="16" coveredstatements="0" conditionals="4" coveredconditionals="0" methods="5" coveredmethods="0"/>
@@ -5002,7 +5003,7 @@
         <line num="756" count="0" type="stmt"/>
       </file>
       <file name="LazyComponents.tsx" path="/Users/matthewmoroney/builds/FreeAgentics/web/components/dashboard/LazyComponents.tsx">
-        <metrics statements="15" coveredstatements="0" conditionals="5" coveredconditionals="0" methods="9" coveredmethods="0"/>
+        <metrics statements="16" coveredstatements="0" conditionals="5" coveredconditionals="0" methods="9" coveredmethods="0"/>
         <line num="3" count="0" type="stmt"/>
         <line num="4" count="0" type="stmt"/>
         <line num="7" count="0" type="stmt"/>
@@ -5018,6 +5019,7 @@
         <line num="66" count="0" type="stmt"/>
         <line num="67" count="0" type="stmt"/>
         <line num="71" count="0" type="stmt"/>
+        <line num="77" count="0" type="stmt"/>
       </file>
       <file name="MobileEnhancements.tsx" path="/Users/matthewmoroney/builds/FreeAgentics/web/components/dashboard/MobileEnhancements.tsx">
         <metrics statements="124" coveredstatements="0" conditionals="55" coveredconditionals="0" methods="36" coveredmethods="0"/>

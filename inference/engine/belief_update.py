@@ -79,7 +79,8 @@ class LearnedGraphObservationModel(nn.Module):
 
     def forward(self, graph_features: torch.Tensor) -> torch.Tensor:
         """Map graph features to observations"""
-        return self.network(graph_features)
+        result: torch.Tensor = self.network(graph_features)
+        return result
 
 
 class GraphNNBeliefUpdater(BeliefUpdater):

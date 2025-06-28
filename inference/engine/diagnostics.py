@@ -18,6 +18,29 @@ import numpy as np
 import seaborn as sns  # type: ignore[import-untyped]
 import torch
 import torch.nn as nn
+
+
+class TensorJSONEncoder(json.JSONEncoder):
+    """Custom JSON encoder that can handle PyTorch tensors and numpy arrays."""
+    
+    def default(self, obj):
+        if isinstance(obj, torch.Tensor):
+            return {
+                "__tensor__": True,
+                "data": obj.detach().cpu().numpy().tolist(),
+                "shape": list(obj.shape),
+                "dtype": str(obj.dtype)
+            }
+        elif isinstance(obj, np.ndarray):
+            return {
+                "__ndarray__": True,
+                "data": obj.tolist(),
+                "shape": list(obj.shape),
+                "dtype": str(obj.dtype)
+            }
+        elif hasattr(obj, 'tolist'):  # Handle other array-like objects
+            return obj.tolist()
+        return super().default(obj)
 from matplotlib.animation import FuncAnimation
 
 """
@@ -552,7 +575,7 @@ class DiagnosticSuite:
 
     def log_inference_step(self, step_data: Dict[str, Any]) -> None:
         """Log complete inference step"""
-        logger.info(f"Inference step: {json.dumps(step_data, indent=2)}")
+        logger.info(f"Inference step: {json.dumps(step_data, indent=2, cls=TensorJSONEncoder)}")
         # Track performance metrics
         if "computation_time" in step_data:
             self.performance_stats["inference_time"].append(step_data["computation_time"])

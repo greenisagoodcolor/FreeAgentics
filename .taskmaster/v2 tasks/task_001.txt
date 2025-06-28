@@ -1,0 +1,67 @@
+# Task ID: 1
+# Title: Setup Project Repository and CI/CD Pipeline
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Initialize the project repository with Next.js 14+ and TypeScript for frontend, FastAPI for backend, and configure CI/CD for automated testing and deployment. Reference PRD at .taskmaster/docs/prd.txt for complete platform specifications and named individuals in the docs folder to simulate committee discussion and consensus.
+# Details:
+Use GitHub Actions for CI/CD. Set up Next.js 14+ with TypeScript, FastAPI with async/await, and Docker for containerization. Configure linti
+ng, testing, and deployment workflows by examining tests folder . Use Python 3.10+ and Node.js 18+. Before marking any task or subtask as complete, ensure ALL tests pass including: mypy for Python type checking, tsc for TypeScript compilation, jest for frontend tests, pytest for backend tests, flake8 for Python linting, and ESLint for JavaScript/TypeScript linting. Run 'npm test' and 'pytest' to verify.
+
+# Test Strategy:
+Verify repository setup, CI/CD pipeline runs, and basic build/test passes. No task should be marked done without passing all applicable tests: mypy, tsc, jest, pytest, flake8, and ESLint.
+
+# Subtasks:
+## 1. Repository Initialization and Structure Design [pending]
+### Dependencies: None
+### Description: Review the foundational repository structure, initialize version control, and create a new ADR based on 002 for any final suggestions to guide new file creation and moving old files considering the current structure, technical debt, and stability of doing too much and the merits of a the monorepo layout for both frontend and backend. Incorporate expert committee debate on monorepo vs. polyrepo, directory conventions, and initial documentation. Reference PRD at .taskmaster/docs/prd.txt for platform specifications.
+### Details:
+Robert C. Martin advocates for clear separation of concerns and modularity, suggesting a monorepo with distinct frontend and backend directories. Martin Fowler emphasizes the importance of evolutionary architecture and recommends including a README and CONTRIBUTING guide from the outset. Rich Hickey raises concerns about accidental complexity and suggests minimalism in initial structure. Kent Beck stresses the value of test-driven development and recommends scaffolding test directories early. Architectural decisions include whether to use a monorepo (favored by Martin Fowler for coordination) or polyrepo (Rich Hickey for simplicity). Mathematical rigor is applied in defining dependency graphs and minimizing coupling. Production-ready considerations include initializing with a .gitignore, license, and basic CI config. Must align with PRD specifications at .taskmaster/docs/prd.txt.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 2. Next.js Frontend Setup [pending]
+### Dependencies: 1.1
+### Description: Bootstrap the Next.js frontend, configure TypeScript, environment variables, and initial routing. Debate SSR vs. SSG, state management, and type safety. Ensure all TypeScript compilation passes with tsc and ESLint configuration is properly set up.
+### Details:
+Conor Heins and Alexander Tschantz discuss the cognitive load of SSR (Server-Side Rendering) versus SSG (Static Site Generation), with Heins favoring SSR for dynamic content and Tschantz advocating SSG for performance. Yann LeCun highlights the importance of type safety (e.g., Zod integration) for robust data handling. Kent Beck recommends setting up initial tests and linting. Architectural decisions include folder structure (pages vs. app directory), state management (Redux, Zustand, or Context API), and integration with backend APIs. Mathematical rigor is applied in analyzing rendering performance and hydration costs. Production-ready considerations include .env management, initial authentication scaffolding, and accessibility linting. Must pass tsc compilation and ESLint checks before completion.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 3. FastAPI Backend Setup [pending]
+### Dependencies: 1.1
+### Description: Initialize the FastAPI backend, configure environment variables, database integration, and API routing. Debate ORM choice, dependency injection, and API documentation. Ensure mypy type checking and flake8 linting pass.
+### Details:
+Geoffrey Hinton and Demis Hassabis discuss the merits of SQLModel vs. SQLAlchemy ORM, with Hinton favoring explicitness and Hassabis advocating for flexibility. Andy Clark and Jakob Hohwy debate the cognitive complexity of dependency injection frameworks. Anil Seth and Thomas Parr emphasize the importance of clear API documentation (OpenAPI/Swagger). Karl Friston suggests mathematical rigor in defining API contracts and data validation. Architectural decisions include folder structure (routers, models, schemas), database migration tools, and authentication strategies. Production-ready considerations include .env setup, initial test endpoints, and health checks. Must pass mypy and flake8 checks before completion.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 4. Docker and Docker Compose Configuration [pending]
+### Dependencies: 1.2, 1.3
+### Description: Create Dockerfiles for frontend and backend, set up Docker Compose for multi-service orchestration, and debate image optimization, build caching, and environment parity.
+### Details:
+Robert C. Martin and Martin Fowler debate single vs. multi-stage Docker builds, with Martin advocating for smaller, production-ready images. Rich Hickey raises concerns about Dockerfile complexity and suggests minimal base images. Yann LeCun emphasizes reproducibility and environment parity between development and production. Architectural decisions include network configuration, volume mounts, and secrets management. Mathematical rigor is applied in analyzing build times and resource utilization. Production-ready considerations include healthcheck directives, non-root users, and .dockerignore files.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 5. GitHub Actions CI/CD Workflow Setup [pending]
+### Dependencies: 1.4
+### Description: Configure GitHub Actions workflows for linting, testing, building, and deploying both frontend and backend. Debate workflow granularity, secrets management, and deployment strategies. Ensure workflows run all required tests.
+### Details:
+Kent Beck and Martin Fowler discuss the merits of monolithic vs. modular workflows, with Beck favoring fast feedback and Fowler advocating for clear separation of concerns. Conor Heins and Alexander Tschantz debate the cognitive load of matrix builds. Yann LeCun and Geoffrey Hinton emphasize the importance of automated testing and reproducibility. Architectural decisions include workflow triggers (push, PR, release), artifact caching, and deployment targets (Vercel, Docker Hub, cloud providers). Mathematical rigor is applied in optimizing workflow parallelism and minimizing build times. Production-ready considerations include secrets management, branch protection, and rollback strategies. Workflows must include steps for mypy, tsc, jest, pytest, flake8, and ESLint.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 6. Linting and Testing Integration [pending]
+### Dependencies: 1.5
+### Description: Integrate linting (ESLint, Flake8), type checking (TypeScript, mypy), and automated testing (Jest, Pytest) for both frontend and backend. Debate strictness, coverage thresholds, and feedback loops. Ensure all tools are properly configured and passing.
+### Details:
+Robert C. Martin and Kent Beck advocate for strict linting and high test coverage, emphasizing code quality and maintainability. Rich Hickey warns against overengineering and suggests focusing on meaningful tests. Yann LeCun and Demis Hassabis discuss the role of static analysis and type inference in reducing bugs. Architectural decisions include pre-commit hooks, test coverage thresholds, and integration with CI workflows. Mathematical rigor is applied in measuring code complexity and test effectiveness. Production-ready considerations include badge integration, flaky test detection, and developer onboarding documentation. All tests must pass: mypy for Python, tsc for TypeScript, jest for frontend, pytest for backend, flake8 for Python linting, and ESLint for JS/TS linting.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 7. Pass integration and end-to-end tests before completing this task and moving to the next. [pending]
+### Dependencies: 1.6
+### Description: Run and pass all integration and end-to-end tests for the entire repository, ensuring that the system works as a whole and meets PRD requirements before marking this task as complete and proceeding to the next task.
+### Details:
+All integration and end-to-end tests must pass. Review PRD at .taskmaster/docs/prd.txt to confirm all platform requirements and committee consensus are satisfied. Only after this step may the task be marked complete.

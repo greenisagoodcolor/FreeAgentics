@@ -540,6 +540,11 @@ class GraphToModelMapper:
         #     model = self._add_batch_norm(model, config)
         # if config.layer_norm:
         #     model = self._add_layer_norm(model, config)
+        
+        # Add graph-level pooling wrapper if needed
+        if config.global_pool:
+            model = self._add_graph_pooling(model, config)
+        
         return model
 
     def _add_batch_norm(self, model: nn.Module, config: ModelConfig) -> nn.Module:
@@ -597,6 +602,37 @@ class GraphToModelMapper:
                 return x
 
         return LayerNormGNN(model, config.hidden_channels)
+
+    def _add_graph_pooling(self, model: nn.Module, config: ModelConfig) -> nn.Module:
+        """Add graph-level pooling wrapper"""
+        from .layers import global_add_pool, global_mean_pool, global_max_pool
+
+        class GraphPoolingGNN(nn.Module):
+            def __init__(self, base_model: nn.Module, pool_type: str) -> None:
+                super().__init__()
+                self.model = base_model
+                self.pool_type = pool_type
+
+            def forward(
+                self,
+                x: torch.Tensor,
+                edge_index: torch.Tensor,
+                batch: Optional[torch.Tensor] = None,
+                **kwargs: Any,
+            ) -> torch.Tensor:
+                x = self.model(x, edge_index)
+                if batch is not None:
+                    if self.pool_type == "add":
+                        x = global_add_pool(x, batch)
+                    elif self.pool_type == "mean":
+                        x = global_mean_pool(x, batch)
+                    elif self.pool_type == "max":
+                        x = global_max_pool(x, batch)
+                    else:
+                        raise ValueError(f"Unknown pooling type: {self.pool_type}")
+                return x
+
+        return GraphPoolingGNN(model, config.global_pool)
 
     def validate_model_compatibility(
         self,

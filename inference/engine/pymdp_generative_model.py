@@ -210,14 +210,16 @@ class PyMDPGenerativeModelAdapter:
         if isinstance(states, torch.Tensor):
             states = states.detach().cpu().numpy()
         # A @ states gives observation probabilities
-        return self.pymdp_model.A @ states
+        result: np.ndarray = self.pymdp_model.A @ states
+        return result
 
     def transition_model(self, states: Union[np.ndarray, torch.Tensor], action: int) -> np.ndarray:
         """Compute state transitions using pymdp format"""
         if isinstance(states, torch.Tensor):
             states = states.detach().cpu().numpy()
         # B[:, :, action] @ states gives next state probabilities
-        return self.pymdp_model.B[:, :, action] @ states
+        result: np.ndarray = self.pymdp_model.B[:, :, action] @ states
+        return result
 
     def get_preferences(self, timestep: int = 0) -> np.ndarray:
         """Get preferences for given timestep"""
@@ -241,7 +243,7 @@ def create_pymdp_generative_model(
     num_observations: int,
     num_actions: int,
     time_horizon: int = 1,
-    **kwargs,
+    **kwargs: Any,
 ) -> PyMDPGenerativeModel:
     """
     Factory function to create pymdp-compatible generative model.

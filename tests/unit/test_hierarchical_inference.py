@@ -297,6 +297,7 @@ class TestTemporalHierarchicalInference:
         """Test coarse-to-fine inference"""
         system, _ = setup_temporal_system
         batch_size = 2
+        system.initialize(batch_size)  # Initialize the system before inference
         observations = torch.randn(batch_size, 4)
         beliefs = system.coarse_to_fine_inference(observations, iterations=3)
         assert len(beliefs) == 2
@@ -349,8 +350,17 @@ class TestFactoryFunction:
 
     def test_invalid_type(self) -> None:
         """Test invalid inference type"""
+        config = HierarchicalConfig(use_gpu=False)
+        # Create minimal required parameters to reach type validation
+        dims = ModelDimensions(num_states=8, num_observations=4, num_actions=2)
+        params = ModelParameters(use_gpu=False)
+        models = [DiscreteGenerativeModel(dims, params)]
+        inf_config = InferenceConfig(use_gpu=False)
+        algorithms = [VariationalMessagePassing(inf_config)]
         with pytest.raises(ValueError, match="Unknown inference type"):
-            create_hierarchical_inference("invalid")
+            create_hierarchical_inference(
+                "invalid", config, generative_models=models, inference_algorithms=algorithms
+            )
 
     def test_missing_required_params(self) -> None:
         """Test missing required parameters"""

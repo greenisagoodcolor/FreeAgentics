@@ -564,15 +564,16 @@ class HierarchicalGraphIntegration:
         """
         updated_beliefs = []
         for i in range(self.num_levels):
-            if self.level_adapters[i] is not None:
+            adapter = self.level_adapters[i]
+            if adapter is not None:
                 graph_data = graph_data_per_level[i]
-                processed = self.level_adapters[i].process_graph(
+                processed = adapter.process_graph(
                     graph_data["node_features"],
                     graph_data["edge_index"],
                     graph_data.get("edge_features"),
                     graph_data.get("batch"),
                 )
-                updated = self.level_adapters[i].update_beliefs_with_graph(
+                updated = adapter.update_beliefs_with_graph(
                     current_beliefs[i], processed
                 )
                 updated_beliefs.append(updated)
@@ -656,7 +657,7 @@ class GNNActiveInferenceIntegration:
 
 
 def create_gnn_adapter(
-    adapter_type: str, config: Optional[GraphNNIntegrationConfig] = None, **kwargs
+    adapter_type: str, config: Optional[GraphNNIntegrationConfig] = None, **kwargs: Any
 ) -> Union[GNNActiveInferenceAdapter, HierarchicalGraphIntegration]:
     """Create GNN adapters.
 
@@ -675,8 +676,12 @@ def create_gnn_adapter(
         inference_algorithm = kwargs.get("inference_algorithm")
         if None in [gnn_model, generative_model, inference_algorithm]:
             raise ValueError(
-                "Standard adapter requires gnn_model, generative_model, " "and inference_algorithm"
+                "Standard adapter requires gnn_model, generative_model, and inference_algorithm"
             )
+        # Type assertions to satisfy mypy after None check
+        assert gnn_model is not None
+        assert generative_model is not None
+        assert inference_algorithm is not None
         return GNNActiveInferenceAdapter(config, gnn_model, generative_model, inference_algorithm)
     elif adapter_type == "hierarchical":
         level_configs = kwargs.get("level_configs", [])
@@ -700,7 +705,7 @@ if __name__ == "__main__":
     class DummyGNN(nn.Module):
         """Dummy GNN for testing."""
 
-        def __init__(self, input_dim, hidden_dim, output_dim) -> None:
+        def __init__(self, input_dim: int, hidden_dim: int, output_dim: int) -> None:
             """Initialize dummy GNN."""
             super().__init__()
             self.layers = nn.Sequential(
@@ -716,7 +721,8 @@ if __name__ == "__main__":
             edge_features: Optional[torch.Tensor] = None,
         ) -> torch.Tensor:
             """Forward pass through dummy GNN."""
-            return self.layers(x)
+            result: torch.Tensor = self.layers(x)
+            return result
 
     gnn_model = DummyGNN(10, 64, 32)
     dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)

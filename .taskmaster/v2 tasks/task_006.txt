@@ -1,0 +1,58 @@
+# Task ID: 6
+# Title: Implement Agent Factory and PyMDP Integration
+# Status: pending
+# Dependencies: 2, 5
+# Priority: high
+# Description: Build agent creation logic with PyMDP-based generative models and belief priors.
+# Details:
+Implement agent factory in Python (agents/base/agent_factory.py). Integrate PyMDP for belief state calculations and policy selection. Use existing codebase patterns.
+
+# Test Strategy:
+Test agent creation, PyMDP initialization, and belief state generation.
+
+# Subtasks:
+## 1. Architect Agent Factory Pattern [pending]
+### Dependencies: None
+### Description: Design the agent factory using established software engineering principles, ensuring extensibility and decoupling. Incorporate perspectives from Robert C. Martin (emphasizing SOLID principles and interface segregation), Kent Beck (testability and simplicity), and Martin Fowler (refactoring and maintainability). Rich Hickey's emphasis on simplicity and data-driven design should inform the abstraction layer. Document architectural decisions and UML diagrams.
+### Details:
+The committee should debate the merits of abstract base classes versus protocol-based interfaces, the trade-offs between inheritance and composition, and the use of dependency injection for agent instantiation. Consider production-readiness, extensibility for new agent types, and alignment with event-driven multi-agent system patterns.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 2. Integrate PyMDP Generative Model [pending]
+### Dependencies: 6.1
+### Description: Implement integration between the agent factory and PyMDP, focusing on clean interfaces and mathematical rigor. Leverage insights from Conor Heins and Alexander Tschantz (PyMDP authors, ensuring correct generative model usage), Karl Friston and Thomas Parr (mathematical soundness of model integration), and Yann LeCun and Geoffrey Hinton (scalability and efficiency).
+### Details:
+The committee should debate the best way to expose generative model configuration to the factory, whether to use composition or delegation, and how to ensure the integration is robust to future PyMDP updates. Discuss the mathematical contract between agent and model, and ensure the interface supports both research and production use cases.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 3. Implement Belief Prior Setup [pending]
+### Dependencies: 6.2
+### Description: Develop the logic for initializing agent belief priors, ensuring mathematical correctness and flexibility. Draw on perspectives from Andy Clark, Jakob Hohwy, and Anil Seth (theoretical rigor in belief representation), as well as Karl Friston (active inference priors). Ensure the setup supports both default and user-specified priors.
+### Details:
+The committee should debate the trade-offs between hardcoded defaults, configuration-driven priors, and learnable priors. Discuss how to validate prior correctness, how to expose prior configuration in the factory, and how to document the mathematical assumptions for production users.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 4. Design Policy Selection Logic [pending]
+### Dependencies: 6.3
+### Description: Implement the policy selection mechanism, ensuring it is modular, mathematically rigorous, and extensible. Incorporate Demis Hassabis (AI planning and search), Geoffrey Hinton (probabilistic reasoning), and Thomas Parr (active inference policy selection) perspectives. Ensure the logic is decoupled from agent instantiation and supports multiple policy types.
+### Details:
+The committee should debate the merits of different policy selection algorithms (e.g., softmax, argmax, sampling), how to expose policy configuration, and how to ensure the logic is testable and production-ready. Discuss the mathematical guarantees and performance implications of each approach.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 5. Comprehensive Testing and Validation [pending]
+### Dependencies: 6.4
+### Description: Develop a robust testing suite covering unit, integration, and system tests for the agent factory, PyMDP integration, belief prior setup, and policy selection. Leverage Kent Beck (test-driven development), Martin Fowler (refactoring for testability), and Robert C. Martin (clean code and test coverage) perspectives. Include mathematical validation tests (Karl Friston, Thomas Parr) and production-readiness checks (Yann LeCun, Demis Hassabis).
+### Details:
+The committee should debate the balance between test coverage and maintainability, the use of property-based testing for mathematical correctness, and strategies for continuous integration. Ensure tests are reproducible, well-documented, and support both research and production deployments.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 6. Integration and End-to-End Testing [pending]
+### Dependencies: 6.5
+### Description: Pass integration and end-to-end tests before completing this task and moving to the next. Reference the PRD for acceptance criteria and committee review.
+### Details:
+All code must meet PRD requirements and be reviewed by the expert committee. Ensure all tests (mypy, tsc, jest, pytest, flake8, ESLint) pass and integration/end-to-end tests are green before closing the task.

@@ -135,13 +135,19 @@ class CommunicationProtocol:
         self.message_queue: queue.Queue = queue.Queue()
         self.conversation_history: Dict[tuple[str, str], List[Message]] = {}
         self.pending_responses: Dict[str, Message] = {}
+        self.broadcast_messages: List[Message] = []  # Store broadcast messages separately
+        self.broadcast_received: Dict[str, set[str]] = {}  # Track which agents received broadcasts
         self._lock = threading.Lock()
 
     def send_message(self, message: Message) -> bool:
         """Send a message to another agent or broadcast"""
         with self._lock:
-            self.message_queue.put(message)
-            if not message.is_broadcast():
+            if message.is_broadcast():
+                # Store broadcast messages separately
+                self.broadcast_messages.append(message)
+                self.broadcast_received[message.id] = set()
+            else:
+                self.message_queue.put(message)
                 # Create conversation key safely, handling None values
                 sender = message.sender_id or "unknown"
                 receiver = message.receiver_id or "unknown"
@@ -159,11 +165,20 @@ class CommunicationProtocol:
         """Receive messages for a specific agent"""
         messages: List[Message] = []
         with self._lock:
+            # First, collect any broadcast messages not yet received by this agent
+            for broadcast_msg in self.broadcast_messages:
+                if agent_id not in self.broadcast_received.get(broadcast_msg.id, set()):
+                    messages.append(broadcast_msg)
+                    self.broadcast_received[broadcast_msg.id].add(agent_id)
+                    if len(messages) >= max_messages:
+                        break
+            
+            # Then collect direct messages
             temp_queue: queue.Queue[Message] = queue.Queue()
             while not self.message_queue.empty() and len(messages) < max_messages:
                 try:
                     msg = self.message_queue.get_nowait()
-                    if msg.is_broadcast() or msg.receiver_id == agent_id:
+                    if msg.receiver_id == agent_id:
                         messages.append(msg)
                     else:
                         temp_queue.put(msg)
@@ -267,11 +282,16 @@ class ConflictResolver:
             share1 = disputed_amount * (agent1.personality.openness / total_priority)
             share2 = disputed_amount * (agent2.personality.openness / total_priority)
         if resource_type == ResourceType.ENERGY:
-            energy_ratio = agent1.resources.energy / (
-                agent1.resources.energy + agent2.resources.energy + 0.001
-            )
-            share1 = share1 * (1 - energy_ratio)
-            share2 = share2 * energy_ratio
+            # Inverse energy weighting - agents with less energy get more
+            total_energy = agent1.resources.energy + agent2.resources.energy + 0.001
+            # Weight inversely by energy (those with less energy need more)
+            weight1 = agent2.resources.energy / total_energy
+            weight2 = agent1.resources.energy / total_energy
+            # Normalize weights to ensure they sum to 1
+            total_weight = weight1 + weight2
+            if total_weight > 0:
+                share1 = disputed_amount * (weight1 / total_weight)
+                share2 = disputed_amount * (weight2 / total_weight)
         result = {agent1.agent_id: share1, agent2.agent_id: share2}
         with self._lock:
             self.conflict_history.append(

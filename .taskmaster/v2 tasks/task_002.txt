@@ -1,0 +1,58 @@
+# Task ID: 2
+# Title: Implement Core FastAPI Backend Structure
+# Status: pending
+# Dependencies: 1
+# Priority: high
+# Description: Establish the main FastAPI backend structure with modular endpoints and async/await patterns. Reference PRD at .taskmaster/docs/prd.txt for requirements and committee consensus.
+# Details:
+Create main FastAPI app with modular routers for agents, inference, GNN, knowledge, coalitions, and deployment. Use Pydantic for request/response validation. Integrate logging and error handling.
+
+# Test Strategy:
+Test API endpoints with Postman/curl, validate modularity and error handling.
+
+# Subtasks:
+## 1. App Initialization and Core Architecture [pending]
+### Dependencies: None
+### Description: Design and implement the FastAPI app initialization, focusing on async support, dependency injection, and scalable project structure. Debate architectural purity (Robert C. Martin, Martin Fowler), functional vs. object-oriented paradigms (Rich Hickey, Kent Beck), and the role of mathematical rigor in API contract definition (Karl Friston, Yann LeCun). Consider production-readiness, startup performance, and maintainability.
+### Details:
+Robert C. Martin advocates for clear separation of concerns and clean architecture, suggesting a layered approach to initialization. Martin Fowler emphasizes modular monoliths for maintainability. Rich Hickey prefers minimalism and immutability, while Kent Beck supports test-driven initialization. Karl Friston and Yann LeCun highlight the importance of formal, mathematically sound API contracts. The committee should debate the merits of a single entrypoint vs. modular initialization, and how to structure dependency injection for async performance.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 2. Modular Router Setup and API Layering [pending]
+### Dependencies: 2.1
+### Description: Establish a modular router structure using FastAPI's APIRouter, ensuring separation of concerns and scalability. Discuss the trade-offs between deep modularity (Robert C. Martin, Martin Fowler), simplicity (Rich Hickey), and the cognitive load of complex router hierarchies (Andy Clark, Jakob Hohwy). Address the mathematical implications of route composition and dependency graphs (Karl Friston, Thomas Parr).
+### Details:
+Robert C. Martin and Martin Fowler argue for routers organized by domain or bounded context, supporting future growth. Rich Hickey warns against overengineering and prefers flat, simple router hierarchies. Andy Clark and Jakob Hohwy discuss the cognitive implications of deep nesting. Karl Friston and Thomas Parr analyze the dependency graph for mathematical soundness and minimal coupling. The committee should decide on router granularity, naming conventions, and inclusion patterns.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 3. Pydantic Validation and Data Modeling [pending]
+### Dependencies: 2.1
+### Description: Implement robust Pydantic models for request/response validation, considering custom base models, settings management, and schema evolution. Debate the balance between strict typing (Kent Beck, Geoffrey Hinton), flexibility (Rich Hickey, Anil Seth), and the mathematical expressiveness of data schemas (Karl Friston, Demis Hassabis).
+### Details:
+Kent Beck and Geoffrey Hinton advocate for strong, explicit typing and validation to catch errors early. Rich Hickey and Anil Seth prefer flexible, evolvable schemas. Karl Friston and Demis Hassabis emphasize the mathematical properties of data models, such as invariants and compositionality. The committee should discuss custom base models, decoupling settings, and strategies for schema migrations.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 4. Logging Integration and Observability [pending]
+### Dependencies: 2.1
+### Description: Integrate structured, async-compatible logging throughout the FastAPI app, ensuring traceability and observability. Discuss logging granularity (Martin Fowler, Conor Heins), performance impact (Yann LeCun), and the role of logging in cognitive debugging (Andy Clark, Jakob Hohwy). Consider mathematical approaches to log analysis (Karl Friston, Thomas Parr).
+### Details:
+Martin Fowler and Conor Heins recommend structured, context-rich logs for maintainability. Yann LeCun highlights the need for non-blocking, performant logging in async environments. Andy Clark and Jakob Hohwy discuss how logging supports cognitive debugging and error tracing. Karl Friston and Thomas Parr propose mathematical models for log anomaly detection. The committee should debate log levels, formats (JSON, plain text), and integration with external observability tools.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 5. Error Handling and Exception Management [pending]
+### Dependencies: 2.1
+### Description: Design a comprehensive error handling strategy, including custom exception classes, global exception handlers, and user-friendly error responses. Debate the trade-offs between strict error boundaries (Robert C. Martin, Kent Beck), graceful degradation (Anil Seth, Andy Clark), and the mathematical modeling of error propagation (Karl Friston, Thomas Parr, Alexander Tschantz).
+### Details:
+Robert C. Martin and Kent Beck advocate for explicit, predictable error handling with clear boundaries. Anil Seth and Andy Clark support graceful degradation and resilience. Karl Friston, Thomas Parr, and Alexander Tschantz analyze error propagation using mathematical frameworks, ensuring that error handling does not introduce hidden state or side effects. The committee should decide on exception hierarchies, error response formats, and integration with logging and monitoring.
+
+Before moving to the next subtask, ensure all tests pass: mypy, tsc, jest, pytest, flake8, ESLint.
+
+## 6. Pass integration and end-to-end tests before completing this task and moving to the next. [pending]
+### Dependencies: 2.5
+### Description: Run and pass all integration and end-to-end tests for the entire backend, ensuring that the system works as a whole and meets PRD requirements before marking this task as complete and proceeding to the next task.
+### Details:
+All integration and end-to-end tests must pass. Review PRD at .taskmaster/docs/prd.txt to confirm all platform requirements and committee consensus are satisfied. Only after this step may the task be marked complete.

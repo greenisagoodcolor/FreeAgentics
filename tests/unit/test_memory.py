@@ -357,7 +357,7 @@ class TestPatternRecognizer:
         for i in range(5):
             exp = Experience(
                 state={"location": "forest"},
-                action=Action(ActionType.GATHER),
+                action=Action(action_type=ActionType.GATHER),
                 outcome={"resource_gained": True, "energy_cost": 5},
                 reward=1.0,
                 next_state={"location": "forest", "has_resource": True},
@@ -365,7 +365,7 @@ class TestPatternRecognizer:
             experiences.append(exp)
         exp_fail = Experience(
             state={"location": "desert"},
-            action=Action(ActionType.GATHER),
+            action=Action(action_type=ActionType.GATHER),
             outcome={"resource_gained": False},
             reward=-0.5,
             next_state={"location": "desert"},

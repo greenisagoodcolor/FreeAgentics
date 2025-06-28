@@ -833,3 +833,19 @@ for step in range(300):
 ---
 
 _This guide represents the collaborative expertise of the FreeAgentics community and expert committee. For technical questions, consult the [Developer Guide](DEVELOPER-GUIDE.md) or [API Reference](API-REFERENCE.md)._
+
+---
+
+## Appendix: Glossary
+
+*(Former standalone Glossary merged for convenience.)*
+
+# FreeAgentics Glossary
+
+This glossary provides definitions for technical terms used throughout the FreeAgentics project documentation.
+
+## A
+
+### Active Inference
+
+A theoretical framework ...

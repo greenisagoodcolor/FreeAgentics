@@ -2,6 +2,12 @@
 
 > **Multi-agent AI platform implementing Active Inference for autonomous, mathematically-principled intelligent systems**
 
+🎉 **v1.0 Release - Ready for Developer Testing & Demos!** 🎉
+
+Building on work from John Clippinger, Andrea Pashea, and Daniel Friedman as well as the active inference intstitute and many others..
+
+This is for developers who want to test, explore, and demo a  multi-agent AI platform. It is designed to share with friends and get feedback!
+
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![Node.js](https://img.shields.io/badge/node-18+-green.svg)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -9,7 +15,7 @@
 
 ## 🎯 What is FreeAgentics?
 
-FreeAgentics creates **truly autonomous AI agents** using **Active Inference** - a mathematical framework from cognitive science. Unlike chatbots or scripted AI, our agents make decisions by minimizing free energy, leading to emergent, intelligent behavior.
+FreeAgentics creates ** AI agents** using **Active Inference** - a mathematical framework from cognitive science. Unlike chatbots or scripted AI, our agents make decisions by minimizing free energy, leading to emergent, intelligent behavior.
 
 ### ⚡ Key Features
 
@@ -20,132 +26,189 @@ FreeAgentics creates **truly autonomous AI agents** using **Active Inference** -
 - 🚀 **Production Ready**: Enterprise-grade performance and edge deployment
 - 📝 **Natural Language**: Create agents using human-readable specifications
 
-## 🚀 Quick Start (5 minutes)
+## 🚀 Quick Start & Developer Setup
 
+### **30-Second Start**
 ```bash
-# Install and run
 git clone https://github.com/your-org/freeagentics.git
 cd freeagentics
-npm install && pip install -e .
-
-# Start the platform
-npm run dev
-# Visit http://localhost:3000
+make install && make dev && make mvp
+# Bloomberg Terminal dashboard opens automatically!
 ```
 
-**Create your first agent**:
+### **Essential Commands**
+```bash
+# Development
+make install           # One-time setup (Python + Node.js)
+make dev              # Start both frontend (3000) + backend (8000)
+make mvp              # Open CEO-ready dashboard
 
-```python
-from freeagentics import Agent, World
+# Testing (30s → 30min options)
+make test             # Quick validation (30s)
+make test-full        # Comprehensive (2-5min)
+make test-all         # Everything (5-10min)
 
-# Create autonomous explorer
-agent = Agent.create("Explorer", personality={'curiosity': 0.8})
+# Troubleshooting
+make kill-ports       # Fix "port in use" errors
+make reset            # Nuclear option: clean restart
+make status           # See what's running where
+```
 
-# Add to world and watch it act intelligently
-world = World(grid_size=20)
-world.add_agent(agent)
-world.simulate(steps=100)
+## 🎮 What You Can Demo
+
+- **Professional Interface**: Amber (#FB8B1E) color scheme, tiling windows
+- **4 Autonomous AI Agents**: Explorer, Guardian, Merchant, Scholar using Active Inference
+- **Real-time Visualization**: D3.js knowledge graphs, live agent activity feeds
+- **Mobile Responsive**: Touch gestures, adaptive layouts, accessibility (WCAG 2.1 AA)
+- **Analytics Dashboard**: Recharts-powered performance metrics
+
+## 🏗️ Codebase Architecture
+
+### **Frontend (`web/`) - Bloomberg Terminal**
+```
+web/
+├── app/dashboard/         # Dashboard
+├── components/dashboard/  # Professional widgets & TilingWindowManager
+├── styles/design-tokens.css # Professional design system
+└── hooks/                 # Custom React hooks
+```
+
+### **Backend (Python) - Multi-Agent AI**
+```
+agents/                    # Explorer, Guardian, Merchant, Scholar
+inference/                 # Active Inference engine + GNN + LLM
+coalitions/               # Multi-agent coordination
+api/                      # FastAPI + WebSocket real-time updates
+```
+
+## 🎯 Development Workflow
+
+```bash
+# Daily cycle
+make status && make dev    # Start development
+# Edit code (auto-reload)
+make test                  # Quick validation
+make quality              # Lint + type check
+git add . && git commit && git push
 ```
 
 ## 🧪 Testing Strategy
 
-**Enterprise-Grade Quality with 15 Comprehensive Test Commands**
+FreeAgentics uses a **layered testing approach** designed for different development phases:
 
-### **Daily Development Workflow** (Fast Feedback)
+### **Core Testing Commands**
 
+| Command              | What It Includes                    | When To Use                | Time     | Output Location    |
+| -------------------- | ----------------------------------- | -------------------------- | -------- | ------------------ |
+| `test`               | **Basic unit tests**                | While coding/debugging     | 30s      | Terminal           |
+| `test-full`          | **Unit tests + coverage reports**  | Before committing changes  | 2-5min   | Terminal + HTML    |
+| `test-all`           | **Unit + Integration + E2E tests** | Before pushing to main     | 5-10min  | Terminal + Reports |
+| `test-comprehensive` | **Complete validation suite**       | Weekly/Before releases     | 15-30min | `.test-reports/`   |
+
+### **Detailed Breakdown**
+
+#### 🏃‍♂️ `make test` - Quick Validation (30 seconds)
+- **Frontend**: Jest unit tests only
+- **Backend**: Basic pytest suite (`tests/`)
+- **Purpose**: Fast feedback during development
+- **Perfect for**: TDD cycles, quick sanity checks
+
+#### 🔬 `make test-full` - Thorough Testing (2-5 minutes)  
+- **Frontend**: Jest with coverage reports + verbose output
+- **Backend**: pytest with full traceback (`-vvv --tb=long`) + coverage reports
+- **Coverage**: HTML reports generated in `coverage/` and `htmlcov/`
+- **Purpose**: Ensure code quality before committing
+- **Perfect for**: Pre-commit validation, code review prep
+
+#### 🚀 `make test-all` - Pre-Push Validation (5-10 minutes)
+- **Phase 1**: All unit tests with coverage (same as `test-full`)
+- **Phase 2**: Integration tests (`tests/integration/`)
+- **Phase 3**: End-to-end tests (Playwright browser automation)
+- **Purpose**: Comprehensive validation before pushing to main branch
+- **Perfect for**: CI/CD pipeline, team collaboration
+
+#### 🎯 `make test-comprehensive` - Expert Committee Suite (15-30 minutes)
+The **complete V1 release validation** with 11 phases:
+1. **Static Analysis** - TypeScript + Python type checking
+2. **Security Scanning** - Bandit + Safety vulnerability checks  
+3. **Code Quality** - Linting, formatting, complexity analysis
+4. **Dependency Analysis** - Unused deps, bundle size validation
+5. **Advanced Quality** - Black, isort, flake8, mypy deep analysis
+6. **Unit Testing** - Full test suite with timeouts
+7. **Integration Testing** - API + database integration
+8. **Advanced Testing** - Property-based, behavior, security, chaos engineering
+9. **Visual/Performance** - Screenshot validation, Lighthouse audits, load testing
+10. **End-to-End** - Complete user scenarios with browser automation
+11. **Coverage Analysis** - Unified reporting across frontend + backend
+
+**Generates**: Complete quality report in `.test-reports/comprehensive-report.md`
+**Purpose**: Release readiness validation, expert committee approval
+
+### **Specialized Testing** (When Issues Arise)
 ```bash
-# 1. During active coding - Quick smoke test
-make test                    # ~30 seconds - basic unit tests
-
-# 2. Before committing - Thorough validation
-make test-full              # ~2-5 minutes - with coverage reports
-```
-
-### **Integration Workflow** (Quality Gate)
-
-```bash
-# 3. Before pushing to main branch
-make test-all               # ~5-10 minutes - unit + integration + e2e
-```
-
-### **Release Workflow** (Complete Validation)
-
-```bash
-# 4. Weekly/before releases - Full enterprise validation
-make test-comprehensive     # ~15-30 minutes - ALL 13 test types
-```
-
-### **Debugging Workflow** (When Tests Fail)
-
-When `test-full` shows failures, dive deeper with specific test types:
-
-```bash
-make test-security          # 🔒 OWASP security validation
-make test-chaos            # 🌪️ System resilience testing
+make test-security          # 🔒 OWASP security validation + vulnerability scanning
+make test-chaos            # 🌪️ Failure injection + system resilience testing  
 make test-compliance       # 📐 Architectural compliance (ADR validation)
 make test-property         # 🔬 Mathematical invariants (Active Inference)
-make test-behavior         # 🎭 Behavior-driven scenarios (BDD)
-make test-contract         # 📝 API backwards compatibility
+make test-visual           # 👁️ Screenshot validation + UI regression testing
+make test-performance      # ⚡ Lighthouse audits + bundle analysis + load testing
 ```
 
-### **Test Command Reference**
+### **When to Use Which Test**
 
-| Command              | What It Includes         | When To Use    | Time     |
-| -------------------- | ------------------------ | -------------- | -------- |
-| `test`               | Basic unit tests         | During coding  | 30s      |
-| `test-full`          | Unit + coverage          | Before commit  | 2-5min   |
-| `test-all`           | Unit + Integration + E2E | Before push    | 5-10min  |
-| `test-comprehensive` | **EVERYTHING**           | Weekly/Release | 15-30min |
+**During Development** → `make test` (fast feedback)  
+**Before Each Commit** → `make test-full` (quality assurance)  
+**Before Pushing** → `make test-all` (integration confidence)  
+**Weekly/Pre-Release** → `make test-comprehensive` (production readiness)
 
-### **Expert Committee Compliance** ✅
+## 🔧 Customization by Developer Type
 
-Our testing strategy satisfies all requirements from:
+**React Developers**: Explore `web/components/dashboard/TilingWindowManager.tsx` and `design-tokens.css`  
+**Python/AI Developers**: Check `agents/` and `inference/engine/` for Active Inference math  
+**Full-Stack Developers**: API layer in `api/main.py` and `websocket/` real-time updates
 
-- **ADR-007**: Property-based, BDD, and chaos testing implemented
-- **Robert C. Martin**: Clean architecture validation
-- **Kent Beck**: Comprehensive test coverage
-- **Rich Hickey**: Mathematical invariant verification
-- **Conor Heins**: Active Inference mathematical properties
+## 🆘 Common Issues & Fixes
 
-**Total: 15 test commands covering every aspect of modern software quality**
+**"Port already in use"** → `make kill-ports`  
+**"Module not found"** → `make clean && make install`  
+**"Tests failing"** → `make test-full --tb=long --vvv` (max verbosity)  
+**"White screen"** → `make dev-frontend` (check build errors)  
+**"Agents not responding"** → `make dev-backend` (check Python logs)
 
-## 📚 Documentation
+## 📊 v1 Release Status
 
-### **For Different Users**
+### **What Makes This Special**
+- 🏆 **Demo Ready**: Interface to test integration between agent generation, conversation, knowledge graphs, and coalitions.
+- 🎨 **Enterprise UI/UX**: Enterprise-style UI/UX
+- 🤖 **4 Autonomous Agents**: Active Inference, not scripted behavior
+- 📊 **Real-time Visualization**: Live knowledge graphs and analytics
+- 📱 **Mobile-First**: Touch gestures, accessibility, responsive design
+- 🔧 **Developer-Friendly**: Comprehensive tooling and documentation
 
-- 👤 **New Users**: [Quick Start Guide](docs/QUICKSTART.md)
-- 👩‍💻 **Developers**: [Developer Guide](docs/DEVELOPER-GUIDE.md)
-- 🏗️ **Architects**: [Architecture Docs](docs/ARCHITECTURE.md)
-- 🚀 **DevOps**: [Deployment Guide](docs/DEPLOYMENT.md)
+### **Perfect For**
+✅ Developers exploring multi-agent AI  
+✅ Demo to friends and colleagues  
+✅ Learning Active Inference in practice  
+✅ Contributing to open-source AI research  
 
-### **Complete Documentation**: [docs/](docs/)
+### **Not Ready For**
+❌ Serious investor pitches (still v1)  
+❌ Production deployments (use at own risk)  
+❌ Mission-critical applications  
 
-## 🎮 Live Demo
+### **Quick Stats** (TODO CHECK COVERAGE after update)
+- **Lines of Code**: 50,000+ (Frontend + Backend + Tests)
+- **Test Coverage**: 86.5% (83/96 passing tests)
+- **Components**: 100+ React components, 15+ Python modules
+- **Tech Stack**: Next.js 13+, FastAPI, D3.js, Recharts, Active Inference
 
-**[Try FreeAgentics Demo](http://localhost:3000)** - Create agents and watch them interact in real-time
+## 📚 Resources
 
-## 🤝 Community & Contributing
-
-- 📖 **Contributing**: [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/your-org/freeagentics/discussions)
-- 🐛 **Issues**: [GitHub Issues](https://github.com/your-org/freeagentics/issues)
-- 💼 **Enterprise**: [Contact Us](mailto:enterprise@freeagentics.ai)
-
-## 📊 Project Status
-
-- **Version**: 0.9.0 (Seed-stage MVP)
-- **Test Coverage**: 88% (375 passing tests)
-- **Expert Review**: Committee approved
-- **Production Ready**: ✅ Edge deployment ready
-
-## 🔬 Research & Academic Use
-
-FreeAgentics is designed for:
-
-- 🎓 **Cognitive Science Research**: Test Active Inference theories
-- 🤖 **AI Research**: Multi-agent systems and emergent behavior
-- 📚 **Education**: Interactive Active Inference demonstrations
-- 🏢 **Industry**: Production multi-agent applications
+- **Documentation**: [docs/](docs/) - Complete guides for all user types
+- **Live Demo**: [localhost:3000](http://localhost:3000) after `make dev`
+- **Contributing**: [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)
+- **Issues**: [GitHub Issues](https://github.com/your-org/freeagentics/issues)
+- **Research**: Designed for cognitive science, AI research, and education
 
 ## 📄 License
 
@@ -153,6 +216,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-**Expert Committee Validated** | **Production Ready** | **Open Source**
+**v1.0 Release** | **Developer Ready** | **Demo Ready** | **Open Source**
 
 _Making Active Inference accessible, visual, and deployable for everyone._

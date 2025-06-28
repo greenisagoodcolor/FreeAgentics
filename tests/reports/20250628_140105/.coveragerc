@@ -1,0 +1,31 @@
+[run]
+branch = True
+source = agents,inference,coalitions,world,api,infrastructure
+data_file = /Users/matthewmoroney/builds/FreeAgentics/tests/reports/20250628_140105/python/coverage/.coverage
+omit =
+    */tests/*
+    */test_*.py
+    */__pycache__/*
+    */venv/*
+    */env/*
+    */.venv/*
+    */site-packages/*
+    */migrations/*
+    */alembic/*
+    */manage.py
+    */setup.py
+    */conftest.py
+
+[report]
+precision = 2
+show_missing = True
+skip_covered = False
+
+[html]
+directory = /Users/matthewmoroney/builds/FreeAgentics/tests/reports/20250628_140105/python/coverage/html
+
+[xml]
+output = /Users/matthewmoroney/builds/FreeAgentics/tests/reports/20250628_140105/python/coverage/coverage.xml
+
+[json]
+output = /Users/matthewmoroney/builds/FreeAgentics/tests/reports/20250628_140105/python/coverage/coverage.json

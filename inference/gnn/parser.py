@@ -89,7 +89,7 @@ class GMNLexer:
         ("LPAREN", r"\("),
         ("RPAREN", r"\)"),
         ("COLON", r":"),
-        ("COMMA", r", "),
+        ("COMMA", r","),
         ("COMMENT", r"//.*$"),
         ("MULTILINE_COMMENT", r"/\*.*?\*/"),
         ("WHITESPACE", r"[ \t]+"),
@@ -109,7 +109,14 @@ class GMNLexer:
         while self.position < len(self.text):
             match_found = False
             for token_type, pattern in self.TOKEN_PATTERNS:
-                regex = re.compile(pattern, re.MULTILINE if token_type == "COMMENT" else 0)
+                # Set appropriate regex flags based on token type
+                if token_type == "COMMENT":
+                    regex = re.compile(pattern, re.MULTILINE)
+                elif token_type == "MULTILINE_COMMENT":
+                    regex = re.compile(pattern, re.DOTALL)
+                else:
+                    regex = re.compile(pattern)
+                    
                 match = regex.match(self.text, self.position)
                 if match:
                     value = match.group(0)
@@ -120,9 +127,16 @@ class GMNLexer:
                     # Update position
                     self.position = match.end()
                     # Update line and column
-                    if token_type == "NEWLINE":
-                        self.line += 1
-                        self.column = 1
+                    if token_type == "NEWLINE" or "\n" in value:
+                        # Count newlines in the matched value
+                        newline_count = value.count("\n")
+                        self.line += newline_count
+                        if newline_count > 0:
+                            # Set column to position after last newline
+                            last_newline_pos = value.rfind("\n")
+                            self.column = len(value) - last_newline_pos
+                        else:
+                            self.column += len(value)
                     else:
                         self.column += len(value)
                     match_found = True
@@ -193,7 +207,7 @@ class GMNParser:
         in_gmn_block = False
         block_start_line = 0
         for i, line in enumerate(lines):
-            if line.strip() == "```gmn":
+            if line.strip() == "```gnn" or line.strip() == "```gmn":
                 if in_gmn_block:
                     errors.append(f"Line {i+1}: Nested GMN blocks not allowed")
                 in_gmn_block = True
@@ -201,7 +215,7 @@ class GMNParser:
             elif line.strip() == "```" and in_gmn_block:
                 in_gmn_block = False
         if in_gmn_block:
-            errors.append(f"Line {block_start_line}: Unclosed GMN block")
+            errors.append(f"Line {block_start_line}: Unclosed GNN block")
         return errors
 
     def _parse_sections(self) -> None:
@@ -272,25 +286,58 @@ class GMNParser:
                         self.metadata[key] = value
 
     def _extract_gmn_block(self, content_lines: List[str]) -> tuple[Optional[str], int]:
-        """Extracts content from a GMN code block and returns it and the number of lines consumed"""
-        try:
-            start_index = content_lines.index("```gmn")
-            # Look for the end of the block *after* the start
-            end_index = content_lines.index("```", start_index + 1)
-            block_content = "\n".join(content_lines[start_index + 1 : end_index])
-            lines_consumed = end_index + 1
-            return block_content, lines_consumed
-        except ValueError:
-            # Block delimiters not found
-            return None, 0
+        """Extract GMN code block from section content"""
+        gmn_content = []
+        i = 0
+        in_block = False
+        
+        while i < len(content_lines):
+            line = content_lines[i].strip()
+            
+            if line == "```gnn" or line == "```gmn":
+                in_block = True
+                i += 1
+                continue
+            elif line == "```" and in_block:
+                break
+            elif in_block:
+                gmn_content.append(content_lines[i])
+            
+            i += 1
+        
+        if gmn_content:
+            return "\n".join(gmn_content), i + 1
+        return None, i
 
     def _parse_gmn_block(self, content: str, section_name: str) -> Dict[str, Any]:
-        """Parse a GMN notation block"""
-        lexer = GMNLexer(content)
-        tokens = lexer.tokenize()
-        # Simple recursive descent parser for GMN blocks
-        parser = GMNBlockParser(tokens)
-        return parser.parse()
+        """Parse GMN block content into structured data"""
+        if not content.strip():
+            return {}
+        
+        try:
+            lexer = GMNLexer(content)
+            tokens = lexer.tokenize()
+            parser = GMNBlockParser(tokens)
+            parsed = parser.parse()
+            
+            # For certain sections, if there's a top-level key matching the section type,
+            # flatten it to make the fields directly accessible
+            section_key_map = {
+                "architecture": "architecture",
+                "active_inference_mapping": "active_inference",
+                "parameters": "parameters",
+                "node_features": "node_features"
+            }
+            
+            if section_name in section_key_map:
+                key = section_key_map[section_name]
+                if key in parsed:
+                    return parsed[key]
+            
+            return parsed
+        except (GMNSyntaxError, Exception) as e:
+            self.errors.append(f"Error parsing {section_name} section: {str(e)}")
+            return {}
 
     def _validate_sections(self) -> None:
         """Validate that required sections are present"""
@@ -352,16 +399,32 @@ class GMNBlockParser:
         if self.current_token and self.current_token.type == "LBRACE":
             self._advance()  # Skip {
             while self.current_token and self.current_token.type != "RBRACE":
+                # Skip newlines within object
+                while self.current_token and self.current_token.type == "NEWLINE":
+                    self._advance()
+                
                 # Parse key
-                if self.current_token.type == "IDENTIFIER":
+                if self.current_token and self.current_token.type == "IDENTIFIER":
                     key = self.current_token.value
                     self._advance()
-                    self._expect("COLON")
-                    # Parse value
-                    value = self._parse_value()
+                    
+                    # Check if this is a nested object (key followed by {)
+                    if self.current_token and self.current_token.type == "LBRACE":
+                        value = self._parse_object()
+                    elif self.current_token and self.current_token.type == "COLON":
+                        self._advance()
+                        value = self._parse_value()
+                    else:
+                        value = True  # Boolean flag
+                        
                     result[key] = value
+                    
                     # Optional comma
                     if self.current_token and self.current_token.type == "COMMA":
+                        self._advance()
+                    
+                    # Skip newlines after comma
+                    while self.current_token and self.current_token.type == "NEWLINE":
                         self._advance()
                 else:
                     break
@@ -370,9 +433,14 @@ class GMNBlockParser:
         else:
             # Parse without braces (top-level)
             while self.current_token:
-                if self.current_token.type == "IDENTIFIER":
+                # Skip newlines
+                while self.current_token and self.current_token.type == "NEWLINE":
+                    self._advance()
+                
+                if self.current_token and self.current_token.type == "IDENTIFIER":
                     key = self.current_token.value
                     self._advance()
+                    
                     # Handle both: and { after identifier
                     if self.current_token and self.current_token.type == "COLON":
                         self._advance()
@@ -381,7 +449,9 @@ class GMNBlockParser:
                         value = self._parse_object()
                     else:
                         value = True  # Boolean flag
+                        
                     result[key] = value
+                    
                     # Skip newlines
                     while self.current_token and self.current_token.type == "NEWLINE":
                         self._advance()

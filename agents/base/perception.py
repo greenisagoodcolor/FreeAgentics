@@ -371,7 +371,8 @@ class PerceptionSystem:
             capabilities = PerceptionCapabilities()
         self.perception_capabilities[agent.agent_id] = capabilities
         self.perception_memories[agent.agent_id] = PerceptionMemory()
-        # Note: Agent capabilities stored in system, not on agent instance
+        # Also set capabilities on agent object for sensor compatibility
+        agent.perception_capabilities = capabilities
 
     def add_stimulus(self, stimulus: Stimulus) -> None:
         """Add a stimulus to the environment"""
