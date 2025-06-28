@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { useAppSelector } from "@/store/hooks";
-import { DashboardView } from "../../../page";
 import { Users, Plus, Settings, Activity, Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +13,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import AgentTemplateSelector from "@/components/dashboard/AgentTemplateSelector";
+
+// Define DashboardView type locally
+export type DashboardView = "ceo-demo" | "executive" | "technical" | "research" | "minimal";
 
 interface AgentPanelProps {
   view: DashboardView;
@@ -103,6 +105,7 @@ export default function AgentPanel({ view }: AgentPanelProps) {
               return (
                 <div
                   key={agentId}
+                  data-testid="agent-card"
                   className={`p-3 rounded-lg border cursor-pointer transition-all ${
                     selectedAgent === agentId
                       ? "border-[var(--accent-primary)] bg-[var(--bg-secondary)]"

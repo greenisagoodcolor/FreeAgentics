@@ -1,42 +1,59 @@
-// Custom error types for better error handling in LLM services
 export class LLMError extends Error {
-  constructor(
-    message: string,
-    public readonly type: "api_key_missing" | "api_error" | "timeout" | "network_error" | "unknown",
-    public readonly provider?: string,
-    public readonly statusCode?: number,
-  ) {
-    super(message)
-    this.name = "LLMError"
+  public code?: string;
+  public provider?: string;
+  public type?: string;
+  public statusCode?: number;
+  
+  constructor(message: string, code?: string) {
+    super(message);
+    this.name = 'LLMError';
+    this.code = code;
+  }
+}
+
+export class RateLimitError extends LLMError {
+  constructor(message: string) {
+    super(message, 'RATE_LIMIT');
+    this.name = 'RateLimitError';
+  }
+}
+
+export class AuthenticationError extends LLMError {
+  constructor(message: string) {
+    super(message, 'AUTH_ERROR');
+    this.name = 'AuthenticationError';
   }
 }
 
 export class ApiKeyError extends LLMError {
-  constructor(provider: string) {
-    super(`API key is required for ${provider} provider`, "api_key_missing", provider)
-    this.name = "ApiKeyError"
+  constructor(message: string) {
+    super(message, 'API_KEY_ERROR');
+    this.name = 'ApiKeyError';
   }
 }
 
 export class TimeoutError extends LLMError {
-  constructor(provider: string, timeoutMs: number) {
-    super(`${provider} API request timed out after ${timeoutMs / 1000} seconds`, "timeout", provider)
-    this.name = "TimeoutError"
+  constructor(message: string) {
+    super(message, 'TIMEOUT_ERROR');
+    this.name = 'TimeoutError';
   }
 }
 
 export class NetworkError extends LLMError {
-  constructor(provider: string, statusCode: number, message: string) {
-    super(`${provider} API error: ${statusCode} - ${message}`, "network_error", provider, statusCode)
-    this.name = "NetworkError"
+  constructor(message: string) {
+    super(message, 'NETWORK_ERROR');
+    this.name = 'NetworkError';
   }
 }
 
-// Add this utility function for handling timeouts in API calls
-export async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, provider: string): Promise<T> {
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(() => reject(new TimeoutError(provider, timeoutMs)), timeoutMs)
-  })
-
-  return Promise.race([promise, timeoutPromise])
+export async function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  timeoutMessage: string = 'Operation timed out'
+): Promise<T> {
+  const timeoutPromise = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new TimeoutError(timeoutMessage)), timeoutMs)
+  );
+  
+  return Promise.race([promise, timeoutPromise]);
 }

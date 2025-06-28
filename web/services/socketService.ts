@@ -1,4 +1,3 @@
-import { io, Socket } from "socket.io-client";
 import { store } from "@/store";
 import {
   connectionEstablished,
@@ -19,66 +18,36 @@ import {
   updateAgentKnowledge,
 } from "@/store/slices/knowledgeSlice";
 
-// Socket event types
-export interface SocketEvents {
-  // Connection events
-  connect: () => void;
-  disconnect: (reason: string) => void;
-  connect_error: (error: Error) => void;
-  reconnect: (attemptNumber: number) => void;
-  reconnect_attempt: (attemptNumber: number) => void;
-  reconnect_error: (error: Error) => void;
-  reconnect_failed: () => void;
-
-  // Custom events
-  "connection:established": (data: {
-    connectionId: string;
-    serverTime: number;
-  }) => void;
-  "ping:response": (data: { latency: number; serverTime: number }) => void;
-
-  // Agent events
-  "agent:status": (data: { agentId: string; status: string }) => void;
-  "agent:typing": (data: {
-    conversationId: string;
-    agentIds: string[];
-  }) => void;
-  "agent:created": (data: { agent: any }) => void;
-  "agent:updated": (data: { agentId: string; updates: any }) => void;
-
-  // Message events
-  "message:new": (data: { message: any }) => void;
-  "message:queued": (data: {
-    messageId: string;
-    conversationId: string;
-  }) => void;
-  "message:delivered": (data: { messageId: string }) => void;
-  "message:failed": (data: { messageId: string; error: string }) => void;
-
-  // Knowledge events
-  "knowledge:node:added": (data: { node: any }) => void;
-  "knowledge:edge:added": (data: { edge: any }) => void;
-  "knowledge:agent:update": (data: {
-    agentId: string;
-    nodeIds: string[];
-    operation: "add" | "remove";
-  }) => void;
-
-  // Analytics events
-  "analytics:update": (data: { metrics: any }) => void;
-  "analytics:snapshot": (data: { snapshot: any }) => void;
+// WebSocket event types for type safety
+export interface WebSocketMessage {
+  type: string;
+  [key: string]: any;
 }
 
-class SocketService {
-  private socket: Socket | null = null;
+class UnifiedWebSocketService {
+  private ws: WebSocket | null = null;
   private reconnectTimer: NodeJS.Timeout | null = null;
   private pingInterval: NodeJS.Timeout | null = null;
   private connectionUrl: string = "";
+  private reconnectAttempts: number = 0;
+  private maxReconnectAttempts: number = 5;
+  private reconnectInterval: number = 3000;
+  private isConnecting: boolean = false;
+  private subscriptions: Set<string> = new Set();
 
   constructor() {
-    // Initialize with environment variable or default
-    this.connectionUrl =
-      process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:8000";
+    // Initialize with proper WebSocket URL (backend port)
+    this.connectionUrl = this.getWebSocketUrl();
+  }
+
+  private getWebSocketUrl(): string {
+    if (typeof window === 'undefined') return '';
+    
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const host = window.location.host;
+    // Connect directly to backend WebSocket endpoint
+    const wsHost = host.replace(':3000', ':8000'); // Use backend port
+    return `${protocol}//${wsHost}/ws/conversations`;
   }
 
   connect(url?: string): void {
@@ -86,118 +55,197 @@ class SocketService {
       this.connectionUrl = url;
     }
 
-    if (this.socket?.connected) {
-      console.log("Socket already connected");
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      console.log("WebSocket already connected");
       return;
     }
 
-    // Update connection status
+    if (this.isConnecting) {
+      console.log("WebSocket connection already in progress");
+      return;
+    }
+
+    this.isConnecting = true;
     store.dispatch(setWebSocketStatus("connecting"));
 
-    // Create socket connection
-    this.socket = io(this.connectionUrl, {
-      transports: ["websocket", "polling"],
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      timeout: 20000,
-      autoConnect: true,
-    });
+    try {
+      console.log("Connecting to WebSocket:", this.connectionUrl);
+      this.ws = new WebSocket(this.connectionUrl);
 
-    this.setupEventListeners();
-    this.startPingInterval();
+      this.ws.onopen = () => {
+        console.log("WebSocket connected successfully");
+        this.isConnecting = false;
+        this.reconnectAttempts = 0;
+        
+        store.dispatch(setWebSocketStatus("connected"));
+        
+        // Request connection info
+        this.send({
+          type: "ping",
+          clientTime: Date.now(),
+        });
+
+        this.startPingInterval();
+      };
+
+      this.ws.onmessage = (event) => {
+        this.handleMessage(event);
+      };
+
+      this.ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+        this.isConnecting = false;
+        
+        store.dispatch(addConnectionError({
+          type: "websocket",
+          message: "WebSocket connection error",
+        }));
+      };
+
+      this.ws.onclose = () => {
+        console.log("WebSocket connection closed");
+        this.isConnecting = false;
+        
+        store.dispatch(setWebSocketStatus("disconnected"));
+        store.dispatch(connectionLost({ 
+          type: "websocket", 
+          error: "Connection closed" 
+        }));
+        
+        this.stopPingInterval();
+        this.handleReconnect();
+      };
+
+    } catch (error) {
+      console.error("Failed to create WebSocket connection:", error);
+      this.isConnecting = false;
+      
+      store.dispatch(setWebSocketStatus("disconnected"));
+      store.dispatch(addConnectionError({
+        type: "websocket",
+        message: "Failed to create WebSocket connection",
+      }));
+    }
   }
 
-  private setupEventListeners(): void {
-    if (!this.socket) return;
+  private handleMessage(event: MessageEvent): void {
+    try {
+      const data = JSON.parse(event.data);
 
-    // Connection events
-    this.socket.on("connect", () => {
-      console.log("Socket connected");
-      store.dispatch(setWebSocketStatus("connected"));
+      // Handle different message types
+      switch (data.type) {
+        case "connection_established":
+          console.log("WebSocket connection established:", data.client_id);
+          store.dispatch(connectionEstablished({
+            connectionId: data.client_id,
+            socketUrl: this.connectionUrl,
+            apiUrl: this.connectionUrl.replace(/:\d+/, ':8000').replace('ws', 'http'),
+          }));
+          break;
 
-      // Request connection info
-      this.socket?.emit("connection:request", {
-        clientTime: Date.now(),
-      });
-    });
+        case "pong":
+          // Handle ping/pong for connection health
+          if (data.clientTime) {
+            const latency = Date.now() - data.clientTime;
+            store.dispatch(updateLatency(latency));
+          }
+          break;
 
-    this.socket.on("disconnect", (reason) => {
-      console.log("Socket disconnected:", reason);
-      store.dispatch(connectionLost({ type: "websocket", error: reason }));
-      this.stopPingInterval();
-    });
+        case "error":
+          console.error("WebSocket error:", data.message);
+          store.dispatch(addConnectionError({
+            type: "websocket",
+            message: data.message,
+          }));
+          break;
 
-    this.socket.on("connect_error", (error) => {
-      console.error("Socket connection error:", error);
-      store.dispatch(
-        addConnectionError({
-          type: "websocket",
-          message: error.message,
-        }),
-      );
-    });
+        // Agent events
+        case "agent_status":
+        case "agent:status":
+          store.dispatch(updateAgentStatus({
+            agentId: data.agentId || data.agent_id,
+            status: data.status,
+          }));
+          break;
 
-    this.socket.on("reconnect_attempt", (attemptNumber) => {
-      console.log("Reconnection attempt:", attemptNumber);
-      store.dispatch(incrementReconnectAttempt());
-    });
+        case "agent_typing":
+        case "agent:typing":
+          if (data.agentIds) {
+            store.dispatch(setTypingAgents(data.agentIds));
+          }
+          if (data.conversationId) {
+            store.dispatch(setTypingIndicators(data));
+          }
+          break;
 
-    // Custom events
-    this.socket.on("connection:established", (data) => {
-      store.dispatch(
-        connectionEstablished({
-          connectionId: data.connectionId,
-          socketUrl: this.connectionUrl,
-          apiUrl: this.connectionUrl.replace(/:\d+$/, ":8000"), // Assume API on same host
-        }),
-      );
-    });
+        // Message events
+        case "message_new":
+        case "message:new":
+        case "message_created":
+          if (data.message) {
+            store.dispatch(addMessage(data.message));
+          }
+          break;
 
-    this.socket.on("ping:response", (data) => {
-      store.dispatch(updateLatency(data.latency));
-    });
+        // Knowledge events
+        case "knowledge_node_added":
+        case "knowledge:node:added":
+          if (data.node) {
+            store.dispatch(addKnowledgeNode(data.node));
+          }
+          break;
 
-    // Agent events
-    this.socket.on("agent:status", (data) => {
-      store.dispatch(
-        updateAgentStatus({
-          agentId: data.agentId,
-          status: data.status as any,
-        }),
-      );
-    });
+        case "knowledge_edge_added":
+        case "knowledge:edge:added":
+          if (data.edge) {
+            store.dispatch(addKnowledgeEdge(data.edge));
+          }
+          break;
 
-    this.socket.on("agent:typing", (data) => {
-      store.dispatch(setTypingAgents(data.agentIds));
-      store.dispatch(setTypingIndicators(data));
-    });
+        case "knowledge_agent_update":
+        case "knowledge:agent:update":
+          store.dispatch(updateAgentKnowledge(data));
+          break;
 
-    // Message events
-    this.socket.on("message:new", (data) => {
-      store.dispatch(addMessage(data.message));
-    });
+        default:
+          console.log("Unknown WebSocket message type:", data.type, data);
+      }
+    } catch (error) {
+      console.error("Error parsing WebSocket message:", error);
+      store.dispatch(addConnectionError({
+        type: "websocket",
+        message: "Failed to parse WebSocket message",
+      }));
+    }
+  }
 
-    // Knowledge events
-    this.socket.on("knowledge:node:added", (data) => {
-      store.dispatch(addKnowledgeNode(data.node));
-    });
+  private handleReconnect(): void {
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      console.error("Max reconnection attempts exceeded");
+      store.dispatch(addConnectionError({
+        type: "websocket",
+        message: "Max reconnection attempts exceeded",
+      }));
+      return;
+    }
 
-    this.socket.on("knowledge:edge:added", (data) => {
-      store.dispatch(addKnowledgeEdge(data.edge));
-    });
-
-    this.socket.on("knowledge:agent:update", (data) => {
-      store.dispatch(updateAgentKnowledge(data));
-    });
+    this.reconnectAttempts++;
+    console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+    
+    store.dispatch(incrementReconnectAttempt());
+    
+    this.reconnectTimer = setTimeout(() => {
+      this.connect();
+    }, this.reconnectInterval);
   }
 
   private startPingInterval(): void {
     this.pingInterval = setInterval(() => {
-      if (this.socket?.connected) {
-        const startTime = Date.now();
-        this.socket.emit("ping", { clientTime: startTime });
+      if (this.ws?.readyState === WebSocket.OPEN) {
+        this.send({
+          type: "ping",
+          clientTime: Date.now(),
+        });
       }
     }, 30000); // Every 30 seconds
   }
@@ -212,80 +260,147 @@ class SocketService {
   disconnect(): void {
     this.stopPingInterval();
 
-    if (this.socket) {
-      this.socket.disconnect();
-      this.socket = null;
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
     }
+
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+
+    this.isConnecting = false;
+    this.reconnectAttempts = 0;
+    store.dispatch(setWebSocketStatus("disconnected"));
   }
 
-  // Emit methods
-  emit(event: string, data?: any): void {
-    if (this.socket?.connected) {
-      this.socket.emit(event, data);
+  // Send methods
+  send(message: WebSocketMessage): boolean {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(message));
+      return true;
     } else {
-      console.warn(`Cannot emit ${event}: Socket not connected`);
+      console.warn("Cannot send message: WebSocket not connected", message);
+      return false;
     }
   }
 
-  // Specific emit methods for type safety
+  // Specific methods for different use cases
   sendMessage(conversationId: string, content: string, agentId: string): void {
-    this.emit("message:send", {
-      conversationId,
+    this.send({
+      type: "message_send",
+      conversation_id: conversationId,
       content,
-      agentId,
+      agent_id: agentId,
       timestamp: Date.now(),
     });
   }
 
   createAgent(templateId: string, name?: string): void {
-    this.emit("agent:create", {
-      templateId,
+    this.send({
+      type: "agent_create",
+      template_id: templateId,
       name,
       timestamp: Date.now(),
     });
   }
 
   updateAgentParameters(agentId: string, parameters: any): void {
-    this.emit("agent:update:parameters", {
-      agentId,
+    this.send({
+      type: "agent_update_parameters",
+      agent_id: agentId,
       parameters,
       timestamp: Date.now(),
     });
   }
 
   startConversation(type: string, participants: string[]): void {
-    this.emit("conversation:start", {
-      type,
+    this.send({
+      type: "conversation_start",
+      conversation_type: type,
       participants,
       timestamp: Date.now(),
     });
   }
 
   subscribeToAgent(agentId: string): void {
-    this.emit("agent:subscribe", { agentId });
+    this.subscriptions.add(`agent:${agentId}`);
+    this.send({
+      type: "subscribe",
+      subscription: {
+        agent_ids: [agentId],
+      },
+    });
   }
 
   unsubscribeFromAgent(agentId: string): void {
-    this.emit("agent:unsubscribe", { agentId });
+    this.subscriptions.delete(`agent:${agentId}`);
+    this.send({
+      type: "unsubscribe",
+      subscription: {
+        agent_ids: [agentId],
+      },
+    });
   }
 
   subscribeToConversation(conversationId: string): void {
-    this.emit("conversation:subscribe", { conversationId });
+    this.subscriptions.add(`conversation:${conversationId}`);
+    this.send({
+      type: "subscribe",
+      subscription: {
+        conversation_ids: [conversationId],
+      },
+    });
   }
 
   unsubscribeFromConversation(conversationId: string): void {
-    this.emit("conversation:unsubscribe", { conversationId });
+    this.subscriptions.delete(`conversation:${conversationId}`);
+    this.send({
+      type: "unsubscribe",
+      subscription: {
+        conversation_ids: [conversationId],
+      },
+    });
+  }
+
+  setTyping(conversationId: string, agentId: string, isTyping: boolean): void {
+    this.send({
+      type: "set_typing",
+      conversation_id: conversationId,
+      agent_id: agentId,
+      is_typing: isTyping,
+    });
+  }
+
+  getConnectionStats(): void {
+    this.send({
+      type: "get_stats",
+    });
+  }
+
+  // Connection status methods
+  isConnected(): boolean {
+    return this.ws?.readyState === WebSocket.OPEN;
+  }
+
+  getIsConnecting(): boolean {
+    return this.isConnecting;
+  }
+
+  getReconnectAttempts(): number {
+    return this.reconnectAttempts;
   }
 
   // Singleton instance
-  private static instance: SocketService;
+  private static instance: UnifiedWebSocketService;
 
-  static getInstance(): SocketService {
-    if (!SocketService.instance) {
-      SocketService.instance = new SocketService();
+  static getInstance(): UnifiedWebSocketService {
+    if (!UnifiedWebSocketService.instance) {
+      UnifiedWebSocketService.instance = new UnifiedWebSocketService();
     }
-    return SocketService.instance;
+    return UnifiedWebSocketService.instance;
   }
 }
 
-export const socketService = SocketService.getInstance();
+export const socketService = UnifiedWebSocketService.getInstance();

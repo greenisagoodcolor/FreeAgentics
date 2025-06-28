@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { DashboardView } from "../../../page";
+import { DashboardView } from "../../../../page";
 import { BarChart3 } from "lucide-react";
 import AnalyticsWidgetSystem from "@/components/dashboard/AnalyticsWidgetSystem";
 

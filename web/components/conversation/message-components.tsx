@@ -46,7 +46,7 @@ export const SystemMessage = memo<MessageComponentProps>(
   ({ message, showMetadata = true, className }) => (
     <div className={cn("flex justify-center py-2", className)}>
       <div className="max-w-2xl">
-        <div className="bg-muted/50 rounded-lg px-4 py-2 text-center text-sm text-muted-foreground">
+        <div className="bg-muted/50 rounded-lg px-4 py-2 text-center text-sm text-muted-foreground system-message">
           <AlertCircle className="inline-block w-4 h-4 mr-2" />
           {message.content}
           {showMetadata && message.timestamp && (
@@ -474,6 +474,84 @@ export const RegularMessage = memo<MessageComponentProps>(
 );
 
 RegularMessage.displayName = "RegularMessage";
+
+// Text Message Component (alias for RegularMessage)
+export const TextMessage = RegularMessage;
+
+// Code Message Component
+export const CodeMessage = memo<MessageComponentProps>(
+  ({
+    message,
+    sender,
+    showMetadata = true,
+    showActions = true,
+    onReply,
+    onReaction,
+    className,
+  }) => {
+    const language = message.metadata?.language || 'text';
+    
+    return (
+      <div
+        className={cn(
+          "group flex gap-3 hover:bg-muted/20 transition-colors",
+          className,
+        )}
+      >
+        {/* Avatar */}
+        <Avatar className="w-8 h-8 flex-shrink-0">
+          <AvatarImage src={sender?.avatar} />
+          <AvatarFallback style={{ backgroundColor: sender?.color || "#666" }}>
+            {sender ? (
+              sender.name.charAt(0).toUpperCase()
+            ) : message.senderId === "user" ? (
+              <User className="w-4 h-4" />
+            ) : (
+              <Bot className="w-4 h-4" />
+            )}
+          </AvatarFallback>
+        </Avatar>
+
+        <div className="flex-1 min-w-0">
+          {/* Message header */}
+          <MessageHeader
+            message={message}
+            sender={sender}
+            showMetadata={showMetadata}
+          />
+
+          {/* Code content */}
+          <div className="mb-2">
+            <div className="text-xs text-muted-foreground mb-1 flex items-center gap-2">
+              <Badge variant="outline" className="text-xs">
+                {language}
+              </Badge>
+            </div>
+            <pre role="code" className="bg-muted/50 rounded-lg p-3 text-sm overflow-x-auto">
+              <code>{message.content}</code>
+            </pre>
+          </div>
+
+          {/* Metadata */}
+          {showMetadata && <MessageMetadata message={message} />}
+
+          {/* Reactions */}
+          <MessageReactions message={message} onReaction={onReaction} />
+
+          {/* Actions */}
+          <MessageActions
+            message={message}
+            onReply={onReply}
+            onReaction={onReaction}
+            showActions={showActions}
+          />
+        </div>
+      </div>
+    );
+  },
+);
+
+CodeMessage.displayName = "CodeMessage";
 
 // Helper function to get message type icon
 function getMessageTypeIcon(type: string) {

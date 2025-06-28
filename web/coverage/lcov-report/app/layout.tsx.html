@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/13</span>
+                <span class='fraction'>0/12</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/12</span>
+                <span class='fraction'>0/11</span>
             </div>
         
             
@@ -116,11 +116,7 @@
 <a name='L51'></a><a href='#L51'>51</a>
 <a name='L52'></a><a href='#L52'>52</a>
 <a name='L53'></a><a href='#L53'>53</a>
-<a name='L54'></a><a href='#L54'>54</a>
-<a name='L55'></a><a href='#L55'>55</a>
-<a name='L56'></a><a href='#L56'>56</a>
-<a name='L57'></a><a href='#L57'>57</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<a name='L54'></a><a href='#L54'>54</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -140,8 +136,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -176,14 +170,13 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import type React from "react";
-import <span class="cstat-no" title="statement not covered" >"../globals.css";</span>
+import <span class="cstat-no" title="statement not covered" >"../styles/globals.css";</span>
 import <span class="cstat-no" title="statement not covered" >"../styles/design-tokens.css";</span>
 import { Inter, JetBrains_Mono } from <span class="cstat-no" title="statement not covered" >"next/font/google";</span>
 import { ThemeProvider } from <span class="cstat-no" title="statement not covered" >"@/components/themeprovider";</span>
 import { LLMProvider } from <span class="cstat-no" title="statement not covered" >"@/contexts/llm-context";</span>
 import { IsSendingProvider } from <span class="cstat-no" title="statement not covered" >"@/contexts/is-sending-context";</span>
 import { ReduxProvider } from <span class="cstat-no" title="statement not covered" >"@/providers/ReduxProvider";</span>
-import NavBar from <span class="cstat-no" title="statement not covered" >"@/components/navbar";</span>
 &nbsp;
 const inter = <span class="cstat-no" title="statement not covered" >Inter({</span>
   subsets: ["latin"],
@@ -203,7 +196,8 @@ export default function <span class="cstat-no" title="statement not covered" ><s
   return (
     &lt;html lang="en" className="dark"&gt;
       &lt;body
-        className={`${inter.variable} ${jetbrainsMono.variable} dark bg-[#0A0A0B] text-white`}
+        className={`${inter.variable} ${jetbrainsMono.variable} dark bg-[var(--bg-primary)] text-[var(--text-primary)]`}
+        style={{ fontFamily: "var(--font-primary)" }}
       &gt;
         &lt;ReduxProvider&gt;
           &lt;ThemeProvider
@@ -213,10 +207,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
             disableTransitionOnChange
           &gt;
             &lt;IsSendingProvider&gt;
-              &lt;LLMProvider&gt;
-                &lt;NavBar /&gt;
-                &lt;main className="pt-16"&gt;{children}&lt;/main&gt;
-              &lt;/LLMProvider&gt;
+              &lt;LLMProvider&gt;{children}&lt;/LLMProvider&gt;
             &lt;/IsSendingProvider&gt;
           &lt;/ThemeProvider&gt;
         &lt;/ReduxProvider&gt;
@@ -226,9 +217,9 @@ export default function <span class="cstat-no" title="statement not covered" ><s
 }
 &nbsp;
 export const <span class="cstat-no" title="statement not covered" >metadata </span>= <span class="cstat-no" title="statement not covered" >{</span>
-  title: "FreeAgentics - Multi-Agent AI System",
+  title: "FreeAgentics - Multi-Agent AI Dashboard",
   description:
-    "AI agents with Active Inference minds forming coalitions and businesses",
+    "Professional Bloomberg-style dashboard for multi-agent AI systems",
   generator: "Next.js",
 };
 &nbsp;</pre></td></tr></table></pre>
@@ -238,7 +229,7 @@ export const <span class="cstat-no" title="statement not covered" >metadata </sp
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-06-27T08:07:18.901Z
+                at 2025-06-28T10:21:20.281Z
             </div>
         <script src="../prettify.js"></script>
         <script>

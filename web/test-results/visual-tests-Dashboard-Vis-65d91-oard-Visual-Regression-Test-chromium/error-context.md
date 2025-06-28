@@ -1,0 +1,102 @@
+# Page snapshot
+
+```yaml
+- text: FA
+- heading "FreeAgentics" [level=1]
+- text: System Operational•12:25:34 PM
+- combobox:
+  - option "Unified" [selected]
+  - option "Bloomberg"
+  - option "Resizable"
+- button:
+  - img
+- button:
+  - img
+- button "SHOW DEMO":
+  - img
+  - text: SHOW DEMO
+- textbox "Enter goal for agents..."
+- button "SET GOAL":
+  - img
+  - text: SET GOAL
+- img
+- heading "Agent Management" [level=3]
+- text: 4 Total
+- button:
+  - img
+- text: Explorer Alpha ACTIVE
+- button:
+  - img
+- text: "Template: explorer An adventurous agent that discovers new territories and maps unknown environments. Specializes in exploration and discovery. Scholar Beta ACTIVE"
+- button:
+  - img
+- text: "Template: scholar A learned agent that analyzes patterns and synthesizes knowledge. Dedicated to understanding and teaching. Merchant Gamma IDLE"
+- button:
+  - img
+- text: "Template: merchant A savvy trader that optimizes resource allocation and market dynamics. Expert in negotiations and value assessment. Guardian Delta UNKNOWN"
+- button:
+  - img
+- text: "Template: guardian A protective agent that safeguards systems and responds to threats. Specializes in security and defense. 2 Active 1 Idle"
+- button "Manage All":
+  - img
+  - text: Manage All
+- text: ACTIVE Agent Loop LLM
+- img
+- text: GNN
+- img
+- text: PyMDP
+- img
+- text: SYSTEM12:59:50 PM
+- paragraph: "Agent initialized with goal: Optimize resource allocation"
+- img
+- text: LLM12:59:51 PM
+- paragraph: Analyzing current resource distribution patterns...
+- img
+- text: GNN12:59:52 PM
+- paragraph: "Graph neural network processing: 847 nodes, 2,341 edges analyzed"
+- img
+- text: PyMDP12:59:53 PM
+- paragraph: "Active inference update: Free energy reduced by 23.4%"
+- img
+- text: Processing next inference cycle...
+- button:
+  - img
+- button:
+  - img
+- combobox:
+  - option "All Nodes" [selected]
+  - option "Agents"
+  - option "Concepts"
+  - option "Relationships"
+- img
+- heading "Knowledge Graph" [level=3]
+- heading "Knowledge Graph" [level=3]
+- paragraph: 5 nodes, 5 edges
+- button:
+  - img
+- button:
+  - img
+- button:
+  - img
+- button:
+  - img
+- button:
+  - img
+- img: Multi-Agent Systems 2 Active Inference ... 2 Belief Propagatio... 2 Coalition Formati... 2 Emergent Communic... 2
+- text: 100%
+- img
+- text: +2 4 TOTAL AGENTS
+- img
+- text: 50% 2 ACTIVE AGENTS
+- img
+- text: +156 5 TOTAL MESSAGES
+- img
+- text: "-12ms 0ms AVG RESPONSE"
+- img
+- text: +89 1,247 KNOWLEDGE NODES
+- img
+- text: +0.1% 99.9% SYSTEM HEALTH
+- img
+- text: "CEO DEMO Launch Demo Control Panel Content 4 Active Agents•12 Conversations•156 Knowledge Nodes Memory: 2.1GB•CPU: 23%•Version 1.0.0"
+- alert
+```

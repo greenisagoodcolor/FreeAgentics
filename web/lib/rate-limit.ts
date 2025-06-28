@@ -40,7 +40,9 @@ class RateLimiter {
 
     if (record.count + tokens > this.limit) {
       const waitTime = record.resetTime - now;
-      throw new Error(`Rate limit exceeded. Try again in ${Math.ceil(waitTime / 1000)} seconds.`);
+      throw new Error(
+        `Rate limit exceeded. Try again in ${Math.ceil(waitTime / 1000)} seconds.`,
+      );
     }
 
     record.count += tokens;

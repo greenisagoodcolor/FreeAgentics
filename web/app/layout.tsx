@@ -26,7 +26,7 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} dark bg-[var(--bg-primary)] text-[var(--text-primary)]`}
-        style={{ fontFamily: 'var(--font-primary)' }}
+        style={{ fontFamily: "var(--font-primary)" }}
       >
         <ReduxProvider>
           <ThemeProvider
@@ -36,9 +36,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <IsSendingProvider>
-              <LLMProvider>
-                {children}
-              </LLMProvider>
+              <LLMProvider>{children}</LLMProvider>
             </IsSendingProvider>
           </ThemeProvider>
         </ReduxProvider>
@@ -48,7 +46,7 @@ export default function RootLayout({
 }
 
 export const metadata = {
-  title: "CogniticNet - Multi-Agent AI Dashboard",
+  title: "FreeAgentics - Multi-Agent AI Dashboard",
   description:
     "Professional Bloomberg-style dashboard for multi-agent AI systems",
   generator: "Next.js",

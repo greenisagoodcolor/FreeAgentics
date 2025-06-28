@@ -5,8 +5,8 @@
  * localStorage to the secure server-side storage.
  */
 
-import { storeSessionId } from "./session-management"
-import { isFeatureEnabled } from "./feature-flags"
+import { storeSessionId } from "./session-management";
+import { isFeatureEnabled } from "./feature-flags";
 
 /**
  * Migrates an API key from localStorage to secure storage
@@ -14,14 +14,17 @@ import { isFeatureEnabled } from "./feature-flags"
  * @param apiKey The API key to migrate
  * @returns Promise resolving to true if migration was successful
  */
-export async function migrateApiKey(provider: string, apiKey: string): Promise<boolean> {
+export async function migrateApiKey(
+  provider: string,
+  apiKey: string,
+): Promise<boolean> {
   try {
-    console.log(`Migrating API key for ${provider} to secure storage`)
+    console.log(`Migrating API key for ${provider} to secure storage`);
 
     // Only proceed if secure storage is enabled
     if (!isFeatureEnabled("useSecureApiStorage")) {
-      console.log("Secure API storage is not enabled, skipping migration")
-      return false
+      console.log("Secure API storage is not enabled, skipping migration");
+      return false;
     }
 
     // Store the API key securely
@@ -34,21 +37,21 @@ export async function migrateApiKey(provider: string, apiKey: string): Promise<b
         provider,
         apiKey,
       }),
-    })
+    });
 
-    const data = await response.json()
+    const data = await response.json();
     if (data.success && data.sessionId) {
-      console.log(`API key for ${provider} migrated successfully`)
+      console.log(`API key for ${provider} migrated successfully`);
       // Store the session ID in localStorage
-      storeSessionId(provider, data.sessionId)
-      return true
+      storeSessionId(provider, data.sessionId);
+      return true;
     } else {
-      console.error(`Failed to migrate API key for ${provider}:`, data.message)
-      return false
+      console.error(`Failed to migrate API key for ${provider}:`, data.message);
+      return false;
     }
   } catch (error) {
-    console.error(`Error migrating API key for ${provider}:`, error)
-    return false
+    console.error(`Error migrating API key for ${provider}:`, error);
+    return false;
   }
 }
 
@@ -58,21 +61,21 @@ export async function migrateApiKey(provider: string, apiKey: string): Promise<b
  */
 export function checkForApiKeysToMigrate(): string[] {
   try {
-    const providersToMigrate: string[] = []
+    const providersToMigrate: string[] = [];
 
     // Check for llm-settings in localStorage
-    const savedSettings = localStorage.getItem("llm-settings")
+    const savedSettings = localStorage.getItem("llm-settings");
     if (savedSettings) {
-      const parsedSettings = JSON.parse(savedSettings)
+      const parsedSettings = JSON.parse(savedSettings);
       if (parsedSettings.apiKey && parsedSettings.provider) {
-        providersToMigrate.push(parsedSettings.provider)
+        providersToMigrate.push(parsedSettings.provider);
       }
     }
 
-    return providersToMigrate
+    return providersToMigrate;
   } catch (error) {
-    console.error("Error checking for API keys to migrate:", error)
-    return []
+    console.error("Error checking for API keys to migrate:", error);
+    return [];
   }
 }
 
@@ -82,27 +85,30 @@ export function checkForApiKeysToMigrate(): string[] {
  */
 export async function migrateAllApiKeys(): Promise<string[]> {
   try {
-    const migratedProviders: string[] = []
+    const migratedProviders: string[] = [];
 
     // Check for llm-settings in localStorage
-    const savedSettings = localStorage.getItem("llm-settings")
+    const savedSettings = localStorage.getItem("llm-settings");
     if (savedSettings) {
-      const parsedSettings = JSON.parse(savedSettings)
+      const parsedSettings = JSON.parse(savedSettings);
       if (parsedSettings.apiKey && parsedSettings.provider) {
-        const success = await migrateApiKey(parsedSettings.provider, parsedSettings.apiKey)
+        const success = await migrateApiKey(
+          parsedSettings.provider,
+          parsedSettings.apiKey,
+        );
         if (success) {
-          migratedProviders.push(parsedSettings.provider)
+          migratedProviders.push(parsedSettings.provider);
 
           // Remove the API key from localStorage settings
-          parsedSettings.apiKey = undefined
-          localStorage.setItem("llm-settings", JSON.stringify(parsedSettings))
+          parsedSettings.apiKey = undefined;
+          localStorage.setItem("llm-settings", JSON.stringify(parsedSettings));
         }
       }
     }
 
-    return migratedProviders
+    return migratedProviders;
   } catch (error) {
-    console.error("Error migrating all API keys:", error)
-    return []
+    console.error("Error migrating all API keys:", error);
+    return [];
   }
 }

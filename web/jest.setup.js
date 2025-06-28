@@ -1,5 +1,10 @@
 // Optional: configure or set up a testing framework before each test.
 import "@testing-library/jest-dom";
+import 'fake-indexeddb/auto';
+
+// Mock IndexedDB
+global.indexedDB = require('fake-indexeddb');
+global.IDBKeyRange = require('fake-indexeddb/lib/FDBKeyRange');
 
 // Mock Next.js router
 jest.mock("next/router", () => ({

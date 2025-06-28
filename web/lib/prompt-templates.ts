@@ -1,62 +1,79 @@
-import type { Agent, Message, KnowledgeEntry } from "@/lib/types"
+import type { Agent, Message, KnowledgeEntry } from "@/lib/types";
 
 export interface PromptTemplate {
-  systemPrompt: string
-  userPromptPrefix?: string
-  userPromptSuffix?: string
-  maxHistoryMessages?: number
+  systemPrompt: string;
+  userPromptPrefix?: string;
+  userPromptSuffix?: string;
+  maxHistoryMessages?: number;
 }
 
 // Helper function to replace template variables
-function replaceVariables(text: string, variables: Record<string, string>): string {
+function replaceVariables(
+  text: string,
+  variables: Record<string, string>,
+): string {
   return Object.entries(variables).reduce(
-    (result, [key, value]) => result.replace(new RegExp(`{{${key}}}`, "g"), value),
+    (result, [key, value]) =>
+      result.replace(new RegExp(`{{${key}}}`, "g"), value),
     text,
-  )
+  );
 }
 
 // Format conversation history for inclusion in prompts
-export function formatConversationHistory(messages: Message[], agents: Map<string, Agent>, maxMessages = 10): string {
+export function formatConversationHistory(
+  messages: Message[],
+  agents: Map<string, Agent>,
+  maxMessages = 10,
+): string {
   // Take the most recent messages up to maxMessages
-  const recentMessages = messages.slice(-maxMessages)
+  const recentMessages = messages.slice(-maxMessages);
 
   return recentMessages
     .map((msg) => {
-      const sender = msg.senderId === "user" ? "User" : agents.get(msg.senderId)?.name || "Unknown Agent"
+      const sender =
+        msg.senderId === "user"
+          ? "User"
+          : agents.get(msg.senderId)?.name || "Unknown Agent";
 
-      return `${sender}: ${msg.content}`
+      return `${sender}: ${msg.content}`;
     })
-    .join("\n\n")
+    .join("\n\n");
 }
 
 // Format knowledge entries for inclusion in prompts
-export function formatKnowledgeForPrompt(entries: KnowledgeEntry[], includeMetadata = false): string {
-  if (!entries.length) return "No relevant knowledge available."
+export function formatKnowledgeForPrompt(
+  entries: KnowledgeEntry[],
+  includeMetadata = false,
+): string {
+  if (!entries.length) return "No relevant knowledge available.";
 
   return entries
     .map((entry) => {
-      let formatted = `KNOWLEDGE ENTRY: ${entry.title}\n${entry.content}`
+      let formatted = `KNOWLEDGE ENTRY: ${entry.title}\n${entry.content}`;
 
       if (includeMetadata) {
-        formatted += `\nTags: ${entry.tags.join(", ")}`
-        formatted += `\nTimestamp: ${entry.timestamp.toISOString()}`
+        formatted += `\nTags: ${entry.tags.join(", ")}`;
+        formatted += `\nTimestamp: ${entry.timestamp.toISOString()}`;
       }
 
-      return formatted
+      return formatted;
     })
-    .join("\n\n")
+    .join("\n\n");
 }
 
 // Add a function to format the participants list for the prompt
 
 // Format conversation participants for inclusion in prompts
-export function formatParticipantsList(agents: Map<string, Agent>, currentAgentId: string): string {
+export function formatParticipantsList(
+  agents: Map<string, Agent>,
+  currentAgentId: string,
+): string {
   return Array.from(agents.values())
     .map((agent) => {
-      const isCurrentAgent = agent.id === currentAgentId
-      return `- ${agent.name}${isCurrentAgent ? " (you)" : ""}: ${agent.biography.split(".")[0]}.`
+      const isCurrentAgent = agent.id === currentAgentId;
+      return `- ${agent.name}${isCurrentAgent ? " (you)" : ""}: ${agent.biography.split(".")[0]}.`;
     })
-    .join("\n")
+    .join("\n");
 }
 
 // Assemble a complete prompt from template and variables
@@ -68,32 +85,40 @@ export function assemblePrompt(
   relevantKnowledge?: KnowledgeEntry[],
 ): { systemPrompt: string; userPrompt: string } {
   // Replace variables in the system prompt
-  const systemPrompt = replaceVariables(template.systemPrompt, variables)
+  const systemPrompt = replaceVariables(template.systemPrompt, variables);
 
   // Format conversation history
-  const historyText = formatConversationHistory(conversationHistory, agents, template.maxHistoryMessages)
+  const historyText = formatConversationHistory(
+    conversationHistory,
+    agents,
+    template.maxHistoryMessages,
+  );
 
   // Format knowledge if provided
-  const knowledgeText = relevantKnowledge ? formatKnowledgeForPrompt(relevantKnowledge) : ""
+  const knowledgeText = relevantKnowledge
+    ? formatKnowledgeForPrompt(relevantKnowledge)
+    : "";
 
   // Assemble user prompt with optional prefix and suffix
-  let userPrompt = ""
+  let userPrompt = "";
 
   if (template.userPromptPrefix) {
-    userPrompt += replaceVariables(template.userPromptPrefix, variables) + "\n\n"
+    userPrompt +=
+      replaceVariables(template.userPromptPrefix, variables) + "\n\n";
   }
 
   if (knowledgeText) {
-    userPrompt += "RELEVANT KNOWLEDGE:\n" + knowledgeText + "\n\n"
+    userPrompt += "RELEVANT KNOWLEDGE:\n" + knowledgeText + "\n\n";
   }
 
-  userPrompt += "CONVERSATION HISTORY:\n" + historyText
+  userPrompt += "CONVERSATION HISTORY:\n" + historyText;
 
   if (template.userPromptSuffix) {
-    userPrompt += "\n\n" + replaceVariables(template.userPromptSuffix, variables)
+    userPrompt +=
+      "\n\n" + replaceVariables(template.userPromptSuffix, variables);
   }
 
-  return { systemPrompt, userPrompt }
+  return { systemPrompt, userPrompt };
 }
 
 // Define standard templates for different purposes
@@ -127,7 +152,7 @@ Remember to start your response with "{{agentName}}:" followed by your message.
 If the message was clearly directed at another agent and you don't have anything valuable to add, respond with "SKIP_RESPONSE" and I will not include your message.`,
 
   maxHistoryMessages: 10,
-}
+};
 
 // Template for extracting beliefs from conversations
 export const beliefExtractionTemplate: PromptTemplate = {
@@ -152,7 +177,7 @@ Example format:
 - {{agentName}} seems to prefer [[coffee]] over [[tea]] based on their ordering habits. (Medium)`,
 
   maxHistoryMessages: 20,
-}
+};
 
 // Template for relationship analysis
 export const relationshipAnalysisTemplate: PromptTemplate = {
@@ -168,4 +193,4 @@ Analyze the conversation to determine {{agentName}}'s relationship with each oth
 3. Key moments in the conversation that support your analysis`,
 
   maxHistoryMessages: 15,
-}
+};

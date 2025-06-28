@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { DashboardView } from "../page";
+import { DashboardView } from "../../page";
 import AgentPanel from "../components/panels/AgentPanel";
 import MetricsPanel from "../components/panels/MetricsPanel";
 import ConversationPanel from "../components/panels/ConversationPanel";

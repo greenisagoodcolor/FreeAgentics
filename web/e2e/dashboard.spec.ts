@@ -22,10 +22,11 @@ test.describe("Dashboard Functionality", () => {
 
     let foundIndicators = 0;
     for (const indicator of dashboardIndicators) {
-      const elements = page.locator(
-        `[data-testid*="${indicator}"], [class*="${indicator}"], :text("${indicator}")`,
-      );
-      if ((await elements.count()) > 0) {
+      const hasText = await page.getByText(indicator, { exact: false }).count() > 0;
+      const hasTestId = await page.locator(`[data-testid*="${indicator}"]`).count() > 0;
+      const hasClass = await page.locator(`[class*="${indicator}"]`).count() > 0;
+      
+      if (hasText || hasTestId || hasClass) {
         foundIndicators++;
       }
     }
@@ -85,8 +86,6 @@ test.describe("Dashboard Functionality", () => {
       '[class*="loading"]',
       '[class*="spinner"]',
       '[class*="skeleton"]',
-      'text="Loading"',
-      'text="loading"',
     ];
 
     // At least initially, we might see loading states
@@ -96,6 +95,12 @@ test.describe("Dashboard Functionality", () => {
         hasLoadingState = true;
         break;
       }
+    }
+    
+    // Also check for text-based loading indicators
+    if (!hasLoadingState) {
+      hasLoadingState = await page.getByText('Loading').count() > 0 ||
+                       await page.getByText('loading').count() > 0;
     }
 
     // Wait for loading to complete

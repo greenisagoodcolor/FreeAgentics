@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { DashboardView } from "../../../page";
+import { DashboardView } from "../../../../page";
 import { Network } from "lucide-react";
 import KnowledgeGraphVisualization from "@/components/dashboard/KnowledgeGraphVisualization";
 
@@ -10,6 +10,11 @@ interface KnowledgePanelProps {
 }
 
 export default function KnowledgePanel({ view }: KnowledgePanelProps) {
+  // Enable test mode for Playwright tests or when NODE_ENV is test
+  const isTestMode = typeof window !== 'undefined' && 
+    (window.location.search.includes('testMode=true') || 
+     process.env.NODE_ENV === 'test');
+
   return (
     <div className="h-full flex flex-col bg-[var(--bg-primary)]">
       {/* Panel Header */}
@@ -24,7 +29,7 @@ export default function KnowledgePanel({ view }: KnowledgePanelProps) {
 
       {/* Knowledge Graph Content - REAL D3.js Implementation */}
       <div className="flex-1 overflow-hidden">
-        <KnowledgeGraphVisualization />
+        <KnowledgeGraphVisualization testMode={isTestMode} />
       </div>
     </div>
   );

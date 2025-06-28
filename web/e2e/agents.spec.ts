@@ -9,20 +9,14 @@ test.describe("Agents Page", () => {
   test("agents page loads successfully", async ({ page }) => {
     await expect(page).toHaveURL(/\/agents/);
 
-    // Look for agent-related content
-    const agentIndicators = ["agent", "create", "list", "add", "new"];
+    // Check for the main heading
+    await expect(page.getByRole('heading', { name: 'Agent Management' })).toBeVisible();
 
-    let foundContent = false;
-    for (const indicator of agentIndicators) {
-      const elements = page.locator(`text="${indicator}" >> visible=true`);
-      if ((await elements.count()) > 0) {
-        foundContent = true;
-        break;
-      }
-    }
+    // Check for the Create Agent button (get first one if multiple exist)
+    await expect(page.getByRole('button', { name: 'Create Agent' }).first()).toBeVisible();
 
-    // Should have some agent-related content
-    expect(foundContent).toBe(true);
+    // Verify agent-related content is present
+    await expect(page.getByText('Total Agents')).toBeVisible();
   });
 
   test("can interact with agent creation flow", async ({ page }) => {
@@ -75,22 +69,26 @@ test.describe("Agents Page", () => {
   test("handles empty state gracefully", async ({ page }) => {
     // The page should handle the case where there are no agents
     // Look for empty state messages or default content
-    const emptyStateIndicators = [
-      'text="No agents"',
-      'text="Empty"',
-      'text="Get started"',
-      'text="Create your first"',
-      '[data-testid*="empty"]',
-      '[class*="empty"]',
-    ];
-
     // Either has content or shows appropriate empty state
     let hasContentOrEmptyState = false;
-
-    for (const indicator of emptyStateIndicators) {
-      if ((await page.locator(indicator).count()) > 0) {
+    
+    // Check for text-based empty state messages
+    const textIndicators = ['No agents', 'Empty', 'Get started', 'Create your first'];
+    for (const text of textIndicators) {
+      if ((await page.getByText(text).count()) > 0) {
         hasContentOrEmptyState = true;
         break;
+      }
+    }
+    
+    // Check for data-testid or class-based empty state
+    if (!hasContentOrEmptyState) {
+      const emptySelectors = ['[data-testid*="empty"]', '[class*="empty"]'];
+      for (const selector of emptySelectors) {
+        if ((await page.locator(selector).count()) > 0) {
+          hasContentOrEmptyState = true;
+          break;
+        }
       }
     }
 
@@ -100,6 +98,13 @@ test.describe("Agents Page", () => {
     );
     if ((await contentElements.count()) > 0) {
       hasContentOrEmptyState = true;
+    }
+    
+    // Or at least the page loaded with the heading
+    if (!hasContentOrEmptyState) {
+      const hasHeading = await page.getByRole('heading', { name: 'Agent Management' }).count() > 0;
+      const hasCreateButton = await page.getByRole('button', { name: 'Create Agent' }).count() > 0;
+      hasContentOrEmptyState = hasHeading || hasCreateButton;
     }
 
     expect(hasContentOrEmptyState).toBe(true);

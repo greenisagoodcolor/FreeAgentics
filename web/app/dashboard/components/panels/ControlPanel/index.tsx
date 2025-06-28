@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { DashboardView } from "../../../page";
+import { DashboardView } from "../../../../page";
 import { Settings } from "lucide-react";
 
 interface ControlPanelProps {

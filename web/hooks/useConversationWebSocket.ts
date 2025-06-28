@@ -1,6 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useDispatch } from "react-redux";
+import { 
+  setWebSocketStatus, 
+  connectionEstablished, 
+  connectionLost,
+  updateLatency,
+  addConnectionError 
+} from "@/store/slices/connectionSlice";
 import type { Message, Conversation } from "@/lib/types";
 
 interface ConversationEvent {
@@ -51,11 +59,13 @@ export function useConversationWebSocket(
     onDisconnect,
   } = options;
 
+  const dispatch = useDispatch();
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const subscriptionRef = useRef<ConversationSubscription>({});
   const pingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const connectionIdRef = useRef<string | null>(null);
 
   const [state, setState] = useState<ConversationWebSocketState>({
     isConnected: false,
@@ -65,11 +75,13 @@ export function useConversationWebSocket(
     connectionStats: null,
   });
 
-  // Get WebSocket URL
+  // Get WebSocket URL - FIXED: Remove /api prefix
   const getWebSocketUrl = useCallback(() => {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const host = window.location.host;
-    return `${protocol}//${host}/api/ws/conversations`;
+    // Connect directly to backend WebSocket endpoint
+    const wsHost = host.replace(':3000', ':8000'); // Use backend port
+    return `${protocol}//${wsHost}/ws/conversations`;
   }, []);
 
   // Handle incoming messages
@@ -77,10 +89,11 @@ export function useConversationWebSocket(
     (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data);
+        const now = new Date();
 
         setState((prev) => ({
           ...prev,
-          lastEventTime: new Date(),
+          lastEventTime: now,
           error: null,
         }));
 
@@ -88,16 +101,30 @@ export function useConversationWebSocket(
         switch (data.type) {
           case "connection_established":
             console.log("WebSocket connection established:", data.client_id);
+            connectionIdRef.current = data.client_id;
+            
             setState((prev) => ({
               ...prev,
               isConnected: true,
               isConnecting: false,
             }));
+
+            // Update Redux state
+            dispatch(setWebSocketStatus("connected"));
+            dispatch(connectionEstablished({
+              connectionId: data.client_id,
+              socketUrl: getWebSocketUrl(),
+              apiUrl: getWebSocketUrl().replace(/:\d+/, ':8000').replace('ws', 'http'),
+            }));
+
             onConnect?.();
             break;
 
           case "pong":
-            // Handle ping/pong for connection health
+            // Handle ping/pong for connection health and update latency
+            if (data.latency) {
+              dispatch(updateLatency(data.latency));
+            }
             break;
 
           case "subscription_updated":
@@ -111,6 +138,10 @@ export function useConversationWebSocket(
           case "error":
             console.error("WebSocket error:", data.message);
             setState((prev) => ({ ...prev, error: data.message }));
+            dispatch(addConnectionError({
+              type: "websocket",
+              message: data.message,
+            }));
             break;
 
           // Conversation events
@@ -133,9 +164,13 @@ export function useConversationWebSocket(
       } catch (error) {
         console.error("Error parsing WebSocket message:", error);
         setState((prev) => ({ ...prev, error: "Failed to parse message" }));
+        dispatch(addConnectionError({
+          type: "websocket",
+          message: "Failed to parse WebSocket message",
+        }));
       }
     },
-    [onEvent, onConnect],
+    [onEvent, onConnect, dispatch, getWebSocketUrl],
   );
 
   // Handle connection errors
@@ -148,9 +183,17 @@ export function useConversationWebSocket(
         isConnected: false,
         isConnecting: false,
       }));
+
+      // Update Redux state
+      dispatch(setWebSocketStatus("disconnected"));
+      dispatch(addConnectionError({
+        type: "websocket",
+        message: "WebSocket connection error",
+      }));
+
       onError?.(event);
     },
-    [onError],
+    [onError, dispatch],
   );
 
   // Handle connection close
@@ -160,6 +203,13 @@ export function useConversationWebSocket(
       ...prev,
       isConnected: false,
       isConnecting: false,
+    }));
+
+    // Update Redux state
+    dispatch(setWebSocketStatus("disconnected"));
+    dispatch(connectionLost({ 
+      type: "websocket", 
+      error: "Connection closed" 
     }));
 
     // Clear ping interval
@@ -177,6 +227,9 @@ export function useConversationWebSocket(
         `Attempting to reconnect (${reconnectAttemptsRef.current}/${maxReconnectAttempts})...`,
       );
 
+      // Update Redux state for reconnecting
+      dispatch(setWebSocketStatus("connecting"));
+
       reconnectTimeoutRef.current = setTimeout(() => {
         connect();
       }, reconnectInterval);
@@ -185,8 +238,12 @@ export function useConversationWebSocket(
         ...prev,
         error: "Max reconnection attempts exceeded",
       }));
+      dispatch(addConnectionError({
+        type: "websocket",
+        message: "Max reconnection attempts exceeded",
+      }));
     }
-  }, [onDisconnect, maxReconnectAttempts, reconnectInterval]);
+  }, [onDisconnect, maxReconnectAttempts, reconnectInterval, dispatch]);
 
   // Connect to WebSocket
   const connect = useCallback(() => {
@@ -195,9 +252,11 @@ export function useConversationWebSocket(
     }
 
     setState((prev) => ({ ...prev, isConnecting: true, error: null }));
+    dispatch(setWebSocketStatus("connecting"));
 
     try {
       const url = getWebSocketUrl();
+      console.log("Connecting to WebSocket:", url);
       wsRef.current = new WebSocket(url);
 
       wsRef.current.onopen = () => {
@@ -206,7 +265,8 @@ export function useConversationWebSocket(
 
         // Set up ping interval to keep connection alive
         pingIntervalRef.current = setInterval(() => {
-          send({ type: "ping" });
+          const startTime = Date.now();
+          send({ type: "ping", clientTime: startTime });
         }, 30000); // Ping every 30 seconds
       };
 
@@ -220,8 +280,13 @@ export function useConversationWebSocket(
         error: "Failed to create connection",
         isConnecting: false,
       }));
+      dispatch(setWebSocketStatus("disconnected"));
+      dispatch(addConnectionError({
+        type: "websocket",
+        message: "Failed to create WebSocket connection",
+      }));
     }
-  }, [getWebSocketUrl, handleMessage, handleError, handleClose]);
+  }, [getWebSocketUrl, handleMessage, handleError, handleClose, dispatch]);
 
   // Disconnect from WebSocket
   const disconnect = useCallback(() => {
@@ -245,7 +310,9 @@ export function useConversationWebSocket(
       isConnected: false,
       isConnecting: false,
     }));
-  }, []);
+
+    dispatch(setWebSocketStatus("disconnected"));
+  }, [dispatch]);
 
   // Send message to WebSocket
   const send = useCallback((message: any) => {
@@ -326,6 +393,29 @@ export function useConversationWebSocket(
     };
   }, [state.isConnected, state.isConnecting, connect]);
 
+  // Online/offline handler for better browser compatibility
+  useEffect(() => {
+    const handleOnline = () => {
+      if (!state.isConnected && !state.isConnecting) {
+        console.log("Browser came online, attempting to reconnect...");
+        connect();
+      }
+    };
+
+    const handleOffline = () => {
+      console.log("Browser went offline");
+      setState((prev) => ({ ...prev, error: "Browser offline" }));
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, [state.isConnected, state.isConnecting, connect]);
+
   return {
     // State
     isConnected: state.isConnected,
@@ -333,6 +423,7 @@ export function useConversationWebSocket(
     error: state.error,
     lastEventTime: state.lastEventTime,
     connectionStats: state.connectionStats,
+    connectionId: connectionIdRef.current,
 
     // Methods
     connect,

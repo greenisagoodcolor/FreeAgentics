@@ -8,47 +8,27 @@ test.describe("Knowledge Graph Evolution Tests", () => {
 
   test("knowledge graph visualization renders correctly", async ({ page }) => {
     // Look for knowledge graph components
-    const knowledgeGraphElements = [
-      '[data-testid*="knowledge-graph"]',
-      '[data-testid*="graph"]',
-      '[class*="knowledge"]',
-      '[class*="graph"]',
-      "text=Knowledge Graph",
-      "text=Graph",
-      "svg", // D3.js visualizations typically use SVG
-      "canvas", // Alternative visualization approach
-    ];
-
-    let foundKnowledgeGraph = false;
-    for (const selector of knowledgeGraphElements) {
-      if ((await page.locator(selector).count()) > 0) {
-        foundKnowledgeGraph = true;
-        break;
-      }
-    }
+    const foundKnowledgeGraph = await page.getByText('Knowledge Graph').count() > 0 ||
+                                await page.getByText('Graph').count() > 0 ||
+                                await page.locator('[data-testid*="knowledge-graph"]').count() > 0 ||
+                                await page.locator('[data-testid*="graph"]').count() > 0 ||
+                                await page.locator('[class*="knowledge"]').count() > 0 ||
+                                await page.locator('[class*="graph"]').count() > 0 ||
+                                await page.locator('svg').count() > 0 ||
+                                await page.locator('canvas').count() > 0;
 
     expect(foundKnowledgeGraph).toBe(true);
   });
 
   test("dual-layer knowledge graph structure is present", async ({ page }) => {
     // Based on PRD: dual-layer knowledge graph (collective + individual)
-    const dualLayerIndicators = [
-      "text=Collective",
-      "text=Individual",
-      "text=Shared",
-      "text=Personal",
-      '[data-testid*="collective"]',
-      '[data-testid*="individual"]',
-      '[data-testid*="layer"]',
-    ];
-
-    let foundDualLayer = false;
-    for (const selector of dualLayerIndicators) {
-      if ((await page.locator(selector).count()) > 0) {
-        foundDualLayer = true;
-        break;
-      }
-    }
+    const foundDualLayer = await page.getByText('Collective').count() > 0 ||
+                          await page.getByText('Individual').count() > 0 ||
+                          await page.getByText('Shared').count() > 0 ||
+                          await page.getByText('Personal').count() > 0 ||
+                          await page.locator('[data-testid*="collective"]').count() > 0 ||
+                          await page.locator('[data-testid*="individual"]').count() > 0 ||
+                          await page.locator('[data-testid*="layer"]').count() > 0;
 
     // Dual layer may not be implemented yet, so we check for basic graph
     const hasBasicGraph =
@@ -59,22 +39,12 @@ test.describe("Knowledge Graph Evolution Tests", () => {
 
   test("real-time graph updates functionality", async ({ page }) => {
     // Look for indicators of real-time updates
-    const realTimeIndicators = [
-      '[data-testid*="real-time"]',
-      '[data-testid*="live"]',
-      '[data-testid*="update"]',
-      "text=Live",
-      "text=Real-time",
-      "text=Updates",
-    ];
-
-    let foundRealTimeFeatures = false;
-    for (const selector of realTimeIndicators) {
-      if ((await page.locator(selector).count()) > 0) {
-        foundRealTimeFeatures = true;
-        break;
-      }
-    }
+    const foundRealTimeFeatures = await page.getByText('Live').count() > 0 ||
+                                  await page.getByText('Real-time').count() > 0 ||
+                                  await page.getByText('Updates').count() > 0 ||
+                                  await page.locator('[data-testid*="real-time"]').count() > 0 ||
+                                  await page.locator('[data-testid*="live"]').count() > 0 ||
+                                  await page.locator('[data-testid*="update"]').count() > 0;
 
     // Check for WebSocket connection (real-time updates)
     let hasWebSocket = false;
@@ -93,23 +63,13 @@ test.describe("Knowledge Graph Evolution Tests", () => {
 
   test("epistemic uncertainty visualization", async ({ page }) => {
     // Based on PRD: epistemic uncertainty reduction visualization
-    const uncertaintyIndicators = [
-      "text=Uncertainty",
-      "text=Epistemic",
-      "text=Confidence",
-      "text=Probability",
-      '[data-testid*="uncertainty"]',
-      '[data-testid*="confidence"]',
-      '[data-testid*="probability"]',
-    ];
-
-    let foundUncertaintyFeatures = false;
-    for (const selector of uncertaintyIndicators) {
-      if ((await page.locator(selector).count()) > 0) {
-        foundUncertaintyFeatures = true;
-        break;
-      }
-    }
+    const foundUncertaintyFeatures = await page.getByText('Uncertainty').count() > 0 ||
+                                     await page.getByText('Epistemic').count() > 0 ||
+                                     await page.getByText('Confidence').count() > 0 ||
+                                     await page.getByText('Probability').count() > 0 ||
+                                     await page.locator('[data-testid*="uncertainty"]').count() > 0 ||
+                                     await page.locator('[data-testid*="confidence"]').count() > 0 ||
+                                     await page.locator('[data-testid*="probability"]').count() > 0;
 
     // May not be implemented yet - check for any numerical indicators
     const numericalElements = page.locator(
@@ -174,29 +134,19 @@ test.describe("Knowledge Graph Evolution Tests", () => {
 
   test("consensus tracking features", async ({ page }) => {
     // Based on PRD: consensus evolution tracking
-    const consensusIndicators = [
-      "text=Consensus",
-      "text=Agreement",
-      "text=Alignment",
-      "text=Convergence",
-      '[data-testid*="consensus"]',
-      '[data-testid*="agreement"]',
-      '[data-testid*="alignment"]',
-    ];
-
-    let foundConsensusFeatures = false;
-    for (const selector of consensusIndicators) {
-      if ((await page.locator(selector).count()) > 0) {
-        foundConsensusFeatures = true;
-        break;
-      }
-    }
+    const foundConsensusFeatures = await page.getByText('Consensus').count() > 0 ||
+                                   await page.getByText('Agreement').count() > 0 ||
+                                   await page.getByText('Alignment').count() > 0 ||
+                                   await page.getByText('Convergence').count() > 0 ||
+                                   await page.locator('[data-testid*="consensus"]').count() > 0 ||
+                                   await page.locator('[data-testid*="agreement"]').count() > 0 ||
+                                   await page.locator('[data-testid*="alignment"]').count() > 0;
 
     // May not be implemented - check for any collaborative indicators
-    const collaborativeElements = page.locator(
-      "text=Agent, text=Multi, text=Shared, text=Collective",
-    );
-    const hasCollaborativeFeatures = (await collaborativeElements.count()) > 0;
+    const hasCollaborativeFeatures = await page.getByText('Agent').count() > 0 ||
+                                     await page.getByText('Multi').count() > 0 ||
+                                     await page.getByText('Shared').count() > 0 ||
+                                     await page.getByText('Collective').count() > 0;
 
     expect(foundConsensusFeatures || hasCollaborativeFeatures).toBe(true);
   });

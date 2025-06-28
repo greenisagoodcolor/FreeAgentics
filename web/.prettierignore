@@ -1,0 +1,22 @@
+# Build directories
+.next/
+node_modules/
+dist/
+build/
+
+# Coverage reports
+coverage/
+
+# Test results
+test-results/
+playwright-report/
+
+# Package files
+package-lock.json
+yarn.lock
+
+# Logs
+*.log
+
+# Generated files
+*.d.ts

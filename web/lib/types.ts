@@ -1,197 +1,234 @@
 export interface Position {
-  x: number
-  y: number
+  x: number;
+  y: number;
 }
 
 export interface KnowledgeEntry {
-  id: string
-  title: string
-  content: string
-  timestamp: Date
-  tags: string[]
+  id: string;
+  title: string;
+  content: string;
+  timestamp: Date;
+  tags: string[];
 }
 
 // Define the tool permissions interface
 export interface AgentToolPermissions {
   // Information Access Tools
-  internetSearch: boolean
-  webScraping: boolean
-  wikipediaAccess: boolean
-  newsApi: boolean
-  academicSearch: boolean
-  documentRetrieval: boolean
+  internetSearch: boolean;
+  webScraping: boolean;
+  wikipediaAccess: boolean;
+  newsApi: boolean;
+  academicSearch: boolean;
+  documentRetrieval: boolean;
 
   // Content Generation & Processing
-  imageGeneration: boolean
-  textSummarization: boolean
-  translation: boolean
-  codeExecution: boolean
+  imageGeneration: boolean;
+  textSummarization: boolean;
+  translation: boolean;
+  codeExecution: boolean;
 
   // Knowledge & Reasoning Tools
-  calculator: boolean
-  knowledgeGraphQuery: boolean
-  factChecking: boolean
-  timelineGenerator: boolean
+  calculator: boolean;
+  knowledgeGraphQuery: boolean;
+  factChecking: boolean;
+  timelineGenerator: boolean;
 
   // External Integrations
-  weatherData: boolean
-  mapLocationData: boolean
-  financialData: boolean
-  publicDatasets: boolean
+  weatherData: boolean;
+  mapLocationData: boolean;
+  financialData: boolean;
+  publicDatasets: boolean;
 
   // Agent-Specific Tools
-  memorySearch: boolean
-  crossAgentKnowledge: boolean
-  conversationAnalysis: boolean
+  memorySearch: boolean;
+  crossAgentKnowledge: boolean;
+  conversationAnalysis: boolean;
 }
 
 export interface Agent {
-  id: string
-  name: string
-  biography?: string
-  class?: string // Agent class/type (Explorer, Merchant, Scholar, Guardian, etc.)
-  avatar?: string // Optional avatar image URL
-  inConversation: boolean
-  position: Position
-  color: string
-  knowledge: KnowledgeEntry[]
-  autonomyEnabled: boolean // New property to track if agent can engage in autonomous conversations
-  toolPermissions?: AgentToolPermissions // Optional to maintain backward compatibility
+  id: string;
+  name: string;
+  biography?: string;
+  class?: string; // Agent class/type (Explorer, Merchant, Scholar, Guardian, etc.)
+  avatar?: string; // Optional avatar image URL
+  inConversation: boolean;
+  position: Position;
+  color: string;
+  knowledge: KnowledgeEntry[];
+  autonomyEnabled: boolean; // New property to track if agent can engage in autonomous conversations
+  toolPermissions?: AgentToolPermissions; // Optional to maintain backward compatibility
+  
+  // Additional properties needed by components
+  status?: 'idle' | 'moving' | 'interacting' | 'planning' | 'executing' | 'learning' | 'error' | 'offline';
+  type?: string; // Agent type
+  role?: string; // Agent role in conversations
+  personality?: {
+    openness: number;
+    conscientiousness: number;
+    extraversion: number;
+    agreeableness: number;
+    neuroticism: number;
+  }; // Agent personality traits
+  performance?: {
+    taskCompletion?: number;
+    collaborationScore?: number;
+  };
+  state?: {
+    energy?: number;
+    beliefs?: Record<string, any>;
+    safety?: number;
+    attention?: number;
+  };
 }
 
 // Enhanced Message interface for real-time conversation monitoring
 export interface Message {
-  id: string
-  content: string
-  senderId: string
-  timestamp: Date
+  id: string;
+  content: string;
+  senderId: string;
+  timestamp: Date;
 
   // Enhanced metadata for conversation monitoring
   metadata?: {
     // Core message properties
-    isGeneratedByLLM?: boolean
-    isSystemMessage?: boolean
-    type?: 'user' | 'agent' | 'system' | 'conversation_starter' | 'conversation_prompt' | 'action' | 'tool_result' | 'typing'
+    isGeneratedByLLM?: boolean;
+    isSystemMessage?: boolean;
+    type?:
+      | "user"
+      | "agent"
+      | "system"
+      | "conversation_starter"
+      | "conversation_prompt"
+      | "action"
+      | "tool_result"
+      | "typing";
 
     // Thread relationships for conversation flow tracking
-    respondingTo?: string // ID of message this is responding to
-    threadId?: string // Thread identifier for grouped conversations
-    parentMessageId?: string // For nested responses
-    childMessageIds?: string[] // For tracking responses to this message
+    respondingTo?: string; // ID of message this is responding to
+    threadId?: string; // Thread identifier for grouped conversations
+    parentMessageId?: string; // For nested responses
+    childMessageIds?: string[]; // For tracking responses to this message
 
     // Agent attribution and context
-    agentType?: 'explorer' | 'merchant' | 'scholar' | 'guardian' | 'custom'
-    agentRole?: string // Role in current conversation
-    confidence?: number // Agent's confidence in this message (0-1)
+    agentType?: "explorer" | "merchant" | "scholar" | "guardian" | "custom";
+    agentRole?: string; // Role in current conversation
+    confidence?: number; // Agent's confidence in this message (0-1)
 
     // Message processing and delivery
-    processingTime?: number // Time taken to generate (ms)
-    deliveryStatus?: 'pending' | 'delivered' | 'failed' | 'retrying'
-    retryCount?: number
+    processingTime?: number; // Time taken to generate (ms)
+    deliveryStatus?: "pending" | "delivered" | "failed" | "retrying";
+    retryCount?: number;
 
     // Knowledge and reasoning
-    knowledgeSources?: Array<{ id: string; title: string; relevance?: number }>
-    reasoningTrace?: Array<{ step: string; confidence: number }>
+    knowledgeSources?: Array<{ id: string; title: string; relevance?: number }>;
+    reasoningTrace?: Array<{ step: string; confidence: number }>;
 
     // Conversation dynamics
-    priority?: 'low' | 'normal' | 'high' | 'urgent'
-    expectations?: string[] // What responses are expected
-    conversationTurn?: number // Turn number in conversation
+    priority?: "low" | "normal" | "high" | "urgent";
+    expectations?: string[]; // What responses are expected
+    conversationTurn?: number; // Turn number in conversation
 
     // Rich content support
-    attachments?: Array<{ type: string; url: string; metadata?: any }>
-    embeddedContent?: { type: string; data: any }
+    attachments?: Array<{ type: string; url: string; metadata?: any }>;
+    embeddedContent?: { type: string; data: any };
 
     // Real-time monitoring
-    readBy?: Array<{ agentId: string; timestamp: Date }>
-    reactions?: Array<{ agentId: string; type: string; timestamp: Date }>
+    readBy?: Array<{ agentId: string; timestamp: Date }>;
+    reactions?: Array<{ agentId: string; type: string; timestamp: Date }>;
 
     // Analytics and tracking
-    sentiment?: { polarity: number; subjectivity: number }
-    topics?: string[]
-    entities?: Array<{ type: string; value: string; confidence: number }>
+    sentiment?: { polarity: number; subjectivity: number };
+    topics?: string[];
+    entities?: Array<{ type: string; value: string; confidence: number }>;
 
     // System and debugging
-    debugInfo?: any
+    debugInfo?: any;
     performanceMetrics?: {
-      generationTime?: number
-      tokens?: { input: number; output: number }
-      modelUsed?: string
-    }
+      generationTime?: number;
+      tokens?: { input: number; output: number };
+      modelUsed?: string;
+    };
 
     // Extensible metadata
-    [key: string]: any
-  }
+    [key: string]: any;
+  };
 }
 
 // Message queue status for tracking pending responses
 export interface MessageQueueStatus {
   pendingMessages: Array<{
-    messageId: string
-    agentId: string
-    estimatedTime?: number
-    priority: 'low' | 'normal' | 'high' | 'urgent'
-  }>
+    messageId: string;
+    agentId: string;
+    estimatedTime?: number;
+    priority: "low" | "normal" | "high" | "urgent";
+  }>;
   processingMessages: Array<{
-    messageId: string
-    agentId: string
-    startTime: Date
-    progress?: number // 0-1
-  }>
+    messageId: string;
+    agentId: string;
+    startTime: Date;
+    progress?: number; // 0-1
+  }>;
   failedMessages: Array<{
-    messageId: string
-    agentId: string
-    error: string
-    retryCount: number
-  }>
+    messageId: string;
+    agentId: string;
+    error: string;
+    retryCount: number;
+  }>;
 }
 
 // Thread information for conversation structure
 export interface ConversationThread {
-  id: string
-  parentMessageId?: string
-  participantIds: string[]
-  topic?: string
-  startTime: Date
-  lastActivity: Date
-  messageCount: number
-  isActive: boolean
+  id: string;
+  parentMessageId?: string;
+  participantIds: string[];
+  topic?: string;
+  startTime: Date;
+  lastActivity: Date;
+  messageCount: number;
+  isActive: boolean;
 }
 
 export interface Conversation {
-  id: string
-  participants: string[]
-  messages: Message[]
-  startTime: Date
-  endTime: Date | null
-  isAutonomous?: boolean // New property to track if conversation was autonomously initiated
-  trigger?: string // What triggered this autonomous conversation
-  topic?: string // The topic of the conversation (especially for knowledge-based triggers)
+  id: string;
+  participants: string[];
+  messages: Message[];
+  startTime: Date;
+  endTime: Date | null;
+  isAutonomous?: boolean; // New property to track if conversation was autonomously initiated
+  trigger?: string; // What triggered this autonomous conversation
+  topic?: string; // The topic of the conversation (especially for knowledge-based triggers)
 
   // Enhanced conversation properties for monitoring
-  threads?: ConversationThread[]
-  activeParticipants?: string[] // Currently active/online participants
-  messageQueue?: MessageQueueStatus
+  threads?: ConversationThread[];
+  activeParticipants?: string[]; // Currently active/online participants
+  messageQueue?: MessageQueueStatus;
   conversationMetrics?: {
-    totalMessages: number
-    averageResponseTime: number
-    participationRates: Record<string, number> // agentId -> participation percentage
-    topicDrift?: number // How much the topic has changed
-    engagementLevel?: number // Overall engagement score
-  }
+    totalMessages: number;
+    averageResponseTime: number;
+    participationRates: Record<string, number>; // agentId -> participation percentage
+    topicDrift?: number; // How much the topic has changed
+    engagementLevel?: number; // Overall engagement score
+  };
 }
 
 export interface SystemPrompt {
-  id: string
-  name: string
-  content: string
+  id: string;
+  name: string;
+  content: string;
 }
 
 // Knowledge Graph Visualization Interfaces for Task 45
 export interface KnowledgeNode {
   id: string;
   title: string;
-  type: 'concept' | 'fact' | 'belief' | 'agent' | 'entity' | 'relationship' | 'pattern';
+  type:
+    | "concept"
+    | "fact"
+    | "belief"
+    | "agent"
+    | "entity"
+    | "relationship"
+    | "pattern";
   content?: string;
 
   // Positioning and physics
@@ -212,7 +249,7 @@ export interface KnowledgeNode {
   // Agent association
   agentId?: string;
   agentIds?: string[]; // for shared knowledge
-  ownerType: 'individual' | 'collective' | 'shared';
+  ownerType: "individual" | "collective" | "shared";
 
   // Knowledge properties
   confidence: number; // 0.0 to 1.0
@@ -248,7 +285,16 @@ export interface KnowledgeEdge {
   target: string; // target node id
 
   // Relationship properties
-  type: 'supports' | 'contradicts' | 'relates_to' | 'causes' | 'prevents' | 'similar_to' | 'derived_from' | 'contains' | 'depends_on';
+  type:
+    | "supports"
+    | "contradicts"
+    | "relates_to"
+    | "causes"
+    | "prevents"
+    | "similar_to"
+    | "derived_from"
+    | "contains"
+    | "depends_on";
   strength: number; // 0.0 to 1.0
   confidence: number; // 0.0 to 1.0
   bidirectional?: boolean;
@@ -257,7 +303,7 @@ export interface KnowledgeEdge {
   color: string;
   width?: number;
   opacity?: number;
-  style?: 'solid' | 'dashed' | 'dotted';
+  style?: "solid" | "dashed" | "dotted";
 
   // Temporal properties
   createdAt: Date;
@@ -280,7 +326,7 @@ export interface KnowledgeEdge {
 export interface KnowledgeGraphLayer {
   id: string;
   name: string;
-  type: 'individual' | 'collective';
+  type: "individual" | "collective";
   agentId?: string; // for individual layers
   nodes: KnowledgeNode[];
   edges: KnowledgeEdge[];
@@ -302,8 +348,8 @@ export interface KnowledgeGraph {
   version: string;
 
   // Display settings
-  layout: 'force-directed' | 'hierarchical' | 'circular' | 'grid';
-  renderer: 'd3' | 'threejs' | 'auto';
+  layout: "force-directed" | "hierarchical" | "circular" | "grid";
+  renderer: "d3" | "threejs" | "auto";
 
   // Performance settings
   maxNodes: number;
@@ -351,7 +397,14 @@ export interface KnowledgeGraphFilters {
 
 // Real-time update events for WebSocket integration
 export interface KnowledgeGraphUpdate {
-  type: 'node_added' | 'node_updated' | 'node_removed' | 'edge_added' | 'edge_updated' | 'edge_removed' | 'graph_reset';
+  type:
+    | "node_added"
+    | "node_updated"
+    | "node_removed"
+    | "edge_added"
+    | "edge_updated"
+    | "edge_removed"
+    | "graph_reset";
   graphId: string;
   layerId?: string;
   agentId?: string;
@@ -395,7 +448,7 @@ export interface KnowledgeGraphMetrics {
 
 // Export configuration
 export interface KnowledgeGraphExport {
-  format: 'png' | 'svg' | 'json' | 'graphml' | 'gexf';
+  format: "png" | "svg" | "json" | "graphml" | "gexf";
   includeMetadata: boolean;
   includeFilters: boolean;
   resolution?: number; // for raster formats
@@ -424,7 +477,7 @@ export interface ConversationPreset {
   id: string;
   name: string;
   description: string;
-  category: 'conservative' | 'balanced' | 'aggressive' | 'custom';
+  category: "conservative" | "balanced" | "aggressive" | "custom";
   version: string;
   createdAt: string;
   updatedAt: string;
@@ -444,7 +497,11 @@ export interface ConversationPreset {
     // Agent selection dynamics
     agentSelection: {
       autoSelectRespondents: boolean;
-      selectionStrategy: 'random' | 'round_robin' | 'expertise_based' | 'engagement_based';
+      selectionStrategy:
+        | "random"
+        | "round_robin"
+        | "expertise_based"
+        | "engagement_based";
       diversityBonus: number; // 0.0-1.0, bonus for agents who haven't spoken recently
       expertiseWeight: number; // 0.0-1.0, weight given to domain expertise
       maxSpeakersPerTurn: number; // 1-10
@@ -455,7 +512,7 @@ export interface ConversationPreset {
       maxKnowledgeEntries: number; // 0-50
       includeAgentKnowledge: boolean;
       streamResponse: boolean;
-      responseLength: 'short' | 'medium' | 'long';
+      responseLength: "short" | "medium" | "long";
       creativityLevel: number; // 0.0-1.0, affects response diversity
       coherenceWeight: number; // 0.0-1.0, weight for maintaining conversation coherence
     };
@@ -465,7 +522,7 @@ export interface ConversationPreset {
   timingControls: {
     // Response delays
     responseDelay: {
-      type: 'fixed' | 'range' | 'adaptive';
+      type: "fixed" | "range" | "adaptive";
       fixedDelay: number; // milliseconds
       minDelay: number; // milliseconds
       maxDelay: number; // milliseconds
@@ -480,7 +537,10 @@ export interface ConversationPreset {
     conversationFlow: {
       maxAutonomousMessages: number; // 5-100
       stallDetectionTimeout: number; // milliseconds
-      stallRecoveryStrategy: 'prompt_random' | 'prompt_expert' | 'end_conversation';
+      stallRecoveryStrategy:
+        | "prompt_random"
+        | "prompt_expert"
+        | "end_conversation";
       turnTimeoutDuration: number; // milliseconds
       pauseBetweenTurns: number; // milliseconds
     };
@@ -533,7 +593,7 @@ export interface ConversationPreset {
   abTestingConfig?: {
     enabled: boolean;
     testId: string;
-    variant: 'A' | 'B';
+    variant: "A" | "B";
     comparisonMetrics: string[];
     sampleSize: number;
     confidenceLevel: number; // 0.90, 0.95, 0.99
@@ -556,7 +616,7 @@ export interface ConversationPreset {
   monitoring: {
     enableMetrics: boolean;
     trackPerformance: boolean;
-    logLevel: 'debug' | 'info' | 'warn' | 'error';
+    logLevel: "debug" | "info" | "warn" | "error";
     metricsRetentionDays: number;
     alertThresholds: {
       responseTimeMs: number;
@@ -570,8 +630,8 @@ export interface ConversationPresetValidation {
   isValid: boolean;
   errors: string[];
   warnings: string[];
-  riskLevel: 'low' | 'medium' | 'high' | 'critical';
-  estimatedPerformanceImpact: 'minimal' | 'moderate' | 'significant' | 'severe';
+  riskLevel: "low" | "medium" | "high" | "critical";
+  estimatedPerformanceImpact: "minimal" | "moderate" | "significant" | "severe";
 }
 
 export interface ConversationPresetDiff {
@@ -580,8 +640,8 @@ export interface ConversationPresetDiff {
     path: string;
     oldValue: any;
     newValue: any;
-    changeType: 'added' | 'modified' | 'removed';
-    riskLevel: 'low' | 'medium' | 'high' | 'critical';
+    changeType: "added" | "modified" | "removed";
+    riskLevel: "low" | "medium" | "high" | "critical";
   }>;
   summary: {
     totalChanges: number;
@@ -610,11 +670,11 @@ export interface ConversationPresetTemplate {
   id: string;
   name: string;
   description: string;
-  category: ConversationPreset['category'];
+  category: ConversationPreset["category"];
   basePreset: Partial<ConversationPreset>;
   customizableFields: string[];
   recommendedUseCase: string;
-  expertiseLevel: 'beginner' | 'intermediate' | 'advanced' | 'expert';
+  expertiseLevel: "beginner" | "intermediate" | "advanced" | "expert";
 }
 
 export interface ConversationParameterConstraints {
@@ -629,7 +689,7 @@ export interface ConversationParameterConstraints {
 }
 
 export interface ConversationPresetExport {
-  format: 'json' | 'yaml' | 'csv';
+  format: "json" | "yaml" | "csv";
   includeHistory: boolean;
   includeMetrics: boolean;
   dateRange?: {
@@ -711,7 +771,7 @@ export interface ABTestResults {
     B: ConversationPreset;
   };
   metrics: {
-    variant: 'A' | 'B';
+    variant: "A" | "B";
     sampleSize: number;
     averageResponseTime: number;
     qualityScore: number;
@@ -720,7 +780,7 @@ export interface ABTestResults {
     engagementLevel: number;
   }[];
   statisticalSignificance: number; // 0.0-1.0
-  recommendation: 'A' | 'B' | 'inconclusive';
+  recommendation: "A" | "B" | "inconclusive";
   confidenceInterval: {
     lower: number;
     upper: number;
@@ -738,9 +798,13 @@ export interface ValidationResult {
 
 export interface SafetyCheckResult {
   passed: boolean;
-  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  riskLevel: "low" | "medium" | "high" | "critical";
   issues: string[];
   recommendations: string[];
 }
 
-export type ExpertReviewStatus = 'pending' | 'approved' | 'rejected' | 'requires-changes';
+export type ExpertReviewStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "requires-changes";

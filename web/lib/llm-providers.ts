@@ -5,12 +5,12 @@
 
 // Common options interface for all providers
 export interface LLMRequestOptions {
-  temperature: number
-  maxTokens: number
-  topP: number
-  frequencyPenalty: number
-  presencePenalty: number
-  systemFingerprint?: boolean
+  temperature: number;
+  maxTokens: number;
+  topP: number;
+  frequencyPenalty: number;
+  presencePenalty: number;
+  systemFingerprint?: boolean;
 }
 
 /**
@@ -23,7 +23,7 @@ export async function generateOpenAIResponse(
   userPrompt: string,
   options: LLMRequestOptions,
 ): Promise<string> {
-  const url = "https://api.openai.com/v1/chat/completions"
+  const url = "https://api.openai.com/v1/chat/completions";
 
   const response = await fetch(url, {
     method: "POST",
@@ -44,15 +44,17 @@ export async function generateOpenAIResponse(
       presence_penalty: options.presencePenalty,
       ...(options.systemFingerprint ? { system_fingerprint: true } : {}),
     }),
-  })
+  });
 
   if (!response.ok) {
-    const errorData = await response.text()
-    throw new Error(`OpenAI API error: ${response.status} ${response.statusText} - ${errorData}`)
+    const errorData = await response.text();
+    throw new Error(
+      `OpenAI API error: ${response.status} ${response.statusText} - ${errorData}`,
+    );
   }
 
-  const data = await response.json()
-  return data.choices[0].message.content
+  const data = await response.json();
+  return data.choices[0].message.content;
 }
 
 /**
@@ -65,7 +67,7 @@ export async function generateOpenRouterResponse(
   userPrompt: string,
   options: LLMRequestOptions,
 ): Promise<string> {
-  const url = "https://openrouter.ai/api/v1/chat/completions"
+  const url = "https://openrouter.ai/api/v1/chat/completions";
 
   const response = await fetch(url, {
     method: "POST",
@@ -87,15 +89,17 @@ export async function generateOpenRouterResponse(
       frequency_penalty: options.frequencyPenalty,
       presence_penalty: options.presencePenalty,
     }),
-  })
+  });
 
   if (!response.ok) {
-    const errorData = await response.text()
-    throw new Error(`OpenRouter API error: ${response.status} ${response.statusText} - ${errorData}`)
+    const errorData = await response.text();
+    throw new Error(
+      `OpenRouter API error: ${response.status} ${response.statusText} - ${errorData}`,
+    );
   }
 
-  const data = await response.json()
-  return data.choices[0].message.content
+  const data = await response.json();
+  return data.choices[0].message.content;
 }
 
 /**
@@ -110,7 +114,7 @@ export async function streamOpenAIResponse(
   options: LLMRequestOptions,
 ): Promise<ReadableStream> {
   // This would be implemented for streaming responses
-  throw new Error("Streaming not yet implemented")
+  throw new Error("Streaming not yet implemented");
 }
 
 /**
@@ -125,5 +129,5 @@ export async function streamOpenRouterResponse(
   options: LLMRequestOptions,
 ): Promise<ReadableStream> {
   // This would be implemented for streaming responses
-  throw new Error("Streaming not yet implemented")
+  throw new Error("Streaming not yet implemented");
 }

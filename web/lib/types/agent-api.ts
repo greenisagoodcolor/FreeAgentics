@@ -9,24 +9,24 @@ export interface AgentPersonality {
 }
 
 export type AgentCapability =
-  | 'movement'
-  | 'perception'
-  | 'communication'
-  | 'planning'
-  | 'learning'
-  | 'memory'
-  | 'resource_management'
-  | 'social_interaction';
+  | "movement"
+  | "perception"
+  | "communication"
+  | "planning"
+  | "learning"
+  | "memory"
+  | "resource_management"
+  | "social_interaction";
 
 export type AgentStatus =
-  | 'idle'
-  | 'moving'
-  | 'interacting'
-  | 'planning'
-  | 'executing'
-  | 'learning'
-  | 'error'
-  | 'offline';
+  | "idle"
+  | "moving"
+  | "interacting"
+  | "planning"
+  | "executing"
+  | "learning"
+  | "error"
+  | "offline";
 
 export interface Position {
   x: number;
@@ -108,8 +108,8 @@ export interface ListAgentsQuery {
   tag?: string;
   limit?: number;
   offset?: number;
-  sortBy?: 'created_at' | 'updated_at' | 'name' | 'status';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: "created_at" | "updated_at" | "name" | "status";
+  sortOrder?: "asc" | "desc";
 }
 
 export interface ListAgentsResponse {
@@ -151,14 +151,20 @@ export interface StateHistoryResponse {
 
 // Command Execution Types
 
-export type CommandType = 'move' | 'interact' | 'observe' | 'plan' | 'learn' | 'rest';
+export type CommandType =
+  | "move"
+  | "interact"
+  | "observe"
+  | "plan"
+  | "learn"
+  | "rest";
 
 export interface Command {
   id: string;
   agent_id: string;
   command: CommandType;
   parameters: Record<string, any>;
-  status: 'queued' | 'executing' | 'completed' | 'failed';
+  status: "queued" | "executing" | "completed" | "failed";
   issued_at: string;
   started_at: string | null;
   completed_at: string | null;
@@ -179,7 +185,12 @@ export interface ExecuteCommandResponse {
 
 // Memory Types
 
-export type MemoryType = 'event' | 'interaction' | 'location' | 'pattern' | 'general';
+export type MemoryType =
+  | "event"
+  | "interaction"
+  | "location"
+  | "pattern"
+  | "general";
 
 export interface Memory {
   id: string;
@@ -276,12 +287,12 @@ export interface AgentExportPackage {
 // WebSocket Types
 
 export interface WebSocketMessage {
-  action: 'subscribe' | 'unsubscribe';
+  action: "subscribe" | "unsubscribe";
   agent_ids: string[];
 }
 
 export interface WebSocketEvent {
-  type: 'state_change' | 'resource_update' | 'command_update' | 'memory_update';
+  type: "state_change" | "resource_update" | "command_update" | "memory_update";
   agent_id: string;
   data: any;
   timestamp: string;
