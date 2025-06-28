@@ -68,8 +68,10 @@ export const preloadComponent = (componentName: string) => {
   }
 };
 
-export default {
+const LazyComponents = {
   LazyKnowledgeGraph,
   LazyAnalyticsSystem,
   preloadComponent
 };
+
+export default LazyComponents;

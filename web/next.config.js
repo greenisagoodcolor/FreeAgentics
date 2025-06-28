@@ -120,7 +120,7 @@ const nextConfig = {
   // Enable experimental features for better performance
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion", "d3", "recharts"],
-    optimizeCss: true,
+    // optimizeCss: true, // Disabled - requires critters package
     scrollRestoration: true,
     largePageDataBytes: 128 * 100, // 12.8KB
   },

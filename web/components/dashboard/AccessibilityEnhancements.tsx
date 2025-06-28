@@ -562,7 +562,7 @@ if (typeof document !== 'undefined') {
   document.head.appendChild(styleSheet);
 }
 
-export default {
+const AccessibilityEnhancements = {
   AccessibilityProvider,
   useAccessibility,
   useKeyboardNavigation,
@@ -570,3 +570,5 @@ export default {
   AccessibleButton,
   AccessiblePanel
 };
+
+export default AccessibilityEnhancements;
