@@ -573,9 +573,7 @@ class HierarchicalGraphIntegration:
                     graph_data.get("edge_features"),
                     graph_data.get("batch"),
                 )
-                updated = adapter.update_beliefs_with_graph(
-                    current_beliefs[i], processed
-                )
+                updated = adapter.update_beliefs_with_graph(current_beliefs[i], processed)
                 updated_beliefs.append(updated)
             else:
                 updated_beliefs.append(current_beliefs[i])

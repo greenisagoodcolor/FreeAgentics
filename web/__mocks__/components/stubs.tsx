@@ -3,8 +3,8 @@
  * These provide minimal implementations of components that don't exist yet
  */
 
-import React from 'react';
-import { Agent } from '@/lib/types';
+import React from "react";
+import { Agent } from "@/lib/types";
 
 // AgentList stub
 interface AgentListProps {
@@ -16,21 +16,23 @@ interface AgentListProps {
 export const AgentList: React.FC<AgentListProps> = ({
   agents,
   onAgentSelect,
-  showPerformance = false
+  showPerformance = false,
 }) => {
-  const [filter, setFilter] = React.useState<string>('all');
-  const [sortBy, setSortBy] = React.useState<string>('name');
+  const [filter, setFilter] = React.useState<string>("all");
+  const [sortBy, setSortBy] = React.useState<string>("name");
 
   const filteredAgents = React.useMemo(() => {
     let filtered = agents;
-    
-    if (filter !== 'all') {
-      filtered = agents.filter(agent => (agent as any).status === filter);
+
+    if (filter !== "all") {
+      filtered = agents.filter((agent) => (agent as any).status === filter);
     }
 
-    if (sortBy === 'performance') {
-      filtered = [...filtered].sort((a, b) => 
-        ((b as any).performance?.taskCompletion || 0) - ((a as any).performance?.taskCompletion || 0)
+    if (sortBy === "performance") {
+      filtered = [...filtered].sort(
+        (a, b) =>
+          ((b as any).performance?.taskCompletion || 0) -
+          ((a as any).performance?.taskCompletion || 0),
       );
     }
 
@@ -63,7 +65,7 @@ export const AgentList: React.FC<AgentListProps> = ({
       </div>
 
       <div className="agents">
-        {filteredAgents.map(agent => (
+        {filteredAgents.map((agent) => (
           <article
             key={agent.id}
             onClick={() => onAgentSelect?.(agent.id)}
@@ -71,12 +73,24 @@ export const AgentList: React.FC<AgentListProps> = ({
             role="article"
           >
             <h3>{agent.name}</h3>
-            <span className={`badge-${(agent as any).type}`}>{(agent as any).type}</span>
+            <span className={`badge-${(agent as any).type}`}>
+              {(agent as any).type}
+            </span>
             <span className="status">{(agent as any).status}</span>
             {showPerformance && (agent as any).performance && (
               <div className="performance">
-                <span>{Math.round(((agent as any).performance.taskCompletion || 0) * 100)}%</span>
-                <span>{Math.round(((agent as any).performance.collaborationScore || 0) * 100)}%</span>
+                <span>
+                  {Math.round(
+                    ((agent as any).performance.taskCompletion || 0) * 100,
+                  )}
+                  %
+                </span>
+                <span>
+                  {Math.round(
+                    ((agent as any).performance.collaborationScore || 0) * 100,
+                  )}
+                  %
+                </span>
               </div>
             )}
           </article>
@@ -100,24 +114,26 @@ export const AgentBeliefVisualizer: React.FC<AgentBeliefVisualizerProps> = ({
   history,
   previousBeliefs,
   editable = false,
-  onBeliefChange
+  onBeliefChange,
 }) => {
   const [showTimeline, setShowTimeline] = React.useState(false);
 
   const getBeliefClass = (belief: string, value: number) => {
-    if (!previousBeliefs) return '';
+    if (!previousBeliefs) return "";
     const prev = previousBeliefs[belief];
-    if (value > prev) return 'belief-increased';
-    if (value < prev) return 'belief-decreased';
-    return '';
+    if (value > prev) return "belief-increased";
+    if (value < prev) return "belief-decreased";
+    return "";
   };
 
   return (
     <div className="belief-visualizer">
       {Object.entries((agent as any).beliefs || {}).map(([belief, value]) => (
         <div key={belief} className="belief-item">
-          <span>{belief}: {String(value)}</span>
-          <div 
+          <span>
+            {belief}: {String(value)}
+          </span>
+          <div
             data-testid={`belief-${belief}`}
             className={getBeliefClass(belief, value as number)}
           >
@@ -129,23 +145,30 @@ export const AgentBeliefVisualizer: React.FC<AgentBeliefVisualizerProps> = ({
                 step="0.1"
                 value={value as number}
                 aria-label={belief}
-                onChange={(e) => onBeliefChange?.(agent.id, {
-                  ...(agent as any).beliefs,
-                  [belief]: parseFloat(e.target.value)
-                })}
+                onChange={(e) =>
+                  onBeliefChange?.(agent.id, {
+                    ...(agent as any).beliefs,
+                    [belief]: parseFloat(e.target.value),
+                  })
+                }
               />
             ) : (
-              <div className="belief-bar" style={{ width: `${(value as number) * 100}%` }} />
+              <div
+                className="belief-bar"
+                style={{ width: `${(value as number) * 100}%` }}
+              />
             )}
           </div>
         </div>
       ))}
-      
+
       <button onClick={() => setShowTimeline(!showTimeline)}>
-        {showTimeline ? 'Hide' : 'Show'} Timeline
+        {showTimeline ? "Hide" : "Show"} Timeline
       </button>
-      
-      {showTimeline && <div data-testid="belief-timeline">Timeline visualization</div>}
+
+      {showTimeline && (
+        <div data-testid="belief-timeline">Timeline visualization</div>
+      )}
     </div>
   );
 };
@@ -155,48 +178,48 @@ interface CharacterCreatorProps {
   onCreate?: (character: any) => void;
 }
 
-export const CharacterCreator: React.FC<CharacterCreatorProps> = ({ onCreate }) => {
-  const [name, setName] = React.useState('');
-  const [type, setType] = React.useState('');
+export const CharacterCreator: React.FC<CharacterCreatorProps> = ({
+  onCreate,
+}) => {
+  const [name, setName] = React.useState("");
+  const [type, setType] = React.useState("");
   const [capabilities, setCapabilities] = React.useState<string[]>([]);
-  const [template, setTemplate] = React.useState('');
+  const [template, setTemplate] = React.useState("");
   const [exploration, setExploration] = React.useState(0.5);
   const [showPreview, setShowPreview] = React.useState(false);
   const [errors, setErrors] = React.useState<Record<string, string>>({});
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const newErrors: Record<string, string> = {};
-    if (!name) newErrors.name = 'Name is required';
-    
+    if (!name) newErrors.name = "Name is required";
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-    
+
     onCreate?.({
       name,
       type,
       capabilities,
-      beliefs: { exploration }
+      beliefs: { exploration },
     });
   };
 
   const handleTemplateChange = (value: string) => {
     setTemplate(value);
-    if (value === 'researcher') {
-      setName('Research Agent');
-      setType('explorer');
-      setCapabilities(['reasoning', 'learning', 'analysis']);
+    if (value === "researcher") {
+      setName("Research Agent");
+      setType("explorer");
+      setCapabilities(["reasoning", "learning", "analysis"]);
     }
   };
 
   const toggleCapability = (cap: string) => {
-    setCapabilities(prev => 
-      prev.includes(cap) 
-        ? prev.filter(c => c !== cap)
-        : [...prev, cap]
+    setCapabilities((prev) =>
+      prev.includes(cap) ? prev.filter((c) => c !== cap) : [...prev, cap],
     );
   };
 
@@ -240,7 +263,15 @@ export const CharacterCreator: React.FC<CharacterCreatorProps> = ({ onCreate }) 
 
       <div>
         <span>Select Capabilities</span>
-        {['reasoning', 'learning', 'analysis', 'communication', 'negotiation', 'planning', 'coordination'].map(cap => (
+        {[
+          "reasoning",
+          "learning",
+          "analysis",
+          "communication",
+          "negotiation",
+          "planning",
+          "coordination",
+        ].map((cap) => (
           <label key={cap}>
             <input
               type="checkbox"
@@ -270,9 +301,7 @@ export const CharacterCreator: React.FC<CharacterCreatorProps> = ({ onCreate }) 
       </button>
 
       {showPreview && (
-        <div data-testid="agent-preview">
-          {name || 'Preview Agent'}
-        </div>
+        <div data-testid="agent-preview">{name || "Preview Agent"}</div>
       )}
 
       <button type="submit">Create Agent</button>

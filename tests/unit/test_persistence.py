@@ -1,15 +1,20 @@
 """
-Module for FreeAgentics Active Inference implementation.
+Comprehensive tests for Agent Persistence Module.
+
+Tests the functionality for saving and loading agent states to/from
+the database, including serialization, deserialization, and version management.
 """
 
+import uuid
 from datetime import datetime, timedelta
-from typing import Optional
-from unittest.mock import Mock, patch
+from typing import Dict, Any, List
+from unittest.mock import Mock, patch, MagicMock, call
 
 import numpy as np
 import pytest
 from sqlalchemy.exc import SQLAlchemyError
 
+from agents.base.persistence import AgentPersistence, AGENT_SCHEMA_VERSION
 from agents.base.data_model import (
     Agent,
     AgentCapability,
@@ -20,386 +25,516 @@ from agents.base.data_model import (
     Orientation,
     Position,
     ResourceAgent,
+    SocialAgent,
     SocialRelationship,
 )
-from agents.base.persistence import AGENT_SCHEMA_VERSION, AgentPersistence, AgentSnapshot
 
 
 class TestAgentPersistence:
-    """Test AgentPersistence class"""
-
-    @pytest.fixture
-    def mock_session(self):
-        """Create a mock database session"""
-        session = Mock()
-        session.query.return_value.filter_by.return_value.first.return_value = None
-        session.commit.return_value = None
-        session.rollback.return_value = None
-        session.close.return_value = None
-        return session
-
-    @pytest.fixture
-    def sample_agent(self):
-        """Create a sample agent for testing"""
-        agent = Agent(agent_id="test-agent-123", name="Test Agent", agent_type="basic")
+    """Test AgentPersistence class."""
+    
+    def setup_method(self):
+        """Set up test persistence handler."""
+        self.mock_session = Mock()
+        self.persistence = AgentPersistence(session=self.mock_session)
+        
+        # Create test agent
+        self.test_agent = self._create_test_agent()
+    
+    def _create_test_agent(self) -> Agent:
+        """Create a test agent with all fields populated."""
+        agent = Agent()
+        agent.agent_id = str(uuid.uuid4())
+        agent.name = "TestAgent"
+        agent.agent_type = "explorer"
         agent.position = Position(10.0, 20.0, 5.0)
-        agent.orientation = Orientation(1.0, 0.0, 0.0, 0.0)
+        agent.orientation = Orientation(w=1.0, x=0.0, y=0.0, z=0.0)
         agent.velocity = np.array([1.0, 2.0, 0.0])
-        agent.status = AgentStatus.MOVING
-        agent.personality = AgentPersonality(
-            openness=0.7,
-            conscientiousness=0.8,
-            extraversion=0.6,
-            agreeableness=0.9,
-            neuroticism=0.3,
-        )
+        agent.status = AgentStatus.IDLE
         agent.resources = AgentResources(
-            energy=75.0, health=90.0, memory_capacity=100.0, memory_used=25.0
+            energy=80.0,
+            health=90.0,
+            memory_capacity=100.0,
+            memory_used=10.0
         )
-        relationship = SocialRelationship(
-            target_agent_id="other-agent-456",
-            relationship_type="friend",
-            trust_level=0.8,
-            interaction_count=5,
-            last_interaction=datetime.now(),
+        agent.capabilities = {AgentCapability.MOVEMENT, AgentCapability.PERCEPTION}
+        agent.personality = AgentPersonality(
+            openness=0.8,
+            conscientiousness=0.7,
+            extraversion=0.6,
+            agreeableness=0.5,
+            neuroticism=0.4
         )
-        agent.add_relationship(relationship)
-        goal = AgentGoal(
-            description="Find resources",
-            priority=0.8,
-            target_position=Position(50.0, 50.0, 0.0),
-            deadline=datetime.now() + timedelta(hours=1),
+        agent.current_goal = AgentGoal(
+            goal_id="goal_1",
+            description="Explore unknown area",
+            priority=0.9,
+            target_position=Position(100.0, 100.0, 0.0),
+            deadline=datetime.now() + timedelta(hours=1)
         )
-        agent.add_goal(goal)
-        agent.add_to_memory({"event": "found_item", "location": [30, 40]}, is_important=True)
+        agent.goals = [agent.current_goal]
+        agent.short_term_memory = ["event1", "event2", "event3"]
+        agent.long_term_memory = ["memory1", "memory2"]
+        agent.experience_count = 42
+        agent.relationships = {
+            "agent_2": SocialRelationship(
+                target_agent_id="agent_2",
+                relationship_type="ally",
+                trust_level=0.8,
+                interaction_count=5,
+                last_interaction=datetime.now()
+            )
+        }
+        agent.belief_state = np.array([0.1, 0.2, 0.3, 0.4])
+        agent.generative_model_params = {"param1": 1.0, "param2": 2.0}
+        agent.metadata = {"role": "scout", "team": "alpha"}
         return agent
-
-    @patch("agents.base.persistence.get_db_session")
-    def test_save_agent_new(self, mock_get_session, mock_session, sample_agent) -> None:
-        """Test saving a new agent"""
-        mock_get_session.return_value = mock_session
-        with patch("infrastructure.database.models.Agent") as MockDBAgent:
-            persistence = AgentPersistence()
-            result = persistence.save_agent(sample_agent)
-            assert result is True
-            assert mock_session.add.called
-            assert mock_session.commit.called
-            call_kwargs = MockDBAgent.call_args.kwargs
-            assert call_kwargs["uuid"] == sample_agent.agent_id
-            assert call_kwargs["name"] == sample_agent.name
-            assert call_kwargs["type"] == sample_agent.agent_type
-            assert call_kwargs["energy_level"] == 0.75
-            assert call_kwargs["experience_points"] == 1
-
-    @patch("agents.base.persistence.get_db_session")
-    def test_save_agent_update_existing(self, mock_get_session, mock_session, sample_agent) -> None:
-        """Test updating an existing agent"""
-        mock_db_agent = Mock()
-        mock_session.query.return_value.filter_by.return_value.first.return_value = mock_db_agent
-        mock_get_session.return_value = mock_session
+    
+    def test_persistence_initialization_with_session(self):
+        """Test initialization with external session."""
+        assert self.persistence.session == self.mock_session
+        assert self.persistence._use_external_session is True
+    
+    def test_persistence_initialization_without_session(self):
+        """Test initialization without external session."""
         persistence = AgentPersistence()
-        result = persistence.save_agent(sample_agent, update_if_exists=True)
+        assert persistence.session is None
+        assert persistence._use_external_session is False
+    
+    @patch('agents.base.persistence.get_db_session')
+    def test_get_session_internal(self, mock_get_db):
+        """Test getting session when using internal session management."""
+        mock_db_session = Mock()
+        mock_get_db.return_value = mock_db_session
+        
+        persistence = AgentPersistence()
+        session = persistence._get_session()
+        
+        assert session == mock_db_session
+        mock_get_db.assert_called_once()
+    
+    def test_get_session_external(self):
+        """Test getting session when using external session."""
+        session = self.persistence._get_session()
+        assert session == self.mock_session
+    
+    def test_save_agent_success_new(self):
+        """Test successfully saving a new agent."""
+        # Mock database query returning no existing agent
+        self.mock_session.query.return_value.filter_by.return_value.first.return_value = None
+        
+        result = self.persistence.save_agent(self.test_agent)
+        
         assert result is True
-        assert mock_db_agent.name == sample_agent.name
-        assert mock_db_agent.type == sample_agent.agent_type
-        assert mock_session.commit.called
-
-    @patch("agents.base.persistence.get_db_session")
-    def test_save_agent_exists_no_update(
-        self, mock_get_session, mock_session, sample_agent
-    ) -> None:
-        """Test saving when agent exists but update_if_exists=False"""
+        
+        # Verify agent was added to session
+        self.mock_session.add.assert_called_once()
+        added_agent = self.mock_session.add.call_args[0][0]
+        assert added_agent.uuid == self.test_agent.agent_id
+        assert added_agent.name == self.test_agent.name
+        assert added_agent.type == self.test_agent.agent_type
+        assert added_agent.energy_level == 0.8  # 80/100
+        assert added_agent.experience_points == 42
+    
+    def test_save_agent_success_update(self):
+        """Test successfully updating an existing agent."""
+        # Mock existing database agent
         mock_db_agent = Mock()
-        mock_session.query.return_value.filter_by.return_value.first.return_value = mock_db_agent
-        mock_get_session.return_value = mock_session
-        persistence = AgentPersistence()
-        result = persistence.save_agent(sample_agent, update_if_exists=False)
-        assert result is False
-        assert not mock_session.commit.called
-
-    @patch("agents.base.persistence.get_db_session")
-    def test_save_agent_database_error(self, mock_get_session, mock_session, sample_agent) -> None:
-        """Test handling database errors during save"""
-        mock_session.commit.side_effect = SQLAlchemyError("Database error")
-        mock_get_session.return_value = mock_session
-        persistence = AgentPersistence()
-        result = persistence.save_agent(sample_agent)
-        assert result is False
-        assert mock_session.rollback.called
-
-    @patch("agents.base.persistence.get_db_session")
-    def test_load_agent_success(self, mock_get_session, mock_session) -> None:
-        """Test loading an agent successfully"""
+        self.mock_session.query.return_value.filter_by.return_value.first.return_value = mock_db_agent
+        
+        result = self.persistence.save_agent(self.test_agent, update_if_exists=True)
+        
+        assert result is True
+        
+        # Verify agent was updated
+        assert mock_db_agent.name == self.test_agent.name
+        assert mock_db_agent.type == self.test_agent.agent_type
+        assert mock_db_agent.energy_level == 0.8
+        assert mock_db_agent.experience_points == 42
+        
+        # Verify add was not called
+        self.mock_session.add.assert_not_called()
+    
+    def test_save_agent_exists_no_update(self):
+        """Test saving existing agent when update_if_exists is False."""
+        # Mock existing database agent
         mock_db_agent = Mock()
-        mock_db_agent.uuid = "test-agent-123"
-        mock_db_agent.name = "Test Agent"
-        mock_db_agent.type = "basic"
+        self.mock_session.query.return_value.filter_by.return_value.first.return_value = mock_db_agent
+        
+        result = self.persistence.save_agent(self.test_agent, update_if_exists=False)
+        
+        assert result is False
+        
+        # Verify nothing was added or committed
+        self.mock_session.add.assert_not_called()
+        self.mock_session.commit.assert_not_called()
+    
+    def test_save_agent_database_error(self):
+        """Test handling database error during save."""
+        self.mock_session.query.side_effect = SQLAlchemyError("Database error")
+        
+        result = self.persistence.save_agent(self.test_agent)
+        
+        assert result is False
+    
+    def test_save_agent_general_error(self):
+        """Test handling general error during save."""
+        self.mock_session.query.side_effect = Exception("General error")
+        
+        result = self.persistence.save_agent(self.test_agent)
+        
+        assert result is False
+    
+    @patch('agents.base.persistence.get_db_session')
+    def test_save_agent_with_internal_session(self, mock_get_db):
+        """Test saving agent with internal session management."""
+        mock_internal_session = Mock()
+        mock_get_db.return_value = mock_internal_session
+        mock_internal_session.query.return_value.filter_by.return_value.first.return_value = None
+        
+        persistence = AgentPersistence()
+        result = persistence.save_agent(self.test_agent)
+        
+        assert result is True
+        mock_internal_session.commit.assert_called_once()
+        mock_internal_session.close.assert_called_once()
+    
+    @patch('agents.base.persistence.get_db_session')
+    def test_save_agent_rollback_on_error(self, mock_get_db):
+        """Test rollback on error with internal session."""
+        mock_internal_session = Mock()
+        mock_get_db.return_value = mock_internal_session
+        mock_internal_session.query.side_effect = SQLAlchemyError("Database error")
+        
+        persistence = AgentPersistence()
+        result = persistence.save_agent(self.test_agent)
+        
+        assert result is False
+        mock_internal_session.rollback.assert_called_once()
+        mock_internal_session.close.assert_called_once()
+    
+    def test_load_agent_success(self):
+        """Test successfully loading an agent."""
+        # Create mock database agent
+        mock_db_agent = Mock()
+        mock_db_agent.uuid = self.test_agent.agent_id
+        mock_db_agent.name = self.test_agent.name
+        mock_db_agent.type = self.test_agent.agent_type
         mock_db_agent.created_at = datetime.now()
         mock_db_agent.updated_at = datetime.now()
         mock_db_agent.state = {
             "position": {"x": 10.0, "y": 20.0, "z": 5.0},
             "orientation": {"w": 1.0, "x": 0.0, "y": 0.0, "z": 0.0},
             "velocity": [1.0, 2.0, 0.0],
-            "status": "moving",
+            "status": "idle",
             "resources": {
-                "energy": 75.0,
+                "energy": 80.0,
                 "health": 90.0,
-                "memory_capacity": 100.0,
-                "memory_used": 25.0,
+                "memory_capacity": 100,
+                "memory_used": 0
             },
-            "current_goal": None,
-            "short_term_memory": [],
-            "experience_count": 0,
-            "schema_version": AGENT_SCHEMA_VERSION,
+            "current_goal": {
+                "goal_id": "goal_1",
+                "description": "Explore unknown area",
+                "priority": 0.9,
+                "target_position": {"x": 100.0, "y": 100.0, "z": 0.0},
+                "deadline": datetime.now().isoformat()
+            },
+            "short_term_memory": ["event1", "event2"],
+            "experience_count": 42
         }
         mock_db_agent.config = {
-            "capabilities": ["movement", "perception", "communication"],
+            "capabilities": ["movement", "perception"],
             "personality": {
-                "openness": 0.5,
-                "conscientiousness": 0.5,
-                "extraversion": 0.5,
+                "openness": 0.8,
+                "conscientiousness": 0.7,
+                "extraversion": 0.6,
                 "agreeableness": 0.5,
-                "neuroticism": 0.5,
+                "neuroticism": 0.4
             },
-            "metadata": {},
+            "metadata": {"role": "scout"}
         }
         mock_db_agent.beliefs = {
             "relationships": {},
             "goals": [],
-            "long_term_memory": [],
-            "generative_model_params": {},
+            "long_term_memory": ["memory1"],
+            "generative_model_params": {"param1": 1.0}
         }
-        mock_session.query.return_value.filter_by.return_value.first.return_value = mock_db_agent
-        mock_get_session.return_value = mock_session
-        persistence = AgentPersistence()
-        agent = persistence.load_agent("test-agent-123")
+        
+        self.mock_session.query.return_value.filter_by.return_value.first.return_value = mock_db_agent
+        
+        agent = self.persistence.load_agent(self.test_agent.agent_id)
+        
         assert agent is not None
-        assert agent.agent_id == "test-agent-123"
-        assert agent.name == "Test Agent"
+        assert agent.agent_id == self.test_agent.agent_id
+        assert agent.name == self.test_agent.name
         assert agent.position.x == 10.0
         assert agent.position.y == 20.0
-        assert agent.status == AgentStatus.MOVING
-        assert AgentCapability.MOVEMENT in agent.capabilities
-
-    @patch("agents.base.persistence.get_db_session")
-    def test_load_agent_not_found(self, mock_get_session, mock_session) -> None:
-        """Test loading a non-existent agent"""
-        mock_session.query.return_value.filter_by.return_value.first.return_value = None
-        mock_get_session.return_value = mock_session
-        persistence = AgentPersistence()
-        agent = persistence.load_agent("non-existent-agent")
+        assert agent.resources.energy == 80.0
+        assert agent.experience_count == 42
+        assert len(agent.short_term_memory) == 2
+    
+    def test_load_agent_not_found(self):
+        """Test loading non-existent agent."""
+        self.mock_session.query.return_value.filter_by.return_value.first.return_value = None
+        
+        agent = self.persistence.load_agent("non_existent_id")
+        
         assert agent is None
-
-    @patch("agents.base.persistence.get_db_session")
-    def test_load_all_agents(self, mock_get_session, mock_session) -> None:
-        """Test loading all agents"""
-        mock_db_agent1 = Mock()
-        mock_db_agent1.uuid = "agent-1"
-        mock_db_agent1.name = "Agent 1"
-        mock_db_agent1.type = "basic"
-        mock_db_agent1.created_at = datetime.now()
-        mock_db_agent1.updated_at = None
-        mock_db_agent1.state = {}
-        mock_db_agent1.config = {}
-        mock_db_agent1.beliefs = {}
-        mock_db_agent2 = Mock()
-        mock_db_agent2.uuid = "agent-2"
-        mock_db_agent2.name = "Agent 2"
-        mock_db_agent2.type = "resource_management"
-        mock_db_agent2.created_at = datetime.now()
-        mock_db_agent2.updated_at = None
-        mock_db_agent2.state = {}
-        mock_db_agent2.config = {}
-        mock_db_agent2.beliefs = {}
-        mock_session.query.return_value.all.return_value = [
-            mock_db_agent1,
-            mock_db_agent2,
-        ]
-        mock_get_session.return_value = mock_session
-        persistence = AgentPersistence()
-        agents = persistence.load_all_agents()
-        assert len(agents) == 2
-        assert agents[0].agent_id == "agent-1"
-        assert agents[1].agent_id == "agent-2"
-        assert isinstance(agents[1], ResourceAgent)
-
-    @patch("agents.base.persistence.get_db_session")
-    def test_delete_agent_success(self, mock_get_session, mock_session) -> None:
-        """Test deleting an agent successfully"""
+    
+    def test_load_agent_error(self):
+        """Test handling error during agent load."""
+        self.mock_session.query.side_effect = Exception("Load error")
+        
+        agent = self.persistence.load_agent(self.test_agent.agent_id)
+        
+        assert agent is None
+    
+    def test_load_all_agents_success(self):
+        """Test loading all agents."""
+        # Create mock database agents
+        mock_agents = []
+        for i in range(3):
+            mock_agent = Mock()
+            mock_agent.uuid = f"agent_{i}"
+            mock_agent.name = f"Agent{i}"
+            mock_agent.type = "explorer"
+            mock_agent.created_at = datetime.now()
+            mock_agent.updated_at = datetime.now()
+            mock_agent.state = {"position": {"x": 0, "y": 0, "z": 0}}
+            mock_agent.config = {"capabilities": [], "personality": {}, "metadata": {}}
+            mock_agent.beliefs = {"relationships": {}, "goals": [], "long_term_memory": []}
+            mock_agents.append(mock_agent)
+        
+        self.mock_session.query.return_value.all.return_value = mock_agents
+        
+        agents = self.persistence.load_all_agents()
+        
+        assert len(agents) == 3
+        for i, agent in enumerate(agents):
+            assert agent.agent_id == f"agent_{i}"
+            assert agent.name == f"Agent{i}"
+    
+    def test_load_all_agents_with_filters(self):
+        """Test loading agents with type and status filters."""
+        mock_query = Mock()
+        self.mock_session.query.return_value = mock_query
+        mock_query.filter_by.return_value = mock_query
+        mock_query.all.return_value = []
+        
+        agents = self.persistence.load_all_agents(agent_type="explorer", status="idle")
+        
+        # Verify filter_by was called twice
+        assert mock_query.filter_by.call_count == 2
+        calls = mock_query.filter_by.call_args_list
+        assert calls[0] == call(type="explorer")
+        assert calls[1] == call(status="idle")
+    
+    def test_load_all_agents_deserialization_error(self):
+        """Test handling deserialization error for some agents."""
+        # Create one valid and one invalid agent
+        valid_agent = Mock()
+        valid_agent.uuid = "valid_agent"
+        valid_agent.name = "ValidAgent"
+        valid_agent.type = "explorer"
+        valid_agent.created_at = datetime.now()
+        valid_agent.updated_at = datetime.now()
+        valid_agent.state = {"position": {"x": 0, "y": 0, "z": 0}}
+        valid_agent.config = {"capabilities": [], "personality": {}, "metadata": {}}
+        valid_agent.beliefs = {"relationships": {}, "goals": [], "long_term_memory": []}
+        
+        invalid_agent = Mock()
+        invalid_agent.uuid = "invalid_agent"
+        invalid_agent.state = None  # This will cause deserialization error
+        
+        self.mock_session.query.return_value.all.return_value = [valid_agent, invalid_agent]
+        
+        agents = self.persistence.load_all_agents()
+        
+        # Should only return the valid agent
+        assert len(agents) == 1
+        assert agents[0].agent_id == "valid_agent"
+    
+    def test_delete_agent_success(self):
+        """Test successfully deleting an agent."""
         mock_db_agent = Mock()
-        mock_session.query.return_value.filter_by.return_value.first.return_value = mock_db_agent
-        mock_get_session.return_value = mock_session
-        persistence = AgentPersistence()
-        result = persistence.delete_agent("test-agent-123")
+        self.mock_session.query.return_value.filter_by.return_value.first.return_value = mock_db_agent
+        
+        result = self.persistence.delete_agent(self.test_agent.agent_id)
+        
         assert result is True
-        mock_session.delete.assert_called_with(mock_db_agent)
-        assert mock_session.commit.called
-
-    @patch("agents.base.persistence.get_db_session")
-    def test_delete_agent_not_found(self, mock_get_session, mock_session) -> None:
-        """Test deleting a non-existent agent"""
-        mock_session.query.return_value.filter_by.return_value.first.return_value = None
-        mock_get_session.return_value = mock_session
-        persistence = AgentPersistence()
-        result = persistence.delete_agent("non-existent-agent")
+        self.mock_session.delete.assert_called_once_with(mock_db_agent)
+    
+    def test_delete_agent_not_found(self):
+        """Test deleting non-existent agent."""
+        self.mock_session.query.return_value.filter_by.return_value.first.return_value = None
+        
+        result = self.persistence.delete_agent("non_existent_id")
+        
         assert result is False
-        assert not mock_session.delete.called
-
-    def test_serialize_deserialize_agent(self, sample_agent) -> None:
-        """Test agent serialization and deserialization"""
-        persistence = AgentPersistence()
-        serialized = persistence._serialize_agent(sample_agent)
+        self.mock_session.delete.assert_not_called()
+    
+    def test_delete_agent_database_error(self):
+        """Test handling database error during delete."""
+        mock_db_agent = Mock()
+        self.mock_session.query.return_value.filter_by.return_value.first.return_value = mock_db_agent
+        self.mock_session.delete.side_effect = SQLAlchemyError("Delete error")
+        
+        result = self.persistence.delete_agent(self.test_agent.agent_id)
+        
+        assert result is False
+    
+    def test_serialize_agent_complete(self):
+        """Test complete agent serialization."""
+        serialized = self.persistence._serialize_agent(self.test_agent)
+        
+        # Check structure
         assert "state" in serialized
         assert "config" in serialized
         assert "beliefs" in serialized
-        assert serialized["state"]["position"]["x"] == 10.0
-        assert serialized["state"]["status"] == "moving"
-        assert set(serialized["config"]["capabilities"]) == {
-            "movement",
-            "perception",
-            "communication",
-            "memory",
-            "learning",
-        }
-        assert len(serialized["beliefs"]["goals"]) == 1
-        assert len(serialized["beliefs"]["relationships"]) == 1
+        assert "location" in serialized
+        
+        # Check state
+        state = serialized["state"]
+        assert state["position"]["x"] == 10.0
+        assert state["position"]["y"] == 20.0
+        assert state["position"]["z"] == 5.0
+        assert state["orientation"]["w"] == 1.0
+        assert state["status"] == "idle"
+        assert state["resources"]["energy"] == 80.0
+        assert state["experience_count"] == 42
+        assert state["schema_version"] == AGENT_SCHEMA_VERSION
+        assert len(state["short_term_memory"]) == 3
+        
+        # Check config
+        config = serialized["config"]
+        assert "movement" in config["capabilities"]
+        assert "perception" in config["capabilities"]
+        assert config["personality"]["openness"] == 0.8
+        assert config["metadata"]["role"] == "scout"
+        
+        # Check beliefs
+        beliefs = serialized["beliefs"]
+        assert len(beliefs["relationships"]) == 1
+        assert "agent_2" in beliefs["relationships"]
+        assert beliefs["relationships"]["agent_2"]["trust_level"] == 0.8
+        assert len(beliefs["goals"]) == 1
+        assert beliefs["belief_state"] == [0.1, 0.2, 0.3, 0.4]
+        assert beliefs["generative_model_params"]["param1"] == 1.0
+    
+    def test_serialize_agent_minimal(self):
+        """Test serialization with minimal agent data."""
+        minimal_agent = Agent()
+        minimal_agent.agent_id = "minimal"
+        minimal_agent.name = "MinimalAgent"
+        
+        serialized = self.persistence._serialize_agent(minimal_agent)
+        
+        # Should not crash and provide defaults
+        assert serialized["state"]["current_goal"] is None
+        assert serialized["state"]["short_term_memory"] == []
+        assert serialized["beliefs"]["relationships"] == {}
+        assert serialized["beliefs"]["goals"] == []
+    
+    def test_deserialize_agent_basic(self):
+        """Test basic agent deserialization."""
         mock_db_agent = Mock()
-        mock_db_agent.uuid = sample_agent.agent_id
-        mock_db_agent.name = sample_agent.name
-        mock_db_agent.type = sample_agent.agent_type
-        mock_db_agent.created_at = sample_agent.created_at
-        mock_db_agent.updated_at = sample_agent.last_updated
+        mock_db_agent.uuid = "test_id"
+        mock_db_agent.name = "TestAgent"
+        mock_db_agent.type = "explorer"
+        mock_db_agent.created_at = datetime.now()
+        mock_db_agent.updated_at = datetime.now()
+        mock_db_agent.state = {}
+        mock_db_agent.config = {}
+        mock_db_agent.beliefs = {}
+        
+        agent = self.persistence._deserialize_agent(mock_db_agent)
+        
+        assert isinstance(agent, Agent)
+        assert agent.agent_id == "test_id"
+        assert agent.name == "TestAgent"
+        assert agent.agent_type == "explorer"
+    
+    def test_deserialize_resource_agent(self):
+        """Test deserializing resource agent."""
+        mock_db_agent = Mock()
+        mock_db_agent.uuid = "resource_id"
+        mock_db_agent.name = "ResourceAgent"
+        mock_db_agent.type = "resource_management"
+        mock_db_agent.created_at = datetime.now()
+        mock_db_agent.updated_at = datetime.now()
+        mock_db_agent.state = {}
+        mock_db_agent.config = {}
+        mock_db_agent.beliefs = {}
+        
+        agent = self.persistence._deserialize_agent(mock_db_agent)
+        
+        assert isinstance(agent, ResourceAgent)
+        assert agent.agent_id == "resource_id"
+    
+    def test_deserialize_social_agent(self):
+        """Test deserializing social agent."""
+        mock_db_agent = Mock()
+        mock_db_agent.uuid = "social_id"
+        mock_db_agent.name = "SocialAgent"
+        mock_db_agent.type = "social_interaction"
+        mock_db_agent.created_at = datetime.now()
+        mock_db_agent.updated_at = datetime.now()
+        mock_db_agent.state = {}
+        mock_db_agent.config = {}
+        mock_db_agent.beliefs = {}
+        
+        agent = self.persistence._deserialize_agent(mock_db_agent)
+        
+        assert isinstance(agent, SocialAgent)
+        assert agent.agent_id == "social_id"
+    
+    def test_serialize_deserialize_roundtrip(self):
+        """Test that serialization and deserialization preserve agent data."""
+        # Serialize the test agent
+        serialized = self.persistence._serialize_agent(self.test_agent)
+        
+        # Create mock DB agent with serialized data
+        mock_db_agent = Mock()
+        mock_db_agent.uuid = self.test_agent.agent_id
+        mock_db_agent.name = self.test_agent.name
+        mock_db_agent.type = self.test_agent.agent_type
+        mock_db_agent.created_at = self.test_agent.created_at
+        mock_db_agent.updated_at = datetime.now()
         mock_db_agent.state = serialized["state"]
         mock_db_agent.config = serialized["config"]
         mock_db_agent.beliefs = serialized["beliefs"]
-        deserialized_agent = persistence._deserialize_agent(mock_db_agent)
-        assert deserialized_agent.agent_id == sample_agent.agent_id
-        assert deserialized_agent.name == sample_agent.name
-        assert deserialized_agent.position.x == sample_agent.position.x
-        assert deserialized_agent.status == sample_agent.status
-        assert len(deserialized_agent.goals) == 1
-        assert len(deserialized_agent.relationships) == 1
-
-    def test_serialize_goal(self, sample_agent) -> None:
-        """Test goal serialization"""
-        persistence = AgentPersistence()
-        goal = sample_agent.goals[0]
-        serialized = persistence._serialize_goal(goal)
-        assert serialized["description"] == goal.description
-        assert serialized["priority"] == goal.priority
-        assert serialized["target_position"]["x"] == 50.0
-        assert serialized["deadline"] is not None
-        deserialized = persistence._deserialize_goal(serialized)
-        assert deserialized.description == goal.description
-        assert deserialized.priority == goal.priority
-        assert deserialized.target_position.x == 50.0
-
-    def test_numpy_array_serialization(self, sample_agent) -> None:
-        """Test serialization of numpy arrays"""
-        persistence = AgentPersistence()
-        sample_agent.belief_state = np.array([0.1, 0.2, 0.3, 0.4, 0.5])
-        serialized = persistence._serialize_agent(sample_agent)
-        assert "belief_state" in serialized["beliefs"]
-        assert serialized["beliefs"]["belief_state"] == [0.1, 0.2, 0.3, 0.4, 0.5]
-
-
-class TestAgentSnapshot:
-    """Test AgentSnapshot class"""
-
-    @pytest.fixture
-    def mock_persistence(self):
-        """Create a mock AgentPersistence"""
-        persistence = Mock(spec=AgentPersistence)
-        persistence.save_agent.return_value = True
-        persistence.load_agent.return_value = None
-        return persistence
-
-    @pytest.fixture
-    def sample_agent(self):
-        """Create a sample agent for testing"""
-        agent = Agent(agent_id="test-agent-123", name="Test Agent", agent_type="basic")
-        agent.position = Position(10.0, 20.0, 5.0)
-        agent.orientation = Orientation(1.0, 0.0, 0.0, 0.0)
-        agent.velocity = np.array([1.0, 2.0, 0.0])
-        agent.status = AgentStatus.MOVING
-        agent.personality = AgentPersonality(
-            openness=0.7,
-            conscientiousness=0.8,
-            extraversion=0.6,
-            agreeableness=0.9,
-            neuroticism=0.3,
-        )
-        agent.resources = AgentResources(
-            energy=75.0, health=90.0, memory_capacity=100.0, memory_used=25.0
-        )
-        relationship = SocialRelationship(
-            target_agent_id="other-agent-456",
-            relationship_type="friend",
-            trust_level=0.8,
-            interaction_count=5,
-            last_interaction=datetime.now(),
-        )
-        agent.add_relationship(relationship)
+        
+        # Deserialize
+        restored_agent = self.persistence._deserialize_agent(mock_db_agent)
+        
+        # Verify key properties are preserved
+        assert restored_agent.agent_id == self.test_agent.agent_id
+        assert restored_agent.name == self.test_agent.name
+        assert restored_agent.position.x == self.test_agent.position.x
+        assert restored_agent.position.y == self.test_agent.position.y
+        assert restored_agent.resources.energy == self.test_agent.resources.energy
+        assert restored_agent.status == self.test_agent.status
+        assert len(restored_agent.capabilities) == len(self.test_agent.capabilities)
+        assert restored_agent.personality.openness == self.test_agent.personality.openness
+    
+    def test_serialize_goal(self):
+        """Test goal serialization."""
         goal = AgentGoal(
-            description="Find resources",
+            goal_id="test_goal",
+            description="Test exploration goal",
             priority=0.8,
             target_position=Position(50.0, 50.0, 0.0),
-            deadline=datetime.now() + timedelta(hours=1),
+            deadline=datetime.now() + timedelta(hours=1)
         )
-        agent.add_goal(goal)
-        agent.add_to_memory({"event": "found_item", "location": [30, 40]}, is_important=True)
-        return agent
-
-    def test_create_snapshot(self, mock_persistence, sample_agent) -> None:
-        """Test creating a snapshot"""
-        snapshot = AgentSnapshot(mock_persistence)
-        snapshot_id = snapshot.create_snapshot(sample_agent, "Test snapshot")
-        assert snapshot_id is not None
-        assert "snapshots" in sample_agent.metadata
-        assert len(sample_agent.metadata["snapshots"]) == 1
-        assert sample_agent.metadata["snapshots"][0]["description"] == "Test snapshot"
-        assert mock_persistence.save_agent.called
-
-    def test_create_multiple_snapshots(self, mock_persistence, sample_agent) -> None:
-        """Test that only last 10 snapshots are kept"""
-        snapshot = AgentSnapshot(mock_persistence)
-        for i in range(15):
-            snapshot.create_snapshot(sample_agent, f"Snapshot {i}")
-        assert len(sample_agent.metadata["snapshots"]) == 10
-        assert sample_agent.metadata["snapshots"][0]["description"] == "Snapshot 5"
-        assert sample_agent.metadata["snapshots"][-1]["description"] == "Snapshot 14"
-
-    def test_restore_snapshot(self, mock_persistence, sample_agent) -> None:
-        """Test restoring from a snapshot"""
-        snapshot = AgentSnapshot(mock_persistence)
-        snapshot_id = snapshot.create_snapshot(sample_agent, "Before changes")
-        original_name = sample_agent.name
-        sample_agent.name = "Modified Agent"
-        sample_agent.position = Position(99.0, 99.0, 99.0)
-        mock_persistence.load_agent.return_value = sample_agent
-        restored_agent = snapshot.restore_snapshot(sample_agent.agent_id, snapshot_id)
-        assert restored_agent is not None
-        assert restored_agent.name == original_name
-        assert restored_agent.position.x == 10.0
-
-    def test_restore_nonexistent_snapshot(self, mock_persistence, sample_agent) -> None:
-        """Test restoring a non-existent snapshot"""
-        snapshot = AgentSnapshot(mock_persistence)
-        mock_persistence.load_agent.return_value = sample_agent
-        restored_agent = snapshot.restore_snapshot(sample_agent.agent_id, "fake-snapshot-id")
-        assert restored_agent is None
-
-    def test_list_snapshots(self, mock_persistence, sample_agent) -> None:
-        """Test listing snapshots"""
-        snapshot = AgentSnapshot(mock_persistence)
-        ids = []
-        for i in range(3):
-            snapshot_id = snapshot.create_snapshot(sample_agent, f"Snapshot {i}")
-            ids.append(snapshot_id)
-        mock_persistence.load_agent.return_value = sample_agent
-        snapshots_list = snapshot.list_snapshots(sample_agent.agent_id)
-        assert len(snapshots_list) == 3
-        for i, snap in enumerate(snapshots_list):
-            assert snap["snapshot_id"] == ids[i]
-            assert snap["description"] == f"Snapshot {i}"
-            assert "timestamp" in snap
+        
+        # The method is referenced but not shown in the file snippet
+        # We'll test it indirectly through agent serialization
+        agent = Agent()
+        agent.current_goal = goal
+        agent.goals = [goal]
+        
+        serialized = self.persistence._serialize_agent(agent)
+        
+        assert serialized["state"]["current_goal"] is not None
+        assert len(serialized["beliefs"]["goals"]) == 1

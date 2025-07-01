@@ -7,7 +7,7 @@ import time
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from dataclasses import dataclass
 from functools import lru_cache
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional
 
 import torch
 import torch.nn as nn
@@ -342,7 +342,7 @@ class GPUOptimizer:
             optimized.append(gpu_tensor)
         return optimized
 
-    @torch.cuda.amp.autocast()
+    @torch.amp.autocast('cuda')
     def mixed_precision_inference(self, model: nn.Module, inputs: torch.Tensor) -> torch.Tensor:
         """Run inference with mixed precision"""
         if not self.config.use_mixed_precision:

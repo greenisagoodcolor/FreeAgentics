@@ -1,4 +1,5 @@
 import pytest
+
 """Property-Based Tests for Active Inference Mathematical Invariants.
 
 Expert Committee: Conor Heins, Alexander Tschantz, Karl Friston
@@ -14,14 +15,18 @@ from hypothesis import strategies as st
 from hypothesis.extra.numpy import arrays
 
 from agents.base.agent import BaseAgent
-from inference.engine.belief_state import DiscreteBeliefState, BeliefStateConfig
-from inference.engine.generative_model import ModelDimensions, ModelParameters, DiscreteGenerativeModel
 from inference.engine.active_inference import InferenceConfig
+from inference.engine.belief_state import BeliefStateConfig, DiscreteBeliefState
+from inference.engine.generative_model import (
+    DiscreteGenerativeModel,
+    ModelDimensions,
+    ModelParameters,
+)
 
 
 class ActiveInferenceAgent:
     """Simple Active Inference agent for testing mathematical invariants."""
-    
+
     def __init__(self, name: str, config: InferenceConfig, model: DiscreteGenerativeModel):
         """Initialize the agent with a name, config, and generative model."""
         self.name = name
@@ -30,49 +35,53 @@ class ActiveInferenceAgent:
         self.device = torch.device(
             "cuda" if config.use_gpu and torch.cuda.is_available() else "cpu"
         )
-        
+
         # Initialize beliefs with uniform distribution
-        self.beliefs = torch.ones(model.dims.num_states, dtype=torch.float64) / model.dims.num_states
+        self.beliefs = (
+            torch.ones(model.dims.num_states, dtype=torch.float64) / model.dims.num_states
+        )
         self.beliefs = self.beliefs.to(self.device)
-        
+
         # Store observations for free energy calculation
         self.observations = []
-        
+
     def update_beliefs(self, obs: torch.Tensor) -> None:
         """Update beliefs based on observation using Bayesian inference."""
         obs = obs.to(self.device)
         self.observations.append(obs)
-        
+
         # Get observation likelihood from generative model
         # P(o|s) from the A matrix
         A = self.model.A  # [num_obs x num_states]
-        
+
         # Extract likelihood for the observed value
         if obs.dim() == 0:
             obs_idx = obs.item()
         else:
             obs_idx = obs[0].item()
-            
+
         likelihood = A[obs_idx, :]  # P(o|s) for each state
-        
+
         # Bayesian update: posterior ∝ likelihood * prior
         posterior = self.beliefs * likelihood
-        
+
         # Normalize to get proper probability distribution
         if posterior.sum() > 0:
             self.beliefs = posterior / posterior.sum()
-    
+
     def calculate_free_energy(self) -> torch.Tensor:
         """Calculate variational free energy F = D_KL[q(s)||p(s)] - E_q[ln p(o|s)]."""
         if not self.observations:
             return torch.tensor(0.0, dtype=torch.float64)
-            
+
         # Get prior from generative model
         prior = self.model.D  # Initial state prior
-        
+
         # KL divergence term: D_KL[q(s)||p(s)]
-        kl_term = torch.sum(self.beliefs * (torch.log(self.beliefs + 1e-10) - torch.log(prior + 1e-10)))
-        
+        kl_term = torch.sum(
+            self.beliefs * (torch.log(self.beliefs + 1e-10) - torch.log(prior + 1e-10))
+        )
+
         # Expected log likelihood term: E_q[ln p(o|s)]
         if self.observations:
             last_obs = self.observations[-1]
@@ -80,16 +89,16 @@ class ActiveInferenceAgent:
                 obs_idx = last_obs.item()
             else:
                 obs_idx = last_obs[0].item()
-                
+
             # Get likelihood for observed value
             log_likelihood = torch.log(self.model.A[obs_idx, :] + 1e-10)
             expected_log_likelihood = torch.sum(self.beliefs * log_likelihood)
         else:
             expected_log_likelihood = 0.0
-            
+
         # Free energy = KL divergence - expected log likelihood
         free_energy = kl_term - expected_log_likelihood
-        
+
         return free_energy
 
 

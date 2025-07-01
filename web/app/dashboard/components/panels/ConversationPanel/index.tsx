@@ -1,10 +1,21 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { MessageSquare, Brain, Network, Activity, ChevronRight } from "lucide-react";
+import {
+  MessageSquare,
+  Brain,
+  Network,
+  Activity,
+  ChevronRight,
+} from "lucide-react";
 
 // Define DashboardView type locally
-export type DashboardView = "ceo-demo" | "executive" | "technical" | "research" | "minimal";
+export type DashboardView =
+  | "ceo-demo"
+  | "executive"
+  | "technical"
+  | "research"
+  | "minimal";
 
 interface ConversationPanelProps {
   view: DashboardView;
@@ -129,7 +140,7 @@ export default function ConversationPanel({ view }: ConversationPanelProps) {
           <div
             key={message.id}
             className={`flex items-start gap-3 p-3 rounded-lg border ${getMessageColor(
-              message.type
+              message.type,
             )} transition-all hover:border-opacity-40`}
           >
             <div className="flex-shrink-0 mt-0.5">

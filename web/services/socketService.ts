@@ -41,12 +41,12 @@ class UnifiedWebSocketService {
   }
 
   private getWebSocketUrl(): string {
-    if (typeof window === 'undefined') return '';
-    
+    if (typeof window === "undefined") return "";
+
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const host = window.location.host;
     // Connect directly to backend WebSocket endpoint
-    const wsHost = host.replace(':3000', ':8000'); // Use backend port
+    const wsHost = host.replace(":3000", ":8000"); // Use backend port
     return `${protocol}//${wsHost}/ws/conversations`;
   }
 
@@ -76,9 +76,9 @@ class UnifiedWebSocketService {
         console.log("WebSocket connected successfully");
         this.isConnecting = false;
         this.reconnectAttempts = 0;
-        
+
         store.dispatch(setWebSocketStatus("connected"));
-        
+
         // Request connection info
         this.send({
           type: "ping",
@@ -95,36 +95,41 @@ class UnifiedWebSocketService {
       this.ws.onerror = (error) => {
         console.error("WebSocket error:", error);
         this.isConnecting = false;
-        
-        store.dispatch(addConnectionError({
-          type: "websocket",
-          message: "WebSocket connection error",
-        }));
+
+        store.dispatch(
+          addConnectionError({
+            type: "websocket",
+            message: "WebSocket connection error",
+          }),
+        );
       };
 
       this.ws.onclose = () => {
         console.log("WebSocket connection closed");
         this.isConnecting = false;
-        
+
         store.dispatch(setWebSocketStatus("disconnected"));
-        store.dispatch(connectionLost({ 
-          type: "websocket", 
-          error: "Connection closed" 
-        }));
-        
+        store.dispatch(
+          connectionLost({
+            type: "websocket",
+            error: "Connection closed",
+          }),
+        );
+
         this.stopPingInterval();
         this.handleReconnect();
       };
-
     } catch (error) {
       console.error("Failed to create WebSocket connection:", error);
       this.isConnecting = false;
-      
+
       store.dispatch(setWebSocketStatus("disconnected"));
-      store.dispatch(addConnectionError({
-        type: "websocket",
-        message: "Failed to create WebSocket connection",
-      }));
+      store.dispatch(
+        addConnectionError({
+          type: "websocket",
+          message: "Failed to create WebSocket connection",
+        }),
+      );
     }
   }
 
@@ -136,11 +141,15 @@ class UnifiedWebSocketService {
       switch (data.type) {
         case "connection_established":
           console.log("WebSocket connection established:", data.client_id);
-          store.dispatch(connectionEstablished({
-            connectionId: data.client_id,
-            socketUrl: this.connectionUrl,
-            apiUrl: this.connectionUrl.replace(/:\d+/, ':8000').replace('ws', 'http'),
-          }));
+          store.dispatch(
+            connectionEstablished({
+              connectionId: data.client_id,
+              socketUrl: this.connectionUrl,
+              apiUrl: this.connectionUrl
+                .replace(/:\d+/, ":8000")
+                .replace("ws", "http"),
+            }),
+          );
           break;
 
         case "pong":
@@ -153,19 +162,23 @@ class UnifiedWebSocketService {
 
         case "error":
           console.error("WebSocket error:", data.message);
-          store.dispatch(addConnectionError({
-            type: "websocket",
-            message: data.message,
-          }));
+          store.dispatch(
+            addConnectionError({
+              type: "websocket",
+              message: data.message,
+            }),
+          );
           break;
 
         // Agent events
         case "agent_status":
         case "agent:status":
-          store.dispatch(updateAgentStatus({
-            agentId: data.agentId || data.agent_id,
-            status: data.status,
-          }));
+          store.dispatch(
+            updateAgentStatus({
+              agentId: data.agentId || data.agent_id,
+              status: data.status,
+            }),
+          );
           break;
 
         case "agent_typing":
@@ -212,28 +225,34 @@ class UnifiedWebSocketService {
       }
     } catch (error) {
       console.error("Error parsing WebSocket message:", error);
-      store.dispatch(addConnectionError({
-        type: "websocket",
-        message: "Failed to parse WebSocket message",
-      }));
+      store.dispatch(
+        addConnectionError({
+          type: "websocket",
+          message: "Failed to parse WebSocket message",
+        }),
+      );
     }
   }
 
   private handleReconnect(): void {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       console.error("Max reconnection attempts exceeded");
-      store.dispatch(addConnectionError({
-        type: "websocket",
-        message: "Max reconnection attempts exceeded",
-      }));
+      store.dispatch(
+        addConnectionError({
+          type: "websocket",
+          message: "Max reconnection attempts exceeded",
+        }),
+      );
       return;
     }
 
     this.reconnectAttempts++;
-    console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
-    
+    console.log(
+      `Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`,
+    );
+
     store.dispatch(incrementReconnectAttempt());
-    
+
     this.reconnectTimer = setTimeout(() => {
       this.connect();
     }, this.reconnectInterval);

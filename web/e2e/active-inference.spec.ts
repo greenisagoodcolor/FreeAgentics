@@ -11,19 +11,21 @@ test.describe("Active Inference Real-Time Tests", () => {
     page,
   }) => {
     // Look for Active Inference dashboard components or general dashboard content
-    const hasActiveInference = await page.getByText('Active Inference').count() > 0 ||
-                               await page.getByText('Belief State').count() > 0 ||
-                               await page.getByText('Free Energy').count() > 0 ||
-                               await page.locator('[data-testid*="active-inference"]').count() > 0 ||
-                               await page.locator('[data-testid*="belief-state"]').count() > 0 ||
-                               await page.locator('[data-testid*="free-energy"]').count() > 0 ||
-                               await page.locator('[class*="inference"]').count() > 0;
-    
+    const hasActiveInference =
+      (await page.getByText("Active Inference").count()) > 0 ||
+      (await page.getByText("Belief State").count()) > 0 ||
+      (await page.getByText("Free Energy").count()) > 0 ||
+      (await page.locator('[data-testid*="active-inference"]').count()) > 0 ||
+      (await page.locator('[data-testid*="belief-state"]').count()) > 0 ||
+      (await page.locator('[data-testid*="free-energy"]').count()) > 0 ||
+      (await page.locator('[class*="inference"]').count()) > 0;
+
     // Also check for general dashboard content as fallback
-    const hasDashboardContent = await page.getByText('Agent').count() > 0 ||
-                                await page.getByText('FreeAgentics').count() > 0 ||
-                                await page.locator('.dashboard-content').count() > 0 ||
-                                await page.locator('[class*="dashboard"]').count() > 0;
+    const hasDashboardContent =
+      (await page.getByText("Agent").count()) > 0 ||
+      (await page.getByText("FreeAgentics").count()) > 0 ||
+      (await page.locator(".dashboard-content").count()) > 0 ||
+      (await page.locator('[class*="dashboard"]').count()) > 0;
 
     expect(hasActiveInference || hasDashboardContent).toBe(true);
   });
@@ -82,22 +84,25 @@ test.describe("Active Inference Real-Time Tests", () => {
 
   test("PyMDP integration status validation", async ({ page }) => {
     // Look for PyMDP-related status indicators
-    const foundPyMDPElements = await page.getByText('PyMDP').count() > 0 ||
-                               await page.getByText('belief').count() > 0 ||
-                               await page.getByText('precision').count() > 0 ||
-                               await page.getByText('policy').count() > 0 ||
-                               await page.locator('[data-testid*="pymdp"]').count() > 0 ||
-                               await page.locator('[data-testid*="model"]').count() > 0;
+    const foundPyMDPElements =
+      (await page.getByText("PyMDP").count()) > 0 ||
+      (await page.getByText("belief").count()) > 0 ||
+      (await page.getByText("precision").count()) > 0 ||
+      (await page.getByText("policy").count()) > 0 ||
+      (await page.locator('[data-testid*="pymdp"]').count()) > 0 ||
+      (await page.locator('[data-testid*="model"]').count()) > 0;
 
     // Either PyMDP is integrated or there's an appropriate status message
-    const hasStatusMessage = await page.getByText('Coming Soon').count() > 0 ||
-                            await page.getByText('In Development').count() > 0 ||
-                            await page.getByText('Not Available').count() > 0 ||
-                            await page.getByText('Configuration Required').count() > 0;
-    
+    const hasStatusMessage =
+      (await page.getByText("Coming Soon").count()) > 0 ||
+      (await page.getByText("In Development").count()) > 0 ||
+      (await page.getByText("Not Available").count()) > 0 ||
+      (await page.getByText("Configuration Required").count()) > 0;
+
     // Also accept general dashboard content as fallback
-    const hasDashboard = await page.locator('.dashboard-content').count() > 0 ||
-                         await page.getByText('FreeAgentics').count() > 0;
+    const hasDashboard =
+      (await page.locator(".dashboard-content").count()) > 0 ||
+      (await page.getByText("FreeAgentics").count()) > 0;
 
     expect(foundPyMDPElements || hasStatusMessage || hasDashboard).toBe(true);
   });

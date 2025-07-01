@@ -314,6 +314,9 @@ class GNNActiveInferenceAdapter:
             updated_beliefs = self.inference.infer_states(
                 observations, self.generative_model, current_beliefs
             )
+        # Remove extra dimension if present to maintain shape consistency
+        if updated_beliefs.dim() == 3 and updated_beliefs.shape[1] == 1:
+            updated_beliefs = updated_beliefs.squeeze(1)
         return updated_beliefs
 
     def compute_expected_free_energy_with_graph(

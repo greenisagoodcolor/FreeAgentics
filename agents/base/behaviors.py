@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from .data_model import Agent, AgentCapability, AgentStatus, Position, SocialRelationship
 from .interfaces import IAgentBehavior, IBehaviorTree
+from agents.base.decision_making import Action, ActionType
 
 if TYPE_CHECKING:
     from .decision_making import Action, ActionType
@@ -173,7 +174,7 @@ class WanderBehavior(BaseBehavior):
             return {"success": False, "reason": "invalid_position"}
         action = Action(
             action_type=ActionType.MOVE,
-            target_position=new_position,
+            target=new_position,
             parameters={"movement_type": "wander"},
         )
         return {"success": True, "action": action, "target_position": new_position}
@@ -238,7 +239,7 @@ class GoalSeekingBehavior(BaseBehavior):
             goal.progress = min(1.0, 1.0 - (distance - move_distance) / distance)
             action = Action(
                 action_type=ActionType.MOVE,
-                target_position=new_position,
+                target=new_position,
                 parameters={"goal_id": goal.goal_id, "movement_type": "goal_seeking"},
             )
             return {
@@ -401,7 +402,7 @@ class ExplorationBehavior(BaseBehavior):
             )
         action = Action(
             action_type=ActionType.MOVE,
-            target_position=new_position,
+            target=new_position,
             parameters={"movement_type": "exploration", "direction": best_direction},
         )
         # Add exploration memory

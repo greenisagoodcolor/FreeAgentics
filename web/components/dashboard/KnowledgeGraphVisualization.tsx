@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useRef, useEffect, useState, useCallback, useMemo } from "react";
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import * as d3 from "d3";
 import { motion } from "framer-motion";
 import { useAppSelector } from "@/store/hooks";
@@ -34,9 +40,9 @@ interface KnowledgeGraphVisualizationProps {
   testMode?: boolean;
 }
 
-const KnowledgeGraphVisualization: React.FC<KnowledgeGraphVisualizationProps> = ({ 
-  testMode = false 
-}) => {
+const KnowledgeGraphVisualization: React.FC<
+  KnowledgeGraphVisualizationProps
+> = ({ testMode = false }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const simulationRef = useRef<d3.Simulation<GraphNode, GraphLink> | null>(
@@ -47,9 +53,9 @@ const KnowledgeGraphVisualization: React.FC<KnowledgeGraphVisualizationProps> = 
   // Responsive dimensions for different viewports in test mode
   const getTestModeDimensions = () => {
     if (!testMode) return { width: 800, height: 600 };
-    
+
     // Check if we're in a mobile viewport (rough approximation)
-    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
       return { width: 350, height: 250 }; // Mobile test dimensions
     }
     return { width: 1280, height: 960 }; // Desktop test dimensions
@@ -69,17 +75,23 @@ const KnowledgeGraphVisualization: React.FC<KnowledgeGraphVisualizationProps> = 
   );
 
   // Color schemes (memoized to prevent unnecessary re-renders)
-  const typeColors = useMemo(() => ({
-    belief: "#4F46E5",
-    fact: "#10B981",
-    hypothesis: "#F59E0B",
-  }), []);
+  const typeColors = useMemo(
+    () => ({
+      belief: "#4F46E5",
+      fact: "#10B981",
+      hypothesis: "#F59E0B",
+    }),
+    [],
+  );
 
-  const edgeStyles = useMemo(() => ({
-    supports: { strokeDasharray: "none", opacity: 0.8 },
-    contradicts: { strokeDasharray: "5,5", opacity: 0.6 },
-    related: { strokeDasharray: "2,3", opacity: 0.4 },
-  }), []);
+  const edgeStyles = useMemo(
+    () => ({
+      supports: { strokeDasharray: "none", opacity: 0.8 },
+      contradicts: { strokeDasharray: "5,5", opacity: 0.6 },
+      related: { strokeDasharray: "2,3", opacity: 0.4 },
+    }),
+    [],
+  );
 
   // Process data for D3
   const processGraphData = useCallback(() => {
@@ -90,8 +102,12 @@ const KnowledgeGraphVisualization: React.FC<KnowledgeGraphVisualizationProps> = 
         radius: Math.sqrt(node.agents.length) * 8 + 12,
         color: typeColors[node.type],
         // Use fixed positions in test mode to prevent movement
-        x: testMode ? 200 + (index % 5) * 200 : (node.position?.x || Math.random() * dimensions.width),
-        y: testMode ? 200 + Math.floor(index / 5) * 150 : (node.position?.y || Math.random() * dimensions.height),
+        x: testMode
+          ? 200 + (index % 5) * 200
+          : node.position?.x || Math.random() * dimensions.width,
+        y: testMode
+          ? 200 + Math.floor(index / 5) * 150
+          : node.position?.y || Math.random() * dimensions.height,
       }));
 
     const links: GraphLink[] = Object.values(knowledgeGraph.edges)
@@ -109,7 +125,14 @@ const KnowledgeGraphVisualization: React.FC<KnowledgeGraphVisualizationProps> = 
       }));
 
     return { nodes, links };
-  }, [knowledgeGraph, confidenceThreshold, dimensions, typeColors, edgeStyles, testMode]);
+  }, [
+    knowledgeGraph,
+    confidenceThreshold,
+    dimensions,
+    typeColors,
+    edgeStyles,
+    testMode,
+  ]);
 
   // Initialize and update D3 simulation
   useEffect(() => {
@@ -345,7 +368,14 @@ const KnowledgeGraphVisualization: React.FC<KnowledgeGraphVisualizationProps> = 
     return () => {
       simulation.stop();
     };
-  }, [processGraphData, dimensions, selectedNode, selectedAgentId, edgeStyles, testMode]);
+  }, [
+    processGraphData,
+    dimensions,
+    selectedNode,
+    selectedAgentId,
+    edgeStyles,
+    testMode,
+  ]);
 
   // Handle container resize - disable in test mode
   useEffect(() => {
@@ -504,8 +534,8 @@ const KnowledgeGraphVisualization: React.FC<KnowledgeGraphVisualizationProps> = 
         </div>
 
         {/* Controls Panel - use regular div in test mode instead of motion.div */}
-        {showControls && (
-          testMode ? (
+        {showControls &&
+          (testMode ? (
             <div className="w-[300px] bg-[var(--bg-secondary)] border-l border-[var(--bg-tertiary)] p-4 space-y-4">
               <div>
                 <Label className="text-sm text-[var(--text-primary)]">
@@ -636,13 +666,12 @@ const KnowledgeGraphVisualization: React.FC<KnowledgeGraphVisualizationProps> = 
                 </div>
               </div>
             </motion.div>
-          )
-        )}
+          ))}
       </div>
 
       {/* Selected Node Details - use regular div in test mode */}
-      {selectedNode && (
-        testMode ? (
+      {selectedNode &&
+        (testMode ? (
           <div className="border-t border-[var(--bg-tertiary)] bg-[var(--bg-secondary)] p-4">
             <Card className="bg-[var(--bg-tertiary)] border-[var(--bg-tertiary)]">
               <CardHeader className="pb-2">
@@ -747,8 +776,7 @@ const KnowledgeGraphVisualization: React.FC<KnowledgeGraphVisualizationProps> = 
               </CardContent>
             </Card>
           </motion.div>
-        )
-      )}
+        ))}
     </div>
   );
 };

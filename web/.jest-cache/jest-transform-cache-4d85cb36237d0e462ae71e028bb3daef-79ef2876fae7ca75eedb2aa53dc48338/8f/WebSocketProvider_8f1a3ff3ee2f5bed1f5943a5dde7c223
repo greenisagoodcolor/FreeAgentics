@@ -1,0 +1,2410 @@
+eb247a4ff9b28585f1004cba3d7cbe29
+"use client";
+"use strict";
+
+/* istanbul ignore next */
+function cov_20tpms0eu2() {
+  var path = "/Users/matthewmoroney/builds/FreeAgentics/web/components/WebSocketProvider.tsx";
+  var hash = "c9b25708261455a878397c3f6d531112ac31716c";
+  var global = new Function("return this")();
+  var gcv = "__coverage__";
+  var coverageData = {
+    path: "/Users/matthewmoroney/builds/FreeAgentics/web/components/WebSocketProvider.tsx",
+    statementMap: {
+      "0": {
+        start: {
+          line: 3,
+          column: 0
+        },
+        end: {
+          line: 5,
+          column: 3
+        }
+      },
+      "1": {
+        start: {
+          line: 7,
+          column: 4
+        },
+        end: {
+          line: 10,
+          column: 7
+        }
+      },
+      "2": {
+        start: {
+          line: 7,
+          column: 24
+        },
+        end: {
+          line: 10,
+          column: 7
+        }
+      },
+      "3": {
+        start: {
+          line: 12,
+          column: 0
+        },
+        end: {
+          line: 19,
+          column: 3
+        }
+      },
+      "4": {
+        start: {
+          line: 14,
+          column: 8
+        },
+        end: {
+          line: 14,
+          column: 33
+        }
+      },
+      "5": {
+        start: {
+          line: 17,
+          column: 8
+        },
+        end: {
+          line: 17,
+          column: 24
+        }
+      },
+      "6": {
+        start: {
+          line: 20,
+          column: 20
+        },
+        end: {
+          line: 20,
+          column: 48
+        }
+      },
+      "7": {
+        start: {
+          line: 21,
+          column: 29
+        },
+        end: {
+          line: 21,
+          column: 72
+        }
+      },
+      "8": {
+        start: {
+          line: 22,
+          column: 22
+        },
+        end: {
+          line: 22,
+          column: 54
+        }
+      },
+      "9": {
+        start: {
+          line: 24,
+          column: 4
+        },
+        end: {
+          line: 24,
+          column: 51
+        }
+      },
+      "10": {
+        start: {
+          line: 24,
+          column: 39
+        },
+        end: {
+          line: 24,
+          column: 51
+        }
+      },
+      "11": {
+        start: {
+          line: 25,
+          column: 28
+        },
+        end: {
+          line: 25,
+          column: 41
+        }
+      },
+      "12": {
+        start: {
+          line: 26,
+          column: 27
+        },
+        end: {
+          line: 26,
+          column: 40
+        }
+      },
+      "13": {
+        start: {
+          line: 27,
+          column: 4
+        },
+        end: {
+          line: 29,
+          column: 20
+        }
+      },
+      "14": {
+        start: {
+          line: 28,
+          column: 8
+        },
+        end: {
+          line: 28,
+          column: 66
+        }
+      },
+      "15": {
+        start: {
+          line: 32,
+          column: 4
+        },
+        end: {
+          line: 34,
+          column: 5
+        }
+      },
+      "16": {
+        start: {
+          line: 33,
+          column: 8
+        },
+        end: {
+          line: 33,
+          column: 19
+        }
+      },
+      "17": {
+        start: {
+          line: 35,
+          column: 4
+        },
+        end: {
+          line: 39,
+          column: 5
+        }
+      },
+      "18": {
+        start: {
+          line: 36,
+          column: 8
+        },
+        end: {
+          line: 38,
+          column: 10
+        }
+      },
+      "19": {
+        start: {
+          line: 40,
+          column: 16
+        },
+        end: {
+          line: 40,
+          column: 53
+        }
+      },
+      "20": {
+        start: {
+          line: 41,
+          column: 4
+        },
+        end: {
+          line: 43,
+          column: 5
+        }
+      },
+      "21": {
+        start: {
+          line: 42,
+          column: 8
+        },
+        end: {
+          line: 42,
+          column: 30
+        }
+      },
+      "22": {
+        start: {
+          line: 44,
+          column: 17
+        },
+        end: {
+          line: 46,
+          column: 5
+        }
+      },
+      "23": {
+        start: {
+          line: 47,
+          column: 32
+        },
+        end: {
+          line: 47,
+          column: 88
+        }
+      },
+      "24": {
+        start: {
+          line: 48,
+          column: 4
+        },
+        end: {
+          line: 57,
+          column: 5
+        }
+      },
+      "25": {
+        start: {
+          line: 49,
+          column: 8
+        },
+        end: {
+          line: 56,
+          column: 9
+        }
+      },
+      "26": {
+        start: {
+          line: 50,
+          column: 23
+        },
+        end: {
+          line: 50,
+          column: 95
+        }
+      },
+      "27": {
+        start: {
+          line: 51,
+          column: 12
+        },
+        end: {
+          line: 55,
+          column: 13
+        }
+      },
+      "28": {
+        start: {
+          line: 52,
+          column: 16
+        },
+        end: {
+          line: 52,
+          column: 57
+        }
+      },
+      "29": {
+        start: {
+          line: 54,
+          column: 16
+        },
+        end: {
+          line: 54,
+          column: 39
+        }
+      },
+      "30": {
+        start: {
+          line: 58,
+          column: 4
+        },
+        end: {
+          line: 58,
+          column: 25
+        }
+      },
+      "31": {
+        start: {
+          line: 59,
+          column: 4
+        },
+        end: {
+          line: 61,
+          column: 5
+        }
+      },
+      "32": {
+        start: {
+          line: 60,
+          column: 8
+        },
+        end: {
+          line: 60,
+          column: 31
+        }
+      },
+      "33": {
+        start: {
+          line: 62,
+          column: 4
+        },
+        end: {
+          line: 62,
+          column: 18
+        }
+      },
+      "34": {
+        start: {
+          line: 65,
+          column: 34
+        },
+        end: {
+          line: 65,
+          column: 61
+        }
+      },
+      "35": {
+        start: {
+          line: 66,
+          column: 22
+        },
+        end: {
+          line: 77,
+          column: 6
+        }
+      },
+      "36": {
+        start: {
+          line: 69,
+          column: 12
+        },
+        end: {
+          line: 69,
+          column: 73
+        }
+      },
+      "37": {
+        start: {
+          line: 72,
+          column: 12
+        },
+        end: {
+          line: 72,
+          column: 63
+        }
+      },
+      "38": {
+        start: {
+          line: 75,
+          column: 12
+        },
+        end: {
+          line: 75,
+          column: 66
+        }
+      },
+      "39": {
+        start: {
+          line: 79,
+          column: 4
+        },
+        end: {
+          line: 81,
+          column: 11
+        }
+      },
+      "40": {
+        start: {
+          line: 80,
+          column: 8
+        },
+        end: {
+          line: 80,
+          column: 25
+        }
+      },
+      "41": {
+        start: {
+          line: 83,
+          column: 4
+        },
+        end: {
+          line: 87,
+          column: 5
+        }
+      },
+      "42": {
+        start: {
+          line: 84,
+          column: 8
+        },
+        end: {
+          line: 86,
+          column: 11
+        }
+      },
+      "43": {
+        start: {
+          line: 88,
+          column: 4
+        },
+        end: {
+          line: 102,
+          column: 7
+        }
+      },
+      "44": {
+        start: {
+          line: 105,
+          column: 27
+        },
+        end: {
+          line: 110,
+          column: 5
+        }
+      },
+      "45": {
+        start: {
+          line: 106,
+          column: 8
+        },
+        end: {
+          line: 106,
+          column: 47
+        }
+      },
+      "46": {
+        start: {
+          line: 106,
+          column: 25
+        },
+        end: {
+          line: 106,
+          column: 47
+        }
+      },
+      "47": {
+        start: {
+          line: 107,
+          column: 8
+        },
+        end: {
+          line: 107,
+          column: 49
+        }
+      },
+      "48": {
+        start: {
+          line: 107,
+          column: 26
+        },
+        end: {
+          line: 107,
+          column: 49
+        }
+      },
+      "49": {
+        start: {
+          line: 108,
+          column: 8
+        },
+        end: {
+          line: 108,
+          column: 39
+        }
+      },
+      "50": {
+        start: {
+          line: 108,
+          column: 19
+        },
+        end: {
+          line: 108,
+          column: 39
+        }
+      },
+      "51": {
+        start: {
+          line: 109,
+          column: 8
+        },
+        end: {
+          line: 109,
+          column: 29
+        }
+      },
+      "52": {
+        start: {
+          line: 111,
+          column: 26
+        },
+        end: {
+          line: 116,
+          column: 5
+        }
+      },
+      "53": {
+        start: {
+          line: 112,
+          column: 8
+        },
+        end: {
+          line: 112,
+          column: 79
+        }
+      },
+      "54": {
+        start: {
+          line: 112,
+          column: 25
+        },
+        end: {
+          line: 112,
+          column: 79
+        }
+      },
+      "55": {
+        start: {
+          line: 113,
+          column: 8
+        },
+        end: {
+          line: 113,
+          column: 49
+        }
+      },
+      "56": {
+        start: {
+          line: 113,
+          column: 26
+        },
+        end: {
+          line: 113,
+          column: 49
+        }
+      },
+      "57": {
+        start: {
+          line: 114,
+          column: 8
+        },
+        end: {
+          line: 114,
+          column: 44
+        }
+      },
+      "58": {
+        start: {
+          line: 114,
+          column: 19
+        },
+        end: {
+          line: 114,
+          column: 44
+        }
+      },
+      "59": {
+        start: {
+          line: 115,
+          column: 8
+        },
+        end: {
+          line: 115,
+          column: 30
+        }
+      },
+      "60": {
+        start: {
+          line: 117,
+          column: 4
+        },
+        end: {
+          line: 136,
+          column: 7
+        }
+      },
+      "61": {
+        start: {
+          line: 138,
+          column: 17
+        },
+        end: {
+          line: 138,
+          column: 34
+        }
+      }
+    },
+    fnMap: {
+      "0": {
+        name: "_export",
+        decl: {
+          start: {
+            line: 6,
+            column: 9
+          },
+          end: {
+            line: 6,
+            column: 16
+          }
+        },
+        loc: {
+          start: {
+            line: 6,
+            column: 30
+          },
+          end: {
+            line: 11,
+            column: 1
+          }
+        },
+        line: 6
+      },
+      "1": {
+        name: "(anonymous_1)",
+        decl: {
+          start: {
+            line: 13,
+            column: 23
+          },
+          end: {
+            line: 13,
+            column: 24
+          }
+        },
+        loc: {
+          start: {
+            line: 13,
+            column: 34
+          },
+          end: {
+            line: 15,
+            column: 5
+          }
+        },
+        line: 13
+      },
+      "2": {
+        name: "(anonymous_2)",
+        decl: {
+          start: {
+            line: 16,
+            column: 13
+          },
+          end: {
+            line: 16,
+            column: 14
+          }
+        },
+        loc: {
+          start: {
+            line: 16,
+            column: 24
+          },
+          end: {
+            line: 18,
+            column: 5
+          }
+        },
+        line: 16
+      },
+      "3": {
+        name: "_getRequireWildcardCache",
+        decl: {
+          start: {
+            line: 23,
+            column: 9
+          },
+          end: {
+            line: 23,
+            column: 33
+          }
+        },
+        loc: {
+          start: {
+            line: 23,
+            column: 47
+          },
+          end: {
+            line: 30,
+            column: 1
+          }
+        },
+        line: 23
+      },
+      "4": {
+        name: "(anonymous_4)",
+        decl: {
+          start: {
+            line: 27,
+            column: 39
+          },
+          end: {
+            line: 27,
+            column: 40
+          }
+        },
+        loc: {
+          start: {
+            line: 27,
+            column: 61
+          },
+          end: {
+            line: 29,
+            column: 5
+          }
+        },
+        line: 27
+      },
+      "5": {
+        name: "_interop_require_wildcard",
+        decl: {
+          start: {
+            line: 31,
+            column: 9
+          },
+          end: {
+            line: 31,
+            column: 34
+          }
+        },
+        loc: {
+          start: {
+            line: 31,
+            column: 53
+          },
+          end: {
+            line: 63,
+            column: 1
+          }
+        },
+        line: 31
+      },
+      "6": {
+        name: "WebSocketProvider",
+        decl: {
+          start: {
+            line: 64,
+            column: 9
+          },
+          end: {
+            line: 64,
+            column: 26
+          }
+        },
+        loc: {
+          start: {
+            line: 64,
+            column: 91
+          },
+          end: {
+            line: 103,
+            column: 1
+          }
+        },
+        line: 64
+      },
+      "7": {
+        name: "(anonymous_7)",
+        decl: {
+          start: {
+            line: 68,
+            column: 19
+          },
+          end: {
+            line: 68,
+            column: 20
+          }
+        },
+        loc: {
+          start: {
+            line: 68,
+            column: 23
+          },
+          end: {
+            line: 70,
+            column: 9
+          }
+        },
+        line: 68
+      },
+      "8": {
+        name: "(anonymous_8)",
+        decl: {
+          start: {
+            line: 71,
+            column: 22
+          },
+          end: {
+            line: 71,
+            column: 23
+          }
+        },
+        loc: {
+          start: {
+            line: 71,
+            column: 26
+          },
+          end: {
+            line: 73,
+            column: 9
+          }
+        },
+        line: 71
+      },
+      "9": {
+        name: "(anonymous_9)",
+        decl: {
+          start: {
+            line: 74,
+            column: 17
+          },
+          end: {
+            line: 74,
+            column: 18
+          }
+        },
+        loc: {
+          start: {
+            line: 74,
+            column: 26
+          },
+          end: {
+            line: 76,
+            column: 9
+          }
+        },
+        line: 74
+      },
+      "10": {
+        name: "(anonymous_10)",
+        decl: {
+          start: {
+            line: 79,
+            column: 26
+          },
+          end: {
+            line: 79,
+            column: 27
+          }
+        },
+        loc: {
+          start: {
+            line: 79,
+            column: 30
+          },
+          end: {
+            line: 81,
+            column: 5
+          }
+        },
+        line: 79
+      },
+      "11": {
+        name: "ConnectionStatusIndicator",
+        decl: {
+          start: {
+            line: 104,
+            column: 9
+          },
+          end: {
+            line: 104,
+            column: 34
+          }
+        },
+        loc: {
+          start: {
+            line: 104,
+            column: 101
+          },
+          end: {
+            line: 137,
+            column: 1
+          }
+        },
+        line: 104
+      },
+      "12": {
+        name: "(anonymous_12)",
+        decl: {
+          start: {
+            line: 105,
+            column: 27
+          },
+          end: {
+            line: 105,
+            column: 28
+          }
+        },
+        loc: {
+          start: {
+            line: 105,
+            column: 31
+          },
+          end: {
+            line: 110,
+            column: 5
+          }
+        },
+        line: 105
+      },
+      "13": {
+        name: "(anonymous_13)",
+        decl: {
+          start: {
+            line: 111,
+            column: 26
+          },
+          end: {
+            line: 111,
+            column: 27
+          }
+        },
+        loc: {
+          start: {
+            line: 111,
+            column: 30
+          },
+          end: {
+            line: 116,
+            column: 5
+          }
+        },
+        line: 111
+      }
+    },
+    branchMap: {
+      "0": {
+        loc: {
+          start: {
+            line: 24,
+            column: 4
+          },
+          end: {
+            line: 24,
+            column: 51
+          }
+        },
+        type: "if",
+        locations: [{
+          start: {
+            line: 24,
+            column: 4
+          },
+          end: {
+            line: 24,
+            column: 51
+          }
+        }, {
+          start: {
+            line: undefined,
+            column: undefined
+          },
+          end: {
+            line: undefined,
+            column: undefined
+          }
+        }],
+        line: 24
+      },
+      "1": {
+        loc: {
+          start: {
+            line: 28,
+            column: 15
+          },
+          end: {
+            line: 28,
+            column: 65
+          }
+        },
+        type: "cond-expr",
+        locations: [{
+          start: {
+            line: 28,
+            column: 29
+          },
+          end: {
+            line: 28,
+            column: 45
+          }
+        }, {
+          start: {
+            line: 28,
+            column: 48
+          },
+          end: {
+            line: 28,
+            column: 65
+          }
+        }],
+        line: 28
+      },
+      "2": {
+        loc: {
+          start: {
+            line: 32,
+            column: 4
+          },
+          end: {
+            line: 34,
+            column: 5
+          }
+        },
+        type: "if",
+        locations: [{
+          start: {
+            line: 32,
+            column: 4
+          },
+          end: {
+            line: 34,
+            column: 5
+          }
+        }, {
+          start: {
+            line: undefined,
+            column: undefined
+          },
+          end: {
+            line: undefined,
+            column: undefined
+          }
+        }],
+        line: 32
+      },
+      "3": {
+        loc: {
+          start: {
+            line: 32,
+            column: 8
+          },
+          end: {
+            line: 32,
+            column: 45
+          }
+        },
+        type: "binary-expr",
+        locations: [{
+          start: {
+            line: 32,
+            column: 8
+          },
+          end: {
+            line: 32,
+            column: 20
+          }
+        }, {
+          start: {
+            line: 32,
+            column: 24
+          },
+          end: {
+            line: 32,
+            column: 27
+          }
+        }, {
+          start: {
+            line: 32,
+            column: 31
+          },
+          end: {
+            line: 32,
+            column: 45
+          }
+        }],
+        line: 32
+      },
+      "4": {
+        loc: {
+          start: {
+            line: 35,
+            column: 4
+          },
+          end: {
+            line: 39,
+            column: 5
+          }
+        },
+        type: "if",
+        locations: [{
+          start: {
+            line: 35,
+            column: 4
+          },
+          end: {
+            line: 39,
+            column: 5
+          }
+        }, {
+          start: {
+            line: undefined,
+            column: undefined
+          },
+          end: {
+            line: undefined,
+            column: undefined
+          }
+        }],
+        line: 35
+      },
+      "5": {
+        loc: {
+          start: {
+            line: 35,
+            column: 8
+          },
+          end: {
+            line: 35,
+            column: 76
+          }
+        },
+        type: "binary-expr",
+        locations: [{
+          start: {
+            line: 35,
+            column: 8
+          },
+          end: {
+            line: 35,
+            column: 20
+          }
+        }, {
+          start: {
+            line: 35,
+            column: 24
+          },
+          end: {
+            line: 35,
+            column: 47
+          }
+        }, {
+          start: {
+            line: 35,
+            column: 51
+          },
+          end: {
+            line: 35,
+            column: 76
+          }
+        }],
+        line: 35
+      },
+      "6": {
+        loc: {
+          start: {
+            line: 41,
+            column: 4
+          },
+          end: {
+            line: 43,
+            column: 5
+          }
+        },
+        type: "if",
+        locations: [{
+          start: {
+            line: 41,
+            column: 4
+          },
+          end: {
+            line: 43,
+            column: 5
+          }
+        }, {
+          start: {
+            line: undefined,
+            column: undefined
+          },
+          end: {
+            line: undefined,
+            column: undefined
+          }
+        }],
+        line: 41
+      },
+      "7": {
+        loc: {
+          start: {
+            line: 41,
+            column: 8
+          },
+          end: {
+            line: 41,
+            column: 31
+          }
+        },
+        type: "binary-expr",
+        locations: [{
+          start: {
+            line: 41,
+            column: 8
+          },
+          end: {
+            line: 41,
+            column: 13
+          }
+        }, {
+          start: {
+            line: 41,
+            column: 17
+          },
+          end: {
+            line: 41,
+            column: 31
+          }
+        }],
+        line: 41
+      },
+      "8": {
+        loc: {
+          start: {
+            line: 47,
+            column: 32
+          },
+          end: {
+            line: 47,
+            column: 88
+          }
+        },
+        type: "binary-expr",
+        locations: [{
+          start: {
+            line: 47,
+            column: 32
+          },
+          end: {
+            line: 47,
+            column: 53
+          }
+        }, {
+          start: {
+            line: 47,
+            column: 57
+          },
+          end: {
+            line: 47,
+            column: 88
+          }
+        }],
+        line: 47
+      },
+      "9": {
+        loc: {
+          start: {
+            line: 49,
+            column: 8
+          },
+          end: {
+            line: 56,
+            column: 9
+          }
+        },
+        type: "if",
+        locations: [{
+          start: {
+            line: 49,
+            column: 8
+          },
+          end: {
+            line: 56,
+            column: 9
+          }
+        }, {
+          start: {
+            line: undefined,
+            column: undefined
+          },
+          end: {
+            line: undefined,
+            column: undefined
+          }
+        }],
+        line: 49
+      },
+      "10": {
+        loc: {
+          start: {
+            line: 49,
+            column: 12
+          },
+          end: {
+            line: 49,
+            column: 79
+          }
+        },
+        type: "binary-expr",
+        locations: [{
+          start: {
+            line: 49,
+            column: 12
+          },
+          end: {
+            line: 49,
+            column: 29
+          }
+        }, {
+          start: {
+            line: 49,
+            column: 33
+          },
+          end: {
+            line: 49,
+            column: 79
+          }
+        }],
+        line: 49
+      },
+      "11": {
+        loc: {
+          start: {
+            line: 50,
+            column: 23
+          },
+          end: {
+            line: 50,
+            column: 95
+          }
+        },
+        type: "cond-expr",
+        locations: [{
+          start: {
+            line: 50,
+            column: 47
+          },
+          end: {
+            line: 50,
+            column: 88
+          }
+        }, {
+          start: {
+            line: 50,
+            column: 91
+          },
+          end: {
+            line: 50,
+            column: 95
+          }
+        }],
+        line: 50
+      },
+      "12": {
+        loc: {
+          start: {
+            line: 51,
+            column: 12
+          },
+          end: {
+            line: 55,
+            column: 13
+          }
+        },
+        type: "if",
+        locations: [{
+          start: {
+            line: 51,
+            column: 12
+          },
+          end: {
+            line: 55,
+            column: 13
+          }
+        }, {
+          start: {
+            line: 53,
+            column: 19
+          },
+          end: {
+            line: 55,
+            column: 13
+          }
+        }],
+        line: 51
+      },
+      "13": {
+        loc: {
+          start: {
+            line: 51,
+            column: 16
+          },
+          end: {
+            line: 51,
+            column: 46
+          }
+        },
+        type: "binary-expr",
+        locations: [{
+          start: {
+            line: 51,
+            column: 16
+          },
+          end: {
+            line: 51,
+            column: 20
+          }
+        }, {
+          start: {
+            line: 51,
+            column: 25
+          },
+          end: {
+            line: 51,
+            column: 33
+          }
+        }, {
+          start: {
+            line: 51,
+            column: 37
+          },
+          end: {
+            line: 51,
+            column: 45
+          }
+        }],
+        line: 51
+      },
+      "14": {
+        loc: {
+          start: {
+            line: 59,
+            column: 4
+          },
+          end: {
+            line: 61,
+            column: 5
+          }
+        },
+        type: "if",
+        locations: [{
+          start: {
+            line: 59,
+            column: 4
+          },
+          end: {
+            line: 61,
+            column: 5
+          }
+        }, {
+          start: {
+            line: undefined,
+            column: undefined
+          },
+          end: {
+            line: undefined,
+            column: undefined
+          }
+        }],
+        line: 59
+      },
+      "15": {
+        loc: {
+          start: {
+            line: 64,
+            column: 39
+          },
+          end: {
+            line: 64,
+            column: 57
+          }
+        },
+        type: "default-arg",
+        locations: [{
+          start: {
+            line: 64,
+            column: 53
+          },
+          end: {
+            line: 64,
+            column: 57
+          }
+        }],
+        line: 64
+      },
+      "16": {
+        loc: {
+          start: {
+            line: 64,
+            column: 59
+          },
+          end: {
+            line: 64,
+            column: 87
+          }
+        },
+        type: "default-arg",
+        locations: [{
+          start: {
+            line: 64,
+            column: 82
+          },
+          end: {
+            line: 64,
+            column: 87
+          }
+        }],
+        line: 64
+      },
+      "17": {
+        loc: {
+          start: {
+            line: 83,
+            column: 4
+          },
+          end: {
+            line: 87,
+            column: 5
+          }
+        },
+        type: "if",
+        locations: [{
+          start: {
+            line: 83,
+            column: 4
+          },
+          end: {
+            line: 87,
+            column: 5
+          }
+        }, {
+          start: {
+            line: undefined,
+            column: undefined
+          },
+          end: {
+            line: undefined,
+            column: undefined
+          }
+        }],
+        line: 83
+      },
+      "18": {
+        loc: {
+          start: {
+            line: 90,
+            column: 12
+          },
+          end: {
+            line: 99,
+            column: 14
+          }
+        },
+        type: "binary-expr",
+        locations: [{
+          start: {
+            line: 90,
+            column: 12
+          },
+          end: {
+            line: 90,
+            column: 32
+          }
+        }, {
+          start: {
+            line: 90,
+            column: 50
+          },
+          end: {
+            line: 99,
+            column: 14
+          }
+        }],
+        line: 90
+      },
+      "19": {
+        loc: {
+          start: {
+            line: 106,
+            column: 8
+          },
+          end: {
+            line: 106,
+            column: 47
+          }
+        },
+        type: "if",
+        locations: [{
+          start: {
+            line: 106,
+            column: 8
+          },
+          end: {
+            line: 106,
+            column: 47
+          }
+        }, {
+          start: {
+            line: undefined,
+            column: undefined
+          },
+          end: {
+            line: undefined,
+            column: undefined
+          }
+        }],
+        line: 106
+      },
+      "20": {
+        loc: {
+          start: {
+            line: 107,
+            column: 8
+          },
+          end: {
+            line: 107,
+            column: 49
+          }
+        },
+        type: "if",
+        locations: [{
+          start: {
+            line: 107,
+            column: 8
+          },
+          end: {
+            line: 107,
+            column: 49
+          }
+        }, {
+          start: {
+            line: undefined,
+            column: undefined
+          },
+          end: {
+            line: undefined,
+            column: undefined
+          }
+        }],
+        line: 107
+      },
+      "21": {
+        loc: {
+          start: {
+            line: 108,
+            column: 8
+          },
+          end: {
+            line: 108,
+            column: 39
+          }
+        },
+        type: "if",
+        locations: [{
+          start: {
+            line: 108,
+            column: 8
+          },
+          end: {
+            line: 108,
+            column: 39
+          }
+        }, {
+          start: {
+            line: undefined,
+            column: undefined
+          },
+          end: {
+            line: undefined,
+            column: undefined
+          }
+        }],
+        line: 108
+      },
+      "22": {
+        loc: {
+          start: {
+            line: 112,
+            column: 8
+          },
+          end: {
+            line: 112,
+            column: 79
+          }
+        },
+        type: "if",
+        locations: [{
+          start: {
+            line: 112,
+            column: 8
+          },
+          end: {
+            line: 112,
+            column: 79
+          }
+        }, {
+          start: {
+            line: undefined,
+            column: undefined
+          },
+          end: {
+            line: undefined,
+            column: undefined
+          }
+        }],
+        line: 112
+      },
+      "23": {
+        loc: {
+          start: {
+            line: 112,
+            column: 45
+          },
+          end: {
+            line: 112,
+            column: 76
+          }
+        },
+        type: "cond-expr",
+        locations: [{
+          start: {
+            line: 112,
+            column: 55
+          },
+          end: {
+            line: 112,
+            column: 71
+          }
+        }, {
+          start: {
+            line: 112,
+            column: 74
+          },
+          end: {
+            line: 112,
+            column: 76
+          }
+        }],
+        line: 112
+      },
+      "24": {
+        loc: {
+          start: {
+            line: 113,
+            column: 8
+          },
+          end: {
+            line: 113,
+            column: 49
+          }
+        },
+        type: "if",
+        locations: [{
+          start: {
+            line: 113,
+            column: 8
+          },
+          end: {
+            line: 113,
+            column: 49
+          }
+        }, {
+          start: {
+            line: undefined,
+            column: undefined
+          },
+          end: {
+            line: undefined,
+            column: undefined
+          }
+        }],
+        line: 113
+      },
+      "25": {
+        loc: {
+          start: {
+            line: 114,
+            column: 8
+          },
+          end: {
+            line: 114,
+            column: 44
+          }
+        },
+        type: "if",
+        locations: [{
+          start: {
+            line: 114,
+            column: 8
+          },
+          end: {
+            line: 114,
+            column: 44
+          }
+        }, {
+          start: {
+            line: undefined,
+            column: undefined
+          },
+          end: {
+            line: undefined,
+            column: undefined
+          }
+        }],
+        line: 114
+      },
+      "26": {
+        loc: {
+          start: {
+            line: 127,
+            column: 12
+          },
+          end: {
+            line: 134,
+            column: 14
+          }
+        },
+        type: "binary-expr",
+        locations: [{
+          start: {
+            line: 127,
+            column: 12
+          },
+          end: {
+            line: 127,
+            column: 33
+          }
+        }, {
+          start: {
+            line: 127,
+            column: 51
+          },
+          end: {
+            line: 134,
+            column: 14
+          }
+        }],
+        line: 127
+      }
+    },
+    s: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0,
+      "9": 0,
+      "10": 0,
+      "11": 0,
+      "12": 0,
+      "13": 0,
+      "14": 0,
+      "15": 0,
+      "16": 0,
+      "17": 0,
+      "18": 0,
+      "19": 0,
+      "20": 0,
+      "21": 0,
+      "22": 0,
+      "23": 0,
+      "24": 0,
+      "25": 0,
+      "26": 0,
+      "27": 0,
+      "28": 0,
+      "29": 0,
+      "30": 0,
+      "31": 0,
+      "32": 0,
+      "33": 0,
+      "34": 0,
+      "35": 0,
+      "36": 0,
+      "37": 0,
+      "38": 0,
+      "39": 0,
+      "40": 0,
+      "41": 0,
+      "42": 0,
+      "43": 0,
+      "44": 0,
+      "45": 0,
+      "46": 0,
+      "47": 0,
+      "48": 0,
+      "49": 0,
+      "50": 0,
+      "51": 0,
+      "52": 0,
+      "53": 0,
+      "54": 0,
+      "55": 0,
+      "56": 0,
+      "57": 0,
+      "58": 0,
+      "59": 0,
+      "60": 0,
+      "61": 0
+    },
+    f: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0,
+      "9": 0,
+      "10": 0,
+      "11": 0,
+      "12": 0,
+      "13": 0
+    },
+    b: {
+      "0": [0, 0],
+      "1": [0, 0],
+      "2": [0, 0],
+      "3": [0, 0, 0],
+      "4": [0, 0],
+      "5": [0, 0, 0],
+      "6": [0, 0],
+      "7": [0, 0],
+      "8": [0, 0],
+      "9": [0, 0],
+      "10": [0, 0],
+      "11": [0, 0],
+      "12": [0, 0],
+      "13": [0, 0, 0],
+      "14": [0, 0],
+      "15": [0],
+      "16": [0],
+      "17": [0, 0],
+      "18": [0, 0],
+      "19": [0, 0],
+      "20": [0, 0],
+      "21": [0, 0],
+      "22": [0, 0],
+      "23": [0, 0],
+      "24": [0, 0],
+      "25": [0, 0],
+      "26": [0, 0]
+    },
+    inputSourceMap: {
+      version: 3,
+      sources: ["/Users/matthewmoroney/builds/FreeAgentics/web/components/WebSocketProvider.tsx"],
+      sourcesContent: ["\"use client\";\n\nimport React, { useEffect, useState } from \"react\";\nimport { useWebSocket } from \"@/hooks/useWebSocket\";\n\ninterface WebSocketProviderProps {\n  children: React.ReactNode;\n  autoConnect?: boolean;\n  showConnectionStatus?: boolean;\n}\n\nexport function WebSocketProvider({\n  children,\n  autoConnect = true,\n  showConnectionStatus = false,\n}: WebSocketProviderProps) {\n  const [mounted, setMounted] = useState(false);\n\n  const websocket = useWebSocket({\n    autoConnect,\n    onConnect: () => {\n      console.log(\"\uD83D\uDFE2 WebSocket connected successfully\");\n    },\n    onDisconnect: () => {\n      console.log(\"\uD83D\uDD34 WebSocket disconnected\");\n    },\n    onError: (error) => {\n      console.error(\"\uD83D\uDFE0 WebSocket error:\", error);\n    },\n  });\n\n  // Handle client-side mounting\n  useEffect(() => {\n    setMounted(true);\n  }, []);\n\n  // Don't render on server side\n  if (!mounted) {\n    return <>{children}</>;\n  }\n\n  return (\n    <>\n      {showConnectionStatus && (\n        <div className=\"fixed top-4 right-4 z-50\">\n          <ConnectionStatusIndicator\n            isConnected={websocket.isConnected}\n            isConnecting={websocket.isConnecting}\n            error={websocket.error}\n            latency={websocket.latency}\n            reconnectAttempts={websocket.reconnectAttempts}\n          />\n        </div>\n      )}\n      {children}\n    </>\n  );\n}\n\ninterface ConnectionStatusIndicatorProps {\n  isConnected: boolean;\n  isConnecting: boolean;\n  error: string | null;\n  latency: number | null;\n  reconnectAttempts: number;\n}\n\nfunction ConnectionStatusIndicator({\n  isConnected,\n  isConnecting,\n  error,\n  latency,\n  reconnectAttempts,\n}: ConnectionStatusIndicatorProps) {\n  const getStatusColor = () => {\n    if (isConnected) return \"bg-green-500\";\n    if (isConnecting) return \"bg-yellow-500\";\n    if (error) return \"bg-red-500\";\n    return \"bg-gray-500\";\n  };\n\n  const getStatusText = () => {\n    if (isConnected) return `Connected ${latency ? `(${latency}ms)` : \"\"}`;\n    if (isConnecting) return \"Connecting...\";\n    if (error) return `Error: ${error}`;\n    return \"Disconnected\";\n  };\n\n  return (\n    <div className=\"flex items-center space-x-2 px-3 py-2 bg-gray-900 rounded-lg border border-gray-700 text-sm\">\n      <div className={`w-2 h-2 rounded-full ${getStatusColor()}`} />\n      <span className=\"text-gray-200\">{getStatusText()}</span>\n      {reconnectAttempts > 0 && (\n        <span className=\"text-yellow-400 text-xs\">\n          (Retry {reconnectAttempts})\n        </span>\n      )}\n    </div>\n  );\n}\n\nexport default WebSocketProvider;\n"],
+      names: ["WebSocketProvider", "children", "autoConnect", "showConnectionStatus", "mounted", "setMounted", "useState", "websocket", "useWebSocket", "onConnect", "console", "log", "onDisconnect", "onError", "error", "useEffect", "div", "className", "ConnectionStatusIndicator", "isConnected", "isConnecting", "latency", "reconnectAttempts", "getStatusColor", "getStatusText", "span"],
+      mappings: "AAAA;;;;;;;;;;;;IAWgBA,iBAAiB;eAAjBA;;IA0FhB,OAAiC;eAAjC;;;;+DAnG2C;8BACd;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AAQtB,SAASA,kBAAkB,EAChCC,QAAQ,EACRC,cAAc,IAAI,EAClBC,uBAAuB,KAAK,EACL;IACvB,MAAM,CAACC,SAASC,WAAW,GAAGC,IAAAA,eAAQ,EAAC;IAEvC,MAAMC,YAAYC,IAAAA,0BAAY,EAAC;QAC7BN;QACAO,WAAW;YACTC,QAAQC,GAAG,CAAC;QACd;QACAC,cAAc;YACZF,QAAQC,GAAG,CAAC;QACd;QACAE,SAAS,CAACC;YACRJ,QAAQI,KAAK,CAAC,iCAAuBA;QACvC;IACF;IAEA,8BAA8B;IAC9BC,IAAAA,gBAAS,EAAC;QACRV,WAAW;IACb,GAAG,EAAE;IAEL,8BAA8B;IAC9B,IAAI,CAACD,SAAS;QACZ,qBAAO;sBAAGH;;IACZ;IAEA,qBACE;;YACGE,sCACC,qBAACa;gBAAIC,WAAU;0BACb,cAAA,qBAACC;oBACCC,aAAaZ,UAAUY,WAAW;oBAClCC,cAAcb,UAAUa,YAAY;oBACpCN,OAAOP,UAAUO,KAAK;oBACtBO,SAASd,UAAUc,OAAO;oBAC1BC,mBAAmBf,UAAUe,iBAAiB;;;YAInDrB;;;AAGP;AAUA,SAASiB,0BAA0B,EACjCC,WAAW,EACXC,YAAY,EACZN,KAAK,EACLO,OAAO,EACPC,iBAAiB,EACc;IAC/B,MAAMC,iBAAiB;QACrB,IAAIJ,aAAa,OAAO;QACxB,IAAIC,cAAc,OAAO;QACzB,IAAIN,OAAO,OAAO;QAClB,OAAO;IACT;IAEA,MAAMU,gBAAgB;QACpB,IAAIL,aAAa,OAAO,CAAC,UAAU,EAAEE,UAAU,CAAC,CAAC,EAAEA,QAAQ,GAAG,CAAC,GAAG,GAAG,CAAC;QACtE,IAAID,cAAc,OAAO;QACzB,IAAIN,OAAO,OAAO,CAAC,OAAO,EAAEA,MAAM,CAAC;QACnC,OAAO;IACT;IAEA,qBACE,sBAACE;QAAIC,WAAU;;0BACb,qBAACD;gBAAIC,WAAW,CAAC,qBAAqB,EAAEM,iBAAiB,CAAC;;0BAC1D,qBAACE;gBAAKR,WAAU;0BAAiBO;;YAChCF,oBAAoB,mBACnB,sBAACG;gBAAKR,WAAU;;oBAA0B;oBAChCK;oBAAkB;;;;;AAKpC;MAEA,WAAetB"
+    },
+    _coverageSchema: "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+    hash: "c9b25708261455a878397c3f6d531112ac31716c"
+  };
+  var coverage = global[gcv] || (global[gcv] = {});
+  if (!coverage[path] || coverage[path].hash !== hash) {
+    coverage[path] = coverageData;
+  }
+  var actualCoverage = coverage[path];
+  {
+    // @ts-ignore
+    cov_20tpms0eu2 = function () {
+      return actualCoverage;
+    };
+  }
+  return actualCoverage;
+}
+cov_20tpms0eu2();
+cov_20tpms0eu2().s[0]++;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+function _export(target, all) {
+  /* istanbul ignore next */
+  cov_20tpms0eu2().f[0]++;
+  cov_20tpms0eu2().s[1]++;
+  for (var name in all) {
+    /* istanbul ignore next */
+    cov_20tpms0eu2().s[2]++;
+    Object.defineProperty(target, name, {
+      enumerable: true,
+      get: all[name]
+    });
+  }
+}
+/* istanbul ignore next */
+cov_20tpms0eu2().s[3]++;
+_export(exports, {
+  WebSocketProvider: function () {
+    /* istanbul ignore next */
+    cov_20tpms0eu2().f[1]++;
+    cov_20tpms0eu2().s[4]++;
+    return WebSocketProvider;
+  },
+  default: function () {
+    /* istanbul ignore next */
+    cov_20tpms0eu2().f[2]++;
+    cov_20tpms0eu2().s[5]++;
+    return _default;
+  }
+});
+const _jsxruntime =
+/* istanbul ignore next */
+(cov_20tpms0eu2().s[6]++, require("react/jsx-runtime"));
+const _react =
+/* istanbul ignore next */
+(/*#__PURE__*/cov_20tpms0eu2().s[7]++, _interop_require_wildcard(require("react")));
+const _useWebSocket =
+/* istanbul ignore next */
+(cov_20tpms0eu2().s[8]++, require("../hooks/useWebSocket"));
+function _getRequireWildcardCache(nodeInterop) {
+  /* istanbul ignore next */
+  cov_20tpms0eu2().f[3]++;
+  cov_20tpms0eu2().s[9]++;
+  if (typeof WeakMap !== "function") {
+    /* istanbul ignore next */
+    cov_20tpms0eu2().b[0][0]++;
+    cov_20tpms0eu2().s[10]++;
+    return null;
+  } else
+  /* istanbul ignore next */
+  {
+    cov_20tpms0eu2().b[0][1]++;
+  }
+  var cacheBabelInterop =
+  /* istanbul ignore next */
+  (cov_20tpms0eu2().s[11]++, new WeakMap());
+  var cacheNodeInterop =
+  /* istanbul ignore next */
+  (cov_20tpms0eu2().s[12]++, new WeakMap());
+  /* istanbul ignore next */
+  cov_20tpms0eu2().s[13]++;
+  return (_getRequireWildcardCache = function (nodeInterop) {
+    /* istanbul ignore next */
+    cov_20tpms0eu2().f[4]++;
+    cov_20tpms0eu2().s[14]++;
+    return nodeInterop ?
+    /* istanbul ignore next */
+    (cov_20tpms0eu2().b[1][0]++, cacheNodeInterop) :
+    /* istanbul ignore next */
+    (cov_20tpms0eu2().b[1][1]++, cacheBabelInterop);
+  })(nodeInterop);
+}
+function _interop_require_wildcard(obj, nodeInterop) {
+  /* istanbul ignore next */
+  cov_20tpms0eu2().f[5]++;
+  cov_20tpms0eu2().s[15]++;
+  if (
+  /* istanbul ignore next */
+  (cov_20tpms0eu2().b[3][0]++, !nodeInterop) &&
+  /* istanbul ignore next */
+  (cov_20tpms0eu2().b[3][1]++, obj) &&
+  /* istanbul ignore next */
+  (cov_20tpms0eu2().b[3][2]++, obj.__esModule)) {
+    /* istanbul ignore next */
+    cov_20tpms0eu2().b[2][0]++;
+    cov_20tpms0eu2().s[16]++;
+    return obj;
+  } else
+  /* istanbul ignore next */
+  {
+    cov_20tpms0eu2().b[2][1]++;
+  }
+  cov_20tpms0eu2().s[17]++;
+  if (
+  /* istanbul ignore next */
+  (cov_20tpms0eu2().b[5][0]++, obj === null) ||
+  /* istanbul ignore next */
+  (cov_20tpms0eu2().b[5][1]++, typeof obj !== "object") &&
+  /* istanbul ignore next */
+  (cov_20tpms0eu2().b[5][2]++, typeof obj !== "function")) {
+    /* istanbul ignore next */
+    cov_20tpms0eu2().b[4][0]++;
+    cov_20tpms0eu2().s[18]++;
+    return {
+      default: obj
+    };
+  } else
+  /* istanbul ignore next */
+  {
+    cov_20tpms0eu2().b[4][1]++;
+  }
+  var cache =
+  /* istanbul ignore next */
+  (cov_20tpms0eu2().s[19]++, _getRequireWildcardCache(nodeInterop));
+  /* istanbul ignore next */
+  cov_20tpms0eu2().s[20]++;
+  if (
+  /* istanbul ignore next */
+  (cov_20tpms0eu2().b[7][0]++, cache) &&
+  /* istanbul ignore next */
+  (cov_20tpms0eu2().b[7][1]++, cache.has(obj))) {
+    /* istanbul ignore next */
+    cov_20tpms0eu2().b[6][0]++;
+    cov_20tpms0eu2().s[21]++;
+    return cache.get(obj);
+  } else
+  /* istanbul ignore next */
+  {
+    cov_20tpms0eu2().b[6][1]++;
+  }
+  var newObj =
+  /* istanbul ignore next */
+  (cov_20tpms0eu2().s[22]++, {
+    __proto__: null
+  });
+  var hasPropertyDescriptor =
+  /* istanbul ignore next */
+  (cov_20tpms0eu2().s[23]++,
+  /* istanbul ignore next */
+  (cov_20tpms0eu2().b[8][0]++, Object.defineProperty) &&
+  /* istanbul ignore next */
+  (cov_20tpms0eu2().b[8][1]++, Object.getOwnPropertyDescriptor));
+  /* istanbul ignore next */
+  cov_20tpms0eu2().s[24]++;
+  for (var key in obj) {
+    /* istanbul ignore next */
+    cov_20tpms0eu2().s[25]++;
+    if (
+    /* istanbul ignore next */
+    (cov_20tpms0eu2().b[10][0]++, key !== "default") &&
+    /* istanbul ignore next */
+    (cov_20tpms0eu2().b[10][1]++, Object.prototype.hasOwnProperty.call(obj, key))) {
+      /* istanbul ignore next */
+      cov_20tpms0eu2().b[9][0]++;
+      var desc =
+      /* istanbul ignore next */
+      (cov_20tpms0eu2().s[26]++, hasPropertyDescriptor ?
+      /* istanbul ignore next */
+      (cov_20tpms0eu2().b[11][0]++, Object.getOwnPropertyDescriptor(obj, key)) :
+      /* istanbul ignore next */
+      (cov_20tpms0eu2().b[11][1]++, null));
+      /* istanbul ignore next */
+      cov_20tpms0eu2().s[27]++;
+      if (
+      /* istanbul ignore next */
+      (cov_20tpms0eu2().b[13][0]++, desc) && (
+      /* istanbul ignore next */
+      (cov_20tpms0eu2().b[13][1]++, desc.get) ||
+      /* istanbul ignore next */
+      (cov_20tpms0eu2().b[13][2]++, desc.set))) {
+        /* istanbul ignore next */
+        cov_20tpms0eu2().b[12][0]++;
+        cov_20tpms0eu2().s[28]++;
+        Object.defineProperty(newObj, key, desc);
+      } else {
+        /* istanbul ignore next */
+        cov_20tpms0eu2().b[12][1]++;
+        cov_20tpms0eu2().s[29]++;
+        newObj[key] = obj[key];
+      }
+    } else
+    /* istanbul ignore next */
+    {
+      cov_20tpms0eu2().b[9][1]++;
+    }
+  }
+  /* istanbul ignore next */
+  cov_20tpms0eu2().s[30]++;
+  newObj.default = obj;
+  /* istanbul ignore next */
+  cov_20tpms0eu2().s[31]++;
+  if (cache) {
+    /* istanbul ignore next */
+    cov_20tpms0eu2().b[14][0]++;
+    cov_20tpms0eu2().s[32]++;
+    cache.set(obj, newObj);
+  } else
+  /* istanbul ignore next */
+  {
+    cov_20tpms0eu2().b[14][1]++;
+  }
+  cov_20tpms0eu2().s[33]++;
+  return newObj;
+}
+function WebSocketProvider({
+  children,
+  autoConnect =
+  /* istanbul ignore next */
+  (cov_20tpms0eu2().b[15][0]++, true),
+  showConnectionStatus =
+  /* istanbul ignore next */
+  (cov_20tpms0eu2().b[16][0]++, false)
+}) {
+  /* istanbul ignore next */
+  cov_20tpms0eu2().f[6]++;
+  const [mounted, setMounted] =
+  /* istanbul ignore next */
+  (cov_20tpms0eu2().s[34]++, (0, _react.useState)(false));
+  const websocket =
+  /* istanbul ignore next */
+  (cov_20tpms0eu2().s[35]++, (0, _useWebSocket.useWebSocket)({
+    autoConnect,
+    onConnect: () => {
+      /* istanbul ignore next */
+      cov_20tpms0eu2().f[7]++;
+      cov_20tpms0eu2().s[36]++;
+      console.log("\uD83D\uDFE2 WebSocket connected successfully");
+    },
+    onDisconnect: () => {
+      /* istanbul ignore next */
+      cov_20tpms0eu2().f[8]++;
+      cov_20tpms0eu2().s[37]++;
+      console.log("\uD83D\uDD34 WebSocket disconnected");
+    },
+    onError: error => {
+      /* istanbul ignore next */
+      cov_20tpms0eu2().f[9]++;
+      cov_20tpms0eu2().s[38]++;
+      console.error("\uD83D\uDFE0 WebSocket error:", error);
+    }
+  }));
+  // Handle client-side mounting
+  /* istanbul ignore next */
+  cov_20tpms0eu2().s[39]++;
+  (0, _react.useEffect)(() => {
+    /* istanbul ignore next */
+    cov_20tpms0eu2().f[10]++;
+    cov_20tpms0eu2().s[40]++;
+    setMounted(true);
+  }, []);
+  // Don't render on server side
+  /* istanbul ignore next */
+  cov_20tpms0eu2().s[41]++;
+  if (!mounted) {
+    /* istanbul ignore next */
+    cov_20tpms0eu2().b[17][0]++;
+    cov_20tpms0eu2().s[42]++;
+    return /*#__PURE__*/(0, _jsxruntime.jsx)(_jsxruntime.Fragment, {
+      children: children
+    });
+  } else
+  /* istanbul ignore next */
+  {
+    cov_20tpms0eu2().b[17][1]++;
+  }
+  cov_20tpms0eu2().s[43]++;
+  return /*#__PURE__*/(0, _jsxruntime.jsxs)(_jsxruntime.Fragment, {
+    children: [
+    /* istanbul ignore next */
+    (cov_20tpms0eu2().b[18][0]++, showConnectionStatus) &&
+    /* istanbul ignore next */
+    (cov_20tpms0eu2().b[18][1]++, /*#__PURE__*/(0, _jsxruntime.jsx)("div", {
+      className: "fixed top-4 right-4 z-50",
+      children: /*#__PURE__*/(0, _jsxruntime.jsx)(ConnectionStatusIndicator, {
+        isConnected: websocket.isConnected,
+        isConnecting: websocket.isConnecting,
+        error: websocket.error,
+        latency: websocket.latency,
+        reconnectAttempts: websocket.reconnectAttempts
+      })
+    })), children]
+  });
+}
+function ConnectionStatusIndicator({
+  isConnected,
+  isConnecting,
+  error,
+  latency,
+  reconnectAttempts
+}) {
+  /* istanbul ignore next */
+  cov_20tpms0eu2().f[11]++;
+  cov_20tpms0eu2().s[44]++;
+  const getStatusColor = () => {
+    /* istanbul ignore next */
+    cov_20tpms0eu2().f[12]++;
+    cov_20tpms0eu2().s[45]++;
+    if (isConnected) {
+      /* istanbul ignore next */
+      cov_20tpms0eu2().b[19][0]++;
+      cov_20tpms0eu2().s[46]++;
+      return "bg-green-500";
+    } else
+    /* istanbul ignore next */
+    {
+      cov_20tpms0eu2().b[19][1]++;
+    }
+    cov_20tpms0eu2().s[47]++;
+    if (isConnecting) {
+      /* istanbul ignore next */
+      cov_20tpms0eu2().b[20][0]++;
+      cov_20tpms0eu2().s[48]++;
+      return "bg-yellow-500";
+    } else
+    /* istanbul ignore next */
+    {
+      cov_20tpms0eu2().b[20][1]++;
+    }
+    cov_20tpms0eu2().s[49]++;
+    if (error) {
+      /* istanbul ignore next */
+      cov_20tpms0eu2().b[21][0]++;
+      cov_20tpms0eu2().s[50]++;
+      return "bg-red-500";
+    } else
+    /* istanbul ignore next */
+    {
+      cov_20tpms0eu2().b[21][1]++;
+    }
+    cov_20tpms0eu2().s[51]++;
+    return "bg-gray-500";
+  };
+  /* istanbul ignore next */
+  cov_20tpms0eu2().s[52]++;
+  const getStatusText = () => {
+    /* istanbul ignore next */
+    cov_20tpms0eu2().f[13]++;
+    cov_20tpms0eu2().s[53]++;
+    if (isConnected) {
+      /* istanbul ignore next */
+      cov_20tpms0eu2().b[22][0]++;
+      cov_20tpms0eu2().s[54]++;
+      return `Connected ${latency ?
+      /* istanbul ignore next */
+      (cov_20tpms0eu2().b[23][0]++, `(${latency}ms)`) :
+      /* istanbul ignore next */
+      (cov_20tpms0eu2().b[23][1]++, "")}`;
+    } else
+    /* istanbul ignore next */
+    {
+      cov_20tpms0eu2().b[22][1]++;
+    }
+    cov_20tpms0eu2().s[55]++;
+    if (isConnecting) {
+      /* istanbul ignore next */
+      cov_20tpms0eu2().b[24][0]++;
+      cov_20tpms0eu2().s[56]++;
+      return "Connecting...";
+    } else
+    /* istanbul ignore next */
+    {
+      cov_20tpms0eu2().b[24][1]++;
+    }
+    cov_20tpms0eu2().s[57]++;
+    if (error) {
+      /* istanbul ignore next */
+      cov_20tpms0eu2().b[25][0]++;
+      cov_20tpms0eu2().s[58]++;
+      return `Error: ${error}`;
+    } else
+    /* istanbul ignore next */
+    {
+      cov_20tpms0eu2().b[25][1]++;
+    }
+    cov_20tpms0eu2().s[59]++;
+    return "Disconnected";
+  };
+  /* istanbul ignore next */
+  cov_20tpms0eu2().s[60]++;
+  return /*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+    className: "flex items-center space-x-2 px-3 py-2 bg-gray-900 rounded-lg border border-gray-700 text-sm",
+    children: [/*#__PURE__*/(0, _jsxruntime.jsx)("div", {
+      className: `w-2 h-2 rounded-full ${getStatusColor()}`
+    }), /*#__PURE__*/(0, _jsxruntime.jsx)("span", {
+      className: "text-gray-200",
+      children: getStatusText()
+    }),
+    /* istanbul ignore next */
+    (cov_20tpms0eu2().b[26][0]++, reconnectAttempts > 0) &&
+    /* istanbul ignore next */
+    (cov_20tpms0eu2().b[26][1]++, /*#__PURE__*/(0, _jsxruntime.jsxs)("span", {
+      className: "text-yellow-400 text-xs",
+      children: ["(Retry ", reconnectAttempts, ")"]
+    }))]
+  });
+}
+const _default =
+/* istanbul ignore next */
+(cov_20tpms0eu2().s[61]++, WebSocketProvider);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJjb3ZfMjB0cG1zMGV1MiIsImFjdHVhbENvdmVyYWdlIiwicyIsIldlYlNvY2tldFByb3ZpZGVyIiwiZiIsImRlZmF1bHQiLCJfZGVmYXVsdCIsImNoaWxkcmVuIiwiYXV0b0Nvbm5lY3QiLCJiIiwic2hvd0Nvbm5lY3Rpb25TdGF0dXMiLCJtb3VudGVkIiwic2V0TW91bnRlZCIsIl9yZWFjdCIsInVzZVN0YXRlIiwid2Vic29ja2V0IiwiX3VzZVdlYlNvY2tldCIsInVzZVdlYlNvY2tldCIsIm9uQ29ubmVjdCIsImNvbnNvbGUiLCJsb2ciLCJvbkRpc2Nvbm5lY3QiLCJvbkVycm9yIiwiZXJyb3IiLCJ1c2VFZmZlY3QiLCJfanN4cnVudGltZSIsImpzeCIsIkZyYWdtZW50IiwianN4cyIsImNsYXNzTmFtZSIsIkNvbm5lY3Rpb25TdGF0dXNJbmRpY2F0b3IiLCJpc0Nvbm5lY3RlZCIsImlzQ29ubmVjdGluZyIsImxhdGVuY3kiLCJyZWNvbm5lY3RBdHRlbXB0cyIsImdldFN0YXR1c0NvbG9yIiwiZ2V0U3RhdHVzVGV4dCJdLCJzb3VyY2VzIjpbIi9Vc2Vycy9tYXR0aGV3bW9yb25leS9idWlsZHMvRnJlZUFnZW50aWNzL3dlYi9jb21wb25lbnRzL1dlYlNvY2tldFByb3ZpZGVyLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJcInVzZSBjbGllbnRcIjtcblxuaW1wb3J0IFJlYWN0LCB7IHVzZUVmZmVjdCwgdXNlU3RhdGUgfSBmcm9tIFwicmVhY3RcIjtcbmltcG9ydCB7IHVzZVdlYlNvY2tldCB9IGZyb20gXCJAL2hvb2tzL3VzZVdlYlNvY2tldFwiO1xuXG5pbnRlcmZhY2UgV2ViU29ja2V0UHJvdmlkZXJQcm9wcyB7XG4gIGNoaWxkcmVuOiBSZWFjdC5SZWFjdE5vZGU7XG4gIGF1dG9Db25uZWN0PzogYm9vbGVhbjtcbiAgc2hvd0Nvbm5lY3Rpb25TdGF0dXM/OiBib29sZWFuO1xufVxuXG5leHBvcnQgZnVuY3Rpb24gV2ViU29ja2V0UHJvdmlkZXIoe1xuICBjaGlsZHJlbixcbiAgYXV0b0Nvbm5lY3QgPSB0cnVlLFxuICBzaG93Q29ubmVjdGlvblN0YXR1cyA9IGZhbHNlLFxufTogV2ViU29ja2V0UHJvdmlkZXJQcm9wcykge1xuICBjb25zdCBbbW91bnRlZCwgc2V0TW91bnRlZF0gPSB1c2VTdGF0ZShmYWxzZSk7XG5cbiAgY29uc3Qgd2Vic29ja2V0ID0gdXNlV2ViU29ja2V0KHtcbiAgICBhdXRvQ29ubmVjdCxcbiAgICBvbkNvbm5lY3Q6ICgpID0+IHtcbiAgICAgIGNvbnNvbGUubG9nKFwi8J+foiBXZWJTb2NrZXQgY29ubmVjdGVkIHN1Y2Nlc3NmdWxseVwiKTtcbiAgICB9LFxuICAgIG9uRGlzY29ubmVjdDogKCkgPT4ge1xuICAgICAgY29uc29sZS5sb2coXCLwn5S0IFdlYlNvY2tldCBkaXNjb25uZWN0ZWRcIik7XG4gICAgfSxcbiAgICBvbkVycm9yOiAoZXJyb3IpID0+IHtcbiAgICAgIGNvbnNvbGUuZXJyb3IoXCLwn5+gIFdlYlNvY2tldCBlcnJvcjpcIiwgZXJyb3IpO1xuICAgIH0sXG4gIH0pO1xuXG4gIC8vIEhhbmRsZSBjbGllbnQtc2lkZSBtb3VudGluZ1xuICB1c2VFZmZlY3QoKCkgPT4ge1xuICAgIHNldE1vdW50ZWQodHJ1ZSk7XG4gIH0sIFtdKTtcblxuICAvLyBEb24ndCByZW5kZXIgb24gc2VydmVyIHNpZGVcbiAgaWYgKCFtb3VudGVkKSB7XG4gICAgcmV0dXJuIDw+e2NoaWxkcmVufTwvPjtcbiAgfVxuXG4gIHJldHVybiAoXG4gICAgPD5cbiAgICAgIHtzaG93Q29ubmVjdGlvblN0YXR1cyAmJiAoXG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZml4ZWQgdG9wLTQgcmlnaHQtNCB6LTUwXCI+XG4gICAgICAgICAgPENvbm5lY3Rpb25TdGF0dXNJbmRpY2F0b3JcbiAgICAgICAgICAgIGlzQ29ubmVjdGVkPXt3ZWJzb2NrZXQuaXNDb25uZWN0ZWR9XG4gICAgICAgICAgICBpc0Nvbm5lY3Rpbmc9e3dlYnNvY2tldC5pc0Nvbm5lY3Rpbmd9XG4gICAgICAgICAgICBlcnJvcj17d2Vic29ja2V0LmVycm9yfVxuICAgICAgICAgICAgbGF0ZW5jeT17d2Vic29ja2V0LmxhdGVuY3l9XG4gICAgICAgICAgICByZWNvbm5lY3RBdHRlbXB0cz17d2Vic29ja2V0LnJlY29ubmVjdEF0dGVtcHRzfVxuICAgICAgICAgIC8+XG4gICAgICAgIDwvZGl2PlxuICAgICAgKX1cbiAgICAgIHtjaGlsZHJlbn1cbiAgICA8Lz5cbiAgKTtcbn1cblxuaW50ZXJmYWNlIENvbm5lY3Rpb25TdGF0dXNJbmRpY2F0b3JQcm9wcyB7XG4gIGlzQ29ubmVjdGVkOiBib29sZWFuO1xuICBpc0Nvbm5lY3Rpbmc6IGJvb2xlYW47XG4gIGVycm9yOiBzdHJpbmcgfCBudWxsO1xuICBsYXRlbmN5OiBudW1iZXIgfCBudWxsO1xuICByZWNvbm5lY3RBdHRlbXB0czogbnVtYmVyO1xufVxuXG5mdW5jdGlvbiBDb25uZWN0aW9uU3RhdHVzSW5kaWNhdG9yKHtcbiAgaXNDb25uZWN0ZWQsXG4gIGlzQ29ubmVjdGluZyxcbiAgZXJyb3IsXG4gIGxhdGVuY3ksXG4gIHJlY29ubmVjdEF0dGVtcHRzLFxufTogQ29ubmVjdGlvblN0YXR1c0luZGljYXRvclByb3BzKSB7XG4gIGNvbnN0IGdldFN0YXR1c0NvbG9yID0gKCkgPT4ge1xuICAgIGlmIChpc0Nvbm5lY3RlZCkgcmV0dXJuIFwiYmctZ3JlZW4tNTAwXCI7XG4gICAgaWYgKGlzQ29ubmVjdGluZykgcmV0dXJuIFwiYmcteWVsbG93LTUwMFwiO1xuICAgIGlmIChlcnJvcikgcmV0dXJuIFwiYmctcmVkLTUwMFwiO1xuICAgIHJldHVybiBcImJnLWdyYXktNTAwXCI7XG4gIH07XG5cbiAgY29uc3QgZ2V0U3RhdHVzVGV4dCA9ICgpID0+IHtcbiAgICBpZiAoaXNDb25uZWN0ZWQpIHJldHVybiBgQ29ubmVjdGVkICR7bGF0ZW5jeSA/IGAoJHtsYXRlbmN5fW1zKWAgOiBcIlwifWA7XG4gICAgaWYgKGlzQ29ubmVjdGluZykgcmV0dXJuIFwiQ29ubmVjdGluZy4uLlwiO1xuICAgIGlmIChlcnJvcikgcmV0dXJuIGBFcnJvcjogJHtlcnJvcn1gO1xuICAgIHJldHVybiBcIkRpc2Nvbm5lY3RlZFwiO1xuICB9O1xuXG4gIHJldHVybiAoXG4gICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBzcGFjZS14LTIgcHgtMyBweS0yIGJnLWdyYXktOTAwIHJvdW5kZWQtbGcgYm9yZGVyIGJvcmRlci1ncmF5LTcwMCB0ZXh0LXNtXCI+XG4gICAgICA8ZGl2IGNsYXNzTmFtZT17YHctMiBoLTIgcm91bmRlZC1mdWxsICR7Z2V0U3RhdHVzQ29sb3IoKX1gfSAvPlxuICAgICAgPHNwYW4gY2xhc3NOYW1lPVwidGV4dC1ncmF5LTIwMFwiPntnZXRTdGF0dXNUZXh0KCl9PC9zcGFuPlxuICAgICAge3JlY29ubmVjdEF0dGVtcHRzID4gMCAmJiAoXG4gICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQteWVsbG93LTQwMCB0ZXh0LXhzXCI+XG4gICAgICAgICAgKFJldHJ5IHtyZWNvbm5lY3RBdHRlbXB0c30pXG4gICAgICAgIDwvc3Bhbj5cbiAgICAgICl9XG4gICAgPC9kaXY+XG4gICk7XG59XG5cbmV4cG9ydCBkZWZhdWx0IFdlYlNvY2tldFByb3ZpZGVyO1xuIl0sIm1hcHBpbmdzIjoiQUFBQTs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0lBcUdpQztJQUFBQSxjQUFBLFlBQUFBLENBQUE7TUFBQSxPQUFBQyxjQUFBO0lBQUE7RUFBQTtFQUFBLE9BQUFBLGNBQUE7QUFBQTtBQUFBRCxjQUFBO0FBQUFB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

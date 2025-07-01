@@ -10,6 +10,11 @@ import { Switch } from "./ui/switch";
 import { Label } from "./ui/label";
 import { Alert, AlertDescription } from "./ui/alert";
 import { Separator } from "./ui/separator";
+import {
+  useMarkovBlanketWebSocket,
+  type BoundaryViolation,
+  type MarkovBlanketEvent,
+} from "../hooks/useMarkovBlanketWebSocket";
 
 /**
  * Markov Blanket Radar Chart Visualization Component
@@ -96,11 +101,11 @@ export const MarkovBlanketVisualization: React.FC<
   MarkovBlanketVisualizationProps
 > = ({
   agentId,
-  dimensions,
-  metrics,
-  violations,
-  agentPosition,
-  boundaryThresholds,
+  dimensions: propDimensions,
+  metrics: propMetrics,
+  violations: propViolations,
+  agentPosition: propAgentPosition,
+  boundaryThresholds: propBoundaryThresholds,
   realTimeUpdates = true,
   showViolations = true,
   showMetrics = true,
@@ -116,6 +121,127 @@ export const MarkovBlanketVisualization: React.FC<
   const [animationSpeed, setAnimationSpeed] = useState([1]);
   const [zoomLevel, setZoomLevel] = useState([1]);
   const [agentTrail, setAgentTrail] = useState<AgentPosition[]>([]);
+
+  // Active Inference WebSocket integration for real-time pymdp/GNN data
+  const {
+    isConnected,
+    violations: wsViolations,
+    monitoringStatus,
+    connect,
+    registerAgent,
+    startMonitoring,
+    getAgentViolations,
+  } = useMarkovBlanketWebSocket({
+    autoConnect: realTimeUpdates,
+    subscription: {
+      agent_ids: [agentId],
+      include_mathematical_proofs: true,
+      include_detailed_metrics: true,
+      real_time_updates: realTimeUpdates,
+    },
+    onEvent: (event: MarkovBlanketEvent) => {
+      console.log("Active Inference Event:", event);
+      // Update local state with real Active Inference data
+      if (event.type === "state_update" && event.data) {
+        updateFromActiveInference(event.data);
+      }
+    },
+    onViolation: (violation: BoundaryViolation) => {
+      console.log("Markov Blanket Violation:", violation);
+      // Handle real boundary violations from Active Inference engine
+    },
+  });
+
+  // State derived from real Active Inference data (pymdp/GNN) or props as fallback
+  const [realTimeDimensions, setRealTimeDimensions] = useState(propDimensions);
+  const [realTimeMetrics, setRealTimeMetrics] = useState(propMetrics);
+  const [realTimePosition, setRealTimePosition] = useState(propAgentPosition);
+  const [realTimeThresholds, setRealTimeThresholds] = useState(
+    propBoundaryThresholds,
+  );
+
+  // Function to update component state from Active Inference engine data
+  const updateFromActiveInference = useCallback(
+    (inferenceData: any) => {
+      if (inferenceData.markov_blanket_dimensions) {
+        setRealTimeDimensions({
+          internal_dimension:
+            inferenceData.markov_blanket_dimensions.internal || 0,
+          sensory_dimension:
+            inferenceData.markov_blanket_dimensions.sensory || 0,
+          active_dimension: inferenceData.markov_blanket_dimensions.active || 0,
+          external_dimension:
+            inferenceData.markov_blanket_dimensions.external || 0,
+        });
+      }
+
+      if (inferenceData.free_energy_metrics) {
+        setRealTimeMetrics({
+          free_energy: inferenceData.free_energy_metrics.free_energy || 0,
+          expected_free_energy:
+            inferenceData.free_energy_metrics.expected_free_energy || 0,
+          kl_divergence: inferenceData.free_energy_metrics.kl_divergence || 0,
+          boundary_integrity:
+            inferenceData.free_energy_metrics.boundary_integrity || 1,
+          conditional_independence:
+            inferenceData.free_energy_metrics.conditional_independence || 1,
+          stability_over_time: inferenceData.free_energy_metrics.stability || 1,
+          violation_count: wsViolations.length,
+          last_violation_time: wsViolations[wsViolations.length - 1]?.timestamp,
+        });
+      }
+
+      if (inferenceData.agent_state) {
+        setRealTimePosition({
+          agent_id: agentId,
+          position: {
+            internal: inferenceData.agent_state.internal || 0,
+            sensory: inferenceData.agent_state.sensory || 0,
+            active: inferenceData.agent_state.active || 0,
+            external: inferenceData.agent_state.external || 0,
+          },
+          boundary_distance: inferenceData.agent_state.boundary_distance || 0,
+          is_within_boundary:
+            inferenceData.agent_state.is_within_boundary !== false,
+        });
+      }
+    },
+    [agentId, wsViolations],
+  );
+
+  // Use real-time data if connected, otherwise fall back to props
+  const dimensions =
+    realTimeUpdates && isConnected ? realTimeDimensions : propDimensions;
+  const metrics =
+    realTimeUpdates && isConnected ? realTimeMetrics : propMetrics;
+  const agentPosition =
+    realTimeUpdates && isConnected ? realTimePosition : propAgentPosition;
+  const boundaryThresholds =
+    realTimeUpdates && isConnected
+      ? realTimeThresholds
+      : propBoundaryThresholds;
+  const violations =
+    realTimeUpdates && isConnected ? wsViolations : propViolations || [];
+
+  // Initialize WebSocket connection and register agent for Active Inference monitoring
+  useEffect(() => {
+    if (realTimeUpdates && !isConnected) {
+      connect();
+    }
+    if (isConnected) {
+      registerAgent(agentId);
+      startMonitoring();
+      getAgentViolations(agentId);
+    }
+  }, [
+    realTimeUpdates,
+    isConnected,
+    agentId,
+    connect,
+    registerAgent,
+    startMonitoring,
+    getAgentViolations,
+  ]);
 
   // Add current position to trail
   useEffect(() => {
@@ -249,13 +375,16 @@ export const MarkovBlanketVisualization: React.FC<
       .y((d) => Math.sin(d.angle - Math.PI / 2) * radiusScale(d.threshold))
       .curve(d3.curveLinearClosed);
 
-    g.append("path")
-      .datum(radarDimensions)
-      .attr("d", boundaryPath)
-      .attr("fill", "rgba(239, 68, 68, 0.1)")
-      .attr("stroke", "#ef4444")
-      .attr("stroke-width", 2)
-      .attr("stroke-dasharray", "5,5");
+    // Create boundary path with proper D3 selection
+    const boundaryPathData = boundaryPath(radarDimensions);
+    if (boundaryPathData) {
+      g.append("path")
+        .attr("d", boundaryPathData)
+        .attr("fill", "rgba(239, 68, 68, 0.1)")
+        .attr("stroke", "#ef4444")
+        .attr("stroke-width", 2)
+        .attr("stroke-dasharray", "5,5");
+    }
 
     // Draw current dimensions
     const currentPath = d3
@@ -264,12 +393,15 @@ export const MarkovBlanketVisualization: React.FC<
       .y((d) => Math.sin(d.angle - Math.PI / 2) * radiusScale(d.value))
       .curve(d3.curveLinearClosed);
 
-    g.append("path")
-      .datum(radarDimensions)
-      .attr("d", currentPath)
-      .attr("fill", "rgba(59, 130, 246, 0.3)")
-      .attr("stroke", "#3b82f6")
-      .attr("stroke-width", 3);
+    // Create current dimensions path with proper D3 selection
+    const currentPathData = currentPath(radarDimensions);
+    if (currentPathData) {
+      g.append("path")
+        .attr("d", currentPathData)
+        .attr("fill", "rgba(59, 130, 246, 0.3)")
+        .attr("stroke", "#3b82f6")
+        .attr("stroke-width", 3);
+    }
 
     // Draw agent position
     if (agentPosition) {
@@ -329,14 +461,16 @@ export const MarkovBlanketVisualization: React.FC<
           })
           .curve(d3.curveCardinal);
 
-        g.append("path")
-          .datum(agentTrail)
-          .attr("d", trailPath)
-          .attr("fill", "none")
-          .attr("stroke", "#8b5cf6")
-          .attr("stroke-width", 2)
-          .attr("opacity", 0.6)
-          .attr("stroke-dasharray", "3,3");
+        const trailPathData = trailPath(agentTrail);
+        if (trailPathData) {
+          g.append("path")
+            .attr("d", trailPathData)
+            .attr("fill", "none")
+            .attr("stroke", "#8b5cf6")
+            .attr("stroke-width", 2)
+            .attr("opacity", 0.6)
+            .attr("stroke-dasharray", "3,3");
+        }
       }
     }
 

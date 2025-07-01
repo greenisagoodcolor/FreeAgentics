@@ -1,0 +1,421 @@
+a77686e8358d2ffad7222c0c0b06be0c
+"use strict";
+
+/* istanbul ignore next */
+function cov_u2a707j2d() {
+  var path = "/Users/matthewmoroney/builds/FreeAgentics/web/lib/crypto-client.ts";
+  var hash = "e003d0076093a7b6df66f1c256fbaecaf11a7e78";
+  var global = new Function("return this")();
+  var gcv = "__coverage__";
+  var coverageData = {
+    path: "/Users/matthewmoroney/builds/FreeAgentics/web/lib/crypto-client.ts",
+    statementMap: {
+      "0": {
+        start: {
+          line: 2,
+          column: 0
+        },
+        end: {
+          line: 4,
+          column: 3
+        }
+      },
+      "1": {
+        start: {
+          line: 6,
+          column: 4
+        },
+        end: {
+          line: 9,
+          column: 7
+        }
+      },
+      "2": {
+        start: {
+          line: 6,
+          column: 24
+        },
+        end: {
+          line: 9,
+          column: 7
+        }
+      },
+      "3": {
+        start: {
+          line: 11,
+          column: 0
+        },
+        end: {
+          line: 24,
+          column: 3
+        }
+      },
+      "4": {
+        start: {
+          line: 13,
+          column: 8
+        },
+        end: {
+          line: 13,
+          column: 46
+        }
+      },
+      "5": {
+        start: {
+          line: 16,
+          column: 8
+        },
+        end: {
+          line: 16,
+          column: 28
+        }
+      },
+      "6": {
+        start: {
+          line: 19,
+          column: 8
+        },
+        end: {
+          line: 19,
+          column: 27
+        }
+      },
+      "7": {
+        start: {
+          line: 22,
+          column: 8
+        },
+        end: {
+          line: 22,
+          column: 27
+        }
+      },
+      "8": {
+        start: {
+          line: 25,
+          column: 22
+        },
+        end: {
+          line: 25,
+          column: 55
+        }
+      },
+      "9": {
+        start: {
+          line: 28,
+          column: 4
+        },
+        end: {
+          line: 28,
+          column: 22
+        }
+      },
+      "10": {
+        start: {
+          line: 32,
+          column: 4
+        },
+        end: {
+          line: 32,
+          column: 22
+        }
+      },
+      "11": {
+        start: {
+          line: 34,
+          column: 21
+        },
+        end: {
+          line: 37,
+          column: 1
+        }
+      }
+    },
+    fnMap: {
+      "0": {
+        name: "_export",
+        decl: {
+          start: {
+            line: 5,
+            column: 9
+          },
+          end: {
+            line: 5,
+            column: 16
+          }
+        },
+        loc: {
+          start: {
+            line: 5,
+            column: 30
+          },
+          end: {
+            line: 10,
+            column: 1
+          }
+        },
+        line: 5
+      },
+      "1": {
+        name: "(anonymous_1)",
+        decl: {
+          start: {
+            line: 12,
+            column: 22
+          },
+          end: {
+            line: 12,
+            column: 23
+          }
+        },
+        loc: {
+          start: {
+            line: 12,
+            column: 33
+          },
+          end: {
+            line: 14,
+            column: 5
+          }
+        },
+        line: 12
+      },
+      "2": {
+        name: "(anonymous_2)",
+        decl: {
+          start: {
+            line: 15,
+            column: 18
+          },
+          end: {
+            line: 15,
+            column: 19
+          }
+        },
+        loc: {
+          start: {
+            line: 15,
+            column: 29
+          },
+          end: {
+            line: 17,
+            column: 5
+          }
+        },
+        line: 15
+      },
+      "3": {
+        name: "(anonymous_3)",
+        decl: {
+          start: {
+            line: 18,
+            column: 17
+          },
+          end: {
+            line: 18,
+            column: 18
+          }
+        },
+        loc: {
+          start: {
+            line: 18,
+            column: 28
+          },
+          end: {
+            line: 20,
+            column: 5
+          }
+        },
+        line: 18
+      },
+      "4": {
+        name: "(anonymous_4)",
+        decl: {
+          start: {
+            line: 21,
+            column: 17
+          },
+          end: {
+            line: 21,
+            column: 18
+          }
+        },
+        loc: {
+          start: {
+            line: 21,
+            column: 28
+          },
+          end: {
+            line: 23,
+            column: 5
+          }
+        },
+        line: 21
+      },
+      "5": {
+        name: "encryptData",
+        decl: {
+          start: {
+            line: 26,
+            column: 9
+          },
+          end: {
+            line: 26,
+            column: 20
+          }
+        },
+        loc: {
+          start: {
+            line: 26,
+            column: 32
+          },
+          end: {
+            line: 29,
+            column: 1
+          }
+        },
+        line: 26
+      },
+      "6": {
+        name: "decryptData",
+        decl: {
+          start: {
+            line: 30,
+            column: 9
+          },
+          end: {
+            line: 30,
+            column: 20
+          }
+        },
+        loc: {
+          start: {
+            line: 30,
+            column: 32
+          },
+          end: {
+            line: 33,
+            column: 1
+          }
+        },
+        line: 30
+      }
+    },
+    branchMap: {},
+    s: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0,
+      "9": 0,
+      "10": 0,
+      "11": 0
+    },
+    f: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0
+    },
+    b: {},
+    inputSourceMap: {
+      version: 3,
+      sources: ["/Users/matthewmoroney/builds/FreeAgentics/web/lib/crypto-client.ts"],
+      sourcesContent: ["export type { EncryptionResult } from \"@/types/llm-providers\";\nexport { CredentialCrypto } from \"@/types/llm-providers\";\n\nexport function encryptData(data: string, key: string): string {\n  // Simple placeholder implementation\n  return btoa(data);\n}\n\nexport function decryptData(data: string, key: string): string {\n  // Simple placeholder implementation\n  return atob(data);\n}\n\nexport const CryptoClient = {\n  encrypt: encryptData,\n  decrypt: decryptData,\n};\n"],
+      names: ["CredentialCrypto", "CryptoClient", "decryptData", "encryptData", "data", "key", "btoa", "atob", "encrypt", "decrypt"],
+      mappings: ";;;;;;;;;;;IACSA,gBAAgB;eAAhBA,8BAAgB;;IAYZC,YAAY;eAAZA;;IALGC,WAAW;eAAXA;;IALAC,WAAW;eAAXA;;;8BAFiB;AAE1B,SAASA,YAAYC,IAAY,EAAEC,GAAW;IACnD,oCAAoC;IACpC,OAAOC,KAAKF;AACd;AAEO,SAASF,YAAYE,IAAY,EAAEC,GAAW;IACnD,oCAAoC;IACpC,OAAOE,KAAKH;AACd;AAEO,MAAMH,eAAe;IAC1BO,SAASL;IACTM,SAASP;AACX"
+    },
+    _coverageSchema: "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+    hash: "e003d0076093a7b6df66f1c256fbaecaf11a7e78"
+  };
+  var coverage = global[gcv] || (global[gcv] = {});
+  if (!coverage[path] || coverage[path].hash !== hash) {
+    coverage[path] = coverageData;
+  }
+  var actualCoverage = coverage[path];
+  {
+    // @ts-ignore
+    cov_u2a707j2d = function () {
+      return actualCoverage;
+    };
+  }
+  return actualCoverage;
+}
+cov_u2a707j2d();
+cov_u2a707j2d().s[0]++;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+function _export(target, all) {
+  /* istanbul ignore next */
+  cov_u2a707j2d().f[0]++;
+  cov_u2a707j2d().s[1]++;
+  for (var name in all) {
+    /* istanbul ignore next */
+    cov_u2a707j2d().s[2]++;
+    Object.defineProperty(target, name, {
+      enumerable: true,
+      get: all[name]
+    });
+  }
+}
+/* istanbul ignore next */
+cov_u2a707j2d().s[3]++;
+_export(exports, {
+  CredentialCrypto: function () {
+    /* istanbul ignore next */
+    cov_u2a707j2d().f[1]++;
+    cov_u2a707j2d().s[4]++;
+    return _llmproviders.CredentialCrypto;
+  },
+  CryptoClient: function () {
+    /* istanbul ignore next */
+    cov_u2a707j2d().f[2]++;
+    cov_u2a707j2d().s[5]++;
+    return CryptoClient;
+  },
+  decryptData: function () {
+    /* istanbul ignore next */
+    cov_u2a707j2d().f[3]++;
+    cov_u2a707j2d().s[6]++;
+    return decryptData;
+  },
+  encryptData: function () {
+    /* istanbul ignore next */
+    cov_u2a707j2d().f[4]++;
+    cov_u2a707j2d().s[7]++;
+    return encryptData;
+  }
+});
+const _llmproviders =
+/* istanbul ignore next */
+(cov_u2a707j2d().s[8]++, require("../types/llm-providers"));
+function encryptData(data, key) {
+  /* istanbul ignore next */
+  cov_u2a707j2d().f[5]++;
+  cov_u2a707j2d().s[9]++;
+  // Simple placeholder implementation
+  return btoa(data);
+}
+function decryptData(data, key) {
+  /* istanbul ignore next */
+  cov_u2a707j2d().f[6]++;
+  cov_u2a707j2d().s[10]++;
+  // Simple placeholder implementation
+  return atob(data);
+}
+const CryptoClient =
+/* istanbul ignore next */
+(cov_u2a707j2d().s[11]++, {
+  encrypt: encryptData,
+  decrypt: decryptData
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJDcmVkZW50aWFsQ3J5cHRvIiwiY292X3UyYTcwN2oyZCIsImYiLCJzIiwiX2xsbXByb3ZpZGVycyIsIkNyeXB0b0NsaWVudCIsImRlY3J5cHREYXRhIiwiZW5jcnlwdERhdGEiLCJkYXRhIiwia2V5IiwiYnRvYSIsImF0b2IiLCJlbmNyeXB0IiwiZGVjcnlwdCJdLCJzb3VyY2VzIjpbIi9Vc2Vycy9tYXR0aGV3bW9yb25leS9idWlsZHMvRnJlZUFnZW50aWNzL3dlYi9saWIvY3J5cHRvLWNsaWVudC50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJleHBvcnQgdHlwZSB7IEVuY3J5cHRpb25SZXN1bHQgfSBmcm9tIFwiQC90eXBlcy9sbG0tcHJvdmlkZXJzXCI7XG5leHBvcnQgeyBDcmVkZW50aWFsQ3J5cHRvIH0gZnJvbSBcIkAvdHlwZXMvbGxtLXByb3ZpZGVyc1wiO1xuXG5leHBvcnQgZnVuY3Rpb24gZW5jcnlwdERhdGEoZGF0YTogc3RyaW5nLCBrZXk6IHN0cmluZyk6IHN0cmluZyB7XG4gIC8vIFNpbXBsZSBwbGFjZWhvbGRlciBpbXBsZW1lbnRhdGlvblxuICByZXR1cm4gYnRvYShkYXRhKTtcbn1cblxuZXhwb3J0IGZ1bmN0aW9uIGRlY3J5cHREYXRhKGRhdGE6IHN0cmluZywga2V5OiBzdHJpbmcpOiBzdHJpbmcge1xuICAvLyBTaW1wbGUgcGxhY2Vob2xkZXIgaW1wbGVtZW50YXRpb25cbiAgcmV0dXJuIGF0b2IoZGF0YSk7XG59XG5cbmV4cG9ydCBjb25zdCBDcnlwdG9DbGllbnQgPSB7XG4gIGVuY3J5cHQ6IGVuY3J5cHREYXRhLFxuICBkZWNyeXB0OiBkZWNyeXB0RGF0YSxcbn07XG4iXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0VBQ1NBLGdCQUFnQixXQUFBQSxDQUFBO0lBQUE7SUFBQUMsYUFBQSxHQUFBQyxDQUFBO0lBQUFELGFBQUEsR0FBQUUsQ0FBQTtXQUFoQkMsYUFBQSxDQUFBSixnQkFBZ0I7O0VBWVpLLFlBQVksV0FBQUEsQ0FBQTtJQUFBO0lBQUFKLGFBQUEsR0FBQUMsQ0FBQTtJQUFBRCxhQUFBLEdBQUFFLENBQUE7V0FBWkUsWUFBQTs7RUFMR0MsV0FBVyxXQUFBQSxDQUFBO0lBQUE7SUFBQUwsYUFBQSxHQUFBQyxDQUFBO0lBQUFELGFBQUEsR0FBQUUsQ0FBQTtXQUFYRyxXQUFBOztFQUxBQyxXQUFXLFdBQUFBLENBQUE7SUFBQTtJQUFBTixhQUFBLEdBQUFDLENBQUE7SUFBQUQsYUFBQSxHQUFBRSxDQUFBO1dBQVhJLFdBQUE7Ozs7O2lDQUZpQjtBQUUxQixTQUFTQSxZQUFZQyxJQUFZLEVBQUVDLEdBQVc7RUFBQTtFQUFBUixhQUFBLEdBQUFDLENBQUE7RUFBQUQsYUFBQSxHQUFBRSxDQUFBO0VBQ25EO0VBQ0EsT0FBT08sSUFBQSxDQUFLRixJQUFBO0FBQ2Q7QUFFTyxTQUFTRixZQUFZRSxJQUFZLEVBQUVDLEdBQVc7RUFBQTtFQUFBUixhQUFBLEdBQUFDLENBQUE7RUFBQUQsYUFBQSxHQUFBRSxDQUFBO0VBQ25EO0VBQ0EsT0FBT1EsSUFBQSxDQUFLSCxJQUFBO0FBQ2Q7QUFFTyxNQUFNSCxZQUFBO0FBQUE7QUFBQSxDQUFBSixhQUFBLEdBQUFFLENBQUEsUUFBZTtFQUMxQlMsT0FBQSxFQUFTTCxXQUFBO0VBQ1RNLE9BQUEsRUFBU1A7QUFDWCIsImlnbm9yZUxpc3QiOltdfQ==

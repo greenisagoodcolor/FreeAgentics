@@ -20,7 +20,7 @@ interface MetricsPanelProps {
 
 export default function MetricsPanel({ view }: MetricsPanelProps) {
   const router = useRouter();
-  
+
   // Redux state
   const agents = useAppSelector((state) => state.agents?.agents) || {};
   const conversations =
@@ -125,11 +125,11 @@ export default function MetricsPanel({ view }: MetricsPanelProps) {
             </div>
           );
         })}
-        
+
         {/* CEO Demo Button */}
         <div
           className="bg-[var(--bg-secondary)] border border-[var(--primary-amber)] rounded-lg p-4 flex flex-col justify-center items-center cursor-pointer hover:bg-[var(--bg-tertiary)] transition-colors"
-          onClick={() => router.push('/dashboard?view=ceo-demo')}
+          onClick={() => router.push("/dashboard?view=ceo-demo")}
         >
           <Presentation className="w-8 h-8 text-[var(--primary-amber)] mb-2" />
           <div className="text-sm font-bold text-[var(--primary-amber)] font-mono">

@@ -1,0 +1,242 @@
+229c75c65d9a4082369c4f9a80e1aeda
+"use client";
+"use strict";
+
+/* istanbul ignore next */
+function cov_7ec32cmft() {
+  var path = "/Users/matthewmoroney/builds/FreeAgentics/web/components/conversation-view.tsx";
+  var hash = "73d32009fe6f731b3f8907cd786920390168a18a";
+  var global = new Function("return this")();
+  var gcv = "__coverage__";
+  var coverageData = {
+    path: "/Users/matthewmoroney/builds/FreeAgentics/web/components/conversation-view.tsx",
+    statementMap: {
+      "0": {
+        start: {
+          line: 3,
+          column: 0
+        },
+        end: {
+          line: 5,
+          column: 3
+        }
+      },
+      "1": {
+        start: {
+          line: 6,
+          column: 0
+        },
+        end: {
+          line: 11,
+          column: 3
+        }
+      },
+      "2": {
+        start: {
+          line: 9,
+          column: 8
+        },
+        end: {
+          line: 9,
+          column: 32
+        }
+      },
+      "3": {
+        start: {
+          line: 12,
+          column: 20
+        },
+        end: {
+          line: 12,
+          column: 48
+        }
+      },
+      "4": {
+        start: {
+          line: 13,
+          column: 14
+        },
+        end: {
+          line: 13,
+          column: 34
+        }
+      },
+      "5": {
+        start: {
+          line: 15,
+          column: 4
+        },
+        end: {
+          line: 33,
+          column: 7
+        }
+      }
+    },
+    fnMap: {
+      "0": {
+        name: "(anonymous_0)",
+        decl: {
+          start: {
+            line: 8,
+            column: 9
+          },
+          end: {
+            line: 8,
+            column: 10
+          }
+        },
+        loc: {
+          start: {
+            line: 8,
+            column: 20
+          },
+          end: {
+            line: 10,
+            column: 5
+          }
+        },
+        line: 8
+      },
+      "1": {
+        name: "ConversationView",
+        decl: {
+          start: {
+            line: 14,
+            column: 9
+          },
+          end: {
+            line: 14,
+            column: 25
+          }
+        },
+        loc: {
+          start: {
+            line: 14,
+            column: 54
+          },
+          end: {
+            line: 34,
+            column: 1
+          }
+        },
+        line: 14
+      }
+    },
+    branchMap: {
+      "0": {
+        loc: {
+          start: {
+            line: 28,
+            column: 20
+          },
+          end: {
+            line: 28,
+            column: 48
+          }
+        },
+        type: "cond-expr",
+        locations: [{
+          start: {
+            line: 28,
+            column: 29
+          },
+          end: {
+            line: 28,
+            column: 35
+          }
+        }, {
+          start: {
+            line: 28,
+            column: 38
+          },
+          end: {
+            line: 28,
+            column: 48
+          }
+        }],
+        line: 28
+      }
+    },
+    s: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0
+    },
+    f: {
+      "0": 0,
+      "1": 0
+    },
+    b: {
+      "0": [0, 0]
+    },
+    inputSourceMap: {
+      version: 3,
+      sources: ["/Users/matthewmoroney/builds/FreeAgentics/web/components/conversation-view.tsx"],
+      sourcesContent: ["\"use client\";\n\nimport { Card } from \"@/components/ui/card\";\n\ninterface ConversationViewProps {\n  conversationId: string;\n  isLive: boolean;\n}\n\nexport function ConversationView({\n  conversationId,\n  isLive,\n}: ConversationViewProps) {\n  return (\n    <Card className=\"w-full h-full p-6\">\n      <h2 className=\"text-2xl font-semibold mb-4\">\n        Conversation {conversationId}\n      </h2>\n      <p className=\"text-muted-foreground\">\n        {isLive ? \"Live\" : \"Recorded\"} conversation interface coming soon...\n      </p>\n    </Card>\n  );\n}\n"],
+      names: ["ConversationView", "conversationId", "isLive", "Card", "className", "h2", "p"],
+      mappings: "AAAA;;;;;+BASgBA;;;eAAAA;;;;sBAPK;AAOd,SAASA,iBAAiB,EAC/BC,cAAc,EACdC,MAAM,EACgB;IACtB,qBACE,sBAACC,UAAI;QAACC,WAAU;;0BACd,sBAACC;gBAAGD,WAAU;;oBAA8B;oBAC5BH;;;0BAEhB,sBAACK;gBAAEF,WAAU;;oBACVF,SAAS,SAAS;oBAAW;;;;;AAItC"
+    },
+    _coverageSchema: "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+    hash: "73d32009fe6f731b3f8907cd786920390168a18a"
+  };
+  var coverage = global[gcv] || (global[gcv] = {});
+  if (!coverage[path] || coverage[path].hash !== hash) {
+    coverage[path] = coverageData;
+  }
+  var actualCoverage = coverage[path];
+  {
+    // @ts-ignore
+    cov_7ec32cmft = function () {
+      return actualCoverage;
+    };
+  }
+  return actualCoverage;
+}
+cov_7ec32cmft();
+cov_7ec32cmft().s[0]++;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/* istanbul ignore next */
+cov_7ec32cmft().s[1]++;
+Object.defineProperty(exports, "ConversationView", {
+  enumerable: true,
+  get: function () {
+    /* istanbul ignore next */
+    cov_7ec32cmft().f[0]++;
+    cov_7ec32cmft().s[2]++;
+    return ConversationView;
+  }
+});
+const _jsxruntime =
+/* istanbul ignore next */
+(cov_7ec32cmft().s[3]++, require("react/jsx-runtime"));
+const _card =
+/* istanbul ignore next */
+(cov_7ec32cmft().s[4]++, require("./ui/card"));
+function ConversationView({
+  conversationId,
+  isLive
+}) {
+  /* istanbul ignore next */
+  cov_7ec32cmft().f[1]++;
+  cov_7ec32cmft().s[5]++;
+  return /*#__PURE__*/(0, _jsxruntime.jsxs)(_card.Card, {
+    className: "w-full h-full p-6",
+    children: [/*#__PURE__*/(0, _jsxruntime.jsxs)("h2", {
+      className: "text-2xl font-semibold mb-4",
+      children: ["Conversation ", conversationId]
+    }), /*#__PURE__*/(0, _jsxruntime.jsxs)("p", {
+      className: "text-muted-foreground",
+      children: [isLive ?
+      /* istanbul ignore next */
+      (cov_7ec32cmft().b[0][0]++, "Live") :
+      /* istanbul ignore next */
+      (cov_7ec32cmft().b[0][1]++, "Recorded"), " conversation interface coming soon..."]
+    })]
+  });
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJjb3ZfN2VjMzJjbWZ0IiwiYWN0dWFsQ292ZXJhZ2UiLCJzIiwiQ29udmVyc2F0aW9uVmlldyIsImNvbnZlcnNhdGlvbklkIiwiaXNMaXZlIiwiZiIsIl9qc3hydW50aW1lIiwianN4cyIsIl9jYXJkIiwiQ2FyZCIsImNsYXNzTmFtZSIsImIiXSwic291cmNlcyI6WyIvVXNlcnMvbWF0dGhld21vcm9uZXkvYnVpbGRzL0ZyZWVBZ2VudGljcy93ZWIvY29tcG9uZW50cy9jb252ZXJzYXRpb24tdmlldy50c3giXSwic291cmNlc0NvbnRlbnQiOlsiXCJ1c2UgY2xpZW50XCI7XG5cbmltcG9ydCB7IENhcmQgfSBmcm9tIFwiQC9jb21wb25lbnRzL3VpL2NhcmRcIjtcblxuaW50ZXJmYWNlIENvbnZlcnNhdGlvblZpZXdQcm9wcyB7XG4gIGNvbnZlcnNhdGlvbklkOiBzdHJpbmc7XG4gIGlzTGl2ZTogYm9vbGVhbjtcbn1cblxuZXhwb3J0IGZ1bmN0aW9uIENvbnZlcnNhdGlvblZpZXcoe1xuICBjb252ZXJzYXRpb25JZCxcbiAgaXNMaXZlLFxufTogQ29udmVyc2F0aW9uVmlld1Byb3BzKSB7XG4gIHJldHVybiAoXG4gICAgPENhcmQgY2xhc3NOYW1lPVwidy1mdWxsIGgtZnVsbCBwLTZcIj5cbiAgICAgIDxoMiBjbGFzc05hbWU9XCJ0ZXh0LTJ4bCBmb250LXNlbWlib2xkIG1iLTRcIj5cbiAgICAgICAgQ29udmVyc2F0aW9uIHtjb252ZXJzYXRpb25JZH1cbiAgICAgIDwvaDI+XG4gICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAge2lzTGl2ZSA/IFwiTGl2ZVwiIDogXCJSZWNvcmRlZFwifSBjb252ZXJzYXRpb24gaW50ZXJmYWNlIGNvbWluZyBzb29uLi4uXG4gICAgICA8L3A+XG4gICAgPC9DYXJkPlxuICApO1xufVxuIl0sIm1hcHBpbmdzIjoiQUFBQTs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0lBY1U7SUFBQUEsYUFBQSxZQUFBQSxDQUFBO01BQUEsT0FBQUMsY0FBQTtJQUFBO0VBQUE7RUFBQSxPQUFBQSxjQUFBO0FBQUE7QUFBQUQsYUFBQTtBQUFBQSxhQUFBLEdBQUFFLENBQUE7Ozs7OzsrQkFMTTs7Ozs7O1dBQUFDLGdCQUFBOzs7Ozs7OztpQ0FQSztBQU9kLFNBQVNBLGlCQUFpQjtFQUMvQkMsY0FBYztFQUNkQztBQUFNLENBQ2dCO0VBQUE7RUFBQUwsYUFBQSxHQUFBTSxDQUFBO0VBQUFOLGFBQUEsR0FBQUUsQ0FBQTtFQUN0QixvQkFDRSxJQUFBSyxXQUFBLENBQUFDLElBQUEsRUFBQ0MsS0FBQSxDQUFBQyxJQUFJO0lBQUNDLFNBQUEsRUFBVTs0QkFDZCxJQUFBSixXQUFBLENBQUFDLElBQUEsRUFBQztNQUFHRyxTQUFBLEVBQVU7aUJBQThCLGlCQUM1QlAsY0FBQTtxQkFFaEIsSUFBQUcsV0FBQSxDQUFBQyxJQUFBLEVBQUM7TUFBRUcsU0FBQSxFQUFVO2lCQUNWTixNQUFBO01BQUE7TUFBQSxDQUFBTCxhQUFBLEdBQUFZLENBQUEsVUFBUztNQUFBO01BQUEsQ0FBQVosYUFBQSxHQUFBWSxDQUFBLFVBQVMsYUFBVzs7O0FBSXRDIiwiaWdub3JlTGlzdCI6W119

@@ -1,0 +1,369 @@
+a8f252d9c000f214f9cde0a09886903c
+"use client";
+"use strict";
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+Object.defineProperty(exports, "CharacterCreator", {
+    enumerable: true,
+    get: function() {
+        return CharacterCreator;
+    }
+});
+const _jsxruntime = require("react/jsx-runtime");
+const _react = /*#__PURE__*/ _interop_require_wildcard(require("react"));
+const _button = require("./ui/button");
+const _card = require("./ui/card");
+const _alert = require("./ui/alert");
+const _lucidereact = require("lucide-react");
+const _agentcreationwizard = require("./ui/agent-creation-wizard");
+const _agentsapi = require("../lib/api/agents-api");
+function _getRequireWildcardCache(nodeInterop) {
+    if (typeof WeakMap !== "function") return null;
+    var cacheBabelInterop = new WeakMap();
+    var cacheNodeInterop = new WeakMap();
+    return (_getRequireWildcardCache = function(nodeInterop) {
+        return nodeInterop ? cacheNodeInterop : cacheBabelInterop;
+    })(nodeInterop);
+}
+function _interop_require_wildcard(obj, nodeInterop) {
+    if (!nodeInterop && obj && obj.__esModule) {
+        return obj;
+    }
+    if (obj === null || typeof obj !== "object" && typeof obj !== "function") {
+        return {
+            default: obj
+        };
+    }
+    var cache = _getRequireWildcardCache(nodeInterop);
+    if (cache && cache.has(obj)) {
+        return cache.get(obj);
+    }
+    var newObj = {
+        __proto__: null
+    };
+    var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;
+    for(var key in obj){
+        if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) {
+            var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;
+            if (desc && (desc.get || desc.set)) {
+                Object.defineProperty(newObj, key, desc);
+            } else {
+                newObj[key] = obj[key];
+            }
+        }
+    }
+    newObj.default = obj;
+    if (cache) {
+        cache.set(obj, newObj);
+    }
+    return newObj;
+}
+function CharacterCreator({ onClose, onSuccess }) {
+    const [isSubmitting, setIsSubmitting] = (0, _react.useState)(false);
+    const [error, setError] = (0, _react.useState)(null);
+    const [success, setSuccess] = (0, _react.useState)(null);
+    const handleAgentCreate = async (template, configuration)=>{
+        setIsSubmitting(true);
+        setError(null);
+        try {
+            // Convert template and configuration to API request format
+            const createRequest = {
+                name: configuration.name,
+                // Convert Active Inference configuration
+                activeInference: {
+                    template: template.category,
+                    stateLabels: [
+                        "State1",
+                        "State2",
+                        "State3"
+                    ],
+                    numStates: configuration.mathematics?.matrices?.aMatrix?.rows || template.mathematicalFoundation.beliefsStates,
+                    numObservations: configuration.mathematics?.matrices?.bMatrix?.observations || template.mathematicalFoundation.observationModalities,
+                    numActions: template.mathematicalFoundation.actionSpaces,
+                    generativeModel: {
+                        A: [],
+                        B: [],
+                        C: [],
+                        D: []
+                    },
+                    precisionParameters: {
+                        sensory: configuration.mathematics?.precision?.sensoryPrecision || template.mathematicalFoundation.defaultPrecision.sensory,
+                        policy: configuration.mathematics?.precision?.policyPrecision || template.mathematicalFoundation.defaultPrecision.policy,
+                        state: configuration.mathematics?.precision?.statePrecision || template.mathematicalFoundation.defaultPrecision.state
+                    },
+                    mathematicalConstraints: {
+                        normalizedBeliefs: true,
+                        stochasticMatrices: true,
+                        precisionBounds: true
+                    }
+                },
+                // Add legacy personality mapping for backward compatibility
+                personality: undefined,
+                capabilities: template.capabilities || [
+                    "movement",
+                    "perception",
+                    "communication"
+                ],
+                tags: [
+                    template.category,
+                    template.complexity,
+                    ...configuration.environment?.tags || []
+                ],
+                metadata: {
+                    templateId: template.id,
+                    templateName: template.name,
+                    complexity: template.complexity,
+                    description: configuration.description,
+                    mathematicalFoundation: template.mathematicalFoundation,
+                    createdViaWizard: true,
+                    configurationVersion: "1.0",
+                    ...configuration.advanced?.customParameters || {}
+                }
+            };
+            // Create agent via API
+            const result = await _agentsapi.agentsApi.createAgent(createRequest);
+            setSuccess(result.agent);
+            // Show success briefly, then call success callback
+            setTimeout(()=>{
+                onSuccess(result.agent);
+            }, 1500);
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+            setError(errorMessage);
+            console.error("Agent creation failed:", err);
+        } finally{
+            setIsSubmitting(false);
+        }
+    };
+    // Handle creating from template directly (backward compatibility)
+    const handleTemplateCreate = async (template)=>{
+        setIsSubmitting(true);
+        setError(null);
+        try {
+            // Create agent using template method
+            const result = await _agentsapi.agentsApi.createAgentFromTemplate({
+                template: template.category,
+                name: `${template.name} ${Date.now()}`,
+                stateLabels: [
+                    "Explore",
+                    "Rest",
+                    "Communicate",
+                    "Plan"
+                ],
+                precisionParameters: {
+                    sensory: template.mathematicalFoundation.defaultPrecision.sensory || 16,
+                    policy: template.mathematicalFoundation.defaultPrecision.policy || 12,
+                    state: template.mathematicalFoundation.defaultPrecision.state || 2
+                },
+                tags: [
+                    template.category,
+                    template.complexity
+                ],
+                metadata: {
+                    templateId: template.id,
+                    templateName: template.name,
+                    complexity: template.complexity,
+                    createdDirectly: true
+                }
+            });
+            setSuccess(result.agent);
+            setTimeout(()=>{
+                onSuccess(result.agent);
+            }, 1500);
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+            setError(errorMessage);
+        } finally{
+            setIsSubmitting(false);
+        }
+    };
+    if (success) {
+        return /*#__PURE__*/ (0, _jsxruntime.jsx)(_card.Card, {
+            className: "p-6",
+            children: /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                className: "text-center space-y-4",
+                children: [
+                    /*#__PURE__*/ (0, _jsxruntime.jsx)(_lucidereact.CheckCircle, {
+                        className: "h-16 w-16 text-green-600 mx-auto"
+                    }),
+                    /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                        children: [
+                            /*#__PURE__*/ (0, _jsxruntime.jsx)("h3", {
+                                className: "text-lg font-semibold text-green-900",
+                                children: "Agent Created Successfully!"
+                            }),
+                            /*#__PURE__*/ (0, _jsxruntime.jsxs)("p", {
+                                className: "text-sm text-green-700 mt-2",
+                                children: [
+                                    /*#__PURE__*/ (0, _jsxruntime.jsx)("strong", {
+                                        children: success.name
+                                    }),
+                                    " has been created with Active Inference capabilities."
+                                ]
+                            }),
+                            success.activeInference && /*#__PURE__*/ (0, _jsxruntime.jsx)("div", {
+                                className: "mt-4 p-3 bg-green-50 border border-green-200 rounded-lg",
+                                children: /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                    className: "text-xs text-green-800 space-y-1",
+                                    children: [
+                                        /*#__PURE__*/ (0, _jsxruntime.jsxs)("p", {
+                                            children: [
+                                                "• Template: ",
+                                                success.activeInference.template
+                                            ]
+                                        }),
+                                        /*#__PURE__*/ (0, _jsxruntime.jsxs)("p", {
+                                            children: [
+                                                "• States: ",
+                                                success.activeInference.numStates
+                                            ]
+                                        }),
+                                        /*#__PURE__*/ (0, _jsxruntime.jsxs)("p", {
+                                            children: [
+                                                "• Precision γ:",
+                                                " ",
+                                                success.activeInference.precisionParameters.sensory.toFixed(1)
+                                            ]
+                                        }),
+                                        /*#__PURE__*/ (0, _jsxruntime.jsx)("p", {
+                                            children: "• Mathematical validation: ✓ Passed"
+                                        })
+                                    ]
+                                })
+                            })
+                        ]
+                    })
+                ]
+            })
+        });
+    }
+    return /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+        className: "space-y-6",
+        children: [
+            /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                className: "flex items-center justify-between",
+                children: [
+                    /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                        children: [
+                            /*#__PURE__*/ (0, _jsxruntime.jsx)("h2", {
+                                className: "text-2xl font-bold",
+                                children: "Create Active Inference Agent"
+                            }),
+                            /*#__PURE__*/ (0, _jsxruntime.jsx)("p", {
+                                className: "text-muted-foreground mt-1",
+                                children: "Build a mathematically rigorous agent with real-time visualization"
+                            })
+                        ]
+                    }),
+                    /*#__PURE__*/ (0, _jsxruntime.jsx)(_button.Button, {
+                        variant: "outline",
+                        onClick: onClose,
+                        disabled: isSubmitting,
+                        children: "Cancel"
+                    })
+                ]
+            }),
+            error && /*#__PURE__*/ (0, _jsxruntime.jsxs)(_alert.Alert, {
+                variant: "destructive",
+                children: [
+                    /*#__PURE__*/ (0, _jsxruntime.jsx)(_lucidereact.AlertTriangle, {
+                        className: "h-4 w-4"
+                    }),
+                    /*#__PURE__*/ (0, _jsxruntime.jsxs)(_alert.AlertDescription, {
+                        children: [
+                            /*#__PURE__*/ (0, _jsxruntime.jsx)("strong", {
+                                children: "Creation Failed:"
+                            }),
+                            " ",
+                            error
+                        ]
+                    })
+                ]
+            }),
+            isSubmitting && /*#__PURE__*/ (0, _jsxruntime.jsx)("div", {
+                className: "relative",
+                children: /*#__PURE__*/ (0, _jsxruntime.jsx)("div", {
+                    className: "absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg",
+                    children: /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                        className: "flex items-center gap-3",
+                        children: [
+                            /*#__PURE__*/ (0, _jsxruntime.jsx)(_lucidereact.Loader2, {
+                                className: "h-6 w-6 animate-spin"
+                            }),
+                            /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                className: "text-center",
+                                children: [
+                                    /*#__PURE__*/ (0, _jsxruntime.jsx)("p", {
+                                        className: "font-medium",
+                                        children: "Creating Agent..."
+                                    }),
+                                    /*#__PURE__*/ (0, _jsxruntime.jsx)("p", {
+                                        className: "text-sm text-muted-foreground",
+                                        children: "Validating mathematical parameters and initializing Active Inference systems"
+                                    })
+                                ]
+                            })
+                        ]
+                    })
+                })
+            }),
+            /*#__PURE__*/ (0, _jsxruntime.jsx)(_agentcreationwizard.AgentCreationWizard, {
+                onAgentCreate: handleAgentCreate,
+                onCancel: onClose
+            }),
+            /*#__PURE__*/ (0, _jsxruntime.jsxs)(_card.Card, {
+                className: "p-4 bg-blue-50 border-blue-200",
+                children: [
+                    /*#__PURE__*/ (0, _jsxruntime.jsx)("h4", {
+                        className: "font-semibold text-blue-900 mb-2",
+                        children: "Active Inference Integration"
+                    }),
+                    /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                        className: "text-sm text-blue-800 space-y-1",
+                        children: [
+                            /*#__PURE__*/ (0, _jsxruntime.jsxs)("p", {
+                                children: [
+                                    "• ",
+                                    /*#__PURE__*/ (0, _jsxruntime.jsx)("strong", {
+                                        children: "API Validation:"
+                                    }),
+                                    " Mathematical constraints verified server-side"
+                                ]
+                            }),
+                            /*#__PURE__*/ (0, _jsxruntime.jsxs)("p", {
+                                children: [
+                                    "• ",
+                                    /*#__PURE__*/ (0, _jsxruntime.jsx)("strong", {
+                                        children: "Belief States:"
+                                    }),
+                                    " Real-time q(s) distribution with entropy calculation"
+                                ]
+                            }),
+                            /*#__PURE__*/ (0, _jsxruntime.jsxs)("p", {
+                                children: [
+                                    "• ",
+                                    /*#__PURE__*/ (0, _jsxruntime.jsx)("strong", {
+                                        children: "Free Energy:"
+                                    }),
+                                    " F = Accuracy + Complexity minimization"
+                                ]
+                            }),
+                            /*#__PURE__*/ (0, _jsxruntime.jsxs)("p", {
+                                children: [
+                                    "• ",
+                                    /*#__PURE__*/ (0, _jsxruntime.jsx)("strong", {
+                                        children: "pymdp Compatible:"
+                                    }),
+                                    " Ready for expert review and production deployment"
+                                ]
+                            })
+                        ]
+                    })
+                ]
+            })
+        ]
+    });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9Vc2Vycy9tYXR0aGV3bW9yb25leS9idWlsZHMvRnJlZUFnZW50aWNzL3dlYi9jb21wb25lbnRzL2NoYXJhY3Rlci1jcmVhdG9yLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJcInVzZSBjbGllbnRcIjtcblxuaW1wb3J0IFJlYWN0LCB7IHVzZVN0YXRlIH0gZnJvbSBcInJlYWN0XCI7XG5pbXBvcnQgeyBCdXR0b24gfSBmcm9tIFwiQC9jb21wb25lbnRzL3VpL2J1dHRvblwiO1xuaW1wb3J0IHsgQ2FyZCB9IGZyb20gXCJAL2NvbXBvbmVudHMvdWkvY2FyZFwiO1xuaW1wb3J0IHsgQWxlcnQsIEFsZXJ0RGVzY3JpcHRpb24gfSBmcm9tIFwiQC9jb21wb25lbnRzL3VpL2FsZXJ0XCI7XG5pbXBvcnQgeyBMb2FkZXIyLCBDaGVja0NpcmNsZSwgQWxlcnRUcmlhbmdsZSB9IGZyb20gXCJsdWNpZGUtcmVhY3RcIjtcbmltcG9ydCB7IEFnZW50Q3JlYXRpb25XaXphcmQgfSBmcm9tIFwiQC9jb21wb25lbnRzL3VpL2FnZW50LWNyZWF0aW9uLXdpemFyZFwiO1xuaW1wb3J0IHsgQWdlbnRUZW1wbGF0ZSB9IGZyb20gXCJAL2NvbXBvbmVudHMvdWkvYWdlbnQtdGVtcGxhdGUtc2VsZWN0b3JcIjtcbmltcG9ydCB7IEFnZW50Q29uZmlndXJhdGlvbkRhdGEgfSBmcm9tIFwiQC9jb21wb25lbnRzL3VpL2FnZW50LWNvbmZpZ3VyYXRpb24tZm9ybVwiO1xuaW1wb3J0IHsgYWdlbnRzQXBpLCBBZ2VudCwgQ3JlYXRlQWdlbnRSZXF1ZXN0IH0gZnJvbSBcIkAvbGliL2FwaS9hZ2VudHMtYXBpXCI7XG5cbmludGVyZmFjZSBDaGFyYWN0ZXJDcmVhdG9yUHJvcHMge1xuICBvbkNsb3NlOiAoKSA9PiB2b2lkO1xuICBvblN1Y2Nlc3M6IChhZ2VudDogQWdlbnQpID0+IHZvaWQ7XG59XG5cbmV4cG9ydCBmdW5jdGlvbiBDaGFyYWN0ZXJDcmVhdG9yKHtcbiAgb25DbG9zZSxcbiAgb25TdWNjZXNzLFxufTogQ2hhcmFjdGVyQ3JlYXRvclByb3BzKSB7XG4gIGNvbnN0IFtpc1N1Ym1pdHRpbmcsIHNldElzU3VibWl0dGluZ10gPSB1c2VTdGF0ZShmYWxzZSk7XG4gIGNvbnN0IFtlcnJvciwgc2V0RXJyb3JdID0gdXNlU3RhdGU8c3RyaW5nIHwgbnVsbD4obnVsbCk7XG4gIGNvbnN0IFtzdWNjZXNzLCBzZXRTdWNjZXNzXSA9IHVzZVN0YXRlPEFnZW50IHwgbnVsbD4obnVsbCk7XG5cbiAgY29uc3QgaGFuZGxlQWdlbnRDcmVhdGUgPSBhc3luYyAoXG4gICAgdGVtcGxhdGU6IEFnZW50VGVtcGxhdGUsXG4gICAgY29uZmlndXJhdGlvbjogQWdlbnRDb25maWd1cmF0aW9uRGF0YSxcbiAgKSA9PiB7XG4gICAgc2V0SXNTdWJtaXR0aW5nKHRydWUpO1xuICAgIHNldEVycm9yKG51bGwpO1xuXG4gICAgdHJ5IHtcbiAgICAgIC8vIENvbnZlcnQgdGVtcGxhdGUgYW5kIGNvbmZpZ3VyYXRpb24gdG8gQVBJIHJlcXVlc3QgZm9ybWF0XG4gICAgICBjb25zdCBjcmVhdGVSZXF1ZXN0OiBDcmVhdGVBZ2VudFJlcXVlc3QgPSB7XG4gICAgICAgIG5hbWU6IGNvbmZpZ3VyYXRpb24ubmFtZSxcblxuICAgICAgICAvLyBDb252ZXJ0IEFjdGl2ZSBJbmZlcmVuY2UgY29uZmlndXJhdGlvblxuICAgICAgICBhY3RpdmVJbmZlcmVuY2U6IHtcbiAgICAgICAgICB0ZW1wbGF0ZTogdGVtcGxhdGUuY2F0ZWdvcnksIC8vIFVzZSB0ZW1wbGF0ZSBjYXRlZ29yeSBhcyBBY3RpdmUgSW5mZXJlbmNlIHRlbXBsYXRlXG4gICAgICAgICAgc3RhdGVMYWJlbHM6IFtcIlN0YXRlMVwiLCBcIlN0YXRlMlwiLCBcIlN0YXRlM1wiXSxcbiAgICAgICAgICBudW1TdGF0ZXM6XG4gICAgICAgICAgICBjb25maWd1cmF0aW9uLm1hdGhlbWF0aWNzPy5tYXRyaWNlcz8uYU1hdHJpeD8ucm93cyB8fFxuICAgICAgICAgICAgdGVtcGxhdGUubWF0aGVtYXRpY2FsRm91bmRhdGlvbi5iZWxpZWZzU3RhdGVzLFxuICAgICAgICAgIG51bU9ic2VydmF0aW9uczpcbiAgICAgICAgICAgIGNvbmZpZ3VyYXRpb24ubWF0aGVtYXRpY3M/Lm1hdHJpY2VzPy5iTWF0cml4Py5vYnNlcnZhdGlvbnMgfHxcbiAgICAgICAgICAgIHRlbXBsYXRlLm1hdGhlbWF0aWNhbEZvdW5kYXRpb24ub2JzZXJ2YXRpb25Nb2RhbGl0aWVzLFxuICAgICAgICAgIG51bUFjdGlvbnM6IHRlbXBsYXRlLm1hdGhlbWF0aWNhbEZvdW5kYXRpb24uYWN0aW9uU3BhY2VzLFxuICAgICAgICAgIGdlbmVyYXRpdmVNb2RlbDoge1xuICAgICAgICAgICAgQTogW10sXG4gICAgICAgICAgICBCOiBbXSxcbiAgICAgICAgICAgIEM6IFtdLFxuICAgICAgICAgICAgRDogW10sXG4gICAgICAgICAgfSxcbiAgICAgICAgICBwcmVjaXNpb25QYXJhbWV0ZXJzOiB7XG4gICAgICAgICAgICBzZW5zb3J5OlxuICAgICAgICAgICAgICBjb25maWd1cmF0aW9uLm1hdGhlbWF0aWNzPy5wcmVjaXNpb24/LnNlbnNvcnlQcmVjaXNpb24gfHxcbiAgICAgICAgICAgICAgdGVtcGxhdGUubWF0aGVtYXRpY2FsRm91bmRhdGlvbi5kZWZhdWx0UHJlY2lzaW9uLnNlbnNvcnksXG4gICAgICAgICAgICBwb2xpY3k6XG4gICAgICAgICAgICAgIGNvbmZpZ3VyYXRpb24ubWF0aGVtYXRpY3M/LnByZWNpc2lvbj8ucG9saWN5UHJlY2lzaW9uIHx8XG4gICAgICAgICAgICAgIHRlbXBsYXRlLm1hdGhlbWF0aWNhbEZvdW5kYXRpb24uZGVmYXVsdFByZWNpc2lvbi5wb2xpY3ksXG4gICAgICAgICAgICBzdGF0ZTpcbiAgICAgICAgICAgICAgY29uZmlndXJhdGlvbi5tYXRoZW1hdGljcz8ucHJlY2lzaW9uPy5zdGF0ZVByZWNpc2lvbiB8fFxuICAgICAgICAgICAgICB0ZW1wbGF0ZS5tYXRoZW1hdGljYWxGb3VuZGF0aW9uLmRlZmF1bHRQcmVjaXNpb24uc3RhdGUsXG4gICAgICAgICAgfSxcbiAgICAgICAgICBtYXRoZW1hdGljYWxDb25zdHJhaW50czoge1xuICAgICAgICAgICAgbm9ybWFsaXplZEJlbGllZnM6IHRydWUsXG4gICAgICAgICAgICBzdG9jaGFzdGljTWF0cmljZXM6IHRydWUsXG4gICAgICAgICAgICBwcmVjaXNpb25Cb3VuZHM6IHRydWUsXG4gICAgICAgICAgfSxcbiAgICAgICAgfSxcblxuICAgICAgICAvLyBBZGQgbGVnYWN5IHBlcnNvbmFsaXR5IG1hcHBpbmcgZm9yIGJhY2t3YXJkIGNvbXBhdGliaWxpdHlcbiAgICAgICAgcGVyc29uYWxpdHk6IHVuZGVmaW5lZCxcblxuICAgICAgICBjYXBhYmlsaXRpZXM6IHRlbXBsYXRlLmNhcGFiaWxpdGllcyB8fCBbXG4gICAgICAgICAgXCJtb3ZlbWVudFwiLFxuICAgICAgICAgIFwicGVyY2VwdGlvblwiLFxuICAgICAgICAgIFwiY29tbXVuaWNhdGlvblwiLFxuICAgICAgICBdLFxuXG4gICAgICAgIHRhZ3M6IFtcbiAgICAgICAgICB0ZW1wbGF0ZS5jYXRlZ29yeSxcbiAgICAgICAgICB0ZW1wbGF0ZS5jb21wbGV4aXR5LFxuICAgICAgICAgIC4uLihjb25maWd1cmF0aW9uLmVudmlyb25tZW50Py50YWdzIHx8IFtdKSxcbiAgICAgICAgXSxcblxuICAgICAgICBtZXRhZGF0YToge1xuICAgICAgICAgIHRlbXBsYXRlSWQ6IHRlbXBsYXRlLmlkLFxuICAgICAgICAgIHRlbXBsYXRlTmFtZTogdGVtcGxhdGUubmFtZSxcbiAgICAgICAgICBjb21wbGV4aXR5OiB0ZW1wbGF0ZS5jb21wbGV4aXR5LFxuICAgICAgICAgIGRlc2NyaXB0aW9uOiBjb25maWd1cmF0aW9uLmRlc2NyaXB0aW9uLFxuICAgICAgICAgIG1hdGhlbWF0aWNhbEZvdW5kYXRpb246IHRlbXBsYXRlLm1hdGhlbWF0aWNhbEZvdW5kYXRpb24sXG4gICAgICAgICAgY3JlYXRlZFZpYVdpemFyZDogdHJ1ZSxcbiAgICAgICAgICBjb25maWd1cmF0aW9uVmVyc2lvbjogXCIxLjBcIixcbiAgICAgICAgICAuLi4oY29uZmlndXJhdGlvbi5hZHZhbmNlZD8uY3VzdG9tUGFyYW1ldGVycyB8fCB7fSksXG4gICAgICAgIH0sXG4gICAgICB9O1xuXG4gICAgICAvLyBDcmVhdGUgYWdlbnQgdmlhIEFQSVxuICAgICAgY29uc3QgcmVzdWx0ID0gYXdhaXQgYWdlbnRzQXBpLmNyZWF0ZUFnZW50KGNyZWF0ZVJlcXVlc3QpO1xuXG4gICAgICBzZXRTdWNjZXNzKHJlc3VsdC5hZ2VudCk7XG5cbiAgICAgIC8vIFNob3cgc3VjY2VzcyBicmllZmx5LCB0aGVuIGNhbGwgc3VjY2VzcyBjYWxsYmFja1xuICAgICAgc2V0VGltZW91dCgoKSA9PiB7XG4gICAgICAgIG9uU3VjY2VzcyhyZXN1bHQuYWdlbnQpO1xuICAgICAgfSwgMTUwMCk7XG4gICAgfSBjYXRjaCAoZXJyKSB7XG4gICAgICBjb25zdCBlcnJvck1lc3NhZ2UgPVxuICAgICAgICBlcnIgaW5zdGFuY2VvZiBFcnJvciA/IGVyci5tZXNzYWdlIDogXCJVbmtub3duIGVycm9yIG9jY3VycmVkXCI7XG4gICAgICBzZXRFcnJvcihlcnJvck1lc3NhZ2UpO1xuICAgICAgY29uc29sZS5lcnJvcihcIkFnZW50IGNyZWF0aW9uIGZhaWxlZDpcIiwgZXJyKTtcbiAgICB9IGZpbmFsbHkge1xuICAgICAgc2V0SXNTdWJtaXR0aW5nKGZhbHNlKTtcbiAgICB9XG4gIH07XG5cbiAgLy8gSGFuZGxlIGNyZWF0aW5nIGZyb20gdGVtcGxhdGUgZGlyZWN0bHkgKGJhY2t3YXJkIGNvbXBhdGliaWxpdHkpXG4gIGNvbnN0IGhhbmRsZVRlbXBsYXRlQ3JlYXRlID0gYXN5bmMgKHRlbXBsYXRlOiBBZ2VudFRlbXBsYXRlKSA9PiB7XG4gICAgc2V0SXNTdWJtaXR0aW5nKHRydWUpO1xuICAgIHNldEVycm9yKG51bGwpO1xuXG4gICAgdHJ5IHtcbiAgICAgIC8vIENyZWF0ZSBhZ2VudCB1c2luZyB0ZW1wbGF0ZSBtZXRob2RcbiAgICAgIGNvbnN0IHJlc3VsdCA9IGF3YWl0IGFnZW50c0FwaS5jcmVhdGVBZ2VudEZyb21UZW1wbGF0ZSh7XG4gICAgICAgIHRlbXBsYXRlOiB0ZW1wbGF0ZS5jYXRlZ29yeSxcbiAgICAgICAgbmFtZTogYCR7dGVtcGxhdGUubmFtZX0gJHtEYXRlLm5vdygpfWAsXG4gICAgICAgIHN0YXRlTGFiZWxzOiBbXCJFeHBsb3JlXCIsIFwiUmVzdFwiLCBcIkNvbW11bmljYXRlXCIsIFwiUGxhblwiXSxcbiAgICAgICAgcHJlY2lzaW9uUGFyYW1ldGVyczoge1xuICAgICAgICAgIHNlbnNvcnk6XG4gICAgICAgICAgICB0ZW1wbGF0ZS5tYXRoZW1hdGljYWxGb3VuZGF0aW9uLmRlZmF1bHRQcmVjaXNpb24uc2Vuc29yeSB8fCAxNixcbiAgICAgICAgICBwb2xpY3k6IHRlbXBsYXRlLm1hdGhlbWF0aWNhbEZvdW5kYXRpb24uZGVmYXVsdFByZWNpc2lvbi5wb2xpY3kgfHwgMTIsXG4gICAgICAgICAgc3RhdGU6IHRlbXBsYXRlLm1hdGhlbWF0aWNhbEZvdW5kYXRpb24uZGVmYXVsdFByZWNpc2lvbi5zdGF0ZSB8fCAyLFxuICAgICAgICB9LFxuICAgICAgICB0YWdzOiBbdGVtcGxhdGUuY2F0ZWdvcnksIHRlbXBsYXRlLmNvbXBsZXhpdHldLFxuICAgICAgICBtZXRhZGF0YToge1xuICAgICAgICAgIHRlbXBsYXRlSWQ6IHRlbXBsYXRlLmlkLFxuICAgICAgICAgIHRlbXBsYXRlTmFtZTogdGVtcGxhdGUubmFtZSxcbiAgICAgICAgICBjb21wbGV4aXR5OiB0ZW1wbGF0ZS5jb21wbGV4aXR5LFxuICAgICAgICAgIGNyZWF0ZWREaXJlY3RseTogdHJ1ZSxcbiAgICAgICAgfSxcbiAgICAgIH0pO1xuXG4gICAgICBzZXRTdWNjZXNzKHJlc3VsdC5hZ2VudCk7XG5cbiAgICAgIHNldFRpbWVvdXQoKCkgPT4ge1xuICAgICAgICBvblN1Y2Nlc3MocmVzdWx0LmFnZW50KTtcbiAgICAgIH0sIDE1MDApO1xuICAgIH0gY2F0Y2ggKGVycikge1xuICAgICAgY29uc3QgZXJyb3JNZXNzYWdlID1cbiAgICAgICAgZXJyIGluc3RhbmNlb2YgRXJyb3IgPyBlcnIubWVzc2FnZSA6IFwiVW5rbm93biBlcnJvciBvY2N1cnJlZFwiO1xuICAgICAgc2V0RXJyb3IoZXJyb3JNZXNzYWdlKTtcbiAgICB9IGZpbmFsbHkge1xuICAgICAgc2V0SXNTdWJtaXR0aW5nKGZhbHNlKTtcbiAgICB9XG4gIH07XG5cbiAgaWYgKHN1Y2Nlc3MpIHtcbiAgICByZXR1cm4gKFxuICAgICAgPENhcmQgY2xhc3NOYW1lPVwicC02XCI+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC1jZW50ZXIgc3BhY2UteS00XCI+XG4gICAgICAgICAgPENoZWNrQ2lyY2xlIGNsYXNzTmFtZT1cImgtMTYgdy0xNiB0ZXh0LWdyZWVuLTYwMCBteC1hdXRvXCIgLz5cbiAgICAgICAgICA8ZGl2PlxuICAgICAgICAgICAgPGgzIGNsYXNzTmFtZT1cInRleHQtbGcgZm9udC1zZW1pYm9sZCB0ZXh0LWdyZWVuLTkwMFwiPlxuICAgICAgICAgICAgICBBZ2VudCBDcmVhdGVkIFN1Y2Nlc3NmdWxseSFcbiAgICAgICAgICAgIDwvaDM+XG4gICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXNtIHRleHQtZ3JlZW4tNzAwIG10LTJcIj5cbiAgICAgICAgICAgICAgPHN0cm9uZz57c3VjY2Vzcy5uYW1lfTwvc3Ryb25nPiBoYXMgYmVlbiBjcmVhdGVkIHdpdGggQWN0aXZlXG4gICAgICAgICAgICAgIEluZmVyZW5jZSBjYXBhYmlsaXRpZXMuXG4gICAgICAgICAgICA8L3A+XG4gICAgICAgICAgICB7c3VjY2Vzcy5hY3RpdmVJbmZlcmVuY2UgJiYgKFxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm10LTQgcC0zIGJnLWdyZWVuLTUwIGJvcmRlciBib3JkZXItZ3JlZW4tMjAwIHJvdW5kZWQtbGdcIj5cbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInRleHQteHMgdGV4dC1ncmVlbi04MDAgc3BhY2UteS0xXCI+XG4gICAgICAgICAgICAgICAgICA8cD7igKIgVGVtcGxhdGU6IHtzdWNjZXNzLmFjdGl2ZUluZmVyZW5jZS50ZW1wbGF0ZX08L3A+XG4gICAgICAgICAgICAgICAgICA8cD7igKIgU3RhdGVzOiB7c3VjY2Vzcy5hY3RpdmVJbmZlcmVuY2UubnVtU3RhdGVzfTwvcD5cbiAgICAgICAgICAgICAgICAgIDxwPlxuICAgICAgICAgICAgICAgICAgICDigKIgUHJlY2lzaW9uIM6zOntcIiBcIn1cbiAgICAgICAgICAgICAgICAgICAge3N1Y2Nlc3MuYWN0aXZlSW5mZXJlbmNlLnByZWNpc2lvblBhcmFtZXRlcnMuc2Vuc29yeS50b0ZpeGVkKFxuICAgICAgICAgICAgICAgICAgICAgIDEsXG4gICAgICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgICAgICA8L3A+XG4gICAgICAgICAgICAgICAgICA8cD7igKIgTWF0aGVtYXRpY2FsIHZhbGlkYXRpb246IOKckyBQYXNzZWQ8L3A+XG4gICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgKX1cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgPC9kaXY+XG4gICAgICA8L0NhcmQ+XG4gICAgKTtcbiAgfVxuXG4gIHJldHVybiAoXG4gICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTZcIj5cbiAgICAgIHsvKiBIZWFkZXIgKi99XG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlblwiPlxuICAgICAgICA8ZGl2PlxuICAgICAgICAgIDxoMiBjbGFzc05hbWU9XCJ0ZXh0LTJ4bCBmb250LWJvbGRcIj5DcmVhdGUgQWN0aXZlIEluZmVyZW5jZSBBZ2VudDwvaDI+XG4gICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1tdXRlZC1mb3JlZ3JvdW5kIG10LTFcIj5cbiAgICAgICAgICAgIEJ1aWxkIGEgbWF0aGVtYXRpY2FsbHkgcmlnb3JvdXMgYWdlbnQgd2l0aCByZWFsLXRpbWUgdmlzdWFsaXphdGlvblxuICAgICAgICAgIDwvcD5cbiAgICAgICAgPC9kaXY+XG4gICAgICAgIDxCdXR0b24gdmFyaWFudD1cIm91dGxpbmVcIiBvbkNsaWNrPXtvbkNsb3NlfSBkaXNhYmxlZD17aXNTdWJtaXR0aW5nfT5cbiAgICAgICAgICBDYW5jZWxcbiAgICAgICAgPC9CdXR0b24+XG4gICAgICA8L2Rpdj5cblxuICAgICAgey8qIEVycm9yIERpc3BsYXkgKi99XG4gICAgICB7ZXJyb3IgJiYgKFxuICAgICAgICA8QWxlcnQgdmFyaWFudD1cImRlc3RydWN0aXZlXCI+XG4gICAgICAgICAgPEFsZXJ0VHJpYW5nbGUgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgPEFsZXJ0RGVzY3JpcHRpb24+XG4gICAgICAgICAgICA8c3Ryb25nPkNyZWF0aW9uIEZhaWxlZDo8L3N0cm9uZz4ge2Vycm9yfVxuICAgICAgICAgIDwvQWxlcnREZXNjcmlwdGlvbj5cbiAgICAgICAgPC9BbGVydD5cbiAgICAgICl9XG5cbiAgICAgIHsvKiBMb2FkaW5nIE92ZXJsYXkgKi99XG4gICAgICB7aXNTdWJtaXR0aW5nICYmIChcbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJyZWxhdGl2ZVwiPlxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYWJzb2x1dGUgaW5zZXQtMCBiZy1iYWNrZ3JvdW5kLzgwIGJhY2tkcm9wLWJsdXItc20gei0xMCBmbGV4IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWNlbnRlciByb3VuZGVkLWxnXCI+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0zXCI+XG4gICAgICAgICAgICAgIDxMb2FkZXIyIGNsYXNzTmFtZT1cImgtNiB3LTYgYW5pbWF0ZS1zcGluXCIgLz5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LWNlbnRlclwiPlxuICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cImZvbnQtbWVkaXVtXCI+Q3JlYXRpbmcgQWdlbnQuLi48L3A+XG4gICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAgICAgIFZhbGlkYXRpbmcgbWF0aGVtYXRpY2FsIHBhcmFtZXRlcnMgYW5kIGluaXRpYWxpemluZyBBY3RpdmVcbiAgICAgICAgICAgICAgICAgIEluZmVyZW5jZSBzeXN0ZW1zXG4gICAgICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICA8L2Rpdj5cbiAgICAgICl9XG5cbiAgICAgIHsvKiBBZ2VudCBDcmVhdGlvbiBXaXphcmQgKi99XG4gICAgICA8QWdlbnRDcmVhdGlvbldpemFyZFxuICAgICAgICBvbkFnZW50Q3JlYXRlPXtoYW5kbGVBZ2VudENyZWF0ZX1cbiAgICAgICAgb25DYW5jZWw9e29uQ2xvc2V9XG4gICAgICAvPlxuXG4gICAgICB7LyogTWF0aGVtYXRpY2FsIEluZm9ybWF0aW9uICovfVxuICAgICAgPENhcmQgY2xhc3NOYW1lPVwicC00IGJnLWJsdWUtNTAgYm9yZGVyLWJsdWUtMjAwXCI+XG4gICAgICAgIDxoNCBjbGFzc05hbWU9XCJmb250LXNlbWlib2xkIHRleHQtYmx1ZS05MDAgbWItMlwiPlxuICAgICAgICAgIEFjdGl2ZSBJbmZlcmVuY2UgSW50ZWdyYXRpb25cbiAgICAgICAgPC9oND5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LXNtIHRleHQtYmx1ZS04MDAgc3BhY2UteS0xXCI+XG4gICAgICAgICAgPHA+XG4gICAgICAgICAgICDigKIgPHN0cm9uZz5BUEkgVmFsaWRhdGlvbjo8L3N0cm9uZz4gTWF0aGVtYXRpY2FsIGNvbnN0cmFpbnRzIHZlcmlmaWVkXG4gICAgICAgICAgICBzZXJ2ZXItc2lkZVxuICAgICAgICAgIDwvcD5cbiAgICAgICAgICA8cD5cbiAgICAgICAgICAgIOKAoiA8c3Ryb25nPkJlbGllZiBTdGF0ZXM6PC9zdHJvbmc+IFJlYWwtdGltZSBxKHMpIGRpc3RyaWJ1dGlvbiB3aXRoXG4gICAgICAgICAgICBlbnRyb3B5IGNhbGN1bGF0aW9uXG4gICAgICAgICAgPC9wPlxuICAgICAgICAgIDxwPlxuICAgICAgICAgICAg4oCiIDxzdHJvbmc+RnJlZSBFbmVyZ3k6PC9zdHJvbmc+IEYgPSBBY2N1cmFjeSArIENvbXBsZXhpdHlcbiAgICAgICAgICAgIG1pbmltaXphdGlvblxuICAgICAgICAgIDwvcD5cbiAgICAgICAgICA8cD5cbiAgICAgICAgICAgIOKAoiA8c3Ryb25nPnB5bWRwIENvbXBhdGlibGU6PC9zdHJvbmc+IFJlYWR5IGZvciBleHBlcnQgcmV2aWV3IGFuZFxuICAgICAgICAgICAgcHJvZHVjdGlvbiBkZXBsb3ltZW50XG4gICAgICAgICAgPC9wPlxuICAgICAgICA8L2Rpdj5cbiAgICAgIDwvQ2FyZD5cbiAgICA8L2Rpdj5cbiAgKTtcbn1cbiJdLCJuYW1lcyI6WyJDaGFyYWN0ZXJDcmVhdG9yIiwib25DbG9zZSIsIm9uU3VjY2VzcyIsImlzU3VibWl0dGluZyIsInNldElzU3VibWl0dGluZyIsInVzZVN0YXRlIiwiZXJyb3IiLCJzZXRFcnJvciIsInN1Y2Nlc3MiLCJzZXRTdWNjZXNzIiwiaGFuZGxlQWdlbnRDcmVhdGUiLCJ0ZW1wbGF0ZSIsImNvbmZpZ3VyYXRpb24iLCJjcmVhdGVSZXF1ZXN0IiwibmFtZSIsImFjdGl2ZUluZmVyZW5jZSIsImNhdGVnb3J5Iiwic3RhdGVMYWJlbHMiLCJudW1TdGF0ZXMiLCJtYXRoZW1hdGljcyIsIm1hdHJpY2VzIiwiYU1hdHJpeCIsInJvd3MiLCJtYXRoZW1hdGljYWxGb3VuZGF0aW9uIiwiYmVsaWVmc1N0YXRlcyIsIm51bU9ic2VydmF0aW9ucyIsImJNYXRyaXgiLCJvYnNlcnZhdGlvbnMiLCJvYnNlcnZhdGlvbk1vZGFsaXRpZXMiLCJudW1BY3Rpb25zIiwiYWN0aW9uU3BhY2VzIiwiZ2VuZXJhdGl2ZU1vZGVsIiwiQSIsIkIiLCJDIiwiRCIsInByZWNpc2lvblBhcmFtZXRlcnMiLCJzZW5zb3J5IiwicHJlY2lzaW9uIiwic2Vuc29yeVByZWNpc2lvbiIsImRlZmF1bHRQcmVjaXNpb24iLCJwb2xpY3kiLCJwb2xpY3lQcmVjaXNpb24iLCJzdGF0ZSIsInN0YXRlUHJlY2lzaW9uIiwibWF0aGVtYXRpY2FsQ29uc3RyYWludHMiLCJub3JtYWxpemVkQmVsaWVmcyIsInN0b2NoYXN0aWNNYXRyaWNlcyIsInByZWNpc2lvbkJvdW5kcyIsInBlcnNvbmFsaXR5IiwidW5kZWZpbmVkIiwiY2FwYWJpbGl0aWVzIiwidGFncyIsImNvbXBsZXhpdHkiLCJlbnZpcm9ubWVudCIsIm1ldGFkYXRhIiwidGVtcGxhdGVJZCIsImlkIiwidGVtcGxhdGVOYW1lIiwiZGVzY3JpcHRpb24iLCJjcmVhdGVkVmlhV2l6YXJkIiwiY29uZmlndXJhdGlvblZlcnNpb24iLCJhZHZhbmNlZCIsImN1c3RvbVBhcmFtZXRlcnMiLCJyZXN1bHQiLCJhZ2VudHNBcGkiLCJjcmVhdGVBZ2VudCIsImFnZW50Iiwic2V0VGltZW91dCIsImVyciIsImVycm9yTWVzc2FnZSIsIkVycm9yIiwibWVzc2FnZSIsImNvbnNvbGUiLCJoYW5kbGVUZW1wbGF0ZUNyZWF0ZSIsImNyZWF0ZUFnZW50RnJvbVRlbXBsYXRlIiwiRGF0ZSIsIm5vdyIsImNyZWF0ZWREaXJlY3RseSIsIkNhcmQiLCJjbGFzc05hbWUiLCJkaXYiLCJDaGVja0NpcmNsZSIsImgzIiwicCIsInN0cm9uZyIsInRvRml4ZWQiLCJoMiIsIkJ1dHRvbiIsInZhcmlhbnQiLCJvbkNsaWNrIiwiZGlzYWJsZWQiLCJBbGVydCIsIkFsZXJ0VHJpYW5nbGUiLCJBbGVydERlc2NyaXB0aW9uIiwiTG9hZGVyMiIsIkFnZW50Q3JlYXRpb25XaXphcmQiLCJvbkFnZW50Q3JlYXRlIiwib25DYW5jZWwiLCJoNCJdLCJtYXBwaW5ncyI6IkFBQUE7Ozs7OytCQWlCZ0JBOzs7ZUFBQUE7Ozs7K0RBZmdCO3dCQUNUO3NCQUNGO3VCQUNtQjs2QkFDWTtxQ0FDaEI7MkJBR2lCOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFPOUMsU0FBU0EsaUJBQWlCLEVBQy9CQyxPQUFPLEVBQ1BDLFNBQVMsRUFDYTtJQUN0QixNQUFNLENBQUNDLGNBQWNDLGdCQUFnQixHQUFHQyxJQUFBQSxlQUFRLEVBQUM7SUFDakQsTUFBTSxDQUFDQyxPQUFPQyxTQUFTLEdBQUdGLElBQUFBLGVBQVEsRUFBZ0I7SUFDbEQsTUFBTSxDQUFDRyxTQUFTQyxXQUFXLEdBQUdKLElBQUFBLGVBQVEsRUFBZTtJQUVyRCxNQUFNSyxvQkFBb0IsT0FDeEJDLFVBQ0FDO1FBRUFSLGdCQUFnQjtRQUNoQkcsU0FBUztRQUVULElBQUk7WUFDRiwyREFBMkQ7WUFDM0QsTUFBTU0sZ0JBQW9DO2dCQUN4Q0MsTUFBTUYsY0FBY0UsSUFBSTtnQkFFeEIseUNBQXlDO2dCQUN6Q0MsaUJBQWlCO29CQUNmSixVQUFVQSxTQUFTSyxRQUFRO29CQUMzQkMsYUFBYTt3QkFBQzt3QkFBVTt3QkFBVTtxQkFBUztvQkFDM0NDLFdBQ0VOLGNBQWNPLFdBQVcsRUFBRUMsVUFBVUMsU0FBU0MsUUFDOUNYLFNBQVNZLHNCQUFzQixDQUFDQyxhQUFhO29CQUMvQ0MsaUJBQ0ViLGNBQWNPLFdBQVcsRUFBRUMsVUFBVU0sU0FBU0MsZ0JBQzlDaEIsU0FBU1ksc0JBQXNCLENBQUNLLHFCQUFxQjtvQkFDdkRDLFlBQVlsQixTQUFTWSxzQkFBc0IsQ0FBQ08sWUFBWTtvQkFDeERDLGlCQUFpQjt3QkFDZkMsR0FBRyxFQUFFO3dCQUNMQyxHQUFHLEVBQUU7d0JBQ0xDLEdBQUcsRUFBRTt3QkFDTEMsR0FBRyxFQUFFO29CQUNQO29CQUNBQyxxQkFBcUI7d0JBQ25CQyxTQUNFekIsY0FBY08sV0FBVyxFQUFFbUIsV0FBV0Msb0JBQ3RDNUIsU0FBU1ksc0JBQXNCLENBQUNpQixnQkFBZ0IsQ0FBQ0gsT0FBTzt3QkFDMURJLFFBQ0U3QixjQUFjTyxXQUFXLEVBQUVtQixXQUFXSSxtQkFDdEMvQixTQUFTWSxzQkFBc0IsQ0FBQ2lCLGdCQUFnQixDQUFDQyxNQUFNO3dCQUN6REUsT0FDRS9CLGNBQWNPLFdBQVcsRUFBRW1CLFdBQVdNLGtCQUN0Q2pDLFNBQVNZLHNCQUFzQixDQUFDaUIsZ0JBQWdCLENBQUNHLEtBQUs7b0JBQzFEO29CQUNBRSx5QkFBeUI7d0JBQ3ZCQyxtQkFBbUI7d0JBQ25CQyxvQkFBb0I7d0JBQ3BCQyxpQkFBaUI7b0JBQ25CO2dCQUNGO2dCQUVBLDREQUE0RDtnQkFDNURDLGFBQWFDO2dCQUViQyxjQUFjeEMsU0FBU3dDLFlBQVksSUFBSTtvQkFDckM7b0JBQ0E7b0JBQ0E7aUJBQ0Q7Z0JBRURDLE1BQU07b0JBQ0p6QyxTQUFTSyxRQUFRO29CQUNqQkwsU0FBUzBDLFVBQVU7dUJBQ2Z6QyxjQUFjMEMsV0FBVyxFQUFFRixRQUFRLEVBQUU7aUJBQzFDO2dCQUVERyxVQUFVO29CQUNSQyxZQUFZN0MsU0FBUzhDLEVBQUU7b0JBQ3ZCQyxjQUFjL0MsU0FBU0csSUFBSTtvQkFDM0J1QyxZQUFZMUMsU0FBUzBDLFVBQVU7b0JBQy9CTSxhQUFhL0MsY0FBYytDLFdBQVc7b0JBQ3RDcEMsd0JBQXdCWixTQUFTWSxzQkFBc0I7b0JBQ3ZEcUMsa0JBQWtCO29CQUNsQkMsc0JBQXNCO29CQUN0QixHQUFJakQsY0FBY2tELFFBQVEsRUFBRUMsb0JBQW9CLENBQUMsQ0FBQztnQkFDcEQ7WUFDRjtZQUVBLHVCQUF1QjtZQUN2QixNQUFNQyxTQUFTLE1BQU1DLG9CQUFTLENBQUNDLFdBQVcsQ0FBQ3JEO1lBRTNDSixXQUFXdUQsT0FBT0csS0FBSztZQUV2QixtREFBbUQ7WUFDbkRDLFdBQVc7Z0JBQ1RsRSxVQUFVOEQsT0FBT0csS0FBSztZQUN4QixHQUFHO1FBQ0wsRUFBRSxPQUFPRSxLQUFLO1lBQ1osTUFBTUMsZUFDSkQsZUFBZUUsUUFBUUYsSUFBSUcsT0FBTyxHQUFHO1lBQ3ZDakUsU0FBUytEO1lBQ1RHLFFBQVFuRSxLQUFLLENBQUMsMEJBQTBCK0Q7UUFDMUMsU0FBVTtZQUNSakUsZ0JBQWdCO1FBQ2xCO0lBQ0Y7SUFFQSxrRUFBa0U7SUFDbEUsTUFBTXNFLHVCQUF1QixPQUFPL0Q7UUFDbENQLGdCQUFnQjtRQUNoQkcsU0FBUztRQUVULElBQUk7WUFDRixxQ0FBcUM7WUFDckMsTUFBTXlELFNBQVMsTUFBTUMsb0JBQVMsQ0FBQ1UsdUJBQXVCLENBQUM7Z0JBQ3JEaEUsVUFBVUEsU0FBU0ssUUFBUTtnQkFDM0JGLE1BQU0sQ0FBQyxFQUFFSCxTQUFTRyxJQUFJLENBQUMsQ0FBQyxFQUFFOEQsS0FBS0MsR0FBRyxHQUFHLENBQUM7Z0JBQ3RDNUQsYUFBYTtvQkFBQztvQkFBVztvQkFBUTtvQkFBZTtpQkFBTztnQkFDdkRtQixxQkFBcUI7b0JBQ25CQyxTQUNFMUIsU0FBU1ksc0JBQXNCLENBQUNpQixnQkFBZ0IsQ0FBQ0gsT0FBTyxJQUFJO29CQUM5REksUUFBUTlCLFNBQVNZLHNCQUFzQixDQUFDaUIsZ0JBQWdCLENBQUNDLE1BQU0sSUFBSTtvQkFDbkVFLE9BQU9oQyxTQUFTWSxzQkFBc0IsQ0FBQ2lCLGdCQUFnQixDQUFDRyxLQUFLLElBQUk7Z0JBQ25FO2dCQUNBUyxNQUFNO29CQUFDekMsU0FBU0ssUUFBUTtvQkFBRUwsU0FBUzBDLFVBQVU7aUJBQUM7Z0JBQzlDRSxVQUFVO29CQUNSQyxZQUFZN0MsU0FBUzhDLEVBQUU7b0JBQ3ZCQyxjQUFjL0MsU0FBU0csSUFBSTtvQkFDM0J1QyxZQUFZMUMsU0FBUzBDLFVBQVU7b0JBQy9CeUIsaUJBQWlCO2dCQUNuQjtZQUNGO1lBRUFyRSxXQUFXdUQsT0FBT0csS0FBSztZQUV2QkMsV0FBVztnQkFDVGxFLFVBQVU4RCxPQUFPRyxLQUFLO1lBQ3hCLEdBQUc7UUFDTCxFQUFFLE9BQU9FLEtBQUs7WUFDWixNQUFNQyxlQUNKRCxlQUFlRSxRQUFRRixJQUFJRyxPQUFPLEdBQUc7WUFDdkNqRSxTQUFTK0Q7UUFDWCxTQUFVO1lBQ1JsRSxnQkFBZ0I7UUFDbEI7SUFDRjtJQUVBLElBQUlJLFNBQVM7UUFDWCxxQkFDRSxxQkFBQ3VFLFVBQUk7WUFBQ0MsV0FBVTtzQkFDZCxjQUFBLHNCQUFDQztnQkFBSUQsV0FBVTs7a0NBQ2IscUJBQUNFLHdCQUFXO3dCQUFDRixXQUFVOztrQ0FDdkIsc0JBQUNDOzswQ0FDQyxxQkFBQ0U7Z0NBQUdILFdBQVU7MENBQXVDOzswQ0FHckQsc0JBQUNJO2dDQUFFSixXQUFVOztrREFDWCxxQkFBQ0s7a0RBQVE3RSxRQUFRTSxJQUFJOztvQ0FBVTs7OzRCQUdoQ04sUUFBUU8sZUFBZSxrQkFDdEIscUJBQUNrRTtnQ0FBSUQsV0FBVTswQ0FDYixjQUFBLHNCQUFDQztvQ0FBSUQsV0FBVTs7c0RBQ2Isc0JBQUNJOztnREFBRTtnREFBYTVFLFFBQVFPLGVBQWUsQ0FBQ0osUUFBUTs7O3NEQUNoRCxzQkFBQ3lFOztnREFBRTtnREFBVzVFLFFBQVFPLGVBQWUsQ0FBQ0csU0FBUzs7O3NEQUMvQyxzQkFBQ2tFOztnREFBRTtnREFDYztnREFDZDVFLFFBQVFPLGVBQWUsQ0FBQ3FCLG1CQUFtQixDQUFDQyxPQUFPLENBQUNpRCxPQUFPLENBQzFEOzs7c0RBR0oscUJBQUNGO3NEQUFFOzs7Ozs7Ozs7O0lBUW5CO0lBRUEscUJBQ0Usc0JBQUNIO1FBQUlELFdBQVU7OzBCQUViLHNCQUFDQztnQkFBSUQsV0FBVTs7a0NBQ2Isc0JBQUNDOzswQ0FDQyxxQkFBQ007Z0NBQUdQLFdBQVU7MENBQXFCOzswQ0FDbkMscUJBQUNJO2dDQUFFSixXQUFVOzBDQUE2Qjs7OztrQ0FJNUMscUJBQUNRLGNBQU07d0JBQUNDLFNBQVE7d0JBQVVDLFNBQVN6Rjt3QkFBUzBGLFVBQVV4RjtrQ0FBYzs7OztZQU1yRUcsdUJBQ0Msc0JBQUNzRixZQUFLO2dCQUFDSCxTQUFROztrQ0FDYixxQkFBQ0ksMEJBQWE7d0JBQUNiLFdBQVU7O2tDQUN6QixzQkFBQ2MsdUJBQWdCOzswQ0FDZixxQkFBQ1Q7MENBQU87OzRCQUF5Qjs0QkFBRS9FOzs7OztZQU14Q0gsOEJBQ0MscUJBQUM4RTtnQkFBSUQsV0FBVTswQkFDYixjQUFBLHFCQUFDQztvQkFBSUQsV0FBVTs4QkFDYixjQUFBLHNCQUFDQzt3QkFBSUQsV0FBVTs7MENBQ2IscUJBQUNlLG9CQUFPO2dDQUFDZixXQUFVOzswQ0FDbkIsc0JBQUNDO2dDQUFJRCxXQUFVOztrREFDYixxQkFBQ0k7d0NBQUVKLFdBQVU7a0RBQWM7O2tEQUMzQixxQkFBQ0k7d0NBQUVKLFdBQVU7a0RBQWdDOzs7Ozs7OzswQkFXdkQscUJBQUNnQix3Q0FBbUI7Z0JBQ2xCQyxlQUFldkY7Z0JBQ2Z3RixVQUFVakc7OzBCQUlaLHNCQUFDOEUsVUFBSTtnQkFBQ0MsV0FBVTs7a0NBQ2QscUJBQUNtQjt3QkFBR25CLFdBQVU7a0NBQW1DOztrQ0FHakQsc0JBQUNDO3dCQUFJRCxXQUFVOzswQ0FDYixzQkFBQ0k7O29DQUFFO2tEQUNDLHFCQUFDQztrREFBTzs7b0NBQXdCOzs7MENBR3BDLHNCQUFDRDs7b0NBQUU7a0RBQ0MscUJBQUNDO2tEQUFPOztvQ0FBdUI7OzswQ0FHbkMsc0JBQUNEOztvQ0FBRTtrREFDQyxxQkFBQ0M7a0RBQU87O29DQUFxQjs7OzBDQUdqQyxzQkFBQ0Q7O29DQUFFO2tEQUNDLHFCQUFDQztrREFBTzs7b0NBQTBCOzs7Ozs7Ozs7QUFPaEQifQ==

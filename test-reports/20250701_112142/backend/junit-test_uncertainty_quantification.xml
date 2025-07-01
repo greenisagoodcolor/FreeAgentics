@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="10" skipped="0" tests="25" time="1.405" timestamp="2025-07-01T11:24:18.853008" hostname="Matthews-MacBook-Air.local"><testcase classname="tests.unit.test_uncertainty_quantification.TestConfidenceLevel" name="test_confidence_levels" time="0.000" /><testcase classname="tests.unit.test_uncertainty_quantification.TestConfidenceLevel" name="test_confidence_level_ordering" time="0.000" /><testcase classname="tests.unit.test_uncertainty_quantification.TestUncertaintyType" name="test_uncertainty_types" time="0.000" /><testcase classname="tests.unit.test_uncertainty_quantification.TestUncertaintyType" name="test_uncertainty_type_coverage" time="0.000" /><testcase classname="tests.unit.test_uncertainty_quantification.TestConfidenceInterval" name="test_confidence_interval_creation" time="0.000" /><testcase classname="tests.unit.test_uncertainty_quantification.TestConfidenceInterval" name="test_confidence_interval_validation" time="0.000" /><testcase classname="tests.unit.test_uncertainty_quantification.TestConvergenceMetrics" name="test_convergence_metrics_creation" time="0.000" /><testcase classname="tests.unit.test_uncertainty_quantification.TestConvergenceMetrics" name="test_convergence_decision_logic" time="0.000" /><testcase classname="tests.unit.test_uncertainty_quantification.TestUncertaintyPropagation" name="test_uncertainty_propagation_creation" time="0.000" /><testcase classname="tests.unit.test_uncertainty_quantification.TestUncertaintyPropagation" name="test_uncertainty_conservation" time="0.000" /><testcase classname="tests.unit.test_uncertainty_quantification.TestStatisticalValidation" name="test_kolmogorov_smirnov_test" time="0.001"><failure message="assert False&#10; +  where False = isinstance(np.True_, bool)">tests/unit/test_uncertainty_quantification.py:229: in test_kolmogorov_smirnov_test
+    assert isinstance(is_significant, bool)
+E   assert False
+E    +  where False = isinstance(np.True_, bool)</failure></testcase><testcase classname="tests.unit.test_uncertainty_quantification.TestStatisticalValidation" name="test_kolmogorov_smirnov_identical_distributions" time="0.001"><failure message="assert np.False_ is False">tests/unit/test_uncertainty_quantification.py:243: in test_kolmogorov_smirnov_identical_distributions
+    assert is_significant is False
+E   assert np.False_ is False</failure></testcase><testcase classname="tests.unit.test_uncertainty_quantification.TestStatisticalValidation" name="test_anderson_darling_test" time="0.001"><failure message="assert False&#10; +  where False = isinstance(np.True_, bool)">tests/unit/test_uncertainty_quantification.py:256: in test_anderson_darling_test
+    assert isinstance(is_normal, bool)
+E   assert False
+E    +  where False = isinstance(np.True_, bool)</failure></testcase><testcase classname="tests.unit.test_uncertainty_quantification.TestStatisticalValidation" name="test_anderson_darling_non_normal" time="0.001"><failure message="assert np.False_ is False">tests/unit/test_uncertainty_quantification.py:271: in test_anderson_darling_non_normal
+    assert is_normal is False
+E   assert np.False_ is False</failure></testcase><testcase classname="tests.unit.test_uncertainty_quantification.TestStatisticalValidation" name="test_chi_squared_goodness_of_fit" time="0.001"><failure message="assert False&#10; +  where False = isinstance(np.True_, bool)">tests/unit/test_uncertainty_quantification.py:284: in test_chi_squared_goodness_of_fit
+    assert isinstance(is_good_fit, bool)
+E   assert False
+E    +  where False = isinstance(np.True_, bool)</failure></testcase><testcase classname="tests.unit.test_uncertainty_quantification.TestStatisticalValidation" name="test_chi_squared_perfect_fit" time="0.000"><failure message="assert np.True_ is True">tests/unit/test_uncertainty_quantification.py:298: in test_chi_squared_perfect_fit
+    assert is_good_fit is True
+E   assert np.True_ is True</failure></testcase><testcase classname="tests.unit.test_uncertainty_quantification.TestUncertaintyQuantificationEngine" name="test_quantifier_initialization" time="0.001" /><testcase classname="tests.unit.test_uncertainty_quantification.TestUncertaintyQuantificationEngine" name="test_calculate_bayesian_confidence_intervals" time="0.000" /><testcase classname="tests.unit.test_uncertainty_quantification.TestUncertaintyQuantificationEngine" name="test_calculate_bayesian_confidence_intervals_quantile" time="0.000" /><testcase classname="tests.unit.test_uncertainty_quantification.TestUncertaintyQuantificationEngine" name="test_calculate_convergence_metrics" time="0.000" /><testcase classname="tests.unit.test_uncertainty_quantification.TestUncertaintyQuantificationEngine" name="test_propagate_uncertainty" time="0.001" /><testcase classname="tests.unit.test_uncertainty_quantification.TestUncertaintyQuantificationEngine" name="test_validate_statistical_significance" time="0.001"><failure message="assert False&#10; +  where False = isinstance(np.False_, bool)">tests/unit/test_uncertainty_quantification.py:420: in test_validate_statistical_significance
+    assert isinstance(result[0], bool)
+E   assert False
+E    +  where False = isinstance(np.False_, bool)</failure></testcase><testcase classname="tests.unit.test_uncertainty_quantification.TestUncertaintyQuantificationEngine" name="test_export_publication_quality_statistics" time="0.001"><failure message="KeyError: 'test_agent'">tests/unit/test_uncertainty_quantification.py:433: in test_export_publication_quality_statistics
+    self.quantifier.calculate_convergence_metrics(agent_id, belief2)
+inference/engine/uncertainty_quantification.py:240: in calculate_convergence_metrics
+    convergence_rate = self._calculate_convergence_rate(agent_id)
+inference/engine/uncertainty_quantification.py:489: in _calculate_convergence_rate
+    if len(self.convergence_history[agent_id]) &lt; 3:
+E   KeyError: 'test_agent'</failure></testcase><testcase classname="tests.unit.test_uncertainty_quantification.TestUncertaintyQuantificationIntegration" name="test_full_uncertainty_analysis_workflow" time="0.000"><failure message="KeyError: 'workflow_test_agent'">tests/unit/test_uncertainty_quantification.py:472: in test_full_uncertainty_analysis_workflow
+    metrics = quantifier.calculate_convergence_metrics(
+inference/engine/uncertainty_quantification.py:240: in calculate_convergence_metrics
+    convergence_rate = self._calculate_convergence_rate(agent_id)
+inference/engine/uncertainty_quantification.py:489: in _calculate_convergence_rate
+    if len(self.convergence_history[agent_id]) &lt; 3:
+E   KeyError: 'workflow_test_agent'</failure></testcase><testcase classname="tests.unit.test_uncertainty_quantification.TestUncertaintyQuantificationIntegration" name="test_active_inference_uncertainty_pipeline" time="0.000"><failure message="KeyError: 'active_inference_agent'">tests/unit/test_uncertainty_quantification.py:523: in test_active_inference_uncertainty_pipeline
+    metrics = quantifier.calculate_convergence_metrics(
+inference/engine/uncertainty_quantification.py:240: in calculate_convergence_metrics
+    convergence_rate = self._calculate_convergence_rate(agent_id)
+inference/engine/uncertainty_quantification.py:489: in _calculate_convergence_rate
+    if len(self.convergence_history[agent_id]) &lt; 3:
+E   KeyError: 'active_inference_agent'</failure></testcase></testsuite></testsuites>

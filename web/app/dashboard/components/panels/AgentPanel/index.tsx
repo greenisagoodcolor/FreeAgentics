@@ -15,7 +15,12 @@ import {
 import AgentTemplateSelector from "@/components/dashboard/AgentTemplateSelector";
 
 // Define DashboardView type locally
-export type DashboardView = "ceo-demo" | "executive" | "technical" | "research" | "minimal";
+export type DashboardView =
+  | "ceo-demo"
+  | "executive"
+  | "technical"
+  | "research"
+  | "minimal";
 
 interface AgentPanelProps {
   view: DashboardView;

@@ -1,0 +1,406 @@
+af8e173b05941e783c6844adc1a90379
+"use client";
+"use strict";
+
+/* istanbul ignore next */
+function cov_1w9h0473u5() {
+  var path = "/Users/matthewmoroney/builds/FreeAgentics/web/components/backend-grid-world.tsx";
+  var hash = "a0f8d719de7522976cce10cc04bd923cc58915f4";
+  var global = new Function("return this")();
+  var gcv = "__coverage__";
+  var coverageData = {
+    path: "/Users/matthewmoroney/builds/FreeAgentics/web/components/backend-grid-world.tsx",
+    statementMap: {
+      "0": {
+        start: {
+          line: 3,
+          column: 0
+        },
+        end: {
+          line: 5,
+          column: 3
+        }
+      },
+      "1": {
+        start: {
+          line: 6,
+          column: 0
+        },
+        end: {
+          line: 11,
+          column: 3
+        }
+      },
+      "2": {
+        start: {
+          line: 9,
+          column: 8
+        },
+        end: {
+          line: 9,
+          column: 32
+        }
+      },
+      "3": {
+        start: {
+          line: 12,
+          column: 20
+        },
+        end: {
+          line: 12,
+          column: 48
+        }
+      },
+      "4": {
+        start: {
+          line: 13,
+          column: 33
+        },
+        end: {
+          line: 13,
+          column: 81
+        }
+      },
+      "5": {
+        start: {
+          line: 15,
+          column: 4
+        },
+        end: {
+          line: 17,
+          column: 6
+        }
+      },
+      "6": {
+        start: {
+          line: 22,
+          column: 4
+        },
+        end: {
+          line: 28,
+          column: 7
+        }
+      }
+    },
+    fnMap: {
+      "0": {
+        name: "(anonymous_0)",
+        decl: {
+          start: {
+            line: 8,
+            column: 9
+          },
+          end: {
+            line: 8,
+            column: 10
+          }
+        },
+        loc: {
+          start: {
+            line: 8,
+            column: 20
+          },
+          end: {
+            line: 10,
+            column: 5
+          }
+        },
+        line: 8
+      },
+      "1": {
+        name: "_interop_require_default",
+        decl: {
+          start: {
+            line: 14,
+            column: 9
+          },
+          end: {
+            line: 14,
+            column: 33
+          }
+        },
+        loc: {
+          start: {
+            line: 14,
+            column: 39
+          },
+          end: {
+            line: 18,
+            column: 1
+          }
+        },
+        line: 14
+      },
+      "2": {
+        name: "BackendGridWorld",
+        decl: {
+          start: {
+            line: 19,
+            column: 9
+          },
+          end: {
+            line: 19,
+            column: 25
+          }
+        },
+        loc: {
+          start: {
+            line: 19,
+            column: 65
+          },
+          end: {
+            line: 29,
+            column: 1
+          }
+        },
+        line: 19
+      },
+      "3": {
+        name: "(anonymous_3)",
+        decl: {
+          start: {
+            line: 24,
+            column: 26
+          },
+          end: {
+            line: 24,
+            column: 27
+          }
+        },
+        loc: {
+          start: {
+            line: 24,
+            column: 30
+          },
+          end: {
+            line: 24,
+            column: 32
+          }
+        },
+        line: 24
+      },
+      "4": {
+        name: "(anonymous_4)",
+        decl: {
+          start: {
+            line: 26,
+            column: 31
+          },
+          end: {
+            line: 26,
+            column: 32
+          }
+        },
+        loc: {
+          start: {
+            line: 26,
+            column: 35
+          },
+          end: {
+            line: 26,
+            column: 37
+          }
+        },
+        line: 26
+      },
+      "5": {
+        name: "(anonymous_5)",
+        decl: {
+          start: {
+            line: 27,
+            column: 21
+          },
+          end: {
+            line: 27,
+            column: 22
+          }
+        },
+        loc: {
+          start: {
+            line: 27,
+            column: 25
+          },
+          end: {
+            line: 27,
+            column: 27
+          }
+        },
+        line: 27
+      }
+    },
+    branchMap: {
+      "0": {
+        loc: {
+          start: {
+            line: 15,
+            column: 11
+          },
+          end: {
+            line: 17,
+            column: 5
+          }
+        },
+        type: "cond-expr",
+        locations: [{
+          start: {
+            line: 15,
+            column: 35
+          },
+          end: {
+            line: 15,
+            column: 38
+          }
+        }, {
+          start: {
+            line: 15,
+            column: 41
+          },
+          end: {
+            line: 17,
+            column: 5
+          }
+        }],
+        line: 15
+      },
+      "1": {
+        loc: {
+          start: {
+            line: 15,
+            column: 11
+          },
+          end: {
+            line: 15,
+            column: 32
+          }
+        },
+        type: "binary-expr",
+        locations: [{
+          start: {
+            line: 15,
+            column: 11
+          },
+          end: {
+            line: 15,
+            column: 14
+          }
+        }, {
+          start: {
+            line: 15,
+            column: 18
+          },
+          end: {
+            line: 15,
+            column: 32
+          }
+        }],
+        line: 15
+      }
+    },
+    s: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0
+    },
+    f: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0
+    },
+    b: {
+      "0": [0, 0],
+      "1": [0, 0]
+    },
+    inputSourceMap: {
+      version: 3,
+      sources: ["/Users/matthewmoroney/builds/FreeAgentics/web/components/backend-grid-world.tsx"],
+      sourcesContent: ["\"use client\";\n\nimport GridWorld from \"@/components/gridworld\";\n\ninterface BackendGridWorldProps {\n  onHexClick?: (hexId: string | null) => void;\n  selectedHex?: string | null;\n  viewMode?: \"terrain\" | \"resources\" | \"agents\";\n}\n\nexport function BackendGridWorld({\n  onHexClick,\n  selectedHex,\n  viewMode,\n}: BackendGridWorldProps) {\n  // This is a wrapper component that uses the existing GridWorld\n  // Props are passed for future implementation\n  return (\n    <GridWorld\n      agents={[]}\n      onUpdatePosition={() => {}}\n      activeConversation={null}\n      onSelectKnowledgeNode={() => {}}\n      onShowAbout={() => {}}\n    />\n  );\n}\n"],
+      names: ["BackendGridWorld", "onHexClick", "selectedHex", "viewMode", "GridWorld", "agents", "onUpdatePosition", "activeConversation", "onSelectKnowledgeNode", "onShowAbout"],
+      mappings: "AAAA;;;;;+BAUgBA;;;eAAAA;;;;kEARM;;;;;;AAQf,SAASA,iBAAiB,EAC/BC,UAAU,EACVC,WAAW,EACXC,QAAQ,EACc;IACtB,+DAA+D;IAC/D,6CAA6C;IAC7C,qBACE,qBAACC,kBAAS;QACRC,QAAQ,EAAE;QACVC,kBAAkB,KAAO;QACzBC,oBAAoB;QACpBC,uBAAuB,KAAO;QAC9BC,aAAa,KAAO;;AAG1B"
+    },
+    _coverageSchema: "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+    hash: "a0f8d719de7522976cce10cc04bd923cc58915f4"
+  };
+  var coverage = global[gcv] || (global[gcv] = {});
+  if (!coverage[path] || coverage[path].hash !== hash) {
+    coverage[path] = coverageData;
+  }
+  var actualCoverage = coverage[path];
+  {
+    // @ts-ignore
+    cov_1w9h0473u5 = function () {
+      return actualCoverage;
+    };
+  }
+  return actualCoverage;
+}
+cov_1w9h0473u5();
+cov_1w9h0473u5().s[0]++;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/* istanbul ignore next */
+cov_1w9h0473u5().s[1]++;
+Object.defineProperty(exports, "BackendGridWorld", {
+  enumerable: true,
+  get: function () {
+    /* istanbul ignore next */
+    cov_1w9h0473u5().f[0]++;
+    cov_1w9h0473u5().s[2]++;
+    return BackendGridWorld;
+  }
+});
+const _jsxruntime =
+/* istanbul ignore next */
+(cov_1w9h0473u5().s[3]++, require("react/jsx-runtime"));
+const _gridworld =
+/* istanbul ignore next */
+(/*#__PURE__*/cov_1w9h0473u5().s[4]++, _interop_require_default(require("./gridworld")));
+function _interop_require_default(obj) {
+  /* istanbul ignore next */
+  cov_1w9h0473u5().f[1]++;
+  cov_1w9h0473u5().s[5]++;
+  return /* istanbul ignore next */(cov_1w9h0473u5().b[1][0]++, obj) &&
+  /* istanbul ignore next */
+  (cov_1w9h0473u5().b[1][1]++, obj.__esModule) ?
+  /* istanbul ignore next */
+  (cov_1w9h0473u5().b[0][0]++, obj) :
+  /* istanbul ignore next */
+  (cov_1w9h0473u5().b[0][1]++, {
+    default: obj
+  });
+}
+function BackendGridWorld({
+  onHexClick,
+  selectedHex,
+  viewMode
+}) {
+  /* istanbul ignore next */
+  cov_1w9h0473u5().f[2]++;
+  cov_1w9h0473u5().s[6]++;
+  // This is a wrapper component that uses the existing GridWorld
+  // Props are passed for future implementation
+  return /*#__PURE__*/(0, _jsxruntime.jsx)(_gridworld.default, {
+    agents: [],
+    onUpdatePosition: () => {
+      /* istanbul ignore next */
+      cov_1w9h0473u5().f[3]++;
+    },
+    activeConversation: null,
+    onSelectKnowledgeNode: () => {
+      /* istanbul ignore next */
+      cov_1w9h0473u5().f[4]++;
+    },
+    onShowAbout: () => {
+      /* istanbul ignore next */
+      cov_1w9h0473u5().f[5]++;
+    }
+  });
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJCYWNrZW5kR3JpZFdvcmxkIiwib25IZXhDbGljayIsInNlbGVjdGVkSGV4Iiwidmlld01vZGUiLCJjb3ZfMXc5aDA0NzN1NSIsImYiLCJzIiwiX2pzeHJ1bnRpbWUiLCJqc3giLCJfZ3JpZHdvcmxkIiwiZGVmYXVsdCIsImFnZW50cyIsIm9uVXBkYXRlUG9zaXRpb24iLCJhY3RpdmVDb252ZXJzYXRpb24iLCJvblNlbGVjdEtub3dsZWRnZU5vZGUiLCJvblNob3dBYm91dCJdLCJzb3VyY2VzIjpbIi9Vc2Vycy9tYXR0aGV3bW9yb25leS9idWlsZHMvRnJlZUFnZW50aWNzL3dlYi9jb21wb25lbnRzL2JhY2tlbmQtZ3JpZC13b3JsZC50c3giXSwic291cmNlc0NvbnRlbnQiOlsiXCJ1c2UgY2xpZW50XCI7XG5cbmltcG9ydCBHcmlkV29ybGQgZnJvbSBcIkAvY29tcG9uZW50cy9ncmlkd29ybGRcIjtcblxuaW50ZXJmYWNlIEJhY2tlbmRHcmlkV29ybGRQcm9wcyB7XG4gIG9uSGV4Q2xpY2s/OiAoaGV4SWQ6IHN0cmluZyB8IG51bGwpID0+IHZvaWQ7XG4gIHNlbGVjdGVkSGV4Pzogc3RyaW5nIHwgbnVsbDtcbiAgdmlld01vZGU/OiBcInRlcnJhaW5cIiB8IFwicmVzb3VyY2VzXCIgfCBcImFnZW50c1wiO1xufVxuXG5leHBvcnQgZnVuY3Rpb24gQmFja2VuZEdyaWRXb3JsZCh7XG4gIG9uSGV4Q2xpY2ssXG4gIHNlbGVjdGVkSGV4LFxuICB2aWV3TW9kZSxcbn06IEJhY2tlbmRHcmlkV29ybGRQcm9wcykge1xuICAvLyBUaGlzIGlzIGEgd3JhcHBlciBjb21wb25lbnQgdGhhdCB1c2VzIHRoZSBleGlzdGluZyBHcmlkV29ybGRcbiAgLy8gUHJvcHMgYXJlIHBhc3NlZCBmb3IgZnV0dXJlIGltcGxlbWVudGF0aW9uXG4gIHJldHVybiAoXG4gICAgPEdyaWRXb3JsZFxuICAgICAgYWdlbnRzPXtbXX1cbiAgICAgIG9uVXBkYXRlUG9zaXRpb249eygpID0+IHt9fVxuICAgICAgYWN0aXZlQ29udmVyc2F0aW9uPXtudWxsfVxuICAgICAgb25TZWxlY3RLbm93bGVkZ2VOb2RlPXsoKSA9PiB7fX1cbiAgICAgIG9uU2hvd0Fib3V0PXsoKSA9PiB7fX1cbiAgICAvPlxuICApO1xufVxuIl0sIm1hcHBpbmdzIjoiQUFBQTs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OytCQVVnQjs7Ozs7O1dBQUFBLGdCQUFBOzs7Ozs7Ozt3RUFSTTs7Ozs7Ozs7Ozs7Ozs7O0FBUWYsU0FBU0EsaUJBQWlCO0VBQy9CQyxVQUFVO0VBQ1ZDLFdBQVc7RUFDWEM7QUFBUSxDQUNjO0VBQUE7RUFBQUMsY0FBQSxHQUFBQyxDQUFBO0VBQUFELGNBQUEsR0FBQUUsQ0FBQTtFQUN0QjtFQUNBO0VBQ0Esb0JBQ0UsSUFBQUMsV0FBQSxDQUFBQyxHQUFBLEVBQUNDLFVBQUEsQ0FBQUMsT0FBUztJQUNSQyxNQUFBLEVBQVEsRUFBRTtJQUNWQyxnQkFBQSxFQUFrQkEsQ0FBQTtNQUFBO01BQUFSLGNBQUEsR0FBQUMsQ0FBQTtJQUFPO0lBQ3pCUSxrQkFBQSxFQUFvQjtJQUNwQkMscUJBQUEsRUFBdUJBLENBQUE7TUFBQTtNQUFBVixjQUFBLEdBQUFDLENBQUE7SUFBTztJQUM5QlUsV0FBQSxFQUFhQSxDQUFBO01BQUE7TUFBQVgsY0FBQSxHQUFBQyxDQUFBO0lBQU87O0FBRzFCIiwiaWdub3JlTGlzdCI6W119

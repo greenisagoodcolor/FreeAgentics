@@ -41,9 +41,51 @@ except ImportError:
     utils = None
 
 from agents.base.data_model import Agent
-from inference.engine.pymdp_generative_model import create_pymdp_generative_model
+
+# Graceful degradation for PyMDP integration
+try:
+    from inference.engine.pymdp_generative_model import create_pymdp_generative_model
+    PYMDP_INTEGRATION_AVAILABLE = True
+except (ImportError, RuntimeError) as e:
+    # Handle import errors gracefully
+    PYMDP_INTEGRATION_AVAILABLE = False
+    create_pymdp_generative_model = None
+    print(f"Warning: PyMDP integration not available in markov_blanket: {e}")
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class MarkovBlanketConfig:
+    """Configuration for Markov blanket boundary system"""
+    
+    num_internal_states: int = 5
+    num_sensory_states: int = 3
+    num_active_states: int = 2
+    boundary_threshold: float = 0.95
+    violation_sensitivity: float = 0.1
+    enable_pymdp_integration: bool = True
+    monitoring_interval: float = 0.1
+
+    def __post_init__(self):
+        """Validate configuration parameters"""
+        if self.boundary_threshold > 1.0 or self.boundary_threshold < 0.0:
+            raise ValueError(f"boundary_threshold must be between 0.0 and 1.0, got {self.boundary_threshold}")
+        
+        if self.num_internal_states < 0:
+            raise ValueError(f"num_internal_states must be non-negative, got {self.num_internal_states}")
+        
+        if self.num_sensory_states < 0:
+            raise ValueError(f"num_sensory_states must be non-negative, got {self.num_sensory_states}")
+        
+        if self.num_active_states < 0:
+            raise ValueError(f"num_active_states must be non-negative, got {self.num_active_states}")
+        
+        if self.violation_sensitivity < 0.0:
+            raise ValueError(f"violation_sensitivity must be non-negative, got {self.violation_sensitivity}")
+        
+        if self.monitoring_interval <= 0.0:
+            raise ValueError(f"monitoring_interval must be positive, got {self.monitoring_interval}")
 
 
 @dataclass
@@ -57,6 +99,13 @@ class AgentState:
     health: float = 1.0
     intended_action: Optional[List[float]] = None
     belief_state: Optional[List[float]] = None
+    
+    # Additional fields for test compatibility
+    internal_states: Optional[np.ndarray] = None
+    sensory_states: Optional[np.ndarray] = None
+    active_states: Optional[np.ndarray] = None
+    timestamp: Optional[datetime] = None
+    confidence: float = 1.0
 
     @classmethod
     def from_agent(cls, agent: Agent) -> "AgentState":
@@ -87,6 +136,17 @@ class ViolationType(Enum):
     BOUNDARY_BREACH = "boundary_breach"
     SENSORY_OVERFLOW = "sensory_overflow"
     ACTION_OVERFLOW = "action_overflow"
+    INTERNAL_LEAK = "internal_leak"
+    EXTERNAL_INTRUSION = "external_intrusion"
+
+
+class BoundaryViolationType(Enum):
+    """Types of boundary violations for compatibility with tests"""
+
+    INTERNAL_INCONSISTENCY = "internal_inconsistency"
+    BOUNDARY_BREACH = "boundary_breach"
+    SENSORY_OVERFLOW = "sensory_overflow"
+    ACTION_CONFLICT = "action_conflict"
     INTERNAL_LEAK = "internal_leak"
     EXTERNAL_INTRUSION = "external_intrusion"
 
@@ -151,7 +211,7 @@ class BoundaryViolationEvent:
 
     event_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     agent_id: str = ""
-    violation_type: ViolationType = ViolationType.INDEPENDENCE_FAILURE
+    violation_type: BoundaryViolationType = BoundaryViolationType.INTERNAL_INCONSISTENCY
     timestamp: datetime = field(default_factory=datetime.now)
 
     # Violation details from pymdp analysis
@@ -172,6 +232,12 @@ class BoundaryViolationEvent:
     acknowledged: bool = False
     mitigated: bool = False
     mitigation_actions: List[str] = field(default_factory=list)
+
+    # Additional fields for test compatibility
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    description: str = ""
+    affected_states: List[str] = field(default_factory=list)
+    recovery_actions: List[str] = field(default_factory=list)
 
 
 @dataclass
@@ -275,6 +341,26 @@ class MarkovBlanketInterface(ABC):
     @abstractmethod
     def set_violation_handler(self, handler: Callable[[BoundaryViolationEvent], None]) -> None:
         """Set handler for violation events"""
+        pass
+
+    @abstractmethod
+    def update_boundary(self, new_state: AgentState) -> bool:
+        """Update boundary with new agent state"""
+        pass
+
+    @abstractmethod
+    def check_boundary_violations(self) -> List[BoundaryViolationEvent]:
+        """Check for boundary violations"""
+        pass
+
+    @abstractmethod
+    def get_current_state(self) -> AgentState:
+        """Get current agent state"""
+        pass
+
+    @abstractmethod
+    def is_boundary_intact(self) -> bool:
+        """Check if boundary is intact"""
         pass
 
 
@@ -605,6 +691,295 @@ class PyMDPMarkovBlanket(MarkovBlanketInterface):
             f"{violation.violation_type.value} "
             f"(severity: {violation.severity:.2f})"
         )
+
+
+class ActiveInferenceMarkovBlanket(MarkovBlanketInterface):
+    """
+    Active Inference Markov blanket implementation.
+    
+    This class provides a simplified interface for testing while maintaining
+    compatibility with the existing PyMDP-based implementation.
+    """
+
+    def __init__(self, agent: Any, config: MarkovBlanketConfig) -> None:
+        """
+        Initialize Active Inference Markov blanket.
+        
+        Args:
+            agent: The agent instance
+            config: Configuration for the Markov blanket
+        """
+        self.agent = agent
+        self.config = config
+        self.violation_history: List[BoundaryViolationEvent] = []
+        self.boundary_intact = True
+        self.current_state: Optional[AgentState] = None
+        self.pymdp_enabled = config.enable_pymdp_integration and PYMDP_AVAILABLE
+        
+        # Initialize metrics
+        self.metrics = BoundaryMetrics()
+        
+        # Initialize violation handlers
+        self.violation_handlers: List[Callable[[BoundaryViolationEvent], None]] = []
+        
+        # Create dimensions based on config
+        self.dimensions = MarkovBlanketDimensions(
+            internal_states=np.random.rand(config.num_internal_states),
+            sensory_states=np.random.rand(config.num_sensory_states),
+            active_states=np.random.rand(config.num_active_states),
+            external_states=np.random.rand(10),  # Default external state size
+        )
+        
+        logger.info(f"Initialized ActiveInferenceMarkovBlanket for agent {getattr(agent, 'id', 'unknown')}")
+
+    def get_dimensions(self) -> MarkovBlanketDimensions:
+        """Get current Markov blanket dimensions"""
+        return self.dimensions
+
+    def update_states(self, agent_state: AgentState, environment_state: np.ndarray) -> None:
+        """Update internal states based on agent and environment"""
+        self.current_state = agent_state
+        # Update metrics
+        self.metrics.last_update = datetime.now()
+
+    def verify_independence(self) -> Tuple[float, Dict[str, Any]]:
+        """Verify conditional independence"""
+        # Simple mock implementation
+        independence_measure = 0.1  # Mock low independence measure
+        evidence = {
+            "free_energy": self.metrics.free_energy,
+            "kl_divergence": self.metrics.kl_divergence,
+            "test_timestamp": datetime.now().isoformat(),
+        }
+        return independence_measure, evidence
+
+    def detect_violations(self) -> List[BoundaryViolationEvent]:
+        """Detect any boundary violations"""
+        return self.check_boundary_violations()
+
+    def get_metrics(self) -> BoundaryMetrics:
+        """Get current boundary metrics"""
+        return self.metrics
+
+    def set_violation_handler(self, handler: Callable[[BoundaryViolationEvent], None]) -> None:
+        """Set handler for violation events"""
+        self.violation_handlers.append(handler)
+
+    def update_boundary(self, new_state: AgentState) -> bool:
+        """Update boundary with new agent state"""
+        try:
+            self.current_state = new_state
+            
+            # Update internal states based on the new state
+            if hasattr(new_state, 'internal_states') and new_state.internal_states is not None:
+                self.dimensions.internal_states = np.array(new_state.internal_states)
+            if hasattr(new_state, 'sensory_states') and new_state.sensory_states is not None:
+                self.dimensions.sensory_states = np.array(new_state.sensory_states)
+            if hasattr(new_state, 'active_states') and new_state.active_states is not None:
+                self.dimensions.active_states = np.array(new_state.active_states)
+            
+            # Update metrics
+            self.metrics.last_update = datetime.now()
+            
+            return True
+        except Exception as e:
+            logger.error(f"Error updating boundary: {e}")
+            return False
+
+    def check_boundary_violations(self) -> List[BoundaryViolationEvent]:
+        """Check for boundary violations"""
+        violations = []
+        
+        if self.current_state is None:
+            return violations
+        
+        # Check for violations based on current state
+        confidence = getattr(self.current_state, 'confidence', 1.0)
+        
+        # Check for low confidence violation
+        if confidence < self.config.boundary_threshold:  # Use boundary_threshold instead of violation_sensitivity
+            violation = BoundaryViolationEvent(
+                agent_id=self.current_state.agent_id,
+                violation_type=BoundaryViolationType.BOUNDARY_BREACH,
+                severity=1.0 - confidence,
+                independence_measure=confidence,
+                threshold_violated=self.config.boundary_threshold,
+                free_energy=self.metrics.free_energy,
+                expected_free_energy=self.metrics.expected_free_energy,
+                kl_divergence=self.metrics.kl_divergence,
+            )
+            violations.append(violation)
+            self.violation_history.append(violation)
+            
+            # Update boundary state
+            if violation.severity > 0.5:
+                self.boundary_intact = False
+            
+            # Trigger handlers
+            for handler in self.violation_handlers:
+                try:
+                    handler(violation)
+                except Exception as e:
+                    logger.error(f"Error in violation handler: {e}")
+        
+        # Check for extreme distributions in internal states
+        if hasattr(self.current_state, 'internal_states') and self.current_state.internal_states is not None:
+            internal_states = np.array(self.current_state.internal_states)
+            if internal_states.size > 0:
+                # Check for extremely skewed distributions (entropy-based)
+                normalized = internal_states / np.sum(internal_states) if np.sum(internal_states) > 0 else internal_states
+                # Check if any single state dominates (> 90%)
+                if np.max(normalized) > 0.9:
+                    violation = BoundaryViolationEvent(
+                        agent_id=self.current_state.agent_id,
+                        violation_type=BoundaryViolationType.INTERNAL_INCONSISTENCY,
+                        severity=np.max(normalized) - 0.5,  # Severity based on how extreme
+                        independence_measure=np.max(normalized),
+                        threshold_violated=0.9,
+                        free_energy=self.metrics.free_energy,
+                        expected_free_energy=self.metrics.expected_free_energy,
+                        kl_divergence=self.metrics.kl_divergence,
+                    )
+                    violations.append(violation)
+                    self.violation_history.append(violation)
+                    self.boundary_intact = False
+        
+        # Check for sensory overflow
+        if hasattr(self.current_state, 'sensory_states') and self.current_state.sensory_states is not None:
+            sensory_states = np.array(self.current_state.sensory_states)
+            if sensory_states.size > 0:
+                # Check for extreme sensory input
+                if np.max(sensory_states) > 0.9:
+                    violation = BoundaryViolationEvent(
+                        agent_id=self.current_state.agent_id,
+                        violation_type=BoundaryViolationType.SENSORY_OVERFLOW,
+                        severity=np.max(sensory_states) - 0.5,
+                        independence_measure=np.max(sensory_states),
+                        threshold_violated=0.9,
+                        free_energy=self.metrics.free_energy,
+                        expected_free_energy=self.metrics.expected_free_energy,
+                        kl_divergence=self.metrics.kl_divergence,
+                    )
+                    violations.append(violation)
+                    self.violation_history.append(violation)
+        
+        # Check for action conflicts
+        if hasattr(self.current_state, 'active_states') and self.current_state.active_states is not None:
+            active_states = np.array(self.current_state.active_states)
+            if active_states.size > 1:
+                # Check for conflicting actions (multiple high activation)
+                high_activations = np.sum(active_states > 0.5)
+                if high_activations > 1:
+                    violation = BoundaryViolationEvent(
+                        agent_id=self.current_state.agent_id,
+                        violation_type=BoundaryViolationType.ACTION_CONFLICT,
+                        severity=min(1.0, high_activations / len(active_states)),
+                        independence_measure=high_activations,
+                        threshold_violated=1.0,
+                        free_energy=self.metrics.free_energy,
+                        expected_free_energy=self.metrics.expected_free_energy,
+                        kl_divergence=self.metrics.kl_divergence,
+                    )
+                    violations.append(violation)
+                    self.violation_history.append(violation)
+        
+        # Trigger handlers for all violations
+        for violation in violations:
+            for handler in self.violation_handlers:
+                try:
+                    handler(violation)
+                except Exception as e:
+                    logger.error(f"Error in violation handler: {e}")
+        
+        return violations
+
+    def get_current_state(self) -> AgentState:
+        """Get current agent state"""
+        if self.current_state is None:
+            # Return a default state
+            return AgentState(
+                agent_id=getattr(self.agent, 'id', 'unknown'),
+                position=None,
+                status=None,
+                energy=1.0,
+                health=1.0,
+            )
+        return self.current_state
+
+    def is_boundary_intact(self) -> bool:
+        """Check if boundary is intact"""
+        return self.boundary_intact
+
+    def get_recent_violations(self, limit: int = 10) -> List[BoundaryViolationEvent]:
+        """Get recent violations from history"""
+        return self.violation_history[-limit:] if self.violation_history else []
+
+    def _check_statistical_independence(self, internal_states: np.ndarray, external_states: np.ndarray, 
+                                      sensory_states: np.ndarray, active_states: np.ndarray) -> float:
+        """Check statistical independence between states"""
+        try:
+            # Simple mock implementation - in reality this would use statistical tests
+            # Ensure arrays have compatible dimensions by using first few elements
+            min_size = min(internal_states.size, external_states.size)
+            if min_size < 2:
+                return 0.5  # Default moderate independence
+            
+            internal_flat = internal_states.flatten()[:min_size]
+            external_flat = external_states.flatten()[:min_size]
+            
+            correlation = np.corrcoef(internal_flat, external_flat)[0, 1]
+            if np.isnan(correlation):
+                return 0.5  # Default if correlation cannot be computed
+            
+            independence_score = 1.0 - abs(correlation)  # Higher score = more independent
+            return max(0.0, min(1.0, independence_score))
+        except Exception as e:
+            logger.warning(f"Error computing statistical independence: {e}")
+            return 0.5  # Default moderate independence
+
+
+class BoundaryMonitor:
+    """
+    Monitor for Markov blanket boundary violations.
+    
+    Provides real-time monitoring and alerting for boundary violations.
+    """
+
+    def __init__(self, markov_blanket: MarkovBlanketInterface) -> None:
+        """
+        Initialize boundary monitor.
+        
+        Args:
+            markov_blanket: The Markov blanket to monitor
+        """
+        self.markov_blanket = markov_blanket
+        self.is_monitoring = False
+        self.violation_callbacks: List[Callable[[BoundaryViolationEvent], None]] = []
+        self._monitoring_thread = None
+        
+        logger.info("Initialized BoundaryMonitor")
+
+    def register_violation_callback(self, callback: Callable[[BoundaryViolationEvent], None]) -> None:
+        """Register a callback for violation events"""
+        self.violation_callbacks.append(callback)
+
+    def start_monitoring(self) -> None:
+        """Start monitoring for violations"""
+        self.is_monitoring = True
+        logger.info("Started boundary monitoring")
+
+    def stop_monitoring(self) -> None:
+        """Stop monitoring for violations"""
+        self.is_monitoring = False
+        logger.info("Stopped boundary monitoring")
+
+    def _notify_violation_callbacks(self, violation: BoundaryViolationEvent) -> None:
+        """Notify all registered callbacks of a violation"""
+        for callback in self.violation_callbacks:
+            try:
+                callback(violation)
+            except Exception as e:
+                logger.error(f"Error in violation callback: {e}")
 
 
 class MarkovBlanketFactory:

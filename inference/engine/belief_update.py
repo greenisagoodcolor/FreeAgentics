@@ -15,6 +15,7 @@ import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
+import numpy as np
 import torch
 import torch.nn as nn
 
@@ -137,13 +138,78 @@ class HierarchicalBeliefUpdater(BeliefUpdater):
         return current_beliefs
 
 
+class DirectBeliefUpdater(BeliefUpdater):
+    """Direct belief updater with proper normalization (pymdp-aligned)"""
+
+    def __init__(self, config: BeliefUpdateConfig) -> None:
+        """Initialize direct belief updater"""
+        super().__init__(config)
+
+    def update_beliefs(
+        self,
+        current_beliefs: torch.Tensor,
+        observations: torch.Tensor,
+        generative_model: GenerativeModel,
+    ) -> torch.Tensor:
+        """Update beliefs with proper normalization following pymdp conventions"""
+        # Handle invalid beliefs by normalizing them to valid probability distributions
+
+        # Convert numpy arrays to torch tensors if needed (pymdp compatibility)
+        if isinstance(current_beliefs, np.ndarray):
+            beliefs = torch.from_numpy(current_beliefs.astype(np.float32))
+        else:
+            beliefs = current_beliefs.clone()
+
+        if isinstance(observations, np.ndarray):
+            observations = torch.from_numpy(observations.astype(np.float32))
+
+        # Replace NaN values with small positive numbers
+        beliefs = torch.nan_to_num(beliefs, nan=1e-8)
+
+        # Ensure all values are positive
+        beliefs = torch.clamp(beliefs, min=1e-8)
+
+        # Normalize to sum to 1.0 (proper probability distribution)
+        beliefs = beliefs / beliefs.sum()
+
+        # Perform Bayesian update: P(s|o) ∝ P(o|s)P(s) (pymdp convention)
+        if hasattr(generative_model, "observation_model") and hasattr(generative_model, "A"):
+            try:
+                # Get observation matrix A (observations x states) - pymdp convention
+                A_matrix = generative_model.A
+                obs_idx = (
+                    observations.long() if observations.numel() == 1 else observations[0].long()
+                )
+
+                # Extract likelihood P(o|s) for the observed outcome
+                if obs_idx < A_matrix.shape[0] and A_matrix.shape[1] == len(beliefs):
+                    likelihood = A_matrix[obs_idx, :]  # P(o=obs_idx | s)
+
+                    # Bayesian update: P(s|o) ∝ P(o|s)P(s)
+                    posterior = beliefs * likelihood
+                    # Normalize posterior
+                    posterior = posterior / (posterior.sum() + 1e-8)
+                    return posterior
+                else:
+                    # Dimension mismatch, return normalized beliefs
+                    return beliefs
+            except Exception:
+                # Fallback to normalized beliefs if any error occurs
+                return beliefs
+        else:
+            # No generative model available, just return normalized beliefs
+            return beliefs
+
+
 def create_belief_updater(updater_type: str, config: BeliefUpdateConfig) -> BeliefUpdater:
     """Create belief updaters"""
-    if updater_type == "graphnn":
+    if updater_type == "direct":
+        return DirectBeliefUpdater(config)
+    elif updater_type == "graphnn":
         return GraphNNBeliefUpdater(config)
     elif updater_type == "attention":
         return AttentionGraphBeliefUpdater(config)
     elif updater_type == "hierarchical":
         return HierarchicalBeliefUpdater(config)
     else:
-        return GraphNNBeliefUpdater(config)
+        return DirectBeliefUpdater(config)  # Default to direct with proper normalization

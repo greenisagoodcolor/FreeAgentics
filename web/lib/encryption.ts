@@ -5,5 +5,5 @@ export function encrypt(text: string): string {
 
 export function decrypt(text: string): string {
   // Simple mock decryption for testing
-  return text.replace('encrypted_', '');
+  return text.replace("encrypted_", "");
 }

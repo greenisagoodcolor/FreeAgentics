@@ -14,7 +14,9 @@ interface BloombergTerminalLayoutProps {
   view: DashboardView;
 }
 
-export default function BloombergTerminalLayout({ view }: BloombergTerminalLayoutProps) {
+export default function BloombergTerminalLayout({
+  view,
+}: BloombergTerminalLayoutProps) {
   const router = useRouter();
   const [focusedPanel, setFocusedPanel] = useState<string | null>(null);
 
@@ -23,7 +25,7 @@ export default function BloombergTerminalLayout({ view }: BloombergTerminalLayou
       {/* CEO Demo Button - Fixed Position */}
       <div className="absolute top-4 right-4 z-50">
         <button
-          onClick={() => router.push('/dashboard?view=ceo-demo')}
+          onClick={() => router.push("/dashboard?view=ceo-demo")}
           className="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--primary-amber)] rounded-lg flex items-center gap-2 hover:bg-[var(--bg-tertiary)] transition-colors"
         >
           <Presentation className="w-4 h-4 text-[var(--primary-amber)]" />
@@ -40,8 +42,8 @@ export default function BloombergTerminalLayout({ view }: BloombergTerminalLayou
           title="AGENT GOAL"
           closable={false}
           detachable={false}
-          focused={focusedPanel === 'goal'}
-          onFocus={() => setFocusedPanel('goal')}
+          focused={focusedPanel === "goal"}
+          onFocus={() => setFocusedPanel("goal")}
           className="h-full"
         >
           <GoalPanel view={view} />
@@ -56,8 +58,8 @@ export default function BloombergTerminalLayout({ view }: BloombergTerminalLayou
           title="AGENT CONVERSATION"
           closable={false}
           detachable={true}
-          focused={focusedPanel === 'conversation'}
-          onFocus={() => setFocusedPanel('conversation')}
+          focused={focusedPanel === "conversation"}
+          onFocus={() => setFocusedPanel("conversation")}
           className="h-full min-h-0"
         >
           <div className="h-full overflow-auto">
@@ -71,8 +73,8 @@ export default function BloombergTerminalLayout({ view }: BloombergTerminalLayou
           title="KNOWLEDGE GRAPH"
           closable={false}
           detachable={true}
-          focused={focusedPanel === 'knowledge'}
-          onFocus={() => setFocusedPanel('knowledge')}
+          focused={focusedPanel === "knowledge"}
+          onFocus={() => setFocusedPanel("knowledge")}
           className="h-full min-h-0"
         >
           <div className="h-full overflow-auto">
@@ -88,8 +90,8 @@ export default function BloombergTerminalLayout({ view }: BloombergTerminalLayou
           title="SYSTEM ANALYTICS"
           closable={false}
           detachable={true}
-          focused={focusedPanel === 'analytics'}
-          onFocus={() => setFocusedPanel('analytics')}
+          focused={focusedPanel === "analytics"}
+          onFocus={() => setFocusedPanel("analytics")}
           className="h-full"
         >
           <AnalyticsPanel view={view} />

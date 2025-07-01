@@ -1,0 +1,215 @@
+3dbf006c1f4a11dd18e2315e35e02da0
+"use client";
+"use strict";
+
+/* istanbul ignore next */
+function cov_1iha9ij8w7() {
+  var path = "/Users/matthewmoroney/builds/FreeAgentics/web/components/AboutButton.tsx";
+  var hash = "2d2e840dcc4841d09e4d26763594a6261914173c";
+  var global = new Function("return this")();
+  var gcv = "__coverage__";
+  var coverageData = {
+    path: "/Users/matthewmoroney/builds/FreeAgentics/web/components/AboutButton.tsx",
+    statementMap: {
+      "0": {
+        start: {
+          line: 3,
+          column: 0
+        },
+        end: {
+          line: 5,
+          column: 3
+        }
+      },
+      "1": {
+        start: {
+          line: 6,
+          column: 0
+        },
+        end: {
+          line: 11,
+          column: 3
+        }
+      },
+      "2": {
+        start: {
+          line: 9,
+          column: 8
+        },
+        end: {
+          line: 9,
+          column: 27
+        }
+      },
+      "3": {
+        start: {
+          line: 12,
+          column: 20
+        },
+        end: {
+          line: 12,
+          column: 48
+        }
+      },
+      "4": {
+        start: {
+          line: 13,
+          column: 21
+        },
+        end: {
+          line: 13,
+          column: 44
+        }
+      },
+      "5": {
+        start: {
+          line: 14,
+          column: 16
+        },
+        end: {
+          line: 14,
+          column: 38
+        }
+      },
+      "6": {
+        start: {
+          line: 16,
+          column: 4
+        },
+        end: {
+          line: 25,
+          column: 7
+        }
+      }
+    },
+    fnMap: {
+      "0": {
+        name: "(anonymous_0)",
+        decl: {
+          start: {
+            line: 8,
+            column: 9
+          },
+          end: {
+            line: 8,
+            column: 10
+          }
+        },
+        loc: {
+          start: {
+            line: 8,
+            column: 20
+          },
+          end: {
+            line: 10,
+            column: 5
+          }
+        },
+        line: 8
+      },
+      "1": {
+        name: "AboutButton",
+        decl: {
+          start: {
+            line: 15,
+            column: 9
+          },
+          end: {
+            line: 15,
+            column: 20
+          }
+        },
+        loc: {
+          start: {
+            line: 15,
+            column: 34
+          },
+          end: {
+            line: 26,
+            column: 1
+          }
+        },
+        line: 15
+      }
+    },
+    branchMap: {},
+    s: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0
+    },
+    f: {
+      "0": 0,
+      "1": 0
+    },
+    b: {},
+    inputSourceMap: {
+      version: 3,
+      sources: ["/Users/matthewmoroney/builds/FreeAgentics/web/components/AboutButton.tsx"],
+      sourcesContent: ["\"use client\";\n\nimport { Info } from \"lucide-react\";\nimport { Button } from \"@/components/ui/button\";\n\ninterface AboutButtonProps {\n  onClick: () => void;\n}\n\nexport default function AboutButton({ onClick }: AboutButtonProps) {\n  return (\n    <Button\n      variant=\"outline\"\n      size=\"sm\"\n      onClick={onClick}\n      className=\"h-6 w-6 p-0 bg-purple-900/50 border-purple-500 text-white hover:bg-purple-800 hover:text-white\"\n      title=\"About\"\n    >\n      <Info size={12} />\n    </Button>\n  );\n}\n"],
+      names: ["AboutButton", "onClick", "Button", "variant", "size", "className", "title", "Info"],
+      mappings: "AAAA;;;;;+BASA;;;eAAwBA;;;;6BAPH;wBACE;AAMR,SAASA,YAAY,EAAEC,OAAO,EAAoB;IAC/D,qBACE,qBAACC,cAAM;QACLC,SAAQ;QACRC,MAAK;QACLH,SAASA;QACTI,WAAU;QACVC,OAAM;kBAEN,cAAA,qBAACC,iBAAI;YAACH,MAAM;;;AAGlB"
+    },
+    _coverageSchema: "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+    hash: "2d2e840dcc4841d09e4d26763594a6261914173c"
+  };
+  var coverage = global[gcv] || (global[gcv] = {});
+  if (!coverage[path] || coverage[path].hash !== hash) {
+    coverage[path] = coverageData;
+  }
+  var actualCoverage = coverage[path];
+  {
+    // @ts-ignore
+    cov_1iha9ij8w7 = function () {
+      return actualCoverage;
+    };
+  }
+  return actualCoverage;
+}
+cov_1iha9ij8w7();
+cov_1iha9ij8w7().s[0]++;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/* istanbul ignore next */
+cov_1iha9ij8w7().s[1]++;
+Object.defineProperty(exports, "default", {
+  enumerable: true,
+  get: function () {
+    /* istanbul ignore next */
+    cov_1iha9ij8w7().f[0]++;
+    cov_1iha9ij8w7().s[2]++;
+    return AboutButton;
+  }
+});
+const _jsxruntime =
+/* istanbul ignore next */
+(cov_1iha9ij8w7().s[3]++, require("react/jsx-runtime"));
+const _lucidereact =
+/* istanbul ignore next */
+(cov_1iha9ij8w7().s[4]++, require("lucide-react"));
+const _button =
+/* istanbul ignore next */
+(cov_1iha9ij8w7().s[5]++, require("./ui/button"));
+function AboutButton({
+  onClick
+}) {
+  /* istanbul ignore next */
+  cov_1iha9ij8w7().f[1]++;
+  cov_1iha9ij8w7().s[6]++;
+  return /*#__PURE__*/(0, _jsxruntime.jsx)(_button.Button, {
+    variant: "outline",
+    size: "sm",
+    onClick: onClick,
+    className: "h-6 w-6 p-0 bg-purple-900/50 border-purple-500 text-white hover:bg-purple-800 hover:text-white",
+    title: "About",
+    children: /*#__PURE__*/(0, _jsxruntime.jsx)(_lucidereact.Info, {
+      size: 12
+    })
+  });
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJjb3ZfMWloYTlpajh3NyIsImFjdHVhbENvdmVyYWdlIiwicyIsIkFib3V0QnV0dG9uIiwib25DbGljayIsImYiLCJfanN4cnVudGltZSIsImpzeCIsIl9idXR0b24iLCJCdXR0b24iLCJ2YXJpYW50Iiwic2l6ZSIsImNsYXNzTmFtZSIsInRpdGxlIiwiX2x1Y2lkZXJlYWN0IiwiSW5mbyJdLCJzb3VyY2VzIjpbIi9Vc2Vycy9tYXR0aGV3bW9yb25leS9idWlsZHMvRnJlZUFnZW50aWNzL3dlYi9jb21wb25lbnRzL0Fib3V0QnV0dG9uLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJcInVzZSBjbGllbnRcIjtcblxuaW1wb3J0IHsgSW5mbyB9IGZyb20gXCJsdWNpZGUtcmVhY3RcIjtcbmltcG9ydCB7IEJ1dHRvbiB9IGZyb20gXCJAL2NvbXBvbmVudHMvdWkvYnV0dG9uXCI7XG5cbmludGVyZmFjZSBBYm91dEJ1dHRvblByb3BzIHtcbiAgb25DbGljazogKCkgPT4gdm9pZDtcbn1cblxuZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gQWJvdXRCdXR0b24oeyBvbkNsaWNrIH06IEFib3V0QnV0dG9uUHJvcHMpIHtcbiAgcmV0dXJuIChcbiAgICA8QnV0dG9uXG4gICAgICB2YXJpYW50PVwib3V0bGluZVwiXG4gICAgICBzaXplPVwic21cIlxuICAgICAgb25DbGljaz17b25DbGlja31cbiAgICAgIGNsYXNzTmFtZT1cImgtNiB3LTYgcC0wIGJnLXB1cnBsZS05MDAvNTAgYm9yZGVyLXB1cnBsZS01MDAgdGV4dC13aGl0ZSBob3ZlcjpiZy1wdXJwbGUtODAwIGhvdmVyOnRleHQtd2hpdGVcIlxuICAgICAgdGl0bGU9XCJBYm91dFwiXG4gICAgPlxuICAgICAgPEluZm8gc2l6ZT17MTJ9IC8+XG4gICAgPC9CdXR0b24+XG4gICk7XG59XG4iXSwibWFwcGluZ3MiOiJBQUFBOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztJQVVFO0lBQUFBLGNBQUEsWUFBQUEsQ0FBQTtNQUFBLE9BQUFDLGNBQUE7SUFBQTtFQUFBO0VBQUEsT0FBQUEsY0FBQTtBQUFBO0FBQUFELGNBQUE7QUFBQUEsY0FBQSxHQUFBRSxDQUFBOzs7Ozs7K0JBREY7Ozs7OztXQUF3QkMsV0FBQTs7Ozs7Ozs7a0NBUEg7OztrQ0FDRTtBQU1SLFNBQVNBLFlBQVk7RUFBRUM7QUFBTyxDQUFvQjtFQUFBO0VBQUFKLGNBQUEsR0FBQUssQ0FBQTtFQUFBTCxjQUFBLEdBQUFFLENBQUE7RUFDL0Qsb0JBQ0UsSUFBQUksV0FBQSxDQUFBQyxHQUFBLEVBQUNDLE9BQUEsQ0FBQUMsTUFBTTtJQUNMQyxPQUFBLEVBQVE7SUFDUkMsSUFBQSxFQUFLO0lBQ0xQLE9BQUEsRUFBU0EsT0FBQTtJQUNUUSxTQUFBLEVBQVU7SUFDVkMsS0FBQSxFQUFNO2NBRU4saUJBQUFQLFdBQUEsQ0FBQUMsR0FBQSxFQUFDTyxZQUFBLENBQUFDLElBQUk7TUFBQ0osSUFBQSxFQUFNOzs7QUFHbEIiLCJpZ25vcmVMaXN0IjpbXX0=

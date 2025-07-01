@@ -8,10 +8,11 @@ All calculations are documented for business intelligence review and
 """
 
 import logging
+import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional
 
 from ..coalition.coalition_models import Coalition
 from .coalition_formation_algorithms import AgentProfile, FormationResult
@@ -439,7 +440,7 @@ class BusinessValueCalculationEngine:
             * self.metric_weights[BusinessMetricType.INNOVATION_POTENTIAL]
         )
 
-        return min(1.0, total)
+        return max(0.0, min(1.0, total))
 
     def _calculate_confidence(
         self, formation_result: FormationResult, agent_profiles: List[AgentProfile]
@@ -466,7 +467,8 @@ class BusinessValueCalculationEngine:
         confidence_factors.append(sample_factor)
 
         if confidence_factors:
-            return sum(confidence_factors) / len(confidence_factors)
+            confidence = sum(confidence_factors) / len(confidence_factors)
+            return max(0.0, min(1.0, confidence))
         else:
             return 0.0
 

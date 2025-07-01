@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="4" failures="0" skipped="0" tests="4" time="0.978" timestamp="2025-07-01T15:13:34.098470" hostname="Matthews-MacBook-Air.local"><testcase classname="" name="tests.unit.test_pymdp_integration" time="0.000"><error message="collection failure">/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/runner.py:341: in from_call
+    result: Optional[TResult] = func()
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/runner.py:372: in &lt;lambda&gt;
+    call = CallInfo.from_call(lambda: list(collector.collect()), "collect")
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:531: in collect
+    self._inject_setup_module_fixture()
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:545: in _inject_setup_module_fixture
+    self.obj, ("setUpModule", "setup_module")
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:310: in obj
+    self._obj = obj = self._getobj()
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:528: in _getobj
+    return self._importtestmodule()
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:617: in _importtestmodule
+    mod = import_path(self.path, mode=importmode, root=self.config.rootpath)
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/pathlib.py:567: in import_path
+    importlib.import_module(module_name)
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
+    ???
+&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
+    ???
+&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
+    ???
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/assertion/rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+tests/unit/test_pymdp_integration.py:11: in &lt;module&gt;
+    import torch
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/torch/__init__.py:1795: in &lt;module&gt;
+    from torch._tensor import Tensor  # usort: skip
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/torch/_tensor.py:21: in &lt;module&gt;
+    from torch.overrides import (
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/torch/overrides.py:1757: in &lt;module&gt;
+    has_torch_function = _add_docstr(
+E   RuntimeError: function '_has_torch_function' already has a docstring</error></testcase><testcase classname="" name="tests.unit.test_pymdp_policy_selector" time="0.000"><error message="collection failure">/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/runner.py:341: in from_call
+    result: Optional[TResult] = func()
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/runner.py:372: in &lt;lambda&gt;
+    call = CallInfo.from_call(lambda: list(collector.collect()), "collect")
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:531: in collect
+    self._inject_setup_module_fixture()
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:545: in _inject_setup_module_fixture
+    self.obj, ("setUpModule", "setup_module")
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:310: in obj
+    self._obj = obj = self._getobj()
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:528: in _getobj
+    return self._importtestmodule()
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:617: in _importtestmodule
+    mod = import_path(self.path, mode=importmode, root=self.config.rootpath)
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/pathlib.py:567: in import_path
+    importlib.import_module(module_name)
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
+    ???
+&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
+    ???
+&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
+    ???
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/assertion/rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+tests/unit/test_pymdp_policy_selector.py:16: in &lt;module&gt;
+    import torch
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/torch/__init__.py:1795: in &lt;module&gt;
+    from torch._tensor import Tensor  # usort: skip
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/torch/_tensor.py:21: in &lt;module&gt;
+    from torch.overrides import (
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/torch/overrides.py:1757: in &lt;module&gt;
+    has_torch_function = _add_docstr(
+E   RuntimeError: function '_has_torch_function' already has a docstring</error></testcase><testcase classname="" name="tests.unit.test_belief_update" time="0.000"><error message="collection failure">/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/runner.py:341: in from_call
+    result: Optional[TResult] = func()
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/runner.py:372: in &lt;lambda&gt;
+    call = CallInfo.from_call(lambda: list(collector.collect()), "collect")
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:531: in collect
+    self._inject_setup_module_fixture()
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:545: in _inject_setup_module_fixture
+    self.obj, ("setUpModule", "setup_module")
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:310: in obj
+    self._obj = obj = self._getobj()
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:528: in _getobj
+    return self._importtestmodule()
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:617: in _importtestmodule
+    mod = import_path(self.path, mode=importmode, root=self.config.rootpath)
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/pathlib.py:567: in import_path
+    importlib.import_module(module_name)
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
+    ???
+&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
+    ???
+&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
+    ???
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/assertion/rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+tests/unit/test_belief_update.py:8: in &lt;module&gt;
+    import torch
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/torch/__init__.py:1795: in &lt;module&gt;
+    from torch._tensor import Tensor  # usort: skip
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/torch/_tensor.py:21: in &lt;module&gt;
+    from torch.overrides import (
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/torch/overrides.py:1757: in &lt;module&gt;
+    has_torch_function = _add_docstr(
+E   RuntimeError: function '_has_torch_function' already has a docstring</error></testcase><testcase classname="" name="tests.unit.test_policy_selection" time="0.000"><error message="collection failure">/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/runner.py:341: in from_call
+    result: Optional[TResult] = func()
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/runner.py:372: in &lt;lambda&gt;
+    call = CallInfo.from_call(lambda: list(collector.collect()), "collect")
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:531: in collect
+    self._inject_setup_module_fixture()
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:545: in _inject_setup_module_fixture
+    self.obj, ("setUpModule", "setup_module")
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:310: in obj
+    self._obj = obj = self._getobj()
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:528: in _getobj
+    return self._importtestmodule()
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/python.py:617: in _importtestmodule
+    mod = import_path(self.path, mode=importmode, root=self.config.rootpath)
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/pathlib.py:567: in import_path
+    importlib.import_module(module_name)
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
+    ???
+&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
+    ???
+&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
+    ???
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/_pytest/assertion/rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+tests/unit/test_policy_selection.py:12: in &lt;module&gt;
+    import torch
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/torch/__init__.py:1795: in &lt;module&gt;
+    from torch._tensor import Tensor  # usort: skip
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/torch/_tensor.py:21: in &lt;module&gt;
+    from torch.overrides import (
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/torch/overrides.py:1757: in &lt;module&gt;
+    has_torch_function = _add_docstr(
+E   RuntimeError: function '_has_torch_function' already has a docstring</error></testcase></testsuite></testsuites>

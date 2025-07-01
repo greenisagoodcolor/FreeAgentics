@@ -7,11 +7,11 @@ import logging
 import math
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional
 
 import h3
 
-from ..world.h3_world import H3World, HexCell, TerrainType
+from world.h3_world import H3World, HexCell, TerrainType
 
 logger = logging.getLogger(__name__)
 
@@ -306,8 +306,7 @@ class MovementPerceptionSystem:
             blocked = False
             observer_elevation = observer_cell.elevation
 
-            for i, hex_id in enumerate(path[1:-1], 1):  # Skip observer and
-                target
+            for i, hex_id in enumerate(path[1:-1], 1):  # Skip observer and target
                 intermediate_cell = self.world.get_cell(hex_id)
                 if not intermediate_cell:
                     continue

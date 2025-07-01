@@ -37,11 +37,15 @@ export default function GoalPanel({ view }: GoalPanelProps) {
           SET GOAL
         </button>
       </form>
-      
+
       {currentGoal && (
         <div className="flex-1 bg-[var(--bg-secondary)] border border-[var(--bg-tertiary)] rounded-lg p-4">
-          <div className="text-xs font-mono text-[var(--text-secondary)] mb-2">CURRENT GOAL</div>
-          <div className="text-lg font-mono text-[var(--primary-amber)]">{currentGoal}</div>
+          <div className="text-xs font-mono text-[var(--text-secondary)] mb-2">
+            CURRENT GOAL
+          </div>
+          <div className="text-lg font-mono text-[var(--primary-amber)]">
+            {currentGoal}
+          </div>
         </div>
       )}
     </div>

@@ -1,74 +1,88 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Dashboard from '@/app/page';
+import React from "react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from "@testing-library/react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Dashboard from "@/app/page";
 
 // Mock Next.js navigation
-jest.mock('next/navigation', () => ({
+jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
   useSearchParams: jest.fn(),
 }));
 
-// Mock dashboard components
-jest.mock('@/components/dashboard/KnowledgeGraphVisualization', () => ({
-  KnowledgeGraphVisualization: () => <div data-testid="knowledge-graph">Knowledge Graph</div>,
-}));
+// Mock dashboard panel components with proper default exports
+jest.mock("@/app/dashboard/components/panels/AgentPanel", () => {
+  return function AgentPanel({ view }: { view: string }) {
+    return <div data-testid="agent-panel">Agent Panel - {view}</div>;
+  };
+});
 
-jest.mock('@/app/dashboard/components/panels/AgentPanel', () => ({
-  default: () => <div data-testid="agent-panel">Agent Panel</div>,
-}));
+jest.mock("@/app/dashboard/components/panels/ConversationPanel", () => {
+  return function ConversationPanel({ view }: { view: string }) {
+    return <div data-testid="conversation-panel">Conversation Panel - {view}</div>;
+  };
+});
 
-jest.mock('@/app/dashboard/components/panels/MetricsPanel', () => ({
-  default: () => <div data-testid="metrics-panel">Metrics Panel</div>,
-}));
+jest.mock("@/app/dashboard/components/panels/GoalPanel", () => {
+  return function GoalPanel({ view }: { view: string }) {
+    return <div data-testid="goal-panel">Goal Panel - {view}</div>;
+  };
+});
 
-jest.mock('@/app/dashboard/components/panels/ControlPanel', () => ({
-  default: () => <div data-testid="control-panel">Control Panel</div>,
-}));
+jest.mock("@/app/dashboard/components/panels/KnowledgePanel", () => {
+  return function KnowledgePanel({ view }: { view: string }) {
+    return <div data-testid="knowledge-panel">Knowledge Panel - {view}</div>;
+  };
+});
 
-jest.mock('@/app/dashboard/components/panels/ConversationPanel', () => ({
-  default: () => <div data-testid="conversation-panel">Conversation Panel</div>,
-}));
+jest.mock("@/app/dashboard/components/panels/MetricsPanel", () => {
+  return function MetricsPanel({ view }: { view: string }) {
+    return <div data-testid="metrics-panel">Metrics Panel - {view}</div>;
+  };
+});
 
-jest.mock('@/app/dashboard/components/panels/AnalyticsPanel', () => ({
-  default: () => <div data-testid="analytics-panel">Analytics Panel</div>,
-}));
-
-jest.mock('@/app/dashboard/components/panels/KnowledgePanel', () => ({
-  default: () => <div data-testid="knowledge-panel">Knowledge Panel</div>,
-}));
+// Removed redundant mocks - using the corrected versions above
 
 // Mock layout components
-jest.mock('@/app/dashboard/layouts/BloombergLayout', () => ({
+jest.mock("@/app/dashboard/layouts/BloombergLayout", () => ({
   default: () => <div data-testid="bloomberg-layout">Bloomberg Layout</div>,
 }));
 
-jest.mock('@/app/dashboard/layouts/BloombergTerminalLayout', () => ({
-  default: () => <div data-testid="bloomberg-terminal-layout">Bloomberg Terminal Layout</div>,
+jest.mock("@/app/dashboard/layouts/BloombergTerminalLayout", () => ({
+  default: () => (
+    <div data-testid="bloomberg-terminal-layout">Bloomberg Terminal Layout</div>
+  ),
 }));
 
-jest.mock('@/app/dashboard/layouts/ResizableLayout', () => ({
+jest.mock("@/app/dashboard/layouts/ResizableLayout", () => ({
   default: () => <div data-testid="resizable-layout">Resizable Layout</div>,
 }));
 
-jest.mock('@/app/dashboard/layouts/KnowledgeLayout', () => ({
+jest.mock("@/app/dashboard/layouts/KnowledgeLayout", () => ({
   default: () => <div data-testid="knowledge-layout">Knowledge Layout</div>,
 }));
 
-jest.mock('@/app/dashboard/layouts/CEODemoLayout', () => ({
+jest.mock("@/app/dashboard/layouts/CEODemoLayout", () => ({
   default: () => <div data-testid="ceo-demo-layout">CEO Demo Layout</div>,
 }));
 
-jest.mock('@/components/dashboard/TilingWindowManager', () => ({
-  default: () => <div data-testid="tiling-window-manager">Tiling Window Manager</div>,
+jest.mock("@/components/dashboard/TilingWindowManager", () => ({
+  default: () => (
+    <div data-testid="tiling-window-manager">Tiling Window Manager</div>
+  ),
 }));
 
 // Mock dashboard store
-jest.mock('@/lib/stores/dashboard-store', () => ({
+jest.mock("@/lib/stores/dashboard-store", () => ({
   useDashboardStore: () => ({
-    activeLayout: 'default',
+    activeLayout: "default",
     setActiveLayout: jest.fn(),
-    theme: 'dark',
+    theme: "dark",
     setTheme: jest.fn(),
     panels: {
       knowledge: { visible: true, order: 0 },
@@ -82,7 +96,7 @@ jest.mock('@/lib/stores/dashboard-store', () => ({
   }),
 }));
 
-describe('Dashboard Page', () => {
+describe("Dashboard Page", () => {
   const mockRouter = {
     push: jest.fn(),
     replace: jest.fn(),
@@ -91,7 +105,7 @@ describe('Dashboard Page', () => {
 
   const mockSearchParams = {
     get: jest.fn((key: string) => {
-      if (key === 'view') return 'ceo-demo';
+      if (key === "view") return "ceo-demo";
       return null;
     }),
     has: jest.fn(),
@@ -103,101 +117,96 @@ describe('Dashboard Page', () => {
     (useSearchParams as jest.Mock).mockReturnValue(mockSearchParams);
   });
 
-  describe('Rendering', () => {
-    it('renders without crashing', () => {
-      render(<Dashboard  {...({} as any)} />);
-      expect(screen.getByRole('main')).toBeInTheDocument();
+  describe("Rendering", () => {
+    it("renders without crashing", () => {
+      render(<Dashboard {...({} as any)} />);
+      // Check for the application title instead of main role
+      expect(screen.getByText("FreeAgentics")).toBeInTheDocument();
     });
 
-    it('renders all dashboard panels', () => {
-      render(<Dashboard  {...({} as any)} />);
-      
-      // The dashboard renders one of the layout components
-      const layouts = [
-        'ceo-demo-layout',
-        'bloomberg-layout', 
-        'bloomberg-terminal-layout',
-        'resizable-layout',
-        'knowledge-layout',
-        'tiling-window-manager'
-      ];
-      
-      const renderedLayout = layouts.find(layout => 
-        screen.queryByTestId(layout) !== null
-      );
-      
-      expect(renderedLayout).toBeDefined();
+    it("renders all dashboard panels", () => {
+      render(<Dashboard {...({} as any)} />);
+
+      // Check that our mocked panels are rendered by checking for the mock content
+      expect(screen.getByText(/Agent Panel - executive/)).toBeInTheDocument();
+      expect(screen.getByText(/Conversation Panel - executive/)).toBeInTheDocument();
+      expect(screen.getByText(/Goal Panel - executive/)).toBeInTheDocument();
+      expect(screen.getByText(/Knowledge Panel - executive/)).toBeInTheDocument();
+      expect(screen.getByText(/Metrics Panel - executive/)).toBeInTheDocument();
     });
 
-    it('renders layout selector', () => {
-      render(<Dashboard  {...({} as any)} />);
+    it("renders layout selector", () => {
+      render(<Dashboard {...({} as any)} />);
       // May render a select or button for layout selection
-      const layoutControl = screen.queryByRole('combobox', { name: /layout/i }) || 
-                           screen.queryByRole('button', { name: /layout/i }) ||
-                           screen.queryByTestId('layout-selector');
+      const layoutControl =
+        screen.queryByRole("combobox", { name: /layout/i }) ||
+        screen.queryByRole("button", { name: /layout/i }) ||
+        screen.queryByTestId("layout-selector");
       expect(layoutControl).toBeTruthy();
     });
 
-    it('renders in dark theme by default', () => {
-      render(<Dashboard  {...({} as any)} />);
+    it("renders in dark theme by default", () => {
+      render(<Dashboard {...({} as any)} />);
       // Check for dark theme class on any element
-      const darkElements = document.querySelectorAll('.dark, [data-theme="dark"]');
+      const darkElements = document.querySelectorAll(
+        '.dark, [data-theme="dark"]',
+      );
       expect(darkElements.length).toBeGreaterThan(0);
     });
   });
 
-  describe('Layout Management', () => {
-    it('switches between layouts', () => {
-      render(<Dashboard  {...({} as any)} />);
-      
-      const layoutSelector = screen.getByRole('combobox', { name: /layout/i });
-      fireEvent.change(layoutSelector, { target: { value: 'bloomberg' } });
+  describe("Layout Management", () => {
+    it("switches between layouts", () => {
+      render(<Dashboard {...({} as any)} />);
 
-      expect(screen.getByRole('main')).toHaveClass('layout-bloomberg');
+      const layoutSelector = screen.getByRole("combobox", { name: /layout/i });
+      fireEvent.change(layoutSelector, { target: { value: "bloomberg" } });
+
+      expect(screen.getByRole("main")).toHaveClass("layout-bloomberg");
     });
 
-    it('loads layout from URL params', () => {
-      mockSearchParams.get.mockReturnValue('resizable');
-      render(<Dashboard  {...({} as any)} />);
+    it("loads layout from URL params", () => {
+      mockSearchParams.get.mockReturnValue("resizable");
+      render(<Dashboard {...({} as any)} />);
 
-      expect(screen.getByRole('main')).toHaveClass('layout-resizable');
+      expect(screen.getByRole("main")).toHaveClass("layout-resizable");
     });
 
-    it('updates URL when layout changes', () => {
-      render(<Dashboard  {...({} as any)} />);
-      
-      const layoutSelector = screen.getByRole('combobox', { name: /layout/i });
-      fireEvent.change(layoutSelector, { target: { value: 'knowledge' } });
+    it("updates URL when layout changes", () => {
+      render(<Dashboard {...({} as any)} />);
+
+      const layoutSelector = screen.getByRole("combobox", { name: /layout/i });
+      fireEvent.change(layoutSelector, { target: { value: "knowledge" } });
 
       expect(mockRouter.replace).toHaveBeenCalledWith(
-        expect.stringContaining('layout=knowledge')
+        expect.stringContaining("layout=knowledge"),
       );
     });
   });
 
-  describe('Panel Visibility', () => {
-    it('toggles panel visibility', () => {
-      render(<Dashboard  {...({} as any)} />);
-      
+  describe("Panel Visibility", () => {
+    it("toggles panel visibility", () => {
+      render(<Dashboard {...({} as any)} />);
+
       const visibilityToggle = screen.getByLabelText(/toggle agent panel/i);
       fireEvent.click(visibilityToggle);
 
-      expect(screen.queryByTestId('agent-panel')).not.toBeInTheDocument();
+      expect(screen.queryByTestId("agent-panel")).not.toBeInTheDocument();
     });
 
-    it('shows panel configuration menu', () => {
-      render(<Dashboard  {...({} as any)} />);
-      
+    it("shows panel configuration menu", () => {
+      render(<Dashboard {...({} as any)} />);
+
       const configButton = screen.getByLabelText(/panel configuration/i);
       fireEvent.click(configButton);
 
-      expect(screen.getByRole('menu')).toBeInTheDocument();
+      expect(screen.getByRole("menu")).toBeInTheDocument();
     });
 
-    it('reorders panels via drag and drop', async (): Promise<void> => {
-      render(<Dashboard  {...({} as any)} />);
-      
-      const panels = screen.getAllByRole('region');
+    it("reorders panels via drag and drop", async (): Promise<void> => {
+      render(<Dashboard {...({} as any)} />);
+
+      const panels = screen.getAllByRole("region");
       const firstPanel = panels[0];
       const secondPanel = panels[1];
 
@@ -214,44 +223,44 @@ describe('Dashboard Page', () => {
     });
   });
 
-  describe('Theme Management', () => {
-    it('toggles between light and dark themes', () => {
-      render(<Dashboard  {...({} as any)} />);
-      
+  describe("Theme Management", () => {
+    it("toggles between light and dark themes", () => {
+      render(<Dashboard {...({} as any)} />);
+
       const themeToggle = screen.getByLabelText(/toggle theme/i);
       fireEvent.click(themeToggle);
 
-      expect(screen.getByRole('main')).toHaveClass('light');
+      expect(screen.getByRole("main")).toHaveClass("light");
     });
 
-    it('persists theme preference', () => {
-      const { rerender } = render(<Dashboard  {...({} as any)} />);
-      
+    it("persists theme preference", () => {
+      const { rerender } = render(<Dashboard {...({} as any)} />);
+
       const themeToggle = screen.getByLabelText(/toggle theme/i);
       fireEvent.click(themeToggle);
 
       // Rerender to simulate page refresh
-      rerender(<Dashboard  {...({} as any)} />);
-      expect(screen.getByRole('main')).toHaveClass('light');
+      rerender(<Dashboard {...({} as any)} />);
+      expect(screen.getByRole("main")).toHaveClass("light");
     });
   });
 
-  describe('Real-time Updates', () => {
-    it('displays connection status', () => {
-      render(<Dashboard  {...({} as any)} />);
+  describe("Real-time Updates", () => {
+    it("displays connection status", () => {
+      render(<Dashboard {...({} as any)} />);
       expect(screen.getByText(/connected/i)).toBeInTheDocument();
     });
 
-    it('shows loading state for data', () => {
-      render(<Dashboard  {...({} as any)} />);
+    it("shows loading state for data", () => {
+      render(<Dashboard {...({} as any)} />);
       expect(screen.queryByText(/loading/i)).not.toBeInTheDocument();
     });
 
-    it('handles WebSocket disconnection', async (): Promise<void> => {
-      render(<Dashboard  {...({} as any)} />);
-      
+    it("handles WebSocket disconnection", async (): Promise<void> => {
+      render(<Dashboard {...({} as any)} />);
+
       // Simulate WebSocket disconnection
-      window.dispatchEvent(new Event('offline'));
+      window.dispatchEvent(new Event("offline"));
 
       await waitFor(() => {
         expect(screen.getByText(/disconnected/i)).toBeInTheDocument();
@@ -259,61 +268,61 @@ describe('Dashboard Page', () => {
     });
   });
 
-  describe('Responsive Design', () => {
-    it('adapts to mobile viewport', () => {
+  describe("Responsive Design", () => {
+    it("adapts to mobile viewport", () => {
       // Mock mobile viewport
-      Object.defineProperty(window, 'innerWidth', {
+      Object.defineProperty(window, "innerWidth", {
         writable: true,
         configurable: true,
         value: 375,
       });
 
-      render(<Dashboard  {...({} as any)} />);
-      expect(screen.getByRole('main')).toHaveClass('mobile-layout');
+      render(<Dashboard {...({} as any)} />);
+      expect(screen.getByRole("main")).toHaveClass("mobile-layout");
     });
 
-    it('shows mobile menu on small screens', () => {
-      Object.defineProperty(window, 'innerWidth', {
+    it("shows mobile menu on small screens", () => {
+      Object.defineProperty(window, "innerWidth", {
         writable: true,
         configurable: true,
         value: 375,
       });
 
-      render(<Dashboard  {...({} as any)} />);
+      render(<Dashboard {...({} as any)} />);
       expect(screen.getByLabelText(/menu/i)).toBeInTheDocument();
     });
 
-    it('handles orientation change', () => {
-      render(<Dashboard  {...({} as any)} />);
-      
-      // Simulate orientation change
-      window.dispatchEvent(new Event('orientationchange'));
+    it("handles orientation change", () => {
+      render(<Dashboard {...({} as any)} />);
 
-      expect(screen.getByRole('main')).toHaveAttribute('data-orientation');
+      // Simulate orientation change
+      window.dispatchEvent(new Event("orientationchange"));
+
+      expect(screen.getByRole("main")).toHaveAttribute("data-orientation");
     });
   });
 
-  describe('Performance', () => {
-    it('renders efficiently with large datasets', async (): Promise<void> => {
+  describe("Performance", () => {
+    it("renders efficiently with large datasets", async (): Promise<void> => {
       const startTime = performance.now();
-      render(<Dashboard  {...({} as any)} />);
+      render(<Dashboard {...({} as any)} />);
       const renderTime = performance.now() - startTime;
 
       expect(renderTime).toBeLessThan(100); // Should render in less than 100ms
     });
 
-    it('implements virtual scrolling for long lists', () => {
-      render(<Dashboard  {...({} as any)} />);
-      
-      const scrollContainer = screen.getByTestId('virtual-scroll-container');
-      expect(scrollContainer).toHaveAttribute('data-virtual-scroll', 'true');
+    it("implements virtual scrolling for long lists", () => {
+      render(<Dashboard {...({} as any)} />);
+
+      const scrollContainer = screen.getByTestId("virtual-scroll-container");
+      expect(scrollContainer).toHaveAttribute("data-virtual-scroll", "true");
     });
 
-    it('debounces rapid state updates', async (): Promise<void> => {
-      render(<Dashboard  {...({} as any)} />);
-      
+    it("debounces rapid state updates", async (): Promise<void> => {
+      render(<Dashboard {...({} as any)} />);
+
       const updateButton = screen.getByLabelText(/refresh data/i);
-      
+
       // Rapid clicks
       for (let i = 0; i < 10; i++) {
         fireEvent.click(updateButton);
@@ -326,110 +335,119 @@ describe('Dashboard Page', () => {
     });
   });
 
-  describe('Accessibility', () => {
-    it('has proper ARIA labels', () => {
-      render(<Dashboard  {...({} as any)} />);
-      
-      expect(screen.getByRole('main')).toHaveAttribute('aria-label', 'Dashboard');
-      expect(screen.getByRole('region', { name: /knowledge graph/i })).toBeInTheDocument();
-      expect(screen.getByRole('region', { name: /agent panel/i })).toBeInTheDocument();
+  describe("Accessibility", () => {
+    it("has proper ARIA labels", () => {
+      render(<Dashboard {...({} as any)} />);
+
+      expect(screen.getByRole("main")).toHaveAttribute(
+        "aria-label",
+        "Dashboard",
+      );
+      expect(
+        screen.getByRole("region", { name: /knowledge graph/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("region", { name: /agent panel/i }),
+      ).toBeInTheDocument();
     });
 
-    it('supports keyboard navigation', () => {
-      render(<Dashboard  {...({} as any)} />);
-      
-      const panels = screen.getAllByRole('region');
+    it("supports keyboard navigation", () => {
+      render(<Dashboard {...({} as any)} />);
+
+      const panels = screen.getAllByRole("region");
       panels[0].focus();
 
-      fireEvent.keyDown(panels[0], { key: 'Tab' });
+      fireEvent.keyDown(panels[0], { key: "Tab" });
       expect(panels[1]).toHaveFocus();
     });
 
-    it('announces updates to screen readers', async (): Promise<void> => {
-      render(<Dashboard  {...({} as any)} />);
-      
+    it("announces updates to screen readers", async (): Promise<void> => {
+      render(<Dashboard {...({} as any)} />);
+
       const updateButton = screen.getByLabelText(/refresh data/i);
       fireEvent.click(updateButton);
 
       await waitFor(() => {
-        expect(screen.getByRole('status')).toHaveTextContent(/data updated/i);
+        expect(screen.getByRole("status")).toHaveTextContent(/data updated/i);
       });
     });
   });
 
-  describe('Error Handling', () => {
-    it('displays error boundary on component crash', () => {
+  describe("Error Handling", () => {
+    it("displays error boundary on component crash", () => {
       // Mock console.error to avoid noise in tests
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = jest.spyOn(console, "error").mockImplementation();
 
       // Force an error
       const ThrowError = () => {
-        throw new Error('Test error');
+        throw new Error("Test error");
         return null; // Never reached but TypeScript needs this
       };
 
       render(
         <Dashboard>
           <ThrowError />
-        </Dashboard>
+        </Dashboard>,
       );
 
       expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
-      
+
       consoleSpy.mockRestore();
     });
 
-    it('shows error message on data fetch failure', async (): Promise<void> => {
-      render(<Dashboard  {...({} as any)} />);
-      
+    it("shows error message on data fetch failure", async (): Promise<void> => {
+      render(<Dashboard {...({} as any)} />);
+
       // Simulate fetch error
-      window.dispatchEvent(new ErrorEvent('error', {
-        message: 'Failed to fetch data',
-      }));
+      window.dispatchEvent(
+        new ErrorEvent("error", {
+          message: "Failed to fetch data",
+        }),
+      );
 
       await waitFor(() => {
         expect(screen.getByText(/failed to fetch data/i)).toBeInTheDocument();
       });
     });
 
-    it('provides retry mechanism on error', async (): Promise<void> => {
-      render(<Dashboard  {...({} as any)} />);
-      
+    it("provides retry mechanism on error", async (): Promise<void> => {
+      render(<Dashboard {...({} as any)} />);
+
       // Simulate error
-      window.dispatchEvent(new ErrorEvent('error'));
+      window.dispatchEvent(new ErrorEvent("error"));
 
       await waitFor(() => {
         const retryButton = screen.getByText(/retry/i);
         expect(retryButton).toBeInTheDocument();
-        
+
         fireEvent.click(retryButton);
         expect(mockRouter.refresh).toHaveBeenCalled();
       });
     });
   });
 
-  describe('Export Functionality', () => {
-    it('exports dashboard configuration', () => {
-      render(<Dashboard  {...({} as any)} />);
-      
+  describe("Export Functionality", () => {
+    it("exports dashboard configuration", () => {
+      render(<Dashboard {...({} as any)} />);
+
       const exportButton = screen.getByLabelText(/export configuration/i);
       fireEvent.click(exportButton);
 
       expect(screen.getByText(/configuration exported/i)).toBeInTheDocument();
     });
 
-    it('imports dashboard configuration', async (): Promise<void> => {
-      render(<Dashboard  {...({} as any)} />);
-      
-      const file = new File(['{"layout": "bloomberg"}'], 'config.json', {
-        type: 'application/json',
+    it("imports dashboard configuration", async (): Promise<void> => {
+      render(<Dashboard {...({} as any)} />);
+
+      const file = new File(['{"layout": "bloomberg"}'], "config.json", {
+        type: "application/json",
       });
 
       const input = screen.getByLabelText(/import configuration/i);
       fireEvent.change(input, { target: { files: [file] } });
 
       await waitFor(() => {
-        expect(screen.getByRole('main')).toHaveClass('layout-bloomberg');
+        expect(screen.getByRole("main")).toHaveClass("layout-bloomberg");
       });
     });
   });

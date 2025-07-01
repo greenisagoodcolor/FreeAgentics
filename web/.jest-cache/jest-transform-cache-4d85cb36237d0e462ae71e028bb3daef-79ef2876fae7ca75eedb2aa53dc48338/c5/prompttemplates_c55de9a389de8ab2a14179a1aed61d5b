@@ -1,0 +1,1598 @@
+df896efcf0ebac15dbf156da74fe6fdd
+"use strict";
+
+/* istanbul ignore next */
+function cov_19bpzc8ahe() {
+  var path = "/Users/matthewmoroney/builds/FreeAgentics/web/lib/prompt-templates.ts";
+  var hash = "3e38c0564fe19d0fa7c7a1d5ca0db648ac93902d";
+  var global = new Function("return this")();
+  var gcv = "__coverage__";
+  var coverageData = {
+    path: "/Users/matthewmoroney/builds/FreeAgentics/web/lib/prompt-templates.ts",
+    statementMap: {
+      "0": {
+        start: {
+          line: 2,
+          column: 0
+        },
+        end: {
+          line: 4,
+          column: 3
+        }
+      },
+      "1": {
+        start: {
+          line: 6,
+          column: 4
+        },
+        end: {
+          line: 9,
+          column: 7
+        }
+      },
+      "2": {
+        start: {
+          line: 6,
+          column: 24
+        },
+        end: {
+          line: 9,
+          column: 7
+        }
+      },
+      "3": {
+        start: {
+          line: 11,
+          column: 0
+        },
+        end: {
+          line: 33,
+          column: 3
+        }
+      },
+      "4": {
+        start: {
+          line: 13,
+          column: 8
+        },
+        end: {
+          line: 13,
+          column: 37
+        }
+      },
+      "5": {
+        start: {
+          line: 16,
+          column: 8
+        },
+        end: {
+          line: 16,
+          column: 30
+        }
+      },
+      "6": {
+        start: {
+          line: 19,
+          column: 8
+        },
+        end: {
+          line: 19,
+          column: 40
+        }
+      },
+      "7": {
+        start: {
+          line: 22,
+          column: 8
+        },
+        end: {
+          line: 22,
+          column: 41
+        }
+      },
+      "8": {
+        start: {
+          line: 25,
+          column: 8
+        },
+        end: {
+          line: 25,
+          column: 40
+        }
+      },
+      "9": {
+        start: {
+          line: 28,
+          column: 8
+        },
+        end: {
+          line: 28,
+          column: 38
+        }
+      },
+      "10": {
+        start: {
+          line: 31,
+          column: 8
+        },
+        end: {
+          line: 31,
+          column: 44
+        }
+      },
+      "11": {
+        start: {
+          line: 36,
+          column: 4
+        },
+        end: {
+          line: 36,
+          column: 128
+        }
+      },
+      "12": {
+        start: {
+          line: 36,
+          column: 68
+        },
+        end: {
+          line: 36,
+          column: 120
+        }
+      },
+      "13": {
+        start: {
+          line: 40,
+          column: 27
+        },
+        end: {
+          line: 40,
+          column: 55
+        }
+      },
+      "14": {
+        start: {
+          line: 41,
+          column: 4
+        },
+        end: {
+          line: 44,
+          column: 20
+        }
+      },
+      "15": {
+        start: {
+          line: 42,
+          column: 23
+        },
+        end: {
+          line: 42,
+          column: 107
+        }
+      },
+      "16": {
+        start: {
+          line: 43,
+          column: 8
+        },
+        end: {
+          line: 43,
+          column: 43
+        }
+      },
+      "17": {
+        start: {
+          line: 47,
+          column: 4
+        },
+        end: {
+          line: 47,
+          column: 67
+        }
+      },
+      "18": {
+        start: {
+          line: 47,
+          column: 25
+        },
+        end: {
+          line: 47,
+          column: 67
+        }
+      },
+      "19": {
+        start: {
+          line: 48,
+          column: 4
+        },
+        end: {
+          line: 55,
+          column: 20
+        }
+      },
+      "20": {
+        start: {
+          line: 49,
+          column: 24
+        },
+        end: {
+          line: 49,
+          column: 75
+        }
+      },
+      "21": {
+        start: {
+          line: 50,
+          column: 8
+        },
+        end: {
+          line: 53,
+          column: 9
+        }
+      },
+      "22": {
+        start: {
+          line: 51,
+          column: 12
+        },
+        end: {
+          line: 51,
+          column: 60
+        }
+      },
+      "23": {
+        start: {
+          line: 52,
+          column: 12
+        },
+        end: {
+          line: 52,
+          column: 73
+        }
+      },
+      "24": {
+        start: {
+          line: 54,
+          column: 8
+        },
+        end: {
+          line: 54,
+          column: 25
+        }
+      },
+      "25": {
+        start: {
+          line: 58,
+          column: 4
+        },
+        end: {
+          line: 61,
+          column: 18
+        }
+      },
+      "26": {
+        start: {
+          line: 59,
+          column: 31
+        },
+        end: {
+          line: 59,
+          column: 58
+        }
+      },
+      "27": {
+        start: {
+          line: 60,
+          column: 8
+        },
+        end: {
+          line: 60,
+          column: 101
+        }
+      },
+      "28": {
+        start: {
+          line: 65,
+          column: 25
+        },
+        end: {
+          line: 65,
+          column: 75
+        }
+      },
+      "29": {
+        start: {
+          line: 67,
+          column: 24
+        },
+        end: {
+          line: 67,
+          column: 107
+        }
+      },
+      "30": {
+        start: {
+          line: 69,
+          column: 26
+        },
+        end: {
+          line: 69,
+          column: 94
+        }
+      },
+      "31": {
+        start: {
+          line: 71,
+          column: 21
+        },
+        end: {
+          line: 71,
+          column: 23
+        }
+      },
+      "32": {
+        start: {
+          line: 72,
+          column: 4
+        },
+        end: {
+          line: 74,
+          column: 5
+        }
+      },
+      "33": {
+        start: {
+          line: 73,
+          column: 8
+        },
+        end: {
+          line: 73,
+          column: 86
+        }
+      },
+      "34": {
+        start: {
+          line: 75,
+          column: 4
+        },
+        end: {
+          line: 77,
+          column: 5
+        }
+      },
+      "35": {
+        start: {
+          line: 76,
+          column: 8
+        },
+        end: {
+          line: 76,
+          column: 71
+        }
+      },
+      "36": {
+        start: {
+          line: 78,
+          column: 4
+        },
+        end: {
+          line: 78,
+          column: 58
+        }
+      },
+      "37": {
+        start: {
+          line: 79,
+          column: 4
+        },
+        end: {
+          line: 81,
+          column: 5
+        }
+      },
+      "38": {
+        start: {
+          line: 80,
+          column: 8
+        },
+        end: {
+          line: 80,
+          column: 86
+        }
+      },
+      "39": {
+        start: {
+          line: 82,
+          column: 4
+        },
+        end: {
+          line: 85,
+          column: 6
+        }
+      },
+      "40": {
+        start: {
+          line: 87,
+          column: 30
+        },
+        end: {
+          line: 113,
+          column: 1
+        }
+      },
+      "41": {
+        start: {
+          line: 114,
+          column: 33
+        },
+        end: {
+          line: 133,
+          column: 1
+        }
+      },
+      "42": {
+        start: {
+          line: 134,
+          column: 37
+        },
+        end: {
+          line: 144,
+          column: 1
+        }
+      }
+    },
+    fnMap: {
+      "0": {
+        name: "_export",
+        decl: {
+          start: {
+            line: 5,
+            column: 9
+          },
+          end: {
+            line: 5,
+            column: 16
+          }
+        },
+        loc: {
+          start: {
+            line: 5,
+            column: 30
+          },
+          end: {
+            line: 10,
+            column: 1
+          }
+        },
+        line: 5
+      },
+      "1": {
+        name: "(anonymous_1)",
+        decl: {
+          start: {
+            line: 12,
+            column: 27
+          },
+          end: {
+            line: 12,
+            column: 28
+          }
+        },
+        loc: {
+          start: {
+            line: 12,
+            column: 38
+          },
+          end: {
+            line: 14,
+            column: 5
+          }
+        },
+        line: 12
+      },
+      "2": {
+        name: "(anonymous_2)",
+        decl: {
+          start: {
+            line: 15,
+            column: 20
+          },
+          end: {
+            line: 15,
+            column: 21
+          }
+        },
+        loc: {
+          start: {
+            line: 15,
+            column: 31
+          },
+          end: {
+            line: 17,
+            column: 5
+          }
+        },
+        line: 15
+      },
+      "3": {
+        name: "(anonymous_3)",
+        decl: {
+          start: {
+            line: 18,
+            column: 30
+          },
+          end: {
+            line: 18,
+            column: 31
+          }
+        },
+        loc: {
+          start: {
+            line: 18,
+            column: 41
+          },
+          end: {
+            line: 20,
+            column: 5
+          }
+        },
+        line: 18
+      },
+      "4": {
+        name: "(anonymous_4)",
+        decl: {
+          start: {
+            line: 21,
+            column: 31
+          },
+          end: {
+            line: 21,
+            column: 32
+          }
+        },
+        loc: {
+          start: {
+            line: 21,
+            column: 42
+          },
+          end: {
+            line: 23,
+            column: 5
+          }
+        },
+        line: 21
+      },
+      "5": {
+        name: "(anonymous_5)",
+        decl: {
+          start: {
+            line: 24,
+            column: 30
+          },
+          end: {
+            line: 24,
+            column: 31
+          }
+        },
+        loc: {
+          start: {
+            line: 24,
+            column: 41
+          },
+          end: {
+            line: 26,
+            column: 5
+          }
+        },
+        line: 24
+      },
+      "6": {
+        name: "(anonymous_6)",
+        decl: {
+          start: {
+            line: 27,
+            column: 28
+          },
+          end: {
+            line: 27,
+            column: 29
+          }
+        },
+        loc: {
+          start: {
+            line: 27,
+            column: 39
+          },
+          end: {
+            line: 29,
+            column: 5
+          }
+        },
+        line: 27
+      },
+      "7": {
+        name: "(anonymous_7)",
+        decl: {
+          start: {
+            line: 30,
+            column: 34
+          },
+          end: {
+            line: 30,
+            column: 35
+          }
+        },
+        loc: {
+          start: {
+            line: 30,
+            column: 45
+          },
+          end: {
+            line: 32,
+            column: 5
+          }
+        },
+        line: 30
+      },
+      "8": {
+        name: "replaceVariables",
+        decl: {
+          start: {
+            line: 35,
+            column: 9
+          },
+          end: {
+            line: 35,
+            column: 25
+          }
+        },
+        loc: {
+          start: {
+            line: 35,
+            column: 43
+          },
+          end: {
+            line: 37,
+            column: 1
+          }
+        },
+        line: 35
+      },
+      "9": {
+        name: "(anonymous_9)",
+        decl: {
+          start: {
+            line: 36,
+            column: 44
+          },
+          end: {
+            line: 36,
+            column: 45
+          }
+        },
+        loc: {
+          start: {
+            line: 36,
+            column: 68
+          },
+          end: {
+            line: 36,
+            column: 120
+          }
+        },
+        line: 36
+      },
+      "10": {
+        name: "formatConversationHistory",
+        decl: {
+          start: {
+            line: 38,
+            column: 9
+          },
+          end: {
+            line: 38,
+            column: 34
+          }
+        },
+        loc: {
+          start: {
+            line: 38,
+            column: 71
+          },
+          end: {
+            line: 45,
+            column: 1
+          }
+        },
+        line: 38
+      },
+      "11": {
+        name: "(anonymous_11)",
+        decl: {
+          start: {
+            line: 41,
+            column: 30
+          },
+          end: {
+            line: 41,
+            column: 31
+          }
+        },
+        loc: {
+          start: {
+            line: 41,
+            column: 37
+          },
+          end: {
+            line: 44,
+            column: 5
+          }
+        },
+        line: 41
+      },
+      "12": {
+        name: "formatKnowledgeForPrompt",
+        decl: {
+          start: {
+            line: 46,
+            column: 9
+          },
+          end: {
+            line: 46,
+            column: 33
+          }
+        },
+        loc: {
+          start: {
+            line: 46,
+            column: 68
+          },
+          end: {
+            line: 56,
+            column: 1
+          }
+        },
+        line: 46
+      },
+      "13": {
+        name: "(anonymous_13)",
+        decl: {
+          start: {
+            line: 48,
+            column: 23
+          },
+          end: {
+            line: 48,
+            column: 24
+          }
+        },
+        loc: {
+          start: {
+            line: 48,
+            column: 32
+          },
+          end: {
+            line: 55,
+            column: 5
+          }
+        },
+        line: 48
+      },
+      "14": {
+        name: "formatParticipantsList",
+        decl: {
+          start: {
+            line: 57,
+            column: 9
+          },
+          end: {
+            line: 57,
+            column: 31
+          }
+        },
+        loc: {
+          start: {
+            line: 57,
+            column: 56
+          },
+          end: {
+            line: 62,
+            column: 1
+          }
+        },
+        line: 57
+      },
+      "15": {
+        name: "(anonymous_15)",
+        decl: {
+          start: {
+            line: 58,
+            column: 43
+          },
+          end: {
+            line: 58,
+            column: 44
+          }
+        },
+        loc: {
+          start: {
+            line: 58,
+            column: 52
+          },
+          end: {
+            line: 61,
+            column: 5
+          }
+        },
+        line: 58
+      },
+      "16": {
+        name: "assemblePrompt",
+        decl: {
+          start: {
+            line: 63,
+            column: 9
+          },
+          end: {
+            line: 63,
+            column: 23
+          }
+        },
+        loc: {
+          start: {
+            line: 63,
+            column: 93
+          },
+          end: {
+            line: 86,
+            column: 1
+          }
+        },
+        line: 63
+      }
+    },
+    branchMap: {
+      "0": {
+        loc: {
+          start: {
+            line: 38,
+            column: 53
+          },
+          end: {
+            line: 38,
+            column: 69
+          }
+        },
+        type: "default-arg",
+        locations: [{
+          start: {
+            line: 38,
+            column: 67
+          },
+          end: {
+            line: 38,
+            column: 69
+          }
+        }],
+        line: 38
+      },
+      "1": {
+        loc: {
+          start: {
+            line: 42,
+            column: 23
+          },
+          end: {
+            line: 42,
+            column: 107
+          }
+        },
+        type: "cond-expr",
+        locations: [{
+          start: {
+            line: 42,
+            column: 49
+          },
+          end: {
+            line: 42,
+            column: 55
+          }
+        }, {
+          start: {
+            line: 42,
+            column: 58
+          },
+          end: {
+            line: 42,
+            column: 107
+          }
+        }],
+        line: 42
+      },
+      "2": {
+        loc: {
+          start: {
+            line: 42,
+            column: 58
+          },
+          end: {
+            line: 42,
+            column: 107
+          }
+        },
+        type: "binary-expr",
+        locations: [{
+          start: {
+            line: 42,
+            column: 58
+          },
+          end: {
+            line: 42,
+            column: 88
+          }
+        }, {
+          start: {
+            line: 42,
+            column: 92
+          },
+          end: {
+            line: 42,
+            column: 107
+          }
+        }],
+        line: 42
+      },
+      "3": {
+        loc: {
+          start: {
+            line: 46,
+            column: 43
+          },
+          end: {
+            line: 46,
+            column: 66
+          }
+        },
+        type: "default-arg",
+        locations: [{
+          start: {
+            line: 46,
+            column: 61
+          },
+          end: {
+            line: 46,
+            column: 66
+          }
+        }],
+        line: 46
+      },
+      "4": {
+        loc: {
+          start: {
+            line: 47,
+            column: 4
+          },
+          end: {
+            line: 47,
+            column: 67
+          }
+        },
+        type: "if",
+        locations: [{
+          start: {
+            line: 47,
+            column: 4
+          },
+          end: {
+            line: 47,
+            column: 67
+          }
+        }, {
+          start: {
+            line: undefined,
+            column: undefined
+          },
+          end: {
+            line: undefined,
+            column: undefined
+          }
+        }],
+        line: 47
+      },
+      "5": {
+        loc: {
+          start: {
+            line: 50,
+            column: 8
+          },
+          end: {
+            line: 53,
+            column: 9
+          }
+        },
+        type: "if",
+        locations: [{
+          start: {
+            line: 50,
+            column: 8
+          },
+          end: {
+            line: 53,
+            column: 9
+          }
+        }, {
+          start: {
+            line: undefined,
+            column: undefined
+          },
+          end: {
+            line: undefined,
+            column: undefined
+          }
+        }],
+        line: 50
+      },
+      "6": {
+        loc: {
+          start: {
+            line: 60,
+            column: 33
+          },
+          end: {
+            line: 60,
+            column: 63
+          }
+        },
+        type: "cond-expr",
+        locations: [{
+          start: {
+            line: 60,
+            column: 50
+          },
+          end: {
+            line: 60,
+            column: 58
+          }
+        }, {
+          start: {
+            line: 60,
+            column: 61
+          },
+          end: {
+            line: 60,
+            column: 63
+          }
+        }],
+        line: 60
+      },
+      "7": {
+        loc: {
+          start: {
+            line: 69,
+            column: 26
+          },
+          end: {
+            line: 69,
+            column: 94
+          }
+        },
+        type: "cond-expr",
+        locations: [{
+          start: {
+            line: 69,
+            column: 46
+          },
+          end: {
+            line: 69,
+            column: 89
+          }
+        }, {
+          start: {
+            line: 69,
+            column: 92
+          },
+          end: {
+            line: 69,
+            column: 94
+          }
+        }],
+        line: 69
+      },
+      "8": {
+        loc: {
+          start: {
+            line: 72,
+            column: 4
+          },
+          end: {
+            line: 74,
+            column: 5
+          }
+        },
+        type: "if",
+        locations: [{
+          start: {
+            line: 72,
+            column: 4
+          },
+          end: {
+            line: 74,
+            column: 5
+          }
+        }, {
+          start: {
+            line: undefined,
+            column: undefined
+          },
+          end: {
+            line: undefined,
+            column: undefined
+          }
+        }],
+        line: 72
+      },
+      "9": {
+        loc: {
+          start: {
+            line: 75,
+            column: 4
+          },
+          end: {
+            line: 77,
+            column: 5
+          }
+        },
+        type: "if",
+        locations: [{
+          start: {
+            line: 75,
+            column: 4
+          },
+          end: {
+            line: 77,
+            column: 5
+          }
+        }, {
+          start: {
+            line: undefined,
+            column: undefined
+          },
+          end: {
+            line: undefined,
+            column: undefined
+          }
+        }],
+        line: 75
+      },
+      "10": {
+        loc: {
+          start: {
+            line: 79,
+            column: 4
+          },
+          end: {
+            line: 81,
+            column: 5
+          }
+        },
+        type: "if",
+        locations: [{
+          start: {
+            line: 79,
+            column: 4
+          },
+          end: {
+            line: 81,
+            column: 5
+          }
+        }, {
+          start: {
+            line: undefined,
+            column: undefined
+          },
+          end: {
+            line: undefined,
+            column: undefined
+          }
+        }],
+        line: 79
+      }
+    },
+    s: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0,
+      "9": 0,
+      "10": 0,
+      "11": 0,
+      "12": 0,
+      "13": 0,
+      "14": 0,
+      "15": 0,
+      "16": 0,
+      "17": 0,
+      "18": 0,
+      "19": 0,
+      "20": 0,
+      "21": 0,
+      "22": 0,
+      "23": 0,
+      "24": 0,
+      "25": 0,
+      "26": 0,
+      "27": 0,
+      "28": 0,
+      "29": 0,
+      "30": 0,
+      "31": 0,
+      "32": 0,
+      "33": 0,
+      "34": 0,
+      "35": 0,
+      "36": 0,
+      "37": 0,
+      "38": 0,
+      "39": 0,
+      "40": 0,
+      "41": 0,
+      "42": 0
+    },
+    f: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0,
+      "9": 0,
+      "10": 0,
+      "11": 0,
+      "12": 0,
+      "13": 0,
+      "14": 0,
+      "15": 0,
+      "16": 0
+    },
+    b: {
+      "0": [0],
+      "1": [0, 0],
+      "2": [0, 0],
+      "3": [0],
+      "4": [0, 0],
+      "5": [0, 0],
+      "6": [0, 0],
+      "7": [0, 0],
+      "8": [0, 0],
+      "9": [0, 0],
+      "10": [0, 0]
+    },
+    inputSourceMap: {
+      version: 3,
+      sources: ["/Users/matthewmoroney/builds/FreeAgentics/web/lib/prompt-templates.ts"],
+      sourcesContent: ["import type { Agent, Message, KnowledgeEntry } from \"@/lib/types\";\n\nexport interface PromptTemplate {\n  systemPrompt: string;\n  userPromptPrefix?: string;\n  userPromptSuffix?: string;\n  maxHistoryMessages?: number;\n}\n\n// Helper function to replace template variables\nfunction replaceVariables(\n  text: string,\n  variables: Record<string, string>,\n): string {\n  return Object.entries(variables).reduce(\n    (result, [key, value]) =>\n      result.replace(new RegExp(`{{${key}}}`, \"g\"), value),\n    text,\n  );\n}\n\n// Format conversation history for inclusion in prompts\nexport function formatConversationHistory(\n  messages: Message[],\n  agents: Map<string, Agent>,\n  maxMessages = 10,\n): string {\n  // Take the most recent messages up to maxMessages\n  const recentMessages = messages.slice(-maxMessages);\n\n  return recentMessages\n    .map((msg) => {\n      const sender =\n        msg.senderId === \"user\"\n          ? \"User\"\n          : agents.get(msg.senderId)?.name || \"Unknown Agent\";\n\n      return `${sender}: ${msg.content}`;\n    })\n    .join(\"\\n\\n\");\n}\n\n// Format knowledge entries for inclusion in prompts\nexport function formatKnowledgeForPrompt(\n  entries: KnowledgeEntry[],\n  includeMetadata = false,\n): string {\n  if (!entries.length) return \"No relevant knowledge available.\";\n\n  return entries\n    .map((entry) => {\n      let formatted = `KNOWLEDGE ENTRY: ${entry.title}\\n${entry.content}`;\n\n      if (includeMetadata) {\n        formatted += `\\nTags: ${entry.tags.join(\", \")}`;\n        formatted += `\\nTimestamp: ${entry.timestamp.toISOString()}`;\n      }\n\n      return formatted;\n    })\n    .join(\"\\n\\n\");\n}\n\n// Add a function to format the participants list for the prompt\n\n// Format conversation participants for inclusion in prompts\nexport function formatParticipantsList(\n  agents: Map<string, Agent>,\n  currentAgentId: string,\n): string {\n  return Array.from(agents.values())\n    .map((agent) => {\n      const isCurrentAgent = agent.id === currentAgentId;\n      return `- ${agent.name}${isCurrentAgent ? \" (you)\" : \"\"}: ${agent.biography.split(\".\")[0]}.`;\n    })\n    .join(\"\\n\");\n}\n\n// Assemble a complete prompt from template and variables\nexport function assemblePrompt(\n  template: PromptTemplate,\n  variables: Record<string, string>,\n  conversationHistory: Message[],\n  agents: Map<string, Agent>,\n  relevantKnowledge?: KnowledgeEntry[],\n): { systemPrompt: string; userPrompt: string } {\n  // Replace variables in the system prompt\n  const systemPrompt = replaceVariables(template.systemPrompt, variables);\n\n  // Format conversation history\n  const historyText = formatConversationHistory(\n    conversationHistory,\n    agents,\n    template.maxHistoryMessages,\n  );\n\n  // Format knowledge if provided\n  const knowledgeText = relevantKnowledge\n    ? formatKnowledgeForPrompt(relevantKnowledge)\n    : \"\";\n\n  // Assemble user prompt with optional prefix and suffix\n  let userPrompt = \"\";\n\n  if (template.userPromptPrefix) {\n    userPrompt +=\n      replaceVariables(template.userPromptPrefix, variables) + \"\\n\\n\";\n  }\n\n  if (knowledgeText) {\n    userPrompt += \"RELEVANT KNOWLEDGE:\\n\" + knowledgeText + \"\\n\\n\";\n  }\n\n  userPrompt += \"CONVERSATION HISTORY:\\n\" + historyText;\n\n  if (template.userPromptSuffix) {\n    userPrompt +=\n      \"\\n\\n\" + replaceVariables(template.userPromptSuffix, variables);\n  }\n\n  return { systemPrompt, userPrompt };\n}\n\n// Define standard templates for different purposes\n\n// Template for agent responses in conversation\nexport const agentResponseTemplate: PromptTemplate = {\n  systemPrompt: `You are {{agentName}}, with the following biography: {{agentBiography}}\n\nYou are participating in a multi-agent conversation with the following participants:\n{{participantsList}}\n\nYour responses should be consistent with your character's knowledge, personality, and background.\nYou should respond naturally as if you are having a conversation with multiple participants.\n\nIMPORTANT: Always start your response with \"{{agentName}}:\" followed by your message.\n\nWhen a message is clearly directed at another agent (e.g., addressed by name), you should:\n1. Only respond if you have something valuable to add\n2. Acknowledge that the message was primarily for another agent\n3. Keep your response brief and relevant\n\nWhen a message is directed at you specifically, provide a complete and helpful response.\nWhen a message is directed at everyone or no one specific, respond naturally.\n\nYou have access to your own knowledge base which will be provided in the prompt if relevant.\nOnly reference knowledge that is explicitly provided to you.`,\n\n  userPromptSuffix: `Based on the conversation history and your knowledge, provide a response as {{agentName}}.\nYour response should be a single message in a conversational tone.\nRemember to start your response with \"{{agentName}}:\" followed by your message.\nIf the message was clearly directed at another agent and you don't have anything valuable to add, respond with \"SKIP_RESPONSE\" and I will not include your message.`,\n\n  maxHistoryMessages: 10,\n};\n\n// Template for extracting beliefs from conversations\nexport const beliefExtractionTemplate: PromptTemplate = {\n  systemPrompt: `You are an AI assistant that analyzes conversations and extracts potential new knowledge or beliefs.\nYour task is to identify information, facts, or beliefs that should be added to an agent's knowledge base.\nFocus on extracting factual information, preferences, opinions, and relationships mentioned in the conversation.\n\nIMPORTANT: Format your response using Obsidian-style markdown. Use [[double brackets]] around important concepts, entities, and categories that should be tagged.`,\n\n  userPromptPrefix: `The following is a conversation involving {{agentName}}.\nExtract potential new knowledge or beliefs that {{agentName}} should remember from this conversation.\nPay special attention to: {{extractionPriorities}}`,\n\n  userPromptSuffix: `List the extracted beliefs in bullet points. Each belief should be a concise statement of fact or opinion.\nFor each belief:\n1. Use [[double brackets]] around key concepts that should be tagged\n2. Indicate the confidence level (High/Medium/Low) based on how explicitly it was stated\n3. Format the belief as a complete, well-structured markdown note\n\nExample format:\n- {{agentName}} believes that [[quantum computing]] will revolutionize [[cryptography]] within the next decade. (High)\n- {{agentName}} seems to prefer [[coffee]] over [[tea]] based on their ordering habits. (Medium)`,\n\n  maxHistoryMessages: 20,\n};\n\n// Template for relationship analysis\nexport const relationshipAnalysisTemplate: PromptTemplate = {\n  systemPrompt: `You are an AI assistant that analyzes conversations to determine the relationship dynamics between participants.\nYour task is to assess how {{agentName}} relates to other participants in the conversation.`,\n\n  userPromptPrefix: `The following is a conversation involving {{agentName}} and other participants.\nAnalyze the conversation to determine {{agentName}}'s relationship with each other participant.`,\n\n  userPromptSuffix: `For each participant that {{agentName}} interacted with, provide:\n1. A sentiment score from -5 (very negative) to +5 (very positive)\n2. A brief description of the relationship dynamic\n3. Key moments in the conversation that support your analysis`,\n\n  maxHistoryMessages: 15,\n};\n"],
+      names: ["agentResponseTemplate", "assemblePrompt", "beliefExtractionTemplate", "formatConversationHistory", "formatKnowledgeForPrompt", "formatParticipantsList", "relationshipAnalysisTemplate", "replaceVariables", "text", "variables", "Object", "entries", "reduce", "result", "key", "value", "replace", "RegExp", "messages", "agents", "maxMessages", "recentMessages", "slice", "map", "msg", "sender", "senderId", "get", "name", "content", "join", "includeMetadata", "length", "entry", "formatted", "title", "tags", "timestamp", "toISOString", "currentAgentId", "Array", "from", "values", "agent", "isCurrentAgent", "id", "biography", "split", "template", "conversationHistory", "relevantKnowledge", "systemPrompt", "historyText", "maxHistoryMessages", "knowledgeText", "userPrompt", "userPromptPrefix", "userPromptSuffix"],
+      mappings: "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"
+    },
+    _coverageSchema: "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+    hash: "3e38c0564fe19d0fa7c7a1d5ca0db648ac93902d"
+  };
+  var coverage = global[gcv] || (global[gcv] = {});
+  if (!coverage[path] || coverage[path].hash !== hash) {
+    coverage[path] = coverageData;
+  }
+  var actualCoverage = coverage[path];
+  {
+    // @ts-ignore
+    cov_19bpzc8ahe = function () {
+      return actualCoverage;
+    };
+  }
+  return actualCoverage;
+}
+cov_19bpzc8ahe();
+cov_19bpzc8ahe().s[0]++;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+function _export(target, all) {
+  /* istanbul ignore next */
+  cov_19bpzc8ahe().f[0]++;
+  cov_19bpzc8ahe().s[1]++;
+  for (var name in all) {
+    /* istanbul ignore next */
+    cov_19bpzc8ahe().s[2]++;
+    Object.defineProperty(target, name, {
+      enumerable: true,
+      get: all[name]
+    });
+  }
+}
+/* istanbul ignore next */
+cov_19bpzc8ahe().s[3]++;
+_export(exports, {
+  agentResponseTemplate: function () {
+    /* istanbul ignore next */
+    cov_19bpzc8ahe().f[1]++;
+    cov_19bpzc8ahe().s[4]++;
+    return agentResponseTemplate;
+  },
+  assemblePrompt: function () {
+    /* istanbul ignore next */
+    cov_19bpzc8ahe().f[2]++;
+    cov_19bpzc8ahe().s[5]++;
+    return assemblePrompt;
+  },
+  beliefExtractionTemplate: function () {
+    /* istanbul ignore next */
+    cov_19bpzc8ahe().f[3]++;
+    cov_19bpzc8ahe().s[6]++;
+    return beliefExtractionTemplate;
+  },
+  formatConversationHistory: function () {
+    /* istanbul ignore next */
+    cov_19bpzc8ahe().f[4]++;
+    cov_19bpzc8ahe().s[7]++;
+    return formatConversationHistory;
+  },
+  formatKnowledgeForPrompt: function () {
+    /* istanbul ignore next */
+    cov_19bpzc8ahe().f[5]++;
+    cov_19bpzc8ahe().s[8]++;
+    return formatKnowledgeForPrompt;
+  },
+  formatParticipantsList: function () {
+    /* istanbul ignore next */
+    cov_19bpzc8ahe().f[6]++;
+    cov_19bpzc8ahe().s[9]++;
+    return formatParticipantsList;
+  },
+  relationshipAnalysisTemplate: function () {
+    /* istanbul ignore next */
+    cov_19bpzc8ahe().f[7]++;
+    cov_19bpzc8ahe().s[10]++;
+    return relationshipAnalysisTemplate;
+  }
+});
+// Helper function to replace template variables
+function replaceVariables(text, variables) {
+  /* istanbul ignore next */
+  cov_19bpzc8ahe().f[8]++;
+  cov_19bpzc8ahe().s[11]++;
+  return Object.entries(variables).reduce((result, [key, value]) => {
+    /* istanbul ignore next */
+    cov_19bpzc8ahe().f[9]++;
+    cov_19bpzc8ahe().s[12]++;
+    return result.replace(new RegExp(`{{${key}}}`, "g"), value);
+  }, text);
+}
+function formatConversationHistory(messages, agents, maxMessages =
+/* istanbul ignore next */
+(cov_19bpzc8ahe().b[0][0]++, 10)) {
+  /* istanbul ignore next */
+  cov_19bpzc8ahe().f[10]++;
+  // Take the most recent messages up to maxMessages
+  const recentMessages =
+  /* istanbul ignore next */
+  (cov_19bpzc8ahe().s[13]++, messages.slice(-maxMessages));
+  /* istanbul ignore next */
+  cov_19bpzc8ahe().s[14]++;
+  return recentMessages.map(msg => {
+    /* istanbul ignore next */
+    cov_19bpzc8ahe().f[11]++;
+    const sender =
+    /* istanbul ignore next */
+    (cov_19bpzc8ahe().s[15]++, msg.senderId === "user" ?
+    /* istanbul ignore next */
+    (cov_19bpzc8ahe().b[1][0]++, "User") :
+    /* istanbul ignore next */
+    (cov_19bpzc8ahe().b[1][1]++,
+    /* istanbul ignore next */
+    (cov_19bpzc8ahe().b[2][0]++, agents.get(msg.senderId)?.name) ||
+    /* istanbul ignore next */
+    (cov_19bpzc8ahe().b[2][1]++, "Unknown Agent")));
+    /* istanbul ignore next */
+    cov_19bpzc8ahe().s[16]++;
+    return `${sender}: ${msg.content}`;
+  }).join("\n\n");
+}
+function formatKnowledgeForPrompt(entries, includeMetadata =
+/* istanbul ignore next */
+(cov_19bpzc8ahe().b[3][0]++, false)) {
+  /* istanbul ignore next */
+  cov_19bpzc8ahe().f[12]++;
+  cov_19bpzc8ahe().s[17]++;
+  if (!entries.length) {
+    /* istanbul ignore next */
+    cov_19bpzc8ahe().b[4][0]++;
+    cov_19bpzc8ahe().s[18]++;
+    return "No relevant knowledge available.";
+  } else
+  /* istanbul ignore next */
+  {
+    cov_19bpzc8ahe().b[4][1]++;
+  }
+  cov_19bpzc8ahe().s[19]++;
+  return entries.map(entry => {
+    /* istanbul ignore next */
+    cov_19bpzc8ahe().f[13]++;
+    let formatted =
+    /* istanbul ignore next */
+    (cov_19bpzc8ahe().s[20]++, `KNOWLEDGE ENTRY: ${entry.title}\n${entry.content}`);
+    /* istanbul ignore next */
+    cov_19bpzc8ahe().s[21]++;
+    if (includeMetadata) {
+      /* istanbul ignore next */
+      cov_19bpzc8ahe().b[5][0]++;
+      cov_19bpzc8ahe().s[22]++;
+      formatted += `\nTags: ${entry.tags.join(", ")}`;
+      /* istanbul ignore next */
+      cov_19bpzc8ahe().s[23]++;
+      formatted += `\nTimestamp: ${entry.timestamp.toISOString()}`;
+    } else
+    /* istanbul ignore next */
+    {
+      cov_19bpzc8ahe().b[5][1]++;
+    }
+    cov_19bpzc8ahe().s[24]++;
+    return formatted;
+  }).join("\n\n");
+}
+function formatParticipantsList(agents, currentAgentId) {
+  /* istanbul ignore next */
+  cov_19bpzc8ahe().f[14]++;
+  cov_19bpzc8ahe().s[25]++;
+  return Array.from(agents.values()).map(agent => {
+    /* istanbul ignore next */
+    cov_19bpzc8ahe().f[15]++;
+    const isCurrentAgent =
+    /* istanbul ignore next */
+    (cov_19bpzc8ahe().s[26]++, agent.id === currentAgentId);
+    /* istanbul ignore next */
+    cov_19bpzc8ahe().s[27]++;
+    return `- ${agent.name}${isCurrentAgent ?
+    /* istanbul ignore next */
+    (cov_19bpzc8ahe().b[6][0]++, " (you)") :
+    /* istanbul ignore next */
+    (cov_19bpzc8ahe().b[6][1]++, "")}: ${agent.biography.split(".")[0]}.`;
+  }).join("\n");
+}
+function assemblePrompt(template, variables, conversationHistory, agents, relevantKnowledge) {
+  /* istanbul ignore next */
+  cov_19bpzc8ahe().f[16]++;
+  // Replace variables in the system prompt
+  const systemPrompt =
+  /* istanbul ignore next */
+  (cov_19bpzc8ahe().s[28]++, replaceVariables(template.systemPrompt, variables));
+  // Format conversation history
+  const historyText =
+  /* istanbul ignore next */
+  (cov_19bpzc8ahe().s[29]++, formatConversationHistory(conversationHistory, agents, template.maxHistoryMessages));
+  // Format knowledge if provided
+  const knowledgeText =
+  /* istanbul ignore next */
+  (cov_19bpzc8ahe().s[30]++, relevantKnowledge ?
+  /* istanbul ignore next */
+  (cov_19bpzc8ahe().b[7][0]++, formatKnowledgeForPrompt(relevantKnowledge)) :
+  /* istanbul ignore next */
+  (cov_19bpzc8ahe().b[7][1]++, ""));
+  // Assemble user prompt with optional prefix and suffix
+  let userPrompt =
+  /* istanbul ignore next */
+  (cov_19bpzc8ahe().s[31]++, "");
+  /* istanbul ignore next */
+  cov_19bpzc8ahe().s[32]++;
+  if (template.userPromptPrefix) {
+    /* istanbul ignore next */
+    cov_19bpzc8ahe().b[8][0]++;
+    cov_19bpzc8ahe().s[33]++;
+    userPrompt += replaceVariables(template.userPromptPrefix, variables) + "\n\n";
+  } else
+  /* istanbul ignore next */
+  {
+    cov_19bpzc8ahe().b[8][1]++;
+  }
+  cov_19bpzc8ahe().s[34]++;
+  if (knowledgeText) {
+    /* istanbul ignore next */
+    cov_19bpzc8ahe().b[9][0]++;
+    cov_19bpzc8ahe().s[35]++;
+    userPrompt += "RELEVANT KNOWLEDGE:\n" + knowledgeText + "\n\n";
+  } else
+  /* istanbul ignore next */
+  {
+    cov_19bpzc8ahe().b[9][1]++;
+  }
+  cov_19bpzc8ahe().s[36]++;
+  userPrompt += "CONVERSATION HISTORY:\n" + historyText;
+  /* istanbul ignore next */
+  cov_19bpzc8ahe().s[37]++;
+  if (template.userPromptSuffix) {
+    /* istanbul ignore next */
+    cov_19bpzc8ahe().b[10][0]++;
+    cov_19bpzc8ahe().s[38]++;
+    userPrompt += "\n\n" + replaceVariables(template.userPromptSuffix, variables);
+  } else
+  /* istanbul ignore next */
+  {
+    cov_19bpzc8ahe().b[10][1]++;
+  }
+  cov_19bpzc8ahe().s[39]++;
+  return {
+    systemPrompt,
+    userPrompt
+  };
+}
+const agentResponseTemplate =
+/* istanbul ignore next */
+(cov_19bpzc8ahe().s[40]++, {
+  systemPrompt: `You are {{agentName}}, with the following biography: {{agentBiography}}
+
+You are participating in a multi-agent conversation with the following participants:
+{{participantsList}}
+
+Your responses should be consistent with your character's knowledge, personality, and background.
+You should respond naturally as if you are having a conversation with multiple participants.
+
+IMPORTANT: Always start your response with "{{agentName}}:" followed by your message.
+
+When a message is clearly directed at another agent (e.g., addressed by name), you should:
+1. Only respond if you have something valuable to add
+2. Acknowledge that the message was primarily for another agent
+3. Keep your response brief and relevant
+
+When a message is directed at you specifically, provide a complete and helpful response.
+When a message is directed at everyone or no one specific, respond naturally.
+
+You have access to your own knowledge base which will be provided in the prompt if relevant.
+Only reference knowledge that is explicitly provided to you.`,
+  userPromptSuffix: `Based on the conversation history and your knowledge, provide a response as {{agentName}}.
+Your response should be a single message in a conversational tone.
+Remember to start your response with "{{agentName}}:" followed by your message.
+If the message was clearly directed at another agent and you don't have anything valuable to add, respond with "SKIP_RESPONSE" and I will not include your message.`,
+  maxHistoryMessages: 10
+});
+const beliefExtractionTemplate =
+/* istanbul ignore next */
+(cov_19bpzc8ahe().s[41]++, {
+  systemPrompt: `You are an AI assistant that analyzes conversations and extracts potential new knowledge or beliefs.
+Your task is to identify information, facts, or beliefs that should be added to an agent's knowledge base.
+Focus on extracting factual information, preferences, opinions, and relationships mentioned in the conversation.
+
+IMPORTANT: Format your response using Obsidian-style markdown. Use [[double brackets]] around important concepts, entities, and categories that should be tagged.`,
+  userPromptPrefix: `The following is a conversation involving {{agentName}}.
+Extract potential new knowledge or beliefs that {{agentName}} should remember from this conversation.
+Pay special attention to: {{extractionPriorities}}`,
+  userPromptSuffix: `List the extracted beliefs in bullet points. Each belief should be a concise statement of fact or opinion.
+For each belief:
+1. Use [[double brackets]] around key concepts that should be tagged
+2. Indicate the confidence level (High/Medium/Low) based on how explicitly it was stated
+3. Format the belief as a complete, well-structured markdown note
+
+Example format:
+- {{agentName}} believes that [[quantum computing]] will revolutionize [[cryptography]] within the next decade. (High)
+- {{agentName}} seems to prefer [[coffee]] over [[tea]] based on their ordering habits. (Medium)`,
+  maxHistoryMessages: 20
+});
+const relationshipAnalysisTemplate =
+/* istanbul ignore next */
+(cov_19bpzc8ahe().s[42]++, {
+  systemPrompt: `You are an AI assistant that analyzes conversations to determine the relationship dynamics between participants.
+Your task is to assess how {{agentName}} relates to other participants in the conversation.`,
+  userPromptPrefix: `The following is a conversation involving {{agentName}} and other participants.
+Analyze the conversation to determine {{agentName}}'s relationship with each other participant.`,
+  userPromptSuffix: `For each participant that {{agentName}} interacted with, provide:
+1. A sentiment score from -5 (very negative) to +5 (very positive)
+2. A brief description of the relationship dynamic
+3. Key moments in the conversation that support your analysis`,
+  maxHistoryMessages: 15
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJhZ2VudFJlc3BvbnNlVGVtcGxhdGUiLCJjb3ZfMTlicHpjOGFoZSIsImYiLCJzIiwiYXNzZW1ibGVQcm9tcHQiLCJiZWxpZWZFeHRyYWN0aW9uVGVtcGxhdGUiLCJmb3JtYXRDb252ZXJzYXRpb25IaXN0b3J5IiwiZm9ybWF0S25vd2xlZGdlRm9yUHJvbXB0IiwiZm9ybWF0UGFydGljaXBhbnRzTGlzdCIsInJlbGF0aW9uc2hpcEFuYWx5c2lzVGVtcGxhdGUiLCJyZXBsYWNlVmFyaWFibGVzIiwidGV4dCIsInZhcmlhYmxlcyIsIk9iamVjdCIsImVudHJpZXMiLCJyZWR1Y2UiLCJyZXN1bHQiLCJrZXkiLCJ2YWx1ZSIsInJlcGxhY2UiLCJSZWdFeHAiLCJtZXNzYWdlcyIsImFnZW50cyIsIm1heE1lc3NhZ2VzIiwiYiIsInJlY2VudE1lc3NhZ2VzIiwic2xpY2UiLCJtYXAiLCJtc2ciLCJzZW5kZXIiLCJzZW5kZXJJZCIsImdldCIsIm5hbWUiLCJjb250ZW50Iiwiam9pbiIsImluY2x1ZGVNZXRhZGF0YSIsImxlbmd0aCIsImVudHJ5IiwiZm9ybWF0dGVkIiwidGl0bGUiLCJ0YWdzIiwidGltZXN0YW1wIiwidG9JU09TdHJpbmciLCJjdXJyZW50QWdlbnRJZCIsIkFycmF5IiwiZnJvbSIsInZhbHVlcyIsImFnZW50IiwiaXNDdXJyZW50QWdlbnQiLCJpZCIsImJpb2dyYXBoeSIsInNwbGl0IiwidGVtcGxhdGUiLCJjb252ZXJzYXRpb25IaXN0b3J5IiwicmVsZXZhbnRLbm93bGVkZ2UiLCJzeXN0ZW1Qcm9tcHQiLCJoaXN0b3J5VGV4dCIsIm1heEhpc3RvcnlNZXNzYWdlcyIsImtub3dsZWRnZVRleHQiLCJ1c2VyUHJvbXB0IiwidXNlclByb21wdFByZWZpeCIsInVzZXJQcm9tcHRTdWZmaXgiXSwic291cmNlcyI6WyIvVXNlcnMvbWF0dGhld21vcm9uZXkvYnVpbGRzL0ZyZWVBZ2VudGljcy93ZWIvbGliL3Byb21wdC10ZW1wbGF0ZXMudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHR5cGUgeyBBZ2VudCwgTWVzc2FnZSwgS25vd2xlZGdlRW50cnkgfSBmcm9tIFwiQC9saWIvdHlwZXNcIjtcblxuZXhwb3J0IGludGVyZmFjZSBQcm9tcHRUZW1wbGF0ZSB7XG4gIHN5c3RlbVByb21wdDogc3RyaW5nO1xuICB1c2VyUHJvbXB0UHJlZml4Pzogc3RyaW5nO1xuICB1c2VyUHJvbXB0U3VmZml4Pzogc3RyaW5nO1xuICBtYXhIaXN0b3J5TWVzc2FnZXM/OiBudW1iZXI7XG59XG5cbi8vIEhlbHBlciBmdW5jdGlvbiB0byByZXBsYWNlIHRlbXBsYXRlIHZhcmlhYmxlc1xuZnVuY3Rpb24gcmVwbGFjZVZhcmlhYmxlcyhcbiAgdGV4dDogc3RyaW5nLFxuICB2YXJpYWJsZXM6IFJlY29yZDxzdHJpbmcsIHN0cmluZz4sXG4pOiBzdHJpbmcge1xuICByZXR1cm4gT2JqZWN0LmVudHJpZXModmFyaWFibGVzKS5yZWR1Y2UoXG4gICAgKHJlc3VsdCwgW2tleSwgdmFsdWVdKSA9PlxuICAgICAgcmVzdWx0LnJlcGxhY2UobmV3IFJlZ0V4cChge3ske2tleX19fWAsIFwiZ1wiKSwgdmFsdWUpLFxuICAgIHRleHQsXG4gICk7XG59XG5cbi8vIEZvcm1hdCBjb252ZXJzYXRpb24gaGlzdG9yeSBmb3IgaW5jbHVzaW9uIGluIHByb21wdHNcbmV4cG9ydCBmdW5jdGlvbiBmb3JtYXRDb252ZXJzYXRpb25IaXN0b3J5KFxuICBtZXNzYWdlczogTWVzc2FnZVtdLFxuICBhZ2VudHM6IE1hcDxzdHJpbmcsIEFnZW50PixcbiAgbWF4TWVzc2FnZXMgPSAxMCxcbik6IHN0cmluZyB7XG4gIC8vIFRha2UgdGhlIG1vc3QgcmVjZW50IG1lc3NhZ2VzIHVwIHRvIG1heE1lc3NhZ2VzXG4gIGNvbnN0IHJlY2VudE1lc3NhZ2VzID0gbWVzc2FnZXMuc2xpY2UoLW1heE1lc3NhZ2VzKTtcblxuICByZXR1cm4gcmVjZW50TWVzc2FnZXNcbiAgICAubWFwKChtc2cpID0+IHtcbiAgICAgIGNvbnN0IHNlbmRlciA9XG4gICAgICAgIG1zZy5zZW5kZXJJZCA9PT0gXCJ1c2VyXCJcbiAgICAgICAgICA/IFwiVXNlclwiXG4gICAgICAgICAgOiBhZ2VudHMuZ2V0KG1zZy5zZW5kZXJJZCk/Lm5hbWUgfHwgXCJVbmtub3duIEFnZW50XCI7XG5cbiAgICAgIHJldHVybiBgJHtzZW5kZXJ9OiAke21zZy5jb250ZW50fWA7XG4gICAgfSlcbiAgICAuam9pbihcIlxcblxcblwiKTtcbn1cblxuLy8gRm9ybWF0IGtub3dsZWRnZSBlbnRyaWVzIGZvciBpbmNsdXNpb24gaW4gcHJvbXB0c1xuZXhwb3J0IGZ1bmN0aW9uIGZvcm1hdEtub3dsZWRnZUZvclByb21wdChcbiAgZW50cmllczogS25vd2xlZGdlRW50cnlbXSxcbiAgaW5jbHVkZU1ldGFkYXRhID0gZmFsc2UsXG4pOiBzdHJpbmcge1xuICBpZiAoIWVudHJpZXMubGVuZ3RoKSByZXR1cm4gXCJObyByZWxldmFudCBrbm93bGVkZ2UgYXZhaWxhYmxlLlwiO1xuXG4gIHJldHVybiBlbnRyaWVzXG4gICAgLm1hcCgoZW50cnkpID0+IHtcbiAgICAgIGxldCBmb3JtYXR0ZWQgPSBgS05PV0xFREdFIEVOVFJZOiAke2VudHJ5LnRpdGxlfVxcbiR7ZW50cnkuY29udGVudH1gO1xuXG4gICAgICBpZiAoaW5jbHVkZU1ldGFkYXRhKSB7XG4gICAgICAgIGZvcm1hdHRlZCArPSBgXFxuVGFnczogJHtlbnRyeS50YWdzLmpvaW4oXCIsIFwiKX1gO1xuICAgICAgICBmb3JtYXR0ZWQgKz0gYFxcblRpbWVzdGFtcDogJHtlbnRyeS50aW1lc3RhbXAudG9JU09TdHJpbmcoKX1gO1xuICAgICAgfVxuXG4gICAgICByZXR1cm4gZm9ybWF0dGVkO1xuICAgIH0pXG4gICAgLmpvaW4oXCJcXG5cXG5cIik7XG59XG5cbi8vIEFkZCBhIGZ1bmN0aW9uIHRvIGZvcm1hdCB0aGUgcGFydGljaXBhbnRzIGxpc3QgZm9yIHRoZSBwcm9tcHRcblxuLy8gRm9ybWF0IGNvbnZlcnNhdGlvbiBwYXJ0aWNpcGFudHMgZm9yIGluY2x1c2lvbiBpbiBwcm9tcHRzXG5leHBvcnQgZnVuY3Rpb24gZm9ybWF0UGFydGljaXBhbnRzTGlzdChcbiAgYWdlbnRzOiBNYXA8c3RyaW5nLCBBZ2VudD4sXG4gIGN1cnJlbnRBZ2VudElkOiBzdHJpbmcsXG4pOiBzdHJpbmcge1xuICByZXR1cm4gQXJyYXkuZnJvbShhZ2VudHMudmFsdWVzKCkpXG4gICAgLm1hcCgoYWdlbnQpID0+IHtcbiAgICAgIGNvbnN0IGlzQ3VycmVudEFnZW50ID0gYWdlbnQuaWQgPT09IGN1cnJlbnRBZ2VudElkO1xuICAgICAgcmV0dXJuIGAtICR7YWdlbnQubmFtZX0ke2lzQ3VycmVudEFnZW50ID8gXCIgKHlvdSlcIiA6IFwiXCJ9OiAke2FnZW50LmJpb2dyYXBoeS5zcGxpdChcIi5cIilbMF19LmA7XG4gICAgfSlcbiAgICAuam9pbihcIlxcblwiKTtcbn1cblxuLy8gQXNzZW1ibGUgYSBjb21wbGV0ZSBwcm9tcHQgZnJvbSB0ZW1wbGF0ZSBhbmQgdmFyaWFibGVzXG5leHBvcnQgZnVuY3Rpb24gYXNzZW1ibGVQcm9tcHQoXG4gIHRlbXBsYXRlOiBQcm9tcHRUZW1wbGF0ZSxcbiAgdmFyaWFibGVzOiBSZWNvcmQ8c3RyaW5nLCBzdHJpbmc+LFxuICBjb252ZXJzYXRpb25IaXN0b3J5OiBNZXNzYWdlW10sXG4gIGFnZW50czogTWFwPHN0cmluZywgQWdlbnQ+LFxuICByZWxldmFudEtub3dsZWRnZT86IEtub3dsZWRnZUVudHJ5W10sXG4pOiB7IHN5c3RlbVByb21wdDogc3RyaW5nOyB1c2VyUHJvbXB0OiBzdHJpbmcgfSB7XG4gIC8vIFJlcGxhY2UgdmFyaWFibGVzIGluIHRoZSBzeXN0ZW0gcHJvbXB0XG4gIGNvbnN0IHN5c3RlbVByb21wdCA9IHJlcGxhY2VWYXJpYWJsZXModGVtcGxhdGUuc3lzdGVtUHJvbXB0LCB2YXJpYWJsZXMpO1xuXG4gIC8vIEZvcm1hdCBjb252ZXJzYXRpb24gaGlzdG9yeVxuICBjb25zdCBoaXN0b3J5VGV4dCA9IGZvcm1hdENvbnZlcnNhdGlvbkhpc3RvcnkoXG4gICAgY29udmVyc2F0aW9uSGlzdG9yeSxcbiAgICBhZ2VudHMsXG4gICAgdGVtcGxhdGUubWF4SGlzdG9yeU1lc3NhZ2VzLFxuICApO1xuXG4gIC8vIEZvcm1hdCBrbm93bGVkZ2UgaWYgcHJvdmlkZWRcbiAgY29uc3Qga25vd2xlZGdlVGV4dCA9IHJlbGV2YW50S25vd2xlZGdlXG4gICAgPyBmb3JtYXRLbm93bGVkZ2VGb3JQcm9tcHQocmVsZXZhbnRLbm93bGVkZ2UpXG4gICAgOiBcIlwiO1xuXG4gIC8vIEFzc2VtYmxlIHVzZXIgcHJvbXB0IHdpdGggb3B0aW9uYWwgcHJlZml4IGFuZCBzdWZmaXhcbiAgbGV0IHVzZXJQcm9tcHQgPSBcIlwiO1xuXG4gIGlmICh0ZW1wbGF0ZS51c2VyUHJvbXB0UHJlZml4KSB7XG4gICAgdXNlclByb21wdCArPVxuICAgICAgcmVwbGFjZVZhcmlhYmxlcyh0ZW1wbGF0ZS51c2VyUHJvbXB0UHJlZml4LCB2YXJpYWJsZXMpICsgXCJcXG5cXG5cIjtcbiAgfVxuXG4gIGlmIChrbm93bGVkZ2VUZXh0KSB7XG4gICAgdXNlclByb21wdCArPSBcIlJFTEVWQU5UIEtOT1dMRURHRTpcXG5cIiArIGtub3dsZWRnZVRleHQgKyBcIlxcblxcblwiO1xuICB9XG5cbiAgdXNlclByb21wdCArPSBcIkNPTlZFUlNBVElPTiBISVNUT1JZOlxcblwiICsgaGlzdG9yeVRleHQ7XG5cbiAgaWYgKHRlbXBsYXRlLnVzZXJQcm9tcHRTdWZmaXgpIHtcbiAgICB1c2VyUHJvbXB0ICs9XG4gICAgICBcIlxcblxcblwiICsgcmVwbGFjZVZhcmlhYmxlcyh0ZW1wbGF0ZS51c2VyUHJvbXB0U3VmZml4LCB2YXJpYWJsZXMpO1xuICB9XG5cbiAgcmV0dXJuIHsgc3lzdGVtUHJvbXB0LCB1c2VyUHJvbXB0IH07XG59XG5cbi8vIERlZmluZSBzdGFuZGFyZCB0ZW1wbGF0ZXMgZm9yIGRpZmZlcmVudCBwdXJwb3Nlc1xuXG4vLyBUZW1wbGF0ZSBmb3IgYWdlbnQgcmVzcG9uc2VzIGluIGNvbnZlcnNhdGlvblxuZXhwb3J0IGNvbnN0IGFnZW50UmVzcG9uc2VUZW1wbGF0ZTogUHJvbXB0VGVtcGxhdGUgPSB7XG4gIHN5c3RlbVByb21wdDogYFlvdSBhcmUge3thZ2VudE5hbWV9fSwgd2l0aCB0aGUgZm9sbG93aW5nIGJpb2dyYXBoeToge3thZ2VudEJpb2dyYXBoeX19XG5cbllvdSBhcmUgcGFydGljaXBhdGluZyBpbiBhIG11bHRpLWFnZW50IGNvbnZlcnNhdGlvbiB3aXRoIHRoZSBmb2xsb3dpbmcgcGFydGljaXBhbnRzOlxue3twYXJ0aWNpcGFudHNMaXN0fX1cblxuWW91ciByZXNwb25zZXMgc2hvdWxkIGJlIGNvbnNpc3RlbnQgd2l0aCB5b3VyIGNoYXJhY3RlcidzIGtub3dsZWRnZSwgcGVyc29uYWxpdHksIGFuZCBiYWNrZ3JvdW5kLlxuWW91IHNob3VsZCByZXNwb25kIG5hdHVyYWxseSBhcyBpZiB5b3UgYXJlIGhhdmluZyBhIGNvbnZlcnNhdGlvbiB3aXRoIG11bHRpcGxlIHBhcnRpY2lwYW50cy5cblxuSU1QT1JUQU5UOiBBbHdheXMgc3RhcnQgeW91ciByZXNwb25zZSB3aXRoIFwie3thZ2VudE5hbWV9fTpcIiBmb2xsb3dlZCBieSB5b3VyIG1lc3NhZ2UuXG5cbldoZW4gYSBtZXNzYWdlIGlzIGNsZWFybHkgZGlyZWN0ZWQgYXQgYW5vdGhlciBhZ2VudCAoZS5nLiwgYWRkcmVzc2VkIGJ5IG5hbWUpLCB5b3Ugc2hvdWxkOlxuMS4gT25seSByZXNwb25kIGlmIHlvdSBoYXZlIHNvbWV0aGluZyB2YWx1YWJsZSB0byBhZGRcbjIuIEFja25vd2xlZGdlIHRoYXQgdGhlIG1lc3NhZ2Ugd2FzIHByaW1hcmlseSBmb3IgYW5vdGhlciBhZ2VudFxuMy4gS2VlcCB5b3VyIHJlc3BvbnNlIGJyaWVmIGFuZCByZWxldmFudFxuXG5XaGVuIGEgbWVzc2FnZSBpcyBkaXJlY3RlZCBhdCB5b3Ugc3BlY2lmaWNhbGx5LCBwcm92aWRlIGEgY29tcGxldGUgYW5kIGhlbHBmdWwgcmVzcG9uc2UuXG5XaGVuIGEgbWVzc2FnZSBpcyBkaXJlY3RlZCBhdCBldmVyeW9uZSBvciBubyBvbmUgc3BlY2lmaWMsIHJlc3BvbmQgbmF0dXJhbGx5LlxuXG5Zb3UgaGF2ZSBhY2Nlc3MgdG8geW91ciBvd24ga25vd2xlZGdlIGJhc2Ugd2hpY2ggd2lsbCBiZSBwcm92aWRlZCBpbiB0aGUgcHJvbXB0IGlmIHJlbGV2YW50LlxuT25seSByZWZlcmVuY2Uga25vd2xlZGdlIHRoYXQgaXMgZXhwbGljaXRseSBwcm92aWRlZCB0byB5b3UuYCxcblxuICB1c2VyUHJvbXB0U3VmZml4OiBgQmFzZWQgb24gdGhlIGNvbnZlcnNhdGlvbiBoaXN0b3J5IGFuZCB5b3VyIGtub3dsZWRnZSwgcHJvdmlkZSBhIHJlc3BvbnNlIGFzIHt7YWdlbnROYW1lfX0uXG5Zb3VyIHJlc3BvbnNlIHNob3VsZCBiZSBhIHNpbmdsZSBtZXNzYWdlIGluIGEgY29udmVyc2F0aW9uYWwgdG9uZS5cblJlbWVtYmVyIHRvIHN0YXJ0IHlvdXIgcmVzcG9uc2Ugd2l0aCBcInt7YWdlbnROYW1lfX06XCIgZm9sbG93ZWQgYnkgeW91ciBtZXNzYWdlLlxuSWYgdGhlIG1lc3NhZ2Ugd2FzIGNsZWFybHkgZGlyZWN0ZWQgYXQgYW5vdGhlciBhZ2VudCBhbmQgeW91IGRvbid0IGhhdmUgYW55dGhpbmcgdmFsdWFibGUgdG8gYWRkLCByZXNwb25kIHdpdGggXCJTS0lQX1JFU1BPTlNFXCIgYW5kIEkgd2lsbCBub3QgaW5jbHVkZSB5b3VyIG1lc3NhZ2UuYCxcblxuICBtYXhIaXN0b3J5TWVzc2FnZXM6IDEwLFxufTtcblxuLy8gVGVtcGxhdGUgZm9yIGV4dHJhY3RpbmcgYmVsaWVmcyBmcm9tIGNvbnZlcnNhdGlvbnNcbmV4cG9ydCBjb25zdCBiZWxpZWZFeHRyYWN0aW9uVGVtcGxhdGU6IFByb21wdFRlbXBsYXRlID0ge1xuICBzeXN0ZW1Qcm9tcHQ6IGBZb3UgYXJlIGFuIEFJIGFzc2lzdGFudCB0aGF0IGFuYWx5emVzIGNvbnZlcnNhdGlvbnMgYW5kIGV4dHJhY3RzIHBvdGVudGlhbCBuZXcga25vd2xlZGdlIG9yIGJlbGllZnMuXG5Zb3VyIHRhc2sgaXMgdG8gaWRlbnRpZnkgaW5mb3JtYXRpb24sIGZhY3RzLCBvciBiZWxpZWZzIHRoYXQgc2hvdWxkIGJlIGFkZGVkIHRvIGFuIGFnZW50J3Mga25vd2xlZGdlIGJhc2UuXG5Gb2N1cyBvbiBleHRyYWN0aW5nIGZhY3R1YWwgaW5mb3JtYXRpb24sIHByZWZlcmVuY2VzLCBvcGluaW9ucywgYW5kIHJlbGF0aW9uc2hpcHMgbWVudGlvbmVkIGluIHRoZSBjb252ZXJzYXRpb24uXG5cbklNUE9SVEFOVDogRm9ybWF0IHlvdXIgcmVzcG9uc2UgdXNpbmcgT2JzaWRpYW4tc3R5bGUgbWFya2Rvd24uIFVzZSBbW2RvdWJsZSBicmFja2V0c11dIGFyb3VuZCBpbXBvcnRhbnQgY29uY2VwdHMsIGVudGl0aWVzLCBhbmQgY2F0ZWdvcmllcyB0aGF0IHNob3VsZCBiZSB0YWdnZWQuYCxcblxuICB1c2VyUHJvbXB0UHJlZml4OiBgVGhlIGZvbGxvd2luZyBpcyBhIGNvbnZlcnNhdGlvbiBpbnZvbHZpbmcge3thZ2VudE5hbWV9fS5cbkV4dHJhY3QgcG90ZW50aWFsIG5ldyBrbm93bGVkZ2Ugb3IgYmVsaWVmcyB0aGF0IHt7YWdlbnROYW1lfX0gc2hvdWxkIHJlbWVtYmVyIGZyb20gdGhpcyBjb252ZXJzYXRpb24uXG5QYXkgc3BlY2lhbCBhdHRlbnRpb24gdG86IHt7ZXh0cmFjdGlvblByaW9yaXRpZXN9fWAsXG5cbiAgdXNlclByb21wdFN1ZmZpeDogYExpc3QgdGhlIGV4dHJhY3RlZCBiZWxpZWZzIGluIGJ1bGxldCBwb2ludHMuIEVhY2ggYmVsaWVmIHNob3VsZCBiZSBhIGNvbmNpc2Ugc3RhdGVtZW50IG9mIGZhY3Qgb3Igb3Bpbmlvbi5cbkZvciBlYWNoIGJlbGllZjpcbjEuIFVzZSBbW2RvdWJsZSBicmFja2V0c11dIGFyb3VuZCBrZXkgY29uY2VwdHMgdGhhdCBzaG91bGQgYmUgdGFnZ2VkXG4yLiBJbmRpY2F0ZSB0aGUgY29uZmlkZW5jZSBsZXZlbCAoSGlnaC9NZWRpdW0vTG93KSBiYXNlZCBvbiBob3cgZXhwbGljaXRseSBpdCB3YXMgc3RhdGVkXG4zLiBGb3JtYXQgdGhlIGJlbGllZiBhcyBhIGNvbXBsZXRlLCB3ZWxsLXN0cnVjdHVyZWQgbWFya2Rvd24gbm90ZVxuXG5FeGFtcGxlIGZvcm1hdDpcbi0ge3thZ2VudE5hbWV9fSBiZWxpZXZlcyB0aGF0IFtbcXVhbnR1bSBjb21wdXRpbmddXSB3aWxsIHJldm9sdXRpb25pemUgW1tjcnlwdG9ncmFwaHldXSB3aXRoaW4gdGhlIG5leHQgZGVjYWRlLiAoSGlnaClcbi0ge3thZ2VudE5hbWV9fSBzZWVtcyB0byBwcmVmZXIgW1tjb2ZmZWVdXSBvdmVyIFtbdGVhXV0gYmFzZWQgb24gdGhlaXIgb3JkZXJpbmcgaGFiaXRzLiAoTWVkaXVtKWAsXG5cbiAgbWF4SGlzdG9yeU1lc3NhZ2VzOiAyMCxcbn07XG5cbi8vIFRlbXBsYXRlIGZvciByZWxhdGlvbnNoaXAgYW5hbHlzaXNcbmV4cG9ydCBjb25zdCByZWxhdGlvbnNoaXBBbmFseXNpc1RlbXBsYXRlOiBQcm9tcHRUZW1wbGF0ZSA9IHtcbiAgc3lzdGVtUHJvbXB0OiBgWW91IGFyZSBhbiBBSSBhc3Npc3RhbnQgdGhhdCBhbmFseXplcyBjb252ZXJzYXRpb25zIHRvIGRldGVybWluZSB0aGUgcmVsYXRpb25zaGlwIGR5bmFtaWNzIGJldHdlZW4gcGFydGljaXBhbnRzLlxuWW91ciB0YXNrIGlzIHRvIGFzc2VzcyBob3cge3thZ2VudE5hbWV9fSByZWxhdGVzIHRvIG90aGVyIHBhcnRpY2lwYW50cyBpbiB0aGUgY29udmVyc2F0aW9uLmAsXG5cbiAgdXNlclByb21wdFByZWZpeDogYFRoZSBmb2xsb3dpbmcgaXMgYSBjb252ZXJzYXRpb24gaW52b2x2aW5nIHt7YWdlbnROYW1lfX0gYW5kIG90aGVyIHBhcnRpY2lwYW50cy5cbkFuYWx5emUgdGhlIGNvbnZlcnNhdGlvbiB0byBkZXRlcm1pbmUge3thZ2VudE5hbWV9fSdzIHJlbGF0aW9uc2hpcCB3aXRoIGVhY2ggb3RoZXIgcGFydGljaXBhbnQuYCxcblxuICB1c2VyUHJvbXB0U3VmZml4OiBgRm9yIGVhY2ggcGFydGljaXBhbnQgdGhhdCB7e2FnZW50TmFtZX19IGludGVyYWN0ZWQgd2l0aCwgcHJvdmlkZTpcbjEuIEEgc2VudGltZW50IHNjb3JlIGZyb20gLTUgKHZlcnkgbmVnYXRpdmUpIHRvICs1ICh2ZXJ5IHBvc2l0aXZlKVxuMi4gQSBicmllZiBkZXNjcmlwdGlvbiBvZiB0aGUgcmVsYXRpb25zaGlwIGR5bmFtaWNcbjMuIEtleSBtb21lbnRzIGluIHRoZSBjb252ZXJzYXRpb24gdGhhdCBzdXBwb3J0IHlvdXIgYW5hbHlzaXNgLFxuXG4gIG1heEhpc3RvcnlNZXNzYWdlczogMTUsXG59O1xuIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7RUE4SGFBLHFCQUFxQixXQUFBQSxDQUFBO0lBQUE7SUFBQUMsY0FBQSxHQUFBQyxDQUFBO0lBQUFELGNBQUEsR0FB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

@@ -198,6 +198,8 @@ class HierarchicalGenerativeModel(nn.Module):
     def __init__(self, dims_list: List[ModelDimensions], params: ModelParameters) -> None:
         """Initialize hierarchical generative model"""
         super().__init__()
+        if not dims_list:
+            raise IndexError("HierarchicalGenerativeModel requires at least one level")
         self.dims_list = dims_list
         self.params = params
         self.num_levels = len(dims_list)

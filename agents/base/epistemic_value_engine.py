@@ -319,18 +319,26 @@ class EpistemicValueCalculationEngine:
         """Calculate confidence level as inverse of normalized entropy"""
         max_entropy = np.log(len(belief_distribution))
         current_entropy = self._calculate_knowledge_entropy(belief_distribution)
+        
+        # Handle single element distribution (max_entropy = 0)
+        if max_entropy == 0:
+            return 1.0  # Maximum confidence for single element
+        
         confidence = 1.0 - (current_entropy / max_entropy)
         return float(np.clip(confidence, 0.0, 1.0))
 
     def _calculate_certainty_measure(self, belief_distribution: np.ndarray) -> float:
         """Calculate certainty as concentration of probability mass"""
-        # Use Gini coefficient-like measure
-        sorted_beliefs = np.sort(belief_distribution)
-        n = len(sorted_beliefs)
-        index = np.arange(1, n + 1)
-        certainty = (
-            (2 * np.sum(index * sorted_beliefs)) / (n * np.sum(sorted_beliefs)) - (n + 1)
-        ) / n
+        # Normalize distribution to ensure it sums to 1
+        normalized_beliefs = belief_distribution / np.sum(belief_distribution) if np.sum(belief_distribution) > 0 else belief_distribution
+        
+        # Use concentration measure based on maximum probability
+        max_prob = np.max(normalized_beliefs)
+        uniform_prob = 1.0 / len(normalized_beliefs)  # What each element would be in uniform distribution
+        
+        # Certainty ranges from 0 (uniform) to 1 (completely concentrated)
+        certainty = (max_prob - uniform_prob) / (1.0 - uniform_prob) if uniform_prob < 1.0 else 0.0
+        
         return float(np.clip(certainty, 0.0, 1.0))
 
     def _calculate_overall_epistemic_value(

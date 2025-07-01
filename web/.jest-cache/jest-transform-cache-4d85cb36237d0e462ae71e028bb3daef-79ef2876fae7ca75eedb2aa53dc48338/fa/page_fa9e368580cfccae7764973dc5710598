@@ -1,0 +1,800 @@
+4390df2903bbbe67bb802f1eade93921
+"use client";
+"use strict";
+
+/* istanbul ignore next */
+function cov_1t4zilotk3() {
+  var path = "/Users/matthewmoroney/builds/FreeAgentics/web/app/knowledge/page.tsx";
+  var hash = "ccf36f68bccf39951c5febb95c98de26caeeb86a";
+  var global = new Function("return this")();
+  var gcv = "__coverage__";
+  var coverageData = {
+    path: "/Users/matthewmoroney/builds/FreeAgentics/web/app/knowledge/page.tsx",
+    statementMap: {
+      "0": {
+        start: {
+          line: 3,
+          column: 0
+        },
+        end: {
+          line: 5,
+          column: 3
+        }
+      },
+      "1": {
+        start: {
+          line: 6,
+          column: 0
+        },
+        end: {
+          line: 11,
+          column: 3
+        }
+      },
+      "2": {
+        start: {
+          line: 9,
+          column: 8
+        },
+        end: {
+          line: 9,
+          column: 29
+        }
+      },
+      "3": {
+        start: {
+          line: 12,
+          column: 20
+        },
+        end: {
+          line: 12,
+          column: 48
+        }
+      },
+      "4": {
+        start: {
+          line: 13,
+          column: 15
+        },
+        end: {
+          line: 13,
+          column: 31
+        }
+      },
+      "5": {
+        start: {
+          line: 14,
+          column: 27
+        },
+        end: {
+          line: 14,
+          column: 73
+        }
+      },
+      "6": {
+        start: {
+          line: 15,
+          column: 14
+        },
+        end: {
+          line: 15,
+          column: 49
+        }
+      },
+      "7": {
+        start: {
+          line: 16,
+          column: 16
+        },
+        end: {
+          line: 16,
+          column: 53
+        }
+      },
+      "8": {
+        start: {
+          line: 17,
+          column: 16
+        },
+        end: {
+          line: 17,
+          column: 53
+        }
+      },
+      "9": {
+        start: {
+          line: 18,
+          column: 21
+        },
+        end: {
+          line: 18,
+          column: 44
+        }
+      },
+      "10": {
+        start: {
+          line: 20,
+          column: 46
+        },
+        end: {
+          line: 20,
+          column: 79
+        }
+      },
+      "11": {
+        start: {
+          line: 21,
+          column: 38
+        },
+        end: {
+          line: 21,
+          column: 72
+        }
+      },
+      "12": {
+        start: {
+          line: 22,
+          column: 40
+        },
+        end: {
+          line: 22,
+          column: 67
+        }
+      },
+      "13": {
+        start: {
+          line: 23,
+          column: 4
+        },
+        end: {
+          line: 581,
+          column: 7
+        }
+      },
+      "14": {
+        start: {
+          line: 205,
+          column: 76
+        },
+        end: {
+          line: 205,
+          column: 91
+        }
+      }
+    },
+    fnMap: {
+      "0": {
+        name: "(anonymous_0)",
+        decl: {
+          start: {
+            line: 8,
+            column: 9
+          },
+          end: {
+            line: 8,
+            column: 10
+          }
+        },
+        loc: {
+          start: {
+            line: 8,
+            column: 20
+          },
+          end: {
+            line: 10,
+            column: 5
+          }
+        },
+        line: 8
+      },
+      "1": {
+        name: "KnowledgePage",
+        decl: {
+          start: {
+            line: 19,
+            column: 9
+          },
+          end: {
+            line: 19,
+            column: 22
+          }
+        },
+        loc: {
+          start: {
+            line: 19,
+            column: 25
+          },
+          end: {
+            line: 582,
+            column: 1
+          }
+        },
+        line: 19
+      },
+      "2": {
+        name: "(anonymous_2)",
+        decl: {
+          start: {
+            line: 205,
+            column: 71
+          },
+          end: {
+            line: 205,
+            column: 72
+          }
+        },
+        loc: {
+          start: {
+            line: 205,
+            column: 76
+          },
+          end: {
+            line: 205,
+            column: 91
+          }
+        },
+        line: 205
+      }
+    },
+    branchMap: {
+      "0": {
+        loc: {
+          start: {
+            line: 225,
+            column: 52
+          },
+          end: {
+            line: 250,
+            column: 54
+          }
+        },
+        type: "binary-expr",
+        locations: [{
+          start: {
+            line: 225,
+            column: 52
+          },
+          end: {
+            line: 225,
+            column: 78
+          }
+        }, {
+          start: {
+            line: 225,
+            column: 96
+          },
+          end: {
+            line: 250,
+            column: 54
+          }
+        }],
+        line: 225
+      },
+      "1": {
+        loc: {
+          start: {
+            line: 263,
+            column: 53
+          },
+          end: {
+            line: 263,
+            column: 107
+          }
+        },
+        type: "cond-expr",
+        locations: [{
+          start: {
+            line: 263,
+            column: 82
+          },
+          end: {
+            line: 263,
+            column: 95
+          }
+        }, {
+          start: {
+            line: 263,
+            column: 98
+          },
+          end: {
+            line: 263,
+            column: 107
+          }
+        }],
+        line: 263
+      }
+    },
+    s: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0,
+      "9": 0,
+      "10": 0,
+      "11": 0,
+      "12": 0,
+      "13": 0,
+      "14": 0
+    },
+    f: {
+      "0": 0,
+      "1": 0,
+      "2": 0
+    },
+    b: {
+      "0": [0, 0],
+      "1": [0, 0]
+    },
+    inputSourceMap: {
+      version: 3,
+      sources: ["/Users/matthewmoroney/builds/FreeAgentics/web/app/knowledge/page.tsx"],
+      sourcesContent: ["\"use client\";\n\nimport { useState } from \"react\";\nimport { KnowledgeGraphViz } from \"@/components/KnowledgeGraph-viz\";\nimport {\n  Card,\n  CardContent,\n  CardDescription,\n  CardHeader,\n  CardTitle,\n} from \"@/components/ui/card\";\nimport { Tabs, TabsContent, TabsList, TabsTrigger } from \"@/components/ui/tabs\";\nimport { Button } from \"@/components/ui/button\";\nimport {\n  Select,\n  SelectContent,\n  SelectItem,\n  SelectTrigger,\n  SelectValue,\n} from \"@/components/ui/select\";\nimport {\n  Brain,\n  Network,\n  TrendingUp,\n  Share2,\n  Filter,\n  Download,\n  Maximize2,\n} from \"lucide-react\";\n\nexport default function KnowledgePage() {\n  const [selectedAgent, setSelectedAgent] = useState<string>(\"agent_123\");\n  const [graphMode, setGraphMode] = useState<\"individual\" | \"collective\">(\n    \"individual\",\n  );\n  const [filterType, setFilterType] = useState<string>(\"all\");\n\n  return (\n    <div className=\"container mx-auto p-6 space-y-6\">\n      {/* Page Header */}\n      <div className=\"flex justify-between items-center\">\n        <div>\n          <h1 className=\"text-3xl font-bold\">Knowledge Graphs</h1>\n          <p className=\"text-muted-foreground mt-1\">\n            Visualize agent knowledge, patterns, and collective intelligence\n          </p>\n        </div>\n        <div className=\"flex gap-2\">\n          <Button variant=\"outline\" size=\"sm\">\n            <Download className=\"h-4 w-4 mr-2\" />\n            Export\n          </Button>\n          <Button variant=\"outline\" size=\"sm\">\n            <Maximize2 className=\"h-4 w-4 mr-2\" />\n            Fullscreen\n          </Button>\n        </div>\n      </div>\n\n      {/* Knowledge Stats */}\n      <div className=\"grid gap-4 md:grid-cols-4\">\n        <Card>\n          <CardHeader className=\"flex flex-row items-center justify-between space-y-0 pb-2\">\n            <CardTitle className=\"text-sm font-medium\">Total Nodes</CardTitle>\n            <Brain className=\"h-4 w-4 text-muted-foreground\" />\n          </CardHeader>\n          <CardContent>\n            <div className=\"text-2xl font-bold\">2,847</div>\n            <p className=\"text-xs text-muted-foreground\">+342 this session</p>\n          </CardContent>\n        </Card>\n        <Card>\n          <CardHeader className=\"flex flex-row items-center justify-between space-y-0 pb-2\">\n            <CardTitle className=\"text-sm font-medium\">Connections</CardTitle>\n            <Network className=\"h-4 w-4 text-muted-foreground\" />\n          </CardHeader>\n          <CardContent>\n            <div className=\"text-2xl font-bold\">5,621</div>\n            <p className=\"text-xs text-muted-foreground\">2.0 avg per node</p>\n          </CardContent>\n        </Card>\n        <Card>\n          <CardHeader className=\"flex flex-row items-center justify-between space-y-0 pb-2\">\n            <CardTitle className=\"text-sm font-medium\">Patterns</CardTitle>\n            <TrendingUp className=\"h-4 w-4 text-muted-foreground\" />\n          </CardHeader>\n          <CardContent>\n            <div className=\"text-2xl font-bold\">156</div>\n            <p className=\"text-xs text-muted-foreground\">23 high confidence</p>\n          </CardContent>\n        </Card>\n        <Card>\n          <CardHeader className=\"flex flex-row items-center justify-between space-y-0 pb-2\">\n            <CardTitle className=\"text-sm font-medium\">\n              Shared Knowledge\n            </CardTitle>\n            <Share2 className=\"h-4 w-4 text-muted-foreground\" />\n          </CardHeader>\n          <CardContent>\n            <div className=\"text-2xl font-bold\">892</div>\n            <p className=\"text-xs text-muted-foreground\">31% of total</p>\n          </CardContent>\n        </Card>\n      </div>\n\n      {/* Main Content */}\n      <div className=\"grid gap-6 lg:grid-cols-4\">\n        {/* Graph View - Takes up 3 columns */}\n        <div className=\"lg:col-span-3\">\n          <Card className=\"h-full\">\n            <CardHeader>\n              <div className=\"flex justify-between items-center\">\n                <CardTitle>Knowledge Graph Visualization</CardTitle>\n                <div className=\"flex gap-2\">\n                  <Select\n                    value={graphMode}\n                    onValueChange={(v) => setGraphMode(v as any)}\n                  >\n                    <SelectTrigger className=\"w-[150px]\">\n                      <SelectValue />\n                    </SelectTrigger>\n                    <SelectContent>\n                      <SelectItem value=\"individual\">Individual</SelectItem>\n                      <SelectItem value=\"collective\">Collective</SelectItem>\n                    </SelectContent>\n                  </Select>\n                  {graphMode === \"individual\" && (\n                    <Select\n                      value={selectedAgent}\n                      onValueChange={setSelectedAgent}\n                    >\n                      <SelectTrigger className=\"w-[200px]\">\n                        <SelectValue />\n                      </SelectTrigger>\n                      <SelectContent>\n                        <SelectItem value=\"agent_123\">\n                          CuriousExplorer\n                        </SelectItem>\n                        <SelectItem value=\"agent_456\">WiseScholar</SelectItem>\n                        <SelectItem value=\"agent_789\">BravePioneer</SelectItem>\n                      </SelectContent>\n                    </Select>\n                  )}\n                </div>\n              </div>\n            </CardHeader>\n            <CardContent>\n              <div\n                className=\"relative bg-slate-900 rounded-lg overflow-hidden\"\n                style={{ height: \"600px\" }}\n              >\n                <KnowledgeGraphViz\n                  agentId={\n                    graphMode === \"individual\" ? selectedAgent : undefined\n                  }\n                  mode={graphMode}\n                  filter={filterType}\n                />\n              </div>\n            </CardContent>\n          </Card>\n        </div>\n\n        {/* Side Panel - Takes up 1 column */}\n        <div className=\"space-y-4\">\n          {/* Filters */}\n          <Card>\n            <CardHeader>\n              <CardTitle className=\"text-lg flex items-center gap-2\">\n                <Filter className=\"h-4 w-4\" />\n                Filters\n              </CardTitle>\n            </CardHeader>\n            <CardContent className=\"space-y-2\">\n              <Select value={filterType} onValueChange={setFilterType}>\n                <SelectTrigger>\n                  <SelectValue />\n                </SelectTrigger>\n                <SelectContent>\n                  <SelectItem value=\"all\">All Knowledge</SelectItem>\n                  <SelectItem value=\"locations\">Locations</SelectItem>\n                  <SelectItem value=\"agents\">Agent Relations</SelectItem>\n                  <SelectItem value=\"resources\">Resources</SelectItem>\n                  <SelectItem value=\"patterns\">Patterns</SelectItem>\n                  <SelectItem value=\"recent\">Recent (last hour)</SelectItem>\n                </SelectContent>\n              </Select>\n              <div className=\"space-y-2 pt-2\">\n                <label className=\"text-sm font-medium\">Node Size</label>\n                <Select defaultValue=\"connections\">\n                  <SelectTrigger>\n                    <SelectValue />\n                  </SelectTrigger>\n                  <SelectContent>\n                    <SelectItem value=\"uniform\">Uniform</SelectItem>\n                    <SelectItem value=\"connections\">By Connections</SelectItem>\n                    <SelectItem value=\"importance\">By Importance</SelectItem>\n                    <SelectItem value=\"age\">By Age</SelectItem>\n                  </SelectContent>\n                </Select>\n              </div>\n            </CardContent>\n          </Card>\n\n          {/* Graph Stats */}\n          <Card>\n            <CardHeader>\n              <CardTitle className=\"text-lg\">Graph Statistics</CardTitle>\n            </CardHeader>\n            <CardContent className=\"space-y-2 text-sm\">\n              <div className=\"flex justify-between\">\n                <span className=\"text-muted-foreground\">Nodes Visible:</span>\n                <span className=\"font-medium\">127</span>\n              </div>\n              <div className=\"flex justify-between\">\n                <span className=\"text-muted-foreground\">Edges Visible:</span>\n                <span className=\"font-medium\">243</span>\n              </div>\n              <div className=\"flex justify-between\">\n                <span className=\"text-muted-foreground\">Clusters:</span>\n                <span className=\"font-medium\">8</span>\n              </div>\n              <div className=\"flex justify-between\">\n                <span className=\"text-muted-foreground\">Avg Path Length:</span>\n                <span className=\"font-medium\">3.2</span>\n              </div>\n              <div className=\"flex justify-between\">\n                <span className=\"text-muted-foreground\">Density:</span>\n                <span className=\"font-medium\">0.15</span>\n              </div>\n            </CardContent>\n          </Card>\n\n          {/* Top Patterns */}\n          <Card>\n            <CardHeader>\n              <CardTitle className=\"text-lg\">Top Patterns</CardTitle>\n              <CardDescription>Most confident discoveries</CardDescription>\n            </CardHeader>\n            <CardContent>\n              <div className=\"space-y-3\">\n                <div className=\"space-y-1\">\n                  <div className=\"flex justify-between items-center\">\n                    <span className=\"text-sm font-medium\">\n                      Resource Clustering\n                    </span>\n                    <span className=\"text-xs text-green-600\">92%</span>\n                  </div>\n                  <p className=\"text-xs text-muted-foreground\">\n                    Materials often found near forest edges\n                  </p>\n                </div>\n                <div className=\"space-y-1\">\n                  <div className=\"flex justify-between items-center\">\n                    <span className=\"text-sm font-medium\">\n                      Agent Cooperation\n                    </span>\n                    <span className=\"text-xs text-green-600\">87%</span>\n                  </div>\n                  <p className=\"text-xs text-muted-foreground\">\n                    Explorers and Scholars share knowledge frequently\n                  </p>\n                </div>\n                <div className=\"space-y-1\">\n                  <div className=\"flex justify-between items-center\">\n                    <span className=\"text-sm font-medium\">\n                      Path Optimization\n                    </span>\n                    <span className=\"text-xs text-yellow-600\">76%</span>\n                  </div>\n                  <p className=\"text-xs text-muted-foreground\">\n                    Mountain passes provide shortest routes\n                  </p>\n                </div>\n              </div>\n            </CardContent>\n          </Card>\n\n          {/* Actions */}\n          <Card>\n            <CardHeader>\n              <CardTitle className=\"text-lg\">Actions</CardTitle>\n            </CardHeader>\n            <CardContent className=\"space-y-2\">\n              <Button className=\"w-full\" variant=\"outline\" size=\"sm\">\n                Compare Agents\n              </Button>\n              <Button className=\"w-full\" variant=\"outline\" size=\"sm\">\n                Find Shortest Path\n              </Button>\n              <Button className=\"w-full\" variant=\"outline\" size=\"sm\">\n                Analyze Clusters\n              </Button>\n              <Button className=\"w-full\" variant=\"outline\" size=\"sm\">\n                Export Subgraph\n              </Button>\n            </CardContent>\n          </Card>\n        </div>\n      </div>\n    </div>\n  );\n}\n"],
+      names: ["KnowledgePage", "selectedAgent", "setSelectedAgent", "useState", "graphMode", "setGraphMode", "filterType", "setFilterType", "div", "className", "h1", "p", "Button", "variant", "size", "Download", "Maximize2", "Card", "CardHeader", "CardTitle", "Brain", "CardContent", "Network", "TrendingUp", "Share2", "Select", "value", "onValueChange", "v", "SelectTrigger", "SelectValue", "SelectContent", "SelectItem", "style", "height", "KnowledgeGraphViz", "agentId", "undefined", "mode", "filter", "Filter", "label", "defaultValue", "span", "CardDescription"],
+      mappings: "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"
+    },
+    _coverageSchema: "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+    hash: "ccf36f68bccf39951c5febb95c98de26caeeb86a"
+  };
+  var coverage = global[gcv] || (global[gcv] = {});
+  if (!coverage[path] || coverage[path].hash !== hash) {
+    coverage[path] = coverageData;
+  }
+  var actualCoverage = coverage[path];
+  {
+    // @ts-ignore
+    cov_1t4zilotk3 = function () {
+      return actualCoverage;
+    };
+  }
+  return actualCoverage;
+}
+cov_1t4zilotk3();
+cov_1t4zilotk3().s[0]++;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/* istanbul ignore next */
+cov_1t4zilotk3().s[1]++;
+Object.defineProperty(exports, "default", {
+  enumerable: true,
+  get: function () {
+    /* istanbul ignore next */
+    cov_1t4zilotk3().f[0]++;
+    cov_1t4zilotk3().s[2]++;
+    return KnowledgePage;
+  }
+});
+const _jsxruntime =
+/* istanbul ignore next */
+(cov_1t4zilotk3().s[3]++, require("react/jsx-runtime"));
+const _react =
+/* istanbul ignore next */
+(cov_1t4zilotk3().s[4]++, require("react"));
+const _KnowledgeGraphviz =
+/* istanbul ignore next */
+(cov_1t4zilotk3().s[5]++, require("../../components/KnowledgeGraph-viz"));
+const _card =
+/* istanbul ignore next */
+(cov_1t4zilotk3().s[6]++, require("../../components/ui/card"));
+const _button =
+/* istanbul ignore next */
+(cov_1t4zilotk3().s[7]++, require("../../components/ui/button"));
+const _select =
+/* istanbul ignore next */
+(cov_1t4zilotk3().s[8]++, require("../../components/ui/select"));
+const _lucidereact =
+/* istanbul ignore next */
+(cov_1t4zilotk3().s[9]++, require("lucide-react"));
+function KnowledgePage() {
+  /* istanbul ignore next */
+  cov_1t4zilotk3().f[1]++;
+  const [selectedAgent, setSelectedAgent] =
+  /* istanbul ignore next */
+  (cov_1t4zilotk3().s[10]++, (0, _react.useState)("agent_123"));
+  const [graphMode, setGraphMode] =
+  /* istanbul ignore next */
+  (cov_1t4zilotk3().s[11]++, (0, _react.useState)("individual"));
+  const [filterType, setFilterType] =
+  /* istanbul ignore next */
+  (cov_1t4zilotk3().s[12]++, (0, _react.useState)("all"));
+  /* istanbul ignore next */
+  cov_1t4zilotk3().s[13]++;
+  return /*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+    className: "container mx-auto p-6 space-y-6",
+    children: [/*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+      className: "flex justify-between items-center",
+      children: [/*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+        children: [/*#__PURE__*/(0, _jsxruntime.jsx)("h1", {
+          className: "text-3xl font-bold",
+          children: "Knowledge Graphs"
+        }), /*#__PURE__*/(0, _jsxruntime.jsx)("p", {
+          className: "text-muted-foreground mt-1",
+          children: "Visualize agent knowledge, patterns, and collective intelligence"
+        })]
+      }), /*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+        className: "flex gap-2",
+        children: [/*#__PURE__*/(0, _jsxruntime.jsxs)(_button.Button, {
+          variant: "outline",
+          size: "sm",
+          children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_lucidereact.Download, {
+            className: "h-4 w-4 mr-2"
+          }), "Export"]
+        }), /*#__PURE__*/(0, _jsxruntime.jsxs)(_button.Button, {
+          variant: "outline",
+          size: "sm",
+          children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_lucidereact.Maximize2, {
+            className: "h-4 w-4 mr-2"
+          }), "Fullscreen"]
+        })]
+      })]
+    }), /*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+      className: "grid gap-4 md:grid-cols-4",
+      children: [/*#__PURE__*/(0, _jsxruntime.jsxs)(_card.Card, {
+        children: [/*#__PURE__*/(0, _jsxruntime.jsxs)(_card.CardHeader, {
+          className: "flex flex-row items-center justify-between space-y-0 pb-2",
+          children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_card.CardTitle, {
+            className: "text-sm font-medium",
+            children: "Total Nodes"
+          }), /*#__PURE__*/(0, _jsxruntime.jsx)(_lucidereact.Brain, {
+            className: "h-4 w-4 text-muted-foreground"
+          })]
+        }), /*#__PURE__*/(0, _jsxruntime.jsxs)(_card.CardContent, {
+          children: [/*#__PURE__*/(0, _jsxruntime.jsx)("div", {
+            className: "text-2xl font-bold",
+            children: "2,847"
+          }), /*#__PURE__*/(0, _jsxruntime.jsx)("p", {
+            className: "text-xs text-muted-foreground",
+            children: "+342 this session"
+          })]
+        })]
+      }), /*#__PURE__*/(0, _jsxruntime.jsxs)(_card.Card, {
+        children: [/*#__PURE__*/(0, _jsxruntime.jsxs)(_card.CardHeader, {
+          className: "flex flex-row items-center justify-between space-y-0 pb-2",
+          children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_card.CardTitle, {
+            className: "text-sm font-medium",
+            children: "Connections"
+          }), /*#__PURE__*/(0, _jsxruntime.jsx)(_lucidereact.Network, {
+            className: "h-4 w-4 text-muted-foreground"
+          })]
+        }), /*#__PURE__*/(0, _jsxruntime.jsxs)(_card.CardContent, {
+          children: [/*#__PURE__*/(0, _jsxruntime.jsx)("div", {
+            className: "text-2xl font-bold",
+            children: "5,621"
+          }), /*#__PURE__*/(0, _jsxruntime.jsx)("p", {
+            className: "text-xs text-muted-foreground",
+            children: "2.0 avg per node"
+          })]
+        })]
+      }), /*#__PURE__*/(0, _jsxruntime.jsxs)(_card.Card, {
+        children: [/*#__PURE__*/(0, _jsxruntime.jsxs)(_card.CardHeader, {
+          className: "flex flex-row items-center justify-between space-y-0 pb-2",
+          children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_card.CardTitle, {
+            className: "text-sm font-medium",
+            children: "Patterns"
+          }), /*#__PURE__*/(0, _jsxruntime.jsx)(_lucidereact.TrendingUp, {
+            className: "h-4 w-4 text-muted-foreground"
+          })]
+        }), /*#__PURE__*/(0, _jsxruntime.jsxs)(_card.CardContent, {
+          children: [/*#__PURE__*/(0, _jsxruntime.jsx)("div", {
+            className: "text-2xl font-bold",
+            children: "156"
+          }), /*#__PURE__*/(0, _jsxruntime.jsx)("p", {
+            className: "text-xs text-muted-foreground",
+            children: "23 high confidence"
+          })]
+        })]
+      }), /*#__PURE__*/(0, _jsxruntime.jsxs)(_card.Card, {
+        children: [/*#__PURE__*/(0, _jsxruntime.jsxs)(_card.CardHeader, {
+          className: "flex flex-row items-center justify-between space-y-0 pb-2",
+          children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_card.CardTitle, {
+            className: "text-sm font-medium",
+            children: "Shared Knowledge"
+          }), /*#__PURE__*/(0, _jsxruntime.jsx)(_lucidereact.Share2, {
+            className: "h-4 w-4 text-muted-foreground"
+          })]
+        }), /*#__PURE__*/(0, _jsxruntime.jsxs)(_card.CardContent, {
+          children: [/*#__PURE__*/(0, _jsxruntime.jsx)("div", {
+            className: "text-2xl font-bold",
+            children: "892"
+          }), /*#__PURE__*/(0, _jsxruntime.jsx)("p", {
+            className: "text-xs text-muted-foreground",
+            children: "31% of total"
+          })]
+        })]
+      })]
+    }), /*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+      className: "grid gap-6 lg:grid-cols-4",
+      children: [/*#__PURE__*/(0, _jsxruntime.jsx)("div", {
+        className: "lg:col-span-3",
+        children: /*#__PURE__*/(0, _jsxruntime.jsxs)(_card.Card, {
+          className: "h-full",
+          children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_card.CardHeader, {
+            children: /*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+              className: "flex justify-between items-center",
+              children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_card.CardTitle, {
+                children: "Knowledge Graph Visualization"
+              }), /*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+                className: "flex gap-2",
+                children: [/*#__PURE__*/(0, _jsxruntime.jsxs)(_select.Select, {
+                  value: graphMode,
+                  onValueChange: v => {
+                    /* istanbul ignore next */
+                    cov_1t4zilotk3().f[2]++;
+                    cov_1t4zilotk3().s[14]++;
+                    return setGraphMode(v);
+                  },
+                  children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_select.SelectTrigger, {
+                    className: "w-[150px]",
+                    children: /*#__PURE__*/(0, _jsxruntime.jsx)(_select.SelectValue, {})
+                  }), /*#__PURE__*/(0, _jsxruntime.jsxs)(_select.SelectContent, {
+                    children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_select.SelectItem, {
+                      value: "individual",
+                      children: "Individual"
+                    }), /*#__PURE__*/(0, _jsxruntime.jsx)(_select.SelectItem, {
+                      value: "collective",
+                      children: "Collective"
+                    })]
+                  })]
+                }),
+                /* istanbul ignore next */
+                (cov_1t4zilotk3().b[0][0]++, graphMode === "individual") &&
+                /* istanbul ignore next */
+                (cov_1t4zilotk3().b[0][1]++, /*#__PURE__*/(0, _jsxruntime.jsxs)(_select.Select, {
+                  value: selectedAgent,
+                  onValueChange: setSelectedAgent,
+                  children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_select.SelectTrigger, {
+                    className: "w-[200px]",
+                    children: /*#__PURE__*/(0, _jsxruntime.jsx)(_select.SelectValue, {})
+                  }), /*#__PURE__*/(0, _jsxruntime.jsxs)(_select.SelectContent, {
+                    children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_select.SelectItem, {
+                      value: "agent_123",
+                      children: "CuriousExplorer"
+                    }), /*#__PURE__*/(0, _jsxruntime.jsx)(_select.SelectItem, {
+                      value: "agent_456",
+                      children: "WiseScholar"
+                    }), /*#__PURE__*/(0, _jsxruntime.jsx)(_select.SelectItem, {
+                      value: "agent_789",
+                      children: "BravePioneer"
+                    })]
+                  })]
+                }))]
+              })]
+            })
+          }), /*#__PURE__*/(0, _jsxruntime.jsx)(_card.CardContent, {
+            children: /*#__PURE__*/(0, _jsxruntime.jsx)("div", {
+              className: "relative bg-slate-900 rounded-lg overflow-hidden",
+              style: {
+                height: "600px"
+              },
+              children: /*#__PURE__*/(0, _jsxruntime.jsx)(_KnowledgeGraphviz.KnowledgeGraphViz, {
+                agentId: graphMode === "individual" ?
+                /* istanbul ignore next */
+                (cov_1t4zilotk3().b[1][0]++, selectedAgent) :
+                /* istanbul ignore next */
+                (cov_1t4zilotk3().b[1][1]++, undefined),
+                mode: graphMode,
+                filter: filterType
+              })
+            })
+          })]
+        })
+      }), /*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+        className: "space-y-4",
+        children: [/*#__PURE__*/(0, _jsxruntime.jsxs)(_card.Card, {
+          children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_card.CardHeader, {
+            children: /*#__PURE__*/(0, _jsxruntime.jsxs)(_card.CardTitle, {
+              className: "text-lg flex items-center gap-2",
+              children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_lucidereact.Filter, {
+                className: "h-4 w-4"
+              }), "Filters"]
+            })
+          }), /*#__PURE__*/(0, _jsxruntime.jsxs)(_card.CardContent, {
+            className: "space-y-2",
+            children: [/*#__PURE__*/(0, _jsxruntime.jsxs)(_select.Select, {
+              value: filterType,
+              onValueChange: setFilterType,
+              children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_select.SelectTrigger, {
+                children: /*#__PURE__*/(0, _jsxruntime.jsx)(_select.SelectValue, {})
+              }), /*#__PURE__*/(0, _jsxruntime.jsxs)(_select.SelectContent, {
+                children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_select.SelectItem, {
+                  value: "all",
+                  children: "All Knowledge"
+                }), /*#__PURE__*/(0, _jsxruntime.jsx)(_select.SelectItem, {
+                  value: "locations",
+                  children: "Locations"
+                }), /*#__PURE__*/(0, _jsxruntime.jsx)(_select.SelectItem, {
+                  value: "agents",
+                  children: "Agent Relations"
+                }), /*#__PURE__*/(0, _jsxruntime.jsx)(_select.SelectItem, {
+                  value: "resources",
+                  children: "Resources"
+                }), /*#__PURE__*/(0, _jsxruntime.jsx)(_select.SelectItem, {
+                  value: "patterns",
+                  children: "Patterns"
+                }), /*#__PURE__*/(0, _jsxruntime.jsx)(_select.SelectItem, {
+                  value: "recent",
+                  children: "Recent (last hour)"
+                })]
+              })]
+            }), /*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+              className: "space-y-2 pt-2",
+              children: [/*#__PURE__*/(0, _jsxruntime.jsx)("label", {
+                className: "text-sm font-medium",
+                children: "Node Size"
+              }), /*#__PURE__*/(0, _jsxruntime.jsxs)(_select.Select, {
+                defaultValue: "connections",
+                children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_select.SelectTrigger, {
+                  children: /*#__PURE__*/(0, _jsxruntime.jsx)(_select.SelectValue, {})
+                }), /*#__PURE__*/(0, _jsxruntime.jsxs)(_select.SelectContent, {
+                  children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_select.SelectItem, {
+                    value: "uniform",
+                    children: "Uniform"
+                  }), /*#__PURE__*/(0, _jsxruntime.jsx)(_select.SelectItem, {
+                    value: "connections",
+                    children: "By Connections"
+                  }), /*#__PURE__*/(0, _jsxruntime.jsx)(_select.SelectItem, {
+                    value: "importance",
+                    children: "By Importance"
+                  }), /*#__PURE__*/(0, _jsxruntime.jsx)(_select.SelectItem, {
+                    value: "age",
+                    children: "By Age"
+                  })]
+                })]
+              })]
+            })]
+          })]
+        }), /*#__PURE__*/(0, _jsxruntime.jsxs)(_card.Card, {
+          children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_card.CardHeader, {
+            children: /*#__PURE__*/(0, _jsxruntime.jsx)(_card.CardTitle, {
+              className: "text-lg",
+              children: "Graph Statistics"
+            })
+          }), /*#__PURE__*/(0, _jsxruntime.jsxs)(_card.CardContent, {
+            className: "space-y-2 text-sm",
+            children: [/*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+              className: "flex justify-between",
+              children: [/*#__PURE__*/(0, _jsxruntime.jsx)("span", {
+                className: "text-muted-foreground",
+                children: "Nodes Visible:"
+              }), /*#__PURE__*/(0, _jsxruntime.jsx)("span", {
+                className: "font-medium",
+                children: "127"
+              })]
+            }), /*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+              className: "flex justify-between",
+              children: [/*#__PURE__*/(0, _jsxruntime.jsx)("span", {
+                className: "text-muted-foreground",
+                children: "Edges Visible:"
+              }), /*#__PURE__*/(0, _jsxruntime.jsx)("span", {
+                className: "font-medium",
+                children: "243"
+              })]
+            }), /*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+              className: "flex justify-between",
+              children: [/*#__PURE__*/(0, _jsxruntime.jsx)("span", {
+                className: "text-muted-foreground",
+                children: "Clusters:"
+              }), /*#__PURE__*/(0, _jsxruntime.jsx)("span", {
+                className: "font-medium",
+                children: "8"
+              })]
+            }), /*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+              className: "flex justify-between",
+              children: [/*#__PURE__*/(0, _jsxruntime.jsx)("span", {
+                className: "text-muted-foreground",
+                children: "Avg Path Length:"
+              }), /*#__PURE__*/(0, _jsxruntime.jsx)("span", {
+                className: "font-medium",
+                children: "3.2"
+              })]
+            }), /*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+              className: "flex justify-between",
+              children: [/*#__PURE__*/(0, _jsxruntime.jsx)("span", {
+                className: "text-muted-foreground",
+                children: "Density:"
+              }), /*#__PURE__*/(0, _jsxruntime.jsx)("span", {
+                className: "font-medium",
+                children: "0.15"
+              })]
+            })]
+          })]
+        }), /*#__PURE__*/(0, _jsxruntime.jsxs)(_card.Card, {
+          children: [/*#__PURE__*/(0, _jsxruntime.jsxs)(_card.CardHeader, {
+            children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_card.CardTitle, {
+              className: "text-lg",
+              children: "Top Patterns"
+            }), /*#__PURE__*/(0, _jsxruntime.jsx)(_card.CardDescription, {
+              children: "Most confident discoveries"
+            })]
+          }), /*#__PURE__*/(0, _jsxruntime.jsx)(_card.CardContent, {
+            children: /*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+              className: "space-y-3",
+              children: [/*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+                className: "space-y-1",
+                children: [/*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+                  className: "flex justify-between items-center",
+                  children: [/*#__PURE__*/(0, _jsxruntime.jsx)("span", {
+                    className: "text-sm font-medium",
+                    children: "Resource Clustering"
+                  }), /*#__PURE__*/(0, _jsxruntime.jsx)("span", {
+                    className: "text-xs text-green-600",
+                    children: "92%"
+                  })]
+                }), /*#__PURE__*/(0, _jsxruntime.jsx)("p", {
+                  className: "text-xs text-muted-foreground",
+                  children: "Materials often found near forest edges"
+                })]
+              }), /*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+                className: "space-y-1",
+                children: [/*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+                  className: "flex justify-between items-center",
+                  children: [/*#__PURE__*/(0, _jsxruntime.jsx)("span", {
+                    className: "text-sm font-medium",
+                    children: "Agent Cooperation"
+                  }), /*#__PURE__*/(0, _jsxruntime.jsx)("span", {
+                    className: "text-xs text-green-600",
+                    children: "87%"
+                  })]
+                }), /*#__PURE__*/(0, _jsxruntime.jsx)("p", {
+                  className: "text-xs text-muted-foreground",
+                  children: "Explorers and Scholars share knowledge frequently"
+                })]
+              }), /*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+                className: "space-y-1",
+                children: [/*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+                  className: "flex justify-between items-center",
+                  children: [/*#__PURE__*/(0, _jsxruntime.jsx)("span", {
+                    className: "text-sm font-medium",
+                    children: "Path Optimization"
+                  }), /*#__PURE__*/(0, _jsxruntime.jsx)("span", {
+                    className: "text-xs text-yellow-600",
+                    children: "76%"
+                  })]
+                }), /*#__PURE__*/(0, _jsxruntime.jsx)("p", {
+                  className: "text-xs text-muted-foreground",
+                  children: "Mountain passes provide shortest routes"
+                })]
+              })]
+            })
+          })]
+        }), /*#__PURE__*/(0, _jsxruntime.jsxs)(_card.Card, {
+          children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_card.CardHeader, {
+            children: /*#__PURE__*/(0, _jsxruntime.jsx)(_card.CardTitle, {
+              className: "text-lg",
+              children: "Actions"
+            })
+          }), /*#__PURE__*/(0, _jsxruntime.jsxs)(_card.CardContent, {
+            className: "space-y-2",
+            children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_button.Button, {
+              className: "w-full",
+              variant: "outline",
+              size: "sm",
+              children: "Compare Agents"
+            }), /*#__PURE__*/(0, _jsxruntime.jsx)(_button.Button, {
+              className: "w-full",
+              variant: "outline",
+              size: "sm",
+              children: "Find Shortest Path"
+            }), /*#__PURE__*/(0, _jsxruntime.jsx)(_button.Button, {
+              className: "w-full",
+              variant: "outline",
+              size: "sm",
+              children: "Analyze Clusters"
+            }), /*#__PURE__*/(0, _jsxruntime.jsx)(_button.Button, {
+              className: "w-full",
+              variant: "outline",
+              size: "sm",
+              children: "Export Subgraph"
+            })]
+          })]
+        })]
+      })]
+    })]
+  });
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJLbm93bGVkZ2VQYWdlIiwiY292XzF0NHppbG90azMiLCJmIiwic2VsZWN0ZWRBZ2VudCIsInNldFNlbGVjdGVkQWdlbnQiLCJzIiwiX3JlYWN0IiwidXNlU3RhdGUiLCJncmFwaE1vZGUiLCJzZXRHcmFwaE1vZGUiLCJmaWx0ZXJUeXBlIiwic2V0RmlsdGVyVHlwZSIsIl9qc3hydW50aW1lIiwianN4cyIsImNsYXNzTmFtZSIsImpzeCIsIl9idXR0b24iLCJCdXR0b24iLCJ2YXJpYW50Iiwic2l6ZSIsIl9sdWNpZGVyZWFjdCIsIkRvd25sb2FkIiwiTWF4aW1pemUyIiwiX2NhcmQiLCJDYXJkIiwiQ2FyZEhlYWRlciIsIkNhcmRUaXRsZSIsIkJyYWluIiwiQ2FyZENvbnRlbnQiLCJOZXR3b3JrIiwiVHJlbmRpbmdVcCIsIlNoYXJlMiIsIl9zZWxlY3QiLCJTZWxlY3QiLCJ2YWx1ZSIsIm9uVmFsdWVDaGFuZ2UiLCJ2IiwiU2VsZWN0VHJpZ2dlciIsIlNlbGVjdFZhbHVlIiwiU2VsZWN0Q29udGVudCIsIlNlbGVjdEl0ZW0iLCJiIiwic3R5bGUiLCJoZWlnaHQiLCJfS25vd2xlZGdlR3JhcGh2aXoiLCJLbm93bGVkZ2VHcmFwaFZpeiIsImFnZW50SWQiLCJ1bmRlZmluZWQiLCJtb2RlIiwiZmlsdGVyIiwiRmlsdGVyIiwiZGVmYXVsdFZhbHVlIiwiQ2FyZERlc2NyaXB0aW9uIl0sInNvdXJjZXMiOlsiL1VzZXJzL21hdHRoZXdtb3JvbmV5L2J1aWxkcy9GcmVlQWdlbnRpY3Mvd2ViL2FwcC9rbm93bGVkZ2UvcGFnZS50c3giXSwic291cmNlc0NvbnRlbnQiOlsiXCJ1c2UgY2xpZW50XCI7XG5cbmltcG9ydCB7IHVzZVN0YXRlIH0gZnJvbSBcInJlYWN0XCI7XG5pbXBvcnQgeyBLbm93bGVkZ2VHcmFwaFZpeiB9IGZyb20gXCJAL2NvbXBvbmVudHMvS25vd2xlZGdlR3JhcGgtdml6XCI7XG5pbXBvcnQge1xuICBDYXJkLFxuICBDYXJkQ29udGVudCxcbiAgQ2FyZERlc2NyaXB0aW9uLFxuICBDYXJkSGVhZGVyLFxuICBDYXJkVGl0bGUsXG59IGZyb20gXCJAL2NvbXBvbmVudHMvdWkvY2FyZFwiO1xuaW1wb3J0IHsgVGFicywgVGFic0NvbnRlbnQsIFRhYnNMaXN0LCBUYWJzVHJpZ2dlciB9IGZyb20gXCJAL2NvbXBvbmVudHMvdWkvdGFic1wiO1xuaW1wb3J0IHsgQnV0dG9uIH0gZnJvbSBcIkAvY29tcG9uZW50cy91aS9idXR0b25cIjtcbmltcG9ydCB7XG4gIFNlbGVjdCxcbiAgU2VsZWN0Q29udGVudCxcbiAgU2VsZWN0SXRlbSxcbiAgU2VsZWN0VHJpZ2dlcixcbiAgU2VsZWN0VmFsdWUsXG59IGZyb20gXCJAL2NvbXBvbmVudHMvdWkvc2VsZWN0XCI7XG5pbXBvcnQge1xuICBCcmFpbixcbiAgTmV0d29yayxcbiAgVHJlbmRpbmdVcCxcbiAgU2hhcmUyLFxuICBGaWx0ZXIsXG4gIERvd25sb2FkLFxuICBNYXhpbWl6ZTIsXG59IGZyb20gXCJsdWNpZGUtcmVhY3RcIjtcblxuZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gS25vd2xlZGdlUGFnZSgpIHtcbiAgY29uc3QgW3NlbGVjdGVkQWdlbnQsIHNldFNlbGVjdGVkQWdlbnRdID0gdXNlU3RhdGU8c3RyaW5nPihcImFnZW50XzEyM1wiKTtcbiAgY29uc3QgW2dyYXBoTW9kZSwgc2V0R3JhcGhNb2RlXSA9IHVzZVN0YXRlPFwiaW5kaXZpZHVhbFwiIHwgXCJjb2xsZWN0aXZlXCI+KFxuICAgIFwiaW5kaXZpZHVhbFwiLFxuICApO1xuICBjb25zdCBbZmlsdGVyVHlwZSwgc2V0RmlsdGVyVHlwZV0gPSB1c2VTdGF0ZTxzdHJpbmc+KFwiYWxsXCIpO1xuXG4gIHJldHVybiAoXG4gICAgPGRpdiBjbGFzc05hbWU9XCJjb250YWluZXIgbXgtYXV0byBwLTYgc3BhY2UteS02XCI+XG4gICAgICB7LyogUGFnZSBIZWFkZXIgKi99XG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXgganVzdGlmeS1iZXR3ZWVuIGl0ZW1zLWNlbnRlclwiPlxuICAgICAgICA8ZGl2PlxuICAgICAgICAgIDxoMSBjbGFzc05hbWU9XCJ0ZXh0LTN4bCBmb250LWJvbGRcIj5Lbm93bGVkZ2UgR3JhcGhzPC9oMT5cbiAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LW11dGVkLWZvcmVncm91bmQgbXQtMVwiPlxuICAgICAgICAgICAgVmlzdWFsaXplIGFnZW50IGtub3dsZWRnZSwgcGF0dGVybnMsIGFuZCBjb2xsZWN0aXZlIGludGVsbGlnZW5jZVxuICAgICAgICAgIDwvcD5cbiAgICAgICAgPC9kaXY+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBnYXAtMlwiPlxuICAgICAgICAgIDxCdXR0b24gdmFyaWFudD1cIm91dGxpbmVcIiBzaXplPVwic21cIj5cbiAgICAgICAgICAgIDxEb3dubG9hZCBjbGFzc05hbWU9XCJoLTQgdy00IG1yLTJcIiAvPlxuICAgICAgICAgICAgRXhwb3J0XG4gICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgICAgPEJ1dHRvbiB2YXJpYW50PVwib3V0bGluZVwiIHNpemU9XCJzbVwiPlxuICAgICAgICAgICAgPE1heGltaXplMiBjbGFzc05hbWU9XCJoLTQgdy00IG1yLTJcIiAvPlxuICAgICAgICAgICAgRnVsbHNjcmVlblxuICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICA8L2Rpdj5cbiAgICAgIDwvZGl2PlxuXG4gICAgICB7LyogS25vd2xlZGdlIFN0YXRzICovfVxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJncmlkIGdhcC00IG1kOmdyaWQtY29scy00XCI+XG4gICAgICAgIDxDYXJkPlxuICAgICAgICAgIDxDYXJkSGVhZGVyIGNsYXNzTmFtZT1cImZsZXggZmxleC1yb3cgaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlbiBzcGFjZS15LTAgcGItMlwiPlxuICAgICAgICAgICAgPENhcmRUaXRsZSBjbGFzc05hbWU9XCJ0ZXh0LXNtIGZvbnQtbWVkaXVtXCI+VG90YWwgTm9kZXM8L0NhcmRUaXRsZT5cbiAgICAgICAgICAgIDxCcmFpbiBjbGFzc05hbWU9XCJoLTQgdy00IHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiIC8+XG4gICAgICAgICAgPC9DYXJkSGVhZGVyPlxuICAgICAgICAgIDxDYXJkQ29udGVudD5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC0yeGwgZm9udC1ib2xkXCI+Miw4NDc8L2Rpdj5cbiAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteHMgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+KzM0MiB0aGlzIHNlc3Npb248L3A+XG4gICAgICAgICAgPC9DYXJkQ29udGVudD5cbiAgICAgICAgPC9DYXJkPlxuICAgICAgICA8Q2FyZD5cbiAgICAgICAgICA8Q2FyZEhlYWRlciBjbGFzc05hbWU9XCJmbGV4IGZsZXgtcm93IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWJldHdlZW4gc3BhY2UteS0wIHBiLTJcIj5cbiAgICAgICAgICAgIDxDYXJkVGl0bGUgY2xhc3NOYW1lPVwidGV4dC1zbSBmb250LW1lZGl1bVwiPkNvbm5lY3Rpb25zPC9DYXJkVGl0bGU+XG4gICAgICAgICAgICA8TmV0d29yayBjbGFzc05hbWU9XCJoLTQgdy00IHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiIC8+XG4gICAgICAgICAgPC9DYXJkSGVhZGVyPlxuICAgICAgICAgIDxDYXJkQ29udGVudD5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC0yeGwgZm9udC1ib2xkXCI+NSw2MjE8L2Rpdj5cbiAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteHMgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+Mi4wIGF2ZyBwZXIgbm9kZTwvcD5cbiAgICAgICAgICA8L0NhcmRDb250ZW50PlxuICAgICAgICA8L0NhcmQ+XG4gICAgICAgIDxDYXJkPlxuICAgICAgICAgIDxDYXJkSGVhZGVyIGNsYXNzTmFtZT1cImZsZXggZmxleC1yb3cgaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlbiBzcGFjZS15LTAgcGItMlwiPlxuICAgICAgICAgICAgPENhcmRUaXRsZSBjbGFzc05hbWU9XCJ0ZXh0LXNtIGZvbnQtbWVkaXVtXCI+UGF0dGVybnM8L0NhcmRUaXRsZT5cbiAgICAgICAgICAgIDxUcmVuZGluZ1VwIGNsYXNzTmFtZT1cImgtNCB3LTQgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCIgLz5cbiAgICAgICAgICA8L0NhcmRIZWFkZXI+XG4gICAgICAgICAgPENhcmRDb250ZW50PlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LTJ4bCBmb250LWJvbGRcIj4xNTY8L2Rpdj5cbiAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteHMgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+MjMgaGlnaCBjb25maWRlbmNlPC9wPlxuICAgICAgICAgIDwvQ2FyZENvbnRlbnQ+XG4gICAgICAgIDwvQ2FyZD5cbiAgICAgICAgPENhcmQ+XG4gICAgICAgICAgPENhcmRIZWFkZXIgY2xhc3NOYW1lPVwiZmxleCBmbGV4LXJvdyBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuIHNwYWNlLXktMCBwYi0yXCI+XG4gICAgICAgICAgICA8Q2FyZFRpdGxlIGNsYXNzTmFtZT1cInRleHQtc20gZm9udC1tZWRpdW1cIj5cbiAgICAgICAgICAgICAgU2hhcmVkIEtub3dsZWRnZVxuICAgICAgICAgICAgPC9DYXJkVGl0bGU+XG4gICAgICAgICAgICA8U2hhcmUyIGNsYXNzTmFtZT1cImgtNCB3LTQgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCIgLz5cbiAgICAgICAgICA8L0NhcmRIZWFkZXI+XG4gICAgICAgICAgPENhcmRDb250ZW50PlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LTJ4bCBmb250LWJvbGRcIj44OTI8L2Rpdj5cbiAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteHMgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+MzElIG9mIHRvdGFsPC9wPlxuICAgICAgICAgIDwvQ2FyZENvbnRlbnQ+XG4gICAgICAgIDwvQ2FyZD5cbiAgICAgIDwvZGl2PlxuXG4gICAgICB7LyogTWFpbiBDb250ZW50ICovfVxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJncmlkIGdhcC02IGxnOmdyaWQtY29scy00XCI+XG4gICAgICAgIHsvKiBHcmFwaCBWaWV3IC0gVGFrZXMgdXAgMyBjb2x1bW5zICovfVxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImxnOmNvbC1zcGFuLTNcIj5cbiAgICAgICAgICA8Q2FyZCBjbGFzc05hbWU9XCJoLWZ1bGxcIj5cbiAgICAgICAgICAgIDxDYXJkSGVhZGVyPlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXgganVzdGlmeS1iZXR3ZWVuIGl0ZW1zLWNlbnRlclwiPlxuICAgICAgICAgICAgICAgIDxDYXJkVGl0bGU+S25vd2xlZGdlIEdyYXBoIFZpc3VhbGl6YXRpb248L0NhcmRUaXRsZT5cbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggZ2FwLTJcIj5cbiAgICAgICAgICAgICAgICAgIDxTZWxlY3RcbiAgICAgICAgICAgICAgICAgICAgdmFsdWU9e2dyYXBoTW9kZX1cbiAgICAgICAgICAgICAgICAgICAgb25WYWx1ZUNoYW5nZT17KHYpID0+IHNldEdyYXBoTW9kZSh2IGFzIGFueSl9XG4gICAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICAgIDxTZWxlY3RUcmlnZ2VyIGNsYXNzTmFtZT1cInctWzE1MHB4XVwiPlxuICAgICAgICAgICAgICAgICAgICAgIDxTZWxlY3RWYWx1ZSAvPlxuICAgICAgICAgICAgICAgICAgICA8L1NlbGVjdFRyaWdnZXI+XG4gICAgICAgICAgICAgICAgICAgIDxTZWxlY3RDb250ZW50PlxuICAgICAgICAgICAgICAgICAgICAgIDxTZWxlY3RJdGVtIHZhbHVlPVwiaW5kaXZpZHVhbFwiPkluZGl2aWR1YWw8L1NlbGVjdEl0ZW0+XG4gICAgICAgICAgICAgICAgICAgICAgPFNlbGVjdEl0ZW0gdmFsdWU9XCJjb2xsZWN0aXZlXCI+Q29sbGVjdGl2ZTwvU2VsZWN0SXRlbT5cbiAgICAgICAgICAgICAgICAgICAgPC9TZWxlY3RDb250ZW50PlxuICAgICAgICAgICAgICAgICAgPC9TZWxlY3Q+XG4gICAgICAgICAgICAgICAgICB7Z3JhcGhNb2RlID09PSBcImluZGl2aWR1YWxcIiAmJiAoXG4gICAgICAgICAgICAgICAgICAgIDxTZWxlY3RcbiAgICAgICAgICAgICAgICAgICAgICB2YWx1ZT17c2VsZWN0ZWRBZ2VudH1cbiAgICAgICAgICAgICAgICAgICAgICBvblZhbHVlQ2hhbmdlPXtzZXRTZWxlY3RlZEFnZW50fVxuICAgICAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICAgICAgPFNlbGVjdFRyaWdnZXIgY2xhc3NOYW1lPVwidy1bMjAwcHhdXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICA8U2VsZWN0VmFsdWUgLz5cbiAgICAgICAgICAgICAgICAgICAgICA8L1NlbGVjdFRyaWdnZXI+XG4gICAgICAgICAgICAgICAgICAgICAgPFNlbGVjdENvbnRlbnQ+XG4gICAgICAgICAgICAgICAgICAgICAgICA8U2VsZWN0SXRlbSB2YWx1ZT1cImFnZW50XzEyM1wiPlxuICAgICAgICAgICAgICAgICAgICAgICAgICBDdXJpb3VzRXhwbG9yZXJcbiAgICAgICAgICAgICAgICAgICAgICAgIDwvU2VsZWN0SXRlbT5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxTZWxlY3RJdGVtIHZhbHVlPVwiYWdlbnRfNDU2XCI+V2lzZVNjaG9sYXI8L1NlbGVjdEl0ZW0+XG4gICAgICAgICAgICAgICAgICAgICAgICA8U2VsZWN0SXRlbSB2YWx1ZT1cImFnZW50Xzc4OVwiPkJyYXZlUGlvbmVlcjwvU2VsZWN0SXRlbT5cbiAgICAgICAgICAgICAgICAgICAgICA8L1NlbGVjdENvbnRlbnQ+XG4gICAgICAgICAgICAgICAgICAgIDwvU2VsZWN0PlxuICAgICAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICA8L0NhcmRIZWFkZXI+XG4gICAgICAgICAgICA8Q2FyZENvbnRlbnQ+XG4gICAgICAgICAgICAgIDxkaXZcbiAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJyZWxhdGl2ZSBiZy1zbGF0ZS05MDAgcm91bmRlZC1sZyBvdmVyZmxvdy1oaWRkZW5cIlxuICAgICAgICAgICAgICAgIHN0eWxlPXt7IGhlaWdodDogXCI2MDBweFwiIH19XG4gICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICA8S25vd2xlZGdlR3JhcGhWaXpcbiAgICAgICAgICAgICAgICAgIGFnZW50SWQ9e1xuICAgICAgICAgICAgICAgICAgICBncmFwaE1vZGUgPT09IFwiaW5kaXZpZHVhbFwiID8gc2VsZWN0ZWRBZ2VudCA6IHVuZGVmaW5lZFxuICAgICAgICAgICAgICAgICAgfVxuICAgICAgICAgICAgICAgICAgbW9kZT17Z3JhcGhNb2RlfVxuICAgICAgICAgICAgICAgICAgZmlsdGVyPXtmaWx0ZXJUeXBlfVxuICAgICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPC9DYXJkQ29udGVudD5cbiAgICAgICAgICA8L0NhcmQ+XG4gICAgICAgIDwvZGl2PlxuXG4gICAgICAgIHsvKiBTaWRlIFBhbmVsIC0gVGFrZXMgdXAgMSBjb2x1bW4gKi99XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS00XCI+XG4gICAgICAgICAgey8qIEZpbHRlcnMgKi99XG4gICAgICAgICAgPENhcmQ+XG4gICAgICAgICAgICA8Q2FyZEhlYWRlcj5cbiAgICAgICAgICAgICAgPENhcmRUaXRsZSBjbGFzc05hbWU9XCJ0ZXh0LWxnIGZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgICAgICAgICAgPEZpbHRlciBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz5cbiAgICAgICAgICAgICAgICBGaWx0ZXJzXG4gICAgICAgICAgICAgIDwvQ2FyZFRpdGxlPlxuICAgICAgICAgICAgPC9DYXJkSGVhZGVyPlxuICAgICAgICAgICAgPENhcmRDb250ZW50IGNsYXNzTmFtZT1cInNwYWNlLXktMlwiPlxuICAgICAgICAgICAgICA8U2VsZWN0IHZhbHVlPXtmaWx0ZXJUeXBlfSBvblZhbHVlQ2hhbmdlPXtzZXRGaWx0ZXJUeXBlfT5cbiAgICAgICAgICAgICAgICA8U2VsZWN0VHJpZ2dlcj5cbiAgICAgICAgICAgICAgICAgIDxTZWxlY3RWYWx1ZSAvPlxuICAgICAgICAgICAgICAgIDwvU2VsZWN0VHJpZ2dlcj5cbiAgICAgICAgICAgICAgICA8U2VsZWN0Q29udGVudD5cbiAgICAgICAgICAgICAgICAgIDxTZWxlY3RJdGVtIHZhbHVlPVwiYWxsXCI+QWxsIEtub3dsZWRnZTwvU2VsZWN0SXRlbT5cbiAgICAgICAgICAgICAgICAgIDxTZWxlY3RJdGVtIHZhbHVlPVwibG9jYXRpb25zXCI+TG9jYXRpb25zPC9TZWxlY3RJdGVtPlxuICAgICAgICAgICAgICAgICAgPFNlbGVjdEl0ZW0gdmFsdWU9XCJhZ2VudHNcIj5BZ2VudCBSZWxhdGlvbnM8L1NlbGVjdEl0ZW0+XG4gICAgICAgICAgICAgICAgICA8U2VsZWN0SXRlbSB2YWx1ZT1cInJlc291cmNlc1wiPlJlc291cmNlczwvU2VsZWN0SXRlbT5cbiAgICAgICAgICAgICAgICAgIDxTZWxlY3RJdGVtIHZhbHVlPVwicGF0dGVybnNcIj5QYXR0ZXJuczwvU2VsZWN0SXRlbT5cbiAgICAgICAgICAgICAgICAgIDxTZWxlY3RJdGVtIHZhbHVlPVwicmVjZW50XCI+UmVjZW50IChsYXN0IGhvdXIpPC9TZWxlY3RJdGVtPlxuICAgICAgICAgICAgICAgIDwvU2VsZWN0Q29udGVudD5cbiAgICAgICAgICAgICAgPC9TZWxlY3Q+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0yIHB0LTJcIj5cbiAgICAgICAgICAgICAgICA8bGFiZWwgY2xhc3NOYW1lPVwidGV4dC1zbSBmb250LW1lZGl1bVwiPk5vZGUgU2l6ZTwvbGFiZWw+XG4gICAgICAgICAgICAgICAgPFNlbGVjdCBkZWZhdWx0VmFsdWU9XCJjb25uZWN0aW9uc1wiPlxuICAgICAgICAgICAgICAgICAgPFNlbGVjdFRyaWdnZXI+XG4gICAgICAgICAgICAgICAgICAgIDxTZWxlY3RWYWx1ZSAvPlxuICAgICAgICAgICAgICAgICAgPC9TZWxlY3RUcmlnZ2VyPlxuICAgICAgICAgICAgICAgICAgPFNlbGVjdENvbnRlbnQ+XG4gICAgICAgICAgICAgICAgICAgIDxTZWxlY3RJdGVtIHZhbHVlPVwidW5pZm9ybVwiPlVuaWZvcm08L1NlbGVjdEl0ZW0+XG4gICAgICAgICAgICAgICAgICAgIDxTZWxlY3RJdGVtIHZhbHVlPVwiY29ubmVjdGlvbnNcIj5CeSBDb25uZWN0aW9uczwvU2VsZWN0SXRlbT5cbiAgICAgICAgICAgICAgICAgICAgPFNlbGVjdEl0ZW0gdmFsdWU9XCJpbXBvcnRhbmNlXCI+QnkgSW1wb3J0YW5jZTwvU2VsZWN0SXRlbT5cbiAgICAgICAgICAgICAgICAgICAgPFNlbGVjdEl0ZW0gdmFsdWU9XCJhZ2VcIj5CeSBBZ2U8L1NlbGVjdEl0ZW0+XG4gICAgICAgICAgICAgICAgICA8L1NlbGVjdENvbnRlbnQ+XG4gICAgICAgICAgICAgICAgPC9TZWxlY3Q+XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPC9DYXJkQ29udGVudD5cbiAgICAgICAgICA8L0NhcmQ+XG5cbiAgICAgICAgICB7LyogR3JhcGggU3RhdHMgKi99XG4gICAgICAgICAgPENhcmQ+XG4gICAgICAgICAgICA8Q2FyZEhlYWRlcj5cbiAgICAgICAgICAgICAgPENhcmRUaXRsZSBjbGFzc05hbWU9XCJ0ZXh0LWxnXCI+R3JhcGggU3RhdGlzdGljczwvQ2FyZFRpdGxlPlxuICAgICAgICAgICAgPC9DYXJkSGVhZGVyPlxuICAgICAgICAgICAgPENhcmRDb250ZW50IGNsYXNzTmFtZT1cInNwYWNlLXktMiB0ZXh0LXNtXCI+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBqdXN0aWZ5LWJldHdlZW5cIj5cbiAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5Ob2RlcyBWaXNpYmxlOjwvc3Bhbj5cbiAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJmb250LW1lZGl1bVwiPjEyNzwvc3Bhbj5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBqdXN0aWZ5LWJldHdlZW5cIj5cbiAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5FZGdlcyBWaXNpYmxlOjwvc3Bhbj5cbiAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJmb250LW1lZGl1bVwiPjI0Mzwvc3Bhbj5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBqdXN0aWZ5LWJldHdlZW5cIj5cbiAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5DbHVzdGVyczo8L3NwYW4+XG4gICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiZm9udC1tZWRpdW1cIj44PC9zcGFuPlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGp1c3RpZnktYmV0d2VlblwiPlxuICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPkF2ZyBQYXRoIExlbmd0aDo8L3NwYW4+XG4gICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiZm9udC1tZWRpdW1cIj4zLjI8L3NwYW4+XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXgganVzdGlmeS1iZXR3ZWVuXCI+XG4gICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwidGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+RGVuc2l0eTo8L3NwYW4+XG4gICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiZm9udC1tZWRpdW1cIj4wLjE1PC9zcGFuPlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgIDwvQ2FyZENvbnRlbnQ+XG4gICAgICAgICAgPC9DYXJkPlxuXG4gICAgICAgICAgey8qIFRvcCBQYXR0ZXJucyAqL31cbiAgICAgICAgICA8Q2FyZD5cbiAgICAgICAgICAgIDxDYXJkSGVhZGVyPlxuICAgICAgICAgICAgICA8Q2FyZFRpdGxlIGNsYXNzTmFtZT1cInRleHQtbGdcIj5Ub3AgUGF0dGVybnM8L0NhcmRUaXRsZT5cbiAgICAgICAgICAgICAgPENhcmREZXNjcmlwdGlvbj5Nb3N0IGNvbmZpZGVudCBkaXNjb3ZlcmllczwvQ2FyZERlc2NyaXB0aW9uPlxuICAgICAgICAgICAgPC9DYXJkSGVhZGVyPlxuICAgICAgICAgICAgPENhcmRDb250ZW50PlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktM1wiPlxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0xXCI+XG4gICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXgganVzdGlmeS1iZXR3ZWVuIGl0ZW1zLWNlbnRlclwiPlxuICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LXNtIGZvbnQtbWVkaXVtXCI+XG4gICAgICAgICAgICAgICAgICAgICAgUmVzb3VyY2UgQ2x1c3RlcmluZ1xuICAgICAgICAgICAgICAgICAgICA8L3NwYW4+XG4gICAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQteHMgdGV4dC1ncmVlbi02MDBcIj45MiU8L3NwYW4+XG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteHMgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgICAgICAgICAgIE1hdGVyaWFscyBvZnRlbiBmb3VuZCBuZWFyIGZvcmVzdCBlZGdlc1xuICAgICAgICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0xXCI+XG4gICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXgganVzdGlmeS1iZXR3ZWVuIGl0ZW1zLWNlbnRlclwiPlxuICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LXNtIGZvbnQtbWVkaXVtXCI+XG4gICAgICAgICAgICAgICAgICAgICAgQWdlbnQgQ29vcGVyYXRpb25cbiAgICAgICAgICAgICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LXhzIHRleHQtZ3JlZW4tNjAwXCI+ODclPC9zcGFuPlxuICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXhzIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAgICAgICAgICBFeHBsb3JlcnMgYW5kIFNjaG9sYXJzIHNoYXJlIGtub3dsZWRnZSBmcmVxdWVudGx5XG4gICAgICAgICAgICAgICAgICA8L3A+XG4gICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTFcIj5cbiAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBqdXN0aWZ5LWJldHdlZW4gaXRlbXMtY2VudGVyXCI+XG4gICAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQtc20gZm9udC1tZWRpdW1cIj5cbiAgICAgICAgICAgICAgICAgICAgICBQYXRoIE9wdGltaXphdGlvblxuICAgICAgICAgICAgICAgICAgICA8L3NwYW4+XG4gICAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQteHMgdGV4dC15ZWxsb3ctNjAwXCI+NzYlPC9zcGFuPlxuICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXhzIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAgICAgICAgICBNb3VudGFpbiBwYXNzZXMgcHJvdmlkZSBzaG9ydGVzdCByb3V0ZXNcbiAgICAgICAgICAgICAgICAgIDwvcD5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICA8L0NhcmRDb250ZW50PlxuICAgICAgICAgIDwvQ2FyZD5cblxuICAgICAgICAgIHsvKiBBY3Rpb25zICovfVxuICAgICAgICAgIDxDYXJkPlxuICAgICAgICAgICAgPENhcmRIZWFkZXI+XG4gICAgICAgICAgICAgIDxDYXJkVGl0bGUgY2xhc3NOYW1lPVwidGV4dC1sZ1wiPkFjdGlvbnM8L0NhcmRUaXRsZT5cbiAgICAgICAgICAgIDwvQ2FyZEhlYWRlcj5cbiAgICAgICAgICAgIDxDYXJkQ29udGVudCBjbGFzc05hbWU9XCJzcGFjZS15LTJcIj5cbiAgICAgICAgICAgICAgPEJ1dHRvbiBjbGFzc05hbWU9XCJ3LWZ1bGxcIiB2YXJpYW50PVwib3V0bGluZVwiIHNpemU9XCJzbVwiPlxuICAgICAgICAgICAgICAgIENvbXBhcmUgQWdlbnRzXG4gICAgICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgICAgICA8QnV0dG9uIGNsYXNzTmFtZT1cInctZnVsbFwiIHZhcmlhbnQ9XCJvdXRsaW5lXCIgc2l6ZT1cInNtXCI+XG4gICAgICAgICAgICAgICAgRmluZCBTaG9ydGVzdCBQYXRoXG4gICAgICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgICAgICA8QnV0dG9uIGNsYXNzTmFtZT1cInctZnVsbFwiIHZhcmlhbnQ9XCJvdXRsaW5lXCIgc2l6ZT1cInNtXCI+XG4gICAgICAgICAgICAgICAgQW5hbHl6ZSBDbHVzdGVyc1xuICAgICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgICAgPEJ1dHRvbiBjbGFzc05hbWU9XCJ3LWZ1bGxcIiB2YXJpYW50PVwib3V0bGluZVwiIHNpemU9XCJzbVwiPlxuICAgICAgICAgICAgICAgIEV4cG9ydCBTdWJncmFwaFxuICAgICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgIDwvQ2FyZENvbnRlbnQ+XG4gICAgICAgICAgPC9DYXJkPlxuICAgICAgICA8L2Rpdj5cbiAgICAgIDwvZGl2PlxuICAgIDwvZGl2PlxuICApO1xufVxuIl0sIm1hcHBpbmdzIjoiQUFBQTs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OzsrQkE4QkE7Ozs7OztXQUF3QkEsYUFBQTs7Ozs7Ozs7a0NBNUJDOzs7a0NBQ1M7OztrQ0FPM0I7OztrQ0FFZ0I7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

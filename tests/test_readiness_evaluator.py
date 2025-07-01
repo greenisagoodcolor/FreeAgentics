@@ -6,7 +6,6 @@ import json
 import tempfile
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional
 from unittest.mock import Mock
 
 import numpy as np

@@ -2,12 +2,12 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
-import { 
-  setWebSocketStatus, 
-  connectionEstablished, 
+import {
+  setWebSocketStatus,
+  connectionEstablished,
   connectionLost,
   updateLatency,
-  addConnectionError 
+  addConnectionError,
 } from "@/store/slices/connectionSlice";
 import type { Message, Conversation } from "@/lib/types";
 
@@ -80,7 +80,7 @@ export function useConversationWebSocket(
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const host = window.location.host;
     // Connect directly to backend WebSocket endpoint
-    const wsHost = host.replace(':3000', ':8000'); // Use backend port
+    const wsHost = host.replace(":3000", ":8000"); // Use backend port
     return `${protocol}//${wsHost}/ws/conversations`;
   }, []);
 
@@ -102,7 +102,7 @@ export function useConversationWebSocket(
           case "connection_established":
             console.log("WebSocket connection established:", data.client_id);
             connectionIdRef.current = data.client_id;
-            
+
             setState((prev) => ({
               ...prev,
               isConnected: true,
@@ -111,11 +111,15 @@ export function useConversationWebSocket(
 
             // Update Redux state
             dispatch(setWebSocketStatus("connected"));
-            dispatch(connectionEstablished({
-              connectionId: data.client_id,
-              socketUrl: getWebSocketUrl(),
-              apiUrl: getWebSocketUrl().replace(/:\d+/, ':8000').replace('ws', 'http'),
-            }));
+            dispatch(
+              connectionEstablished({
+                connectionId: data.client_id,
+                socketUrl: getWebSocketUrl(),
+                apiUrl: getWebSocketUrl()
+                  .replace(/:\d+/, ":8000")
+                  .replace("ws", "http"),
+              }),
+            );
 
             onConnect?.();
             break;
@@ -138,10 +142,12 @@ export function useConversationWebSocket(
           case "error":
             console.error("WebSocket error:", data.message);
             setState((prev) => ({ ...prev, error: data.message }));
-            dispatch(addConnectionError({
-              type: "websocket",
-              message: data.message,
-            }));
+            dispatch(
+              addConnectionError({
+                type: "websocket",
+                message: data.message,
+              }),
+            );
             break;
 
           // Conversation events
@@ -164,10 +170,12 @@ export function useConversationWebSocket(
       } catch (error) {
         console.error("Error parsing WebSocket message:", error);
         setState((prev) => ({ ...prev, error: "Failed to parse message" }));
-        dispatch(addConnectionError({
-          type: "websocket",
-          message: "Failed to parse WebSocket message",
-        }));
+        dispatch(
+          addConnectionError({
+            type: "websocket",
+            message: "Failed to parse WebSocket message",
+          }),
+        );
       }
     },
     [onEvent, onConnect, dispatch, getWebSocketUrl],
@@ -186,10 +194,12 @@ export function useConversationWebSocket(
 
       // Update Redux state
       dispatch(setWebSocketStatus("disconnected"));
-      dispatch(addConnectionError({
-        type: "websocket",
-        message: "WebSocket connection error",
-      }));
+      dispatch(
+        addConnectionError({
+          type: "websocket",
+          message: "WebSocket connection error",
+        }),
+      );
 
       onError?.(event);
     },
@@ -207,10 +217,12 @@ export function useConversationWebSocket(
 
     // Update Redux state
     dispatch(setWebSocketStatus("disconnected"));
-    dispatch(connectionLost({ 
-      type: "websocket", 
-      error: "Connection closed" 
-    }));
+    dispatch(
+      connectionLost({
+        type: "websocket",
+        error: "Connection closed",
+      }),
+    );
 
     // Clear ping interval
     if (pingIntervalRef.current) {
@@ -238,10 +250,12 @@ export function useConversationWebSocket(
         ...prev,
         error: "Max reconnection attempts exceeded",
       }));
-      dispatch(addConnectionError({
-        type: "websocket",
-        message: "Max reconnection attempts exceeded",
-      }));
+      dispatch(
+        addConnectionError({
+          type: "websocket",
+          message: "Max reconnection attempts exceeded",
+        }),
+      );
     }
   }, [onDisconnect, maxReconnectAttempts, reconnectInterval, dispatch]);
 
@@ -281,10 +295,12 @@ export function useConversationWebSocket(
         isConnecting: false,
       }));
       dispatch(setWebSocketStatus("disconnected"));
-      dispatch(addConnectionError({
-        type: "websocket",
-        message: "Failed to create WebSocket connection",
-      }));
+      dispatch(
+        addConnectionError({
+          type: "websocket",
+          message: "Failed to create WebSocket connection",
+        }),
+      );
     }
   }, [getWebSocketUrl, handleMessage, handleError, handleClose, dispatch]);
 

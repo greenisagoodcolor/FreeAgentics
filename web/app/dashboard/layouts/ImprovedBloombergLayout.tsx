@@ -13,7 +13,9 @@ interface ImprovedBloombergLayoutProps {
   view: DashboardView;
 }
 
-export default function ImprovedBloombergLayout({ view }: ImprovedBloombergLayoutProps) {
+export default function ImprovedBloombergLayout({
+  view,
+}: ImprovedBloombergLayoutProps) {
   const [focusedPanel, setFocusedPanel] = useState<string | null>(null);
 
   return (
@@ -25,8 +27,8 @@ export default function ImprovedBloombergLayout({ view }: ImprovedBloombergLayou
         gridArea={{ rowStart: 1, rowEnd: 2, colStart: 1, colEnd: 13 }}
         closable={false}
         detachable={false}
-        focused={focusedPanel === 'goal'}
-        onFocus={() => setFocusedPanel('goal')}
+        focused={focusedPanel === "goal"}
+        onFocus={() => setFocusedPanel("goal")}
         className="h-full"
       >
         <GoalPanel view={view} />
@@ -41,8 +43,8 @@ export default function ImprovedBloombergLayout({ view }: ImprovedBloombergLayou
           gridArea={{ rowStart: 1, rowEnd: 2, colStart: 1, colEnd: 7 }}
           closable={false}
           detachable={true}
-          focused={focusedPanel === 'conversation'}
-          onFocus={() => setFocusedPanel('conversation')}
+          focused={focusedPanel === "conversation"}
+          onFocus={() => setFocusedPanel("conversation")}
           className="col-span-6 h-full overflow-hidden"
         >
           <ConversationPanel view={view} />
@@ -55,8 +57,8 @@ export default function ImprovedBloombergLayout({ view }: ImprovedBloombergLayou
           gridArea={{ rowStart: 1, rowEnd: 2, colStart: 7, colEnd: 13 }}
           closable={false}
           detachable={true}
-          focused={focusedPanel === 'knowledge'}
-          onFocus={() => setFocusedPanel('knowledge')}
+          focused={focusedPanel === "knowledge"}
+          onFocus={() => setFocusedPanel("knowledge")}
           className="col-span-6 h-full overflow-hidden"
         >
           <KnowledgePanel view={view} />
@@ -70,8 +72,8 @@ export default function ImprovedBloombergLayout({ view }: ImprovedBloombergLayou
         gridArea={{ rowStart: 3, rowEnd: 4, colStart: 1, colEnd: 13 }}
         closable={false}
         detachable={true}
-        focused={focusedPanel === 'analytics'}
-        onFocus={() => setFocusedPanel('analytics')}
+        focused={focusedPanel === "analytics"}
+        onFocus={() => setFocusedPanel("analytics")}
         className="h-full"
       >
         <AnalyticsPanel view={view} />

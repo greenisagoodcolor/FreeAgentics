@@ -17,12 +17,15 @@ interface AccessibilityContextType {
   setHighContrast: (enabled: boolean) => void;
 }
 
-const AccessibilityContext = React.createContext<AccessibilityContextType | null>(null);
+const AccessibilityContext =
+  React.createContext<AccessibilityContextType | null>(null);
 
 export const useAccessibility = () => {
   const context = React.useContext(AccessibilityContext);
   if (!context) {
-    throw new Error('useAccessibility must be used within AccessibilityProvider');
+    throw new Error(
+      "useAccessibility must be used within AccessibilityProvider",
+    );
   }
   return context;
 };
@@ -31,7 +34,9 @@ export const useAccessibility = () => {
 // ACCESSIBILITY PROVIDER
 // =============================================================================
 
-export const AccessibilityProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AccessibilityProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [isHighContrast, setIsHighContrast] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [screenReaderMode, setScreenReaderMode] = useState(false);
@@ -41,34 +46,48 @@ export const AccessibilityProvider: React.FC<{ children: React.ReactNode }> = ({
   // Detect user preferences
   useEffect(() => {
     const mediaQueries = {
-      highContrast: window.matchMedia('(prefers-contrast: high)'),
-      reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)'),
+      highContrast: window.matchMedia("(prefers-contrast: high)"),
+      reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)"),
     };
 
     setIsHighContrast(mediaQueries.highContrast.matches);
     setReducedMotion(mediaQueries.reducedMotion.matches);
 
-    const handleHighContrastChange = (e: MediaQueryListEvent) => setIsHighContrast(e.matches);
-    const handleReducedMotionChange = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+    const handleHighContrastChange = (e: MediaQueryListEvent) =>
+      setIsHighContrast(e.matches);
+    const handleReducedMotionChange = (e: MediaQueryListEvent) =>
+      setReducedMotion(e.matches);
 
-    mediaQueries.highContrast.addEventListener('change', handleHighContrastChange);
-    mediaQueries.reducedMotion.addEventListener('change', handleReducedMotionChange);
+    mediaQueries.highContrast.addEventListener(
+      "change",
+      handleHighContrastChange,
+    );
+    mediaQueries.reducedMotion.addEventListener(
+      "change",
+      handleReducedMotionChange,
+    );
 
     return () => {
-      mediaQueries.highContrast.removeEventListener('change', handleHighContrastChange);
-      mediaQueries.reducedMotion.removeEventListener('change', handleReducedMotionChange);
+      mediaQueries.highContrast.removeEventListener(
+        "change",
+        handleHighContrastChange,
+      );
+      mediaQueries.reducedMotion.removeEventListener(
+        "change",
+        handleReducedMotionChange,
+      );
     };
   }, []);
 
   // Detect screen reader usage
   useEffect(() => {
     const detectScreenReader = () => {
-      const hasScreenReader = 
-        navigator.userAgent.includes('NVDA') ||
-        navigator.userAgent.includes('JAWS') ||
-        navigator.userAgent.includes('VoiceOver') ||
+      const hasScreenReader =
+        navigator.userAgent.includes("NVDA") ||
+        navigator.userAgent.includes("JAWS") ||
+        navigator.userAgent.includes("VoiceOver") ||
         window.speechSynthesis?.getVoices().length > 0;
-      
+
       setScreenReaderMode(hasScreenReader);
     };
 
@@ -79,7 +98,7 @@ export const AccessibilityProvider: React.FC<{ children: React.ReactNode }> = ({
   // Focus visible detection
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Tab') {
+      if (e.key === "Tab") {
         setFocusVisible(true);
       }
     };
@@ -88,19 +107,19 @@ export const AccessibilityProvider: React.FC<{ children: React.ReactNode }> = ({
       setFocusVisible(false);
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleMouseDown);
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleMouseDown);
     };
   }, []);
 
   const announce = (message: string) => {
-    setAnnouncements(prev => [...prev, message]);
+    setAnnouncements((prev) => [...prev, message]);
     setTimeout(() => {
-      setAnnouncements(prev => prev.slice(1));
+      setAnnouncements((prev) => prev.slice(1));
     }, 1000);
   };
 
@@ -116,8 +135,8 @@ export const AccessibilityProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <AccessibilityContext.Provider value={value}>
-      <div 
-        className={`accessibility-root ${isHighContrast ? 'high-contrast' : ''} ${reducedMotion ? 'reduced-motion' : ''} ${focusVisible ? 'focus-visible' : ''}`}
+      <div
+        className={`accessibility-root ${isHighContrast ? "high-contrast" : ""} ${reducedMotion ? "reduced-motion" : ""} ${focusVisible ? "focus-visible" : ""}`}
       >
         {children}
         <LiveRegion announcements={announcements} />
@@ -131,13 +150,10 @@ export const AccessibilityProvider: React.FC<{ children: React.ReactNode }> = ({
 // LIVE REGION FOR ANNOUNCEMENTS
 // =============================================================================
 
-const LiveRegion: React.FC<{ announcements: string[] }> = ({ announcements }) => (
-  <div
-    aria-live="polite"
-    aria-atomic="true"
-    className="sr-only"
-    role="status"
-  >
+const LiveRegion: React.FC<{ announcements: string[] }> = ({
+  announcements,
+}) => (
+  <div aria-live="polite" aria-atomic="true" className="sr-only" role="status">
     {announcements.map((announcement, index) => (
       <div key={index}>{announcement}</div>
     ))}
@@ -173,17 +189,17 @@ export const useKeyboardNavigation = (
     enableHomeEnd?: boolean;
     enableTypeAhead?: boolean;
     focusableSelector?: string;
-  } = {}
+  } = {},
 ) => {
   const {
     enableArrowKeys = true,
     enableHomeEnd = true,
     enableTypeAhead = false,
-    focusableSelector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    focusableSelector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
   } = options;
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const typeAheadRef = useRef('');
+  const typeAheadRef = useRef("");
   const typeAheadTimeoutRef = useRef<number>();
 
   useEffect(() => {
@@ -192,14 +208,14 @@ export const useKeyboardNavigation = (
 
     const handleKeyDown = (e: KeyboardEvent) => {
       const focusableElements = Array.from(
-        container.querySelectorAll(focusableSelector)
+        container.querySelectorAll(focusableSelector),
       ) as HTMLElement[];
 
       if (focusableElements.length === 0) return;
 
       switch (e.key) {
-        case 'ArrowDown':
-        case 'ArrowRight':
+        case "ArrowDown":
+        case "ArrowRight":
           if (enableArrowKeys) {
             e.preventDefault();
             const nextIndex = (currentIndex + 1) % focusableElements.length;
@@ -208,17 +224,20 @@ export const useKeyboardNavigation = (
           }
           break;
 
-        case 'ArrowUp':
-        case 'ArrowLeft':
+        case "ArrowUp":
+        case "ArrowLeft":
           if (enableArrowKeys) {
             e.preventDefault();
-            const prevIndex = currentIndex === 0 ? focusableElements.length - 1 : currentIndex - 1;
+            const prevIndex =
+              currentIndex === 0
+                ? focusableElements.length - 1
+                : currentIndex - 1;
             setCurrentIndex(prevIndex);
             focusableElements[prevIndex]?.focus();
           }
           break;
 
-        case 'Home':
+        case "Home":
           if (enableHomeEnd) {
             e.preventDefault();
             setCurrentIndex(0);
@@ -226,7 +245,7 @@ export const useKeyboardNavigation = (
           }
           break;
 
-        case 'End':
+        case "End":
           if (enableHomeEnd) {
             e.preventDefault();
             const lastIndex = focusableElements.length - 1;
@@ -238,9 +257,9 @@ export const useKeyboardNavigation = (
         default:
           if (enableTypeAhead && e.key.length === 1) {
             typeAheadRef.current += e.key.toLowerCase();
-            
-            const matchingElement = focusableElements.find(el => 
-              el.textContent?.toLowerCase().startsWith(typeAheadRef.current)
+
+            const matchingElement = focusableElements.find((el) =>
+              el.textContent?.toLowerCase().startsWith(typeAheadRef.current),
             );
 
             if (matchingElement) {
@@ -251,19 +270,26 @@ export const useKeyboardNavigation = (
 
             clearTimeout(typeAheadTimeoutRef.current);
             typeAheadTimeoutRef.current = window.setTimeout(() => {
-              typeAheadRef.current = '';
+              typeAheadRef.current = "";
             }, 1000);
           }
           break;
       }
     };
 
-    container.addEventListener('keydown', handleKeyDown);
+    container.addEventListener("keydown", handleKeyDown);
     return () => {
-      container.removeEventListener('keydown', handleKeyDown);
+      container.removeEventListener("keydown", handleKeyDown);
       clearTimeout(typeAheadTimeoutRef.current);
     };
-  }, [containerRef, currentIndex, enableArrowKeys, enableHomeEnd, enableTypeAhead, focusableSelector]);
+  }, [
+    containerRef,
+    currentIndex,
+    enableArrowKeys,
+    enableHomeEnd,
+    enableTypeAhead,
+    focusableSelector,
+  ]);
 
   return { currentIndex, setCurrentIndex };
 };
@@ -280,14 +306,14 @@ export const useFocusTrap = (isActive: boolean) => {
 
     const container = containerRef.current;
     const focusableElements = container.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     ) as NodeListOf<HTMLElement>;
 
     const firstElement = focusableElements[0];
     const lastElement = focusableElements[focusableElements.length - 1];
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Tab') {
+      if (e.key === "Tab") {
         if (e.shiftKey) {
           if (document.activeElement === firstElement) {
             e.preventDefault();
@@ -301,9 +327,11 @@ export const useFocusTrap = (isActive: boolean) => {
         }
       }
 
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         // Allow parent components to handle escape
-        const escapeEvent = new CustomEvent('escapeFocusTrap', { bubbles: true });
+        const escapeEvent = new CustomEvent("escapeFocusTrap", {
+          bubbles: true,
+        });
         container.dispatchEvent(escapeEvent);
       }
     };
@@ -311,8 +339,8 @@ export const useFocusTrap = (isActive: boolean) => {
     // Focus first element when trap becomes active
     firstElement?.focus();
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isActive]);
 
   return containerRef;
@@ -322,30 +350,33 @@ export const useFocusTrap = (isActive: boolean) => {
 // ACCESSIBLE BUTTON COMPONENT
 // =============================================================================
 
-interface AccessibleButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
+interface AccessibleButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: "primary" | "secondary" | "ghost";
+  size?: "sm" | "md" | "lg";
   loading?: boolean;
   loadingText?: string;
   children: React.ReactNode;
 }
 
 export const AccessibleButton: React.FC<AccessibleButtonProps> = ({
-  variant = 'primary',
-  size = 'md',
+  variant = "primary",
+  size = "md",
   loading = false,
-  loadingText = 'Loading...',
+  loadingText = "Loading...",
   disabled,
   children,
-  className = '',
+  className = "",
   ...props
 }) => {
   const { announce } = useAccessibility();
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (loading || disabled) return;
-    
-    announce(`Button activated: ${typeof children === 'string' ? children : 'Button'}`);
+
+    announce(
+      `Button activated: ${typeof children === "string" ? children : "Button"}`,
+    );
     props.onClick?.(e);
   };
 
@@ -389,7 +420,7 @@ export const AccessiblePanel: React.FC<AccessiblePanelProps> = ({
   children,
   expanded = true,
   onToggle,
-  level = 3
+  level = 3,
 }) => {
   const { announce } = useAccessibility();
   const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
@@ -397,7 +428,7 @@ export const AccessiblePanel: React.FC<AccessiblePanelProps> = ({
   const handleToggle = () => {
     const newExpanded = !expanded;
     onToggle?.(newExpanded);
-    announce(`Panel ${newExpanded ? 'expanded' : 'collapsed'}: ${title}`);
+    announce(`Panel ${newExpanded ? "expanded" : "collapsed"}: ${title}`);
   };
 
   return (
@@ -411,10 +442,10 @@ export const AccessiblePanel: React.FC<AccessiblePanelProps> = ({
             className="panel-toggle-button"
           >
             <span className="sr-only">
-              {expanded ? 'Collapse' : 'Expand'} panel:
+              {expanded ? "Collapse" : "Expand"} panel:
             </span>
             {title}
-            <span className={`panel-toggle-icon ${expanded ? 'expanded' : ''}`}>
+            <span className={`panel-toggle-icon ${expanded ? "expanded" : ""}`}>
               ▼
             </span>
           </button>
@@ -422,7 +453,7 @@ export const AccessiblePanel: React.FC<AccessiblePanelProps> = ({
           title
         )}
       </HeadingTag>
-      
+
       <AnimatePresence>
         {expanded && (
           <motion.div
@@ -431,7 +462,7 @@ export const AccessiblePanel: React.FC<AccessiblePanelProps> = ({
             role="region"
             aria-labelledby={`${id}-heading`}
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
+            animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
@@ -556,8 +587,8 @@ const accessibilityStyles = `
 `;
 
 // Inject styles
-if (typeof document !== 'undefined') {
-  const styleSheet = document.createElement('style');
+if (typeof document !== "undefined") {
+  const styleSheet = document.createElement("style");
   styleSheet.textContent = accessibilityStyles;
   document.head.appendChild(styleSheet);
 }
@@ -568,7 +599,7 @@ const AccessibilityEnhancements = {
   useKeyboardNavigation,
   useFocusTrap,
   AccessibleButton,
-  AccessiblePanel
+  AccessiblePanel,
 };
 
 export default AccessibilityEnhancements;

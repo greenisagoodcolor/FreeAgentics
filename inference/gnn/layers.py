@@ -7,7 +7,7 @@ Implements the GAT layer from Velickovic et al. (2018).
 """
 
 from enum import Enum
-from typing import Any, List, Optional, Union, Tuple
+from typing import Any, List, Optional, Tuple, Union
 
 import torch
 import torch.nn as nn
@@ -104,12 +104,14 @@ class GCNLayer(nn.Module):
         self.conv.reset_parameters()
         self._cached_edge_index = None  # Reset cache
 
-    def forward(self, x: torch.Tensor, edge_index: torch.Tensor, edge_weight: Optional[torch.Tensor] = None) -> torch.Tensor:
+    def forward(
+        self, x: torch.Tensor, edge_index: torch.Tensor, edge_weight: Optional[torch.Tensor] = None
+    ) -> torch.Tensor:
         """Forward pass through GCN layer"""
         # Store cached edge index if caching enabled
         if self.cached:
             self._cached_edge_index = edge_index
-        
+
         # Pass edge_weight if provided
         if edge_weight is not None:
             return self.conv(x, edge_index, edge_weight)  # type: ignore[no-any-return]
@@ -148,13 +150,13 @@ class GATLayer(nn.Module):
             dropout=dropout,
             bias=bias,
         )
-        
+
         # Add expected attributes for test compatibility
         # lin_src is typically the transformation matrix for source nodes
         self.lin_src = nn.Linear(in_channels, heads * out_channels, bias=False)
         # att_src is the attention mechanism for source nodes
         self.att_src = nn.Parameter(torch.empty(1, heads, out_channels))
-        
+
     @property
     def dropout(self) -> float:
         """Get dropout probability"""
@@ -316,10 +318,10 @@ def scatter_max(
         size[dim] = 0
     else:
         size[dim] = int(index.max()) + 1
-    
-    out = torch.full(size, float('-inf'), dtype=src.dtype, device=src.device)
+
+    out = torch.full(size, float("-inf"), dtype=src.dtype, device=src.device)
     arg_out = torch.zeros(size, dtype=torch.long, device=src.device)
-    
+
     # For each unique index, find the maximum value across all dimensions
     unique_indices = torch.unique(index)
     for idx in unique_indices:
@@ -330,7 +332,7 @@ def scatter_max(
         else:
             # For 2D tensors, take max along each column
             out[idx_int] = src[mask].max(dim=0)[0]
-    
+
     return out, arg_out
 
 
@@ -338,13 +340,13 @@ class SAGELayer(nn.Module):
     """GraphSAGE layer implementation using PyTorch Geometric"""
 
     def __init__(
-        self, 
-        in_channels: int, 
-        out_channels: int, 
-        aggregation: str = "mean", 
+        self,
+        in_channels: int,
+        out_channels: int,
+        aggregation: str = "mean",
         bias: bool = True,
         normalize: bool = False,
-        aggr: Optional[str] = None
+        aggr: Optional[str] = None,
     ) -> None:
         super().__init__()
 
@@ -360,7 +362,7 @@ class SAGELayer(nn.Module):
             bias=bias,
             normalize=normalize,
         )
-        
+
         # Add expected attributes for test compatibility
         # lin_r is typically the right (neighbor) transformation matrix in SAGE
         self.lin_r = nn.Linear(in_channels, out_channels, bias=False)
@@ -378,7 +380,7 @@ class SAGELayer(nn.Module):
     @property
     def lin_l(self) -> nn.Module:
         """Access left linear layer for compatibility (expected by tests)"""
-        return self.conv.lin_l if hasattr(self.conv, 'lin_l') else self.conv.lin
+        return self.conv.lin_l if hasattr(self.conv, "lin_l") else self.conv.lin
 
     def reset_parameters(self) -> None:
         """Reset layer parameters"""
@@ -414,7 +416,7 @@ class GINLayer(nn.Module):
         if train_eps:
             self.eps = nn.Parameter(torch.tensor(eps))
         else:
-            self.register_buffer('eps', torch.tensor(eps))
+            self.register_buffer("eps", torch.tensor(eps))
 
         # Create default neural network if none provided
         if neural_net is None:
@@ -427,8 +429,8 @@ class GINLayer(nn.Module):
             self.nn = neural_net
 
         # Remove nn from kwargs to avoid conflict since we pass it directly
-        kwargs.pop('nn', None)
-        
+        kwargs.pop("nn", None)
+
         self.conv = GINConv(nn=self.nn, eps=eps, train_eps=train_eps, **kwargs)
 
     @property

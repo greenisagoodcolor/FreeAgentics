@@ -1,13 +1,13 @@
 /**
  * Advanced Dashboard Tests
- * 
+ *
  * Comprehensive tests for dashboard panels, layouts, and interactive components
  * following ADR-007 requirements for complete dashboard coverage.
  */
 
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { jest } from '@jest/globals';
+import React from "react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { jest } from "@jest/globals";
 
 // Mock D3 for visualizations
 const mockD3 = {
@@ -16,16 +16,26 @@ const mockD3 = {
       data: jest.fn((...args: any[]) => ({
         enter: jest.fn((...args: any[]) => ({
           append: jest.fn((...args: any[]) => ({
-            attr: jest.fn((...args: any[]) => ({ attr: jest.fn((...args: any[]) => {}) })),
-            style: jest.fn((...args: any[]) => ({ style: jest.fn((...args: any[]) => {}) })),
-            text: jest.fn((...args: any[]) => ({ text: jest.fn((...args: any[]) => {}) })),
+            attr: jest.fn((...args: any[]) => ({
+              attr: jest.fn((...args: any[]) => {}),
+            })),
+            style: jest.fn((...args: any[]) => ({
+              style: jest.fn((...args: any[]) => {}),
+            })),
+            text: jest.fn((...args: any[]) => ({
+              text: jest.fn((...args: any[]) => {}),
+            })),
           })),
         })),
       })),
       remove: jest.fn((...args: any[]) => {}),
     })),
-    attr: jest.fn((...args: any[]) => ({ attr: jest.fn((...args: any[]) => {}) })),
-    style: jest.fn((...args: any[]) => ({ style: jest.fn((...args: any[]) => {}) })),
+    attr: jest.fn((...args: any[]) => ({
+      attr: jest.fn((...args: any[]) => {}),
+    })),
+    style: jest.fn((...args: any[]) => ({
+      style: jest.fn((...args: any[]) => {}),
+    })),
     on: jest.fn((...args: any[]) => ({ on: jest.fn((...args: any[]) => {}) })),
   })),
   scaleLinear: jest.fn(() => {
@@ -44,8 +54,12 @@ const mockD3 = {
   max: jest.fn((...args: any[]) => 100),
   min: jest.fn((...args: any[]) => 0),
   zoom: jest.fn(() => ({
-    scaleExtent: jest.fn((...args: any[]) => ({ on: jest.fn((...args: any[]) => {}) })),
-    on: jest.fn((...args: any[]) => ({ scaleExtent: jest.fn((...args: any[]) => {}) })),
+    scaleExtent: jest.fn((...args: any[]) => ({
+      on: jest.fn((...args: any[]) => {}),
+    })),
+    on: jest.fn((...args: any[]) => ({
+      scaleExtent: jest.fn((...args: any[]) => {}),
+    })),
   })),
   drag: jest.fn(() => ({
     on: jest.fn((...args: any[]) => ({ on: jest.fn((...args: any[]) => {}) })),
@@ -62,16 +76,25 @@ const mockD3 = {
     return simulation;
   }),
   forceLink: jest.fn((...args: any[]) => ({
-    id: jest.fn((...args: any[]) => ({ distance: jest.fn((...args: any[]) => {}) })),
-    distance: jest.fn((...args: any[]) => ({ id: jest.fn((...args: any[]) => {}) })),
+    id: jest.fn((...args: any[]) => ({
+      distance: jest.fn((...args: any[]) => {}),
+    })),
+    distance: jest.fn((...args: any[]) => ({
+      id: jest.fn((...args: any[]) => {}),
+    })),
   })),
   forceManyBody: jest.fn((...args: any[]) => ({
-    strength: jest.fn((...args: any[]) => ({ strength: jest.fn((...args: any[]) => {}) })),
+    strength: jest.fn((...args: any[]) => ({
+      strength: jest.fn((...args: any[]) => {}),
+    })),
   })),
-  forceCenter: jest.fn((...args: any[]) => ({ x: jest.fn((...args: any[]) => {}), y: jest.fn((...args: any[]) => {}) })),
+  forceCenter: jest.fn((...args: any[]) => ({
+    x: jest.fn((...args: any[]) => {}),
+    y: jest.fn((...args: any[]) => {}),
+  })),
 };
 
-jest.unstable_mockModule('d3', () => mockD3);
+jest.unstable_mockModule("d3", () => mockD3);
 
 // Mock comprehensive dashboard implementations
 interface DashboardMetrics {
@@ -87,79 +110,83 @@ interface DashboardMetrics {
 
 interface DashboardAlert {
   id: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   message: string;
   timestamp: Date;
   acknowledged: boolean;
-  category: 'performance' | 'security' | 'system' | 'user';
+  category: "performance" | "security" | "system" | "user";
 }
 
 // Enhanced Metrics Panel
 const MetricsPanel: React.FC<{ metrics: DashboardMetrics }> = ({ metrics }) => {
   const getMetricColor = (value: number, threshold: number) => {
-    return value > threshold ? '#ef4444' : value > threshold * 0.7 ? '#f59e0b' : '#10b981';
+    return value > threshold
+      ? "#ef4444"
+      : value > threshold * 0.7
+        ? "#f59e0b"
+        : "#10b981";
   };
 
   return (
     <div data-testid="metrics-panel" className="metrics-panel">
       <h3>System Metrics</h3>
-      
+
       <div className="metric-grid">
         <div data-testid="active-agents" className="metric-card">
           <span className="metric-label">Active Agents</span>
           <span className="metric-value">{metrics.activeAgents}</span>
         </div>
-        
+
         <div data-testid="message-rate" className="metric-card">
           <span className="metric-label">Message Rate (msg/s)</span>
-          <span 
+          <span
             className="metric-value"
             style={{ color: getMetricColor(metrics.messageRate, 100) }}
           >
             {metrics.messageRate.toFixed(1)}
           </span>
         </div>
-        
+
         <div data-testid="network-utilization" className="metric-card">
           <span className="metric-label">Network Utilization (%)</span>
-          <span 
+          <span
             className="metric-value"
             style={{ color: getMetricColor(metrics.networkUtilization, 80) }}
           >
             {metrics.networkUtilization.toFixed(1)}%
           </span>
         </div>
-        
+
         <div data-testid="error-rate" className="metric-card">
           <span className="metric-label">Error Rate (%)</span>
-          <span 
+          <span
             className="metric-value"
             style={{ color: getMetricColor(metrics.errorRate, 5) }}
           >
             {metrics.errorRate.toFixed(2)}%
           </span>
         </div>
-        
+
         <div data-testid="response-time" className="metric-card">
           <span className="metric-label">Avg Response Time (ms)</span>
-          <span 
+          <span
             className="metric-value"
             style={{ color: getMetricColor(metrics.averageResponseTime, 500) }}
           >
             {metrics.averageResponseTime.toFixed(0)}
           </span>
         </div>
-        
+
         <div data-testid="knowledge-nodes" className="metric-card">
           <span className="metric-label">Knowledge Nodes</span>
           <span className="metric-value">{metrics.knowledgeGraphNodes}</span>
         </div>
-        
+
         <div data-testid="coalitions-formed" className="metric-card">
           <span className="metric-label">Coalitions Formed</span>
           <span className="metric-value">{metrics.coalitionsFormed}</span>
         </div>
-        
+
         <div data-testid="belief-states" className="metric-card">
           <span className="metric-label">Belief States</span>
           <span className="metric-value">{metrics.beliefStates}</span>
@@ -176,21 +203,27 @@ const AlertPanel: React.FC<{
   onDismiss: (id: string) => void;
   onClearAll: () => void;
 }> = ({ alerts, onAcknowledge, onDismiss, onClearAll }) => {
-  const [filter, setFilter] = React.useState<string>('all');
-  const [sortBy, setSortBy] = React.useState<'timestamp' | 'severity'>('timestamp');
+  const [filter, setFilter] = React.useState<string>("all");
+  const [sortBy, setSortBy] = React.useState<"timestamp" | "severity">(
+    "timestamp",
+  );
 
   const filteredAlerts = React.useMemo(() => {
     let filtered = alerts;
-    
-    if (filter !== 'all') {
-      filtered = alerts.filter(alert => 
-        filter === 'unacknowledged' ? !alert.acknowledged : alert.category === filter
+
+    if (filter !== "all") {
+      filtered = alerts.filter((alert) =>
+        filter === "unacknowledged"
+          ? !alert.acknowledged
+          : alert.category === filter,
       );
     }
-    
+
     return filtered.sort((a, b) => {
-      if (sortBy === 'timestamp') {
-        return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+      if (sortBy === "timestamp") {
+        return (
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
       } else {
         const severityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
         return severityOrder[b.severity] - severityOrder[a.severity];
@@ -200,12 +233,12 @@ const AlertPanel: React.FC<{
 
   const getSeverityColor = (severity: string) => {
     const colors = {
-      critical: '#dc2626',
-      high: '#ea580c',
-      medium: '#d97706',
-      low: '#65a30d',
+      critical: "#dc2626",
+      high: "#ea580c",
+      medium: "#d97706",
+      low: "#65a30d",
     };
-    return colors[severity as keyof typeof colors] || '#6b7280';
+    return colors[severity as keyof typeof colors] || "#6b7280";
   };
 
   return (
@@ -213,10 +246,10 @@ const AlertPanel: React.FC<{
       <div className="alert-header">
         <h3>System Alerts</h3>
         <div className="alert-controls">
-          <select 
+          <select
             data-testid="alert-filter"
-            value={filter} 
-            onChange={e => setFilter(e.target.value)}
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
           >
             <option value="all">All Alerts</option>
             <option value="unacknowledged">Unacknowledged</option>
@@ -225,17 +258,19 @@ const AlertPanel: React.FC<{
             <option value="system">System</option>
             <option value="user">User</option>
           </select>
-          
-          <select 
+
+          <select
             data-testid="alert-sort"
-            value={sortBy} 
-            onChange={e => setSortBy(e.target.value as 'timestamp' | 'severity')}
+            value={sortBy}
+            onChange={(e) =>
+              setSortBy(e.target.value as "timestamp" | "severity")
+            }
           >
             <option value="timestamp">Sort by Time</option>
             <option value="severity">Sort by Severity</option>
           </select>
-          
-          <button 
+
+          <button
             data-testid="clear-all-alerts"
             onClick={onClearAll}
             disabled={alerts.length === 0}
@@ -244,38 +279,50 @@ const AlertPanel: React.FC<{
           </button>
         </div>
       </div>
-      
+
       <div className="alert-list" data-testid="alert-list">
         {filteredAlerts.length === 0 ? (
           <div data-testid="no-alerts" className="no-alerts">
             No alerts to display
           </div>
         ) : (
-          filteredAlerts.map(alert => (
-            <div 
+          filteredAlerts.map((alert) => (
+            <div
               key={alert.id}
               data-testid={`alert-${alert.id}`}
-              className={`alert-item ${alert.acknowledged ? 'acknowledged' : ''}`}
+              className={`alert-item ${alert.acknowledged ? "acknowledged" : ""}`}
               style={{ borderLeftColor: getSeverityColor(alert.severity) }}
             >
               <div className="alert-content">
-                <div className="alert-severity" data-testid={`alert-severity-${alert.id}`}>
+                <div
+                  className="alert-severity"
+                  data-testid={`alert-severity-${alert.id}`}
+                >
                   {alert.severity.toUpperCase()}
                 </div>
-                <div className="alert-category" data-testid={`alert-category-${alert.id}`}>
+                <div
+                  className="alert-category"
+                  data-testid={`alert-category-${alert.id}`}
+                >
                   {alert.category}
                 </div>
-                <div className="alert-message" data-testid={`alert-message-${alert.id}`}>
+                <div
+                  className="alert-message"
+                  data-testid={`alert-message-${alert.id}`}
+                >
                   {alert.message}
                 </div>
-                <div className="alert-timestamp" data-testid={`alert-timestamp-${alert.id}`}>
+                <div
+                  className="alert-timestamp"
+                  data-testid={`alert-timestamp-${alert.id}`}
+                >
                   {alert.timestamp.toLocaleString()}
                 </div>
               </div>
-              
+
               <div className="alert-actions">
                 {!alert.acknowledged && (
-                  <button 
+                  <button
                     data-testid={`acknowledge-${alert.id}`}
                     onClick={() => onAcknowledge(alert.id)}
                     className="acknowledge-btn"
@@ -283,7 +330,7 @@ const AlertPanel: React.FC<{
                     Acknowledge
                   </button>
                 )}
-                <button 
+                <button
                   data-testid={`dismiss-${alert.id}`}
                   onClick={() => onDismiss(alert.id)}
                   className="dismiss-btn"
@@ -302,8 +349,8 @@ const AlertPanel: React.FC<{
 // Performance Chart Component
 const PerformanceChart: React.FC<{
   data: Array<{ timestamp: Date; value: number; metric: string }>;
-  timeRange: '1h' | '6h' | '24h' | '7d';
-  onTimeRangeChange: (range: '1h' | '6h' | '24h' | '7d') => void;
+  timeRange: "1h" | "6h" | "24h" | "7d";
+  onTimeRangeChange: (range: "1h" | "6h" | "24h" | "7d") => void;
 }> = ({ data, timeRange, onTimeRangeChange }) => {
   const chartRef = React.useRef<SVGSVGElement>(null);
   const [hoveredPoint, setHoveredPoint] = React.useState<any>(null);
@@ -313,23 +360,30 @@ const PerformanceChart: React.FC<{
 
     // Mock D3 chart rendering
     const svg = mockD3.select(chartRef.current);
-    svg.selectAll('*').remove();
-    
+    svg.selectAll("*").remove();
+
     // Simulate chart rendering with D3
     const margin = { top: 20, right: 30, bottom: 40, left: 50 };
     const width = 800 - margin.left - margin.right;
     const height = 400 - margin.top - margin.bottom;
 
-    const xScale = mockD3.scaleLinear()
+    const xScale = mockD3
+      .scaleLinear()
       .domain(mockD3.extent(data, (d: any) => d.timestamp))
       .range([0, width]);
 
-    const yScale = mockD3.scaleLinear()
+    const yScale = mockD3
+      .scaleLinear()
       .domain(mockD3.extent(data, (d: any) => d.value))
       .range([height, 0]);
 
     // Mock line path creation
-    const line = data.map((d, i) => `${i === 0 ? 'M' : 'L'} ${xScale(d.timestamp)} ${yScale(d.value)}`).join(' ');
+    const line = data
+      .map(
+        (d, i) =>
+          `${i === 0 ? "M" : "L"} ${xScale(d.timestamp)} ${yScale(d.value)}`,
+      )
+      .join(" ");
 
     return () => {
       // Cleanup
@@ -341,11 +395,11 @@ const PerformanceChart: React.FC<{
       <div className="chart-header">
         <h3>Performance Metrics</h3>
         <div className="time-range-selector">
-          {(['1h', '6h', '24h', '7d'] as const).map(range => (
+          {(["1h", "6h", "24h", "7d"] as const).map((range) => (
             <button
               key={range}
               data-testid={`time-range-${range}`}
-              className={timeRange === range ? 'active' : ''}
+              className={timeRange === range ? "active" : ""}
               onClick={() => onTimeRangeChange(range)}
             >
               {range}
@@ -353,7 +407,7 @@ const PerformanceChart: React.FC<{
           ))}
         </div>
       </div>
-      
+
       <div className="chart-container">
         <svg
           ref={chartRef}
@@ -369,13 +423,13 @@ const PerformanceChart: React.FC<{
             </text>
           </g>
         </svg>
-        
+
         {hoveredPoint && (
-          <div 
+          <div
             data-testid="chart-tooltip"
             className="chart-tooltip"
             style={{
-              position: 'absolute',
+              position: "absolute",
               left: hoveredPoint.x,
               top: hoveredPoint.y,
             }}
@@ -391,8 +445,18 @@ const PerformanceChart: React.FC<{
 
 // Network Topology Visualization
 const NetworkTopology: React.FC<{
-  nodes: Array<{ id: string; type: string; status: string; connections: number }>;
-  edges: Array<{ source: string; target: string; strength: number; type: string }>;
+  nodes: Array<{
+    id: string;
+    type: string;
+    status: string;
+    connections: number;
+  }>;
+  edges: Array<{
+    source: string;
+    target: string;
+    strength: number;
+    type: string;
+  }>;
   onNodeClick: (nodeId: string) => void;
   onEdgeClick: (edgeId: string) => void;
 }> = ({ nodes, edges, onNodeClick, onEdgeClick }) => {
@@ -404,12 +468,16 @@ const NetworkTopology: React.FC<{
     if (!svgRef.current) return;
 
     // Mock D3 force simulation
-    const simulation = mockD3.forceSimulation(nodes)
-      .force('link', mockD3.forceLink(edges).id((d: any) => d.id))
-      .force('charge', mockD3.forceManyBody().strength(-300))
-      .force('center', mockD3.forceCenter(400, 300));
+    const simulation = mockD3
+      .forceSimulation(nodes)
+      .force(
+        "link",
+        mockD3.forceLink(edges).id((d: any) => d.id),
+      )
+      .force("charge", mockD3.forceManyBody().strength(-300))
+      .force("center", mockD3.forceCenter(400, 300));
 
-    simulation.on('tick', () => {
+    simulation.on("tick", () => {
       // Mock tick updates
     });
 
@@ -425,14 +493,15 @@ const NetworkTopology: React.FC<{
 
   const getNodeColor = (type: string, status: string) => {
     const typeColors = {
-      agent: '#3b82f6',
-      coalition: '#8b5cf6',
-      knowledge: '#10b981',
-      message: '#f59e0b',
+      agent: "#3b82f6",
+      coalition: "#8b5cf6",
+      knowledge: "#10b981",
+      message: "#f59e0b",
     };
-    
-    const statusModifier = status === 'active' ? 1 : status === 'idle' ? 0.7 : 0.4;
-    return typeColors[type as keyof typeof typeColors] || '#6b7280';
+
+    const statusModifier =
+      status === "active" ? 1 : status === "idle" ? 0.7 : 0.4;
+    return typeColors[type as keyof typeof typeColors] || "#6b7280";
   };
 
   return (
@@ -440,33 +509,32 @@ const NetworkTopology: React.FC<{
       <div className="topology-header">
         <h3>Network Topology</h3>
         <div className="topology-controls">
-          <button 
+          <button
             data-testid="zoom-in"
-            onClick={() => setZoomLevel(prev => Math.min(prev * 1.2, 3))}
+            onClick={() => setZoomLevel((prev) => Math.min(prev * 1.2, 3))}
           >
             Zoom In
           </button>
-          <button 
+          <button
             data-testid="zoom-out"
-            onClick={() => setZoomLevel(prev => Math.max(prev / 1.2, 0.3))}
+            onClick={() => setZoomLevel((prev) => Math.max(prev / 1.2, 0.3))}
           >
             Zoom Out
           </button>
-          <button 
-            data-testid="reset-view"
-            onClick={() => setZoomLevel(1)}
-          >
+          <button data-testid="reset-view" onClick={() => setZoomLevel(1)}>
             Reset View
           </button>
         </div>
       </div>
-      
+
       <div className="topology-stats">
         <span data-testid="node-count">Nodes: {nodes.length}</span>
         <span data-testid="edge-count">Connections: {edges.length}</span>
-        <span data-testid="zoom-level">Zoom: {(zoomLevel * 100).toFixed(0)}%</span>
+        <span data-testid="zoom-level">
+          Zoom: {(zoomLevel * 100).toFixed(0)}%
+        </span>
       </div>
-      
+
       <div className="topology-container">
         <svg
           ref={svgRef}
@@ -488,7 +556,7 @@ const NetworkTopology: React.FC<{
               <polygon points="0 0, 10 3.5, 0 7" fill="#666" />
             </marker>
           </defs>
-          
+
           {/* Render edges */}
           <g data-testid="topology-edges">
             {edges.map((edge, index) => (
@@ -503,11 +571,11 @@ const NetworkTopology: React.FC<{
                 strokeWidth={edge.strength * 2}
                 markerEnd="url(#arrowhead)"
                 onClick={() => onEdgeClick(`${edge.source}-${edge.target}`)}
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: "pointer" }}
               />
             ))}
           </g>
-          
+
           {/* Render nodes */}
           <g data-testid="topology-nodes">
             {nodes.map((node, index) => (
@@ -518,10 +586,10 @@ const NetworkTopology: React.FC<{
                   cy={100 + Math.floor(index / 8) * 80}
                   r={10 + node.connections * 2}
                   fill={getNodeColor(node.type, node.status)}
-                  stroke={selectedNode === node.id ? '#000' : 'none'}
+                  stroke={selectedNode === node.id ? "#000" : "none"}
                   strokeWidth={selectedNode === node.id ? 3 : 0}
                   onClick={() => handleNodeClick(node.id)}
-                  style={{ cursor: 'pointer' }}
+                  style={{ cursor: "pointer" }}
                 />
                 <text
                   data-testid={`node-label-${node.id}`}
@@ -538,15 +606,18 @@ const NetworkTopology: React.FC<{
           </g>
         </svg>
       </div>
-      
+
       {selectedNode && (
         <div data-testid="node-details" className="node-details">
           <h4>Node Details: {selectedNode}</h4>
-          {nodes.find(n => n.id === selectedNode) && (
+          {nodes.find((n) => n.id === selectedNode) && (
             <div>
-              <p>Type: {nodes.find(n => n.id === selectedNode)?.type}</p>
-              <p>Status: {nodes.find(n => n.id === selectedNode)?.status}</p>
-              <p>Connections: {nodes.find(n => n.id === selectedNode)?.connections}</p>
+              <p>Type: {nodes.find((n) => n.id === selectedNode)?.type}</p>
+              <p>Status: {nodes.find((n) => n.id === selectedNode)?.status}</p>
+              <p>
+                Connections:{" "}
+                {nodes.find((n) => n.id === selectedNode)?.connections}
+              </p>
             </div>
           )}
         </div>
@@ -570,53 +641,78 @@ const AdvancedDashboard: React.FC = () => {
 
   const [alerts, setAlerts] = React.useState<DashboardAlert[]>([
     {
-      id: '1',
-      severity: 'high',
-      message: 'High network utilization detected',
+      id: "1",
+      severity: "high",
+      message: "High network utilization detected",
       timestamp: new Date(Date.now() - 300000),
       acknowledged: false,
-      category: 'performance',
+      category: "performance",
     },
     {
-      id: '2',
-      severity: 'medium',
-      message: 'Agent coalition formation taking longer than expected',
+      id: "2",
+      severity: "medium",
+      message: "Agent coalition formation taking longer than expected",
       timestamp: new Date(Date.now() - 600000),
       acknowledged: true,
-      category: 'system',
+      category: "system",
     },
   ]);
 
   const [performanceData, setPerformanceData] = React.useState([
-    { timestamp: new Date(Date.now() - 3600000), value: 45, metric: 'response_time' },
-    { timestamp: new Date(Date.now() - 1800000), value: 52, metric: 'response_time' },
-    { timestamp: new Date(Date.now() - 900000), value: 38, metric: 'response_time' },
-    { timestamp: new Date(), value: 41, metric: 'response_time' },
+    {
+      timestamp: new Date(Date.now() - 3600000),
+      value: 45,
+      metric: "response_time",
+    },
+    {
+      timestamp: new Date(Date.now() - 1800000),
+      value: 52,
+      metric: "response_time",
+    },
+    {
+      timestamp: new Date(Date.now() - 900000),
+      value: 38,
+      metric: "response_time",
+    },
+    { timestamp: new Date(), value: 41, metric: "response_time" },
   ]);
 
-  const [timeRange, setTimeRange] = React.useState<'1h' | '6h' | '24h' | '7d'>('1h');
+  const [timeRange, setTimeRange] = React.useState<"1h" | "6h" | "24h" | "7d">(
+    "1h",
+  );
 
   const [networkNodes] = React.useState([
-    { id: 'agent-1', type: 'agent', status: 'active', connections: 5 },
-    { id: 'agent-2', type: 'agent', status: 'idle', connections: 3 },
-    { id: 'coalition-1', type: 'coalition', status: 'active', connections: 8 },
-    { id: 'knowledge-1', type: 'knowledge', status: 'active', connections: 12 },
+    { id: "agent-1", type: "agent", status: "active", connections: 5 },
+    { id: "agent-2", type: "agent", status: "idle", connections: 3 },
+    { id: "coalition-1", type: "coalition", status: "active", connections: 8 },
+    { id: "knowledge-1", type: "knowledge", status: "active", connections: 12 },
   ]);
 
   const [networkEdges] = React.useState([
-    { source: 'agent-1', target: 'coalition-1', strength: 0.8, type: 'member' },
-    { source: 'agent-2', target: 'coalition-1', strength: 0.6, type: 'member' },
-    { source: 'coalition-1', target: 'knowledge-1', strength: 0.9, type: 'access' },
+    { source: "agent-1", target: "coalition-1", strength: 0.8, type: "member" },
+    { source: "agent-2", target: "coalition-1", strength: 0.6, type: "member" },
+    {
+      source: "coalition-1",
+      target: "knowledge-1",
+      strength: 0.9,
+      type: "access",
+    },
   ]);
 
   // Simulate real-time updates
   React.useEffect(() => {
     const interval = setInterval(() => {
-      setMetrics(prev => ({
+      setMetrics((prev) => ({
         ...prev,
         messageRate: prev.messageRate + (Math.random() - 0.5) * 10,
-        networkUtilization: Math.max(0, Math.min(100, prev.networkUtilization + (Math.random() - 0.5) * 5)),
-        averageResponseTime: Math.max(50, prev.averageResponseTime + (Math.random() - 0.5) * 50),
+        networkUtilization: Math.max(
+          0,
+          Math.min(100, prev.networkUtilization + (Math.random() - 0.5) * 5),
+        ),
+        averageResponseTime: Math.max(
+          50,
+          prev.averageResponseTime + (Math.random() - 0.5) * 50,
+        ),
       }));
     }, 5000);
 
@@ -624,13 +720,15 @@ const AdvancedDashboard: React.FC = () => {
   }, []);
 
   const handleAcknowledgeAlert = (id: string) => {
-    setAlerts(prev => prev.map(alert => 
-      alert.id === id ? { ...alert, acknowledged: true } : alert
-    ));
+    setAlerts((prev) =>
+      prev.map((alert) =>
+        alert.id === id ? { ...alert, acknowledged: true } : alert,
+      ),
+    );
   };
 
   const handleDismissAlert = (id: string) => {
-    setAlerts(prev => prev.filter(alert => alert.id !== id));
+    setAlerts((prev) => prev.filter((alert) => alert.id !== id));
   };
 
   const handleClearAllAlerts = () => {
@@ -638,11 +736,11 @@ const AdvancedDashboard: React.FC = () => {
   };
 
   const handleNodeClick = (nodeId: string) => {
-    console.log('Node clicked:', nodeId);
+    console.log("Node clicked:", nodeId);
   };
 
   const handleEdgeClick = (edgeId: string) => {
-    console.log('Edge clicked:', edgeId);
+    console.log("Edge clicked:", edgeId);
   };
 
   return (
@@ -691,12 +789,12 @@ const AdvancedDashboard: React.FC = () => {
   );
 };
 
-describe('Advanced Dashboard Tests', () => {
+describe("Advanced Dashboard Tests", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('MetricsPanel', () => {
+  describe("MetricsPanel", () => {
     const mockMetrics: DashboardMetrics = {
       activeAgents: 15,
       messageRate: 78.5,
@@ -708,45 +806,49 @@ describe('Advanced Dashboard Tests', () => {
       beliefStates: 289,
     };
 
-    it('renders all metrics correctly', () => {
+    it("renders all metrics correctly", () => {
       render(<MetricsPanel metrics={mockMetrics} />);
 
-      expect(screen.getByTestId('active-agents')).toHaveTextContent('15');
-      expect(screen.getByTestId('message-rate')).toHaveTextContent('78.5');
-      expect(screen.getByTestId('network-utilization')).toHaveTextContent('85.2%');
-      expect(screen.getByTestId('error-rate')).toHaveTextContent('2.10%');
-      expect(screen.getByTestId('response-time')).toHaveTextContent('456');
-      expect(screen.getByTestId('knowledge-nodes')).toHaveTextContent('2341');
-      expect(screen.getByTestId('coalitions-formed')).toHaveTextContent('12');
-      expect(screen.getByTestId('belief-states')).toHaveTextContent('289');
+      expect(screen.getByTestId("active-agents")).toHaveTextContent("15");
+      expect(screen.getByTestId("message-rate")).toHaveTextContent("78.5");
+      expect(screen.getByTestId("network-utilization")).toHaveTextContent(
+        "85.2%",
+      );
+      expect(screen.getByTestId("error-rate")).toHaveTextContent("2.10%");
+      expect(screen.getByTestId("response-time")).toHaveTextContent("456");
+      expect(screen.getByTestId("knowledge-nodes")).toHaveTextContent("2341");
+      expect(screen.getByTestId("coalitions-formed")).toHaveTextContent("12");
+      expect(screen.getByTestId("belief-states")).toHaveTextContent("289");
     });
 
-    it('applies correct color coding for thresholds', () => {
+    it("applies correct color coding for thresholds", () => {
       render(<MetricsPanel metrics={mockMetrics} />);
 
       // High network utilization should have warning/error color
-      const networkMetric = screen.getByTestId('network-utilization').querySelector('.metric-value');
+      const networkMetric = screen
+        .getByTestId("network-utilization")
+        .querySelector(".metric-value");
       expect(networkMetric).toHaveStyle({ color: expect.any(String) });
     });
   });
 
-  describe('AlertPanel', () => {
+  describe("AlertPanel", () => {
     const mockAlerts: DashboardAlert[] = [
       {
-        id: '1',
-        severity: 'critical',
-        message: 'System overload detected',
-        timestamp: new Date('2024-01-01T10:00:00Z'),
+        id: "1",
+        severity: "critical",
+        message: "System overload detected",
+        timestamp: new Date("2024-01-01T10:00:00Z"),
         acknowledged: false,
-        category: 'performance',
+        category: "performance",
       },
       {
-        id: '2',
-        severity: 'medium',
-        message: 'Agent timeout warning',
-        timestamp: new Date('2024-01-01T09:30:00Z'),
+        id: "2",
+        severity: "medium",
+        message: "Agent timeout warning",
+        timestamp: new Date("2024-01-01T09:30:00Z"),
         acknowledged: true,
-        category: 'system',
+        category: "system",
       },
     ];
 
@@ -756,152 +858,133 @@ describe('Advanced Dashboard Tests', () => {
       onClearAll: jest.fn(),
     };
 
-    it('renders alerts correctly', () => {
-      render(
-        <AlertPanel
-          alerts={mockAlerts}
-          {...mockHandlers}
-        />
-      );
+    it("renders alerts correctly", () => {
+      render(<AlertPanel alerts={mockAlerts} {...mockHandlers} />);
 
-      expect(screen.getByTestId('alert-1')).toBeInTheDocument();
-      expect(screen.getByTestId('alert-2')).toBeInTheDocument();
-      expect(screen.getByTestId('alert-severity-1')).toHaveTextContent('CRITICAL');
-      expect(screen.getByTestId('alert-message-1')).toHaveTextContent('System overload detected');
+      expect(screen.getByTestId("alert-1")).toBeInTheDocument();
+      expect(screen.getByTestId("alert-2")).toBeInTheDocument();
+      expect(screen.getByTestId("alert-severity-1")).toHaveTextContent(
+        "CRITICAL",
+      );
+      expect(screen.getByTestId("alert-message-1")).toHaveTextContent(
+        "System overload detected",
+      );
     });
 
-    it('filters alerts correctly', () => {
-      render(
-        <AlertPanel
-          alerts={mockAlerts}
-          {...mockHandlers}
-        />
-      );
+    it("filters alerts correctly", () => {
+      render(<AlertPanel alerts={mockAlerts} {...mockHandlers} />);
 
-      const filterSelect = screen.getByTestId('alert-filter');
-      fireEvent.change(filterSelect, { target: { value: 'unacknowledged' } });
+      const filterSelect = screen.getByTestId("alert-filter");
+      fireEvent.change(filterSelect, { target: { value: "unacknowledged" } });
 
-      expect(screen.getByTestId('alert-1')).toBeInTheDocument();
-      expect(screen.queryByTestId('alert-2')).not.toBeInTheDocument();
+      expect(screen.getByTestId("alert-1")).toBeInTheDocument();
+      expect(screen.queryByTestId("alert-2")).not.toBeInTheDocument();
     });
 
-    it('sorts alerts correctly', () => {
-      render(
-        <AlertPanel
-          alerts={mockAlerts}
-          {...mockHandlers}
-        />
-      );
+    it("sorts alerts correctly", () => {
+      render(<AlertPanel alerts={mockAlerts} {...mockHandlers} />);
 
-      const sortSelect = screen.getByTestId('alert-sort');
-      fireEvent.change(sortSelect, { target: { value: 'severity' } });
+      const sortSelect = screen.getByTestId("alert-sort");
+      fireEvent.change(sortSelect, { target: { value: "severity" } });
 
       // Critical alert should appear first
-      const alertList = screen.getByTestId('alert-list');
+      const alertList = screen.getByTestId("alert-list");
       const alerts = alertList.querySelectorAll('[data-testid^="alert-"]');
-      expect(alerts[0]).toHaveAttribute('data-testid', 'alert-1');
+      expect(alerts[0]).toHaveAttribute("data-testid", "alert-1");
     });
 
-    it('acknowledges alerts', () => {
-      render(
-        <AlertPanel
-          alerts={mockAlerts}
-          {...mockHandlers}
-        />
-      );
+    it("acknowledges alerts", () => {
+      render(<AlertPanel alerts={mockAlerts} {...mockHandlers} />);
 
-      const acknowledgeButton = screen.getByTestId('acknowledge-1');
+      const acknowledgeButton = screen.getByTestId("acknowledge-1");
       fireEvent.click(acknowledgeButton);
 
-      expect(mockHandlers.onAcknowledge).toHaveBeenCalledWith('1');
+      expect(mockHandlers.onAcknowledge).toHaveBeenCalledWith("1");
     });
 
-    it('dismisses alerts', () => {
-      render(
-        <AlertPanel
-          alerts={mockAlerts}
-          {...mockHandlers}
-        />
-      );
+    it("dismisses alerts", () => {
+      render(<AlertPanel alerts={mockAlerts} {...mockHandlers} />);
 
-      const dismissButton = screen.getByTestId('dismiss-1');
+      const dismissButton = screen.getByTestId("dismiss-1");
       fireEvent.click(dismissButton);
 
-      expect(mockHandlers.onDismiss).toHaveBeenCalledWith('1');
+      expect(mockHandlers.onDismiss).toHaveBeenCalledWith("1");
     });
 
-    it('clears all alerts', () => {
-      render(
-        <AlertPanel
-          alerts={mockAlerts}
-          {...mockHandlers}
-        />
-      );
+    it("clears all alerts", () => {
+      render(<AlertPanel alerts={mockAlerts} {...mockHandlers} />);
 
-      const clearAllButton = screen.getByTestId('clear-all-alerts');
+      const clearAllButton = screen.getByTestId("clear-all-alerts");
       fireEvent.click(clearAllButton);
 
       expect(mockHandlers.onClearAll).toHaveBeenCalled();
     });
 
-    it('shows no alerts message when empty', () => {
-      render(
-        <AlertPanel
-          alerts={[]}
-          {...mockHandlers}
-        />
-      );
+    it("shows no alerts message when empty", () => {
+      render(<AlertPanel alerts={[]} {...mockHandlers} />);
 
-      expect(screen.getByTestId('no-alerts')).toHaveTextContent('No alerts to display');
+      expect(screen.getByTestId("no-alerts")).toHaveTextContent(
+        "No alerts to display",
+      );
     });
   });
 
-  describe('PerformanceChart', () => {
+  describe("PerformanceChart", () => {
     const mockData = [
-      { timestamp: new Date('2024-01-01T10:00:00Z'), value: 100, metric: 'cpu' },
-      { timestamp: new Date('2024-01-01T10:15:00Z'), value: 120, metric: 'cpu' },
-      { timestamp: new Date('2024-01-01T10:30:00Z'), value: 95, metric: 'cpu' },
+      {
+        timestamp: new Date("2024-01-01T10:00:00Z"),
+        value: 100,
+        metric: "cpu",
+      },
+      {
+        timestamp: new Date("2024-01-01T10:15:00Z"),
+        value: 120,
+        metric: "cpu",
+      },
+      { timestamp: new Date("2024-01-01T10:30:00Z"), value: 95, metric: "cpu" },
     ];
 
     const mockProps = {
       data: mockData,
-      timeRange: '1h' as const,
+      timeRange: "1h" as const,
       onTimeRangeChange: jest.fn(),
     };
 
-    it('renders chart correctly', () => {
+    it("renders chart correctly", () => {
       render(<PerformanceChart {...mockProps} />);
 
-      expect(screen.getByTestId('performance-chart')).toBeInTheDocument();
-      expect(screen.getByTestId('chart-svg')).toBeInTheDocument();
-      expect(screen.getByTestId('chart-content')).toHaveTextContent('3 data points');
+      expect(screen.getByTestId("performance-chart")).toBeInTheDocument();
+      expect(screen.getByTestId("chart-svg")).toBeInTheDocument();
+      expect(screen.getByTestId("chart-content")).toHaveTextContent(
+        "3 data points",
+      );
     });
 
-    it('changes time range', () => {
+    it("changes time range", () => {
       render(<PerformanceChart {...mockProps} />);
 
-      const timeRangeButton = screen.getByTestId('time-range-6h');
+      const timeRangeButton = screen.getByTestId("time-range-6h");
       fireEvent.click(timeRangeButton);
 
-      expect(mockProps.onTimeRangeChange).toHaveBeenCalledWith('6h');
+      expect(mockProps.onTimeRangeChange).toHaveBeenCalledWith("6h");
     });
 
-    it('highlights active time range', () => {
+    it("highlights active time range", () => {
       render(<PerformanceChart {...mockProps} />);
 
-      const activeButton = screen.getByTestId('time-range-1h');
-      expect(activeButton).toHaveClass('active');
+      const activeButton = screen.getByTestId("time-range-1h");
+      expect(activeButton).toHaveClass("active");
     });
   });
 
-  describe('NetworkTopology', () => {
+  describe("NetworkTopology", () => {
     const mockNodes = [
-      { id: 'node1', type: 'agent', status: 'active', connections: 3 },
-      { id: 'node2', type: 'coalition', status: 'idle', connections: 5 },
+      { id: "node1", type: "agent", status: "active", connections: 3 },
+      { id: "node2", type: "coalition", status: "idle", connections: 5 },
     ];
 
     const mockEdges = [
-      { source: 'node1', target: 'node2', strength: 0.8, type: 'connection' },
+      { source: "node1", target: "node2", strength: 0.8, type: "connection" },
     ];
 
     const mockProps = {
@@ -911,107 +994,110 @@ describe('Advanced Dashboard Tests', () => {
       onEdgeClick: jest.fn(),
     };
 
-    it('renders topology correctly', () => {
+    it("renders topology correctly", () => {
       render(<NetworkTopology {...mockProps} />);
 
-      expect(screen.getByTestId('network-topology')).toBeInTheDocument();
-      expect(screen.getByTestId('topology-svg')).toBeInTheDocument();
-      expect(screen.getByTestId('node-count')).toHaveTextContent('Nodes: 2');
-      expect(screen.getByTestId('edge-count')).toHaveTextContent('Connections: 1');
+      expect(screen.getByTestId("network-topology")).toBeInTheDocument();
+      expect(screen.getByTestId("topology-svg")).toBeInTheDocument();
+      expect(screen.getByTestId("node-count")).toHaveTextContent("Nodes: 2");
+      expect(screen.getByTestId("edge-count")).toHaveTextContent(
+        "Connections: 1",
+      );
     });
 
-    it('handles node clicks', () => {
+    it("handles node clicks", () => {
       render(<NetworkTopology {...mockProps} />);
 
-      const node = screen.getByTestId('node-node1');
+      const node = screen.getByTestId("node-node1");
       fireEvent.click(node);
 
-      expect(mockProps.onNodeClick).toHaveBeenCalledWith('node1');
-      expect(screen.getByTestId('node-details')).toBeInTheDocument();
+      expect(mockProps.onNodeClick).toHaveBeenCalledWith("node1");
+      expect(screen.getByTestId("node-details")).toBeInTheDocument();
     });
 
-    it('handles edge clicks', () => {
+    it("handles edge clicks", () => {
       render(<NetworkTopology {...mockProps} />);
 
-      const edge = screen.getByTestId('edge-node1-node2');
+      const edge = screen.getByTestId("edge-node1-node2");
       fireEvent.click(edge);
 
-      expect(mockProps.onEdgeClick).toHaveBeenCalledWith('node1-node2');
+      expect(mockProps.onEdgeClick).toHaveBeenCalledWith("node1-node2");
     });
 
-    it('controls zoom levels', () => {
+    it("controls zoom levels", () => {
       render(<NetworkTopology {...mockProps} />);
 
-      const zoomInButton = screen.getByTestId('zoom-in');
+      const zoomInButton = screen.getByTestId("zoom-in");
       fireEvent.click(zoomInButton);
 
-      expect(screen.getByTestId('zoom-level')).toHaveTextContent('120%');
+      expect(screen.getByTestId("zoom-level")).toHaveTextContent("120%");
 
-      const zoomOutButton = screen.getByTestId('zoom-out');
+      const zoomOutButton = screen.getByTestId("zoom-out");
       fireEvent.click(zoomOutButton);
 
-      const resetButton = screen.getByTestId('reset-view');
+      const resetButton = screen.getByTestId("reset-view");
       fireEvent.click(resetButton);
 
-      expect(screen.getByTestId('zoom-level')).toHaveTextContent('100%');
+      expect(screen.getByTestId("zoom-level")).toHaveTextContent("100%");
     });
   });
 
-  describe('AdvancedDashboard Integration', () => {
-    it('renders full dashboard', () => {
+  describe("AdvancedDashboard Integration", () => {
+    it("renders full dashboard", () => {
       render(<AdvancedDashboard />);
 
-      expect(screen.getByTestId('advanced-dashboard')).toBeInTheDocument();
-      expect(screen.getByTestId('metrics-panel')).toBeInTheDocument();
-      expect(screen.getByTestId('alert-panel')).toBeInTheDocument();
-      expect(screen.getByTestId('performance-chart')).toBeInTheDocument();
-      expect(screen.getByTestId('network-topology')).toBeInTheDocument();
+      expect(screen.getByTestId("advanced-dashboard")).toBeInTheDocument();
+      expect(screen.getByTestId("metrics-panel")).toBeInTheDocument();
+      expect(screen.getByTestId("alert-panel")).toBeInTheDocument();
+      expect(screen.getByTestId("performance-chart")).toBeInTheDocument();
+      expect(screen.getByTestId("network-topology")).toBeInTheDocument();
     });
 
-    it('handles dashboard actions', () => {
+    it("handles dashboard actions", () => {
       render(<AdvancedDashboard />);
 
-      expect(screen.getByTestId('refresh-dashboard')).toBeInTheDocument();
-      expect(screen.getByTestId('export-data')).toBeInTheDocument();
-      expect(screen.getByTestId('configure-alerts')).toBeInTheDocument();
+      expect(screen.getByTestId("refresh-dashboard")).toBeInTheDocument();
+      expect(screen.getByTestId("export-data")).toBeInTheDocument();
+      expect(screen.getByTestId("configure-alerts")).toBeInTheDocument();
     });
 
-    it('updates metrics in real-time', async () => {
+    it("updates metrics in real-time", async () => {
       jest.useFakeTimers();
       render(<AdvancedDashboard />);
 
-      const initialMessageRate = screen.getByTestId('message-rate').textContent;
+      const initialMessageRate = screen.getByTestId("message-rate").textContent;
 
       // Fast-forward time to trigger updates
       jest.advanceTimersByTime(5000);
 
       await waitFor(() => {
-        const updatedMessageRate = screen.getByTestId('message-rate').textContent;
+        const updatedMessageRate =
+          screen.getByTestId("message-rate").textContent;
         expect(updatedMessageRate).toBeDefined();
       });
 
       jest.useRealTimers();
     });
 
-    it('manages alert lifecycle', () => {
+    it("manages alert lifecycle", () => {
       render(<AdvancedDashboard />);
 
       // Initial alerts should be present
-      expect(screen.getByTestId('alert-1')).toBeInTheDocument();
+      expect(screen.getByTestId("alert-1")).toBeInTheDocument();
 
       // Acknowledge an alert
-      const acknowledgeButton = screen.getByTestId('acknowledge-1');
+      const acknowledgeButton = screen.getByTestId("acknowledge-1");
       fireEvent.click(acknowledgeButton);
 
       // Alert should still be present but acknowledged
-      expect(screen.getByTestId('alert-1')).toHaveClass('acknowledged');
+      expect(screen.getByTestId("alert-1")).toHaveClass("acknowledged");
 
       // Dismiss an alert
-      const dismissButton = screen.getByTestId('dismiss-1');
+      const dismissButton = screen.getByTestId("dismiss-1");
       fireEvent.click(dismissButton);
 
       // Alert should be removed
-      expect(screen.queryByTestId('alert-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId("alert-1")).not.toBeInTheDocument();
     });
   });
 });

@@ -18,6 +18,9 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 import numpy as np
 
+from agents.base.markov_blanket import BoundaryViolationEvent
+from agents.base.markov_blanket import ViolationType as BoundaryViolationType
+
 # Import safety infrastructure
 from infrastructure.safety.boundary_monitoring_service import (
     AlertConfiguration,
@@ -25,8 +28,8 @@ from infrastructure.safety.boundary_monitoring_service import (
     MonitoringEvent,
 )
 from infrastructure.safety.markov_blanket_verification import (
-    BoundaryViolation,
-    MarkovBlanketVerifier,
+    MarkovBlanketVerificationService,
+    VerificationConfig,
 )
 from infrastructure.safety.safety_protocols import (
     MarkovBlanketSafetyProtocol,
@@ -198,7 +201,7 @@ class SafetyComplianceVerifier:
             monitoring_interval=0.5,  # More frequent for deployment verification
         )
 
-        self.markov_verifier = MarkovBlanketVerifier()
+        self.markov_verifier = MarkovBlanketVerificationService()
         self.safety_protocol = MarkovBlanketSafetyProtocol()
 
         # Compliance requirements

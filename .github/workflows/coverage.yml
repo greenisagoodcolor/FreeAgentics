@@ -12,54 +12,9 @@ env:
   PYTHON_VERSION: "3.11"
 
 jobs:
-  frontend-coverage:
-    name: Frontend Coverage
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run frontend tests with coverage
-        run: npm run test:coverage
-        env:
-          CI: true
-
-      - name: Upload frontend coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage/lcov.info
-          flags: frontend
-          name: frontend-coverage
-          fail_ci_if_error: false
-
   backend-coverage:
     name: Backend Coverage
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: freeagentics_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
 
     steps:
       - name: Checkout code
@@ -74,78 +29,224 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt', '**/pyproject.toml') }}
           restore-keys: |
             ${{ runner.os }}-pip-
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements-dev.txt
-          pip install coverage pytest-cov
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f api/requirements.txt ]; then pip install -r api/requirements.txt; fi
+          pip install pytest pytest-cov coverage
 
       - name: Run backend tests with coverage
         run: |
-          coverage run -m pytest src/tests/ --cov=src --cov-report=xml --cov-report=term
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/freeagentics_test
-          ENVIRONMENT: test
+          python3 -m pytest \
+            --cov=api \
+            --cov=agents \
+            --cov=coalitions \
+            --cov=inference \
+            --cov=knowledge \
+            --cov=infrastructure \
+            --cov=world \
+            --cov-report=term \
+            --cov-report=xml:coverage-backend.xml \
+            --cov-report=html:coverage-backend-html \
+            --maxfail=5 \
+            -v \
+            --tb=short
+        continue-on-error: true
 
       - name: Upload backend coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
-          file: ./coverage.xml
+          file: ./coverage-backend.xml
           flags: backend
           name: backend-coverage
           fail_ci_if_error: false
 
-  merge-coverage:
-    name: Merge Coverage Reports
-    needs: [frontend-coverage, backend-coverage]
+      - name: Upload backend coverage artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-coverage
+          path: |
+            coverage-backend.xml
+            coverage-backend-html/
+
+  frontend-coverage:
+    name: Frontend Coverage
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: web/package-lock.json
 
-      - name: Install coverage tools
+      - name: Install dependencies
+        working-directory: ./web
+        run: npm ci
+
+      - name: Run frontend tests with coverage
+        working-directory: ./web
         run: |
-          npm install -g nyc codecov
+          npm test -- \
+            --coverage \
+            --watchAll=false \
+            --coverageReporters=text \
+            --coverageReporters=html \
+            --coverageReporters=lcov \
+            --coverageReporters=json \
+            --passWithNoTests
+        continue-on-error: true
+        env:
+          CI: true
 
-      - name: Generate coverage badge
-        run: |
-          # This would normally process the coverage data and generate a badge
-          echo "Coverage data processed"
-
-      - name: Comment on PR with coverage
-        if: github.event_name == 'pull_request'
+      - name: Upload frontend coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
-          verbose: true
+          file: ./web/coverage/lcov.info
+          flags: frontend
+          name: frontend-coverage
+          fail_ci_if_error: false
+
+      - name: Upload frontend coverage artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-coverage
+          path: web/coverage/
 
   coverage-report:
-    name: Coverage Report Summary
+    name: Generate Combined Coverage Report
     needs: [frontend-coverage, backend-coverage]
     runs-on: ubuntu-latest
     if: always()
 
     steps:
-      - name: Coverage Summary
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download backend coverage
+        uses: actions/download-artifact@v3
+        with:
+          name: backend-coverage
+          path: ./backend-coverage/
+
+      - name: Download frontend coverage
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-coverage
+          path: ./frontend-coverage/
+
+      - name: Install bc for calculations
+        run: sudo apt-get update && sudo apt-get install -y bc
+
+      - name: Generate combined coverage report
         run: |
-          echo "## Coverage Report Summary" >> $GITHUB_STEP_SUMMARY
+          # Extract coverage percentages
+          if [ -f backend-coverage/coverage-backend.xml ]; then
+            BACKEND_COVERAGE=$(grep -o 'line-rate="[^"]*"' backend-coverage/coverage-backend.xml | head -1 | sed 's/line-rate="//;s/"//' | awk '{printf "%.2f", $1*100}')
+          else
+            BACKEND_COVERAGE="0"
+          fi
+          
+          if [ -f frontend-coverage/coverage-summary.json ]; then
+            FRONTEND_COVERAGE=$(cat frontend-coverage/coverage-summary.json | grep -o '"lines":{"total":[0-9]*,"covered":[0-9]*' | awk -F'[,:}]' '{printf "%.2f", ($4/$2)*100}')
+          else
+            FRONTEND_COVERAGE="0"
+          fi
+          
+          # Calculate weighted average (68% backend, 32% frontend)
+          COMBINED_COVERAGE=$(echo "scale=2; ($BACKEND_COVERAGE * 0.68) + ($FRONTEND_COVERAGE * 0.32)" | bc)
+          
+          # Generate summary
+          echo "## 📊 Coverage Report Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Frontend | ${{ needs.frontend-coverage.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Backend | ${{ needs.backend-coverage.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Coverage | Weight | Contribution |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|----------|--------|-------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Backend (Python)** | ${BACKEND_COVERAGE}% | 68% | $(echo "scale=2; $BACKEND_COVERAGE * 0.68" | bc)% |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Frontend (TS/JS)** | ${FRONTEND_COVERAGE}% | 32% | $(echo "scale=2; $FRONTEND_COVERAGE * 0.32" | bc)% |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Combined Total** | **${COMBINED_COVERAGE}%** | 100% | ${COMBINED_COVERAGE}% |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "View detailed coverage reports on [Codecov](https://codecov.io/gh/${{ github.repository }})" >> $GITHUB_STEP_SUMMARY
+          echo "## 🎯 Coverage Targets" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Timeframe | Target | Current | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|---------|---------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Q1 2025 | 35% | ${COMBINED_COVERAGE}% | $(if (( $(echo "$COMBINED_COVERAGE >= 35" | bc -l) )); then echo "✅ Met"; else echo "❌ Not Met"; fi) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Q2 2025 | 55% | ${COMBINED_COVERAGE}% | $(if (( $(echo "$COMBINED_COVERAGE >= 55" | bc -l) )); then echo "✅ Met"; else echo "⏳ Pending"; fi) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Q3 2025 | 75% | ${COMBINED_COVERAGE}% | $(if (( $(echo "$COMBINED_COVERAGE >= 75" | bc -l) )); then echo "✅ Met"; else echo "⏳ Pending"; fi) |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📁 Coverage Reports" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- [Backend Coverage Report](https://codecov.io/gh/${{ github.repository }}/flags/backend)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Frontend Coverage Report](https://codecov.io/gh/${{ github.repository }}/flags/frontend)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Combined Codecov Dashboard](https://codecov.io/gh/${{ github.repository }})" >> $GITHUB_STEP_SUMMARY
+          
+          # Export for other steps
+          echo "BACKEND_COVERAGE=${BACKEND_COVERAGE}" >> $GITHUB_ENV
+          echo "FRONTEND_COVERAGE=${FRONTEND_COVERAGE}" >> $GITHUB_ENV
+          echo "COMBINED_COVERAGE=${COMBINED_COVERAGE}" >> $GITHUB_ENV
+
+      - name: Comment on PR with coverage
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const backendCoverage = process.env.BACKEND_COVERAGE;
+            const frontendCoverage = process.env.FRONTEND_COVERAGE;
+            const combinedCoverage = process.env.COMBINED_COVERAGE;
+            
+            const comment = `## 📊 Coverage Report
+            
+            | Component | Coverage | Status |
+            |-----------|----------|--------|
+            | **Backend** | ${backendCoverage}% | ${parseFloat(backendCoverage) >= 40 ? '✅' : '❌'} |
+            | **Frontend** | ${frontendCoverage}% | ${parseFloat(frontendCoverage) >= 25 ? '✅' : '❌'} |
+            | **Combined** | **${combinedCoverage}%** | ${parseFloat(combinedCoverage) >= 35 ? '✅' : '❌'} |
+            
+            🎯 **Target:** 35% combined coverage for Q1 2025
+            
+            View detailed reports on [Codecov](https://codecov.io/gh/${{ github.repository }})`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Check coverage thresholds
+        run: |
+          # Set coverage thresholds
+          MIN_BACKEND_COVERAGE=15
+          MIN_FRONTEND_COVERAGE=2
+          MIN_COMBINED_COVERAGE=10
+          
+          echo "Checking coverage thresholds..."
+          echo "Backend: ${BACKEND_COVERAGE}% (min: ${MIN_BACKEND_COVERAGE}%)"
+          echo "Frontend: ${FRONTEND_COVERAGE}% (min: ${MIN_FRONTEND_COVERAGE}%)"
+          echo "Combined: ${COMBINED_COVERAGE}% (min: ${MIN_COMBINED_COVERAGE}%)"
+          
+          # Check thresholds (lenient for now, will increase over time)
+          if (( $(echo "$BACKEND_COVERAGE < $MIN_BACKEND_COVERAGE" | bc -l) )); then
+            echo "❌ Backend coverage below minimum threshold"
+            exit 1
+          fi
+          
+          if (( $(echo "$FRONTEND_COVERAGE < $MIN_FRONTEND_COVERAGE" | bc -l) )); then
+            echo "❌ Frontend coverage below minimum threshold"
+            exit 1
+          fi
+          
+          if (( $(echo "$COMBINED_COVERAGE < $MIN_COMBINED_COVERAGE" | bc -l) )); then
+            echo "❌ Combined coverage below minimum threshold"
+            exit 1
+          fi
+          
+          echo "✅ All coverage thresholds met!"

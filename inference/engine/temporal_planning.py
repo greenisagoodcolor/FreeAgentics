@@ -84,14 +84,16 @@ class TreeNode:
                 return float("inf")
             exploitation = -child.expected_free_energy
             exploration = exploration_constant * np.sqrt(np.log(self.visits) / child.visits)
-            return exploitation + exploration
+            result: float = exploitation + exploration
+            return result
 
         return max(self.children, key=ucb1)
 
     def __hash__(self) -> int:
         """Hash for caching"""
         if self._hash is None:
-            self._hash = hash((self.state.numpy().tobytes(), self.action, self.depth))
+            hash_value = hash((self.state.numpy().tobytes(), self.action, self.depth))
+            self._hash = hash_value
         return self._hash
 
 
@@ -148,7 +150,7 @@ class MonteCarloTreeSearch(TemporalPlanner):
     ) -> None:
         super().__init__(config, policy_selector, inference_algorithm)
         self.node_count = 0
-        self.node_cache = {}
+        self.node_cache: Dict[Any, Any] = {}
 
     def plan(
         self,
@@ -196,10 +198,11 @@ class MonteCarloTreeSearch(TemporalPlanner):
         action = np.random.choice(untried_actions)
         if isinstance(generative_model, DiscreteGenerativeModel):
             # Ensure consistent tensor dtype for matrix operations
-            node_state_float = (
-                node.state.float() if isinstance(node.state, torch.Tensor) else node.state
-            )
-            next_beliefs = generative_model.B[:, :, action] @ node_state_float
+            if isinstance(node.state, torch.Tensor):
+                node_state_float = node.state.float()
+            else:
+                node_state_float = torch.tensor(node.state, dtype=torch.float32)
+            next_beliefs = torch.matmul(generative_model.B[:, :, action], node_state_float)
         else:
             next_beliefs = node.state
         child = TreeNode(next_beliefs, action, parent=node, depth=node.depth + 1)
@@ -265,6 +268,7 @@ class MonteCarloTreeSearch(TemporalPlanner):
         for i in range(len(trajectory) - 1):
             if trajectory[i + 1].action is not None:
                 action = trajectory[i + 1].action
+                assert action is not None  # Type hint for mypy
                 policy = Policy([action])
                 G, _, _ = self.policy_selector.compute_expected_free_energy(
                     policy, trajectory[i].state, generative_model, preferences
@@ -374,7 +378,9 @@ class AStarPlanner(TemporalPlanner):
         """
         Plan using A* search.
         """
-        open_set: List[Tuple[float, float, List[int], torch.Tensor]] = [(0.0, 0.0, [], initial_beliefs)]
+        open_set: List[Tuple[float, float, List[int], torch.Tensor]] = [
+            (0.0, 0.0, [], initial_beliefs)
+        ]
         closed_set: set[int] = set()
         g_scores = defaultdict(lambda: float("inf"))
         g_scores[self._hash_beliefs(initial_beliefs)] = 0.0

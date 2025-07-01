@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="11" skipped="0" tests="29" time="1.590" timestamp="2025-07-01T11:23:49.613413" hostname="Matthews-MacBook-Air.local"><testcase classname="tests.unit.test_precision.TestPrecisionConfig" name="test_default_config" time="0.000" /><testcase classname="tests.unit.test_precision.TestPrecisionConfig" name="test_custom_config" time="0.000" /><testcase classname="tests.unit.test_precision.TestGradientPrecisionOptimizer" name="test_initialization" time="0.539" /><testcase classname="tests.unit.test_precision.TestGradientPrecisionOptimizer" name="test_precision_optimization" time="0.001" /><testcase classname="tests.unit.test_precision.TestGradientPrecisionOptimizer" name="test_single_observation_optimization" time="0.000" /><testcase classname="tests.unit.test_precision.TestGradientPrecisionOptimizer" name="test_volatility_estimation" time="0.000"><failure message="AttributeError: 'GradientPrecisionOptimizer' object has no attribute '_optimize_precision_hierarchical'">tests/unit/test_precision.py:95: in test_volatility_estimation
+    self.optimizer._optimize_precision_hierarchical(errors)
+E   AttributeError: 'GradientPrecisionOptimizer' object has no attribute '_optimize_precision_hierarchical'</failure></testcase><testcase classname="tests.unit.test_precision.TestGradientPrecisionOptimizer" name="test_volatility_adaptation" time="0.000"><failure message="AttributeError: 'GradientPrecisionOptimizer' object has no attribute '_optimize_precision_hierarchical'">tests/unit/test_precision.py:110: in test_volatility_adaptation
+    self.optimizer._optimize_precision_hierarchical(errors)
+E   AttributeError: 'GradientPrecisionOptimizer' object has no attribute '_optimize_precision_hierarchical'</failure></testcase><testcase classname="tests.unit.test_precision.TestGradientPrecisionOptimizer" name="test_gradient_clipping" time="0.000" /><testcase classname="tests.unit.test_precision.TestHierarchicalPrecisionOptimizer" name="test_initialization" time="0.000" /><testcase classname="tests.unit.test_precision.TestHierarchicalPrecisionOptimizer" name="test_hierarchical_optimization" time="0.001" /><testcase classname="tests.unit.test_precision.TestHierarchicalPrecisionOptimizer" name="test_level_coupling" time="0.001" /><testcase classname="tests.unit.test_precision.TestHierarchicalPrecisionOptimizer" name="test_volatility_per_level" time="0.008"><failure message="RuntimeError: stack expects each tensor to be equal size, but got [1, 3] at entry 0 and [1, 2] at entry 1">tests/unit/test_precision.py:188: in test_volatility_per_level
+    volatilities = self.optimizer._estimate_volatility_hierarchical(error_history_per_level)
+inference/engine/precision.py:313: in _estimate_volatility_hierarchical
+    return self._estimate_volatility_impl(error_history)
+inference/engine/precision.py:274: in _estimate_volatility_impl
+    errors = torch.stack(level_errors)
+E   RuntimeError: stack expects each tensor to be equal size, but got [1, 3] at entry 0 and [1, 2] at entry 1</failure></testcase><testcase classname="tests.unit.test_precision.TestMetaLearningPrecisionOptimizer" name="test_initialization" time="0.000" /><testcase classname="tests.unit.test_precision.TestMetaLearningPrecisionOptimizer" name="test_feature_extraction" time="0.001"><failure message="assert 5 == (6 + 3)&#10; +  where 3 = &lt;inference.engine.precision.MetaLearningPrecisionOptimizer object at 0x1264cfd90&gt;.input_dim&#10; +    where &lt;inference.engine.precision.MetaLearningPrecisionOptimizer object at 0x1264cfd90&gt; = &lt;test_precision.TestMetaLearningPrecisionOptimizer object at 0x12151f610&gt;.optimizer">tests/unit/test_precision.py:221: in test_feature_extraction
+    assert features.shape[0] == (6 + self.optimizer.input_dim)  # 6 error stats + context
+E   assert 5 == (6 + 3)
+E    +  where 3 = &lt;inference.engine.precision.MetaLearningPrecisionOptimizer object at 0x1264cfd90&gt;.input_dim
+E    +    where &lt;inference.engine.precision.MetaLearningPrecisionOptimizer object at 0x1264cfd90&gt; = &lt;test_precision.TestMetaLearningPrecisionOptimizer object at 0x12151f610&gt;.optimizer</failure></testcase><testcase classname="tests.unit.test_precision.TestMetaLearningPrecisionOptimizer" name="test_precision_optimization_with_context" time="0.002"><failure message="RuntimeError: mat1 and mat2 shapes cannot be multiplied (1x5 and 9x32)">tests/unit/test_precision.py:227: in test_precision_optimization_with_context
+    precision = self.optimizer.optimize_precision(errors, context)
+inference/engine/precision.py:401: in optimize_precision
+    precision_adjustment = self.meta_network(features)
+venv/lib/python3.13/site-packages/torch/nn/modules/module.py:1751: in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+venv/lib/python3.13/site-packages/torch/nn/modules/module.py:1762: in _call_impl
+    return forward_call(*args, **kwargs)
+venv/lib/python3.13/site-packages/torch/nn/modules/container.py:240: in forward
+    input = module(input)
+venv/lib/python3.13/site-packages/torch/nn/modules/module.py:1751: in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+venv/lib/python3.13/site-packages/torch/nn/modules/module.py:1762: in _call_impl
+    return forward_call(*args, **kwargs)
+venv/lib/python3.13/site-packages/torch/nn/modules/linear.py:125: in forward
+    return F.linear(input, self.weight, self.bias)
+E   RuntimeError: mat1 and mat2 shapes cannot be multiplied (1x5 and 9x32)</failure></testcase><testcase classname="tests.unit.test_precision.TestMetaLearningPrecisionOptimizer" name="test_context_buffer" time="0.001"><failure message="AttributeError: 'MetaLearningPrecisionOptimizer' object has no attribute '_optimize_precision_hierarchical'">tests/unit/test_precision.py:236: in test_context_buffer
+    self.optimizer._optimize_precision_hierarchical(errors)
+E   AttributeError: 'MetaLearningPrecisionOptimizer' object has no attribute '_optimize_precision_hierarchical'</failure></testcase><testcase classname="tests.unit.test_precision.TestMetaLearningPrecisionOptimizer" name="test_meta_update" time="0.000"><failure message="AttributeError: 'MetaLearningPrecisionOptimizer' object has no attribute '_optimize_precision_hierarchical'">tests/unit/test_precision.py:245: in test_meta_update
+    self.optimizer._optimize_precision_hierarchical(errors)
+E   AttributeError: 'MetaLearningPrecisionOptimizer' object has no attribute '_optimize_precision_hierarchical'</failure></testcase><testcase classname="tests.unit.test_precision.TestMetaLearningPrecisionOptimizer" name="test_volatility_from_buffer" time="0.000"><failure message="AttributeError: 'MetaLearningPrecisionOptimizer' object has no attribute '_optimize_precision_hierarchical'">tests/unit/test_precision.py:258: in test_volatility_from_buffer
+    self.optimizer._optimize_precision_hierarchical(errors)
+E   AttributeError: 'MetaLearningPrecisionOptimizer' object has no attribute '_optimize_precision_hierarchical'</failure></testcase><testcase classname="tests.unit.test_precision.TestAdaptivePrecisionController" name="test_initialization" time="0.000"><failure message="AttributeError: 'AdaptivePrecisionController' object has no attribute 'context_dim'">tests/unit/test_precision.py:275: in test_initialization
+    assert self.controller.context_dim == 4
+E   AttributeError: 'AdaptivePrecisionController' object has no attribute 'context_dim'</failure></testcase><testcase classname="tests.unit.test_precision.TestAdaptivePrecisionController" name="test_optimization_with_strategy" time="0.001"><failure message="RuntimeError: mat1 and mat2 shapes cannot be multiplied (1x6 and 10x64)">tests/unit/test_precision.py:288: in test_optimization_with_strategy
+    precision2 = self.controller.optimize(errors, context)
+inference/engine/precision.py:551: in optimize
+    precision = self.meta_optimizer.optimize_precision(prediction_errors, context)
+inference/engine/precision.py:401: in optimize_precision
+    precision_adjustment = self.meta_network(features)
+venv/lib/python3.13/site-packages/torch/nn/modules/module.py:1751: in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+venv/lib/python3.13/site-packages/torch/nn/modules/module.py:1762: in _call_impl
+    return forward_call(*args, **kwargs)
+venv/lib/python3.13/site-packages/torch/nn/modules/container.py:240: in forward
+    input = module(input)
+venv/lib/python3.13/site-packages/torch/nn/modules/module.py:1751: in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+venv/lib/python3.13/site-packages/torch/nn/modules/module.py:1762: in _call_impl
+    return forward_call(*args, **kwargs)
+venv/lib/python3.13/site-packages/torch/nn/modules/linear.py:125: in forward
+    return F.linear(input, self.weight, self.bias)
+E   RuntimeError: mat1 and mat2 shapes cannot be multiplied (1x6 and 10x64)</failure></testcase><testcase classname="tests.unit.test_precision.TestAdaptivePrecisionController" name="test_strategy_evaluation" time="0.005"><failure message="AttributeError: 'AdaptivePrecisionController' object has no attribute 'evaluate_strategy'">tests/unit/test_precision.py:301: in test_strategy_evaluation
+    self.controller.evaluate_strategy()
+E   AttributeError: 'AdaptivePrecisionController' object has no attribute 'evaluate_strategy'</failure></testcase><testcase classname="tests.unit.test_precision.TestAdaptivePrecisionController" name="test_volatility_estimate" time="0.003" /><testcase classname="tests.unit.test_precision.TestAdaptivePrecisionController" name="test_precision_statistics" time="0.002" /><testcase classname="tests.unit.test_precision.TestPrecisionFactory" name="test_create_gradient_optimizer" time="0.000" /><testcase classname="tests.unit.test_precision.TestPrecisionFactory" name="test_create_hierarchical_optimizer" time="0.000" /><testcase classname="tests.unit.test_precision.TestPrecisionFactory" name="test_create_meta_optimizer" time="0.000" /><testcase classname="tests.unit.test_precision.TestPrecisionFactory" name="test_create_adaptive_controller" time="0.000" /><testcase classname="tests.unit.test_precision.TestPrecisionFactory" name="test_invalid_optimizer_type" time="0.000" /><testcase classname="tests.unit.test_precision.TestPrecisionFactory" name="test_custom_config" time="0.000" /></testsuite></testsuites>

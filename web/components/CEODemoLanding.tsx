@@ -30,7 +30,8 @@ export default function CEODemoLanding({ onStartDemo }: CEODemoLandingProps) {
             FreeAgentics CEO Demo
           </h1>
           <p className="text-xl text-gray-300 mb-8 leading-relaxed">
-            Experience how autonomous AI agents transform business operations in just 3 minutes
+            Experience how autonomous AI agents transform business operations in
+            just 3 minutes
           </p>
         </motion.div>
 
@@ -44,17 +45,23 @@ export default function CEODemoLanding({ onStartDemo }: CEODemoLandingProps) {
           <div className="text-center">
             <Clock className="w-8 h-8 text-blue-400 mx-auto mb-3" />
             <h3 className="font-semibold mb-2">3 Minute Demo</h3>
-            <p className="text-sm text-gray-400">Quick, focused presentation designed for busy executives</p>
+            <p className="text-sm text-gray-400">
+              Quick, focused presentation designed for busy executives
+            </p>
           </div>
           <div className="text-center">
             <TrendingUp className="w-8 h-8 text-green-400 mx-auto mb-3" />
             <h3 className="font-semibold mb-2">Real ROI Metrics</h3>
-            <p className="text-sm text-gray-400">See actual cost savings and productivity gains</p>
+            <p className="text-sm text-gray-400">
+              See actual cost savings and productivity gains
+            </p>
           </div>
           <div className="text-center">
             <Users className="w-8 h-8 text-purple-400 mx-auto mb-3" />
             <h3 className="font-semibold mb-2">Live Collaboration</h3>
-            <p className="text-sm text-gray-400">Watch AI agents work together in real-time</p>
+            <p className="text-sm text-gray-400">
+              Watch AI agents work together in real-time
+            </p>
           </div>
         </motion.div>
 
@@ -65,7 +72,7 @@ export default function CEODemoLanding({ onStartDemo }: CEODemoLandingProps) {
           transition={{ delay: 0.6 }}
           className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 mb-8 border border-gray-700"
         >
-                     <h3 className="text-xl font-semibold mb-4">What You&apos;ll See:</h3>
+          <h3 className="text-xl font-semibold mb-4">What You&apos;ll See:</h3>
           <div className="grid grid-cols-2 gap-6 text-left">
             <div>
               <h4 className="font-medium text-blue-400 mb-2">Business Value</h4>
@@ -76,7 +83,9 @@ export default function CEODemoLanding({ onStartDemo }: CEODemoLandingProps) {
               </ul>
             </div>
             <div>
-              <h4 className="font-medium text-purple-400 mb-2">Live Demonstration</h4>
+              <h4 className="font-medium text-purple-400 mb-2">
+                Live Demonstration
+              </h4>
               <ul className="text-sm text-gray-300 space-y-1">
                 <li>• AI research team collaboration</li>
                 <li>• Autonomous problem solving</li>
@@ -101,7 +110,7 @@ export default function CEODemoLanding({ onStartDemo }: CEODemoLandingProps) {
             Start CEO Demo
             <ArrowRight className="w-5 h-5" />
           </button>
-          
+
           <p className="text-sm text-gray-400">
             No signup required • 3 minutes • Full interactive experience
           </p>
@@ -109,4 +118,4 @@ export default function CEODemoLanding({ onStartDemo }: CEODemoLandingProps) {
       </motion.div>
     </div>
   );
-} 
+}

@@ -1,0 +1,342 @@
+1ce8131b7832eedc0313dece2431554a
+"use strict";
+
+/* istanbul ignore next */
+function cov_285lkgp3z0() {
+  var path = "/Users/matthewmoroney/builds/FreeAgentics/web/hooks/useDebounce.ts";
+  var hash = "8cac967e6654878238cb022ad4bddd6f146ccc3e";
+  var global = new Function("return this")();
+  var gcv = "__coverage__";
+  var coverageData = {
+    path: "/Users/matthewmoroney/builds/FreeAgentics/web/hooks/useDebounce.ts",
+    statementMap: {
+      "0": {
+        start: {
+          line: 2,
+          column: 0
+        },
+        end: {
+          line: 4,
+          column: 3
+        }
+      },
+      "1": {
+        start: {
+          line: 5,
+          column: 0
+        },
+        end: {
+          line: 10,
+          column: 3
+        }
+      },
+      "2": {
+        start: {
+          line: 8,
+          column: 8
+        },
+        end: {
+          line: 8,
+          column: 27
+        }
+      },
+      "3": {
+        start: {
+          line: 11,
+          column: 15
+        },
+        end: {
+          line: 11,
+          column: 31
+        }
+      },
+      "4": {
+        start: {
+          line: 13,
+          column: 48
+        },
+        end: {
+          line: 13,
+          column: 75
+        }
+      },
+      "5": {
+        start: {
+          line: 14,
+          column: 4
+        },
+        end: {
+          line: 24,
+          column: 7
+        }
+      },
+      "6": {
+        start: {
+          line: 15,
+          column: 24
+        },
+        end: {
+          line: 17,
+          column: 17
+        }
+      },
+      "7": {
+        start: {
+          line: 16,
+          column: 12
+        },
+        end: {
+          line: 16,
+          column: 37
+        }
+      },
+      "8": {
+        start: {
+          line: 18,
+          column: 8
+        },
+        end: {
+          line: 20,
+          column: 10
+        }
+      },
+      "9": {
+        start: {
+          line: 19,
+          column: 12
+        },
+        end: {
+          line: 19,
+          column: 34
+        }
+      },
+      "10": {
+        start: {
+          line: 25,
+          column: 4
+        },
+        end: {
+          line: 25,
+          column: 26
+        }
+      }
+    },
+    fnMap: {
+      "0": {
+        name: "(anonymous_0)",
+        decl: {
+          start: {
+            line: 7,
+            column: 9
+          },
+          end: {
+            line: 7,
+            column: 10
+          }
+        },
+        loc: {
+          start: {
+            line: 7,
+            column: 20
+          },
+          end: {
+            line: 9,
+            column: 5
+          }
+        },
+        line: 7
+      },
+      "1": {
+        name: "useDebounce",
+        decl: {
+          start: {
+            line: 12,
+            column: 9
+          },
+          end: {
+            line: 12,
+            column: 20
+          }
+        },
+        loc: {
+          start: {
+            line: 12,
+            column: 35
+          },
+          end: {
+            line: 26,
+            column: 1
+          }
+        },
+        line: 12
+      },
+      "2": {
+        name: "(anonymous_2)",
+        decl: {
+          start: {
+            line: 14,
+            column: 26
+          },
+          end: {
+            line: 14,
+            column: 27
+          }
+        },
+        loc: {
+          start: {
+            line: 14,
+            column: 30
+          },
+          end: {
+            line: 21,
+            column: 5
+          }
+        },
+        line: 14
+      },
+      "3": {
+        name: "(anonymous_3)",
+        decl: {
+          start: {
+            line: 15,
+            column: 35
+          },
+          end: {
+            line: 15,
+            column: 36
+          }
+        },
+        loc: {
+          start: {
+            line: 15,
+            column: 39
+          },
+          end: {
+            line: 17,
+            column: 9
+          }
+        },
+        line: 15
+      },
+      "4": {
+        name: "(anonymous_4)",
+        decl: {
+          start: {
+            line: 18,
+            column: 15
+          },
+          end: {
+            line: 18,
+            column: 16
+          }
+        },
+        loc: {
+          start: {
+            line: 18,
+            column: 19
+          },
+          end: {
+            line: 20,
+            column: 9
+          }
+        },
+        line: 18
+      }
+    },
+    branchMap: {},
+    s: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0,
+      "9": 0,
+      "10": 0
+    },
+    f: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    b: {},
+    inputSourceMap: {
+      version: 3,
+      sources: ["/Users/matthewmoroney/builds/FreeAgentics/web/hooks/useDebounce.ts"],
+      sourcesContent: ["import { useState, useEffect } from \"react\";\n\n/**\n * useDebounce hook - debounces a value to prevent excessive updates\n *\n * @param value - The value to debounce\n * @param delay - The delay in milliseconds\n * @returns The debounced value\n */\nexport function useDebounce<T>(value: T, delay: number): T {\n  const [debouncedValue, setDebouncedValue] = useState<T>(value);\n\n  useEffect(() => {\n    const handler = setTimeout(() => {\n      setDebouncedValue(value);\n    }, delay);\n\n    return () => {\n      clearTimeout(handler);\n    };\n  }, [value, delay]);\n\n  return debouncedValue;\n}\n"],
+      names: ["useDebounce", "value", "delay", "debouncedValue", "setDebouncedValue", "useState", "useEffect", "handler", "setTimeout", "clearTimeout"],
+      mappings: ";;;;+BASgBA;;;eAAAA;;;uBAToB;AAS7B,SAASA,YAAeC,KAAQ,EAAEC,KAAa;IACpD,MAAM,CAACC,gBAAgBC,kBAAkB,GAAGC,IAAAA,eAAQ,EAAIJ;IAExDK,IAAAA,gBAAS,EAAC;QACR,MAAMC,UAAUC,WAAW;YACzBJ,kBAAkBH;QACpB,GAAGC;QAEH,OAAO;YACLO,aAAaF;QACf;IACF,GAAG;QAACN;QAAOC;KAAM;IAEjB,OAAOC;AACT"
+    },
+    _coverageSchema: "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+    hash: "8cac967e6654878238cb022ad4bddd6f146ccc3e"
+  };
+  var coverage = global[gcv] || (global[gcv] = {});
+  if (!coverage[path] || coverage[path].hash !== hash) {
+    coverage[path] = coverageData;
+  }
+  var actualCoverage = coverage[path];
+  {
+    // @ts-ignore
+    cov_285lkgp3z0 = function () {
+      return actualCoverage;
+    };
+  }
+  return actualCoverage;
+}
+cov_285lkgp3z0();
+cov_285lkgp3z0().s[0]++;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/* istanbul ignore next */
+cov_285lkgp3z0().s[1]++;
+Object.defineProperty(exports, "useDebounce", {
+  enumerable: true,
+  get: function () {
+    /* istanbul ignore next */
+    cov_285lkgp3z0().f[0]++;
+    cov_285lkgp3z0().s[2]++;
+    return useDebounce;
+  }
+});
+const _react =
+/* istanbul ignore next */
+(cov_285lkgp3z0().s[3]++, require("react"));
+function useDebounce(value, delay) {
+  /* istanbul ignore next */
+  cov_285lkgp3z0().f[1]++;
+  const [debouncedValue, setDebouncedValue] =
+  /* istanbul ignore next */
+  (cov_285lkgp3z0().s[4]++, (0, _react.useState)(value));
+  /* istanbul ignore next */
+  cov_285lkgp3z0().s[5]++;
+  (0, _react.useEffect)(() => {
+    /* istanbul ignore next */
+    cov_285lkgp3z0().f[2]++;
+    const handler =
+    /* istanbul ignore next */
+    (cov_285lkgp3z0().s[6]++, setTimeout(() => {
+      /* istanbul ignore next */
+      cov_285lkgp3z0().f[3]++;
+      cov_285lkgp3z0().s[7]++;
+      setDebouncedValue(value);
+    }, delay));
+    /* istanbul ignore next */
+    cov_285lkgp3z0().s[8]++;
+    return () => {
+      /* istanbul ignore next */
+      cov_285lkgp3z0().f[4]++;
+      cov_285lkgp3z0().s[9]++;
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+  /* istanbul ignore next */
+  cov_285lkgp3z0().s[10]++;
+  return debouncedValue;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJjb3ZfMjg1bGtncDN6MCIsImFjdHVhbENvdmVyYWdlIiwicyIsInVzZURlYm91bmNlIiwidmFsdWUiLCJkZWxheSIsImYiLCJkZWJvdW5jZWRWYWx1ZSIsInNldERlYm91bmNlZFZhbHVlIiwiX3JlYWN0IiwidXNlU3RhdGUiLCJ1c2VFZmZlY3QiLCJoYW5kbGVyIiwic2V0VGltZW91dCIsImNsZWFyVGltZW91dCJdLCJzb3VyY2VzIjpbIi9Vc2Vycy9tYXR0aGV3bW9yb25leS9idWlsZHMvRnJlZUFnZW50aWNzL3dlYi9ob29rcy91c2VEZWJvdW5jZS50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyB1c2VTdGF0ZSwgdXNlRWZmZWN0IH0gZnJvbSBcInJlYWN0XCI7XG5cbi8qKlxuICogdXNlRGVib3VuY2UgaG9vayAtIGRlYm91bmNlcyBhIHZhbHVlIHRvIHByZXZlbnQgZXhjZXNzaXZlIHVwZGF0ZXNcbiAqXG4gKiBAcGFyYW0gdmFsdWUgLSBUaGUgdmFsdWUgdG8gZGVib3VuY2VcbiAqIEBwYXJhbSBkZWxheSAtIFRoZSBkZWxheSBpbiBtaWxsaXNlY29uZHNcbiAqIEByZXR1cm5zIFRoZSBkZWJvdW5jZWQgdmFsdWVcbiAqL1xuZXhwb3J0IGZ1bmN0aW9uIHVzZURlYm91bmNlPFQ+KHZhbHVlOiBULCBkZWxheTogbnVtYmVyKTogVCB7XG4gIGNvbnN0IFtkZWJvdW5jZWRWYWx1ZSwgc2V0RGVib3VuY2VkVmFsdWVdID0gdXNlU3RhdGU8VD4odmFsdWUpO1xuXG4gIHVzZUVmZmVjdCgoKSA9PiB7XG4gICAgY29uc3QgaGFuZGxlciA9IHNldFRpbWVvdXQoKCkgPT4ge1xuICAgICAgc2V0RGVib3VuY2VkVmFsdWUodmFsdWUpO1xuICAgIH0sIGRlbGF5KTtcblxuICAgIHJldHVybiAoKSA9PiB7XG4gICAgICBjbGVhclRpbWVvdXQoaGFuZGxlcik7XG4gICAgfTtcbiAgfSwgW3ZhbHVlLCBkZWxheV0pO1xuXG4gIHJldHVybiBkZWJvdW5jZWRWYWx1ZTtcbn1cbiJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0lBY007SUFBQUEsY0FBQSxZQUFBQSxDQUFBO01BQUEsT0FBQUMsY0FBQTtJQUFBO0VBQUE7RUFBQSxPQUFBQSxjQUFBO0FBQUE7QUFBQUQsY0FBQTtBQUFBQSxjQUFBLEdBQUFFLENBQUE7Ozs7OzsrQkFMVTs7Ozs7O1dBQUFDLFdBQUE7Ozs7O2tDQVRvQjtBQVM3QixTQUFTQSxZQUFlQyxLQUFRLEVBQUVDLEtBQWE7RUFBQTtFQUFBTCxjQUFBLEdBQUFNLENBQUE7RUFDcEQsTUFBTSxDQUFDQyxjQUFBLEVBQWdCQyxpQkFBQSxDQUFrQjtFQUFBO0VBQUEsQ0FBQVIsY0FBQSxHQUFBRSxDQUFBLE9BQUcsSUFBQU8sTUFBQSxDQUFBQyxRQUFRLEVBQUlOLEtBQUE7RUFBQTtFQUFBSixjQUFBLEdBQUFFLENBQUE7RUFFeEQsSUFBQU8sTUFBQSxDQUFBRSxTQUFTLEVBQUM7SUFBQTtJQUFBWCxjQUFBLEdBQUFNLENBQUE7SUFDUixNQUFNTSxPQUFBO0lBQUE7SUFBQSxDQUFBWixjQUFBLEdBQUFFLENBQUEsT0FBVVcsVUFBQSxDQUFXO01BQUE7TUFBQWIsY0FBQSxHQUFBTSxDQUFBO01BQUFOLGNBQUEsR0FBQUUsQ0FBQTtNQUN6Qk0saUJBQUEsQ0FBa0JKLEtBQUE7SUFDcEIsR0FBR0MsS0FBQTtJQUFBO0lBQUFMLGNBQUEsR0FBQUUsQ0FBQTtJQUVILE9BQU87TUFBQTtNQUFBRixjQUFBLEdBQUFNLENBQUE7TUFBQU4sY0FBQSxHQUFBRSxDQUFBO01BQ0xZLFlBQUEsQ0FBYUYsT0FBQTtJQUNmO0VBQ0YsR0FBRyxDQUFDUixLQUFBLEVBQU9DLEtBQUEsQ0FBTTtFQUFBO0VBQUFMLGNBQUEsR0FBQUUsQ0FBQTtFQUVqQixPQUFPSyxjQUFBO0FBQ1QiLCJpZ25vcmVMaXN0IjpbXX0=

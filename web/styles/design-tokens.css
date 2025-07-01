@@ -1245,7 +1245,7 @@ body {
 
 /* CRITICAL: Ensure no overlay interference */
 .panel-btn::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -2px;
   left: -2px;
@@ -1323,8 +1323,13 @@ body {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* Professional Hover Effects */

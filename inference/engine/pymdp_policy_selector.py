@@ -601,13 +601,24 @@ def replace_discrete_expected_free_energy(
         PyMDPPolicySelector that can replace DiscreteExpectedFreeEnergy
     """
     # Convert to pymdp format if needed
-    if not isinstance(generative_model, PyMDPGenerativeModel):
-        if isinstance(generative_model, DiscreteGenerativeModel):
-            pymdp_model = PyMDPGenerativeModel.from_discrete_model(generative_model)
-        else:
-            raise ValueError(f"Cannot convert {type(generative_model)} to pymdp format")
-    else:
+    # Use type name checking instead of isinstance to avoid import issues
+    model_type_name = type(generative_model).__name__
+
+    if model_type_name == "PyMDPGenerativeModel":
         pymdp_model = generative_model
+    elif model_type_name == "DiscreteGenerativeModel" or hasattr(generative_model, "dims"):
+        # Handle DiscreteGenerativeModel or similar models with dims
+        try:
+            pymdp_model = PyMDPGenerativeModel.from_discrete_model(generative_model)
+        except Exception as e:
+            logger.warning(f"Failed to convert model {model_type_name}: {e}")
+            raise ValueError(f"Cannot convert {type(generative_model)} to pymdp format")
+    elif hasattr(generative_model, "get_pymdp_matrices"):
+        # Handle objects that have PyMDP interface (like mocks)
+        pymdp_model = generative_model
+    else:
+        raise ValueError(f"Cannot convert {type(generative_model)} to pymdp format")
+
     return create_pymdp_policy_selector(config, pymdp_model)
 
 

@@ -2,7 +2,7 @@
 Module for FreeAgentics Active Inference implementation.
 """
 
-from typing import Optional, Tuple
+from typing import Optional
 
 import torch
 

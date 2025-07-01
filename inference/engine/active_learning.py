@@ -5,7 +5,7 @@ Module for FreeAgentics Active Inference implementation.
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Tuple, Union
+from typing import List, Optional, Union
 
 import torch
 import torch.nn.functional as F
@@ -265,6 +265,10 @@ class ActiveLearningAgent:
         Returns:
             Epistemic values for each policy
         """
+        # Handle batch dimension if present
+        if beliefs.dim() > 1 and beliefs.shape[0] == 1:
+            beliefs = beliefs.squeeze(0)
+
         num_policies = len(policies)
         epistemic_values = torch.zeros(num_policies, device=self.device)
         for i, policy in enumerate(policies):
@@ -289,6 +293,10 @@ class ActiveLearningAgent:
         Returns:
             Pragmatic values for each policy
         """
+        # Handle batch dimension if present
+        if beliefs.dim() > 1 and beliefs.shape[0] == 1:
+            beliefs = beliefs.squeeze(0)
+
         pragmatic_values = []
         for policy in policies:
             _, _, pragmatic = self.policy_selector.compute_expected_free_energy(

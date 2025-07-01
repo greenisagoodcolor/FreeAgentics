@@ -4,12 +4,16 @@
 fastapi
 uvicorn[standard]
 pydantic
-torch
 pymdp
 psycopg2-binary
 h3
 scikit-learn
-torch-geometric
+
+# Optional Deep Learning Dependencies
+# PyTorch for GNN layers and neural network components only
+# Can be installed separately if GNN features are needed
+torch>=2.0.0,<2.7.0; extra == "neural"
+torch-geometric; extra == "neural"
 
 # Demo/monitoring/real-time support (from docs/requirements-demo.txt)
 asyncio-redis==0.16.0

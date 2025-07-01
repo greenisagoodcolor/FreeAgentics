@@ -1,0 +1,377 @@
+2ce650117ef3f4880f963c7edb5aa6c4
+"use client";
+"use strict";
+
+/* istanbul ignore next */
+function cov_vikxoqmqg() {
+  var path = "/Users/matthewmoroney/builds/FreeAgentics/web/components/aboutmodal.tsx";
+  var hash = "b9f78a4b379a1b986500b934d9f1340f378b145c";
+  var global = new Function("return this")();
+  var gcv = "__coverage__";
+  var coverageData = {
+    path: "/Users/matthewmoroney/builds/FreeAgentics/web/components/aboutmodal.tsx",
+    statementMap: {
+      "0": {
+        start: {
+          line: 3,
+          column: 0
+        },
+        end: {
+          line: 5,
+          column: 3
+        }
+      },
+      "1": {
+        start: {
+          line: 6,
+          column: 0
+        },
+        end: {
+          line: 11,
+          column: 3
+        }
+      },
+      "2": {
+        start: {
+          line: 9,
+          column: 8
+        },
+        end: {
+          line: 9,
+          column: 26
+        }
+      },
+      "3": {
+        start: {
+          line: 12,
+          column: 20
+        },
+        end: {
+          line: 12,
+          column: 48
+        }
+      },
+      "4": {
+        start: {
+          line: 13,
+          column: 16
+        },
+        end: {
+          line: 13,
+          column: 38
+        }
+      },
+      "5": {
+        start: {
+          line: 14,
+          column: 14
+        },
+        end: {
+          line: 14,
+          column: 34
+        }
+      },
+      "6": {
+        start: {
+          line: 16,
+          column: 4
+        },
+        end: {
+          line: 16,
+          column: 29
+        }
+      },
+      "7": {
+        start: {
+          line: 16,
+          column: 17
+        },
+        end: {
+          line: 16,
+          column: 29
+        }
+      },
+      "8": {
+        start: {
+          line: 17,
+          column: 4
+        },
+        end: {
+          line: 162,
+          column: 7
+        }
+      }
+    },
+    fnMap: {
+      "0": {
+        name: "(anonymous_0)",
+        decl: {
+          start: {
+            line: 8,
+            column: 9
+          },
+          end: {
+            line: 8,
+            column: 10
+          }
+        },
+        loc: {
+          start: {
+            line: 8,
+            column: 20
+          },
+          end: {
+            line: 10,
+            column: 5
+          }
+        },
+        line: 8
+      },
+      "1": {
+        name: "AboutModal",
+        decl: {
+          start: {
+            line: 15,
+            column: 9
+          },
+          end: {
+            line: 15,
+            column: 19
+          }
+        },
+        loc: {
+          start: {
+            line: 15,
+            column: 41
+          },
+          end: {
+            line: 163,
+            column: 1
+          }
+        },
+        line: 15
+      }
+    },
+    branchMap: {
+      "0": {
+        loc: {
+          start: {
+            line: 16,
+            column: 4
+          },
+          end: {
+            line: 16,
+            column: 29
+          }
+        },
+        type: "if",
+        locations: [{
+          start: {
+            line: 16,
+            column: 4
+          },
+          end: {
+            line: 16,
+            column: 29
+          }
+        }, {
+          start: {
+            line: undefined,
+            column: undefined
+          },
+          end: {
+            line: undefined,
+            column: undefined
+          }
+        }],
+        line: 16
+      }
+    },
+    s: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0
+    },
+    f: {
+      "0": 0,
+      "1": 0
+    },
+    b: {
+      "0": [0, 0]
+    },
+    inputSourceMap: {
+      version: 3,
+      sources: ["/Users/matthewmoroney/builds/FreeAgentics/web/components/aboutmodal.tsx"],
+      sourcesContent: ["\"use client\";\n\nimport { Button } from \"@/components/ui/button\";\nimport {\n  Card,\n  CardContent,\n  CardFooter,\n  CardHeader,\n  CardTitle,\n} from \"@/components/ui/card\";\n\ninterface AboutModalProps {\n  isOpen: boolean;\n  onClose: () => void;\n}\n\nexport default function AboutModal({ isOpen, onClose }: AboutModalProps) {\n  if (!isOpen) return null;\n\n  return (\n    <div className=\"fixed inset-0 bg-black/70 flex items-center justify-center z-50\">\n      <Card className=\"w-[90%] max-w-2xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-purple-950 to-indigo-950 border border-purple-700\">\n        <CardHeader>\n          <CardTitle className=\"text-white\">About FreeAgentics</CardTitle>\n        </CardHeader>\n        <CardContent className=\"text-purple-100 space-y-4\">\n          <h2 className=\"text-xl font-semibold\">Contact Information</h2>\n          <p>Andrew Pashea</p>\n          <p>Email: andrewpashea@activeinference.institute</p>\n\n          <h2 className=\"text-xl font-semibold\">Project Links</h2>\n          <p>\n            <a\n              href=\"https://github.com/apashea/FreeAgentics/\"\n              className=\"text-blue-300 hover:underline\"\n              target=\"_blank\"\n              rel=\"noopener noreferrer\"\n            >\n              GitHub Repository\n            </a>\n          </p>\n          <p>\n            <a\n              href=\"https://doi.org/10.5281/zenodo.15450213\"\n              className=\"text-blue-300 hover:underline\"\n              target=\"_blank\"\n              rel=\"noopener noreferrer\"\n            >\n              Zenodo Publication\n            </a>\n          </p>\n\n          <h2 className=\"text-xl font-semibold\">Description</h2>\n          <p>\n            FreeAgentics is an interactive platform for creating and managing\n            intelligent agents with persistent knowledge bases. The application\n            enables users to design agents with unique knowledge graphs,\n            visualize connections between knowledge elements, and observe how\n            agents&apos; understanding evolves over time. Through its intuitive\n            interface, users can interact with agents, contribute to their\n            knowledge bases, and explore the emergent properties of\n            interconnected cognitive systems.\n          </p>\n\n          <h2 className=\"text-xl font-semibold\">Version</h2>\n          <p>0.0.1</p>\n\n          <h2 className=\"text-xl font-semibold\">License</h2>\n          <p>Dual Licensed:</p>\n          <ul className=\"list-disc pl-5 space-y-1\">\n            <li>\n              Creative Commons CC BY-NC-SA license for non-commercial use\n              <ul className=\"list-disc pl-5 space-y-1 mt-1 text-sm\">\n                <li>\n                  <strong>BY</strong> - Attribution: Credit must be given to the\n                  original creator\n                </li>\n                <li>\n                  <strong>NC</strong> - NonCommercial: May not be used for\n                  commercial purposes\n                </li>\n                <li>\n                  <strong>SA</strong> - ShareAlike: Adaptations must be shared\n                  under the same terms\n                </li>\n              </ul>\n            </li>\n            <li>Commercial License available for proprietary applications</li>\n          </ul>\n          <p className=\"text-sm mt-1\">\n            All contributions require a Contributor License Agreement (CLA)\n          </p>\n\n          <h2 className=\"text-xl font-semibold mt-6\">Disclaimer</h2>\n          <div className=\"bg-purple-900/30 border border-purple-800 rounded-md p-3 text-sm\">\n            <p className=\"mb-2\">\n              DISCLAIMER: FreeAgentics is currently in early development\n              (version 0.0.1) and is provided for research and experimental\n              purposes only. The information, knowledge, and interactions\n              generated by agents within this application may be incomplete,\n              inaccurate, or misleading. Users should not rely on any outputs\n              from this system for critical decisions or as factual truth.\n            </p>\n            <p className=\"mb-2\">\n              By using FreeAgentics, you acknowledge that you are doing so at\n              your own risk and discretion. Neither Andrew Pashea, the Active\n              Inference Institute, nor any contributors to this project shall be\n              held liable for any damages, consequences, or misunderstandings\n              arising from the use of this software.\n            </p>\n            <p>\n              This application is provided &quot;as is&quot; without warranty of\n              any kind, either expressed or implied, including, but not limited\n              to, the implied warranties of merchantability and fitness for a\n              particular purpose.\n            </p>\n          </div>\n        </CardContent>\n        <CardFooter className=\"flex justify-end border-t border-purple-800 pt-4\">\n          <Button\n            onClick={onClose}\n            className=\"bg-purple-700 hover:bg-purple-600\"\n          >\n            Get Started\n          </Button>\n        </CardFooter>\n      </Card>\n    </div>\n  );\n}\n"],
+      names: ["AboutModal", "isOpen", "onClose", "div", "className", "Card", "CardHeader", "CardTitle", "CardContent", "h2", "p", "a", "href", "target", "rel", "ul", "li", "strong", "CardFooter", "Button", "onClick"],
+      mappings: "AAAA;;;;;+BAgBA;;;eAAwBA;;;;wBAdD;sBAOhB;AAOQ,SAASA,WAAW,EAAEC,MAAM,EAAEC,OAAO,EAAmB;IACrE,IAAI,CAACD,QAAQ,OAAO;IAEpB,qBACE,qBAACE;QAAIC,WAAU;kBACb,cAAA,sBAACC,UAAI;YAACD,WAAU;;8BACd,qBAACE,gBAAU;8BACT,cAAA,qBAACC,eAAS;wBAACH,WAAU;kCAAa;;;8BAEpC,sBAACI,iBAAW;oBAACJ,WAAU;;sCACrB,qBAACK;4BAAGL,WAAU;sCAAwB;;sCACtC,qBAACM;sCAAE;;sCACH,qBAACA;sCAAE;;sCAEH,qBAACD;4BAAGL,WAAU;sCAAwB;;sCACtC,qBAACM;sCACC,cAAA,qBAACC;gCACCC,MAAK;gCACLR,WAAU;gCACVS,QAAO;gCACPC,KAAI;0CACL;;;sCAIH,qBAACJ;sCACC,cAAA,qBAACC;gCACCC,MAAK;gCACLR,WAAU;gCACVS,QAAO;gCACPC,KAAI;0CACL;;;sCAKH,qBAACL;4BAAGL,WAAU;sCAAwB;;sCACtC,qBAACM;sCAAE;;sCAWH,qBAACD;4BAAGL,WAAU;sCAAwB;;sCACtC,qBAACM;sCAAE;;sCAEH,qBAACD;4BAAGL,WAAU;sCAAwB;;sCACtC,qBAACM;sCAAE;;sCACH,sBAACK;4BAAGX,WAAU;;8CACZ,sBAACY;;wCAAG;sDAEF,sBAACD;4CAAGX,WAAU;;8DACZ,sBAACY;;sEACC,qBAACC;sEAAO;;wDAAW;;;8DAGrB,sBAACD;;sEACC,qBAACC;sEAAO;;wDAAW;;;8DAGrB,sBAACD;;sEACC,qBAACC;sEAAO;;wDAAW;;;;;;;8CAKzB,qBAACD;8CAAG;;;;sCAEN,qBAACN;4BAAEN,WAAU;sCAAe;;sCAI5B,qBAACK;4BAAGL,WAAU;sCAA6B;;sCAC3C,sBAACD;4BAAIC,WAAU;;8CACb,qBAACM;oCAAEN,WAAU;8CAAO;;8CAQpB,qBAACM;oCAAEN,WAAU;8CAAO;;8CAOpB,qBAACM;8CAAE;;;;;;8BAQP,qBAACQ,gBAAU;oBAACd,WAAU;8BACpB,cAAA,qBAACe,cAAM;wBACLC,SAASlB;wBACTE,WAAU;kCACX;;;;;;AAOX"
+    },
+    _coverageSchema: "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+    hash: "b9f78a4b379a1b986500b934d9f1340f378b145c"
+  };
+  var coverage = global[gcv] || (global[gcv] = {});
+  if (!coverage[path] || coverage[path].hash !== hash) {
+    coverage[path] = coverageData;
+  }
+  var actualCoverage = coverage[path];
+  {
+    // @ts-ignore
+    cov_vikxoqmqg = function () {
+      return actualCoverage;
+    };
+  }
+  return actualCoverage;
+}
+cov_vikxoqmqg();
+cov_vikxoqmqg().s[0]++;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/* istanbul ignore next */
+cov_vikxoqmqg().s[1]++;
+Object.defineProperty(exports, "default", {
+  enumerable: true,
+  get: function () {
+    /* istanbul ignore next */
+    cov_vikxoqmqg().f[0]++;
+    cov_vikxoqmqg().s[2]++;
+    return AboutModal;
+  }
+});
+const _jsxruntime =
+/* istanbul ignore next */
+(cov_vikxoqmqg().s[3]++, require("react/jsx-runtime"));
+const _button =
+/* istanbul ignore next */
+(cov_vikxoqmqg().s[4]++, require("./ui/button"));
+const _card =
+/* istanbul ignore next */
+(cov_vikxoqmqg().s[5]++, require("./ui/card"));
+function AboutModal({
+  isOpen,
+  onClose
+}) {
+  /* istanbul ignore next */
+  cov_vikxoqmqg().f[1]++;
+  cov_vikxoqmqg().s[6]++;
+  if (!isOpen) {
+    /* istanbul ignore next */
+    cov_vikxoqmqg().b[0][0]++;
+    cov_vikxoqmqg().s[7]++;
+    return null;
+  } else
+  /* istanbul ignore next */
+  {
+    cov_vikxoqmqg().b[0][1]++;
+  }
+  cov_vikxoqmqg().s[8]++;
+  return /*#__PURE__*/(0, _jsxruntime.jsx)("div", {
+    className: "fixed inset-0 bg-black/70 flex items-center justify-center z-50",
+    children: /*#__PURE__*/(0, _jsxruntime.jsxs)(_card.Card, {
+      className: "w-[90%] max-w-2xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-purple-950 to-indigo-950 border border-purple-700",
+      children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_card.CardHeader, {
+        children: /*#__PURE__*/(0, _jsxruntime.jsx)(_card.CardTitle, {
+          className: "text-white",
+          children: "About FreeAgentics"
+        })
+      }), /*#__PURE__*/(0, _jsxruntime.jsxs)(_card.CardContent, {
+        className: "text-purple-100 space-y-4",
+        children: [/*#__PURE__*/(0, _jsxruntime.jsx)("h2", {
+          className: "text-xl font-semibold",
+          children: "Contact Information"
+        }), /*#__PURE__*/(0, _jsxruntime.jsx)("p", {
+          children: "Andrew Pashea"
+        }), /*#__PURE__*/(0, _jsxruntime.jsx)("p", {
+          children: "Email: andrewpashea@activeinference.institute"
+        }), /*#__PURE__*/(0, _jsxruntime.jsx)("h2", {
+          className: "text-xl font-semibold",
+          children: "Project Links"
+        }), /*#__PURE__*/(0, _jsxruntime.jsx)("p", {
+          children: /*#__PURE__*/(0, _jsxruntime.jsx)("a", {
+            href: "https://github.com/apashea/FreeAgentics/",
+            className: "text-blue-300 hover:underline",
+            target: "_blank",
+            rel: "noopener noreferrer",
+            children: "GitHub Repository"
+          })
+        }), /*#__PURE__*/(0, _jsxruntime.jsx)("p", {
+          children: /*#__PURE__*/(0, _jsxruntime.jsx)("a", {
+            href: "https://doi.org/10.5281/zenodo.15450213",
+            className: "text-blue-300 hover:underline",
+            target: "_blank",
+            rel: "noopener noreferrer",
+            children: "Zenodo Publication"
+          })
+        }), /*#__PURE__*/(0, _jsxruntime.jsx)("h2", {
+          className: "text-xl font-semibold",
+          children: "Description"
+        }), /*#__PURE__*/(0, _jsxruntime.jsx)("p", {
+          children: "FreeAgentics is an interactive platform for creating and managing intelligent agents with persistent knowledge bases. The application enables users to design agents with unique knowledge graphs, visualize connections between knowledge elements, and observe how agents' understanding evolves over time. Through its intuitive interface, users can interact with agents, contribute to their knowledge bases, and explore the emergent properties of interconnected cognitive systems."
+        }), /*#__PURE__*/(0, _jsxruntime.jsx)("h2", {
+          className: "text-xl font-semibold",
+          children: "Version"
+        }), /*#__PURE__*/(0, _jsxruntime.jsx)("p", {
+          children: "0.0.1"
+        }), /*#__PURE__*/(0, _jsxruntime.jsx)("h2", {
+          className: "text-xl font-semibold",
+          children: "License"
+        }), /*#__PURE__*/(0, _jsxruntime.jsx)("p", {
+          children: "Dual Licensed:"
+        }), /*#__PURE__*/(0, _jsxruntime.jsxs)("ul", {
+          className: "list-disc pl-5 space-y-1",
+          children: [/*#__PURE__*/(0, _jsxruntime.jsxs)("li", {
+            children: ["Creative Commons CC BY-NC-SA license for non-commercial use", /*#__PURE__*/(0, _jsxruntime.jsxs)("ul", {
+              className: "list-disc pl-5 space-y-1 mt-1 text-sm",
+              children: [/*#__PURE__*/(0, _jsxruntime.jsxs)("li", {
+                children: [/*#__PURE__*/(0, _jsxruntime.jsx)("strong", {
+                  children: "BY"
+                }), " - Attribution: Credit must be given to the original creator"]
+              }), /*#__PURE__*/(0, _jsxruntime.jsxs)("li", {
+                children: [/*#__PURE__*/(0, _jsxruntime.jsx)("strong", {
+                  children: "NC"
+                }), " - NonCommercial: May not be used for commercial purposes"]
+              }), /*#__PURE__*/(0, _jsxruntime.jsxs)("li", {
+                children: [/*#__PURE__*/(0, _jsxruntime.jsx)("strong", {
+                  children: "SA"
+                }), " - ShareAlike: Adaptations must be shared under the same terms"]
+              })]
+            })]
+          }), /*#__PURE__*/(0, _jsxruntime.jsx)("li", {
+            children: "Commercial License available for proprietary applications"
+          })]
+        }), /*#__PURE__*/(0, _jsxruntime.jsx)("p", {
+          className: "text-sm mt-1",
+          children: "All contributions require a Contributor License Agreement (CLA)"
+        }), /*#__PURE__*/(0, _jsxruntime.jsx)("h2", {
+          className: "text-xl font-semibold mt-6",
+          children: "Disclaimer"
+        }), /*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+          className: "bg-purple-900/30 border border-purple-800 rounded-md p-3 text-sm",
+          children: [/*#__PURE__*/(0, _jsxruntime.jsx)("p", {
+            className: "mb-2",
+            children: "DISCLAIMER: FreeAgentics is currently in early development (version 0.0.1) and is provided for research and experimental purposes only. The information, knowledge, and interactions generated by agents within this application may be incomplete, inaccurate, or misleading. Users should not rely on any outputs from this system for critical decisions or as factual truth."
+          }), /*#__PURE__*/(0, _jsxruntime.jsx)("p", {
+            className: "mb-2",
+            children: "By using FreeAgentics, you acknowledge that you are doing so at your own risk and discretion. Neither Andrew Pashea, the Active Inference Institute, nor any contributors to this project shall be held liable for any damages, consequences, or misunderstandings arising from the use of this software."
+          }), /*#__PURE__*/(0, _jsxruntime.jsx)("p", {
+            children: 'This application is provided "as is" without warranty of any kind, either expressed or implied, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose.'
+          })]
+        })]
+      }), /*#__PURE__*/(0, _jsxruntime.jsx)(_card.CardFooter, {
+        className: "flex justify-end border-t border-purple-800 pt-4",
+        children: /*#__PURE__*/(0, _jsxruntime.jsx)(_button.Button, {
+          onClick: onClose,
+          className: "bg-purple-700 hover:bg-purple-600",
+          children: "Get Started"
+        })
+      })]
+    })
+  });
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJjb3ZfdmlreG9xbXFnIiwiYWN0dWFsQ292ZXJhZ2UiLCJzIiwiQWJvdXRNb2RhbCIsImlzT3BlbiIsIm9uQ2xvc2UiLCJmIiwiYiIsIl9qc3hydW50aW1lIiwianN4IiwiY2xhc3NOYW1lIiwianN4cyIsIl9jYXJkIiwiQ2FyZCIsIkNhcmRIZWFkZXIiLCJDYXJkVGl0bGUiLCJDYXJkQ29udGVudCIsImhyZWYiLCJ0YXJnZXQiLCJyZWwiLCJDYXJkRm9vdGVyIiwiX2J1dHRvbiIsIkJ1dHRvbiIsIm9uQ2xpY2siXSwic291cmNlcyI6WyIvVXNlcnMvbWF0dGhld21vcm9uZXkvYnVpbGRzL0ZyZWVBZ2VudGljcy93ZWIvY29tcG9uZW50cy9hYm91dG1vZGFsLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJcInVzZSBjbGllbnRcIjtcblxuaW1wb3J0IHsgQnV0dG9uIH0gZnJvbSBcIkAvY29tcG9uZW50cy91aS9idXR0b25cIjtcbmltcG9ydCB7XG4gIENhcmQsXG4gIENhcmRDb250ZW50LFxuICBDYXJkRm9vdGVyLFxuICBDYXJkSGVhZGVyLFxuICBDYXJkVGl0bGUsXG59IGZyb20gXCJAL2NvbXBvbmVudHMvdWkvY2FyZFwiO1xuXG5pbnRlcmZhY2UgQWJvdXRNb2RhbFByb3BzIHtcbiAgaXNPcGVuOiBib29sZWFuO1xuICBvbkNsb3NlOiAoKSA9PiB2b2lkO1xufVxuXG5leHBvcnQgZGVmYXVsdCBmdW5jdGlvbiBBYm91dE1vZGFsKHsgaXNPcGVuLCBvbkNsb3NlIH06IEFib3V0TW9kYWxQcm9wcykge1xuICBpZiAoIWlzT3BlbikgcmV0dXJuIG51bGw7XG5cbiAgcmV0dXJuIChcbiAgICA8ZGl2IGNsYXNzTmFtZT1cImZpeGVkIGluc2V0LTAgYmctYmxhY2svNzAgZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1jZW50ZXIgei01MFwiPlxuICAgICAgPENhcmQgY2xhc3NOYW1lPVwidy1bOTAlXSBtYXgtdy0yeGwgbWF4LWgtWzkwdmhdIG92ZXJmbG93LXktYXV0byBiZy1ncmFkaWVudC10by1iciBmcm9tLXB1cnBsZS05NTAgdG8taW5kaWdvLTk1MCBib3JkZXIgYm9yZGVyLXB1cnBsZS03MDBcIj5cbiAgICAgICAgPENhcmRIZWFkZXI+XG4gICAgICAgICAgPENhcmRUaXRsZSBjbGFzc05hbWU9XCJ0ZXh0LXdoaXRlXCI+QWJvdXQgRnJlZUFnZW50aWNzPC9DYXJkVGl0bGU+XG4gICAgICAgIDwvQ2FyZEhlYWRlcj5cbiAgICAgICAgPENhcmRDb250ZW50IGNsYXNzTmFtZT1cInRleHQtcHVycGxlLTEwMCBzcGFjZS15LTRcIj5cbiAgICAgICAgICA8aDIgY2xhc3NOYW1lPVwidGV4dC14bCBmb250LXNlbWlib2xkXCI+Q29udGFjdCBJbmZvcm1hdGlvbjwvaDI+XG4gICAgICAgICAgPHA+QW5kcmV3IFBhc2hlYTwvcD5cbiAgICAgICAgICA8cD5FbWFpbDogYW5kcmV3cGFzaGVhQGFjdGl2ZWluZmVyZW5jZS5pbnN0aXR1dGU8L3A+XG5cbiAgICAgICAgICA8aDIgY2xhc3NOYW1lPVwidGV4dC14bCBmb250LXNlbWlib2xkXCI+UHJvamVjdCBMaW5rczwvaDI+XG4gICAgICAgICAgPHA+XG4gICAgICAgICAgICA8YVxuICAgICAgICAgICAgICBocmVmPVwiaHR0cHM6Ly9naXRodWIuY29tL2FwYXNoZWEvRnJlZUFnZW50aWNzL1wiXG4gICAgICAgICAgICAgIGNsYXNzTmFtZT1cInRleHQtYmx1ZS0zMDAgaG92ZXI6dW5kZXJsaW5lXCJcbiAgICAgICAgICAgICAgdGFyZ2V0PVwiX2JsYW5rXCJcbiAgICAgICAgICAgICAgcmVsPVwibm9vcGVuZXIgbm9yZWZlcnJlclwiXG4gICAgICAgICAgICA+XG4gICAgICAgICAgICAgIEdpdEh1YiBSZXBvc2l0b3J5XG4gICAgICAgICAgICA8L2E+XG4gICAgICAgICAgPC9wPlxuICAgICAgICAgIDxwPlxuICAgICAgICAgICAgPGFcbiAgICAgICAgICAgICAgaHJlZj1cImh0dHBzOi8vZG9pLm9yZy8xMC41MjgxL3plbm9kby4xNTQ1MDIxM1wiXG4gICAgICAgICAgICAgIGNsYXNzTmFtZT1cInRleHQtYmx1ZS0zMDAgaG92ZXI6dW5kZXJsaW5lXCJcbiAgICAgICAgICAgICAgdGFyZ2V0PVwiX2JsYW5rXCJcbiAgICAgICAgICAgICAgcmVsPVwibm9vcGVuZXIgbm9yZWZlcnJlclwiXG4gICAgICAgICAgICA+XG4gICAgICAgICAgICAgIFplbm9kbyBQdWJsaWNhdGlvblxuICAgICAgICAgICAgPC9hPlxuICAgICAgICAgIDwvcD5cblxuICAgICAgICAgIDxoMiBjbGFzc05hbWU9XCJ0ZXh0LXhsIGZvbnQtc2VtaWJvbGRcIj5EZXNjcmlwdGlvbjwvaDI+XG4gICAgICAgICAgPHA+XG4gICAgICAgICAgICBGcmVlQWdlbnRpY3MgaXMgYW4gaW50ZXJhY3RpdmUgcGxhdGZvcm0gZm9yIGNyZWF0aW5nIGFuZCBtYW5hZ2luZ1xuICAgICAgICAgICAgaW50ZWxsaWdlbnQgYWdlbnRzIHdpdGggcGVyc2lzdGVudCBrbm93bGVkZ2UgYmFzZXMuIFRoZSBhcHBsaWNhdGlvblxuICAgICAgICAgICAgZW5hYmxlcyB1c2VycyB0byBkZXNpZ24gYWdlbnRzIHdpdGggdW5pcXVlIGtub3dsZWRnZSBncmFwaHMsXG4gICAgICAgICAgICB2aXN1YWxpemUgY29ubmVjdGlvbnMgYmV0d2VlbiBrbm93bGVkZ2UgZWxlbWVudHMsIGFuZCBvYnNlcnZlIGhvd1xuICAgICAgICAgICAgYWdlbnRzJmFwb3M7IHVuZGVyc3RhbmRpbmcgZXZvbHZlcyBvdmVyIHRpbWUuIFRocm91Z2ggaXRzIGludHVpdGl2ZVxuICAgICAgICAgICAgaW50ZXJmYWNlLCB1c2VycyBjYW4gaW50ZXJhY3Qgd2l0aCBhZ2VudHMsIGNvbnRyaWJ1dGUgdG8gdGhlaXJcbiAgICAgICAgICAgIGtub3dsZWRnZSBiYXNlcywgYW5kIGV4cGxvcmUgdGhlIGVtZXJnZW50IHByb3BlcnRpZXMgb2ZcbiAgICAgICAgICAgIGludGVyY29ubmVjdGVkIGNvZ25pdGl2ZSBzeXN0ZW1zLlxuICAgICAgICAgIDwvcD5cblxuICAgICAgICAgIDxoMiBjbGFzc05hbWU9XCJ0ZXh0LXhsIGZvbnQtc2VtaWJvbGRcIj5WZXJzaW9uPC9oMj5cbiAgICAgICAgICA8cD4wLjAuMTwvcD5cblxuICAgICAgICAgIDxoMiBjbGFzc05hbWU9XCJ0ZXh0LXhsIGZvbnQtc2VtaWJvbGRcIj5MaWNlbnNlPC9oMj5cbiAgICAgICAgICA8cD5EdWFsIExpY2Vuc2VkOjwvcD5cbiAgICAgICAgICA8dWwgY2xhc3NOYW1lPVwibGlzdC1kaXNjIHBsLTUgc3BhY2UteS0xXCI+XG4gICAgICAgICAgICA8bGk+XG4gICAgICAgICAgICAgIENyZWF0aXZlIENvbW1vbnMgQ0MgQlktTkMtU0EgbGljZW5zZSBmb3Igbm9uLWNvbW1lcmNpYWwgdXNlXG4gICAgICAgICAgICAgIDx1bCBjbGFzc05hbWU9XCJsaXN0LWRpc2MgcGwtNSBzcGFjZS15LTEgbXQtMSB0ZXh0LXNtXCI+XG4gICAgICAgICAgICAgICAgPGxpPlxuICAgICAgICAgICAgICAgICAgPHN0cm9uZz5CWTwvc3Ryb25nPiAtIEF0dHJpYnV0aW9uOiBDcmVkaXQgbXVzdCBiZSBnaXZlbiB0byB0aGVcbiAgICAgICAgICAgICAgICAgIG9yaWdpbmFsIGNyZWF0b3JcbiAgICAgICAgICAgICAgICA8L2xpPlxuICAgICAgICAgICAgICAgIDxsaT5cbiAgICAgICAgICAgICAgICAgIDxzdHJvbmc+TkM8L3N0cm9uZz4gLSBOb25Db21tZXJjaWFsOiBNYXkgbm90IGJlIHVzZWQgZm9yXG4gICAgICAgICAgICAgICAgICBjb21tZXJjaWFsIHB1cnBvc2VzXG4gICAgICAgICAgICAgICAgPC9saT5cbiAgICAgICAgICAgICAgICA8bGk+XG4gICAgICAgICAgICAgICAgICA8c3Ryb25nPlNBPC9zdHJvbmc+IC0gU2hhcmVBbGlrZTogQWRhcHRhdGlvbnMgbXVzdCBiZSBzaGFyZWRcbiAgICAgICAgICAgICAgICAgIHVuZGVyIHRoZSBzYW1lIHRlcm1zXG4gICAgICAgICAgICAgICAgPC9saT5cbiAgICAgICAgICAgICAgPC91bD5cbiAgICAgICAgICAgIDwvbGk+XG4gICAgICAgICAgICA8bGk+Q29tbWVyY2lhbCBMaWNlbnNlIGF2YWlsYWJsZSBmb3IgcHJvcHJpZXRhcnkgYXBwbGljYXRpb25zPC9saT5cbiAgICAgICAgICA8L3VsPlxuICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtc20gbXQtMVwiPlxuICAgICAgICAgICAgQWxsIGNvbnRyaWJ1dGlvbnMgcmVxdWlyZSBhIENvbnRyaWJ1dG9yIExpY2Vuc2UgQWdyZWVtZW50IChDTEEpXG4gICAgICAgICAgPC9wPlxuXG4gICAgICAgICAgPGgyIGNsYXNzTmFtZT1cInRleHQteGwgZm9udC1zZW1pYm9sZCBtdC02XCI+RGlzY2xhaW1lcjwvaDI+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJiZy1wdXJwbGUtOTAwLzMwIGJvcmRlciBib3JkZXItcHVycGxlLTgwMCByb3VuZGVkLW1kIHAtMyB0ZXh0LXNtXCI+XG4gICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJtYi0yXCI+XG4gICAgICAgICAgICAgIERJU0NMQUlNRVI6IEZyZWVBZ2VudGljcyBpcyBjdXJyZW50bHkgaW4gZWFybHkgZGV2ZWxvcG1lbnRcbiAgICAgICAgICAgICAgKHZlcnNpb24gMC4wLjEpIGFuZCBpcyBwcm92aWRlZCBmb3IgcmVzZWFyY2ggYW5kIGV4cGVyaW1lbnRhbFxuICAgICAgICAgICAgICBwdXJwb3NlcyBvbmx5LiBUaGUgaW5mb3JtYXRpb24sIGtub3dsZWRnZSwgYW5kIGludGVyYWN0aW9uc1xuICAgICAgICAgICAgICBnZW5lcmF0ZWQgYnkgYWdlbnRzIHdpdGhpbiB0aGlzIGFwcGxpY2F0aW9uIG1heSBiZSBpbmNvbXBsZXRlLFxuICAgICAgICAgICAgICBpbmFjY3VyYXRlLCBvciBtaXNsZWFkaW5nLiBVc2VycyBzaG91bGQgbm90IHJlbHkgb24gYW55IG91dHB1dHNcbiAgICAgICAgICAgICAgZnJvbSB0aGlzIHN5c3RlbSBmb3IgY3JpdGljYWwgZGVjaXNpb25zIG9yIGFzIGZhY3R1YWwgdHJ1dGguXG4gICAgICAgICAgICA8L3A+XG4gICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJtYi0yXCI+XG4gICAgICAgICAgICAgIEJ5IHVzaW5nIEZyZWVBZ2VudGljcywgeW91IGFja25vd2xlZGdlIHRoYXQgeW91IGFyZSBkb2luZyBzbyBhdFxuICAgICAgICAgICAgICB5b3VyIG93biByaXNrIGFuZCBkaXNjcmV0aW9uLiBOZWl0aGVyIEFuZHJldyBQYXNoZWEsIHRoZSBBY3RpdmVcbiAgICAgICAgICAgICAgSW5mZXJlbmNlIEluc3RpdHV0ZSwgbm9yIGFueSBjb250cmlidXRvcnMgdG8gdGhpcyBwcm9qZWN0IHNoYWxsIGJlXG4gICAgICAgICAgICAgIGhlbGQgbGlhYmxlIGZvciBhbnkgZGFtYWdlcywgY29uc2VxdWVuY2VzLCBvciBtaXN1bmRlcnN0YW5kaW5nc1xuICAgICAgICAgICAgICBhcmlzaW5nIGZyb20gdGhlIHVzZSBvZiB0aGlzIHNvZnR3YXJlLlxuICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgPHA+XG4gICAgICAgICAgICAgIFRoaXMgYXBwbGljYXRpb24gaXMgcHJvdmlkZWQgJnF1b3Q7YXMgaXMmcXVvdDsgd2l0aG91dCB3YXJyYW50eSBvZlxuICAgICAgICAgICAgICBhbnkga2luZCwgZWl0aGVyIGV4cHJlc3NlZCBvciBpbXBsaWVkLCBpbmNsdWRpbmcsIGJ1dCBub3QgbGltaXRlZFxuICAgICAgICAgICAgICB0bywgdGhlIGltcGxpZWQgd2FycmFudGllcyBvZiBtZXJjaGFudGFiaWxpdHkgYW5kIGZpdG5lc3MgZm9yIGFcbiAgICAgICAgICAgICAgcGFydGljdWxhciBwdXJwb3NlLlxuICAgICAgICAgICAgPC9wPlxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICA8L0NhcmRDb250ZW50PlxuICAgICAgICA8Q2FyZEZvb3RlciBjbGFzc05hbWU9XCJmbGV4IGp1c3RpZnktZW5kIGJvcmRlci10IGJvcmRlci1wdXJwbGUtODAwIHB0LTRcIj5cbiAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICBvbkNsaWNrPXtvbkNsb3NlfVxuICAgICAgICAgICAgY2xhc3NOYW1lPVwiYmctcHVycGxlLTcwMCBob3ZlcjpiZy1wdXJwbGUtNjAwXCJcbiAgICAgICAgICA+XG4gICAgICAgICAgICBHZXQgU3RhcnRlZFxuICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICA8L0NhcmRGb290ZXI+XG4gICAgICA8L0NhcmQ+XG4gICAgPC9kaXY+XG4gICk7XG59XG4iXSwibWFwcGluZ3MiOiJBQUFBOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7SUFpQk87SUFBQUEsYUFBQSxZQUFBQSxDQUFBO01BQUEsT0FBQUMsY0FBQTtJQUFBO0VBQUE7RUFBQSxPQUFBQSxjQUFBO0FBQUE7QUFBQUQsYUFBQTtBQUFBQSxhQUFBLEdBQUFFLENBQUE7Ozs7OzsrQkFEUDs7Ozs7O1dBQXdCQyxVQUFBOzs7Ozs7OztpQ0FkRDs7O2lDQU9oQjtBQU9RLFNBQVNBLFdBQVc7RUFBRUMsTUFBTTtFQUFFQztBQUFPLENBQW1CO0VBQUE7RUFBQUwsYUFBQSxHQUFBTSxDQUFBO0VBQUFOLGFBQUEsR0FBQUUsQ0FBQTtFQUNyRSxJQUFJLENBQUNFLE1BQUEsRUFBUTtJQUFBO0lBQUFKLGFBQUEsR0FBQU8sQ0FBQTtJQUFBUCxhQUFBLEdBQUFFLENBQUE7SUFBQSxPQUFPO0VBQUE7RUFBQTtFQUFBO0lBQUFGLGFBQUEsR0FBQU8sQ0FBQTtFQUFBO0VBQUFQLGFBQUEsR0FBQUUsQ0FBQTtFQUVwQixvQkFDRSxJQUFBTSxXQUFBLENBQUFDLEdBQUEsRUFBQztJQUFJQyxTQUFBLEVBQVU7Y0FDYixpQkFBQUYsV0FBQSxDQUFBRyxJQUFBLEVBQUNDLEtBQUEsQ0FBQUMsSUFBSTtNQUFDSCxTQUFBLEVBQVU7OEJBQ2QsSUFBQUYsV0FBQSxDQUFBQyxHQUFBLEVBQUNHLEtBQUEsQ0FBQUUsVUFBVTtrQkFDVCxpQkFBQU4sV0FBQSxDQUFBQyxHQUFBLEVBQUNHLEtBQUEsQ0FBQUcsU0FBUztVQUFDTCxTQUFBLEVBQVU7b0JBQWE7O3VCQUVwQyxJQUFBRixXQUFBLENBQUFHLElBQUEsRUFBQ0MsS0FBQSxDQUFBSSxXQUFXO1FBQUNOLFNBQUEsRUFBVTtnQ0FDckIsSUFBQUYsV0FBQSxDQUFBQyxHQUFBLEVBQUM7VUFBR0MsU0FBQSxFQUFVO29CQUF3Qjt5QkFDdEMsSUFBQUYsV0FBQSxDQUFBQyxHQUFBLEVBQUM7b0JBQUU7eUJBQ0gsSUFBQUQsV0FBQSxDQUFBQyxHQUFBLEVBQUM7b0JBQUU7eUJBRUgsSUFBQUQsV0FBQSxDQUFBQyxHQUFBLEVBQUM7VUFBR0MsU0FBQSxFQUFVO29CQUF3Qjt5QkFDdEMsSUFBQUYsV0FBQSxDQUFBQyxHQUFBLEVBQUM7b0JBQ0MsaUJBQUFELFdBQUEsQ0FBQUMsR0FBQSxFQUFDO1lBQ0NRLElBQUEsRUFBSztZQUNMUCxTQUFBLEVBQVU7WUFDVlEsTUFBQSxFQUFPO1lBQ1BDLEdBQUEsRUFBSTtzQkFDTDs7eUJBSUgsSUFBQVgsV0FBQSxDQUFBQyxHQUFBLEVBQUM7b0JBQ0MsaUJBQUFELFdBQUEsQ0FBQUMsR0FBQSxFQUFDO1lBQ0NRLElBQUEsRUFBSztZQUNMUCxTQUFBLEVBQVU7WUFDVlEsTUFBQSxFQUFPO1lBQ1BDLEdBQUEsRUFBSTtzQkFDTDs7eUJBS0gsSUFBQVgsV0FBQSxDQUFBQyxHQUFBLEVBQUM7VUFBR0MsU0FBQSxFQUFVO29CQUF3Qjt5QkFDdEMsSUFBQUYsV0FBQSxDQUFBQyxHQUFBLEVBQUM7b0JBQUU7eUJBV0gsSUFBQUQsV0FBQSxDQUFBQyxHQUFBLEVBQUM7VUFBR0MsU0FBQSxFQUFVO29CQUF3Qjt5QkFDdEMsSUFBQUYsV0FBQSxDQUFBQyxHQUFBLEVBQUM7b0JBQUU7eUJBRUgsSUFBQUQsV0FBQSxDQUFBQyxHQUFBLEVBQUM7VUFBR0MsU0FBQSxFQUFVO29CQUF3Qjt5QkFDdEMsSUFBQUYsV0FBQSxDQUFBQyxHQUFBLEVBQUM7b0JBQUU7eUJBQ0gsSUFBQUQsV0FBQSxDQUFBRyxJQUFBLEVBQUM7VUFBR0QsU0FBQSxFQUFVO2tDQUNaLElBQUFGLFdBQUEsQ0FBQUcsSUFBQSxFQUFDO3VCQUFHLCtELGFBRUYsSUFBQUgsV0FBQSxDQUFBRyxJQUFBLEVBQUM7Y0FBR0QsU0FBQSxFQUFVO3NDQUNaLElBQUFGLFdBQUEsQ0FBQUcsSUFBQSxFQUFDO3dDQUNDLElBQUFILFdBQUEsQ0FBQUMsR0FBQSxFQUFDOzRCQUFPO29CQUFXOytCQUdyQixJQUFBRCxXQUFBLENBQUFHLElBQUEsRUFBQzt3Q0FDQyxJQUFBSCxXQUFBLENBQUFDLEdBQUEsRUFBQzs0QkFBTztvQkFBVzsrQkFHckIsSUFBQUQsV0FBQSxDQUFBRyxJQUFBLEVBQUM7d0NBQ0MsSUFBQUgsV0FBQSxDQUFBQyxHQUFBLEVBQUM7NEJBQU87b0JBQVc7OzsyQkFLekIsSUFBQUQsV0FBQSxDQUFBQyxHQUFBLEVBQUM7c0JBQUc7O3lCQUVOLElBQUFELFdBQUEsQ0FBQUMsR0FBQSxFQUFDO1VBQUVDLFNBQUEsRUFBVTtvQkFBZTt5QkFJNUIsSUFBQUYsV0FBQSxDQUFBQyxHQUFBLEVBQUM7VUFBR0MsU0FBQSxFQUFVO29CQUE2Qjt5QkFDM0MsSUFBQUYsV0FBQSxDQUFBRyxJQUFBLEVBQUM7VUFBSUQsU0FBQSxFQUFVO2tDQUNiLElBQUFGLFdBQUEsQ0FBQUMsR0FBQSxFQUFDO1lBQUVDLFNBQUEsRUFBVTtzQkFBTzsyQkFRcEIsSUFBQUYsV0FBQSxDQUFBQyxHQUFBLEVBQUM7WUFBRUMsU0FBQSxFQUFVO3NCQUFPOzJCQU9wQixJQUFBRixXQUFBLENBQUFDLEdBQUEsRUFBQztzQkFBRTs7O3VCQVFQLElBQUFELFdBQUEsQ0FBQUMsR0FBQSxFQUFDRyxLQUFBLENBQUFRLFVBQVU7UUFBQ1YsU0FBQSxFQUFVO2tCQUNwQixpQkFBQUYsV0FBQSxDQUFBQyxHQUFBLEVBQUNZLE9BQUEsQ0FBQUMsTUFBTTtVQUNMQyxPQUFBLEVBQVNsQixPQUFBO1VBQ1RLLFNBQUEsRUFBVTtvQkFDWDs7Ozs7QUFPWCIsImlnbm9yZUxpc3QiOltdfQ==

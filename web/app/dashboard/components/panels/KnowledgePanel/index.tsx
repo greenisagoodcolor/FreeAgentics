@@ -11,9 +11,10 @@ interface KnowledgePanelProps {
 
 export default function KnowledgePanel({ view }: KnowledgePanelProps) {
   // Enable test mode for Playwright tests or when NODE_ENV is test
-  const isTestMode = typeof window !== 'undefined' && 
-    (window.location.search.includes('testMode=true') || 
-     process.env.NODE_ENV === 'test');
+  const isTestMode =
+    typeof window !== "undefined" &&
+    (window.location.search.includes("testMode=true") ||
+      process.env.NODE_ENV === "test");
 
   return (
     <div className="h-full flex flex-col bg-[var(--bg-primary)]">

@@ -21,6 +21,7 @@ from .agent_template import (
     create_scholar_agent,
 )
 from .data_model import Agent, AgentCapability, AgentStatus, Position
+from .world_integration import AgentWorldManager
 
 __version__ = "0.1.0"
 __all__: List[str] = [
@@ -31,6 +32,7 @@ __all__: List[str] = [
     "Position",
     "AgentStatus",
     "get_default_factory",
+    "AgentWorldManager",
     # Agent Template System
     "AgentTemplateFactory",
     "TemplateType",

@@ -1,0 +1,254 @@
+19689feba7238b5f0a6f2f5c44105218
+"use client";
+"use strict";
+
+/* istanbul ignore next */
+function cov_2m6ul7lgc6() {
+  var path = "/Users/matthewmoroney/builds/FreeAgentics/web/components/simulation-controls.tsx";
+  var hash = "ff4bec27ec30a62faa109969c6f661d333f7b72e";
+  var global = new Function("return this")();
+  var gcv = "__coverage__";
+  var coverageData = {
+    path: "/Users/matthewmoroney/builds/FreeAgentics/web/components/simulation-controls.tsx",
+    statementMap: {
+      "0": {
+        start: {
+          line: 3,
+          column: 0
+        },
+        end: {
+          line: 5,
+          column: 3
+        }
+      },
+      "1": {
+        start: {
+          line: 6,
+          column: 0
+        },
+        end: {
+          line: 11,
+          column: 3
+        }
+      },
+      "2": {
+        start: {
+          line: 9,
+          column: 8
+        },
+        end: {
+          line: 9,
+          column: 34
+        }
+      },
+      "3": {
+        start: {
+          line: 12,
+          column: 20
+        },
+        end: {
+          line: 12,
+          column: 48
+        }
+      },
+      "4": {
+        start: {
+          line: 13,
+          column: 16
+        },
+        end: {
+          line: 13,
+          column: 38
+        }
+      },
+      "5": {
+        start: {
+          line: 14,
+          column: 14
+        },
+        end: {
+          line: 14,
+          column: 34
+        }
+      },
+      "6": {
+        start: {
+          line: 15,
+          column: 21
+        },
+        end: {
+          line: 15,
+          column: 44
+        }
+      },
+      "7": {
+        start: {
+          line: 17,
+          column: 4
+        },
+        end: {
+          line: 73,
+          column: 7
+        }
+      }
+    },
+    fnMap: {
+      "0": {
+        name: "(anonymous_0)",
+        decl: {
+          start: {
+            line: 8,
+            column: 9
+          },
+          end: {
+            line: 8,
+            column: 10
+          }
+        },
+        loc: {
+          start: {
+            line: 8,
+            column: 20
+          },
+          end: {
+            line: 10,
+            column: 5
+          }
+        },
+        line: 8
+      },
+      "1": {
+        name: "SimulationControls",
+        decl: {
+          start: {
+            line: 16,
+            column: 9
+          },
+          end: {
+            line: 16,
+            column: 27
+          }
+        },
+        loc: {
+          start: {
+            line: 16,
+            column: 30
+          },
+          end: {
+            line: 74,
+            column: 1
+          }
+        },
+        line: 16
+      }
+    },
+    branchMap: {},
+    s: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0
+    },
+    f: {
+      "0": 0,
+      "1": 0
+    },
+    b: {},
+    inputSourceMap: {
+      version: 3,
+      sources: ["/Users/matthewmoroney/builds/FreeAgentics/web/components/simulation-controls.tsx"],
+      sourcesContent: ["\"use client\";\n\nimport { Button } from \"@/components/ui/button\";\nimport { Card, CardContent, CardHeader, CardTitle } from \"@/components/ui/card\";\nimport { Play, Pause, RotateCcw, FastForward } from \"lucide-react\";\n\nexport function SimulationControls() {\n  return (\n    <Card>\n      <CardHeader>\n        <CardTitle className=\"text-lg\">Simulation Controls</CardTitle>\n      </CardHeader>\n      <CardContent>\n        <div className=\"flex gap-2\">\n          <Button size=\"sm\" variant=\"outline\">\n            <Play className=\"h-4 w-4 mr-1\" />\n            Play\n          </Button>\n          <Button size=\"sm\" variant=\"outline\">\n            <Pause className=\"h-4 w-4 mr-1\" />\n            Pause\n          </Button>\n          <Button size=\"sm\" variant=\"outline\">\n            <RotateCcw className=\"h-4 w-4 mr-1\" />\n            Reset\n          </Button>\n          <Button size=\"sm\" variant=\"outline\">\n            <FastForward className=\"h-4 w-4 mr-1\" />\n            Speed\n          </Button>\n        </div>\n      </CardContent>\n    </Card>\n  );\n}\n"],
+      names: ["SimulationControls", "Card", "CardHeader", "CardTitle", "className", "CardContent", "div", "Button", "size", "variant", "Play", "Pause", "RotateCcw", "FastForward"],
+      mappings: "AAAA;;;;;+BAMgBA;;;eAAAA;;;;wBAJO;sBACkC;6BACL;AAE7C,SAASA;IACd,qBACE,sBAACC,UAAI;;0BACH,qBAACC,gBAAU;0BACT,cAAA,qBAACC,eAAS;oBAACC,WAAU;8BAAU;;;0BAEjC,qBAACC,iBAAW;0BACV,cAAA,sBAACC;oBAAIF,WAAU;;sCACb,sBAACG,cAAM;4BAACC,MAAK;4BAAKC,SAAQ;;8CACxB,qBAACC,iBAAI;oCAACN,WAAU;;gCAAiB;;;sCAGnC,sBAACG,cAAM;4BAACC,MAAK;4BAAKC,SAAQ;;8CACxB,qBAACE,kBAAK;oCAACP,WAAU;;gCAAiB;;;sCAGpC,sBAACG,cAAM;4BAACC,MAAK;4BAAKC,SAAQ;;8CACxB,qBAACG,sBAAS;oCAACR,WAAU;;gCAAiB;;;sCAGxC,sBAACG,cAAM;4BAACC,MAAK;4BAAKC,SAAQ;;8CACxB,qBAACI,wBAAW;oCAACT,WAAU;;gCAAiB;;;;;;;;AAOpD"
+    },
+    _coverageSchema: "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+    hash: "ff4bec27ec30a62faa109969c6f661d333f7b72e"
+  };
+  var coverage = global[gcv] || (global[gcv] = {});
+  if (!coverage[path] || coverage[path].hash !== hash) {
+    coverage[path] = coverageData;
+  }
+  var actualCoverage = coverage[path];
+  {
+    // @ts-ignore
+    cov_2m6ul7lgc6 = function () {
+      return actualCoverage;
+    };
+  }
+  return actualCoverage;
+}
+cov_2m6ul7lgc6();
+cov_2m6ul7lgc6().s[0]++;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/* istanbul ignore next */
+cov_2m6ul7lgc6().s[1]++;
+Object.defineProperty(exports, "SimulationControls", {
+  enumerable: true,
+  get: function () {
+    /* istanbul ignore next */
+    cov_2m6ul7lgc6().f[0]++;
+    cov_2m6ul7lgc6().s[2]++;
+    return SimulationControls;
+  }
+});
+const _jsxruntime =
+/* istanbul ignore next */
+(cov_2m6ul7lgc6().s[3]++, require("react/jsx-runtime"));
+const _button =
+/* istanbul ignore next */
+(cov_2m6ul7lgc6().s[4]++, require("./ui/button"));
+const _card =
+/* istanbul ignore next */
+(cov_2m6ul7lgc6().s[5]++, require("./ui/card"));
+const _lucidereact =
+/* istanbul ignore next */
+(cov_2m6ul7lgc6().s[6]++, require("lucide-react"));
+function SimulationControls() {
+  /* istanbul ignore next */
+  cov_2m6ul7lgc6().f[1]++;
+  cov_2m6ul7lgc6().s[7]++;
+  return /*#__PURE__*/(0, _jsxruntime.jsxs)(_card.Card, {
+    children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_card.CardHeader, {
+      children: /*#__PURE__*/(0, _jsxruntime.jsx)(_card.CardTitle, {
+        className: "text-lg",
+        children: "Simulation Controls"
+      })
+    }), /*#__PURE__*/(0, _jsxruntime.jsx)(_card.CardContent, {
+      children: /*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+        className: "flex gap-2",
+        children: [/*#__PURE__*/(0, _jsxruntime.jsxs)(_button.Button, {
+          size: "sm",
+          variant: "outline",
+          children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_lucidereact.Play, {
+            className: "h-4 w-4 mr-1"
+          }), "Play"]
+        }), /*#__PURE__*/(0, _jsxruntime.jsxs)(_button.Button, {
+          size: "sm",
+          variant: "outline",
+          children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_lucidereact.Pause, {
+            className: "h-4 w-4 mr-1"
+          }), "Pause"]
+        }), /*#__PURE__*/(0, _jsxruntime.jsxs)(_button.Button, {
+          size: "sm",
+          variant: "outline",
+          children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_lucidereact.RotateCcw, {
+            className: "h-4 w-4 mr-1"
+          }), "Reset"]
+        }), /*#__PURE__*/(0, _jsxruntime.jsxs)(_button.Button, {
+          size: "sm",
+          variant: "outline",
+          children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_lucidereact.FastForward, {
+            className: "h-4 w-4 mr-1"
+          }), "Speed"]
+        })]
+      })
+    })]
+  });
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJjb3ZfMm02dWw3bGdjNiIsImFjdHVhbENvdmVyYWdlIiwicyIsIlNpbXVsYXRpb25Db250cm9scyIsImYiLCJfanN4cnVudGltZSIsImpzeHMiLCJfY2FyZCIsIkNhcmQiLCJqc3giLCJDYXJkSGVhZGVyIiwiQ2FyZFRpdGxlIiwiY2xhc3NOYW1lIiwiQ2FyZENvbnRlbnQiLCJfYnV0dG9uIiwiQnV0dG9uIiwic2l6ZSIsInZhcmlhbnQiLCJfbHVjaWRlcmVhY3QiLCJQbGF5IiwiUGF1c2UiLCJSb3RhdGVDY3ciLCJGYXN0Rm9yd2FyZCJdLCJzb3VyY2VzIjpbIi9Vc2Vycy9tYXR0aGV3bW9yb25leS9idWlsZHMvRnJlZUFnZW50aWNzL3dlYi9jb21wb25lbnRzL3NpbXVsYXRpb24tY29udHJvbHMudHN4Il0sInNvdXJjZXNDb250ZW50IjpbIlwidXNlIGNsaWVudFwiO1xuXG5pbXBvcnQgeyBCdXR0b24gfSBmcm9tIFwiQC9jb21wb25lbnRzL3VpL2J1dHRvblwiO1xuaW1wb3J0IHsgQ2FyZCwgQ2FyZENvbnRlbnQsIENhcmRIZWFkZXIsIENhcmRUaXRsZSB9IGZyb20gXCJAL2NvbXBvbmVudHMvdWkvY2FyZFwiO1xuaW1wb3J0IHsgUGxheSwgUGF1c2UsIFJvdGF0ZUNjdywgRmFzdEZvcndhcmQgfSBmcm9tIFwibHVjaWRlLXJlYWN0XCI7XG5cbmV4cG9ydCBmdW5jdGlvbiBTaW11bGF0aW9uQ29udHJvbHMoKSB7XG4gIHJldHVybiAoXG4gICAgPENhcmQ+XG4gICAgICA8Q2FyZEhlYWRlcj5cbiAgICAgICAgPENhcmRUaXRsZSBjbGFzc05hbWU9XCJ0ZXh0LWxnXCI+U2ltdWxhdGlvbiBDb250cm9sczwvQ2FyZFRpdGxlPlxuICAgICAgPC9DYXJkSGVhZGVyPlxuICAgICAgPENhcmRDb250ZW50PlxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggZ2FwLTJcIj5cbiAgICAgICAgICA8QnV0dG9uIHNpemU9XCJzbVwiIHZhcmlhbnQ9XCJvdXRsaW5lXCI+XG4gICAgICAgICAgICA8UGxheSBjbGFzc05hbWU9XCJoLTQgdy00IG1yLTFcIiAvPlxuICAgICAgICAgICAgUGxheVxuICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgIDxCdXR0b24gc2l6ZT1cInNtXCIgdmFyaWFudD1cIm91dGxpbmVcIj5cbiAgICAgICAgICAgIDxQYXVzZSBjbGFzc05hbWU9XCJoLTQgdy00IG1yLTFcIiAvPlxuICAgICAgICAgICAgUGF1c2VcbiAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICA8QnV0dG9uIHNpemU9XCJzbVwiIHZhcmlhbnQ9XCJvdXRsaW5lXCI+XG4gICAgICAgICAgICA8Um90YXRlQ2N3IGNsYXNzTmFtZT1cImgtNCB3LTQgbXItMVwiIC8+XG4gICAgICAgICAgICBSZXNldFxuICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgIDxCdXR0b24gc2l6ZT1cInNtXCIgdmFyaWFudD1cIm91dGxpbmVcIj5cbiAgICAgICAgICAgIDxGYXN0Rm9yd2FyZCBjbGFzc05hbWU9XCJoLTQgdy00IG1yLTFcIiAvPlxuICAgICAgICAgICAgU3BlZWRcbiAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgPC9kaXY+XG4gICAgICA8L0NhcmRDb250ZW50PlxuICAgIDwvQ2FyZD5cbiAgKTtcbn1cbiJdLCJtYXBwaW5ncyI6IkFBQUE7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7SUFNZ0I7SUFBQUEsY0FBQSxZQUFBQSxDQUFBO01BQUEsT0FBQUMsY0FBQTtJQUFBO0VBQUE7RUFBQSxPQUFBQSxjQUFBO0FBQUE7QUFBQUQsY0FBQTtBQUFBQSxjQUFBLEdBQUFFLENBQUE7Ozs7OzsrQkFBQTs7Ozs7O1dBQUFDLGtCQUFBOzs7Ozs7OztrQ0FKTzs7O2tDQUNrQzs7O2tDQUNMO0FBRTdDLFNBQVNBLG1CQUFBO0VBQUE7RUFBQUgsY0FBQSxHQUFBSSxDQUFBO0VBQUFKLGNBQUEsR0FBQUUsQ0FBQTtFQUNkLG9CQUNFLElBQUFHLFdBQUEsQ0FBQUMsSUFBQSxFQUFDQyxLQUFBLENBQUFDLElBQUk7NEJBQ0gsSUFBQUgsV0FBQSxDQUFBSSxHQUFBLEVBQUNGLEtBQUEsQ0FBQUcsVUFBVTtnQkFDVCxpQkFBQUwsV0FBQSxDQUFBSSxHQUFBLEVBQUNGLEtBQUEsQ0FBQUksU0FBUztRQUFDQyxTQUFBLEVBQVU7a0JBQVU7O3FCQUVqQyxJQUFBUCxXQUFBLENBQUFJLEdBQUEsRUFBQ0YsS0FBQSxDQUFBTSxXQUFXO2dCQUNWLGlCQUFBUixXQUFBLENBQUFDLElBQUEsRUFBQztRQUFJTSxTQUFBLEVBQVU7Z0NBQ2IsSUFBQVAsV0FBQSxDQUFBQyxJQUFBLEVBQUNRLE9BQUEsQ0FBQUMsTUFBTTtVQUFDQyxJQUFBLEVBQUs7VUFBS0MsT0FBQSxFQUFRO2tDQUN4QixJQUFBWixXQUFBLENBQUFJLEdBQUEsRUFBQ1MsWUFBQSxDQUFBQyxJQUFJO1lBQUNQLFNBQUEsRUFBVTtjQUFpQjt5QkFHbkMsSUFBQVAsV0FBQSxDQUFBQyxJQUFBLEVBQUNRLE9BQUEsQ0FBQUMsTUFBTTtVQUFDQyxJQUFBLEVBQUs7VUFBS0MsT0FBQSxFQUFRO2tDQUN4QixJQUFBWixXQUFBLENBQUFJLEdBQUEsRUFBQ1MsWUFBQSxDQUFBRSxLQUFLO1lBQUNSLFNBQUEsRUFBVTtjQUFpQjt5QkFHcEMsSUFBQVAsV0FBQSxDQUFBQyxJQUFBLEVBQUNRLE9BQUEsQ0FBQUMsTUFBTTtVQUFDQyxJQUFBLEVBQUs7VUFBS0MsT0FBQSxFQUFRO2tDQUN4QixJQUFBWixXQUFBLENBQUFJLEdBQUEsRUFBQ1MsWUFBQSxDQUFBRyxTQUFTO1lBQUNULFNBQUEsRUFBVTtjQUFpQjt5QkFHeEMsSUFBQVAsV0FBQSxDQUFBQyxJQUFBLEVBQUNRLE9BQUEsQ0FBQUMsTUFBTTtVQUFDQyxJQUFBLEVBQUs7VUFBS0MsT0FBQSxFQUFRO2tDQUN4QixJQUFBWixXQUFBLENBQUFJLEdBQUEsRUFBQ1MsWUFBQSxDQUFBSSxXQUFXO1lBQUNWLFNBQUEsRUFBVTtjQUFpQjs7Ozs7QUFPcEQiLCJpZ25vcmVMaXN0IjpbXX0=

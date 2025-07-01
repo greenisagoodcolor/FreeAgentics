@@ -1,0 +1,113 @@
+d8341c0f95d89b4690c86c3fb5029ce8
+"use client";
+"use strict";
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+Object.defineProperty(exports, "ConversationFeed", {
+    enumerable: true,
+    get: function() {
+        return ConversationFeed;
+    }
+});
+const _jsxruntime = require("react/jsx-runtime");
+const _react = /*#__PURE__*/ _interop_require_default(require("react"));
+const _card = require("../ui/card");
+const _badge = require("../ui/badge");
+const _lucidereact = require("lucide-react");
+function _interop_require_default(obj) {
+    return obj && obj.__esModule ? obj : {
+        default: obj
+    };
+}
+const mockConversations = [
+    {
+        id: "1",
+        agents: [
+            "Explorer-Alpha",
+            "Scholar-Delta"
+        ],
+        topic: "Market Analysis Collaboration",
+        status: "active",
+        timestamp: "2 min ago",
+        messageCount: 23
+    },
+    {
+        id: "2",
+        agents: [
+            "Guardian-Beta",
+            "Merchant-Gamma"
+        ],
+        topic: "Risk Assessment Protocol",
+        status: "completed",
+        timestamp: "15 min ago",
+        messageCount: 45
+    }
+];
+function ConversationFeed() {
+    return /*#__PURE__*/ (0, _jsxruntime.jsxs)(_card.Card, {
+        className: "h-full",
+        children: [
+            /*#__PURE__*/ (0, _jsxruntime.jsx)(_card.CardHeader, {
+                children: /*#__PURE__*/ (0, _jsxruntime.jsxs)(_card.CardTitle, {
+                    className: "flex items-center gap-2",
+                    children: [
+                        /*#__PURE__*/ (0, _jsxruntime.jsx)(_lucidereact.MessageSquare, {
+                            className: "h-5 w-5"
+                        }),
+                        "Active Conversations"
+                    ]
+                })
+            }),
+            /*#__PURE__*/ (0, _jsxruntime.jsx)(_card.CardContent, {
+                children: /*#__PURE__*/ (0, _jsxruntime.jsx)("div", {
+                    className: "space-y-4",
+                    children: mockConversations.map((conv)=>/*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                            className: "p-3 border rounded-lg",
+                            children: [
+                                /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                    className: "flex items-center justify-between mb-2",
+                                    children: [
+                                        /*#__PURE__*/ (0, _jsxruntime.jsx)("div", {
+                                            className: "font-medium",
+                                            children: conv.topic
+                                        }),
+                                        /*#__PURE__*/ (0, _jsxruntime.jsx)(_badge.Badge, {
+                                            variant: conv.status === "active" ? "default" : "secondary",
+                                            children: conv.status
+                                        })
+                                    ]
+                                }),
+                                /*#__PURE__*/ (0, _jsxruntime.jsx)("div", {
+                                    className: "text-sm text-muted-foreground mb-2",
+                                    children: conv.agents.join(" ↔ ")
+                                }),
+                                /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                    className: "flex items-center justify-between text-xs text-muted-foreground",
+                                    children: [
+                                        /*#__PURE__*/ (0, _jsxruntime.jsxs)("span", {
+                                            children: [
+                                                conv.messageCount,
+                                                " messages"
+                                            ]
+                                        }),
+                                        /*#__PURE__*/ (0, _jsxruntime.jsxs)("span", {
+                                            className: "flex items-center gap-1",
+                                            children: [
+                                                /*#__PURE__*/ (0, _jsxruntime.jsx)(_lucidereact.Clock, {
+                                                    className: "h-3 w-3"
+                                                }),
+                                                conv.timestamp
+                                            ]
+                                        })
+                                    ]
+                                })
+                            ]
+                        }, conv.id))
+                })
+            })
+        ]
+    });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9Vc2Vycy9tYXR0aGV3bW9yb25leS9idWlsZHMvRnJlZUFnZW50aWNzL3dlYi9jb21wb25lbnRzL2Rhc2hib2FyZC9Db252ZXJzYXRpb25GZWVkLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJcInVzZSBjbGllbnRcIjtcblxuaW1wb3J0IFJlYWN0IGZyb20gXCJyZWFjdFwiO1xuaW1wb3J0IHsgQ2FyZCwgQ2FyZENvbnRlbnQsIENhcmRIZWFkZXIsIENhcmRUaXRsZSB9IGZyb20gXCJAL2NvbXBvbmVudHMvdWkvY2FyZFwiO1xuaW1wb3J0IHsgQmFkZ2UgfSBmcm9tIFwiQC9jb21wb25lbnRzL3VpL2JhZGdlXCI7XG5pbXBvcnQgeyBNZXNzYWdlU3F1YXJlLCBDbG9jayB9IGZyb20gXCJsdWNpZGUtcmVhY3RcIjtcblxuaW50ZXJmYWNlIENvbnZlcnNhdGlvbiB7XG4gIGlkOiBzdHJpbmc7XG4gIGFnZW50czogc3RyaW5nW107XG4gIHRvcGljOiBzdHJpbmc7XG4gIHN0YXR1czogXCJhY3RpdmVcIiB8IFwiY29tcGxldGVkXCIgfCBcInBlbmRpbmdcIjtcbiAgdGltZXN0YW1wOiBzdHJpbmc7XG4gIG1lc3NhZ2VDb3VudDogbnVtYmVyO1xufVxuXG5jb25zdCBtb2NrQ29udmVyc2F0aW9uczogQ29udmVyc2F0aW9uW10gPSBbXG4gIHtcbiAgICBpZDogXCIxXCIsXG4gICAgYWdlbnRzOiBbXCJFeHBsb3Jlci1BbHBoYVwiLCBcIlNjaG9sYXItRGVsdGFcIl0sXG4gICAgdG9waWM6IFwiTWFya2V0IEFuYWx5c2lzIENvbGxhYm9yYXRpb25cIixcbiAgICBzdGF0dXM6IFwiYWN0aXZlXCIsXG4gICAgdGltZXN0YW1wOiBcIjIgbWluIGFnb1wiLFxuICAgIG1lc3NhZ2VDb3VudDogMjMsXG4gIH0sXG4gIHtcbiAgICBpZDogXCIyXCIsXG4gICAgYWdlbnRzOiBbXCJHdWFyZGlhbi1CZXRhXCIsIFwiTWVyY2hhbnQtR2FtbWFcIl0sXG4gICAgdG9waWM6IFwiUmlzayBBc3Nlc3NtZW50IFByb3RvY29sXCIsXG4gICAgc3RhdHVzOiBcImNvbXBsZXRlZFwiLFxuICAgIHRpbWVzdGFtcDogXCIxNSBtaW4gYWdvXCIsXG4gICAgbWVzc2FnZUNvdW50OiA0NSxcbiAgfSxcbl07XG5cbmV4cG9ydCBmdW5jdGlvbiBDb252ZXJzYXRpb25GZWVkKCkge1xuICByZXR1cm4gKFxuICAgIDxDYXJkIGNsYXNzTmFtZT1cImgtZnVsbFwiPlxuICAgICAgPENhcmRIZWFkZXI+XG4gICAgICAgIDxDYXJkVGl0bGUgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTJcIj5cbiAgICAgICAgICA8TWVzc2FnZVNxdWFyZSBjbGFzc05hbWU9XCJoLTUgdy01XCIgLz5cbiAgICAgICAgICBBY3RpdmUgQ29udmVyc2F0aW9uc1xuICAgICAgICA8L0NhcmRUaXRsZT5cbiAgICAgIDwvQ2FyZEhlYWRlcj5cbiAgICAgIDxDYXJkQ29udGVudD5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTRcIj5cbiAgICAgICAgICB7bW9ja0NvbnZlcnNhdGlvbnMubWFwKChjb252KSA9PiAoXG4gICAgICAgICAgICA8ZGl2IGtleT17Y29udi5pZH0gY2xhc3NOYW1lPVwicC0zIGJvcmRlciByb3VuZGVkLWxnXCI+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuIG1iLTJcIj5cbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZvbnQtbWVkaXVtXCI+e2NvbnYudG9waWN9PC9kaXY+XG4gICAgICAgICAgICAgICAgPEJhZGdlXG4gICAgICAgICAgICAgICAgICB2YXJpYW50PXtjb252LnN0YXR1cyA9PT0gXCJhY3RpdmVcIiA/IFwiZGVmYXVsdFwiIDogXCJzZWNvbmRhcnlcIn1cbiAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICB7Y29udi5zdGF0dXN9XG4gICAgICAgICAgICAgICAgPC9CYWRnZT5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmQgbWItMlwiPlxuICAgICAgICAgICAgICAgIHtjb252LmFnZW50cy5qb2luKFwiIOKGlCBcIil9XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlbiB0ZXh0LXhzIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAgICAgIDxzcGFuPntjb252Lm1lc3NhZ2VDb3VudH0gbWVzc2FnZXM8L3NwYW4+XG4gICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTFcIj5cbiAgICAgICAgICAgICAgICAgIDxDbG9jayBjbGFzc05hbWU9XCJoLTMgdy0zXCIgLz5cbiAgICAgICAgICAgICAgICAgIHtjb252LnRpbWVzdGFtcH1cbiAgICAgICAgICAgICAgICA8L3NwYW4+XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgKSl9XG4gICAgICAgIDwvZGl2PlxuICAgICAgPC9DYXJkQ29udGVudD5cbiAgICA8L0NhcmQ+XG4gICk7XG59XG4iXSwibmFtZXMiOlsiQ29udmVyc2F0aW9uRmVlZCIsIm1vY2tDb252ZXJzYXRpb25zIiwiaWQiLCJhZ2VudHMiLCJ0b3BpYyIsInN0YXR1cyIsInRpbWVzdGFtcCIsIm1lc3NhZ2VDb3VudCIsIkNhcmQiLCJjbGFzc05hbWUiLCJDYXJkSGVhZGVyIiwiQ2FyZFRpdGxlIiwiTWVzc2FnZVNxdWFyZSIsIkNhcmRDb250ZW50IiwiZGl2IiwibWFwIiwiY29udiIsIkJhZGdlIiwidmFyaWFudCIsImpvaW4iLCJzcGFuIiwiQ2xvY2siXSwibWFwcGluZ3MiOiJBQUFBOzs7OzsrQkFtQ2dCQTs7O2VBQUFBOzs7OzhEQWpDRTtzQkFDdUM7dUJBQ25DOzZCQUNlOzs7Ozs7QUFXckMsTUFBTUMsb0JBQW9DO0lBQ3hDO1FBQ0VDLElBQUk7UUFDSkMsUUFBUTtZQUFDO1lBQWtCO1NBQWdCO1FBQzNDQyxPQUFPO1FBQ1BDLFFBQVE7UUFDUkMsV0FBVztRQUNYQyxjQUFjO0lBQ2hCO0lBQ0E7UUFDRUwsSUFBSTtRQUNKQyxRQUFRO1lBQUM7WUFBaUI7U0FBaUI7UUFDM0NDLE9BQU87UUFDUEMsUUFBUTtRQUNSQyxXQUFXO1FBQ1hDLGNBQWM7SUFDaEI7Q0FDRDtBQUVNLFNBQVNQO0lBQ2QscUJBQ0Usc0JBQUNRLFVBQUk7UUFBQ0MsV0FBVTs7MEJBQ2QscUJBQUNDLGdCQUFVOzBCQUNULGNBQUEsc0JBQUNDLGVBQVM7b0JBQUNGLFdBQVU7O3NDQUNuQixxQkFBQ0csMEJBQWE7NEJBQUNILFdBQVU7O3dCQUFZOzs7OzBCQUl6QyxxQkFBQ0ksaUJBQVc7MEJBQ1YsY0FBQSxxQkFBQ0M7b0JBQUlMLFdBQVU7OEJBQ1pSLGtCQUFrQmMsR0FBRyxDQUFDLENBQUNDLHFCQUN0QixzQkFBQ0Y7NEJBQWtCTCxXQUFVOzs4Q0FDM0Isc0JBQUNLO29DQUFJTCxXQUFVOztzREFDYixxQkFBQ0s7NENBQUlMLFdBQVU7c0RBQWVPLEtBQUtaLEtBQUs7O3NEQUN4QyxxQkFBQ2EsWUFBSzs0Q0FDSkMsU0FBU0YsS0FBS1gsTUFBTSxLQUFLLFdBQVcsWUFBWTtzREFFL0NXLEtBQUtYLE1BQU07Ozs7OENBR2hCLHFCQUFDUztvQ0FBSUwsV0FBVTs4Q0FDWk8sS0FBS2IsTUFBTSxDQUFDZ0IsSUFBSSxDQUFDOzs4Q0FFcEIsc0JBQUNMO29DQUFJTCxXQUFVOztzREFDYixzQkFBQ1c7O2dEQUFNSixLQUFLVCxZQUFZO2dEQUFDOzs7c0RBQ3pCLHNCQUFDYTs0Q0FBS1gsV0FBVTs7OERBQ2QscUJBQUNZLGtCQUFLO29EQUFDWixXQUFVOztnREFDaEJPLEtBQUtWLFNBQVM7Ozs7OzsyQkFoQlhVLEtBQUtkLEVBQUU7Ozs7O0FBeUI3QiJ9

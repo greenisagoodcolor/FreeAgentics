@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 
 interface UseAsyncOperationResult<T> {
   data: T | null;
@@ -9,7 +9,7 @@ interface UseAsyncOperationResult<T> {
 }
 
 export function useAsyncOperation<T>(
-  asyncFunction: () => Promise<T>
+  asyncFunction: () => Promise<T>,
 ): UseAsyncOperationResult<T> {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
@@ -18,7 +18,7 @@ export function useAsyncOperation<T>(
   const execute = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const result = await asyncFunction();
       setData(result);

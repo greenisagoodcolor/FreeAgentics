@@ -402,7 +402,9 @@ class TestFullSystemIntegration:
                     )
                     # G_values already computed above, just use them directly
                     G_adjusted = G_values
-                    action_probs = F.softmax(-G_adjusted * precision, dim=0)
+                    # Use only the first precision value to match G_values dimensions
+                    precision_scalar = precision[0] if precision.numel() > 1 else precision
+                    action_probs = F.softmax(-G_adjusted * precision_scalar, dim=0)
                     action_idx = int(torch.multinomial(action_probs, 1).item())
                 action_history.append(action_idx)
                 next_belief = torch.matmul(gen_model.B[:, :, action_idx], belief)
@@ -729,7 +731,7 @@ class TestActiveInferenceIntegration:
         )
         for _ in range(5):
             integration.update(dt=0.1)
-        memories = components["memory_system"].retrieve_memories({"memory_type": "episodic"}, 5)
+        memories = components["memory_system"].retrieve_memories({"memory_type": MemoryType.EPISODIC}, 5)
         assert len(memories) > 0
 
     def test_advisory_mode_integration(self, agent, components, ai_config) -> None:

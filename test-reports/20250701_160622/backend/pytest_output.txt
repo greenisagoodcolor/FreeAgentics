@@ -1,0 +1,74 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.7, pytest-8.4.1, pluggy-1.6.0
+rootdir: /Users/matthewmoroney/builds/FreeAgentics
+configfile: pyproject.toml
+testpaths: tests
+plugins: anyio-4.9.0, timeout-2.4.0, cov-6.2.1, mock-3.14.1, asyncio-1.0.0
+asyncio: mode=Mode.STRICT, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 152 items / 5 errors
+
+==================================== ERRORS ====================================
+___________ ERROR collecting tests/behavior/test_agent_scenarios.py ____________
+ImportError while importing test module '/Users/matthewmoroney/builds/FreeAgentics/tests/behavior/test_agent_scenarios.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Cellar/python@3.12/3.12.7_1/Frameworks/Python.framework/Versions/3.12/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/behavior/test_agent_scenarios.py:8: in <module>
+    from pytest_bdd import given, parsers, scenarios, then, when
+E   ModuleNotFoundError: No module named 'pytest_bdd'
+_______ ERROR collecting tests/behavior/test_frontend_agent_scenarios.py _______
+ImportError while importing test module '/Users/matthewmoroney/builds/FreeAgentics/tests/behavior/test_frontend_agent_scenarios.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Cellar/python@3.12/3.12.7_1/Frameworks/Python.framework/Versions/3.12/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/behavior/test_frontend_agent_scenarios.py:12: in <module>
+    from pytest_bdd import given, scenario, then, when
+E   ModuleNotFoundError: No module named 'pytest_bdd'
+____________ ERROR collecting tests/contract/test_api_contracts.py _____________
+ImportError while importing test module '/Users/matthewmoroney/builds/FreeAgentics/tests/contract/test_api_contracts.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Cellar/python@3.12/3.12.7_1/Frameworks/Python.framework/Versions/3.12/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/contract/test_api_contracts.py:10: in <module>
+    import httpx
+E   ModuleNotFoundError: No module named 'httpx'
+_____ ERROR collecting tests/property/test_active_inference_invariants.py ______
+ImportError while importing test module '/Users/matthewmoroney/builds/FreeAgentics/tests/property/test_active_inference_invariants.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Cellar/python@3.12/3.12.7_1/Frameworks/Python.framework/Versions/3.12/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/property/test_active_inference_invariants.py:13: in <module>
+    from hypothesis import assume, given, settings
+E   ModuleNotFoundError: No module named 'hypothesis'
+_________ ERROR collecting tests/property/test_frontend_invariants.py __________
+ImportError while importing test module '/Users/matthewmoroney/builds/FreeAgentics/tests/property/test_frontend_invariants.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/opt/homebrew/Cellar/python@3.12/3.12.7_1/Frameworks/Python.framework/Versions/3.12/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/property/test_frontend_invariants.py:11: in <module>
+    from hypothesis import given, settings
+E   ModuleNotFoundError: No module named 'hypothesis'
+=============================== warnings summary ===============================
+venv/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:186
+  /Users/matthewmoroney/builds/FreeAgentics/venv/lib/python3.12/site-packages/_pytest/assertion/rewrite.py:186: UserWarning: PyMDP not available for testing: cannot import name 'Agent' from 'pymdp' (/Users/matthewmoroney/builds/FreeAgentics/venv/lib/python3.12/site-packages/pymdp/__init__.py)
+    exec(co, module.__dict__)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR tests/behavior/test_agent_scenarios.py
+ERROR tests/behavior/test_frontend_agent_scenarios.py
+ERROR tests/contract/test_api_contracts.py
+ERROR tests/property/test_active_inference_invariants.py
+ERROR tests/property/test_frontend_invariants.py
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 5 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+========================= 1 warning, 5 errors in 4.37s =========================

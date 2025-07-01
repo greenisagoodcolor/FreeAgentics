@@ -11,12 +11,51 @@ from typing import Any, Dict, List, Optional
 
 import numpy as np
 
-from .data_model import Agent, AgentGoal, AgentStatus
-from .decision_making import Action, ActionType, DecisionSystem
-from .memory import Memory, MemorySystem, MemoryType
-from .movement import MovementController
-from .perception import Percept, PerceptionSystem, StimulusType
-from .state_manager import AgentStateManager
+# Graceful degradation for PyTorch-dependent imports
+try:
+    from inference.engine import (
+        create_generative_model,
+        create_inference_algorithm,
+        create_policy_selector,
+        create_precision_optimizer,
+        create_temporal_planner,
+    )
+    from inference.engine.active_inference import InferenceConfig
+    from inference.engine.belief_update import (
+        BeliefUpdateConfig,
+        DirectGraphObservationModel,
+        create_belief_updater,
+    )
+    from inference.engine.generative_model import ModelDimensions
+    from inference.engine.policy_selection import PolicyConfig
+    from inference.engine.precision import PrecisionConfig
+    from inference.engine.temporal_planning import PlanningConfig
+    ACTIVE_INFERENCE_AVAILABLE = True
+except (ImportError, RuntimeError) as e:
+    # Handle PyTorch import errors or runtime errors
+    ACTIVE_INFERENCE_AVAILABLE = False
+    create_generative_model = None
+    create_inference_algorithm = None
+    create_policy_selector = None
+    create_precision_optimizer = None
+    create_temporal_planner = None
+    InferenceConfig = None
+    BeliefUpdateConfig = None
+    DirectGraphObservationModel = None
+    create_belief_updater = None
+    ModelDimensions = None
+    PolicyConfig = None
+    PrecisionConfig = None
+    PlanningConfig = None
+    print(f"Warning: Active Inference engine not available: {e}")
+
+# Import base agent components (these should not depend on PyTorch)
+from agents.base.data_model import Agent, AgentGoal, AgentStatus
+from agents.base.state_manager import AgentStateManager
+from agents.base.perception import PerceptionSystem, Percept, StimulusType
+from agents.base.decision_making import DecisionSystem, Action, ActionType
+from agents.base.movement import MovementController
+from agents.base.memory import MemorySystem, Memory, MemoryType
 
 """
 Active Inference Integration for Basic Agent System
@@ -25,26 +64,8 @@ and the Active Inference Engine, enabling agents to use active inference
 for decision-making, planning, and learning.
 """
 
-from inference.engine import (
-    create_generative_model,
-    create_inference_algorithm,
-    create_policy_selector,
-    create_precision_optimizer,
-    create_temporal_planner,
-)
-from inference.engine.active_inference import InferenceConfig
-from inference.engine.belief_update import (
-    BeliefUpdateConfig,
-    DirectGraphObservationModel,
-    create_belief_updater,
-)
-from inference.engine.generative_model import ModelDimensions
-from inference.engine.policy_selection import PolicyConfig
-from inference.engine.precision import PrecisionConfig
-
 # from inference.engine.pymdp_policy_selector import PyMDPPolicyAdapter
 # Using policy selector from base engine for now
-from inference.engine.temporal_planning import PlanningConfig
 
 logger = logging.getLogger(__name__)
 
@@ -371,7 +392,7 @@ class ActiveInferenceIntegration:
             ),
         )
         self.policy_selector = create_policy_selector(
-            "expected_free_energy", generative_model=self.generative_model, config=PolicyConfig()
+            "discrete", config=PolicyConfig(), inference_algorithm=self.inference
         )
         self.planner = create_temporal_planner(
             self.config.planning_type,
@@ -388,11 +409,7 @@ class ActiveInferenceIntegration:
             num_modalities=self.config.num_observations,
         )
         # Create a proper observation model instead of using generative model
-        observation_model = DirectGraphObservationModel(
-            config=BeliefUpdateConfig(),
-            state_dim=int(self.config.num_states),
-            feature_dim=int(self.config.num_observations),
-        )
+        observation_model = DirectGraphObservationModel(config=BeliefUpdateConfig())
         # Create belief updater with correct signature
         self.belief_updater = create_belief_updater("standard", BeliefUpdateConfig())
 
@@ -522,33 +539,33 @@ class ActiveInferenceIntegration:
 
     def _update_memory(self, state: np.ndarray, observation: np.ndarray, action: Optional[Action]):
         """Update memory with experience"""
-        if action:
-            # Convert PyTorch tensor to NumPy safely if needed
-            if hasattr(self.current_belief, "detach"):
-                belief_array = self.current_belief.detach().numpy()
-            else:
-                belief_array = np.array(self.current_belief)
-            memory = Memory(
-                memory_id=f"{self.agent.agent_id}_{uuid.uuid4().hex[:8]}",
-                memory_type=MemoryType.EPISODIC,
-                content={
-                    "state": state.tolist(),
-                    "observation": observation.tolist(),
-                    "action": action.action_type.value,
-                    "belief_entropy": -np.sum(belief_array * np.log(belief_array + 1e-10)),
-                },
-                timestamp=datetime.now(),
-                importance=0.5,
-            )
-            self.memory_system.store_memory(
-                content=memory.content,
-                memory_type=memory.memory_type,
-                importance=memory.importance,
-                context={
-                    "agent_id": self.agent.agent_id,
-                    "integration_mode": self.config.mode.value,
-                },
-            )
+        # Convert PyTorch tensor to NumPy safely if needed
+        if hasattr(self.current_belief, "detach"):
+            belief_array = self.current_belief.detach().numpy()
+        else:
+            belief_array = np.array(self.current_belief)
+        
+        memory = Memory(
+            memory_id=f"{self.agent.agent_id}_{uuid.uuid4().hex[:8]}",
+            memory_type=MemoryType.EPISODIC,
+            content={
+                "state": state.tolist(),
+                "observation": observation.tolist(),
+                "action": action.action_type.value if action else "none",  # Handle None action
+                "belief_entropy": -np.sum(belief_array * np.log(belief_array + 1e-10)),
+            },
+            timestamp=datetime.now(),
+            importance=0.5,
+        )
+        self.memory_system.store_memory(
+            content=memory.content,
+            memory_type=memory.memory_type,
+            importance=memory.importance,
+            context={
+                "agent_id": self.agent.agent_id,
+                "integration_mode": self.config.mode.value,
+            },
+        )
 
     def get_visualization_data(self) -> Dict[str, Any]:
         """Get data for visualization"""

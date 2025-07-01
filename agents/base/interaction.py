@@ -172,7 +172,7 @@ class CommunicationProtocol:
                     self.broadcast_received[broadcast_msg.id].add(agent_id)
                     if len(messages) >= max_messages:
                         break
-            
+
             # Then collect direct messages
             temp_queue: queue.Queue[Message] = queue.Queue()
             while not self.message_queue.empty() and len(messages) < max_messages:

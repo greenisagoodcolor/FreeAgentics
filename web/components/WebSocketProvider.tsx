@@ -9,13 +9,13 @@ interface WebSocketProviderProps {
   showConnectionStatus?: boolean;
 }
 
-export function WebSocketProvider({ 
-  children, 
-  autoConnect = true, 
-  showConnectionStatus = false 
+export function WebSocketProvider({
+  children,
+  autoConnect = true,
+  showConnectionStatus = false,
 }: WebSocketProviderProps) {
   const [mounted, setMounted] = useState(false);
-  
+
   const websocket = useWebSocket({
     autoConnect,
     onConnect: () => {
@@ -99,4 +99,4 @@ function ConnectionStatusIndicator({
   );
 }
 
-export default WebSocketProvider; 
+export default WebSocketProvider;

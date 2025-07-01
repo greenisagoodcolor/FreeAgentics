@@ -1,0 +1,95 @@
+108d993c87bce6dc68a8d7391739a782
+// LLM Settings types and defaults
+// Separated from llm-service.ts due to "use server" restrictions
+"use strict";
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+function _export(target, all) {
+    for(var name in all)Object.defineProperty(target, name, {
+        enumerable: true,
+        get: all[name]
+    });
+}
+_export(exports, {
+    clientDefaultSettings: function() {
+        return clientDefaultSettings;
+    },
+    defaultSettings: function() {
+        return defaultSettings;
+    },
+    providerModels: function() {
+        return providerModels;
+    }
+});
+const defaultSettings = {
+    provider: "openai",
+    model: "gpt-4o",
+    temperature: 0.7,
+    maxTokens: 1024,
+    topP: 0.9,
+    frequencyPenalty: 0,
+    presencePenalty: 0,
+    systemFingerprint: false,
+    hasServerRef: false,
+    maxAutonomousMessages: 4,
+    conversationCooldown: 5000
+};
+const clientDefaultSettings = {
+    provider: "openai",
+    model: "gpt-4o",
+    temperature: 0.7,
+    maxTokens: 1024,
+    topP: 0.9,
+    frequencyPenalty: 0,
+    presencePenalty: 0,
+    systemFingerprint: false,
+    maxAutonomousMessages: 4,
+    conversationCooldown: 5000
+};
+const providerModels = {
+    openai: [
+        {
+            id: "gpt-4o",
+            name: "GPT-4o"
+        },
+        {
+            id: "gpt-4o-mini",
+            name: "GPT-4o Mini"
+        },
+        {
+            id: "gpt-4-turbo",
+            name: "GPT-4 Turbo"
+        },
+        {
+            id: "gpt-3.5-turbo",
+            name: "GPT-3.5 Turbo"
+        }
+    ],
+    anthropic: [
+        {
+            id: "claude-3-5-sonnet-20241022",
+            name: "Claude 3.5 Sonnet"
+        },
+        {
+            id: "claude-3-opus-20240229",
+            name: "Claude 3 Opus"
+        },
+        {
+            id: "claude-3-haiku-20240307",
+            name: "Claude 3 Haiku"
+        }
+    ],
+    openrouter: [
+        {
+            id: "anthropic/claude-3-5-sonnet",
+            name: "Claude 3.5 Sonnet (OpenRouter)"
+        },
+        {
+            id: "openai/gpt-4o",
+            name: "GPT-4o (OpenRouter)"
+        }
+    ]
+};
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9Vc2Vycy9tYXR0aGV3bW9yb25leS9idWlsZHMvRnJlZUFnZW50aWNzL3dlYi9saWIvbGxtLXNldHRpbmdzLnRzIl0sInNvdXJjZXNDb250ZW50IjpbIi8vIExMTSBTZXR0aW5ncyB0eXBlcyBhbmQgZGVmYXVsdHNcbi8vIFNlcGFyYXRlZCBmcm9tIGxsbS1zZXJ2aWNlLnRzIGR1ZSB0byBcInVzZSBzZXJ2ZXJcIiByZXN0cmljdGlvbnNcblxuZXhwb3J0IGludGVyZmFjZSBMTE1TZXR0aW5ncyB7XG4gIHByb3ZpZGVyOiBcIm9wZW5haVwiIHwgXCJhbnRocm9waWNcIiB8IFwib3BlbnJvdXRlclwiO1xuICBtb2RlbDogc3RyaW5nO1xuICB0ZW1wZXJhdHVyZTogbnVtYmVyO1xuICBtYXhUb2tlbnM6IG51bWJlcjtcbiAgdG9wUDogbnVtYmVyO1xuICBmcmVxdWVuY3lQZW5hbHR5OiBudW1iZXI7XG4gIHByZXNlbmNlUGVuYWx0eTogbnVtYmVyO1xuICBzeXN0ZW1GaW5nZXJwcmludD86IHN0cmluZyB8IGJvb2xlYW47XG4gIGFwaUtleT86IHN0cmluZztcbiAgYXBpS2V5U2Vzc2lvbklkPzogc3RyaW5nO1xuICBoYXNTZXJ2ZXJSZWY/OiBib29sZWFuO1xuICBtYXhBdXRvbm9tb3VzTWVzc2FnZXM/OiBudW1iZXI7XG4gIGNvbnZlcnNhdGlvbkNvb2xkb3duPzogbnVtYmVyO1xufVxuXG5leHBvcnQgY29uc3QgZGVmYXVsdFNldHRpbmdzOiBMTE1TZXR0aW5ncyA9IHtcbiAgcHJvdmlkZXI6IFwib3BlbmFpXCIsXG4gIG1vZGVsOiBcImdwdC00b1wiLFxuICB0ZW1wZXJhdHVyZTogMC43LFxuICBtYXhUb2tlbnM6IDEwMjQsXG4gIHRvcFA6IDAuOSxcbiAgZnJlcXVlbmN5UGVuYWx0eTogMCxcbiAgcHJlc2VuY2VQZW5hbHR5OiAwLFxuICBzeXN0ZW1GaW5nZXJwcmludDogZmFsc2UsXG4gIGhhc1NlcnZlclJlZjogZmFsc2UsXG4gIG1heEF1dG9ub21vdXNNZXNzYWdlczogNCxcbiAgY29udmVyc2F0aW9uQ29vbGRvd246IDUwMDAsXG59O1xuXG5leHBvcnQgY29uc3QgY2xpZW50RGVmYXVsdFNldHRpbmdzOiBQYXJ0aWFsPExMTVNldHRpbmdzPiA9IHtcbiAgcHJvdmlkZXI6IFwib3BlbmFpXCIsXG4gIG1vZGVsOiBcImdwdC00b1wiLFxuICB0ZW1wZXJhdHVyZTogMC43LFxuICBtYXhUb2tlbnM6IDEwMjQsXG4gIHRvcFA6IDAuOSxcbiAgZnJlcXVlbmN5UGVuYWx0eTogMCxcbiAgcHJlc2VuY2VQZW5hbHR5OiAwLFxuICBzeXN0ZW1GaW5nZXJwcmludDogZmFsc2UsXG4gIG1heEF1dG9ub21vdXNNZXNzYWdlczogNCxcbiAgY29udmVyc2F0aW9uQ29vbGRvd246IDUwMDAsXG59O1xuXG4vLyBQcm92aWRlciBjb25maWd1cmF0aW9uc1xuZXhwb3J0IGNvbnN0IHByb3ZpZGVyTW9kZWxzID0ge1xuICBvcGVuYWk6IFtcbiAgICB7IGlkOiBcImdwdC00b1wiLCBuYW1lOiBcIkdQVC00b1wiIH0sXG4gICAgeyBpZDogXCJncHQtNG8tbWluaVwiLCBuYW1lOiBcIkdQVC00byBNaW5pXCIgfSxcbiAgICB7IGlkOiBcImdwdC00LXR1cmJvXCIsIG5hbWU6IFwiR1BULTQgVHVyYm9cIiB9LFxuICAgIHsgaWQ6IFwiZ3B0LTMuNS10dXJib1wiLCBuYW1lOiBcIkdQVC0zLjUgVHVyYm9cIiB9LFxuICBdLFxuICBhbnRocm9waWM6IFtcbiAgICB7IGlkOiBcImNsYXVkZS0zLTUtc29ubmV0LTIwMjQxMDIyXCIsIG5hbWU6IFwiQ2xhdWRlIDMuNSBTb25uZXRcIiB9LFxuICAgIHsgaWQ6IFwiY2xhdWRlLTMtb3B1cy0yMDI0MDIyOVwiLCBuYW1lOiBcIkNsYXVkZSAzIE9wdXNcIiB9LFxuICAgIHsgaWQ6IFwiY2xhdWRlLTMtaGFpa3UtMjAyNDAzMDdcIiwgbmFtZTogXCJDbGF1ZGUgMyBIYWlrdVwiIH0sXG4gIF0sXG4gIG9wZW5yb3V0ZXI6IFtcbiAgICB7XG4gICAgICBpZDogXCJhbnRocm9waWMvY2xhdWRlLTMtNS1zb25uZXRcIixcbiAgICAgIG5hbWU6IFwiQ2xhdWRlIDMuNSBTb25uZXQgKE9wZW5Sb3V0ZXIpXCIsXG4gICAgfSxcbiAgICB7IGlkOiBcIm9wZW5haS9ncHQtNG9cIiwgbmFtZTogXCJHUFQtNG8gKE9wZW5Sb3V0ZXIpXCIgfSxcbiAgXSxcbn07XG4iXSwibmFtZXMiOlsiY2xpZW50RGVmYXVsdFNldHRpbmdzIiwiZGVmYXVsdFNldHRpbmdzIiwicHJvdmlkZXJNb2RlbHMiLCJwcm92aWRlciIsIm1vZGVsIiwidGVtcGVyYXR1cmUiLCJtYXhUb2tlbnMiLCJ0b3BQIiwiZnJlcXVlbmN5UGVuYWx0eSIsInByZXNlbmNlUGVuYWx0eSIsInN5c3RlbUZpbmdlcnByaW50IiwiaGFzU2VydmVyUmVmIiwibWF4QXV0b25vbW91c01lc3NhZ2VzIiwiY29udmVyc2F0aW9uQ29vbGRvd24iLCJvcGVuYWkiLCJpZCIsIm5hbWUiLCJhbnRocm9waWMiLCJvcGVucm91dGVyIl0sIm1hcHBpbmdzIjoiQUFBQSxrQ0FBa0M7QUFDbEMsaUVBQWlFOzs7Ozs7Ozs7Ozs7SUFnQ3BEQSxxQkFBcUI7ZUFBckJBOztJQWRBQyxlQUFlO2VBQWZBOztJQTRCQUMsY0FBYztlQUFkQTs7O0FBNUJOLE1BQU1ELGtCQUErQjtJQUMxQ0UsVUFBVTtJQUNWQyxPQUFPO0lBQ1BDLGFBQWE7SUFDYkMsV0FBVztJQUNYQyxNQUFNO0lBQ05DLGtCQUFrQjtJQUNsQkMsaUJBQWlCO0lBQ2pCQyxtQkFBbUI7SUFDbkJDLGNBQWM7SUFDZEMsdUJBQXVCO0lBQ3ZCQyxzQkFBc0I7QUFDeEI7QUFFTyxNQUFNYix3QkFBOEM7SUFDekRHLFVBQVU7SUFDVkMsT0FBTztJQUNQQyxhQUFhO0lBQ2JDLFdBQVc7SUFDWEMsTUFBTTtJQUNOQyxrQkFBa0I7SUFDbEJDLGlCQUFpQjtJQUNqQkMsbUJBQW1CO0lBQ25CRSx1QkFBdUI7SUFDdkJDLHNCQUFzQjtBQUN4QjtBQUdPLE1BQU1YLGlCQUFpQjtJQUM1QlksUUFBUTtRQUNOO1lBQUVDLElBQUk7WUFBVUMsTUFBTTtRQUFTO1FBQy9CO1lBQUVELElBQUk7WUFBZUMsTUFBTTtRQUFjO1FBQ3pDO1lBQUVELElBQUk7WUFBZUMsTUFBTTtRQUFjO1FBQ3pDO1lBQUVELElBQUk7WUFBaUJDLE1BQU07UUFBZ0I7S0FDOUM7SUFDREMsV0FBVztRQUNUO1lBQUVGLElBQUk7WUFBOEJDLE1BQU07UUFBb0I7UUFDOUQ7WUFBRUQsSUFBSTtZQUEwQkMsTUFBTTtRQUFnQjtRQUN0RDtZQUFFRCxJQUFJO1lBQTJCQyxNQUFNO1FBQWlCO0tBQ3pEO0lBQ0RFLFlBQVk7UUFDVjtZQUNFSCxJQUFJO1lBQ0pDLE1BQU07UUFDUjtRQUNBO1lBQUVELElBQUk7WUFBaUJDLE1BQU07UUFBc0I7S0FDcEQ7QUFDSCJ9

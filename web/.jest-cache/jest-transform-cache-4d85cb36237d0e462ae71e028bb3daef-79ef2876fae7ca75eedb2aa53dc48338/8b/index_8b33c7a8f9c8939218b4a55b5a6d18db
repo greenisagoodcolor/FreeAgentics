@@ -1,0 +1,357 @@
+42d880e17fe658a10f43c4c8a3e63d44
+"use client";
+"use strict";
+
+/* istanbul ignore next */
+function cov_1grnpr34e0() {
+  var path = "/Users/matthewmoroney/builds/FreeAgentics/web/app/dashboard/components/panels/AnalyticsPanel/index.tsx";
+  var hash = "762e0e85d0e651ef709d494abf3eae3375df5572";
+  var global = new Function("return this")();
+  var gcv = "__coverage__";
+  var coverageData = {
+    path: "/Users/matthewmoroney/builds/FreeAgentics/web/app/dashboard/components/panels/AnalyticsPanel/index.tsx",
+    statementMap: {
+      "0": {
+        start: {
+          line: 3,
+          column: 0
+        },
+        end: {
+          line: 5,
+          column: 3
+        }
+      },
+      "1": {
+        start: {
+          line: 6,
+          column: 0
+        },
+        end: {
+          line: 11,
+          column: 3
+        }
+      },
+      "2": {
+        start: {
+          line: 9,
+          column: 8
+        },
+        end: {
+          line: 9,
+          column: 30
+        }
+      },
+      "3": {
+        start: {
+          line: 12,
+          column: 20
+        },
+        end: {
+          line: 12,
+          column: 48
+        }
+      },
+      "4": {
+        start: {
+          line: 13,
+          column: 29
+        },
+        end: {
+          line: 13,
+          column: 71
+        }
+      },
+      "5": {
+        start: {
+          line: 14,
+          column: 21
+        },
+        end: {
+          line: 14,
+          column: 44
+        }
+      },
+      "6": {
+        start: {
+          line: 15,
+          column: 45
+        },
+        end: {
+          line: 15,
+          column: 139
+        }
+      },
+      "7": {
+        start: {
+          line: 17,
+          column: 4
+        },
+        end: {
+          line: 19,
+          column: 6
+        }
+      },
+      "8": {
+        start: {
+          line: 22,
+          column: 4
+        },
+        end: {
+          line: 45,
+          column: 7
+        }
+      }
+    },
+    fnMap: {
+      "0": {
+        name: "(anonymous_0)",
+        decl: {
+          start: {
+            line: 8,
+            column: 9
+          },
+          end: {
+            line: 8,
+            column: 10
+          }
+        },
+        loc: {
+          start: {
+            line: 8,
+            column: 20
+          },
+          end: {
+            line: 10,
+            column: 5
+          }
+        },
+        line: 8
+      },
+      "1": {
+        name: "_interop_require_default",
+        decl: {
+          start: {
+            line: 16,
+            column: 9
+          },
+          end: {
+            line: 16,
+            column: 33
+          }
+        },
+        loc: {
+          start: {
+            line: 16,
+            column: 39
+          },
+          end: {
+            line: 20,
+            column: 1
+          }
+        },
+        line: 16
+      },
+      "2": {
+        name: "AnalyticsPanel",
+        decl: {
+          start: {
+            line: 21,
+            column: 9
+          },
+          end: {
+            line: 21,
+            column: 23
+          }
+        },
+        loc: {
+          start: {
+            line: 21,
+            column: 34
+          },
+          end: {
+            line: 46,
+            column: 1
+          }
+        },
+        line: 21
+      }
+    },
+    branchMap: {
+      "0": {
+        loc: {
+          start: {
+            line: 17,
+            column: 11
+          },
+          end: {
+            line: 19,
+            column: 5
+          }
+        },
+        type: "cond-expr",
+        locations: [{
+          start: {
+            line: 17,
+            column: 35
+          },
+          end: {
+            line: 17,
+            column: 38
+          }
+        }, {
+          start: {
+            line: 17,
+            column: 41
+          },
+          end: {
+            line: 19,
+            column: 5
+          }
+        }],
+        line: 17
+      },
+      "1": {
+        loc: {
+          start: {
+            line: 17,
+            column: 11
+          },
+          end: {
+            line: 17,
+            column: 32
+          }
+        },
+        type: "binary-expr",
+        locations: [{
+          start: {
+            line: 17,
+            column: 11
+          },
+          end: {
+            line: 17,
+            column: 14
+          }
+        }, {
+          start: {
+            line: 17,
+            column: 18
+          },
+          end: {
+            line: 17,
+            column: 32
+          }
+        }],
+        line: 17
+      }
+    },
+    s: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0
+    },
+    f: {
+      "0": 0,
+      "1": 0,
+      "2": 0
+    },
+    b: {
+      "0": [0, 0],
+      "1": [0, 0]
+    },
+    inputSourceMap: {
+      version: 3,
+      sources: ["/Users/matthewmoroney/builds/FreeAgentics/web/app/dashboard/components/panels/AnalyticsPanel/index.tsx"],
+      sourcesContent: ["\"use client\";\n\nimport React from \"react\";\nimport { DashboardView } from \"../../../../page\";\nimport { BarChart3 } from \"lucide-react\";\nimport AnalyticsWidgetSystem from \"@/components/dashboard/AnalyticsWidgetSystem\";\n\ninterface AnalyticsPanelProps {\n  view: DashboardView;\n}\n\nexport default function AnalyticsPanel({ view }: AnalyticsPanelProps) {\n  return (\n    <div className=\"h-full flex flex-col bg-[var(--bg-primary)]\">\n      {/* Panel Header */}\n      <div className=\"flex items-center justify-between p-4 border-b border-[var(--bg-tertiary)]\">\n        <div className=\"flex items-center gap-2\">\n          <BarChart3 className=\"w-5 h-5 text-[var(--accent-primary)]\" />\n          <h3 className=\"font-semibold text-[var(--text-primary)]\">\n            Analytics Dashboard\n          </h3>\n        </div>\n      </div>\n\n      {/* Analytics Widget System - REAL Drag-and-Drop Implementation */}\n      <div className=\"flex-1 overflow-hidden\">\n        <AnalyticsWidgetSystem />\n      </div>\n    </div>\n  );\n}\n"],
+      names: ["AnalyticsPanel", "view", "div", "className", "BarChart3", "h3", "AnalyticsWidgetSystem"],
+      mappings: "AAAA;;;;;+BAWA;;;eAAwBA;;;;8DATN;6BAEQ;8EACQ;;;;;;AAMnB,SAASA,eAAe,EAAEC,IAAI,EAAuB;IAClE,qBACE,sBAACC;QAAIC,WAAU;;0BAEb,qBAACD;gBAAIC,WAAU;0BACb,cAAA,sBAACD;oBAAIC,WAAU;;sCACb,qBAACC,sBAAS;4BAACD,WAAU;;sCACrB,qBAACE;4BAAGF,WAAU;sCAA2C;;;;;0BAO7D,qBAACD;gBAAIC,WAAU;0BACb,cAAA,qBAACG,8BAAqB;;;;AAI9B"
+    },
+    _coverageSchema: "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+    hash: "762e0e85d0e651ef709d494abf3eae3375df5572"
+  };
+  var coverage = global[gcv] || (global[gcv] = {});
+  if (!coverage[path] || coverage[path].hash !== hash) {
+    coverage[path] = coverageData;
+  }
+  var actualCoverage = coverage[path];
+  {
+    // @ts-ignore
+    cov_1grnpr34e0 = function () {
+      return actualCoverage;
+    };
+  }
+  return actualCoverage;
+}
+cov_1grnpr34e0();
+cov_1grnpr34e0().s[0]++;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/* istanbul ignore next */
+cov_1grnpr34e0().s[1]++;
+Object.defineProperty(exports, "default", {
+  enumerable: true,
+  get: function () {
+    /* istanbul ignore next */
+    cov_1grnpr34e0().f[0]++;
+    cov_1grnpr34e0().s[2]++;
+    return AnalyticsPanel;
+  }
+});
+const _jsxruntime =
+/* istanbul ignore next */
+(cov_1grnpr34e0().s[3]++, require("react/jsx-runtime"));
+const _react =
+/* istanbul ignore next */
+(/*#__PURE__*/cov_1grnpr34e0().s[4]++, _interop_require_default(require("react")));
+const _lucidereact =
+/* istanbul ignore next */
+(cov_1grnpr34e0().s[5]++, require("lucide-react"));
+const _AnalyticsWidgetSystem =
+/* istanbul ignore next */
+(/*#__PURE__*/cov_1grnpr34e0().s[6]++, _interop_require_default(require("../../../../../components/dashboard/AnalyticsWidgetSystem")));
+function _interop_require_default(obj) {
+  /* istanbul ignore next */
+  cov_1grnpr34e0().f[1]++;
+  cov_1grnpr34e0().s[7]++;
+  return /* istanbul ignore next */(cov_1grnpr34e0().b[1][0]++, obj) &&
+  /* istanbul ignore next */
+  (cov_1grnpr34e0().b[1][1]++, obj.__esModule) ?
+  /* istanbul ignore next */
+  (cov_1grnpr34e0().b[0][0]++, obj) :
+  /* istanbul ignore next */
+  (cov_1grnpr34e0().b[0][1]++, {
+    default: obj
+  });
+}
+function AnalyticsPanel({
+  view
+}) {
+  /* istanbul ignore next */
+  cov_1grnpr34e0().f[2]++;
+  cov_1grnpr34e0().s[8]++;
+  return /*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+    className: "h-full flex flex-col bg-[var(--bg-primary)]",
+    children: [/*#__PURE__*/(0, _jsxruntime.jsx)("div", {
+      className: "flex items-center justify-between p-4 border-b border-[var(--bg-tertiary)]",
+      children: /*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+        className: "flex items-center gap-2",
+        children: [/*#__PURE__*/(0, _jsxruntime.jsx)(_lucidereact.BarChart3, {
+          className: "w-5 h-5 text-[var(--accent-primary)]"
+        }), /*#__PURE__*/(0, _jsxruntime.jsx)("h3", {
+          className: "font-semibold text-[var(--text-primary)]",
+          children: "Analytics Dashboard"
+        })]
+      })
+    }), /*#__PURE__*/(0, _jsxruntime.jsx)("div", {
+      className: "flex-1 overflow-hidden",
+      children: /*#__PURE__*/(0, _jsxruntime.jsx)(_AnalyticsWidgetSystem.default, {})
+    })]
+  });
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJBbmFseXRpY3NQYW5lbCIsInZpZXciLCJjb3ZfMWdybnByMzRlMCIsImYiLCJzIiwiX2pzeHJ1bnRpbWUiLCJqc3hzIiwiY2xhc3NOYW1lIiwianN4IiwiX2x1Y2lkZXJlYWN0IiwiQmFyQ2hhcnQzIiwiX0FuYWx5dGljc1dpZGdldFN5c3RlbSIsImRlZmF1bHQiXSwic291cmNlcyI6WyIvVXNlcnMvbWF0dGhld21vcm9uZXkvYnVpbGRzL0ZyZWVBZ2VudGljcy93ZWIvYXBwL2Rhc2hib2FyZC9jb21wb25lbnRzL3BhbmVscy9BbmFseXRpY3NQYW5lbC9pbmRleC50c3giXSwic291cmNlc0NvbnRlbnQiOlsiXCJ1c2UgY2xpZW50XCI7XG5cbmltcG9ydCBSZWFjdCBmcm9tIFwicmVhY3RcIjtcbmltcG9ydCB7IERhc2hib2FyZFZpZXcgfSBmcm9tIFwiLi4vLi4vLi4vLi4vcGFnZVwiO1xuaW1wb3J0IHsgQmFyQ2hhcnQzIH0gZnJvbSBcImx1Y2lkZS1yZWFjdFwiO1xuaW1wb3J0IEFuYWx5dGljc1dpZGdldFN5c3RlbSBmcm9tIFwiQC9jb21wb25lbnRzL2Rhc2hib2FyZC9BbmFseXRpY3NXaWRnZXRTeXN0ZW1cIjtcblxuaW50ZXJmYWNlIEFuYWx5dGljc1BhbmVsUHJvcHMge1xuICB2aWV3OiBEYXNoYm9hcmRWaWV3O1xufVxuXG5leHBvcnQgZGVmYXVsdCBmdW5jdGlvbiBBbmFseXRpY3NQYW5lbCh7IHZpZXcgfTogQW5hbHl0aWNzUGFuZWxQcm9wcykge1xuICByZXR1cm4gKFxuICAgIDxkaXYgY2xhc3NOYW1lPVwiaC1mdWxsIGZsZXggZmxleC1jb2wgYmctW3ZhcigtLWJnLXByaW1hcnkpXVwiPlxuICAgICAgey8qIFBhbmVsIEhlYWRlciAqL31cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuIHAtNCBib3JkZXItYiBib3JkZXItW3ZhcigtLWJnLXRlcnRpYXJ5KV1cIj5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMlwiPlxuICAgICAgICAgIDxCYXJDaGFydDMgY2xhc3NOYW1lPVwidy01IGgtNSB0ZXh0LVt2YXIoLS1hY2NlbnQtcHJpbWFyeSldXCIgLz5cbiAgICAgICAgICA8aDMgY2xhc3NOYW1lPVwiZm9udC1zZW1pYm9sZCB0ZXh0LVt2YXIoLS10ZXh0LXByaW1hcnkpXVwiPlxuICAgICAgICAgICAgQW5hbHl0aWNzIERhc2hib2FyZFxuICAgICAgICAgIDwvaDM+XG4gICAgICAgIDwvZGl2PlxuICAgICAgPC9kaXY+XG5cbiAgICAgIHsvKiBBbmFseXRpY3MgV2lkZ2V0IFN5c3RlbSAtIFJFQUwgRHJhZy1hbmQtRHJvcCBJbXBsZW1lbnRhdGlvbiAqL31cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleC0xIG92ZXJmbG93LWhpZGRlblwiPlxuICAgICAgICA8QW5hbHl0aWNzV2lkZ2V0U3lzdGVtIC8+XG4gICAgICA8L2Rpdj5cbiAgICA8L2Rpdj5cbiAgKTtcbn1cbiJdLCJtYXBwaW5ncyI6IkFBQUE7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7K0JBV0E7Ozs7OztXQUF3QkEsY0FBQTs7Ozs7Ozs7d0VBVE47OztrQ0FFUTs7O3dFQUNROzs7Ozs7Ozs7Ozs7Ozs7QUFNbkIsU0FBU0EsZUFBZTtFQUFFQztBQUFJLENBQXVCO0VBQUE7RUFBQUMsY0FBQSxHQUFBQyxDQUFBO0VBQUFELGNBQUEsR0FBQUUsQ0FBQTtFQUNsRSxvQkFDRSxJQUFBQyxXQUFBLENBQUFDLElBQUEsRUFBQztJQUFJQyxTQUFBLEVBQVU7NEJBRWIsSUFBQUYsV0FBQSxDQUFBRyxHQUFBLEVBQUM7TUFBSUQsU0FBQSxFQUFVO2dCQUNiLGlCQUFBRixXQUFBLENBQUFDLElBQUEsRUFBQztRQUFJQyxTQUFBLEVBQVU7Z0NBQ2IsSUFBQUYsV0FBQSxDQUFBRyxHQUFBLEVBQUNDLFlBQUEsQ0FBQUMsU0FBUztVQUFDSCxTQUFBLEVBQVU7eUJBQ3JCLElBQUFGLFdBQUEsQ0FBQUcsR0FBQSxFQUFDO1VBQUdELFNBQUEsRUFBVTtvQkFBMkM7OztxQkFPN0QsSUFBQUYsV0FBQSxDQUFBRyxHQUFBLEVBQUM7TUFBSUQsU0FBQSxFQUFVO2dCQUNiLGlCQUFBRixXQUFBLENBQUFHLEdBQUEsRUFBQ0csc0JBQUEsQ0FBQUMsT0FBcUI7OztBQUk5QiIsImlnbm9yZUxpc3QiOltdfQ==

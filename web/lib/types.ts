@@ -57,9 +57,17 @@ export interface Agent {
   knowledge: KnowledgeEntry[];
   autonomyEnabled: boolean; // New property to track if agent can engage in autonomous conversations
   toolPermissions?: AgentToolPermissions; // Optional to maintain backward compatibility
-  
+
   // Additional properties needed by components
-  status?: 'idle' | 'moving' | 'interacting' | 'planning' | 'executing' | 'learning' | 'error' | 'offline';
+  status?:
+    | "idle"
+    | "moving"
+    | "interacting"
+    | "planning"
+    | "executing"
+    | "learning"
+    | "error"
+    | "offline";
   type?: string; // Agent type
   role?: string; // Agent role in conversations
   personality?: {

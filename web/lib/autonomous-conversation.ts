@@ -571,14 +571,14 @@ export class AutonomousConversationSystem {
       messages: [],
       agents: [],
       activeConversations: this.activeConversations,
-      options: this.options
+      options: this.options,
     };
   }
 
   getDynamics(): any {
     return {
       turnTaking: "round-robin",
-      responseCoordination: "sequential"
+      responseCoordination: "sequential",
     };
   }
 
@@ -589,13 +589,13 @@ export class AutonomousConversationSystem {
   async selectNextSpeaker(): Promise<Agent> {
     // Return a mock agent for tests
     return {
-      id: 'test-agent',
-      name: 'Test Agent',
+      id: "test-agent",
+      name: "Test Agent",
       inConversation: false,
       position: { x: 0, y: 0 },
-      color: '#000',
+      color: "#000",
       knowledge: [],
-      autonomyEnabled: true
+      autonomyEnabled: true,
     };
   }
 
@@ -647,8 +647,9 @@ export class AutonomousConversationSystem {
 
 // Export legacy names for compatibility
 export const AutonomousConversationManager = AutonomousConversationSystem;
-export const createAutonomousConversation = (options: AutonomousConversationOptions) => 
-  new AutonomousConversationSystem(options);
+export const createAutonomousConversation = (
+  options: AutonomousConversationOptions,
+) => new AutonomousConversationSystem(options);
 
 // Export types for tests
 export type ConversationConfig = AutonomousConversationOptions;
@@ -660,22 +661,24 @@ export type TurnTakingStrategy = string;
 export type ResponseCoordination = any; // Simplified for now
 
 // Export placeholder functions for tests
-export const orchestrateConversation = (manager: any, options: any) => Promise.resolve({
-  messages: [],
-  participants: [],
-  duration: 0
-});
+export const orchestrateConversation = (manager: any, options: any) =>
+  Promise.resolve({
+    messages: [],
+    participants: [],
+    duration: 0,
+  });
 
 export const evaluateConversationQuality = (state: any) => ({
   overall: 0.5,
-  recommendations: ['improve clarity', 'enhance engagement']
+  recommendations: ["improve clarity", "enhance engagement"],
 });
 
 export const detectEmergentPatterns = (state: any) => [];
 export const applyConversationRules = () => {};
 
-export const generateAgentResponse = (context: any) => Promise.resolve({
-  content: "Generated response",
-  agentId: context?.currentSpeaker?.id || 'unknown',
-  timestamp: Date.now()
-});
+export const generateAgentResponse = (context: any) =>
+  Promise.resolve({
+    content: "Generated response",
+    agentId: context?.currentSpeaker?.id || "unknown",
+    timestamp: Date.now(),
+  });

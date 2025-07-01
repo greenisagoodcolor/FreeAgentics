@@ -1,0 +1,227 @@
+85cb36b351c5e50fa0c22a28f8ddcfb6
+"use strict";
+
+/* istanbul ignore next */
+function cov_1m5ndv80wz() {
+  var path = "/Users/matthewmoroney/builds/FreeAgentics/web/components/conversation-orchestration/preset-selector.tsx";
+  var hash = "926d2de015adc86d7d78b6ac834040244bff2ef6";
+  var global = new Function("return this")();
+  var gcv = "__coverage__";
+  var coverageData = {
+    path: "/Users/matthewmoroney/builds/FreeAgentics/web/components/conversation-orchestration/preset-selector.tsx",
+    statementMap: {
+      "0": {
+        start: {
+          line: 2,
+          column: 0
+        },
+        end: {
+          line: 4,
+          column: 3
+        }
+      },
+      "1": {
+        start: {
+          line: 5,
+          column: 0
+        },
+        end: {
+          line: 10,
+          column: 3
+        }
+      },
+      "2": {
+        start: {
+          line: 8,
+          column: 8
+        },
+        end: {
+          line: 8,
+          column: 30
+        }
+      },
+      "3": {
+        start: {
+          line: 11,
+          column: 20
+        },
+        end: {
+          line: 11,
+          column: 48
+        }
+      },
+      "4": {
+        start: {
+          line: 13,
+          column: 4
+        },
+        end: {
+          line: 26,
+          column: 7
+        }
+      }
+    },
+    fnMap: {
+      "0": {
+        name: "(anonymous_0)",
+        decl: {
+          start: {
+            line: 7,
+            column: 9
+          },
+          end: {
+            line: 7,
+            column: 10
+          }
+        },
+        loc: {
+          start: {
+            line: 7,
+            column: 20
+          },
+          end: {
+            line: 9,
+            column: 5
+          }
+        },
+        line: 7
+      },
+      "1": {
+        name: "PresetSelector",
+        decl: {
+          start: {
+            line: 12,
+            column: 9
+          },
+          end: {
+            line: 12,
+            column: 23
+          }
+        },
+        loc: {
+          start: {
+            line: 12,
+            column: 87
+          },
+          end: {
+            line: 27,
+            column: 1
+          }
+        },
+        line: 12
+      }
+    },
+    branchMap: {
+      "0": {
+        loc: {
+          start: {
+            line: 19,
+            column: 12
+          },
+          end: {
+            line: 24,
+            column: 14
+          }
+        },
+        type: "binary-expr",
+        locations: [{
+          start: {
+            line: 19,
+            column: 12
+          },
+          end: {
+            line: 19,
+            column: 25
+          }
+        }, {
+          start: {
+            line: 19,
+            column: 43
+          },
+          end: {
+            line: 24,
+            column: 14
+          }
+        }],
+        line: 19
+      }
+    },
+    s: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    f: {
+      "0": 0,
+      "1": 0
+    },
+    b: {
+      "0": [0, 0]
+    },
+    inputSourceMap: {
+      version: 3,
+      sources: ["/Users/matthewmoroney/builds/FreeAgentics/web/components/conversation-orchestration/preset-selector.tsx"],
+      sourcesContent: ["import { ConversationPreset } from \"../../lib/types\";\n\ninterface PresetSelectorProps {\n  currentPreset: ConversationPreset | null;\n  onPresetChange: (preset: ConversationPreset) => void;\n  onSavePreset: (name: string) => void;\n  onLoadPreset: (preset: ConversationPreset) => void;\n}\n\nexport default function PresetSelector({\n  currentPreset,\n  onPresetChange,\n  onSavePreset,\n  onLoadPreset,\n}: PresetSelectorProps) {\n  return (\n    <div className=\"preset-selector\">\n      <p>Preset Selector Component</p>\n      {currentPreset && <p>Current: {currentPreset.name}</p>}\n    </div>\n  );\n}\n"],
+      names: ["PresetSelector", "currentPreset", "onPresetChange", "onSavePreset", "onLoadPreset", "div", "className", "p", "name"],
+      mappings: ";;;;+BASA;;;eAAwBA;;;;AAAT,SAASA,eAAe,EACrCC,aAAa,EACbC,cAAc,EACdC,YAAY,EACZC,YAAY,EACQ;IACpB,qBACE,sBAACC;QAAIC,WAAU;;0BACb,qBAACC;0BAAE;;YACFN,+BAAiB,sBAACM;;oBAAE;oBAAUN,cAAcO,IAAI;;;;;AAGvD"
+    },
+    _coverageSchema: "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+    hash: "926d2de015adc86d7d78b6ac834040244bff2ef6"
+  };
+  var coverage = global[gcv] || (global[gcv] = {});
+  if (!coverage[path] || coverage[path].hash !== hash) {
+    coverage[path] = coverageData;
+  }
+  var actualCoverage = coverage[path];
+  {
+    // @ts-ignore
+    cov_1m5ndv80wz = function () {
+      return actualCoverage;
+    };
+  }
+  return actualCoverage;
+}
+cov_1m5ndv80wz();
+cov_1m5ndv80wz().s[0]++;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/* istanbul ignore next */
+cov_1m5ndv80wz().s[1]++;
+Object.defineProperty(exports, "default", {
+  enumerable: true,
+  get: function () {
+    /* istanbul ignore next */
+    cov_1m5ndv80wz().f[0]++;
+    cov_1m5ndv80wz().s[2]++;
+    return PresetSelector;
+  }
+});
+const _jsxruntime =
+/* istanbul ignore next */
+(cov_1m5ndv80wz().s[3]++, require("react/jsx-runtime"));
+function PresetSelector({
+  currentPreset,
+  onPresetChange,
+  onSavePreset,
+  onLoadPreset
+}) {
+  /* istanbul ignore next */
+  cov_1m5ndv80wz().f[1]++;
+  cov_1m5ndv80wz().s[4]++;
+  return /*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+    className: "preset-selector",
+    children: [/*#__PURE__*/(0, _jsxruntime.jsx)("p", {
+      children: "Preset Selector Component"
+    }),
+    /* istanbul ignore next */
+    (cov_1m5ndv80wz().b[0][0]++, currentPreset) &&
+    /* istanbul ignore next */
+    (cov_1m5ndv80wz().b[0][1]++, /*#__PURE__*/(0, _jsxruntime.jsxs)("p", {
+      children: ["Current: ", currentPreset.name]
+    }))]
+  });
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJQcmVzZXRTZWxlY3RvciIsImN1cnJlbnRQcmVzZXQiLCJvblByZXNldENoYW5nZSIsIm9uU2F2ZVByZXNldCIsIm9uTG9hZFByZXNldCIsImNvdl8xbTVuZHY4MHd6IiwiZiIsInMiLCJfanN4cnVudGltZSIsImpzeHMiLCJjbGFzc05hbWUiLCJqc3giLCJiIiwibmFtZSJdLCJzb3VyY2VzIjpbIi9Vc2Vycy9tYXR0aGV3bW9yb25leS9idWlsZHMvRnJlZUFnZW50aWNzL3dlYi9jb21wb25lbnRzL2NvbnZlcnNhdGlvbi1vcmNoZXN0cmF0aW9uL3ByZXNldC1zZWxlY3Rvci50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgQ29udmVyc2F0aW9uUHJlc2V0IH0gZnJvbSBcIi4uLy4uL2xpYi90eXBlc1wiO1xuXG5pbnRlcmZhY2UgUHJlc2V0U2VsZWN0b3JQcm9wcyB7XG4gIGN1cnJlbnRQcmVzZXQ6IENvbnZlcnNhdGlvblByZXNldCB8IG51bGw7XG4gIG9uUHJlc2V0Q2hhbmdlOiAocHJlc2V0OiBDb252ZXJzYXRpb25QcmVzZXQpID0+IHZvaWQ7XG4gIG9uU2F2ZVByZXNldDogKG5hbWU6IHN0cmluZykgPT4gdm9pZDtcbiAgb25Mb2FkUHJlc2V0OiAocHJlc2V0OiBDb252ZXJzYXRpb25QcmVzZXQpID0+IHZvaWQ7XG59XG5cbmV4cG9ydCBkZWZhdWx0IGZ1bmN0aW9uIFByZXNldFNlbGVjdG9yKHtcbiAgY3VycmVudFByZXNldCxcbiAgb25QcmVzZXRDaGFuZ2UsXG4gIG9uU2F2ZVByZXNldCxcbiAgb25Mb2FkUHJlc2V0LFxufTogUHJlc2V0U2VsZWN0b3JQcm9wcykge1xuICByZXR1cm4gKFxuICAgIDxkaXYgY2xhc3NOYW1lPVwicHJlc2V0LXNlbGVjdG9yXCI+XG4gICAgICA8cD5QcmVzZXQgU2VsZWN0b3IgQ29tcG9uZW50PC9wPlxuICAgICAge2N1cnJlbnRQcmVzZXQgJiYgPHA+Q3VycmVudDoge2N1cnJlbnRQcmVzZXQubmFtZX08L3A+fVxuICAgIDwvZGl2PlxuICApO1xufVxuIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OzsrQkFTQTs7Ozs7O1dBQXdCQSxjQUFBOzs7Ozs7QUFBVCxTQUFTQSxlQUFlO0VBQ3JDQyxhQUFhO0VBQ2JDLGNBQWM7RUFDZEMsWUFBWTtFQUNaQztBQUFZLENBQ1E7RUFBQTtFQUFBQyxjQUFBLEdBQUFDLENBQUE7RUFBQUQsY0FBQSxHQUFBRSxDQUFBO0VBQ3BCLG9CQUNFLElBQUFDLFdBQUEsQ0FBQUMsSUFBQSxFQUFDO0lBQUlDLFNBQUEsRUFBVTs0QkFDYixJQUFBRixXQUFBLENBQUFHLEdBQUEsRUFBQztnQkFBRTs7SUFDRjtJQUFBLENBQUFOLGNBQUEsR0FBQU8sQ0FBQSxVQUFBWCxhQUFBO0lBQUE7SUFBQSxDQUFBSSxjQUFBLEdBQUFPLENBQUEsdUJBQWlCLElBQUFKLFdBQUEsQ0FBQUMsSUFBQSxFQUFDO2lCQUFFLGFBQVVSLGFBQUEsQ0FBY1ksSUFBSTs7O0FBR3ZEIiwiaWdub3JlTGlzdCI6W119

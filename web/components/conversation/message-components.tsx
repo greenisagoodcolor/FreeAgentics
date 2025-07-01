@@ -489,8 +489,8 @@ export const CodeMessage = memo<MessageComponentProps>(
     onReaction,
     className,
   }) => {
-    const language = message.metadata?.language || 'text';
-    
+    const language = message.metadata?.language || "text";
+
     return (
       <div
         className={cn(
@@ -527,7 +527,10 @@ export const CodeMessage = memo<MessageComponentProps>(
                 {language}
               </Badge>
             </div>
-            <pre role="code" className="bg-muted/50 rounded-lg p-3 text-sm overflow-x-auto">
+            <pre
+              role="code"
+              className="bg-muted/50 rounded-lg p-3 text-sm overflow-x-auto"
+            >
               <code>{message.content}</code>
             </pre>
           </div>

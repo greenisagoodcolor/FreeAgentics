@@ -2,13 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Minimize2,
-  Maximize2,
-  X,
-  Move,
-  MoreVertical,
-} from "lucide-react";
+import { Minimize2, Maximize2, X, Move, MoreVertical } from "lucide-react";
 
 interface TiledPanelProps {
   id: string;
@@ -38,20 +32,22 @@ const TiledPanel: React.FC<TiledPanelProps> = ({
   onFocus,
   onClose,
   children,
-  className = ""
+  className = "",
 }) => {
   const [isMinimized, setIsMinimized] = useState(false);
 
-  const gridStyles = gridArea ? {
-    gridRowStart: gridArea.rowStart,
-    gridRowEnd: gridArea.rowEnd,
-    gridColumnStart: gridArea.colStart,
-    gridColumnEnd: gridArea.colEnd,
-  } : {};
+  const gridStyles = gridArea
+    ? {
+        gridRowStart: gridArea.rowStart,
+        gridRowEnd: gridArea.rowEnd,
+        gridColumnStart: gridArea.colStart,
+        gridColumnEnd: gridArea.colEnd,
+      }
+    : {};
 
   return (
     <motion.div
-      className={`tiled-panel ${focused ? 'focused' : ''} ${className}`}
+      className={`tiled-panel ${focused ? "focused" : ""} ${className}`}
       style={gridStyles}
       onClick={onFocus}
       initial={{ opacity: 0, scale: 0.95 }}
@@ -69,7 +65,7 @@ const TiledPanel: React.FC<TiledPanelProps> = ({
             <span className="text-xs text-[var(--text-secondary)]">LIVE</span>
           </div>
         </div>
-        
+
         <div className="panel-controls">
           <motion.button
             className="panel-btn"
@@ -83,7 +79,7 @@ const TiledPanel: React.FC<TiledPanelProps> = ({
           >
             <Minimize2 className="w-3 h-3" />
           </motion.button>
-          
+
           <motion.button
             className="panel-btn"
             title="Maximize"
@@ -92,7 +88,7 @@ const TiledPanel: React.FC<TiledPanelProps> = ({
           >
             <Maximize2 className="w-3 h-3" />
           </motion.button>
-          
+
           {detachable && (
             <motion.button
               className="panel-btn"
@@ -103,7 +99,7 @@ const TiledPanel: React.FC<TiledPanelProps> = ({
               <Move className="w-3 h-3" />
             </motion.button>
           )}
-          
+
           {closable && (
             <motion.button
               className="panel-btn"
@@ -118,7 +114,7 @@ const TiledPanel: React.FC<TiledPanelProps> = ({
               <X className="w-3 h-3" />
             </motion.button>
           )}
-          
+
           <motion.button
             className="panel-btn"
             title="More options"
@@ -129,7 +125,7 @@ const TiledPanel: React.FC<TiledPanelProps> = ({
           </motion.button>
         </div>
       </div>
-      
+
       {/* Panel Content */}
       <AnimatePresence>
         {!isMinimized && (
@@ -148,4 +144,4 @@ const TiledPanel: React.FC<TiledPanelProps> = ({
   );
 };
 
-export default TiledPanel; 
+export default TiledPanel;

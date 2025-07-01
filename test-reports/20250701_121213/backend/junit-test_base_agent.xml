@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="15" failures="6" skipped="0" tests="32" time="5.225" timestamp="2025-07-01T12:13:10.613396+02:00" hostname="Matthews-MacBook-Air.local"><testcase classname="tests.unit.test_base_agent.TestAgentData" name="test_default_agent_data" time="0.001" /><testcase classname="tests.unit.test_base_agent.TestAgentData" name="test_custom_agent_data" time="0.001" /><testcase classname="tests.unit.test_base_agent.TestAgentData" name="test_agent_capabilities" time="0.001" /><testcase classname="tests.unit.test_base_agent.TestAgentData" name="test_agent_resources" time="0.001" /><testcase classname="tests.unit.test_base_agent.TestPosition" name="test_position_creation" time="0.001" /><testcase classname="tests.unit.test_base_agent.TestPosition" name="test_position_default_z" time="0.001" /><testcase classname="tests.unit.test_base_agent.TestPosition" name="test_position_to_array" time="0.006" /><testcase classname="tests.unit.test_base_agent.TestPosition" name="test_position_distance" time="0.003" /><testcase classname="tests.unit.test_base_agent.TestPosition" name="test_position_hash" time="0.001" /><testcase classname="tests.unit.test_base_agent.TestPosition" name="test_position_equality" time="0.004" /><testcase classname="tests.unit.test_base_agent.TestBaseAgent" name="test_agent_initialization" time="0.009"><failure message="TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'">tests/unit/test_base_agent.py:175: in test_agent_initialization
+    agent = BaseAgent(
+agents/base/agent.py:162: in __init__
+    self._initialize_core_components()
+agents/base/agent.py:261: in _initialize_core_components
+    self._components["markov_blanket"] = MarkovBlanketFactory.create_pymdp_blanket(
+agents/base/markov_blanket.py:671: in create_pymdp_blanket
+    return PyMDPMarkovBlanket(
+E   TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'</failure></testcase><testcase classname="tests.unit.test_base_agent.TestBaseAgent" name="test_agent_backward_compatibility" time="0.002"><failure message="TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'">tests/unit/test_base_agent.py:189: in test_agent_backward_compatibility
+    agent = BaseAgent(
+agents/base/agent.py:162: in __init__
+    self._initialize_core_components()
+agents/base/agent.py:261: in _initialize_core_components
+    self._components["markov_blanket"] = MarkovBlanketFactory.create_pymdp_blanket(
+agents/base/markov_blanket.py:671: in create_pymdp_blanket
+    return PyMDPMarkovBlanket(
+E   TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'</failure></testcase><testcase classname="tests.unit.test_base_agent.TestBaseAgent" name="test_agent_initialization_lifecycle" time="0.005"><error message="failed on setup with &quot;TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'&quot;">tests/unit/test_base_agent.py:166: in test_agent
+    agent = BaseAgent(
+agents/base/agent.py:162: in __init__
+    self._initialize_core_components()
+agents/base/agent.py:261: in _initialize_core_components
+    self._components["markov_blanket"] = MarkovBlanketFactory.create_pymdp_blanket(
+agents/base/markov_blanket.py:671: in create_pymdp_blanket
+    return PyMDPMarkovBlanket(
+E   TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'</error></testcase><testcase classname="tests.unit.test_base_agent.TestBaseAgent" name="test_agent_update_cycle" time="0.003"><error message="failed on setup with &quot;TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'&quot;">tests/unit/test_base_agent.py:166: in test_agent
+    agent = BaseAgent(
+agents/base/agent.py:162: in __init__
+    self._initialize_core_components()
+agents/base/agent.py:261: in _initialize_core_components
+    self._components["markov_blanket"] = MarkovBlanketFactory.create_pymdp_blanket(
+agents/base/markov_blanket.py:671: in create_pymdp_blanket
+    return PyMDPMarkovBlanket(
+E   TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'</error></testcase><testcase classname="tests.unit.test_base_agent.TestBaseAgent" name="test_agent_step_execution" time="0.003"><error message="failed on setup with &quot;TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'&quot;">tests/unit/test_base_agent.py:166: in test_agent
+    agent = BaseAgent(
+agents/base/agent.py:162: in __init__
+    self._initialize_core_components()
+agents/base/agent.py:261: in _initialize_core_components
+    self._components["markov_blanket"] = MarkovBlanketFactory.create_pymdp_blanket(
+agents/base/markov_blanket.py:671: in create_pymdp_blanket
+    return PyMDPMarkovBlanket(
+E   TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'</error></testcase><testcase classname="tests.unit.test_base_agent.TestBaseAgent" name="test_agent_pause_resume" time="0.003"><error message="failed on setup with &quot;TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'&quot;">tests/unit/test_base_agent.py:166: in test_agent
+    agent = BaseAgent(
+agents/base/agent.py:162: in __init__
+    self._initialize_core_components()
+agents/base/agent.py:261: in _initialize_core_components
+    self._components["markov_blanket"] = MarkovBlanketFactory.create_pymdp_blanket(
+agents/base/markov_blanket.py:671: in create_pymdp_blanket
+    return PyMDPMarkovBlanket(
+E   TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'</error></testcase><testcase classname="tests.unit.test_base_agent.TestBaseAgent" name="test_agent_stop" time="0.002"><error message="failed on setup with &quot;TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'&quot;">tests/unit/test_base_agent.py:166: in test_agent
+    agent = BaseAgent(
+agents/base/agent.py:162: in __init__
+    self._initialize_core_components()
+agents/base/agent.py:261: in _initialize_core_components
+    self._components["markov_blanket"] = MarkovBlanketFactory.create_pymdp_blanket(
+agents/base/markov_blanket.py:671: in create_pymdp_blanket
+    return PyMDPMarkovBlanket(
+E   TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'</error></testcase><testcase classname="tests.unit.test_base_agent.TestBaseAgent" name="test_agent_shutdown" time="0.006"><error message="failed on setup with &quot;TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'&quot;">tests/unit/test_base_agent.py:166: in test_agent
+    agent = BaseAgent(
+agents/base/agent.py:162: in __init__
+    self._initialize_core_components()
+agents/base/agent.py:261: in _initialize_core_components
+    self._components["markov_blanket"] = MarkovBlanketFactory.create_pymdp_blanket(
+agents/base/markov_blanket.py:671: in create_pymdp_blanket
+    return PyMDPMarkovBlanket(
+E   TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'</error></testcase><testcase classname="tests.unit.test_base_agent.TestBaseAgent" name="test_agent_position_update" time="0.004"><error message="failed on setup with &quot;TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'&quot;">tests/unit/test_base_agent.py:166: in test_agent
+    agent = BaseAgent(
+agents/base/agent.py:162: in __init__
+    self._initialize_core_components()
+agents/base/agent.py:261: in _initialize_core_components
+    self._components["markov_blanket"] = MarkovBlanketFactory.create_pymdp_blanket(
+agents/base/markov_blanket.py:671: in create_pymdp_blanket
+    return PyMDPMarkovBlanket(
+E   TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'</error></testcase><testcase classname="tests.unit.test_base_agent.TestBaseAgent" name="test_agent_status_update" time="0.004"><error message="failed on setup with &quot;TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'&quot;">tests/unit/test_base_agent.py:166: in test_agent
+    agent = BaseAgent(
+agents/base/agent.py:162: in __init__
+    self._initialize_core_components()
+agents/base/agent.py:261: in _initialize_core_components
+    self._components["markov_blanket"] = MarkovBlanketFactory.create_pymdp_blanket(
+agents/base/markov_blanket.py:671: in create_pymdp_blanket
+    return PyMDPMarkovBlanket(
+E   TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'</error></testcase><testcase classname="tests.unit.test_base_agent.TestBaseAgent" name="test_agent_energy_management" time="0.004"><error message="failed on setup with &quot;TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'&quot;">tests/unit/test_base_agent.py:166: in test_agent
+    agent = BaseAgent(
+agents/base/agent.py:162: in __init__
+    self._initialize_core_components()
+agents/base/agent.py:261: in _initialize_core_components
+    self._components["markov_blanket"] = MarkovBlanketFactory.create_pymdp_blanket(
+agents/base/markov_blanket.py:671: in create_pymdp_blanket
+    return PyMDPMarkovBlanket(
+E   TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'</error></testcase><testcase classname="tests.unit.test_base_agent.TestBaseAgent" name="test_agent_goal_management" time="0.002"><error message="failed on setup with &quot;TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'&quot;">tests/unit/test_base_agent.py:166: in test_agent
+    agent = BaseAgent(
+agents/base/agent.py:162: in __init__
+    self._initialize_core_components()
+agents/base/agent.py:261: in _initialize_core_components
+    self._components["markov_blanket"] = MarkovBlanketFactory.create_pymdp_blanket(
+agents/base/markov_blanket.py:671: in create_pymdp_blanket
+    return PyMDPMarkovBlanket(
+E   TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'</error></testcase><testcase classname="tests.unit.test_base_agent.TestBaseAgent" name="test_agent_perception_integration" time="0.002"><error message="failed on setup with &quot;TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'&quot;">tests/unit/test_base_agent.py:166: in test_agent
+    agent = BaseAgent(
+agents/base/agent.py:162: in __init__
+    self._initialize_core_components()
+agents/base/agent.py:261: in _initialize_core_components
+    self._components["markov_blanket"] = MarkovBlanketFactory.create_pymdp_blanket(
+agents/base/markov_blanket.py:671: in create_pymdp_blanket
+    return PyMDPMarkovBlanket(
+E   TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'</error></testcase><testcase classname="tests.unit.test_base_agent.TestBaseAgent" name="test_agent_memory_integration" time="0.003"><error message="failed on setup with &quot;TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'&quot;">tests/unit/test_base_agent.py:166: in test_agent
+    agent = BaseAgent(
+agents/base/agent.py:162: in __init__
+    self._initialize_core_components()
+agents/base/agent.py:261: in _initialize_core_components
+    self._components["markov_blanket"] = MarkovBlanketFactory.create_pymdp_blanket(
+agents/base/markov_blanket.py:671: in create_pymdp_blanket
+    return PyMDPMarkovBlanket(
+E   TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'</error></testcase><testcase classname="tests.unit.test_base_agent.TestBaseAgent" name="test_agent_behavior_execution" time="0.005"><error message="failed on setup with &quot;TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'&quot;">tests/unit/test_base_agent.py:166: in test_agent
+    agent = BaseAgent(
+agents/base/agent.py:162: in __init__
+    self._initialize_core_components()
+agents/base/agent.py:261: in _initialize_core_components
+    self._components["markov_blanket"] = MarkovBlanketFactory.create_pymdp_blanket(
+agents/base/markov_blanket.py:671: in create_pymdp_blanket
+    return PyMDPMarkovBlanket(
+E   TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'</error></testcase><testcase classname="tests.unit.test_base_agent.TestBaseAgent" name="test_agent_event_handling" time="0.003"><error message="failed on setup with &quot;TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'&quot;">tests/unit/test_base_agent.py:166: in test_agent
+    agent = BaseAgent(
+agents/base/agent.py:162: in __init__
+    self._initialize_core_components()
+agents/base/agent.py:261: in _initialize_core_components
+    self._components["markov_blanket"] = MarkovBlanketFactory.create_pymdp_blanket(
+agents/base/markov_blanket.py:671: in create_pymdp_blanket
+    return PyMDPMarkovBlanket(
+E   TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'</error></testcase><testcase classname="tests.unit.test_base_agent.TestBaseAgent" name="test_agent_serialization" time="0.003"><error message="failed on setup with &quot;TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'&quot;">tests/unit/test_base_agent.py:166: in test_agent
+    agent = BaseAgent(
+agents/base/agent.py:162: in __init__
+    self._initialize_core_components()
+agents/base/agent.py:261: in _initialize_core_components
+    self._components["markov_blanket"] = MarkovBlanketFactory.create_pymdp_blanket(
+agents/base/markov_blanket.py:671: in create_pymdp_blanket
+    return PyMDPMarkovBlanket(
+E   TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'</error></testcase><testcase classname="tests.unit.test_base_agent.TestBaseAgent" name="test_agent_active_inference_integration" time="3.213"><failure message="TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'">tests/unit/test_base_agent.py:355: in test_agent_active_inference_integration
+    agent = BaseAgent(
+agents/base/agent.py:162: in __init__
+    self._initialize_core_components()
+agents/base/agent.py:261: in _initialize_core_components
+    self._components["markov_blanket"] = MarkovBlanketFactory.create_pymdp_blanket(
+agents/base/markov_blanket.py:671: in create_pymdp_blanket
+    return PyMDPMarkovBlanket(
+E   TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'</failure></testcase><testcase classname="tests.unit.test_base_agent.TestBaseAgent" name="test_agent_markov_blanket_integration" time="0.005" /><testcase classname="tests.unit.test_base_agent.TestAgentPerformance" name="test_agent_update_performance" time="0.014"><failure message="TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'">tests/unit/test_base_agent.py:411: in test_agent_update_performance
+    agent = BaseAgent(
+agents/base/agent.py:162: in __init__
+    self._initialize_core_components()
+agents/base/agent.py:261: in _initialize_core_components
+    self._components["markov_blanket"] = MarkovBlanketFactory.create_pymdp_blanket(
+agents/base/markov_blanket.py:671: in create_pymdp_blanket
+    return PyMDPMarkovBlanket(
+E   TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'</failure></testcase><testcase classname="tests.unit.test_base_agent.TestAgentPerformance" name="test_agent_memory_efficiency" time="0.002"><failure message="TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'">tests/unit/test_base_agent.py:426: in test_agent_memory_efficiency
+    agent = BaseAgent(
+agents/base/agent.py:162: in __init__
+    self._initialize_core_components()
+agents/base/agent.py:261: in _initialize_core_components
+    self._components["markov_blanket"] = MarkovBlanketFactory.create_pymdp_blanket(
+agents/base/markov_blanket.py:671: in create_pymdp_blanket
+    return PyMDPMarkovBlanket(
+E   TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'</failure></testcase><testcase classname="tests.unit.test_base_agent.TestAgentPerformance" name="test_multiple_agents_coordination" time="0.001"><failure message="TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'">tests/unit/test_base_agent.py:449: in test_multiple_agents_coordination
+    agent = BaseAgent(
+agents/base/agent.py:162: in __init__
+    self._initialize_core_components()
+agents/base/agent.py:261: in _initialize_core_components
+    self._components["markov_blanket"] = MarkovBlanketFactory.create_pymdp_blanket(
+agents/base/markov_blanket.py:671: in create_pymdp_blanket
+    return PyMDPMarkovBlanket(
+E   TypeError: Can't instantiate abstract class PyMDPMarkovBlanket without an implementation for abstract methods 'check_boundary_violations', 'get_current_state', 'is_boundary_intact', 'update_boundary'</failure></testcase></testsuite></testsuites>

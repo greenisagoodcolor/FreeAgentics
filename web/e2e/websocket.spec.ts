@@ -179,7 +179,9 @@ test.describe("WebSocket Real-time Features", () => {
 
     // Check that the app is still functional
     const dashboardContent = await page
-      .locator('main, [role="main"], .dashboard, .dashboard-content, [class*="dashboard"]')
+      .locator(
+        'main, [role="main"], .dashboard, .dashboard-content, [class*="dashboard"]',
+      )
       .count();
     expect(dashboardContent).toBeGreaterThan(0);
 

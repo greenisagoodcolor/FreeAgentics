@@ -11,27 +11,29 @@ import { Menu, X, Maximize2, Minimize2, MoreVertical } from "lucide-react";
 export const useMobileDetection = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
-  const [orientation, setOrientation] = useState<'portrait' | 'landscape'>('portrait');
+  const [orientation, setOrientation] = useState<"portrait" | "landscape">(
+    "portrait",
+  );
   const [screenSize, setScreenSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     const checkDevice = () => {
       const width = window.innerWidth;
       const height = window.innerHeight;
-      
+
       setScreenSize({ width, height });
       setIsMobile(width < 768);
       setIsTablet(width >= 768 && width < 1024);
-      setOrientation(width > height ? 'landscape' : 'portrait');
+      setOrientation(width > height ? "landscape" : "portrait");
     };
 
     checkDevice();
-    window.addEventListener('resize', checkDevice);
-    window.addEventListener('orientationchange', checkDevice);
+    window.addEventListener("resize", checkDevice);
+    window.addEventListener("orientationchange", checkDevice);
 
     return () => {
-      window.removeEventListener('resize', checkDevice);
-      window.removeEventListener('orientationchange', checkDevice);
+      window.removeEventListener("resize", checkDevice);
+      window.removeEventListener("orientationchange", checkDevice);
     };
   }, []);
 
@@ -53,7 +55,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
   isOpen,
   onClose,
   children,
-  title = "Navigation"
+  title = "Navigation",
 }) => {
   const drawerRef = useRef<HTMLDivElement>(null);
 
@@ -74,13 +76,13 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
   // Prevent body scroll when drawer is open
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     }
 
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     };
   }, [isOpen]);
 
@@ -124,9 +126,7 @@ export const MobileDrawer: React.FC<MobileDrawerProps> = ({
             </div>
 
             {/* Content */}
-            <div className="p-4">
-              {children}
-            </div>
+            <div className="p-4">{children}</div>
           </motion.div>
         </>
       )}
@@ -152,37 +152,39 @@ interface MobilePanelStackProps {
 export const MobilePanelStack: React.FC<MobilePanelStackProps> = ({
   panels,
   activePanel,
-  onPanelChange
+  onPanelChange,
 }) => {
-  const [currentPanel, setCurrentPanel] = useState(activePanel || panels[0]?.id);
+  const [currentPanel, setCurrentPanel] = useState(
+    activePanel || panels[0]?.id,
+  );
   const [direction, setDirection] = useState(0);
 
   const handlePanelChange = (panelId: string) => {
-    const currentIndex = panels.findIndex(p => p.id === currentPanel);
-    const newIndex = panels.findIndex(p => p.id === panelId);
-    
+    const currentIndex = panels.findIndex((p) => p.id === currentPanel);
+    const newIndex = panels.findIndex((p) => p.id === panelId);
+
     setDirection(newIndex > currentIndex ? 1 : -1);
     setCurrentPanel(panelId);
     onPanelChange?.(panelId);
   };
 
-  const currentPanelData = panels.find(p => p.id === currentPanel);
+  const currentPanelData = panels.find((p) => p.id === currentPanel);
 
   const variants = {
     enter: (direction: number) => ({
       x: direction > 0 ? 300 : -300,
-      opacity: 0
+      opacity: 0,
     }),
     center: {
       zIndex: 1,
       x: 0,
-      opacity: 1
+      opacity: 1,
     },
     exit: (direction: number) => ({
       zIndex: 0,
       x: direction < 0 ? 300 : -300,
-      opacity: 0
-    })
+      opacity: 0,
+    }),
   };
 
   return (
@@ -195,8 +197,8 @@ export const MobilePanelStack: React.FC<MobilePanelStackProps> = ({
             onClick={() => handlePanelChange(panel.id)}
             className={`flex-1 flex items-center justify-center gap-2 p-3 text-sm font-medium transition-colors ${
               currentPanel === panel.id
-                ? 'text-[var(--primary-amber)] border-b-2 border-[var(--primary-amber)]'
-                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                ? "text-[var(--primary-amber)] border-b-2 border-[var(--primary-amber)]"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
             {panel.icon}
@@ -217,7 +219,7 @@ export const MobilePanelStack: React.FC<MobilePanelStackProps> = ({
             exit="exit"
             transition={{
               x: { type: "spring", stiffness: 300, damping: 30 },
-              opacity: { duration: 0.2 }
+              opacity: { duration: 0.2 },
             }}
             className="absolute inset-0 overflow-auto"
           >
@@ -244,11 +246,11 @@ interface MobileTilingManagerProps {
 
 export const MobileTilingManager: React.FC<MobileTilingManagerProps> = ({
   children,
-  panels
+  panels,
 }) => {
   const { isMobile, orientation } = useMobileDetection();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [currentView, setCurrentView] = useState<'stack' | 'single'>('stack');
+  const [currentView, setCurrentView] = useState<"stack" | "single">("stack");
   const [selectedPanel, setSelectedPanel] = useState<string | null>(null);
 
   if (!isMobile) {
@@ -257,15 +259,17 @@ export const MobileTilingManager: React.FC<MobileTilingManagerProps> = ({
 
   const handlePanelSelect = (panelId: string) => {
     setSelectedPanel(panelId);
-    setCurrentView('single');
+    setCurrentView("single");
   };
 
   const handleBackToStack = () => {
-    setCurrentView('stack');
+    setCurrentView("stack");
     setSelectedPanel(null);
   };
 
-  const selectedPanelData = selectedPanel ? panels.find(p => p.id === selectedPanel) : null;
+  const selectedPanelData = selectedPanel
+    ? panels.find((p) => p.id === selectedPanel)
+    : null;
 
   return (
     <div className="mobile-tiling-manager h-full flex flex-col">
@@ -278,19 +282,23 @@ export const MobileTilingManager: React.FC<MobileTilingManagerProps> = ({
           >
             <Menu className="w-5 h-5" />
           </button>
-          
+
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded bg-[var(--primary-amber)] flex items-center justify-center">
-              <span className="text-xs font-bold text-[var(--bg-primary)]">CN</span>
+              <span className="text-xs font-bold text-[var(--bg-primary)]">
+                CN
+              </span>
             </div>
             <h1 className="text-sm font-semibold text-[var(--text-primary)]">
-              {currentView === 'single' && selectedPanelData ? selectedPanelData.title : 'Dashboard'}
+              {currentView === "single" && selectedPanelData
+                ? selectedPanelData.title
+                : "Dashboard"}
             </h1>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          {currentView === 'single' && (
+          {currentView === "single" && (
             <button
               onClick={handleBackToStack}
               className="p-2 rounded-md hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)]"
@@ -298,7 +306,7 @@ export const MobileTilingManager: React.FC<MobileTilingManagerProps> = ({
               <Minimize2 className="w-4 h-4" />
             </button>
           )}
-          
+
           <button className="p-2 rounded-md hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)]">
             <MoreVertical className="w-4 h-4" />
           </button>
@@ -307,9 +315,9 @@ export const MobileTilingManager: React.FC<MobileTilingManagerProps> = ({
 
       {/* Content Area */}
       <div className="flex-1 overflow-hidden">
-        {currentView === 'stack' ? (
+        {currentView === "stack" ? (
           <MobilePanelStack
-            panels={panels.map(panel => ({
+            panels={panels.map((panel) => ({
               id: panel.id,
               title: panel.title,
               content: (
@@ -330,14 +338,12 @@ export const MobileTilingManager: React.FC<MobileTilingManagerProps> = ({
                     {panel.component}
                   </div>
                 </div>
-              )
+              ),
             }))}
           />
         ) : (
           selectedPanelData && (
-            <div className="h-full p-4">
-              {selectedPanelData.component}
-            </div>
+            <div className="h-full p-4">{selectedPanelData.component}</div>
           )
         )}
       </div>
@@ -374,13 +380,13 @@ export const MobileTilingManager: React.FC<MobileTilingManagerProps> = ({
             <div className="space-y-2">
               <button
                 onClick={() => {
-                  setCurrentView('stack');
+                  setCurrentView("stack");
                   setIsDrawerOpen(false);
                 }}
                 className={`w-full text-left p-3 rounded-md transition-colors ${
-                  currentView === 'stack'
-                    ? 'bg-[var(--primary-amber)] text-[var(--bg-primary)]'
-                    : 'hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                  currentView === "stack"
+                    ? "bg-[var(--primary-amber)] text-[var(--bg-primary)]"
+                    : "hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                 }`}
               >
                 Stack View
@@ -388,17 +394,17 @@ export const MobileTilingManager: React.FC<MobileTilingManagerProps> = ({
               <button
                 onClick={() => {
                   if (selectedPanel) {
-                    setCurrentView('single');
+                    setCurrentView("single");
                   }
                   setIsDrawerOpen(false);
                 }}
                 disabled={!selectedPanel}
                 className={`w-full text-left p-3 rounded-md transition-colors ${
-                  currentView === 'single'
-                    ? 'bg-[var(--primary-amber)] text-[var(--bg-primary)]'
+                  currentView === "single"
+                    ? "bg-[var(--primary-amber)] text-[var(--bg-primary)]"
                     : selectedPanel
-                    ? 'hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                    : 'opacity-50 cursor-not-allowed text-[var(--text-muted)]'
+                      ? "hover:bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      : "opacity-50 cursor-not-allowed text-[var(--text-muted)]"
                 }`}
               >
                 Single Panel
@@ -426,15 +432,15 @@ interface TouchGestureOptions {
 
 export const useTouchGestures = (
   elementRef: React.RefObject<HTMLElement>,
-  options: TouchGestureOptions
+  options: TouchGestureOptions,
 ) => {
-  const { 
-    onSwipeLeft, 
-    onSwipeRight, 
-    onSwipeUp, 
-    onSwipeDown, 
+  const {
+    onSwipeLeft,
+    onSwipeRight,
+    onSwipeUp,
+    onSwipeDown,
     onPinch,
-    threshold = 50 
+    threshold = 50,
   } = options;
 
   useEffect(() => {
@@ -470,10 +476,10 @@ export const useTouchGestures = (
       if (e.changedTouches.length === 1) {
         const endX = e.changedTouches[0].clientX;
         const endY = e.changedTouches[0].clientY;
-        
+
         const deltaX = endX - startX;
         const deltaY = endY - startY;
-        
+
         const absDeltaX = Math.abs(deltaX);
         const absDeltaY = Math.abs(deltaY);
 
@@ -497,16 +503,24 @@ export const useTouchGestures = (
       }
     };
 
-    element.addEventListener('touchstart', handleTouchStart, { passive: true });
-    element.addEventListener('touchmove', handleTouchMove, { passive: true });
-    element.addEventListener('touchend', handleTouchEnd, { passive: true });
+    element.addEventListener("touchstart", handleTouchStart, { passive: true });
+    element.addEventListener("touchmove", handleTouchMove, { passive: true });
+    element.addEventListener("touchend", handleTouchEnd, { passive: true });
 
     return () => {
-      element.removeEventListener('touchstart', handleTouchStart);
-      element.removeEventListener('touchmove', handleTouchMove);
-      element.removeEventListener('touchend', handleTouchEnd);
+      element.removeEventListener("touchstart", handleTouchStart);
+      element.removeEventListener("touchmove", handleTouchMove);
+      element.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [elementRef, onSwipeLeft, onSwipeRight, onSwipeUp, onSwipeDown, onPinch, threshold]);
+  }, [
+    elementRef,
+    onSwipeLeft,
+    onSwipeRight,
+    onSwipeUp,
+    onSwipeDown,
+    onPinch,
+    threshold,
+  ]);
 };
 
 export default {
@@ -514,5 +528,5 @@ export default {
   MobileDrawer,
   MobilePanelStack,
   MobileTilingManager,
-  useTouchGestures
+  useTouchGestures,
 };

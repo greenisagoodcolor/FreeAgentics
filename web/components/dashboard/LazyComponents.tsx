@@ -4,28 +4,24 @@ import React, { Suspense } from "react";
 import { motion } from "framer-motion";
 
 // Lazy load heavy dashboard components
-const KnowledgeGraphVisualization = React.lazy(() => 
-  import("./KnowledgeGraphVisualization").then(module => ({
-    default: module.default
-  }))
+const KnowledgeGraphVisualization = React.lazy(() =>
+  import("./KnowledgeGraphVisualization").then((module) => ({
+    default: module.default,
+  })),
 );
 
-const AnalyticsWidgetSystem = React.lazy(() => 
-  import("./AnalyticsWidgetSystem").then(module => ({
-    default: module.default
-  }))
+const AnalyticsWidgetSystem = React.lazy(() =>
+  import("./AnalyticsWidgetSystem").then((module) => ({
+    default: module.default,
+  })),
 );
 
 // Loading skeleton component
-const LoadingSkeleton: React.FC<{ 
-  height?: string; 
+const LoadingSkeleton: React.FC<{
+  height?: string;
   className?: string;
   children?: React.ReactNode;
-}> = ({ 
-  height = "200px", 
-  className = "",
-  children 
-}) => (
+}> = ({ height = "200px", className = "", children }) => (
   <motion.div
     className={`skeleton-enhanced ${className}`}
     style={{ height }}
@@ -59,10 +55,10 @@ export const LazyAnalyticsSystem: React.FC<any> = (props) => (
 // Preload utilities
 export const preloadComponent = (componentName: string) => {
   switch (componentName) {
-    case 'knowledge-graph':
+    case "knowledge-graph":
       import("./KnowledgeGraphVisualization");
       break;
-    case 'analytics':
+    case "analytics":
       import("./AnalyticsWidgetSystem");
       break;
   }
@@ -71,7 +67,7 @@ export const preloadComponent = (componentName: string) => {
 const LazyComponents = {
   LazyKnowledgeGraph,
   LazyAnalyticsSystem,
-  preloadComponent
+  preloadComponent,
 };
 
 export default LazyComponents;

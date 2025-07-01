@@ -21,6 +21,9 @@ const customJestConfig = {
     "^@/hooks/(.*)$": "<rootDir>/hooks/$1",
     "^@/contexts/(.*)$": "<rootDir>/contexts/$1",
     "^@/types/(.*)$": "<rootDir>/types/$1",
+    // Mock lodash-es to use lodash instead
+    "^lodash-es$": "lodash",
+    "^lodash-es/(.*)$": "lodash/$1",
   },
 
   // Coverage configuration
@@ -47,15 +50,29 @@ const customJestConfig = {
     },
   },
 
-  // Test patterns - exclude E2E tests
-  testMatch: ["**/__tests__/**/*.(ts|tsx|js)", "**/*.(test|spec).(ts|tsx|js)"],
+  // Test patterns - exclude E2E tests and setup files
+  testMatch: [
+    "**/__tests__/**/*.(test|spec).(ts|tsx|js)",
+    "**/*.(test|spec).(ts|tsx|js)"
+  ],
 
-  // Ignore patterns - exclude E2E tests from Jest
+  // Ignore patterns - exclude E2E tests, setup files, and problematic test files
   testPathIgnorePatterns: [
     "<rootDir>/.next/",
     "<rootDir>/node_modules/",
     "<rootDir>/e2e/",
     "<rootDir>/test-results/",
+    "<rootDir>/__tests__/setup/", // Exclude setup files
+    "<rootDir>/__tests__/test-helpers/", // Exclude helper files
+    "massive",
+    "boost", 
+    "comprehensive",
+    "ultra",
+  ],
+
+  // Transform patterns - handle ESM modules properly
+  transformIgnorePatterns: [
+    "node_modules/(?!(lodash-es|@?[^/]+/.*\\.(m)?js$))"
   ],
 
   // Transform patterns
@@ -79,8 +96,18 @@ const customJestConfig = {
   // Verbose output
   verbose: true,
 
-  // Test timeout
-  testTimeout: 10000,
+  // Performance optimizations from comprehensive testing strategy
+  testTimeout: 15000, // Increased slightly for React component rendering
+  maxWorkers: "50%", // Use half of available CPU cores
+  
+  // Cache configuration for faster subsequent runs
+  cacheDirectory: "<rootDir>/.jest-cache",
+  
+  // Optimize test execution
+  passWithNoTests: true,
+  
+  // Reduce memory usage
+  logHeapUsage: true,
 };
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

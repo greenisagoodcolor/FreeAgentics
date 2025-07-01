@@ -8,11 +8,11 @@ ensuring mathematical correctness and ADR-005 compliance.
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List
 
 import numpy as np
 
-from .belief_state import BeliefState, create_belief_state
+from .belief_state import BeliefState
 from .pymdp_generative_model import PyMDPGenerativeModel
 
 logger = logging.getLogger(__name__)

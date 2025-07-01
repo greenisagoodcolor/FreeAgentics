@@ -22,25 +22,27 @@ import torch.nn as nn
 
 class TensorJSONEncoder(json.JSONEncoder):
     """Custom JSON encoder that can handle PyTorch tensors and numpy arrays."""
-    
+
     def default(self, obj):
         if isinstance(obj, torch.Tensor):
             return {
                 "__tensor__": True,
                 "data": obj.detach().cpu().numpy().tolist(),
                 "shape": list(obj.shape),
-                "dtype": str(obj.dtype)
+                "dtype": str(obj.dtype),
             }
         elif isinstance(obj, np.ndarray):
             return {
                 "__ndarray__": True,
                 "data": obj.tolist(),
                 "shape": list(obj.shape),
-                "dtype": str(obj.dtype)
+                "dtype": str(obj.dtype),
             }
-        elif hasattr(obj, 'tolist'):  # Handle other array-like objects
+        elif hasattr(obj, "tolist"):  # Handle other array-like objects
             return obj.tolist()
         return super().default(obj)
+
+
 from matplotlib.animation import FuncAnimation
 
 """

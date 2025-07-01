@@ -1,0 +1,430 @@
+d4a4e45c98d597aad3ede0ff3aecef5b
+"use client";
+"use strict";
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+Object.defineProperty(exports, "default", {
+    enumerable: true,
+    get: function() {
+        return AgentPerformanceChart;
+    }
+});
+const _jsxruntime = require("react/jsx-runtime");
+const _card = require("./ui/card");
+const _select = require("./ui/select");
+const _react = require("react");
+function AgentPerformanceChart({ agents, agentDetails }) {
+    const [selectedMetric, setSelectedMetric] = (0, _react.useState)("resources");
+    const [selectedAgent, setSelectedAgent] = (0, _react.useState)("all");
+    // Calculate metrics for visualization
+    const getMetricData = ()=>{
+        const filteredAgents = selectedAgent === "all" ? agents : agents.filter((a)=>a.id === selectedAgent);
+        switch(selectedMetric){
+            case "resources":
+                return filteredAgents.map((agent)=>{
+                    const details = agentDetails[agent.id];
+                    return {
+                        name: agent.name,
+                        energy: details?.resources.energy || 0,
+                        health: details?.resources.health || 0,
+                        memory: details?.resources.memory_used || 0
+                    };
+                });
+            case "goals":
+                return filteredAgents.map((agent)=>{
+                    const details = agentDetails[agent.id];
+                    const goals = details?.goals || [];
+                    // Mock data for goal status - in real app this would be tracked
+                    const completed = Math.floor(goals.length * 0.6);
+                    const active = goals.length - completed;
+                    return {
+                        name: agent.name,
+                        completed,
+                        active,
+                        total: goals.length
+                    };
+                });
+            case "activity":
+                return filteredAgents.map((agent)=>{
+                    const details = agentDetails[agent.id];
+                    // Mock activity scores
+                    return {
+                        name: agent.name,
+                        interactions: Math.floor(Math.random() * 20),
+                        movements: Math.floor(Math.random() * 50),
+                        learningEvents: Math.floor(Math.random() * 10)
+                    };
+                });
+            case "efficiency":
+                return filteredAgents.map((agent)=>{
+                    const details = agentDetails[agent.id];
+                    const energyEfficiency = details ? 100 - details.resources.energy : 0;
+                    const memoryEfficiency = details ? details.resources.memory_used / details.resources.memory_capacity * 100 : 0;
+                    return {
+                        name: agent.name,
+                        energyEfficiency,
+                        memoryEfficiency,
+                        overallScore: (energyEfficiency + memoryEfficiency) / 2
+                    };
+                });
+        }
+    };
+    const data = getMetricData();
+    // Simple bar chart visualization
+    const renderBars = (value, maxValue, color)=>{
+        const percentage = value / maxValue * 100;
+        return /*#__PURE__*/ (0, _jsxruntime.jsx)("div", {
+            className: "w-full bg-gray-200 rounded-full h-2",
+            children: /*#__PURE__*/ (0, _jsxruntime.jsx)("div", {
+                className: `h-2 rounded-full ${color}`,
+                style: {
+                    width: `${percentage}%`
+                }
+            })
+        });
+    };
+    return /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+        className: "h-full flex flex-col",
+        children: [
+            /*#__PURE__*/ (0, _jsxruntime.jsx)(_card.CardHeader, {
+                children: /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                    className: "flex items-center justify-between",
+                    children: [
+                        /*#__PURE__*/ (0, _jsxruntime.jsx)(_card.CardTitle, {
+                            children: "Performance Metrics"
+                        }),
+                        /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                            className: "flex gap-2",
+                            children: [
+                                /*#__PURE__*/ (0, _jsxruntime.jsxs)(_select.Select, {
+                                    value: selectedMetric,
+                                    onValueChange: (value)=>setSelectedMetric(value),
+                                    children: [
+                                        /*#__PURE__*/ (0, _jsxruntime.jsx)(_select.SelectTrigger, {
+                                            className: "w-[180px]",
+                                            children: /*#__PURE__*/ (0, _jsxruntime.jsx)(_select.SelectValue, {
+                                                placeholder: "Select metric"
+                                            })
+                                        }),
+                                        /*#__PURE__*/ (0, _jsxruntime.jsxs)(_select.SelectContent, {
+                                            children: [
+                                                /*#__PURE__*/ (0, _jsxruntime.jsx)(_select.SelectItem, {
+                                                    value: "resources",
+                                                    children: "Resources"
+                                                }),
+                                                /*#__PURE__*/ (0, _jsxruntime.jsx)(_select.SelectItem, {
+                                                    value: "goals",
+                                                    children: "Goals"
+                                                }),
+                                                /*#__PURE__*/ (0, _jsxruntime.jsx)(_select.SelectItem, {
+                                                    value: "activity",
+                                                    children: "Activity"
+                                                }),
+                                                /*#__PURE__*/ (0, _jsxruntime.jsx)(_select.SelectItem, {
+                                                    value: "efficiency",
+                                                    children: "Efficiency"
+                                                })
+                                            ]
+                                        })
+                                    ]
+                                }),
+                                /*#__PURE__*/ (0, _jsxruntime.jsxs)(_select.Select, {
+                                    value: selectedAgent,
+                                    onValueChange: setSelectedAgent,
+                                    children: [
+                                        /*#__PURE__*/ (0, _jsxruntime.jsx)(_select.SelectTrigger, {
+                                            className: "w-[180px]",
+                                            children: /*#__PURE__*/ (0, _jsxruntime.jsx)(_select.SelectValue, {
+                                                placeholder: "Select agent"
+                                            })
+                                        }),
+                                        /*#__PURE__*/ (0, _jsxruntime.jsxs)(_select.SelectContent, {
+                                            children: [
+                                                /*#__PURE__*/ (0, _jsxruntime.jsx)(_select.SelectItem, {
+                                                    value: "all",
+                                                    children: "All Agents"
+                                                }),
+                                                agents.map((agent)=>/*#__PURE__*/ (0, _jsxruntime.jsx)(_select.SelectItem, {
+                                                        value: agent.id,
+                                                        children: agent.name
+                                                    }, agent.id))
+                                            ]
+                                        })
+                                    ]
+                                })
+                            ]
+                        })
+                    ]
+                })
+            }),
+            /*#__PURE__*/ (0, _jsxruntime.jsx)(_card.CardContent, {
+                className: "flex-1 overflow-auto",
+                children: /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                    className: "space-y-4",
+                    children: [
+                        selectedMetric === "resources" && /*#__PURE__*/ (0, _jsxruntime.jsx)("div", {
+                            className: "space-y-4",
+                            children: data.map((item, index)=>/*#__PURE__*/ (0, _jsxruntime.jsxs)(_card.Card, {
+                                    className: "p-4",
+                                    children: [
+                                        /*#__PURE__*/ (0, _jsxruntime.jsx)("h4", {
+                                            className: "font-medium mb-3",
+                                            children: item.name
+                                        }),
+                                        /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                            className: "space-y-2",
+                                            children: [
+                                                /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                                    children: [
+                                                        /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                                            className: "flex justify-between text-sm mb-1",
+                                                            children: [
+                                                                /*#__PURE__*/ (0, _jsxruntime.jsx)("span", {
+                                                                    children: "Energy"
+                                                                }),
+                                                                /*#__PURE__*/ (0, _jsxruntime.jsxs)("span", {
+                                                                    children: [
+                                                                        item.energy,
+                                                                        "%"
+                                                                    ]
+                                                                })
+                                                            ]
+                                                        }),
+                                                        renderBars(item.energy, 100, "bg-yellow-500")
+                                                    ]
+                                                }),
+                                                /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                                    children: [
+                                                        /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                                            className: "flex justify-between text-sm mb-1",
+                                                            children: [
+                                                                /*#__PURE__*/ (0, _jsxruntime.jsx)("span", {
+                                                                    children: "Health"
+                                                                }),
+                                                                /*#__PURE__*/ (0, _jsxruntime.jsxs)("span", {
+                                                                    children: [
+                                                                        item.health,
+                                                                        "%"
+                                                                    ]
+                                                                })
+                                                            ]
+                                                        }),
+                                                        renderBars(item.health, 100, "bg-red-500")
+                                                    ]
+                                                }),
+                                                /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                                    children: [
+                                                        /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                                            className: "flex justify-between text-sm mb-1",
+                                                            children: [
+                                                                /*#__PURE__*/ (0, _jsxruntime.jsx)("span", {
+                                                                    children: "Memory"
+                                                                }),
+                                                                /*#__PURE__*/ (0, _jsxruntime.jsxs)("span", {
+                                                                    children: [
+                                                                        item.memory,
+                                                                        "MB"
+                                                                    ]
+                                                                })
+                                                            ]
+                                                        }),
+                                                        renderBars(item.memory, 100, "bg-purple-500")
+                                                    ]
+                                                })
+                                            ]
+                                        })
+                                    ]
+                                }, index))
+                        }),
+                        selectedMetric === "goals" && /*#__PURE__*/ (0, _jsxruntime.jsx)("div", {
+                            className: "space-y-4",
+                            children: data.map((item, index)=>/*#__PURE__*/ (0, _jsxruntime.jsxs)(_card.Card, {
+                                    className: "p-4",
+                                    children: [
+                                        /*#__PURE__*/ (0, _jsxruntime.jsx)("h4", {
+                                            className: "font-medium mb-3",
+                                            children: item.name
+                                        }),
+                                        /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                            className: "grid grid-cols-3 gap-4 text-center",
+                                            children: [
+                                                /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                                    children: [
+                                                        /*#__PURE__*/ (0, _jsxruntime.jsx)("div", {
+                                                            className: "text-2xl font-bold text-green-500",
+                                                            children: item.completed
+                                                        }),
+                                                        /*#__PURE__*/ (0, _jsxruntime.jsx)("div", {
+                                                            className: "text-sm text-muted-foreground",
+                                                            children: "Completed"
+                                                        })
+                                                    ]
+                                                }),
+                                                /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                                    children: [
+                                                        /*#__PURE__*/ (0, _jsxruntime.jsx)("div", {
+                                                            className: "text-2xl font-bold text-blue-500",
+                                                            children: item.active
+                                                        }),
+                                                        /*#__PURE__*/ (0, _jsxruntime.jsx)("div", {
+                                                            className: "text-sm text-muted-foreground",
+                                                            children: "Active"
+                                                        })
+                                                    ]
+                                                }),
+                                                /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                                    children: [
+                                                        /*#__PURE__*/ (0, _jsxruntime.jsx)("div", {
+                                                            className: "text-2xl font-bold",
+                                                            children: item.total
+                                                        }),
+                                                        /*#__PURE__*/ (0, _jsxruntime.jsx)("div", {
+                                                            className: "text-sm text-muted-foreground",
+                                                            children: "Total"
+                                                        })
+                                                    ]
+                                                })
+                                            ]
+                                        })
+                                    ]
+                                }, index))
+                        }),
+                        selectedMetric === "activity" && /*#__PURE__*/ (0, _jsxruntime.jsx)("div", {
+                            className: "space-y-4",
+                            children: data.map((item, index)=>/*#__PURE__*/ (0, _jsxruntime.jsxs)(_card.Card, {
+                                    className: "p-4",
+                                    children: [
+                                        /*#__PURE__*/ (0, _jsxruntime.jsx)("h4", {
+                                            className: "font-medium mb-3",
+                                            children: item.name
+                                        }),
+                                        /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                            className: "space-y-2",
+                                            children: [
+                                                /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                                    className: "flex justify-between",
+                                                    children: [
+                                                        /*#__PURE__*/ (0, _jsxruntime.jsx)("span", {
+                                                            className: "text-sm",
+                                                            children: "Interactions"
+                                                        }),
+                                                        /*#__PURE__*/ (0, _jsxruntime.jsx)("span", {
+                                                            className: "font-medium",
+                                                            children: item.interactions
+                                                        })
+                                                    ]
+                                                }),
+                                                /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                                    className: "flex justify-between",
+                                                    children: [
+                                                        /*#__PURE__*/ (0, _jsxruntime.jsx)("span", {
+                                                            className: "text-sm",
+                                                            children: "Movements"
+                                                        }),
+                                                        /*#__PURE__*/ (0, _jsxruntime.jsx)("span", {
+                                                            className: "font-medium",
+                                                            children: item.movements
+                                                        })
+                                                    ]
+                                                }),
+                                                /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                                    className: "flex justify-between",
+                                                    children: [
+                                                        /*#__PURE__*/ (0, _jsxruntime.jsx)("span", {
+                                                            className: "text-sm",
+                                                            children: "Learning Events"
+                                                        }),
+                                                        /*#__PURE__*/ (0, _jsxruntime.jsx)("span", {
+                                                            className: "font-medium",
+                                                            children: item.learningEvents
+                                                        })
+                                                    ]
+                                                })
+                                            ]
+                                        })
+                                    ]
+                                }, index))
+                        }),
+                        selectedMetric === "efficiency" && /*#__PURE__*/ (0, _jsxruntime.jsx)("div", {
+                            className: "space-y-4",
+                            children: data.map((item, index)=>/*#__PURE__*/ (0, _jsxruntime.jsxs)(_card.Card, {
+                                    className: "p-4",
+                                    children: [
+                                        /*#__PURE__*/ (0, _jsxruntime.jsx)("h4", {
+                                            className: "font-medium mb-3",
+                                            children: item.name
+                                        }),
+                                        /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                            className: "space-y-2",
+                                            children: [
+                                                /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                                    children: [
+                                                        /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                                            className: "flex justify-between text-sm mb-1",
+                                                            children: [
+                                                                /*#__PURE__*/ (0, _jsxruntime.jsx)("span", {
+                                                                    children: "Energy Efficiency"
+                                                                }),
+                                                                /*#__PURE__*/ (0, _jsxruntime.jsxs)("span", {
+                                                                    children: [
+                                                                        item.energyEfficiency.toFixed(1),
+                                                                        "%"
+                                                                    ]
+                                                                })
+                                                            ]
+                                                        }),
+                                                        renderBars(item.energyEfficiency, 100, "bg-green-500")
+                                                    ]
+                                                }),
+                                                /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                                    children: [
+                                                        /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                                            className: "flex justify-between text-sm mb-1",
+                                                            children: [
+                                                                /*#__PURE__*/ (0, _jsxruntime.jsx)("span", {
+                                                                    children: "Memory Efficiency"
+                                                                }),
+                                                                /*#__PURE__*/ (0, _jsxruntime.jsxs)("span", {
+                                                                    children: [
+                                                                        item.memoryEfficiency.toFixed(1),
+                                                                        "%"
+                                                                    ]
+                                                                })
+                                                            ]
+                                                        }),
+                                                        renderBars(item.memoryEfficiency, 100, "bg-blue-500")
+                                                    ]
+                                                }),
+                                                /*#__PURE__*/ (0, _jsxruntime.jsx)("div", {
+                                                    className: "mt-3 pt-3 border-t",
+                                                    children: /*#__PURE__*/ (0, _jsxruntime.jsxs)("div", {
+                                                        className: "flex justify-between",
+                                                        children: [
+                                                            /*#__PURE__*/ (0, _jsxruntime.jsx)("span", {
+                                                                className: "font-medium",
+                                                                children: "Overall Score"
+                                                            }),
+                                                            /*#__PURE__*/ (0, _jsxruntime.jsxs)("span", {
+                                                                className: "font-bold text-lg",
+                                                                children: [
+                                                                    item.overallScore.toFixed(1),
+                                                                    "%"
+                                                                ]
+                                                            })
+                                                        ]
+                                                    })
+                                                })
+                                            ]
+                                        })
+                                    ]
+                                }, index))
+                        })
+                    ]
+                })
+            })
+        ]
+    });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9Vc2Vycy9tYXR0aGV3bW9yb25leS9idWlsZHMvRnJlZUFnZW50aWNzL3dlYi9jb21wb25lbnRzL2FnZW50LXBlcmZvcm1hbmNlLWNoYXJ0LnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJcInVzZSBjbGllbnRcIjtcblxuaW1wb3J0IHsgQ2FyZCwgQ2FyZENvbnRlbnQsIENhcmRIZWFkZXIsIENhcmRUaXRsZSB9IGZyb20gXCJAL2NvbXBvbmVudHMvdWkvY2FyZFwiO1xuaW1wb3J0IHtcbiAgU2VsZWN0LFxuICBTZWxlY3RDb250ZW50LFxuICBTZWxlY3RJdGVtLFxuICBTZWxlY3RUcmlnZ2VyLFxuICBTZWxlY3RWYWx1ZSxcbn0gZnJvbSBcIkAvY29tcG9uZW50cy91aS9zZWxlY3RcIjtcbmltcG9ydCB0eXBlIHsgQWdlbnQgfSBmcm9tIFwiQC9saWIvdHlwZXNcIjtcbmltcG9ydCB0eXBlIHsgQWdlbnREZXRhaWxlZCB9IGZyb20gXCJAL2xpYi90eXBlcy9hZ2VudC1hcGlcIjtcbmltcG9ydCB7IHVzZVN0YXRlIH0gZnJvbSBcInJlYWN0XCI7XG5cbmludGVyZmFjZSBBZ2VudFBlcmZvcm1hbmNlQ2hhcnRQcm9wcyB7XG4gIGFnZW50czogQWdlbnRbXTtcbiAgYWdlbnREZXRhaWxzOiBSZWNvcmQ8c3RyaW5nLCBBZ2VudERldGFpbGVkPjtcbn1cblxudHlwZSBNZXRyaWNUeXBlID0gXCJyZXNvdXJjZXNcIiB8IFwiZ29hbHNcIiB8IFwiYWN0aXZpdHlcIiB8IFwiZWZmaWNpZW5jeVwiO1xuXG5leHBvcnQgZGVmYXVsdCBmdW5jdGlvbiBBZ2VudFBlcmZvcm1hbmNlQ2hhcnQoe1xuICBhZ2VudHMsXG4gIGFnZW50RGV0YWlscyxcbn06IEFnZW50UGVyZm9ybWFuY2VDaGFydFByb3BzKSB7XG4gIGNvbnN0IFtzZWxlY3RlZE1ldHJpYywgc2V0U2VsZWN0ZWRNZXRyaWNdID0gdXNlU3RhdGU8TWV0cmljVHlwZT4oXCJyZXNvdXJjZXNcIik7XG4gIGNvbnN0IFtzZWxlY3RlZEFnZW50LCBzZXRTZWxlY3RlZEFnZW50XSA9IHVzZVN0YXRlPHN0cmluZz4oXCJhbGxcIik7XG5cbiAgLy8gQ2FsY3VsYXRlIG1ldHJpY3MgZm9yIHZpc3VhbGl6YXRpb25cbiAgY29uc3QgZ2V0TWV0cmljRGF0YSA9ICgpID0+IHtcbiAgICBjb25zdCBmaWx0ZXJlZEFnZW50cyA9XG4gICAgICBzZWxlY3RlZEFnZW50ID09PSBcImFsbFwiXG4gICAgICAgID8gYWdlbnRzXG4gICAgICAgIDogYWdlbnRzLmZpbHRlcigoYSkgPT4gYS5pZCA9PT0gc2VsZWN0ZWRBZ2VudCk7XG5cbiAgICBzd2l0Y2ggKHNlbGVjdGVkTWV0cmljKSB7XG4gICAgICBjYXNlIFwicmVzb3VyY2VzXCI6XG4gICAgICAgIHJldHVybiBmaWx0ZXJlZEFnZW50cy5tYXAoKGFnZW50KSA9PiB7XG4gICAgICAgICAgY29uc3QgZGV0YWlscyA9IGFnZW50RGV0YWlsc1thZ2VudC5pZF07XG4gICAgICAgICAgcmV0dXJuIHtcbiAgICAgICAgICAgIG5hbWU6IGFnZW50Lm5hbWUsXG4gICAgICAgICAgICBlbmVyZ3k6IGRldGFpbHM/LnJlc291cmNlcy5lbmVyZ3kgfHwgMCxcbiAgICAgICAgICAgIGhlYWx0aDogZGV0YWlscz8ucmVzb3VyY2VzLmhlYWx0aCB8fCAwLFxuICAgICAgICAgICAgbWVtb3J5OiBkZXRhaWxzPy5yZXNvdXJjZXMubWVtb3J5X3VzZWQgfHwgMCxcbiAgICAgICAgICB9O1xuICAgICAgICB9KTtcblxuICAgICAgY2FzZSBcImdvYWxzXCI6XG4gICAgICAgIHJldHVybiBmaWx0ZXJlZEFnZW50cy5tYXAoKGFnZW50KSA9PiB7XG4gICAgICAgICAgY29uc3QgZGV0YWlscyA9IGFnZW50RGV0YWlsc1thZ2VudC5pZF07XG4gICAgICAgICAgY29uc3QgZ29hbHMgPSBkZXRhaWxzPy5nb2FscyB8fCBbXTtcbiAgICAgICAgICAvLyBNb2NrIGRhdGEgZm9yIGdvYWwgc3RhdHVzIC0gaW4gcmVhbCBhcHAgdGhpcyB3b3VsZCBiZSB0cmFja2VkXG4gICAgICAgICAgY29uc3QgY29tcGxldGVkID0gTWF0aC5mbG9vcihnb2Fscy5sZW5ndGggKiAwLjYpO1xuICAgICAgICAgIGNvbnN0IGFjdGl2ZSA9IGdvYWxzLmxlbmd0aCAtIGNvbXBsZXRlZDtcbiAgICAgICAgICByZXR1cm4ge1xuICAgICAgICAgICAgbmFtZTogYWdlbnQubmFtZSxcbiAgICAgICAgICAgIGNvbXBsZXRlZCxcbiAgICAgICAgICAgIGFjdGl2ZSxcbiAgICAgICAgICAgIHRvdGFsOiBnb2Fscy5sZW5ndGgsXG4gICAgICAgICAgfTtcbiAgICAgICAgfSk7XG5cbiAgICAgIGNhc2UgXCJhY3Rpdml0eVwiOlxuICAgICAgICByZXR1cm4gZmlsdGVyZWRBZ2VudHMubWFwKChhZ2VudCkgPT4ge1xuICAgICAgICAgIGNvbnN0IGRldGFpbHMgPSBhZ2VudERldGFpbHNbYWdlbnQuaWRdO1xuICAgICAgICAgIC8vIE1vY2sgYWN0aXZpdHkgc2NvcmVzXG4gICAgICAgICAgcmV0dXJuIHtcbiAgICAgICAgICAgIG5hbWU6IGFnZW50Lm5hbWUsXG4gICAgICAgICAgICBpbnRlcmFjdGlvbnM6IE1hdGguZmxvb3IoTWF0aC5yYW5kb20oKSAqIDIwKSxcbiAgICAgICAgICAgIG1vdmVtZW50czogTWF0aC5mbG9vcihNYXRoLnJhbmRvbSgpICogNTApLFxuICAgICAgICAgICAgbGVhcm5pbmdFdmVudHM6IE1hdGguZmxvb3IoTWF0aC5yYW5kb20oKSAqIDEwKSxcbiAgICAgICAgICB9O1xuICAgICAgICB9KTtcblxuICAgICAgY2FzZSBcImVmZmljaWVuY3lcIjpcbiAgICAgICAgcmV0dXJuIGZpbHRlcmVkQWdlbnRzLm1hcCgoYWdlbnQpID0+IHtcbiAgICAgICAgICBjb25zdCBkZXRhaWxzID0gYWdlbnREZXRhaWxzW2FnZW50LmlkXTtcbiAgICAgICAgICBjb25zdCBlbmVyZ3lFZmZpY2llbmN5ID0gZGV0YWlscyA/IDEwMCAtIGRldGFpbHMucmVzb3VyY2VzLmVuZXJneSA6IDA7XG4gICAgICAgICAgY29uc3QgbWVtb3J5RWZmaWNpZW5jeSA9IGRldGFpbHNcbiAgICAgICAgICAgID8gKGRldGFpbHMucmVzb3VyY2VzLm1lbW9yeV91c2VkIC9cbiAgICAgICAgICAgICAgICBkZXRhaWxzLnJlc291cmNlcy5tZW1vcnlfY2FwYWNpdHkpICpcbiAgICAgICAgICAgICAgMTAwXG4gICAgICAgICAgICA6IDA7XG4gICAgICAgICAgcmV0dXJuIHtcbiAgICAgICAgICAgIG5hbWU6IGFnZW50Lm5hbWUsXG4gICAgICAgICAgICBlbmVyZ3lFZmZpY2llbmN5LFxuICAgICAgICAgICAgbWVtb3J5RWZmaWNpZW5jeSxcbiAgICAgICAgICAgIG92ZXJhbGxTY29yZTogKGVuZXJneUVmZmljaWVuY3kgKyBtZW1vcnlFZmZpY2llbmN5KSAvIDIsXG4gICAgICAgICAgfTtcbiAgICAgICAgfSk7XG4gICAgfVxuICB9O1xuXG4gIGNvbnN0IGRhdGEgPSBnZXRNZXRyaWNEYXRhKCk7XG5cbiAgLy8gU2ltcGxlIGJhciBjaGFydCB2aXN1YWxpemF0aW9uXG4gIGNvbnN0IHJlbmRlckJhcnMgPSAodmFsdWU6IG51bWJlciwgbWF4VmFsdWU6IG51bWJlciwgY29sb3I6IHN0cmluZykgPT4ge1xuICAgIGNvbnN0IHBlcmNlbnRhZ2UgPSAodmFsdWUgLyBtYXhWYWx1ZSkgKiAxMDA7XG4gICAgcmV0dXJuIChcbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwidy1mdWxsIGJnLWdyYXktMjAwIHJvdW5kZWQtZnVsbCBoLTJcIj5cbiAgICAgICAgPGRpdlxuICAgICAgICAgIGNsYXNzTmFtZT17YGgtMiByb3VuZGVkLWZ1bGwgJHtjb2xvcn1gfVxuICAgICAgICAgIHN0eWxlPXt7IHdpZHRoOiBgJHtwZXJjZW50YWdlfSVgIH19XG4gICAgICAgIC8+XG4gICAgICA8L2Rpdj5cbiAgICApO1xuICB9O1xuXG4gIHJldHVybiAoXG4gICAgPGRpdiBjbGFzc05hbWU9XCJoLWZ1bGwgZmxleCBmbGV4LWNvbFwiPlxuICAgICAgPENhcmRIZWFkZXI+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuXCI+XG4gICAgICAgICAgPENhcmRUaXRsZT5QZXJmb3JtYW5jZSBNZXRyaWNzPC9DYXJkVGl0bGU+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGdhcC0yXCI+XG4gICAgICAgICAgICA8U2VsZWN0XG4gICAgICAgICAgICAgIHZhbHVlPXtzZWxlY3RlZE1ldHJpY31cbiAgICAgICAgICAgICAgb25WYWx1ZUNoYW5nZT17KHZhbHVlKSA9PiBzZXRTZWxlY3RlZE1ldHJpYyh2YWx1ZSBhcyBNZXRyaWNUeXBlKX1cbiAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgPFNlbGVjdFRyaWdnZXIgY2xhc3NOYW1lPVwidy1bMTgwcHhdXCI+XG4gICAgICAgICAgICAgICAgPFNlbGVjdFZhbHVlIHBsYWNlaG9sZGVyPVwiU2VsZWN0IG1ldHJpY1wiIC8+XG4gICAgICAgICAgICAgIDwvU2VsZWN0VHJpZ2dlcj5cbiAgICAgICAgICAgICAgPFNlbGVjdENvbnRlbnQ+XG4gICAgICAgICAgICAgICAgPFNlbGVjdEl0ZW0gdmFsdWU9XCJyZXNvdXJjZXNcIj5SZXNvdXJjZXM8L1NlbGVjdEl0ZW0+XG4gICAgICAgICAgICAgICAgPFNlbGVjdEl0ZW0gdmFsdWU9XCJnb2Fsc1wiPkdvYWxzPC9TZWxlY3RJdGVtPlxuICAgICAgICAgICAgICAgIDxTZWxlY3RJdGVtIHZhbHVlPVwiYWN0aXZpdHlcIj5BY3Rpdml0eTwvU2VsZWN0SXRlbT5cbiAgICAgICAgICAgICAgICA8U2VsZWN0SXRlbSB2YWx1ZT1cImVmZmljaWVuY3lcIj5FZmZpY2llbmN5PC9TZWxlY3RJdGVtPlxuICAgICAgICAgICAgICA8L1NlbGVjdENvbnRlbnQ+XG4gICAgICAgICAgICA8L1NlbGVjdD5cbiAgICAgICAgICAgIDxTZWxlY3QgdmFsdWU9e3NlbGVjdGVkQWdlbnR9IG9uVmFsdWVDaGFuZ2U9e3NldFNlbGVjdGVkQWdlbnR9PlxuICAgICAgICAgICAgICA8U2VsZWN0VHJpZ2dlciBjbGFzc05hbWU9XCJ3LVsxODBweF1cIj5cbiAgICAgICAgICAgICAgICA8U2VsZWN0VmFsdWUgcGxhY2Vob2xkZXI9XCJTZWxlY3QgYWdlbnRcIiAvPlxuICAgICAgICAgICAgICA8L1NlbGVjdFRyaWdnZXI+XG4gICAgICAgICAgICAgIDxTZWxlY3RDb250ZW50PlxuICAgICAgICAgICAgICAgIDxTZWxlY3RJdGVtIHZhbHVlPVwiYWxsXCI+QWxsIEFnZW50czwvU2VsZWN0SXRlbT5cbiAgICAgICAgICAgICAgICB7YWdlbnRzLm1hcCgoYWdlbnQpID0+IChcbiAgICAgICAgICAgICAgICAgIDxTZWxlY3RJdGVtIGtleT17YWdlbnQuaWR9IHZhbHVlPXthZ2VudC5pZH0+XG4gICAgICAgICAgICAgICAgICAgIHthZ2VudC5uYW1lfVxuICAgICAgICAgICAgICAgICAgPC9TZWxlY3RJdGVtPlxuICAgICAgICAgICAgICAgICkpfVxuICAgICAgICAgICAgICA8L1NlbGVjdENvbnRlbnQ+XG4gICAgICAgICAgICA8L1NlbGVjdD5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgPC9kaXY+XG4gICAgICA8L0NhcmRIZWFkZXI+XG4gICAgICA8Q2FyZENvbnRlbnQgY2xhc3NOYW1lPVwiZmxleC0xIG92ZXJmbG93LWF1dG9cIj5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTRcIj5cbiAgICAgICAgICB7c2VsZWN0ZWRNZXRyaWMgPT09IFwicmVzb3VyY2VzXCIgJiYgKFxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTRcIj5cbiAgICAgICAgICAgICAgeyhkYXRhIGFzIGFueVtdKS5tYXAoKGl0ZW0sIGluZGV4KSA9PiAoXG4gICAgICAgICAgICAgICAgPENhcmQga2V5PXtpbmRleH0gY2xhc3NOYW1lPVwicC00XCI+XG4gICAgICAgICAgICAgICAgICA8aDQgY2xhc3NOYW1lPVwiZm9udC1tZWRpdW0gbWItM1wiPntpdGVtLm5hbWV9PC9oND5cbiAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0yXCI+XG4gICAgICAgICAgICAgICAgICAgIDxkaXY+XG4gICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGp1c3RpZnktYmV0d2VlbiB0ZXh0LXNtIG1iLTFcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxzcGFuPkVuZXJneTwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxzcGFuPntpdGVtLmVuZXJneX0lPC9zcGFuPlxuICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICAgIHtyZW5kZXJCYXJzKGl0ZW0uZW5lcmd5LCAxMDAsIFwiYmcteWVsbG93LTUwMFwiKX1cbiAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICAgIDxkaXY+XG4gICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGp1c3RpZnktYmV0d2VlbiB0ZXh0LXNtIG1iLTFcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxzcGFuPkhlYWx0aDwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxzcGFuPntpdGVtLmhlYWx0aH0lPC9zcGFuPlxuICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICAgIHtyZW5kZXJCYXJzKGl0ZW0uaGVhbHRoLCAxMDAsIFwiYmctcmVkLTUwMFwiKX1cbiAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICAgIDxkaXY+XG4gICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGp1c3RpZnktYmV0d2VlbiB0ZXh0LXNtIG1iLTFcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxzcGFuPk1lbW9yeTwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxzcGFuPntpdGVtLm1lbW9yeX1NQjwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgICB7cmVuZGVyQmFycyhpdGVtLm1lbW9yeSwgMTAwLCBcImJnLXB1cnBsZS01MDBcIil9XG4gICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgPC9DYXJkPlxuICAgICAgICAgICAgICApKX1cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICl9XG5cbiAgICAgICAgICB7c2VsZWN0ZWRNZXRyaWMgPT09IFwiZ29hbHNcIiAmJiAoXG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktNFwiPlxuICAgICAgICAgICAgICB7KGRhdGEgYXMgYW55W10pLm1hcCgoaXRlbSwgaW5kZXgpID0+IChcbiAgICAgICAgICAgICAgICA8Q2FyZCBrZXk9e2luZGV4fSBjbGFzc05hbWU9XCJwLTRcIj5cbiAgICAgICAgICAgICAgICAgIDxoNCBjbGFzc05hbWU9XCJmb250LW1lZGl1bSBtYi0zXCI+e2l0ZW0ubmFtZX08L2g0PlxuICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJncmlkIGdyaWQtY29scy0zIGdhcC00IHRleHQtY2VudGVyXCI+XG4gICAgICAgICAgICAgICAgICAgIDxkaXY+XG4gICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LTJ4bCBmb250LWJvbGQgdGV4dC1ncmVlbi01MDBcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgIHtpdGVtLmNvbXBsZXRlZH1cbiAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInRleHQtc20gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICBDb21wbGV0ZWRcbiAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICAgIDxkaXY+XG4gICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LTJ4bCBmb250LWJvbGQgdGV4dC1ibHVlLTUwMFwiPlxuICAgICAgICAgICAgICAgICAgICAgICAge2l0ZW0uYWN0aXZlfVxuICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgIEFjdGl2ZVxuICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgPGRpdj5cbiAgICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInRleHQtMnhsIGZvbnQtYm9sZFwiPntpdGVtLnRvdGFsfTwvZGl2PlxuICAgICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5Ub3RhbDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgIDwvQ2FyZD5cbiAgICAgICAgICAgICAgKSl9XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICApfVxuXG4gICAgICAgICAge3NlbGVjdGVkTWV0cmljID09PSBcImFjdGl2aXR5XCIgJiYgKFxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTRcIj5cbiAgICAgICAgICAgICAgeyhkYXRhIGFzIGFueVtdKS5tYXAoKGl0ZW0sIGluZGV4KSA9PiAoXG4gICAgICAgICAgICAgICAgPENhcmQga2V5PXtpbmRleH0gY2xhc3NOYW1lPVwicC00XCI+XG4gICAgICAgICAgICAgICAgICA8aDQgY2xhc3NOYW1lPVwiZm9udC1tZWRpdW0gbWItM1wiPntpdGVtLm5hbWV9PC9oND5cbiAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0yXCI+XG4gICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBqdXN0aWZ5LWJldHdlZW5cIj5cbiAgICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LXNtXCI+SW50ZXJhY3Rpb25zPC9zcGFuPlxuICAgICAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cImZvbnQtbWVkaXVtXCI+e2l0ZW0uaW50ZXJhY3Rpb25zfTwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBqdXN0aWZ5LWJldHdlZW5cIj5cbiAgICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LXNtXCI+TW92ZW1lbnRzPC9zcGFuPlxuICAgICAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cImZvbnQtbWVkaXVtXCI+e2l0ZW0ubW92ZW1lbnRzfTwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBqdXN0aWZ5LWJldHdlZW5cIj5cbiAgICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LXNtXCI+TGVhcm5pbmcgRXZlbnRzPC9zcGFuPlxuICAgICAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cImZvbnQtbWVkaXVtXCI+e2l0ZW0ubGVhcm5pbmdFdmVudHN9PC9zcGFuPlxuICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgIDwvQ2FyZD5cbiAgICAgICAgICAgICAgKSl9XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICApfVxuXG4gICAgICAgICAge3NlbGVjdGVkTWV0cmljID09PSBcImVmZmljaWVuY3lcIiAmJiAoXG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktNFwiPlxuICAgICAgICAgICAgICB7KGRhdGEgYXMgYW55W10pLm1hcCgoaXRlbSwgaW5kZXgpID0+IChcbiAgICAgICAgICAgICAgICA8Q2FyZCBrZXk9e2luZGV4fSBjbGFzc05hbWU9XCJwLTRcIj5cbiAgICAgICAgICAgICAgICAgIDxoNCBjbGFzc05hbWU9XCJmb250LW1lZGl1bSBtYi0zXCI+e2l0ZW0ubmFtZX08L2g0PlxuICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTJcIj5cbiAgICAgICAgICAgICAgICAgICAgPGRpdj5cbiAgICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXgganVzdGlmeS1iZXR3ZWVuIHRleHQtc20gbWItMVwiPlxuICAgICAgICAgICAgICAgICAgICAgICAgPHNwYW4+RW5lcmd5IEVmZmljaWVuY3k8L3NwYW4+XG4gICAgICAgICAgICAgICAgICAgICAgICA8c3Bhbj57aXRlbS5lbmVyZ3lFZmZpY2llbmN5LnRvRml4ZWQoMSl9JTwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgICB7cmVuZGVyQmFycyhpdGVtLmVuZXJneUVmZmljaWVuY3ksIDEwMCwgXCJiZy1ncmVlbi01MDBcIil9XG4gICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICA8ZGl2PlxuICAgICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBqdXN0aWZ5LWJldHdlZW4gdGV4dC1zbSBtYi0xXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICA8c3Bhbj5NZW1vcnkgRWZmaWNpZW5jeTwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxzcGFuPntpdGVtLm1lbW9yeUVmZmljaWVuY3kudG9GaXhlZCgxKX0lPC9zcGFuPlxuICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICAgIHtyZW5kZXJCYXJzKGl0ZW0ubWVtb3J5RWZmaWNpZW5jeSwgMTAwLCBcImJnLWJsdWUtNTAwXCIpfVxuICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtdC0zIHB0LTMgYm9yZGVyLXRcIj5cbiAgICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXgganVzdGlmeS1iZXR3ZWVuXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJmb250LW1lZGl1bVwiPk92ZXJhbGwgU2NvcmU8L3NwYW4+XG4gICAgICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJmb250LWJvbGQgdGV4dC1sZ1wiPlxuICAgICAgICAgICAgICAgICAgICAgICAgICB7aXRlbS5vdmVyYWxsU2NvcmUudG9GaXhlZCgxKX0lXG4gICAgICAgICAgICAgICAgICAgICAgICA8L3NwYW4+XG4gICAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgPC9DYXJkPlxuICAgICAgICAgICAgICApKX1cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICl9XG4gICAgICAgIDwvZGl2PlxuICAgICAgPC9DYXJkQ29udGVudD5cbiAgICA8L2Rpdj5cbiAgKTtcbn1cbiJdLCJuYW1lcyI6WyJBZ2VudFBlcmZvcm1hbmNlQ2hhcnQiLCJhZ2VudHMiLCJhZ2VudERldGFpbHMiLCJzZWxlY3RlZE1ldHJpYyIsInNldFNlbGVjdGVkTWV0cmljIiwidXNlU3RhdGUiLCJzZWxlY3RlZEFnZW50Iiwic2V0U2VsZWN0ZWRBZ2VudCIsImdldE1ldHJpY0RhdGEiLCJmaWx0ZXJlZEFnZW50cyIsImZpbHRlciIsImEiLCJpZCIsIm1hcCIsImFnZW50IiwiZGV0YWlscyIsIm5hbWUiLCJlbmVyZ3kiLCJyZXNvdXJjZXMiLCJoZWFsdGgiLCJtZW1vcnkiLCJtZW1vcnlfdXNlZCIsImdvYWxzIiwiY29tcGxldGVkIiwiTWF0aCIsImZsb29yIiwibGVuZ3RoIiwiYWN0aXZlIiwidG90YWwiLCJpbnRlcmFjdGlvbnMiLCJyYW5kb20iLCJtb3ZlbWVudHMiLCJsZWFybmluZ0V2ZW50cyIsImVuZXJneUVmZmljaWVuY3kiLCJtZW1vcnlFZmZpY2llbmN5IiwibWVtb3J5X2NhcGFjaXR5Iiwib3ZlcmFsbFNjb3JlIiwiZGF0YSIsInJlbmRlckJhcnMiLCJ2YWx1ZSIsIm1heFZhbHVlIiwiY29sb3IiLCJwZXJjZW50YWdlIiwiZGl2IiwiY2xhc3NOYW1lIiwic3R5bGUiLCJ3aWR0aCIsIkNhcmRIZWFkZXIiLCJDYXJkVGl0bGUiLCJTZWxlY3QiLCJvblZhbHVlQ2hhbmdlIiwiU2VsZWN0VHJpZ2dlciIsIlNlbGVjdFZhbHVlIiwicGxhY2Vob2xkZXIiLCJTZWxlY3RDb250ZW50IiwiU2VsZWN0SXRlbSIsIkNhcmRDb250ZW50IiwiaXRlbSIsImluZGV4IiwiQ2FyZCIsImg0Iiwic3BhbiIsInRvRml4ZWQiXSwibWFwcGluZ3MiOiJBQUFBOzs7OzsrQkFxQkE7OztlQUF3QkE7Ozs7c0JBbkJpQzt3QkFPbEQ7dUJBR2tCO0FBU1YsU0FBU0Esc0JBQXNCLEVBQzVDQyxNQUFNLEVBQ05DLFlBQVksRUFDZTtJQUMzQixNQUFNLENBQUNDLGdCQUFnQkMsa0JBQWtCLEdBQUdDLElBQUFBLGVBQVEsRUFBYTtJQUNqRSxNQUFNLENBQUNDLGVBQWVDLGlCQUFpQixHQUFH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

@@ -269,13 +269,13 @@ export default function GlobalKnowledgeGraph({
     const allTags = new Set<string>();
 
     agents.forEach((agent) => {
-      agent.knowledge.forEach((entry) => {
+      agent.knowledge?.forEach((entry) => {
         allEntries.push({
           entry,
           agentId: agent.id,
           agentColor: agent.color,
         });
-        entry.tags.forEach((tag) => allTags.add(tag));
+        entry.tags?.forEach((tag) => allTags.add(tag));
       });
     });
 
@@ -360,7 +360,7 @@ export default function GlobalKnowledgeGraph({
 
     // Links between agents and their entries (now consolidated)
     agents.forEach((agent) => {
-      agent.knowledge.forEach((entry) => {
+      agent.knowledge?.forEach((entry) => {
         const entryNodeId = `entry-${entry.title.replace(/\s+/g, "-").toLowerCase()}`;
 
         // Link agent to entry
@@ -372,7 +372,7 @@ export default function GlobalKnowledgeGraph({
         });
 
         // Links between entries and their tags
-        entry.tags.forEach((tag) => {
+        entry.tags?.forEach((tag) => {
           // Check if this link already exists to avoid duplicates
           const linkExists = newLinks.some(
             (link) =>
@@ -405,10 +405,10 @@ export default function GlobalKnowledgeGraph({
 
         allEntries.forEach(({ entry }) => {
           if (entry.title === entry1.title) {
-            entry.tags.forEach((tag) => entry1Tags.add(tag));
+            entry.tags?.forEach((tag) => entry1Tags.add(tag));
           }
           if (entry.title === entry2.title) {
-            entry.tags.forEach((tag) => entry2Tags.add(tag));
+            entry.tags?.forEach((tag) => entry2Tags.add(tag));
           }
         });
 
@@ -944,8 +944,8 @@ export default function GlobalKnowledgeGraph({
         const entriesWithTag: { entry: KnowledgeEntry; agent: Agent }[] = [];
 
         agents.forEach((agent) => {
-          agent.knowledge.forEach((entry) => {
-            if (entry.tags.includes(tagName)) {
+          agent.knowledge?.forEach((entry) => {
+            if (entry.tags?.includes(tagName)) {
               entriesWithTag.push({ entry, agent });
             }
           });
@@ -981,7 +981,7 @@ export default function GlobalKnowledgeGraph({
         const entriesWithTitle: { entry: KnowledgeEntry; agent: Agent }[] = [];
 
         agents.forEach((agent) => {
-          agent.knowledge.forEach((entry) => {
+          agent.knowledge?.forEach((entry) => {
             if (entry.title === entryTitle) {
               entriesWithTitle.push({ entry, agent });
             }
@@ -1284,14 +1284,14 @@ export default function GlobalKnowledgeGraph({
 
   // Count total knowledge entries
   const totalEntries = agents.reduce(
-    (sum, agent) => sum + agent.knowledge.length,
+    (sum, agent) => sum + (agent.knowledge?.length || 0),
     0,
   );
 
   // Count unique knowledge titles
   const uniqueTitles = new Set<string>();
   agents.forEach((agent) => {
-    agent.knowledge.forEach((entry) => {
+    agent.knowledge?.forEach((entry) => {
       uniqueTitles.add(entry.title);
     });
   });
@@ -1299,8 +1299,8 @@ export default function GlobalKnowledgeGraph({
   // Count unique tags
   const uniqueTags = new Set<string>();
   agents.forEach((agent) => {
-    agent.knowledge.forEach((entry) => {
-      entry.tags.forEach((tag) => uniqueTags.add(tag));
+    agent.knowledge?.forEach((entry) => {
+      entry.tags?.forEach((tag) => uniqueTags.add(tag));
     });
   });
 
@@ -1398,8 +1398,8 @@ export default function GlobalKnowledgeGraph({
                     {agents.reduce((count, agent) => {
                       return (
                         count +
-                        agent.knowledge.filter((entry) =>
-                          entry.tags.includes(hoveredNode.title),
+                        (agent.knowledge || []).filter((entry) =>
+                          entry.tags?.includes(hoveredNode.title),
                         ).length
                       );
                     }, 0)}{" "}
@@ -1417,7 +1417,7 @@ export default function GlobalKnowledgeGraph({
                     {agents.reduce((count, agent) => {
                       return (
                         count +
-                        agent.knowledge.filter(
+                        (agent.knowledge || []).filter(
                           (entry) => entry.title === hoveredNode.title,
                         ).length
                       );
@@ -1425,7 +1425,7 @@ export default function GlobalKnowledgeGraph({
                     instances across{" "}
                     {
                       agents.filter((agent) =>
-                        agent.knowledge.some(
+                        (agent.knowledge || []).some(
                           (entry) => entry.title === hoveredNode.title,
                         ),
                       ).length

@@ -540,11 +540,11 @@ class GraphToModelMapper:
         #     model = self._add_batch_norm(model, config)
         # if config.layer_norm:
         #     model = self._add_layer_norm(model, config)
-        
+
         # Add graph-level pooling wrapper if needed
         if config.global_pool:
             model = self._add_graph_pooling(model, config)
-        
+
         return model
 
     def _add_batch_norm(self, model: nn.Module, config: ModelConfig) -> nn.Module:
@@ -605,7 +605,7 @@ class GraphToModelMapper:
 
     def _add_graph_pooling(self, model: nn.Module, config: ModelConfig) -> nn.Module:
         """Add graph-level pooling wrapper"""
-        from .layers import global_add_pool, global_mean_pool, global_max_pool
+        from .layers import global_add_pool, global_max_pool, global_mean_pool
 
         class GraphPoolingGNN(nn.Module):
             def __init__(self, base_model: nn.Module, pool_type: str) -> None:

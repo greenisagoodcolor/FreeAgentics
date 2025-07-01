@@ -33,35 +33,35 @@ export class DashboardErrorBoundary extends React.Component<
     return {
       hasError: true,
       error,
-      errorId: `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      errorId: `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     const { onError } = this.props;
-    
+
     this.setState({ errorInfo });
-    
+
     // Log error details
     console.error("Dashboard Error Boundary caught an error:", {
       error,
       errorInfo,
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
-      url: window.location.href
+      url: window.location.href,
     });
 
     // Call custom error handler
     onError?.(error, errorInfo);
 
     // Report to analytics if available
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', 'exception', {
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag("event", "exception", {
         description: error.message,
         fatal: false,
         custom_map: {
-          component_stack: errorInfo.componentStack
-        }
+          component_stack: errorInfo.componentStack,
+        },
       });
     }
   }
@@ -87,7 +87,11 @@ export class DashboardErrorBoundary extends React.Component<
 
   render() {
     const { hasError, error, errorInfo } = this.state;
-    const { children, fallback: CustomFallback, level = "component" } = this.props;
+    const {
+      children,
+      fallback: CustomFallback,
+      level = "component",
+    } = this.props;
 
     if (hasError && error) {
       // Use custom fallback if provided
@@ -106,8 +110,8 @@ export class DashboardErrorBoundary extends React.Component<
           {level === "page" ? (
             <PageErrorFallback error={error} onRetry={this.handleRetry} />
           ) : level === "component" ? (
-            <ComponentErrorFallback 
-              error={error} 
+            <ComponentErrorFallback
+              error={error}
               onRetry={this.handleRetry}
               onAutoRetry={this.handleAutoRetry}
             />
@@ -137,27 +141,25 @@ const PageErrorFallback: React.FC<{
       >
         <AlertTriangle className="w-full h-full" />
       </motion.div>
-      
+
       <div className="space-y-2">
         <h1 className="text-2xl font-bold text-[var(--text-primary)]">
           Something went wrong
         </h1>
         <p className="text-[var(--text-secondary)]">
-          The dashboard encountered an unexpected error. Please try refreshing the page.
+          The dashboard encountered an unexpected error. Please try refreshing
+          the page.
         </p>
       </div>
 
       <div className="space-y-3">
-        <button
-          onClick={onRetry}
-          className="button button-primary w-full"
-        >
+        <button onClick={onRetry} className="button button-primary w-full">
           <RefreshCw className="w-4 h-4 mr-2" />
           Try Again
         </button>
-        
+
         <button
-          onClick={() => window.location.href = "/"}
+          onClick={() => (window.location.href = "/")}
           className="button button-secondary w-full"
         >
           <Home className="w-4 h-4 mr-2" />
@@ -192,7 +194,7 @@ const ComponentErrorFallback: React.FC<{
       <div className="w-8 h-8 mx-auto text-red-400">
         <AlertTriangle className="w-full h-full" />
       </div>
-      
+
       <div className="space-y-1">
         <h3 className="font-semibold text-red-400">Component Error</h3>
         <p className="text-sm text-[var(--text-secondary)]">
@@ -201,10 +203,7 @@ const ComponentErrorFallback: React.FC<{
       </div>
 
       <div className="space-y-2">
-        <button
-          onClick={onRetry}
-          className="button button-sm button-secondary"
-        >
+        <button onClick={onRetry} className="button button-sm button-secondary">
           <RefreshCw className="w-3 h-3 mr-1" />
           Retry
         </button>
@@ -238,7 +237,7 @@ const WidgetErrorFallback: React.FC<{
 // Higher-order component for easy wrapping
 export const withErrorBoundary = <P extends object>(
   Component: React.ComponentType<P>,
-  errorBoundaryProps?: Partial<ErrorBoundaryProps>
+  errorBoundaryProps?: Partial<ErrorBoundaryProps>,
 ) => {
   const WrappedComponent = (props: P) => (
     <DashboardErrorBoundary {...errorBoundaryProps}>
@@ -252,13 +251,13 @@ export const withErrorBoundary = <P extends object>(
 
 // Utility for manual error reporting
 export const reportError = (error: Error, context?: string) => {
-  console.error(`Manual error report${context ? ` (${context})` : ''}:`, error);
-  
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('event', 'exception', {
+  console.error(`Manual error report${context ? ` (${context})` : ""}:`, error);
+
+  if (typeof window !== "undefined" && (window as any).gtag) {
+    (window as any).gtag("event", "exception", {
       description: error.message,
       fatal: false,
-      custom_map: { context }
+      custom_map: { context },
     });
   }
 };

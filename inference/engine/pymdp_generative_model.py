@@ -3,7 +3,7 @@ Module for FreeAgentics Active Inference implementation.
 """
 
 import logging
-from typing import Tuple, Union
+from typing import Any, Tuple, Union
 
 import numpy as np
 import torch

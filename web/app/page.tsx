@@ -5,7 +5,12 @@ import { useRouter } from "next/navigation";
 import { Presentation, Menu, Moon, Sun, ZoomIn, ZoomOut } from "lucide-react";
 
 // Define DashboardView type locally
-export type DashboardView = "ceo-demo" | "executive" | "technical" | "research" | "minimal";
+export type DashboardView =
+  | "ceo-demo"
+  | "executive"
+  | "technical"
+  | "research"
+  | "minimal";
 
 // Import components
 import GoalPanel from "./dashboard/components/panels/GoalPanel";
@@ -25,15 +30,15 @@ export default function HomePage() {
   useEffect(() => {
     // Set client flag first
     setIsClient(true);
-    
+
     // Set initial time and update every second
     const updateTime = () => {
       setCurrentTime(new Date().toLocaleTimeString());
     };
-    
+
     updateTime(); // Set initial time
     const interval = setInterval(updateTime, 1000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -43,7 +48,7 @@ export default function HomePage() {
 
   const toggleTheme = () => {
     setIsDarkTheme(!isDarkTheme);
-    document.body.classList.toggle('dark', !isDarkTheme);
+    document.body.classList.toggle("dark", !isDarkTheme);
   };
 
   const handleLayoutChange = (layout: string) => {
@@ -52,7 +57,9 @@ export default function HomePage() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col bg-[var(--bg-primary)] ${isDarkTheme ? 'dark' : ''} ${selectedLayout === 'bloomberg' ? 'layout-bloomberg bloomberg-theme' : ''}`}>
+    <div
+      className={`min-h-screen flex flex-col bg-[var(--bg-primary)] ${isDarkTheme ? "dark" : ""} ${selectedLayout === "bloomberg" ? "layout-bloomberg bloomberg-theme" : ""}`}
+    >
       {/* Title and Status Bar */}
       <div className="flex items-center justify-between p-4 border-b border-[var(--border-primary)]">
         <div className="flex items-center gap-4">
@@ -68,10 +75,16 @@ export default function HomePage() {
             </span>
           </div>
           <div>
-            <h1 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
+            <h1
+              className="text-xl font-bold"
+              style={{ color: "var(--text-primary)" }}
+            >
               FreeAgentics
             </h1>
-            <div className="flex items-center gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>
+            <div
+              className="flex items-center gap-2 text-sm"
+              style={{ color: "var(--text-secondary)" }}
+            >
               <span className="inline-block w-2 h-2 bg-green-500 rounded-full"></span>
               <span>System Operational</span>
               <span>•</span>
@@ -82,7 +95,7 @@ export default function HomePage() {
 
         <div className="flex items-center gap-4">
           {/* Layout Selector */}
-          <select 
+          <select
             data-testid="layout-selector"
             value={selectedLayout}
             onChange={(e) => handleLayoutChange(e.target.value)}
@@ -135,19 +148,31 @@ export default function HomePage() {
       {/* Three Panels Side-by-Side */}
       <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 p-4 min-h-[400px]">
         {/* Agents Panel */}
-        <div data-testid="agent-panel" className="bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-primary)]">
+        <div
+          data-testid="agent-panel"
+          className="bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-primary)]"
+        >
           <AgentPanel view={view} />
         </div>
 
         {/* Conversation Panel */}
-        <div data-testid="conversation-panel" className="bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-primary)]">
+        <div
+          data-testid="conversation-panel"
+          className="bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-primary)]"
+        >
           <ConversationPanel view={view} />
         </div>
 
         {/* Knowledge Graph Panel */}
-        <div data-testid="knowledge-panel" className="bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-primary)] relative">
+        <div
+          data-testid="knowledge-panel"
+          className="bg-[var(--bg-secondary)] rounded-lg border border-[var(--border-primary)] relative"
+        >
           {/* Knowledge Graph Controls */}
-          <div className="absolute top-2 right-2 z-10 flex gap-1" data-testid="zoom-controls">
+          <div
+            className="absolute top-2 right-2 z-10 flex gap-1"
+            data-testid="zoom-controls"
+          >
             <button
               data-testid="zoom-in"
               className="p-1 rounded bg-[var(--bg-primary)] hover:bg-[var(--bg-tertiary)]"
@@ -163,10 +188,10 @@ export default function HomePage() {
               <ZoomOut size={14} />
             </button>
           </div>
-          
+
           {/* Node Filter */}
           <div className="absolute top-2 left-2 z-10">
-            <select 
+            <select
               data-testid="node-filter"
               className="text-xs px-2 py-1 rounded border bg-[var(--bg-primary)] text-[var(--text-primary)] border-[var(--border-primary)]"
             >
@@ -192,7 +217,10 @@ export default function HomePage() {
       </div>
 
       {/* Footer Status Bar */}
-      <div className="flex items-center justify-between p-3 border-t border-[var(--border-primary)] text-sm" style={{ color: "var(--text-secondary)" }}>
+      <div
+        className="flex items-center justify-between p-3 border-t border-[var(--border-primary)] text-sm"
+        style={{ color: "var(--text-secondary)" }}
+      >
         <div className="flex items-center gap-4">
           <span>4 Active Agents</span>
           <span>•</span>

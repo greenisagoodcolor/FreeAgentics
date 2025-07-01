@@ -147,7 +147,7 @@ async function callOpenRouterAPI(
       throw new NetworkError(
         `OpenRouter API error: ${response.status} ${response.statusText}${
           errorData ? ` - ${JSON.stringify(errorData)}` : ""
-        }`
+        }`,
       );
     }
 
@@ -275,7 +275,7 @@ export async function generateResponse(
     } else {
       throw new LLMError(
         `Unsupported provider: ${completeSettings.provider}`,
-        "unknown"
+        "unknown",
       );
     }
   } catch (error) {
@@ -437,7 +437,7 @@ export async function* streamGenerateResponse(
           if (!response.ok) {
             const errorText = await response.text();
             throw new NetworkError(
-              `OpenRouter API error: ${response.status} ${response.statusText} - ${errorText}`
+              `OpenRouter API error: ${response.status} ${response.statusText} - ${errorText}`,
             );
           }
 

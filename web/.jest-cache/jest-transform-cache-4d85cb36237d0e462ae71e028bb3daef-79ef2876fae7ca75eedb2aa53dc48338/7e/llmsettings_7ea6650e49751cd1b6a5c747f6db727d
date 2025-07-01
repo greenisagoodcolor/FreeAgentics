@@ -1,0 +1,360 @@
+2eba86d869dffcd86537d9ec6400d62f
+// LLM Settings types and defaults
+// Separated from llm-service.ts due to "use server" restrictions
+"use strict";
+
+/* istanbul ignore next */
+function cov_rg9g4uqem() {
+  var path = "/Users/matthewmoroney/builds/FreeAgentics/web/lib/llm-settings.ts";
+  var hash = "e841cfb45d44e758aaeb90e32263f07d174be096";
+  var global = new Function("return this")();
+  var gcv = "__coverage__";
+  var coverageData = {
+    path: "/Users/matthewmoroney/builds/FreeAgentics/web/lib/llm-settings.ts",
+    statementMap: {
+      "0": {
+        start: {
+          line: 4,
+          column: 0
+        },
+        end: {
+          line: 6,
+          column: 3
+        }
+      },
+      "1": {
+        start: {
+          line: 8,
+          column: 4
+        },
+        end: {
+          line: 11,
+          column: 7
+        }
+      },
+      "2": {
+        start: {
+          line: 8,
+          column: 24
+        },
+        end: {
+          line: 11,
+          column: 7
+        }
+      },
+      "3": {
+        start: {
+          line: 13,
+          column: 0
+        },
+        end: {
+          line: 23,
+          column: 3
+        }
+      },
+      "4": {
+        start: {
+          line: 15,
+          column: 8
+        },
+        end: {
+          line: 15,
+          column: 37
+        }
+      },
+      "5": {
+        start: {
+          line: 18,
+          column: 8
+        },
+        end: {
+          line: 18,
+          column: 31
+        }
+      },
+      "6": {
+        start: {
+          line: 21,
+          column: 8
+        },
+        end: {
+          line: 21,
+          column: 30
+        }
+      },
+      "7": {
+        start: {
+          line: 24,
+          column: 24
+        },
+        end: {
+          line: 36,
+          column: 1
+        }
+      },
+      "8": {
+        start: {
+          line: 37,
+          column: 30
+        },
+        end: {
+          line: 48,
+          column: 1
+        }
+      },
+      "9": {
+        start: {
+          line: 49,
+          column: 23
+        },
+        end: {
+          line: 92,
+          column: 1
+        }
+      }
+    },
+    fnMap: {
+      "0": {
+        name: "_export",
+        decl: {
+          start: {
+            line: 7,
+            column: 9
+          },
+          end: {
+            line: 7,
+            column: 16
+          }
+        },
+        loc: {
+          start: {
+            line: 7,
+            column: 30
+          },
+          end: {
+            line: 12,
+            column: 1
+          }
+        },
+        line: 7
+      },
+      "1": {
+        name: "(anonymous_1)",
+        decl: {
+          start: {
+            line: 14,
+            column: 27
+          },
+          end: {
+            line: 14,
+            column: 28
+          }
+        },
+        loc: {
+          start: {
+            line: 14,
+            column: 38
+          },
+          end: {
+            line: 16,
+            column: 5
+          }
+        },
+        line: 14
+      },
+      "2": {
+        name: "(anonymous_2)",
+        decl: {
+          start: {
+            line: 17,
+            column: 21
+          },
+          end: {
+            line: 17,
+            column: 22
+          }
+        },
+        loc: {
+          start: {
+            line: 17,
+            column: 32
+          },
+          end: {
+            line: 19,
+            column: 5
+          }
+        },
+        line: 17
+      },
+      "3": {
+        name: "(anonymous_3)",
+        decl: {
+          start: {
+            line: 20,
+            column: 20
+          },
+          end: {
+            line: 20,
+            column: 21
+          }
+        },
+        loc: {
+          start: {
+            line: 20,
+            column: 31
+          },
+          end: {
+            line: 22,
+            column: 5
+          }
+        },
+        line: 20
+      }
+    },
+    branchMap: {},
+    s: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0,
+      "9": 0
+    },
+    f: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0
+    },
+    b: {},
+    inputSourceMap: {
+      version: 3,
+      sources: ["/Users/matthewmoroney/builds/FreeAgentics/web/lib/llm-settings.ts"],
+      sourcesContent: ["// LLM Settings types and defaults\n// Separated from llm-service.ts due to \"use server\" restrictions\n\nexport interface LLMSettings {\n  provider: \"openai\" | \"anthropic\" | \"openrouter\";\n  model: string;\n  temperature: number;\n  maxTokens: number;\n  topP: number;\n  frequencyPenalty: number;\n  presencePenalty: number;\n  systemFingerprint?: string | boolean;\n  apiKey?: string;\n  apiKeySessionId?: string;\n  hasServerRef?: boolean;\n  maxAutonomousMessages?: number;\n  conversationCooldown?: number;\n}\n\nexport const defaultSettings: LLMSettings = {\n  provider: \"openai\",\n  model: \"gpt-4o\",\n  temperature: 0.7,\n  maxTokens: 1024,\n  topP: 0.9,\n  frequencyPenalty: 0,\n  presencePenalty: 0,\n  systemFingerprint: false,\n  hasServerRef: false,\n  maxAutonomousMessages: 4,\n  conversationCooldown: 5000,\n};\n\nexport const clientDefaultSettings: Partial<LLMSettings> = {\n  provider: \"openai\",\n  model: \"gpt-4o\",\n  temperature: 0.7,\n  maxTokens: 1024,\n  topP: 0.9,\n  frequencyPenalty: 0,\n  presencePenalty: 0,\n  systemFingerprint: false,\n  maxAutonomousMessages: 4,\n  conversationCooldown: 5000,\n};\n\n// Provider configurations\nexport const providerModels = {\n  openai: [\n    { id: \"gpt-4o\", name: \"GPT-4o\" },\n    { id: \"gpt-4o-mini\", name: \"GPT-4o Mini\" },\n    { id: \"gpt-4-turbo\", name: \"GPT-4 Turbo\" },\n    { id: \"gpt-3.5-turbo\", name: \"GPT-3.5 Turbo\" },\n  ],\n  anthropic: [\n    { id: \"claude-3-5-sonnet-20241022\", name: \"Claude 3.5 Sonnet\" },\n    { id: \"claude-3-opus-20240229\", name: \"Claude 3 Opus\" },\n    { id: \"claude-3-haiku-20240307\", name: \"Claude 3 Haiku\" },\n  ],\n  openrouter: [\n    {\n      id: \"anthropic/claude-3-5-sonnet\",\n      name: \"Claude 3.5 Sonnet (OpenRouter)\",\n    },\n    { id: \"openai/gpt-4o\", name: \"GPT-4o (OpenRouter)\" },\n  ],\n};\n"],
+      names: ["clientDefaultSettings", "defaultSettings", "providerModels", "provider", "model", "temperature", "maxTokens", "topP", "frequencyPenalty", "presencePenalty", "systemFingerprint", "hasServerRef", "maxAutonomousMessages", "conversationCooldown", "openai", "id", "name", "anthropic", "openrouter"],
+      mappings: "AAAA,kCAAkC;AAClC,iEAAiE;;;;;;;;;;;;IAgCpDA,qBAAqB;eAArBA;;IAdAC,eAAe;eAAfA;;IA4BAC,cAAc;eAAdA;;;AA5BN,MAAMD,kBAA+B;IAC1CE,UAAU;IACVC,OAAO;IACPC,aAAa;IACbC,WAAW;IACXC,MAAM;IACNC,kBAAkB;IAClBC,iBAAiB;IACjBC,mBAAmB;IACnBC,cAAc;IACdC,uBAAuB;IACvBC,sBAAsB;AACxB;AAEO,MAAMb,wBAA8C;IACzDG,UAAU;IACVC,OAAO;IACPC,aAAa;IACbC,WAAW;IACXC,MAAM;IACNC,kBAAkB;IAClBC,iBAAiB;IACjBC,mBAAmB;IACnBE,uBAAuB;IACvBC,sBAAsB;AACxB;AAGO,MAAMX,iBAAiB;IAC5BY,QAAQ;QACN;YAAEC,IAAI;YAAUC,MAAM;QAAS;QAC/B;YAAED,IAAI;YAAeC,MAAM;QAAc;QACzC;YAAED,IAAI;YAAeC,MAAM;QAAc;QACzC;YAAED,IAAI;YAAiBC,MAAM;QAAgB;KAC9C;IACDC,WAAW;QACT;YAAEF,IAAI;YAA8BC,MAAM;QAAoB;QAC9D;YAAED,IAAI;YAA0BC,MAAM;QAAgB;QACtD;YAAED,IAAI;YAA2BC,MAAM;QAAiB;KACzD;IACDE,YAAY;QACV;YACEH,IAAI;YACJC,MAAM;QACR;QACA;YAAED,IAAI;YAAiBC,MAAM;QAAsB;KACpD;AACH"
+    },
+    _coverageSchema: "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+    hash: "e841cfb45d44e758aaeb90e32263f07d174be096"
+  };
+  var coverage = global[gcv] || (global[gcv] = {});
+  if (!coverage[path] || coverage[path].hash !== hash) {
+    coverage[path] = coverageData;
+  }
+  var actualCoverage = coverage[path];
+  {
+    // @ts-ignore
+    cov_rg9g4uqem = function () {
+      return actualCoverage;
+    };
+  }
+  return actualCoverage;
+}
+cov_rg9g4uqem();
+cov_rg9g4uqem().s[0]++;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+function _export(target, all) {
+  /* istanbul ignore next */
+  cov_rg9g4uqem().f[0]++;
+  cov_rg9g4uqem().s[1]++;
+  for (var name in all) {
+    /* istanbul ignore next */
+    cov_rg9g4uqem().s[2]++;
+    Object.defineProperty(target, name, {
+      enumerable: true,
+      get: all[name]
+    });
+  }
+}
+/* istanbul ignore next */
+cov_rg9g4uqem().s[3]++;
+_export(exports, {
+  clientDefaultSettings: function () {
+    /* istanbul ignore next */
+    cov_rg9g4uqem().f[1]++;
+    cov_rg9g4uqem().s[4]++;
+    return clientDefaultSettings;
+  },
+  defaultSettings: function () {
+    /* istanbul ignore next */
+    cov_rg9g4uqem().f[2]++;
+    cov_rg9g4uqem().s[5]++;
+    return defaultSettings;
+  },
+  providerModels: function () {
+    /* istanbul ignore next */
+    cov_rg9g4uqem().f[3]++;
+    cov_rg9g4uqem().s[6]++;
+    return providerModels;
+  }
+});
+const defaultSettings =
+/* istanbul ignore next */
+(cov_rg9g4uqem().s[7]++, {
+  provider: "openai",
+  model: "gpt-4o",
+  temperature: 0.7,
+  maxTokens: 1024,
+  topP: 0.9,
+  frequencyPenalty: 0,
+  presencePenalty: 0,
+  systemFingerprint: false,
+  hasServerRef: false,
+  maxAutonomousMessages: 4,
+  conversationCooldown: 5000
+});
+const clientDefaultSettings =
+/* istanbul ignore next */
+(cov_rg9g4uqem().s[8]++, {
+  provider: "openai",
+  model: "gpt-4o",
+  temperature: 0.7,
+  maxTokens: 1024,
+  topP: 0.9,
+  frequencyPenalty: 0,
+  presencePenalty: 0,
+  systemFingerprint: false,
+  maxAutonomousMessages: 4,
+  conversationCooldown: 5000
+});
+const providerModels =
+/* istanbul ignore next */
+(cov_rg9g4uqem().s[9]++, {
+  openai: [{
+    id: "gpt-4o",
+    name: "GPT-4o"
+  }, {
+    id: "gpt-4o-mini",
+    name: "GPT-4o Mini"
+  }, {
+    id: "gpt-4-turbo",
+    name: "GPT-4 Turbo"
+  }, {
+    id: "gpt-3.5-turbo",
+    name: "GPT-3.5 Turbo"
+  }],
+  anthropic: [{
+    id: "claude-3-5-sonnet-20241022",
+    name: "Claude 3.5 Sonnet"
+  }, {
+    id: "claude-3-opus-20240229",
+    name: "Claude 3 Opus"
+  }, {
+    id: "claude-3-haiku-20240307",
+    name: "Claude 3 Haiku"
+  }],
+  openrouter: [{
+    id: "anthropic/claude-3-5-sonnet",
+    name: "Claude 3.5 Sonnet (OpenRouter)"
+  }, {
+    id: "openai/gpt-4o",
+    name: "GPT-4o (OpenRouter)"
+  }]
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJjbGllbnREZWZhdWx0U2V0dGluZ3MiLCJjb3Zfcmc5ZzR1cWVtIiwiZiIsInMiLCJkZWZhdWx0U2V0dGluZ3MiLCJwcm92aWRlck1vZGVscyIsInByb3ZpZGVyIiwibW9kZWwiLCJ0ZW1wZXJhdHVyZSIsIm1heFRva2VucyIsInRvcFAiLCJmcmVxdWVuY3lQZW5hbHR5IiwicHJlc2VuY2VQZW5hbHR5Iiwic3lzdGVtRmluZ2VycHJpbnQiLCJoYXNTZXJ2ZXJSZWYiLCJtYXhBdXRvbm9tb3VzTWVzc2FnZXMiLCJjb252ZXJzYXRpb25Db29sZG93biIsIm9wZW5haSIsImlkIiwibmFtZSIsImFudGhyb3BpYyIsIm9wZW5yb3V0ZXIiXSwic291cmNlcyI6WyIvVXNlcnMvbWF0dGhld21vcm9uZXkvYnVpbGRzL0ZyZWVBZ2VudGljcy93ZWIvbGliL2xsbS1zZXR0aW5ncy50cyJdLCJzb3VyY2VzQ29udGVudCI6WyIvLyBMTE0gU2V0dGluZ3MgdHlwZXMgYW5kIGRlZmF1bHRzXG4vLyBTZXBhcmF0ZWQgZnJvbSBsbG0tc2VydmljZS50cyBkdWUgdG8gXCJ1c2Ugc2VydmVyXCIgcmVzdHJpY3Rpb25zXG5cbmV4cG9ydCBpbnRlcmZhY2UgTExNU2V0dGluZ3Mge1xuICBwcm92aWRlcjogXCJvcGVuYWlcIiB8IFwiYW50aHJvcGljXCIgfCBcIm9wZW5yb3V0ZXJcIjtcbiAgbW9kZWw6IHN0cmluZztcbiAgdGVtcGVyYXR1cmU6IG51bWJlcjtcbiAgbWF4VG9rZW5zOiBudW1iZXI7XG4gIHRvcFA6IG51bWJlcjtcbiAgZnJlcXVlbmN5UGVuYWx0eTogbnVtYmVyO1xuICBwcmVzZW5jZVBlbmFsdHk6IG51bWJlcjtcbiAgc3lzdGVtRmluZ2VycHJpbnQ/OiBzdHJpbmcgfCBib29sZWFuO1xuICBhcGlLZXk/OiBzdHJpbmc7XG4gIGFwaUtleVNlc3Npb25JZD86IHN0cmluZztcbiAgaGFzU2VydmVyUmVmPzogYm9vbGVhbjtcbiAgbWF4QXV0b25vbW91c01lc3NhZ2VzPzogbnVtYmVyO1xuICBjb252ZXJzYXRpb25Db29sZG93bj86IG51bWJlcjtcbn1cblxuZXhwb3J0IGNvbnN0IGRlZmF1bHRTZXR0aW5nczogTExNU2V0dGluZ3MgPSB7XG4gIHByb3ZpZGVyOiBcIm9wZW5haVwiLFxuICBtb2RlbDogXCJncHQtNG9cIixcbiAgdGVtcGVyYXR1cmU6IDAuNyxcbiAgbWF4VG9rZW5zOiAxMDI0LFxuICB0b3BQOiAwLjksXG4gIGZyZXF1ZW5jeVBlbmFsdHk6IDAsXG4gIHByZXNlbmNlUGVuYWx0eTogMCxcbiAgc3lzdGVtRmluZ2VycHJpbnQ6IGZhbHNlLFxuICBoYXNTZXJ2ZXJSZWY6IGZhbHNlLFxuICBtYXhBdXRvbm9tb3VzTWVzc2FnZXM6IDQsXG4gIGNvbnZlcnNhdGlvbkNvb2xkb3duOiA1MDAwLFxufTtcblxuZXhwb3J0IGNvbnN0IGNsaWVudERlZmF1bHRTZXR0aW5nczogUGFydGlhbDxMTE1TZXR0aW5ncz4gPSB7XG4gIHByb3ZpZGVyOiBcIm9wZW5haVwiLFxuICBtb2RlbDogXCJncHQtNG9cIixcbiAgdGVtcGVyYXR1cmU6IDAuNyxcbiAgbWF4VG9rZW5zOiAxMDI0LFxuICB0b3BQOiAwLjksXG4gIGZyZXF1ZW5jeVBlbmFsdHk6IDAsXG4gIHByZXNlbmNlUGVuYWx0eTogMCxcbiAgc3lzdGVtRmluZ2VycHJpbnQ6IGZhbHNlLFxuICBtYXhBdXRvbm9tb3VzTWVzc2FnZXM6IDQsXG4gIGNvbnZlcnNhdGlvbkNvb2xkb3duOiA1MDAwLFxufTtcblxuLy8gUHJvdmlkZXIgY29uZmlndXJhdGlvbnNcbmV4cG9ydCBjb25zdCBwcm92aWRlck1vZGVscyA9IHtcbiAgb3BlbmFpOiBbXG4gICAgeyBpZDogXCJncHQtNG9cIiwgbmFtZTogXCJHUFQtNG9cIiB9LFxuICAgIHsgaWQ6IFwiZ3B0LTRvLW1pbmlcIiwgbmFtZTogXCJHUFQtNG8gTWluaVwiIH0sXG4gICAgeyBpZDogXCJncHQtNC10dXJib1wiLCBuYW1lOiBcIkdQVC00IFR1cmJvXCIgfSxcbiAgICB7IGlkOiBcImdwdC0zLjUtdHVyYm9cIiwgbmFtZTogXCJHUFQtMy41IFR1cmJvXCIgfSxcbiAgXSxcbiAgYW50aHJvcGljOiBbXG4gICAgeyBpZDogXCJjbGF1ZGUtMy01LXNvbm5ldC0yMDI0MTAyMlwiLCBuYW1lOiBcIkNsYXVkZSAzLjUgU29ubmV0XCIgfSxcbiAgICB7IGlkOiBcImNsYXVkZS0zLW9wdXMtMjAyNDAyMjlcIiwgbmFtZTogXCJDbGF1ZGUgMyBPcHVzXCIgfSxcbiAgICB7IGlkOiBcImNsYXVkZS0zLWhhaWt1LTIwMjQwMzA3XCIsIG5hbWU6IFwiQ2xhdWRlIDMgSGFpa3VcIiB9LFxuICBdLFxuICBvcGVucm91dGVyOiBbXG4gICAge1xuICAgICAgaWQ6IFwiYW50aHJvcGljL2NsYXVkZS0zLTUtc29ubmV0XCIsXG4gICAgICBuYW1lOiBcIkNsYXVkZSAzLjUgU29ubmV0IChPcGVuUm91dGVyKVwiLFxuICAgIH0sXG4gICAgeyBpZDogXCJvcGVuYWkvZ3B0LTRvXCIsIG5hbWU6IFwiR1BULTRvIChPcGVuUm91dGVyKVwiIH0sXG4gIF0sXG59O1xuIl0sIm1hcHBpbmdzIjoiQUFBQTtBQUNBOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztFQWdDYUEscUJBQXFCLFdBQUFBLENBQUE7SUFBQTtJQUFBQyxhQUFBLEdBQUFDLENBQUE7SUFBQUQsYUFBQSxHQUFBRSxDQUFBO1dBQXJCSCxxQkFBQTs7RUFkQUksZUFBZSxXQUFBQSxDQUFBO0lBQUE7SUFBQUgsYUFBQSxHQUFBQyxDQUFBO0lBQUFELGFBQUEsR0FBQUUsQ0FBQTtXQUFmQyxlQUFBOztFQTRCQUMsY0FBYyxXQUFBQSxDQUFBO0lBQUE7SUFBQUosYUFBQSxHQUFBQyxDQUFBO0lBQUFELGFBQUEsR0FBQUUsQ0FBQTtXQUFkRSxjQUFBOzs7QUE1Qk4sTUFBTUQsZUFBQTtBQUFBO0FBQUEsQ0FBQUgsYUFBQSxHQUFBRSxDQUFBLE9BQStCO0VBQzFDRyxRQUFBLEVBQVU7RUFDVkMsS0FBQSxFQUFPO0VBQ1BDLFdBQUEsRUFBYTtFQUNiQyxTQUFBLEVBQVc7RUFDWEMsSUFBQSxFQUFNO0VBQ05DLGdCQUFBLEVBQWtCO0VBQ2xCQyxlQUFBLEVBQWlCO0VBQ2pCQyxpQkFBQSxFQUFtQjtFQUNuQkMsWUFBQSxFQUFjO0VBQ2RDLHFCQUFBLEVBQXVCO0VBQ3ZCQyxvQkFBQSxFQUFzQjtBQUN4QjtBQUVPLE1BQU1oQixxQkFBQTtBQUFBO0FBQUEsQ0FBQUMsYUFBQSxHQUFBRSxDQUFBLE9BQThDO0VBQ3pERyxRQUFBLEVBQVU7RUFDVkMsS0FBQSxFQUFPO0VBQ1BDLFdBQUEsRUFBYTtFQUNiQyxTQUFBLEVBQVc7RUFDWEMsSUFBQSxFQUFNO0VBQ05DLGdCQUFBLEVBQWtCO0VBQ2xCQyxlQUFBLEVBQWlCO0VBQ2pCQyxpQkFBQSxFQUFtQjtFQUNuQkUscUJBQUEsRUFBdUI7RUFDdkJDLG9CQUFBLEVBQXNCO0FBQ3hCO0FBR08sTUFBTVgsY0FBQTtBQUFBO0FBQUEsQ0FBQUosYUFBQSxHQUFBRSxDQUFBLE9BQWlCO0VBQzVCYyxNQUFBLEVBQVEsQ0FDTjtJQUFFQyxFQUFBLEVBQUk7SUFBVUMsSUFBQSxFQUFNO0VBQVMsR0FDL0I7SUFBRUQsRUFBQSxFQUFJO0lBQWVDLElBQUEsRUFBTTtFQUFjLEdBQ3pDO0lBQUVELEVBQUEsRUFBSTtJQUFlQyxJQUFBLEVBQU07RUFBYyxHQUN6QztJQUFFRCxFQUFBLEVBQUk7SUFBaUJDLElBQUEsRUFBTTtFQUFnQixFQUM5QztFQUNEQyxTQUFBLEVBQVcsQ0FDVDtJQUFFRixFQUFBLEVBQUk7SUFBOEJDLElBQUEsRUFBTTtFQUFvQixHQUM5RDtJQUFFRCxFQUFBLEVBQUk7SUFBMEJDLElBQUEsRUFBTTtFQUFnQixHQUN0RDtJQUFFRCxFQUFBLEVBQUk7SUFBMkJDLElBQUEsRUFBTTtFQUFpQixFQUN6RDtFQUNERSxVQUFBLEVBQVksQ0FDVjtJQUNFSCxFQUFBLEVBQUk7SUFDSkMsSUFBQSxFQUFNO0VBQ1IsR0FDQTtJQUFFRCxFQUFBLEVBQUk7SUFBaUJDLElBQUEsRUFBTTtFQUFzQjtBQUV2RCIsImlnbm9yZUxpc3QiOltdfQ==

@@ -1,0 +1,441 @@
+119916b76542fcac5618bb5440fda496
+"use client";
+"use strict";
+
+/* istanbul ignore next */
+function cov_vvgrt0zxh() {
+  var path = "/Users/matthewmoroney/builds/FreeAgentics/web/components/dashboard/AnalyticsWidgetGrid.tsx";
+  var hash = "d9ed9b1b3a44411cdf6e4ef5dea2f8c7455f27f8";
+  var global = new Function("return this")();
+  var gcv = "__coverage__";
+  var coverageData = {
+    path: "/Users/matthewmoroney/builds/FreeAgentics/web/components/dashboard/AnalyticsWidgetGrid.tsx",
+    statementMap: {
+      "0": {
+        start: {
+          line: 3,
+          column: 0
+        },
+        end: {
+          line: 5,
+          column: 3
+        }
+      },
+      "1": {
+        start: {
+          line: 6,
+          column: 0
+        },
+        end: {
+          line: 11,
+          column: 3
+        }
+      },
+      "2": {
+        start: {
+          line: 9,
+          column: 8
+        },
+        end: {
+          line: 9,
+          column: 35
+        }
+      },
+      "3": {
+        start: {
+          line: 12,
+          column: 20
+        },
+        end: {
+          line: 12,
+          column: 48
+        }
+      },
+      "4": {
+        start: {
+          line: 13,
+          column: 29
+        },
+        end: {
+          line: 13,
+          column: 71
+        }
+      },
+      "5": {
+        start: {
+          line: 14,
+          column: 14
+        },
+        end: {
+          line: 14,
+          column: 35
+        }
+      },
+      "6": {
+        start: {
+          line: 15,
+          column: 21
+        },
+        end: {
+          line: 15,
+          column: 44
+        }
+      },
+      "7": {
+        start: {
+          line: 17,
+          column: 4
+        },
+        end: {
+          line: 19,
+          column: 6
+        }
+      },
+      "8": {
+        start: {
+          line: 21,
+          column: 16
+        },
+        end: {
+          line: 50,
+          column: 1
+        }
+      },
+      "9": {
+        start: {
+          line: 52,
+          column: 4
+        },
+        end: {
+          line: 83,
+          column: 7
+        }
+      },
+      "10": {
+        start: {
+          line: 54,
+          column: 54
+        },
+        end: {
+          line: 82,
+          column: 28
+        }
+      }
+    },
+    fnMap: {
+      "0": {
+        name: "(anonymous_0)",
+        decl: {
+          start: {
+            line: 8,
+            column: 9
+          },
+          end: {
+            line: 8,
+            column: 10
+          }
+        },
+        loc: {
+          start: {
+            line: 8,
+            column: 20
+          },
+          end: {
+            line: 10,
+            column: 5
+          }
+        },
+        line: 8
+      },
+      "1": {
+        name: "_interop_require_default",
+        decl: {
+          start: {
+            line: 16,
+            column: 9
+          },
+          end: {
+            line: 16,
+            column: 33
+          }
+        },
+        loc: {
+          start: {
+            line: 16,
+            column: 39
+          },
+          end: {
+            line: 20,
+            column: 1
+          }
+        },
+        line: 16
+      },
+      "2": {
+        name: "AnalyticsWidgetGrid",
+        decl: {
+          start: {
+            line: 51,
+            column: 9
+          },
+          end: {
+            line: 51,
+            column: 28
+          }
+        },
+        loc: {
+          start: {
+            line: 51,
+            column: 31
+          },
+          end: {
+            line: 84,
+            column: 1
+          }
+        },
+        line: 51
+      },
+      "3": {
+        name: "(anonymous_3)",
+        decl: {
+          start: {
+            line: 54,
+            column: 30
+          },
+          end: {
+            line: 54,
+            column: 31
+          }
+        },
+        loc: {
+          start: {
+            line: 54,
+            column: 54
+          },
+          end: {
+            line: 82,
+            column: 28
+          }
+        },
+        line: 54
+      }
+    },
+    branchMap: {
+      "0": {
+        loc: {
+          start: {
+            line: 17,
+            column: 11
+          },
+          end: {
+            line: 19,
+            column: 5
+          }
+        },
+        type: "cond-expr",
+        locations: [{
+          start: {
+            line: 17,
+            column: 35
+          },
+          end: {
+            line: 17,
+            column: 38
+          }
+        }, {
+          start: {
+            line: 17,
+            column: 41
+          },
+          end: {
+            line: 19,
+            column: 5
+          }
+        }],
+        line: 17
+      },
+      "1": {
+        loc: {
+          start: {
+            line: 17,
+            column: 11
+          },
+          end: {
+            line: 17,
+            column: 32
+          }
+        },
+        type: "binary-expr",
+        locations: [{
+          start: {
+            line: 17,
+            column: 11
+          },
+          end: {
+            line: 17,
+            column: 14
+          }
+        }, {
+          start: {
+            line: 17,
+            column: 18
+          },
+          end: {
+            line: 17,
+            column: 32
+          }
+        }],
+        line: 17
+      }
+    },
+    s: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0,
+      "9": 0,
+      "10": 0
+    },
+    f: {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0
+    },
+    b: {
+      "0": [0, 0],
+      "1": [0, 0]
+    },
+    inputSourceMap: {
+      version: 3,
+      sources: ["/Users/matthewmoroney/builds/FreeAgentics/web/components/dashboard/AnalyticsWidgetGrid.tsx"],
+      sourcesContent: ["\"use client\";\n\nimport React from \"react\";\nimport { Card, CardContent, CardHeader, CardTitle } from \"@/components/ui/card\";\nimport { BarChart3, TrendingUp, Activity, Zap } from \"lucide-react\";\n\nconst metrics = [\n  {\n    title: \"Active Agents\",\n    value: \"4\",\n    change: \"+2\",\n    icon: Activity,\n    color: \"text-green-600\",\n  },\n  {\n    title: \"Conversations\",\n    value: \"23\",\n    change: \"+5\",\n    icon: BarChart3,\n    color: \"text-blue-600\",\n  },\n  {\n    title: \"Performance\",\n    value: \"94%\",\n    change: \"+3%\",\n    icon: TrendingUp,\n    color: \"text-purple-600\",\n  },\n  {\n    title: \"Inference Rate\",\n    value: \"1.2k/s\",\n    change: \"+12%\",\n    icon: Zap,\n    color: \"text-orange-600\",\n  },\n];\n\nexport function AnalyticsWidgetGrid() {\n  return (\n    <div className=\"grid grid-cols-2 md:grid-cols-4 gap-4\">\n      {metrics.map((metric) => (\n        <Card key={metric.title}>\n          <CardContent className=\"p-4\">\n            <div className=\"flex items-center justify-between\">\n              <div>\n                <p className=\"text-sm text-muted-foreground\">{metric.title}</p>\n                <p className=\"text-2xl font-bold\">{metric.value}</p>\n                <p className={`text-sm ${metric.color}`}>{metric.change}</p>\n              </div>\n              <metric.icon className={`h-8 w-8 ${metric.color}`} />\n            </div>\n          </CardContent>\n        </Card>\n      ))}\n    </div>\n  );\n}\n"],
+      names: ["AnalyticsWidgetGrid", "metrics", "title", "value", "change", "icon", "Activity", "color", "BarChart3", "TrendingUp", "Zap", "div", "className", "map", "metric", "Card", "CardContent", "p"],
+      mappings: "AAAA;;;;;+BAqCgBA;;;eAAAA;;;;8DAnCE;sBACuC;6BACJ;;;;;;AAErD,MAAMC,UAAU;IACd;QACEC,OAAO;QACPC,OAAO;QACPC,QAAQ;QACRC,MAAMC,qBAAQ;QACdC,OAAO;IACT;IACA;QACEL,OAAO;QACPC,OAAO;QACPC,QAAQ;QACRC,MAAMG,sBAAS;QACfD,OAAO;IACT;IACA;QACEL,OAAO;QACPC,OAAO;QACPC,QAAQ;QACRC,MAAMI,uBAAU;QAChBF,OAAO;IACT;IACA;QACEL,OAAO;QACPC,OAAO;QACPC,QAAQ;QACRC,MAAMK,gBAAG;QACTH,OAAO;IACT;CACD;AAEM,SAASP;IACd,qBACE,qBAACW;QAAIC,WAAU;kBACZX,QAAQY,GAAG,CAAC,CAACC,uBACZ,qBAACC,UAAI;0BACH,cAAA,qBAACC,iBAAW;oBAACJ,WAAU;8BACrB,cAAA,sBAACD;wBAAIC,WAAU;;0CACb,sBAACD;;kDACC,qBAACM;wCAAEL,WAAU;kDAAiCE,OAAOZ,KAAK;;kDAC1D,qBAACe;wCAAEL,WAAU;kDAAsBE,OAAOX,KAAK;;kDAC/C,qBAACc;wCAAEL,WAAW,CAAC,QAAQ,EAAEE,OAAOP,KAAK,CAAC,CAAC;kDAAGO,OAAOV,MAAM;;;;0CAEzD,qBAACU,OAAOT,IAAI;gCAACO,WAAW,CAAC,QAAQ,EAAEE,OAAOP,KAAK,CAAC,CAAC;;;;;eAR5CO,OAAOZ,KAAK;;AAe/B"
+    },
+    _coverageSchema: "1a1c01bbd47fc00a2c39e90264f33305004495a9",
+    hash: "d9ed9b1b3a44411cdf6e4ef5dea2f8c7455f27f8"
+  };
+  var coverage = global[gcv] || (global[gcv] = {});
+  if (!coverage[path] || coverage[path].hash !== hash) {
+    coverage[path] = coverageData;
+  }
+  var actualCoverage = coverage[path];
+  {
+    // @ts-ignore
+    cov_vvgrt0zxh = function () {
+      return actualCoverage;
+    };
+  }
+  return actualCoverage;
+}
+cov_vvgrt0zxh();
+cov_vvgrt0zxh().s[0]++;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/* istanbul ignore next */
+cov_vvgrt0zxh().s[1]++;
+Object.defineProperty(exports, "AnalyticsWidgetGrid", {
+  enumerable: true,
+  get: function () {
+    /* istanbul ignore next */
+    cov_vvgrt0zxh().f[0]++;
+    cov_vvgrt0zxh().s[2]++;
+    return AnalyticsWidgetGrid;
+  }
+});
+const _jsxruntime =
+/* istanbul ignore next */
+(cov_vvgrt0zxh().s[3]++, require("react/jsx-runtime"));
+const _react =
+/* istanbul ignore next */
+(/*#__PURE__*/cov_vvgrt0zxh().s[4]++, _interop_require_default(require("react")));
+const _card =
+/* istanbul ignore next */
+(cov_vvgrt0zxh().s[5]++, require("../ui/card"));
+const _lucidereact =
+/* istanbul ignore next */
+(cov_vvgrt0zxh().s[6]++, require("lucide-react"));
+function _interop_require_default(obj) {
+  /* istanbul ignore next */
+  cov_vvgrt0zxh().f[1]++;
+  cov_vvgrt0zxh().s[7]++;
+  return /* istanbul ignore next */(cov_vvgrt0zxh().b[1][0]++, obj) &&
+  /* istanbul ignore next */
+  (cov_vvgrt0zxh().b[1][1]++, obj.__esModule) ?
+  /* istanbul ignore next */
+  (cov_vvgrt0zxh().b[0][0]++, obj) :
+  /* istanbul ignore next */
+  (cov_vvgrt0zxh().b[0][1]++, {
+    default: obj
+  });
+}
+const metrics =
+/* istanbul ignore next */
+(cov_vvgrt0zxh().s[8]++, [{
+  title: "Active Agents",
+  value: "4",
+  change: "+2",
+  icon: _lucidereact.Activity,
+  color: "text-green-600"
+}, {
+  title: "Conversations",
+  value: "23",
+  change: "+5",
+  icon: _lucidereact.BarChart3,
+  color: "text-blue-600"
+}, {
+  title: "Performance",
+  value: "94%",
+  change: "+3%",
+  icon: _lucidereact.TrendingUp,
+  color: "text-purple-600"
+}, {
+  title: "Inference Rate",
+  value: "1.2k/s",
+  change: "+12%",
+  icon: _lucidereact.Zap,
+  color: "text-orange-600"
+}]);
+function AnalyticsWidgetGrid() {
+  /* istanbul ignore next */
+  cov_vvgrt0zxh().f[2]++;
+  cov_vvgrt0zxh().s[9]++;
+  return /*#__PURE__*/(0, _jsxruntime.jsx)("div", {
+    className: "grid grid-cols-2 md:grid-cols-4 gap-4",
+    children: metrics.map(metric => {
+      /* istanbul ignore next */
+      cov_vvgrt0zxh().f[3]++;
+      cov_vvgrt0zxh().s[10]++;
+      return /*#__PURE__*/(0, _jsxruntime.jsx)(_card.Card, {
+        children: /*#__PURE__*/(0, _jsxruntime.jsx)(_card.CardContent, {
+          className: "p-4",
+          children: /*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+            className: "flex items-center justify-between",
+            children: [/*#__PURE__*/(0, _jsxruntime.jsxs)("div", {
+              children: [/*#__PURE__*/(0, _jsxruntime.jsx)("p", {
+                className: "text-sm text-muted-foreground",
+                children: metric.title
+              }), /*#__PURE__*/(0, _jsxruntime.jsx)("p", {
+                className: "text-2xl font-bold",
+                children: metric.value
+              }), /*#__PURE__*/(0, _jsxruntime.jsx)("p", {
+                className: `text-sm ${metric.color}`,
+                children: metric.change
+              })]
+            }), /*#__PURE__*/(0, _jsxruntime.jsx)(metric.icon, {
+              className: `h-8 w-8 ${metric.color}`
+            })]
+          })
+        })
+      }, metric.title);
+    })
+  });
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJBbmFseXRpY3NXaWRnZXRHcmlkIiwibWV0cmljcyIsImNvdl92dmdydDB6eGgiLCJzIiwidGl0bGUiLCJ2YWx1ZSIsImNoYW5nZSIsImljb24iLCJfbHVjaWRlcmVhY3QiLCJBY3Rpdml0eSIsImNvbG9yIiwiQmFyQ2hhcnQzIiwiVHJlbmRpbmdVcCIsIlphcCIsImYiLCJfanN4cnVudGltZSIsImpzeCIsImNsYXNzTmFtZSIsIm1hcCIsIm1ldHJpYyIsIl9jYXJkIiwiQ2FyZCIsIkNhcmRDb250ZW50IiwianN4cyJdLCJzb3VyY2VzIjpbIi9Vc2Vycy9tYXR0aGV3bW9yb25leS9idWlsZHMvRnJlZUFnZW50aWNzL3dlYi9jb21wb25lbnRzL2Rhc2hib2FyZC9BbmFseXRpY3NXaWRnZXRHcmlkLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJcInVzZSBjbGllbnRcIjtcblxuaW1wb3J0IFJlYWN0IGZyb20gXCJyZWFjdFwiO1xuaW1wb3J0IHsgQ2FyZCwgQ2FyZENvbnRlbnQsIENhcmRIZWFkZXIsIENhcmRUaXRsZSB9IGZyb20gXCJAL2NvbXBvbmVudHMvdWkvY2FyZFwiO1xuaW1wb3J0IHsgQmFyQ2hhcnQzLCBUcmVuZGluZ1VwLCBBY3Rpdml0eSwgWmFwIH0gZnJvbSBcImx1Y2lkZS1yZWFjdFwiO1xuXG5jb25zdCBtZXRyaWNzID0gW1xuICB7XG4gICAgdGl0bGU6IFwiQWN0aXZlIEFnZW50c1wiLFxuICAgIHZhbHVlOiBcIjRcIixcbiAgICBjaGFuZ2U6IFwiKzJcIixcbiAgICBpY29uOiBBY3Rpdml0eSxcbiAgICBjb2xvcjogXCJ0ZXh0LWdyZWVuLTYwMFwiLFxuICB9LFxuICB7XG4gICAgdGl0bGU6IFwiQ29udmVyc2F0aW9uc1wiLFxuICAgIHZhbHVlOiBcIjIzXCIsXG4gICAgY2hhbmdlOiBcIis1XCIsXG4gICAgaWNvbjogQmFyQ2hhcnQzLFxuICAgIGNvbG9yOiBcInRleHQtYmx1ZS02MDBcIixcbiAgfSxcbiAge1xuICAgIHRpdGxlOiBcIlBlcmZvcm1hbmNlXCIsXG4gICAgdmFsdWU6IFwiOTQlXCIsXG4gICAgY2hhbmdlOiBcIiszJVwiLFxuICAgIGljb246IFRyZW5kaW5nVXAsXG4gICAgY29sb3I6IFwidGV4dC1wdXJwbGUtNjAwXCIsXG4gIH0sXG4gIHtcbiAgICB0aXRsZTogXCJJbmZlcmVuY2UgUmF0ZVwiLFxuICAgIHZhbHVlOiBcIjEuMmsvc1wiLFxuICAgIGNoYW5nZTogXCIrMTIlXCIsXG4gICAgaWNvbjogWmFwLFxuICAgIGNvbG9yOiBcInRleHQtb3JhbmdlLTYwMFwiLFxuICB9LFxuXTtcblxuZXhwb3J0IGZ1bmN0aW9uIEFuYWx5dGljc1dpZGdldEdyaWQoKSB7XG4gIHJldHVybiAoXG4gICAgPGRpdiBjbGFzc05hbWU9XCJncmlkIGdyaWQtY29scy0yIG1kOmdyaWQtY29scy00IGdhcC00XCI+XG4gICAgICB7bWV0cmljcy5tYXAoKG1ldHJpYykgPT4gKFxuICAgICAgICA8Q2FyZCBrZXk9e21ldHJpYy50aXRsZX0+XG4gICAgICAgICAgPENhcmRDb250ZW50IGNsYXNzTmFtZT1cInAtNFwiPlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWJldHdlZW5cIj5cbiAgICAgICAgICAgICAgPGRpdj5cbiAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXNtIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPnttZXRyaWMudGl0bGV9PC9wPlxuICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtMnhsIGZvbnQtYm9sZFwiPnttZXRyaWMudmFsdWV9PC9wPlxuICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT17YHRleHQtc20gJHttZXRyaWMuY29sb3J9YH0+e21ldHJpYy5jaGFuZ2V9PC9wPlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgPG1ldHJpYy5pY29uIGNsYXNzTmFtZT17YGgtOCB3LTggJHttZXRyaWMuY29sb3J9YH0gLz5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDwvQ2FyZENvbnRlbnQ+XG4gICAgICAgIDwvQ2FyZD5cbiAgICAgICkpfVxuICAgIDwvZGl2PlxuICApO1xufVxuIl0sIm1hcHBpbmdzIjoiQUFBQTs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OytCQXFDZ0I7Ozs7OztXQUFBQSxtQkFBQTs7Ozs7Ozs7dUVBbkNFOzs7aUNBQ3VDOzs7aUNBQ0o7Ozs7Ozs7Ozs7Ozs7OztBQUVyRCxNQUFNQyxPQUFBO0FBQUE7QUFBQSxDQUFBQyxhQUFBLEdBQUFDLENBQUEsT0FBVSxDQUNkO0VBQ0VDLEtBQUEsRUFBTztFQUNQQyxLQUFBLEVBQU87RUFDUEMsTUFBQSxFQUFRO0VBQ1JDLElBQUEsRUFBTUMsWUFBQSxDQUFBQyxRQUFRO0VBQ2RDLEtBQUEsRUFBTztBQUNULEdBQ0E7RUFDRU4sS0FBQSxFQUFPO0VBQ1BDLEtBQUEsRUFBTztFQUNQQyxNQUFBLEVBQVE7RUFDUkMsSUFBQSxFQUFNQyxZQUFBLENBQUFHLFNBQVM7RUFDZkQsS0FBQSxFQUFPO0FBQ1QsR0FDQTtFQUNFTixLQUFBLEVBQU87RUFDUEMsS0FBQSxFQUFPO0VBQ1BDLE1BQUEsRUFBUTtFQUNSQyxJQUFBLEVBQU1DLFlBQUEsQ0FBQUksVUFBVTtFQUNoQkYsS0FBQSxFQUFPO0FBQ1QsR0FDQTtFQUNFTixLQUFBLEVBQU87RUFDUEMsS0FBQSxFQUFPO0VBQ1BDLE1BQUEsRUFBUTtFQUNSQyxJQUFBLEVBQU1DLFlBQUEsQ0FBQUssR0FBRztFQUNUSCxLQUFBLEVBQU87QUFDVCxFQUNEO0FBRU0sU0FBU1Ysb0JBQUE7RUFBQTtFQUFBRSxhQUFBLEdBQUFZLENBQUE7RUFBQVosYUFBQSxHQUFBQyxDQUFBO0VBQ2Qsb0JBQ0UsSUFBQVksV0FBQSxDQUFBQyxHQUFBLEVBQUM7SUFBSUMsU0FBQSxFQUFVO2NBQ1poQixPQUFBLENBQVFpQixHQUFHLENBQUVDLE1BQUEsSUFDWjtNQUFBO01BQUFqQixhQUFBLEdBQUFZLENBQUE7TUFBQVosYUFBQSxHQUFBQyxDQUFBO01BQUEsT0FEWSxhQUNaLElBQUFZLFdBQUEsQ0FBQUMsR0FBQSxFQUFDSSxLQUFBLENBQUFDLElBQUk7a0JBQ0gsaUJBQUFOLFdBQUEsQ0FBQUMsR0FBQSxFQUFDSSxLQUFBLENBQUFFLFdBQVc7VUFBQ0wsU0FBQSxFQUFVO29CQUNyQixpQkFBQUYsV0FBQSxDQUFBUSxJQUFBLEVBQUM7WUFBSU4sU0FBQSxFQUFVO29DQUNiLElBQUFGLFdBQUEsQ0FBQVEsSUFBQSxFQUFDO3NDQUNDLElBQUFSLFdBQUEsQ0FBQUMsR0FBQSxFQUFDO2dCQUFFQyxTQUFBLEVBQVU7MEJBQWlDRSxNQUFBLENBQU9mOytCQUNyRCxJQUFBVyxXQUFBLENBQUFDLEdBQUEsRUFBQztnQkFBRUMsU0FBQSxFQUFVOzBCQUFzQkUsTUFBQSxDQUFPZDsrQkFDMUMsSUFBQVUsV0FBQSxDQUFBQyxHQUFBLEVBQUM7Z0JBQUVDLFNBQUEsRUFBVyxXQUFXRSxNQUFBLENBQU9ULEtBQUssRUFBRTswQkFBR1MsTUFBQSxDQUFPYjs7NkJBRW5ELElBQUFTLFdBQUEsQ0FBQUMsR0FBQSxFQUFDRyxNQUFBLENBQU9aLElBQUk7Y0FBQ1UsU0FBQSxFQUFXLFdBQVdFLE1BQUEsQ0FBT1QsS0FBSzs7OztTQVIxQ1MsTUFBQSxDQUFPZixLQUFLO0lBQUE7O0FBZS9CIiwiaWdub3JlTGlzdCI6W119

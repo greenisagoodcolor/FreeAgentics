@@ -1,13 +1,13 @@
 /**
  * Conversation Orchestration Tests
- * 
+ *
  * Comprehensive tests for conversation orchestration components
  * following ADR-007 testing requirements.
  */
 
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import React from "react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 // Mock conversation orchestration components
 const AdvancedControls = ({ settings, onSettingsChange }: any) => {
@@ -23,7 +23,12 @@ const AdvancedControls = ({ settings, onSettingsChange }: any) => {
             max={2}
             step={0.1}
             value={settings?.temperature || 0.7}
-            onChange={(e) => onSettingsChange?.({ ...settings, temperature: parseFloat(e.target.value) })}
+            onChange={(e) =>
+              onSettingsChange?.({
+                ...settings,
+                temperature: parseFloat(e.target.value),
+              })
+            }
           />
           <span>{settings?.temperature || 0.7}</span>
         </label>
@@ -36,7 +41,12 @@ const AdvancedControls = ({ settings, onSettingsChange }: any) => {
             min={1}
             max={4000}
             value={settings?.maxTokens || 1000}
-            onChange={(e) => onSettingsChange?.({ ...settings, maxTokens: parseInt(e.target.value) })}
+            onChange={(e) =>
+              onSettingsChange?.({
+                ...settings,
+                maxTokens: parseInt(e.target.value),
+              })
+            }
           />
         </label>
       </div>
@@ -45,7 +55,12 @@ const AdvancedControls = ({ settings, onSettingsChange }: any) => {
           <input
             type="checkbox"
             checked={settings?.streamResponses || false}
-            onChange={(e) => onSettingsChange?.({ ...settings, streamResponses: e.target.checked })}
+            onChange={(e) =>
+              onSettingsChange?.({
+                ...settings,
+                streamResponses: e.target.checked,
+              })
+            }
           />
           Stream Responses
         </label>
@@ -54,8 +69,13 @@ const AdvancedControls = ({ settings, onSettingsChange }: any) => {
         <label>
           Response Format
           <select
-            value={settings?.responseFormat || 'text'}
-            onChange={(e) => onSettingsChange?.({ ...settings, responseFormat: e.target.value })}
+            value={settings?.responseFormat || "text"}
+            onChange={(e) =>
+              onSettingsChange?.({
+                ...settings,
+                responseFormat: e.target.value,
+              })
+            }
           >
             <option value="text">Text</option>
             <option value="json">JSON</option>
@@ -88,17 +108,22 @@ const ChangeHistory = ({ changes, onRevert }: any) => {
   );
 };
 
-const PresetSelector = ({ presets, selectedPreset, onPresetSelect, onSavePreset }: any) => {
-  const [customName, setCustomName] = React.useState('');
-  
+const PresetSelector = ({
+  presets,
+  selectedPreset,
+  onPresetSelect,
+  onSavePreset,
+}: any) => {
+  const [customName, setCustomName] = React.useState("");
+
   return (
     <div data-testid="preset-selector">
       <h3>Conversation Presets</h3>
       <div className="preset-list">
         {presets?.map((preset: any) => (
-          <div 
-            key={preset.id} 
-            className={`preset-item ${selectedPreset?.id === preset.id ? 'selected' : ''}`}
+          <div
+            key={preset.id}
+            className={`preset-item ${selectedPreset?.id === preset.id ? "selected" : ""}`}
             onClick={() => onPresetSelect?.(preset)}
           >
             <span className="preset-name">{preset.name}</span>
@@ -117,10 +142,10 @@ const PresetSelector = ({ presets, selectedPreset, onPresetSelect, onSavePreset 
           value={customName}
           onChange={(e) => setCustomName(e.target.value)}
         />
-        <button 
+        <button
           onClick={() => {
             onSavePreset?.(customName);
-            setCustomName('');
+            setCustomName("");
           }}
           disabled={!customName.trim()}
         >
@@ -135,19 +160,21 @@ const RealTimePreview = ({ previewData, isActive }: any) => {
   return (
     <div data-testid="real-time-preview">
       <h3>Real-time Preview</h3>
-      <div className={`preview-status ${isActive ? 'active' : 'inactive'}`}>
-        {isActive ? 'Live Preview' : 'Preview Paused'}
+      <div className={`preview-status ${isActive ? "active" : "inactive"}`}>
+        {isActive ? "Live Preview" : "Preview Paused"}
       </div>
       <div className="preview-content">
         <div className="conversation-flow">
           <h4>Conversation Flow</h4>
           <div className="flow-diagram">
-            {previewData?.participants?.map((participant: any, index: number) => (
-              <div key={index} className="participant-node">
-                <span className="participant-name">{participant.name}</span>
-                <div className="participant-state">{participant.state}</div>
-              </div>
-            ))}
+            {previewData?.participants?.map(
+              (participant: any, index: number) => (
+                <div key={index} className="participant-node">
+                  <span className="participant-name">{participant.name}</span>
+                  <div className="participant-state">{participant.state}</div>
+                </div>
+              ),
+            )}
           </div>
         </div>
         <div className="message-preview">
@@ -181,7 +208,12 @@ const ResponseDynamicsControls = ({ dynamics, onDynamicsChange }: any) => {
               max={5000}
               step={100}
               value={dynamics?.responseDelay || 1000}
-              onChange={(e) => onDynamicsChange?.({ ...dynamics, responseDelay: parseInt(e.target.value) })}
+              onChange={(e) =>
+                onDynamicsChange?.({
+                  ...dynamics,
+                  responseDelay: parseInt(e.target.value),
+                })
+              }
             />
             <span>{dynamics?.responseDelay || 1000}ms</span>
           </label>
@@ -195,7 +227,12 @@ const ResponseDynamicsControls = ({ dynamics, onDynamicsChange }: any) => {
               max={10000}
               step={500}
               value={dynamics?.thinkingTime || 2000}
-              onChange={(e) => onDynamicsChange?.({ ...dynamics, thinkingTime: parseInt(e.target.value) })}
+              onChange={(e) =>
+                onDynamicsChange?.({
+                  ...dynamics,
+                  thinkingTime: parseInt(e.target.value),
+                })
+              }
             />
             <span>{dynamics?.thinkingTime || 2000}ms</span>
           </label>
@@ -204,8 +241,13 @@ const ResponseDynamicsControls = ({ dynamics, onDynamicsChange }: any) => {
           <label>
             Turn-taking Strategy
             <select
-              value={dynamics?.turnTakingStrategy || 'round-robin'}
-              onChange={(e) => onDynamicsChange?.({ ...dynamics, turnTakingStrategy: e.target.value })}
+              value={dynamics?.turnTakingStrategy || "round-robin"}
+              onChange={(e) =>
+                onDynamicsChange?.({
+                  ...dynamics,
+                  turnTakingStrategy: e.target.value,
+                })
+              }
             >
               <option value="round-robin">Round Robin</option>
               <option value="random">Random</option>
@@ -219,7 +261,12 @@ const ResponseDynamicsControls = ({ dynamics, onDynamicsChange }: any) => {
             <input
               type="checkbox"
               checked={dynamics?.allowInterruptions || false}
-              onChange={(e) => onDynamicsChange?.({ ...dynamics, allowInterruptions: e.target.checked })}
+              onChange={(e) =>
+                onDynamicsChange?.({
+                  ...dynamics,
+                  allowInterruptions: e.target.checked,
+                })
+              }
             />
             Allow Interruptions
           </label>
@@ -242,7 +289,12 @@ const TimingControls = ({ timing, onTimingChange }: any) => {
               min={1}
               max={180}
               value={timing?.duration || 30}
-              onChange={(e) => onTimingChange?.({ ...timing, duration: parseInt(e.target.value) })}
+              onChange={(e) =>
+                onTimingChange?.({
+                  ...timing,
+                  duration: parseInt(e.target.value),
+                })
+              }
             />
           </label>
         </div>
@@ -254,7 +306,12 @@ const TimingControls = ({ timing, onTimingChange }: any) => {
               min={1}
               max={20}
               value={timing?.messagesPerMinute || 5}
-              onChange={(e) => onTimingChange?.({ ...timing, messagesPerMinute: parseInt(e.target.value) })}
+              onChange={(e) =>
+                onTimingChange?.({
+                  ...timing,
+                  messagesPerMinute: parseInt(e.target.value),
+                })
+              }
             />
             <span>{timing?.messagesPerMinute || 5} msg/min</span>
           </label>
@@ -267,7 +324,12 @@ const TimingControls = ({ timing, onTimingChange }: any) => {
               min={0}
               max={100}
               value={timing?.autoPauseAfter || 0}
-              onChange={(e) => onTimingChange?.({ ...timing, autoPauseAfter: parseInt(e.target.value) })}
+              onChange={(e) =>
+                onTimingChange?.({
+                  ...timing,
+                  autoPauseAfter: parseInt(e.target.value),
+                })
+              }
             />
           </label>
         </div>
@@ -276,7 +338,12 @@ const TimingControls = ({ timing, onTimingChange }: any) => {
             <input
               type="checkbox"
               checked={timing?.enableScheduledBreaks || false}
-              onChange={(e) => onTimingChange?.({ ...timing, enableScheduledBreaks: e.target.checked })}
+              onChange={(e) =>
+                onTimingChange?.({
+                  ...timing,
+                  enableScheduledBreaks: e.target.checked,
+                })
+              }
             />
             Enable Scheduled Breaks
           </label>
@@ -290,7 +357,12 @@ const TimingControls = ({ timing, onTimingChange }: any) => {
                 min={5}
                 max={60}
                 value={timing?.breakInterval || 15}
-                onChange={(e) => onTimingChange?.({ ...timing, breakInterval: parseInt(e.target.value) })}
+                onChange={(e) =>
+                  onTimingChange?.({
+                    ...timing,
+                    breakInterval: parseInt(e.target.value),
+                  })
+                }
               />
             </label>
             <label>
@@ -300,7 +372,12 @@ const TimingControls = ({ timing, onTimingChange }: any) => {
                 min={10}
                 max={300}
                 value={timing?.breakDuration || 30}
-                onChange={(e) => onTimingChange?.({ ...timing, breakDuration: parseInt(e.target.value) })}
+                onChange={(e) =>
+                  onTimingChange?.({
+                    ...timing,
+                    breakDuration: parseInt(e.target.value),
+                  })
+                }
               />
             </label>
           </div>
@@ -310,13 +387,13 @@ const TimingControls = ({ timing, onTimingChange }: any) => {
   );
 };
 
-describe('Conversation Orchestration Components', () => {
-  describe('AdvancedControls', () => {
+describe("Conversation Orchestration Components", () => {
+  describe("AdvancedControls", () => {
     const mockSettings = {
       temperature: 0.7,
       maxTokens: 1000,
       streamResponses: true,
-      responseFormat: 'text',
+      responseFormat: "text",
     };
 
     const mockOnSettingsChange = jest.fn();
@@ -325,88 +402,118 @@ describe('Conversation Orchestration Components', () => {
       jest.clearAllMocks();
     });
 
-    it('renders all control sections', () => {
-      render(<AdvancedControls settings={mockSettings} onSettingsChange={mockOnSettingsChange} />);
-      
-      expect(screen.getByText('Advanced Controls')).toBeInTheDocument();
-      expect(screen.getByText('Temperature')).toBeInTheDocument();
-      expect(screen.getByText('Max Tokens')).toBeInTheDocument();
-      expect(screen.getByText('Stream Responses')).toBeInTheDocument();
-      expect(screen.getByText('Response Format')).toBeInTheDocument();
+    it("renders all control sections", () => {
+      render(
+        <AdvancedControls
+          settings={mockSettings}
+          onSettingsChange={mockOnSettingsChange}
+        />,
+      );
+
+      expect(screen.getByText("Advanced Controls")).toBeInTheDocument();
+      expect(screen.getByText("Temperature")).toBeInTheDocument();
+      expect(screen.getByText("Max Tokens")).toBeInTheDocument();
+      expect(screen.getByText("Stream Responses")).toBeInTheDocument();
+      expect(screen.getByText("Response Format")).toBeInTheDocument();
     });
 
-    it('displays current temperature value', () => {
-      render(<AdvancedControls settings={mockSettings} onSettingsChange={mockOnSettingsChange} />);
-      expect(screen.getByDisplayValue('0.7')).toBeInTheDocument();
+    it("displays current temperature value", () => {
+      render(
+        <AdvancedControls
+          settings={mockSettings}
+          onSettingsChange={mockOnSettingsChange}
+        />,
+      );
+      expect(screen.getByDisplayValue("0.7")).toBeInTheDocument();
     });
 
-    it('handles temperature changes', () => {
-      render(<AdvancedControls settings={mockSettings} onSettingsChange={mockOnSettingsChange} />);
-      
-      const temperatureSlider = screen.getByRole('slider');
-      fireEvent.change(temperatureSlider, { target: { value: '0.9' } });
-      
+    it("handles temperature changes", () => {
+      render(
+        <AdvancedControls
+          settings={mockSettings}
+          onSettingsChange={mockOnSettingsChange}
+        />,
+      );
+
+      const temperatureSlider = screen.getByRole("slider");
+      fireEvent.change(temperatureSlider, { target: { value: "0.9" } });
+
       expect(mockOnSettingsChange).toHaveBeenCalledWith({
         ...mockSettings,
         temperature: 0.9,
       });
     });
 
-    it('handles max tokens changes', () => {
-      render(<AdvancedControls settings={mockSettings} onSettingsChange={mockOnSettingsChange} />);
-      
-      const maxTokensInput = screen.getByDisplayValue('1000');
-      fireEvent.change(maxTokensInput, { target: { value: '2000' } });
-      
+    it("handles max tokens changes", () => {
+      render(
+        <AdvancedControls
+          settings={mockSettings}
+          onSettingsChange={mockOnSettingsChange}
+        />,
+      );
+
+      const maxTokensInput = screen.getByDisplayValue("1000");
+      fireEvent.change(maxTokensInput, { target: { value: "2000" } });
+
       expect(mockOnSettingsChange).toHaveBeenCalledWith({
         ...mockSettings,
         maxTokens: 2000,
       });
     });
 
-    it('toggles stream responses', () => {
-      render(<AdvancedControls settings={mockSettings} onSettingsChange={mockOnSettingsChange} />);
-      
-      const streamCheckbox = screen.getByRole('checkbox');
+    it("toggles stream responses", () => {
+      render(
+        <AdvancedControls
+          settings={mockSettings}
+          onSettingsChange={mockOnSettingsChange}
+        />,
+      );
+
+      const streamCheckbox = screen.getByRole("checkbox");
       fireEvent.click(streamCheckbox);
-      
+
       expect(mockOnSettingsChange).toHaveBeenCalledWith({
         ...mockSettings,
         streamResponses: false,
       });
     });
 
-    it('changes response format', () => {
-      render(<AdvancedControls settings={mockSettings} onSettingsChange={mockOnSettingsChange} />);
-      
-      const formatSelect = screen.getByDisplayValue('text');
-      fireEvent.change(formatSelect, { target: { value: 'json' } });
-      
+    it("changes response format", () => {
+      render(
+        <AdvancedControls
+          settings={mockSettings}
+          onSettingsChange={mockOnSettingsChange}
+        />,
+      );
+
+      const formatSelect = screen.getByDisplayValue("text");
+      fireEvent.change(formatSelect, { target: { value: "json" } });
+
       expect(mockOnSettingsChange).toHaveBeenCalledWith({
         ...mockSettings,
-        responseFormat: 'json',
+        responseFormat: "json",
       });
     });
 
-    it('handles missing settings gracefully', () => {
+    it("handles missing settings gracefully", () => {
       render(<AdvancedControls onSettingsChange={mockOnSettingsChange} />);
-      expect(screen.getByText('0.7')).toBeInTheDocument(); // Default temperature
+      expect(screen.getByText("0.7")).toBeInTheDocument(); // Default temperature
     });
   });
 
-  describe('ChangeHistory', () => {
+  describe("ChangeHistory", () => {
     const mockChanges = [
       {
-        id: 'change-1',
-        timestamp: '2024-01-01 10:00',
-        type: 'setting',
-        description: 'Changed temperature to 0.8',
+        id: "change-1",
+        timestamp: "2024-01-01 10:00",
+        type: "setting",
+        description: "Changed temperature to 0.8",
       },
       {
-        id: 'change-2',
-        timestamp: '2024-01-01 10:05',
-        type: 'preset',
-        description: 'Applied casual conversation preset',
+        id: "change-2",
+        timestamp: "2024-01-01 10:05",
+        type: "preset",
+        description: "Applied casual conversation preset",
       },
     ];
 
@@ -416,55 +523,59 @@ describe('Conversation Orchestration Components', () => {
       jest.clearAllMocks();
     });
 
-    it('renders change history list', () => {
+    it("renders change history list", () => {
       render(<ChangeHistory changes={mockChanges} onRevert={mockOnRevert} />);
-      
-      expect(screen.getByText('Change History')).toBeInTheDocument();
-      expect(screen.getByText('Changed temperature to 0.8')).toBeInTheDocument();
-      expect(screen.getByText('Applied casual conversation preset')).toBeInTheDocument();
+
+      expect(screen.getByText("Change History")).toBeInTheDocument();
+      expect(
+        screen.getByText("Changed temperature to 0.8"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("Applied casual conversation preset"),
+      ).toBeInTheDocument();
     });
 
-    it('displays change timestamps and types', () => {
+    it("displays change timestamps and types", () => {
       render(<ChangeHistory changes={mockChanges} onRevert={mockOnRevert} />);
-      
-      expect(screen.getByText('2024-01-01 10:00')).toBeInTheDocument();
-      expect(screen.getByText('setting')).toBeInTheDocument();
-      expect(screen.getByText('preset')).toBeInTheDocument();
+
+      expect(screen.getByText("2024-01-01 10:00")).toBeInTheDocument();
+      expect(screen.getByText("setting")).toBeInTheDocument();
+      expect(screen.getByText("preset")).toBeInTheDocument();
     });
 
-    it('handles revert button clicks', () => {
+    it("handles revert button clicks", () => {
       render(<ChangeHistory changes={mockChanges} onRevert={mockOnRevert} />);
-      
-      const revertButtons = screen.getAllByText('Revert');
+
+      const revertButtons = screen.getAllByText("Revert");
       fireEvent.click(revertButtons[0]);
-      
-      expect(mockOnRevert).toHaveBeenCalledWith('change-1');
+
+      expect(mockOnRevert).toHaveBeenCalledWith("change-1");
     });
 
-    it('shows message when no changes exist', () => {
+    it("shows message when no changes exist", () => {
       render(<ChangeHistory changes={[]} onRevert={mockOnRevert} />);
-      expect(screen.getByText('No changes recorded')).toBeInTheDocument();
+      expect(screen.getByText("No changes recorded")).toBeInTheDocument();
     });
 
-    it('handles undefined changes', () => {
+    it("handles undefined changes", () => {
       render(<ChangeHistory onRevert={mockOnRevert} />);
-      expect(screen.getByText('No changes recorded')).toBeInTheDocument();
+      expect(screen.getByText("No changes recorded")).toBeInTheDocument();
     });
   });
 
-  describe('PresetSelector', () => {
+  describe("PresetSelector", () => {
     const mockPresets = [
       {
-        id: 'preset-1',
-        name: 'Casual Discussion',
-        description: 'Relaxed conversation between agents',
+        id: "preset-1",
+        name: "Casual Discussion",
+        description: "Relaxed conversation between agents",
         agentCount: 3,
         expectedDuration: 15,
       },
       {
-        id: 'preset-2',
-        name: 'Formal Debate',
-        description: 'Structured argumentation',
+        id: "preset-2",
+        name: "Formal Debate",
+        description: "Structured argumentation",
         agentCount: 2,
         expectedDuration: 30,
       },
@@ -479,136 +590,154 @@ describe('Conversation Orchestration Components', () => {
       jest.clearAllMocks();
     });
 
-    it('renders preset list', () => {
+    it("renders preset list", () => {
       render(<PresetSelector presets={mockPresets} {...mockHandlers} />);
-      
-      expect(screen.getByText('Conversation Presets')).toBeInTheDocument();
-      expect(screen.getByText('Casual Discussion')).toBeInTheDocument();
-      expect(screen.getByText('Formal Debate')).toBeInTheDocument();
+
+      expect(screen.getByText("Conversation Presets")).toBeInTheDocument();
+      expect(screen.getByText("Casual Discussion")).toBeInTheDocument();
+      expect(screen.getByText("Formal Debate")).toBeInTheDocument();
     });
 
-    it('displays preset details', () => {
+    it("displays preset details", () => {
       render(<PresetSelector presets={mockPresets} {...mockHandlers} />);
-      
-      expect(screen.getByText('Relaxed conversation between agents')).toBeInTheDocument();
-      expect(screen.getByText('Agents: 3')).toBeInTheDocument();
-      expect(screen.getByText('Duration: 15min')).toBeInTheDocument();
+
+      expect(
+        screen.getByText("Relaxed conversation between agents"),
+      ).toBeInTheDocument();
+      expect(screen.getByText("Agents: 3")).toBeInTheDocument();
+      expect(screen.getByText("Duration: 15min")).toBeInTheDocument();
     });
 
-    it('highlights selected preset', () => {
+    it("highlights selected preset", () => {
       render(
-        <PresetSelector 
-          presets={mockPresets} 
+        <PresetSelector
+          presets={mockPresets}
           selectedPreset={mockPresets[0]}
-          {...mockHandlers} 
-        />
+          {...mockHandlers}
+        />,
       );
-      
-      const selectedItem = screen.getByText('Casual Discussion').closest('.preset-item');
-      expect(selectedItem).toHaveClass('selected');
+
+      const selectedItem = screen
+        .getByText("Casual Discussion")
+        .closest(".preset-item");
+      expect(selectedItem).toHaveClass("selected");
     });
 
-    it('handles preset selection', () => {
+    it("handles preset selection", () => {
       render(<PresetSelector presets={mockPresets} {...mockHandlers} />);
-      
-      fireEvent.click(screen.getByText('Formal Debate'));
+
+      fireEvent.click(screen.getByText("Formal Debate"));
       expect(mockHandlers.onPresetSelect).toHaveBeenCalledWith(mockPresets[1]);
     });
 
-    it('handles saving custom presets', async () => {
+    it("handles saving custom presets", async () => {
       const user = userEvent.setup();
       render(<PresetSelector presets={mockPresets} {...mockHandlers} />);
-      
-      const nameInput = screen.getByPlaceholderText('Preset name');
-      const saveButton = screen.getByText('Save Current as Preset');
-      
-      await user.type(nameInput, 'My Custom Preset');
+
+      const nameInput = screen.getByPlaceholderText("Preset name");
+      const saveButton = screen.getByText("Save Current as Preset");
+
+      await user.type(nameInput, "My Custom Preset");
       await user.click(saveButton);
-      
-      expect(mockHandlers.onSavePreset).toHaveBeenCalledWith('My Custom Preset');
+
+      expect(mockHandlers.onSavePreset).toHaveBeenCalledWith(
+        "My Custom Preset",
+      );
     });
 
-    it('disables save button when name is empty', () => {
+    it("disables save button when name is empty", () => {
       render(<PresetSelector presets={mockPresets} {...mockHandlers} />);
-      
-      const saveButton = screen.getByText('Save Current as Preset');
+
+      const saveButton = screen.getByText("Save Current as Preset");
       expect(saveButton).toBeDisabled();
     });
 
-    it('clears input after saving', async () => {
+    it("clears input after saving", async () => {
       const user = userEvent.setup();
       render(<PresetSelector presets={mockPresets} {...mockHandlers} />);
-      
-      const nameInput = screen.getByPlaceholderText('Preset name');
-      const saveButton = screen.getByText('Save Current as Preset');
-      
-      await user.type(nameInput, 'Test Preset');
+
+      const nameInput = screen.getByPlaceholderText("Preset name");
+      const saveButton = screen.getByText("Save Current as Preset");
+
+      await user.type(nameInput, "Test Preset");
       await user.click(saveButton);
-      
-      expect(nameInput).toHaveValue('');
+
+      expect(nameInput).toHaveValue("");
     });
   });
 
-  describe('RealTimePreview', () => {
+  describe("RealTimePreview", () => {
     const mockPreviewData = {
       participants: [
-        { name: 'Agent Alpha', state: 'thinking' },
-        { name: 'Agent Beta', state: 'responding' },
-        { name: 'Agent Gamma', state: 'listening' },
+        { name: "Agent Alpha", state: "thinking" },
+        { name: "Agent Beta", state: "responding" },
+        { name: "Agent Gamma", state: "listening" },
       ],
       nextMessages: [
-        { sender: 'Agent Alpha', content: 'I think we should...', expectedTime: 5 },
-        { sender: 'Agent Beta', content: 'Actually, let me counter...', expectedTime: 8 },
+        {
+          sender: "Agent Alpha",
+          content: "I think we should...",
+          expectedTime: 5,
+        },
+        {
+          sender: "Agent Beta",
+          content: "Actually, let me counter...",
+          expectedTime: 8,
+        },
       ],
     };
 
-    it('renders preview content', () => {
+    it("renders preview content", () => {
       render(<RealTimePreview previewData={mockPreviewData} isActive={true} />);
-      
-      expect(screen.getByText('Real-time Preview')).toBeInTheDocument();
-      expect(screen.getByText('Conversation Flow')).toBeInTheDocument();
-      expect(screen.getByText('Next Messages')).toBeInTheDocument();
+
+      expect(screen.getByText("Real-time Preview")).toBeInTheDocument();
+      expect(screen.getByText("Conversation Flow")).toBeInTheDocument();
+      expect(screen.getByText("Next Messages")).toBeInTheDocument();
     });
 
-    it('shows active status when live', () => {
+    it("shows active status when live", () => {
       render(<RealTimePreview previewData={mockPreviewData} isActive={true} />);
-      expect(screen.getByText('Live Preview')).toBeInTheDocument();
+      expect(screen.getByText("Live Preview")).toBeInTheDocument();
     });
 
-    it('shows inactive status when paused', () => {
-      render(<RealTimePreview previewData={mockPreviewData} isActive={false} />);
-      expect(screen.getByText('Preview Paused')).toBeInTheDocument();
+    it("shows inactive status when paused", () => {
+      render(
+        <RealTimePreview previewData={mockPreviewData} isActive={false} />,
+      );
+      expect(screen.getByText("Preview Paused")).toBeInTheDocument();
     });
 
-    it('displays participant information', () => {
+    it("displays participant information", () => {
       render(<RealTimePreview previewData={mockPreviewData} isActive={true} />);
-      
-      expect(screen.getByText('Agent Alpha')).toBeInTheDocument();
-      expect(screen.getByText('thinking')).toBeInTheDocument();
-      expect(screen.getByText('Agent Beta')).toBeInTheDocument();
-      expect(screen.getByText('responding')).toBeInTheDocument();
+
+      expect(screen.getByText("Agent Alpha")).toBeInTheDocument();
+      expect(screen.getByText("thinking")).toBeInTheDocument();
+      expect(screen.getByText("Agent Beta")).toBeInTheDocument();
+      expect(screen.getByText("responding")).toBeInTheDocument();
     });
 
-    it('displays next messages queue', () => {
+    it("displays next messages queue", () => {
       render(<RealTimePreview previewData={mockPreviewData} isActive={true} />);
-      
-      expect(screen.getByText('I think we should...')).toBeInTheDocument();
-      expect(screen.getByText('5s')).toBeInTheDocument();
-      expect(screen.getByText('Actually, let me counter...')).toBeInTheDocument();
-      expect(screen.getByText('8s')).toBeInTheDocument();
+
+      expect(screen.getByText("I think we should...")).toBeInTheDocument();
+      expect(screen.getByText("5s")).toBeInTheDocument();
+      expect(
+        screen.getByText("Actually, let me counter..."),
+      ).toBeInTheDocument();
+      expect(screen.getByText("8s")).toBeInTheDocument();
     });
 
-    it('handles missing preview data', () => {
+    it("handles missing preview data", () => {
       render(<RealTimePreview isActive={true} />);
-      expect(screen.getByText('Real-time Preview')).toBeInTheDocument();
+      expect(screen.getByText("Real-time Preview")).toBeInTheDocument();
     });
   });
 
-  describe('ResponseDynamicsControls', () => {
+  describe("ResponseDynamicsControls", () => {
     const mockDynamics = {
       responseDelay: 1000,
       thinkingTime: 2000,
-      turnTakingStrategy: 'round-robin',
+      turnTakingStrategy: "round-robin",
       allowInterruptions: false,
     };
 
@@ -618,79 +747,111 @@ describe('Conversation Orchestration Components', () => {
       jest.clearAllMocks();
     });
 
-    it('renders all dynamics controls', () => {
-      render(<ResponseDynamicsControls dynamics={mockDynamics} onDynamicsChange={mockOnDynamicsChange} />);
-      
-      expect(screen.getByText('Response Dynamics')).toBeInTheDocument();
-      expect(screen.getByText('Response Delay (ms)')).toBeInTheDocument();
-      expect(screen.getByText('Thinking Time (ms)')).toBeInTheDocument();
-      expect(screen.getByText('Turn-taking Strategy')).toBeInTheDocument();
-      expect(screen.getByText('Allow Interruptions')).toBeInTheDocument();
+    it("renders all dynamics controls", () => {
+      render(
+        <ResponseDynamicsControls
+          dynamics={mockDynamics}
+          onDynamicsChange={mockOnDynamicsChange}
+        />,
+      );
+
+      expect(screen.getByText("Response Dynamics")).toBeInTheDocument();
+      expect(screen.getByText("Response Delay (ms)")).toBeInTheDocument();
+      expect(screen.getByText("Thinking Time (ms)")).toBeInTheDocument();
+      expect(screen.getByText("Turn-taking Strategy")).toBeInTheDocument();
+      expect(screen.getByText("Allow Interruptions")).toBeInTheDocument();
     });
 
-    it('displays current values', () => {
-      render(<ResponseDynamicsControls dynamics={mockDynamics} onDynamicsChange={mockOnDynamicsChange} />);
-      
-      expect(screen.getByText('1000ms')).toBeInTheDocument();
-      expect(screen.getByText('2000ms')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('round-robin')).toBeInTheDocument();
+    it("displays current values", () => {
+      render(
+        <ResponseDynamicsControls
+          dynamics={mockDynamics}
+          onDynamicsChange={mockOnDynamicsChange}
+        />,
+      );
+
+      expect(screen.getByText("1000ms")).toBeInTheDocument();
+      expect(screen.getByText("2000ms")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("round-robin")).toBeInTheDocument();
     });
 
-    it('handles response delay changes', () => {
-      render(<ResponseDynamicsControls dynamics={mockDynamics} onDynamicsChange={mockOnDynamicsChange} />);
-      
-      const responseDelaySlider = screen.getAllByRole('slider')[0];
-      fireEvent.change(responseDelaySlider, { target: { value: '1500' } });
-      
+    it("handles response delay changes", () => {
+      render(
+        <ResponseDynamicsControls
+          dynamics={mockDynamics}
+          onDynamicsChange={mockOnDynamicsChange}
+        />,
+      );
+
+      const responseDelaySlider = screen.getAllByRole("slider")[0];
+      fireEvent.change(responseDelaySlider, { target: { value: "1500" } });
+
       expect(mockOnDynamicsChange).toHaveBeenCalledWith({
         ...mockDynamics,
         responseDelay: 1500,
       });
     });
 
-    it('handles thinking time changes', () => {
-      render(<ResponseDynamicsControls dynamics={mockDynamics} onDynamicsChange={mockOnDynamicsChange} />);
-      
-      const thinkingTimeSlider = screen.getAllByRole('slider')[1];
-      fireEvent.change(thinkingTimeSlider, { target: { value: '3000' } });
-      
+    it("handles thinking time changes", () => {
+      render(
+        <ResponseDynamicsControls
+          dynamics={mockDynamics}
+          onDynamicsChange={mockOnDynamicsChange}
+        />,
+      );
+
+      const thinkingTimeSlider = screen.getAllByRole("slider")[1];
+      fireEvent.change(thinkingTimeSlider, { target: { value: "3000" } });
+
       expect(mockOnDynamicsChange).toHaveBeenCalledWith({
         ...mockDynamics,
         thinkingTime: 3000,
       });
     });
 
-    it('handles turn-taking strategy changes', () => {
-      render(<ResponseDynamicsControls dynamics={mockDynamics} onDynamicsChange={mockOnDynamicsChange} />);
-      
-      const strategySelect = screen.getByDisplayValue('round-robin');
-      fireEvent.change(strategySelect, { target: { value: 'weighted' } });
-      
+    it("handles turn-taking strategy changes", () => {
+      render(
+        <ResponseDynamicsControls
+          dynamics={mockDynamics}
+          onDynamicsChange={mockOnDynamicsChange}
+        />,
+      );
+
+      const strategySelect = screen.getByDisplayValue("round-robin");
+      fireEvent.change(strategySelect, { target: { value: "weighted" } });
+
       expect(mockOnDynamicsChange).toHaveBeenCalledWith({
         ...mockDynamics,
-        turnTakingStrategy: 'weighted',
+        turnTakingStrategy: "weighted",
       });
     });
 
-    it('toggles interruptions setting', () => {
-      render(<ResponseDynamicsControls dynamics={mockDynamics} onDynamicsChange={mockOnDynamicsChange} />);
-      
-      const interruptionsCheckbox = screen.getByRole('checkbox');
+    it("toggles interruptions setting", () => {
+      render(
+        <ResponseDynamicsControls
+          dynamics={mockDynamics}
+          onDynamicsChange={mockOnDynamicsChange}
+        />,
+      );
+
+      const interruptionsCheckbox = screen.getByRole("checkbox");
       fireEvent.click(interruptionsCheckbox);
-      
+
       expect(mockOnDynamicsChange).toHaveBeenCalledWith({
         ...mockDynamics,
         allowInterruptions: true,
       });
     });
 
-    it('handles missing dynamics gracefully', () => {
-      render(<ResponseDynamicsControls onDynamicsChange={mockOnDynamicsChange} />);
-      expect(screen.getByText('1000ms')).toBeInTheDocument(); // Default values
+    it("handles missing dynamics gracefully", () => {
+      render(
+        <ResponseDynamicsControls onDynamicsChange={mockOnDynamicsChange} />,
+      );
+      expect(screen.getByText("1000ms")).toBeInTheDocument(); // Default values
     });
   });
 
-  describe('TimingControls', () => {
+  describe("TimingControls", () => {
     const mockTiming = {
       duration: 30,
       messagesPerMinute: 5,
@@ -706,105 +867,156 @@ describe('Conversation Orchestration Components', () => {
       jest.clearAllMocks();
     });
 
-    it('renders all timing controls', () => {
-      render(<TimingControls timing={mockTiming} onTimingChange={mockOnTimingChange} />);
-      
-      expect(screen.getByText('Timing Controls')).toBeInTheDocument();
-      expect(screen.getByText('Conversation Duration (minutes)')).toBeInTheDocument();
-      expect(screen.getByText('Messages per Minute')).toBeInTheDocument();
-      expect(screen.getByText('Auto-pause after (messages)')).toBeInTheDocument();
-      expect(screen.getByText('Enable Scheduled Breaks')).toBeInTheDocument();
+    it("renders all timing controls", () => {
+      render(
+        <TimingControls
+          timing={mockTiming}
+          onTimingChange={mockOnTimingChange}
+        />,
+      );
+
+      expect(screen.getByText("Timing Controls")).toBeInTheDocument();
+      expect(
+        screen.getByText("Conversation Duration (minutes)"),
+      ).toBeInTheDocument();
+      expect(screen.getByText("Messages per Minute")).toBeInTheDocument();
+      expect(
+        screen.getByText("Auto-pause after (messages)"),
+      ).toBeInTheDocument();
+      expect(screen.getByText("Enable Scheduled Breaks")).toBeInTheDocument();
     });
 
-    it('shows break controls when scheduled breaks are enabled', () => {
-      render(<TimingControls timing={mockTiming} onTimingChange={mockOnTimingChange} />);
-      
-      expect(screen.getByText('Break Interval (minutes)')).toBeInTheDocument();
-      expect(screen.getByText('Break Duration (seconds)')).toBeInTheDocument();
+    it("shows break controls when scheduled breaks are enabled", () => {
+      render(
+        <TimingControls
+          timing={mockTiming}
+          onTimingChange={mockOnTimingChange}
+        />,
+      );
+
+      expect(screen.getByText("Break Interval (minutes)")).toBeInTheDocument();
+      expect(screen.getByText("Break Duration (seconds)")).toBeInTheDocument();
     });
 
-    it('hides break controls when scheduled breaks are disabled', () => {
-      const timingWithoutBreaks = { ...mockTiming, enableScheduledBreaks: false };
-      render(<TimingControls timing={timingWithoutBreaks} onTimingChange={mockOnTimingChange} />);
-      
-      expect(screen.queryByText('Break Interval (minutes)')).not.toBeInTheDocument();
-      expect(screen.queryByText('Break Duration (seconds)')).not.toBeInTheDocument();
+    it("hides break controls when scheduled breaks are disabled", () => {
+      const timingWithoutBreaks = {
+        ...mockTiming,
+        enableScheduledBreaks: false,
+      };
+      render(
+        <TimingControls
+          timing={timingWithoutBreaks}
+          onTimingChange={mockOnTimingChange}
+        />,
+      );
+
+      expect(
+        screen.queryByText("Break Interval (minutes)"),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("Break Duration (seconds)"),
+      ).not.toBeInTheDocument();
     });
 
-    it('handles duration changes', () => {
-      render(<TimingControls timing={mockTiming} onTimingChange={mockOnTimingChange} />);
-      
-      const durationInput = screen.getByDisplayValue('30');
-      fireEvent.change(durationInput, { target: { value: '45' } });
-      
+    it("handles duration changes", () => {
+      render(
+        <TimingControls
+          timing={mockTiming}
+          onTimingChange={mockOnTimingChange}
+        />,
+      );
+
+      const durationInput = screen.getByDisplayValue("30");
+      fireEvent.change(durationInput, { target: { value: "45" } });
+
       expect(mockOnTimingChange).toHaveBeenCalledWith({
         ...mockTiming,
         duration: 45,
       });
     });
 
-    it('handles messages per minute changes', () => {
-      render(<TimingControls timing={mockTiming} onTimingChange={mockOnTimingChange} />);
-      
-      const messagesSlider = screen.getByRole('slider');
-      fireEvent.change(messagesSlider, { target: { value: '8' } });
-      
+    it("handles messages per minute changes", () => {
+      render(
+        <TimingControls
+          timing={mockTiming}
+          onTimingChange={mockOnTimingChange}
+        />,
+      );
+
+      const messagesSlider = screen.getByRole("slider");
+      fireEvent.change(messagesSlider, { target: { value: "8" } });
+
       expect(mockOnTimingChange).toHaveBeenCalledWith({
         ...mockTiming,
         messagesPerMinute: 8,
       });
     });
 
-    it('displays messages per minute value', () => {
-      render(<TimingControls timing={mockTiming} onTimingChange={mockOnTimingChange} />);
-      expect(screen.getByText('5 msg/min')).toBeInTheDocument();
+    it("displays messages per minute value", () => {
+      render(
+        <TimingControls
+          timing={mockTiming}
+          onTimingChange={mockOnTimingChange}
+        />,
+      );
+      expect(screen.getByText("5 msg/min")).toBeInTheDocument();
     });
 
-    it('toggles scheduled breaks', () => {
-      render(<TimingControls timing={mockTiming} onTimingChange={mockOnTimingChange} />);
-      
-      const breaksCheckbox = screen.getByRole('checkbox');
+    it("toggles scheduled breaks", () => {
+      render(
+        <TimingControls
+          timing={mockTiming}
+          onTimingChange={mockOnTimingChange}
+        />,
+      );
+
+      const breaksCheckbox = screen.getByRole("checkbox");
       fireEvent.click(breaksCheckbox);
-      
+
       expect(mockOnTimingChange).toHaveBeenCalledWith({
         ...mockTiming,
         enableScheduledBreaks: false,
       });
     });
 
-    it('handles break interval changes', () => {
-      render(<TimingControls timing={mockTiming} onTimingChange={mockOnTimingChange} />);
-      
-      const breakIntervalInput = screen.getByDisplayValue('15');
-      fireEvent.change(breakIntervalInput, { target: { value: '20' } });
-      
+    it("handles break interval changes", () => {
+      render(
+        <TimingControls
+          timing={mockTiming}
+          onTimingChange={mockOnTimingChange}
+        />,
+      );
+
+      const breakIntervalInput = screen.getByDisplayValue("15");
+      fireEvent.change(breakIntervalInput, { target: { value: "20" } });
+
       expect(mockOnTimingChange).toHaveBeenCalledWith({
         ...mockTiming,
         breakInterval: 20,
       });
     });
 
-    it('handles missing timing gracefully', () => {
+    it("handles missing timing gracefully", () => {
       render(<TimingControls onTimingChange={mockOnTimingChange} />);
-      expect(screen.getByDisplayValue('30')).toBeInTheDocument(); // Default duration
+      expect(screen.getByDisplayValue("30")).toBeInTheDocument(); // Default duration
     });
   });
 
-  describe('Component Integration', () => {
-    it('renders multiple orchestration components together', () => {
+  describe("Component Integration", () => {
+    it("renders multiple orchestration components together", () => {
       const { container } = render(
         <div>
           <AdvancedControls settings={{}} onSettingsChange={() => {}} />
           <ResponseDynamicsControls dynamics={{}} onDynamicsChange={() => {}} />
           <TimingControls timing={{}} onTimingChange={() => {}} />
           <RealTimePreview isActive={true} />
-        </div>
+        </div>,
       );
-      
-      expect(container.querySelectorAll('[data-testid]')).toHaveLength(4);
+
+      expect(container.querySelectorAll("[data-testid]")).toHaveLength(4);
     });
 
-    it('handles complex state interactions', async () => {
+    it("handles complex state interactions", async () => {
       const mockState = {
         settings: { temperature: 0.7 },
         dynamics: { responseDelay: 1000 },
@@ -819,16 +1031,25 @@ describe('Conversation Orchestration Components', () => {
 
       render(
         <div>
-          <AdvancedControls settings={mockState.settings} onSettingsChange={handlers.onSettingsChange} />
-          <ResponseDynamicsControls dynamics={mockState.dynamics} onDynamicsChange={handlers.onDynamicsChange} />
-          <TimingControls timing={mockState.timing} onTimingChange={handlers.onTimingChange} />
-        </div>
+          <AdvancedControls
+            settings={mockState.settings}
+            onSettingsChange={handlers.onSettingsChange}
+          />
+          <ResponseDynamicsControls
+            dynamics={mockState.dynamics}
+            onDynamicsChange={handlers.onDynamicsChange}
+          />
+          <TimingControls
+            timing={mockState.timing}
+            onTimingChange={handlers.onTimingChange}
+          />
+        </div>,
       );
 
       // Test cross-component interactions
-      const temperatureSlider = screen.getByRole('slider');
-      fireEvent.change(temperatureSlider, { target: { value: '0.9' } });
-      
+      const temperatureSlider = screen.getByRole("slider");
+      fireEvent.change(temperatureSlider, { target: { value: "0.9" } });
+
       expect(handlers.onSettingsChange).toHaveBeenCalled();
     });
   });

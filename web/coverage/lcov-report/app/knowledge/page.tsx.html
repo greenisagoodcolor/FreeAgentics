@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">90.9% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/11</span>
+                <span class='fraction'>10/11</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">66.66% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/3</span>
+                <span class='fraction'>2/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/2</span>
+                <span class='fraction'>1/2</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">90.9% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/11</span>
+                <span class='fraction'>10/11</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -368,40 +368,40 @@
 <a name='L303'></a><a href='#L303'>303</a>
 <a name='L304'></a><a href='#L304'>304</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -671,24 +671,24 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">"use client";
 &nbsp;
-import { useState } from <span class="cstat-no" title="statement not covered" >"react";</span>
-import { KnowledgeGraphViz } from <span class="cstat-no" title="statement not covered" >"@/components/KnowledgeGraph-viz";</span>
+import { useState } from "react";
+import { KnowledgeGraphViz } from "@/components/KnowledgeGraph-viz";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from <span class="cstat-no" title="statement not covered" >"@/components/ui/card";</span>
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from <span class="cstat-no" title="statement not covered" >"@/components/ui/button";</span>
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from <span class="cstat-no" title="statement not covered" >"@/components/ui/select";</span>
+} from "@/components/ui/select";
 import {
   Brain,
   Network,
@@ -697,14 +697,14 @@ import {
   Filter,
   Download,
   Maximize2,
-} from <span class="cstat-no" title="statement not covered" >"lucide-react";</span>
+} from "lucide-react";
 &nbsp;
-export default function <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >KnowledgePage() {</span></span>
-  const [selectedAgent, setSelectedAgent] = <span class="cstat-no" title="statement not covered" >useState&lt;string&gt;("agent_123");</span>
-  const [graphMode, setGraphMode] = <span class="cstat-no" title="statement not covered" >useState&lt;"individual" | "collective"&gt;(</span>
+export default function KnowledgePage() {
+  const [selectedAgent, setSelectedAgent] = useState&lt;string&gt;("agent_123");
+  const [graphMode, setGraphMode] = useState&lt;"individual" | "collective"&gt;(
     "individual",
   );
-  const [filterType, setFilterType] = <span class="cstat-no" title="statement not covered" >useState&lt;string&gt;("all");</span>
+  const [filterType, setFilterType] = useState&lt;string&gt;("all");
 &nbsp;
   return (
     &lt;div className="container mx-auto p-6 space-y-6"&gt;
@@ -795,7 +795,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
                       &lt;SelectItem value="collective"&gt;Collective&lt;/SelectItem&gt;
                     &lt;/SelectContent&gt;
                   &lt;/Select&gt;
-                  {<span class="branch-0 cbranch-no" title="branch not covered" >graphMode === "individual" &amp;&amp; (</span>
+                  {graphMode === "individual" &amp;&amp; (
                     &lt;Select
                       value={selectedAgent}
                       onValueChange={setSelectedAgent}
@@ -822,7 +822,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
               &gt;
                 &lt;KnowledgeGraphViz
                   agentId={
-                    graphMode === "individual" ? selectedAgent : undefined
+                    graphMode === "individual" ? selectedAgent : <span class="branch-1 cbranch-no" title="branch not covered" >undefined</span>
                   }
                   mode={graphMode}
                   filter={filterType}
@@ -979,7 +979,7 @@ export default function <span class="cstat-no" title="statement not covered" ><s
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-06-28T12:54:13.252Z
+                at 2025-07-01T13:19:55.630Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

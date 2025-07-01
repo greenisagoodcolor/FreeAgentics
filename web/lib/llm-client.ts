@@ -13,60 +13,60 @@ export class LLMClient {
   providers?: Array<{ provider: string; priority: number }>;
 
   constructor(config: LLMClientConfig) {
-    const validProviders = ['openai', 'anthropic', 'google', 'azure'];
+    const validProviders = ["openai", "anthropic", "google", "azure"];
     if (!validProviders.includes(config.provider)) {
-      throw new Error('Invalid provider');
+      throw new Error("Invalid provider");
     }
-    
+
     this.provider = config.provider;
     this.apiKey = config.apiKey;
     this.providers = config.providers;
-    
+
     if (config.useSecureStorage) {
-      const { encrypt } = require('@/lib/encryption');
+      const { encrypt } = require("@/lib/encryption");
       encrypt(config.apiKey);
     }
   }
 
   async chat(messages: any[]): Promise<any> {
     const response = await fetch(`/api/llm/${this.provider}/chat/completions`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apiKey}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.apiKey}`,
       },
-      body: JSON.stringify({ messages })
+      body: JSON.stringify({ messages }),
     });
-    
+
     if (!response.ok) {
       if (response.status === 429) {
-        const { RateLimitError } = await import('@/lib/llm-errors');
-        throw new RateLimitError('Rate limit exceeded');
+        const { RateLimitError } = await import("@/lib/llm-errors");
+        throw new RateLimitError("Rate limit exceeded");
       }
       if (response.status === 401) {
-        const { AuthenticationError } = await import('@/lib/llm-errors');
-        throw new AuthenticationError('Invalid API key');
+        const { AuthenticationError } = await import("@/lib/llm-errors");
+        throw new AuthenticationError("Invalid API key");
       }
-      throw new Error('Request failed');
+      throw new Error("Request failed");
     }
-    
+
     return response.json();
   }
 
   async chatStream(messages: any[]): Promise<ReadableStream> {
     const response = await fetch(`/api/llm/${this.provider}/chat/completions`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apiKey}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.apiKey}`,
       },
-      body: JSON.stringify({ messages, stream: true })
+      body: JSON.stringify({ messages, stream: true }),
     });
-    
+
     if (!response.body) {
-      throw new Error('No response body');
+      throw new Error("No response body");
     }
-    
+
     return response.body;
   }
 
@@ -97,39 +97,42 @@ export class LLMClient {
 
   async createEmbedding(text: string): Promise<number[]> {
     const response = await fetch(`/api/llm/${this.provider}/embeddings`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apiKey}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.apiKey}`,
       },
-      body: JSON.stringify({ input: text })
+      body: JSON.stringify({ input: text }),
     });
-    
+
     const data = await response.json();
     return data.embedding;
   }
 
   async analyzeImage(imageUrl: string, prompt: string): Promise<string> {
     const response = await fetch(`/api/llm/${this.provider}/vision`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apiKey}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.apiKey}`,
       },
-      body: JSON.stringify({ image_url: imageUrl, prompt })
+      body: JSON.stringify({ image_url: imageUrl, prompt }),
     });
-    
+
     const data = await response.json();
     return data.description;
   }
 
   async getFineTuneStatus(modelId: string): Promise<any> {
-    const response = await fetch(`/api/llm/${this.provider}/fine-tunes/${modelId}`, {
-      headers: {
-        'Authorization': `Bearer ${this.apiKey}`
-      }
-    });
-    
+    const response = await fetch(
+      `/api/llm/${this.provider}/fine-tunes/${modelId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+        },
+      },
+    );
+
     return response.json();
   }
 
@@ -137,8 +140,8 @@ export class LLMClient {
   getSettings(): any {
     return {
       provider: this.provider,
-      apiKey: this.apiKey ? '***' : '', // Hide actual key
-      providers: this.providers
+      apiKey: this.apiKey ? "***" : "", // Hide actual key
+      providers: this.providers,
     };
   }
 
@@ -155,27 +158,31 @@ export class LLMClient {
 
   // Response generation methods
   async generateResponse(prompt: string, options?: any): Promise<string> {
-    const messages = [{ role: 'user', content: prompt }];
+    const messages = [{ role: "user", content: prompt }];
     const response = await this.chat(messages);
-    return response.choices?.[0]?.message?.content || '';
+    return response.choices?.[0]?.message?.content || "";
   }
 
-  async streamResponse(prompt: string, userPrompt?: string, onChunk?: Function): Promise<string> {
+  async streamResponse(
+    prompt: string,
+    userPrompt?: string,
+    onChunk?: Function,
+  ): Promise<string> {
     // For compatibility, if streaming is requested, we'll still return a string
     // but call the onChunk callback if provided
-    const messages = [{ role: 'user', content: prompt }];
+    const messages = [{ role: "user", content: prompt }];
     if (userPrompt) {
-      messages.push({ role: 'user', content: userPrompt });
+      messages.push({ role: "user", content: userPrompt });
     }
-    
+
     const response = await this.chat(messages);
-    const content = response.choices?.[0]?.message?.content || '';
-    
+    const content = response.choices?.[0]?.message?.content || "";
+
     // Call onChunk if provided (for compatibility)
     if (onChunk) {
       onChunk({ text: content, isComplete: true });
     }
-    
+
     return content;
   }
 
@@ -195,7 +202,7 @@ export class LLMClient {
     return {
       totalTokens: 0,
       promptTokens: 0,
-      completionTokens: 0
+      completionTokens: 0,
     };
   }
 
@@ -204,13 +211,13 @@ export class LLMClient {
     return {
       averageResponseTime: 0,
       successRate: 1.0,
-      errorRate: 0.0
+      errorRate: 0.0,
     };
   }
 }
 
 // Export a default instance
 export const llmClient = new LLMClient({
-  provider: 'openai',
-  apiKey: process.env.OPENAI_API_KEY || 'dummy-key'
+  provider: "openai",
+  apiKey: process.env.OPENAI_API_KEY || "dummy-key",
 });

@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Agent } from '@/lib/types';
+import React, { useState, useMemo } from "react";
+import { Agent } from "@/lib/types";
 
 interface AgentListProps {
   agents: Agent[];
@@ -10,21 +10,23 @@ interface AgentListProps {
 export const AgentList: React.FC<AgentListProps> = ({
   agents,
   onAgentSelect,
-  showPerformance = false
+  showPerformance = false,
 }) => {
-  const [filter, setFilter] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<string>('name');
+  const [filter, setFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("name");
 
   const filteredAgents = useMemo(() => {
     let filtered = agents;
-    
-    if (filter !== 'all') {
-      filtered = agents.filter(agent => agent.status === filter);
+
+    if (filter !== "all") {
+      filtered = agents.filter((agent) => agent.status === filter);
     }
 
-    if (sortBy === 'performance') {
-      filtered = [...filtered].sort((a, b) => 
-        (b.performance?.taskCompletion || 0) - (a.performance?.taskCompletion || 0)
+    if (sortBy === "performance") {
+      filtered = [...filtered].sort(
+        (a, b) =>
+          (b.performance?.taskCompletion || 0) -
+          (a.performance?.taskCompletion || 0),
       );
     } else {
       filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name));
@@ -60,7 +62,7 @@ export const AgentList: React.FC<AgentListProps> = ({
       </div>
 
       <div className="agents">
-        {filteredAgents.map(agent => (
+        {filteredAgents.map((agent) => (
           <article
             key={agent.id}
             onClick={() => onAgentSelect?.(agent.id)}
@@ -71,8 +73,15 @@ export const AgentList: React.FC<AgentListProps> = ({
             <span className="status">{agent.status}</span>
             {showPerformance && agent.performance && (
               <div className="performance">
-                <span>{Math.round((agent.performance.taskCompletion || 0) * 100)}%</span>
-                <span>{Math.round((agent.performance.collaborationScore || 0) * 100)}%</span>
+                <span>
+                  {Math.round((agent.performance.taskCompletion || 0) * 100)}%
+                </span>
+                <span>
+                  {Math.round(
+                    (agent.performance.collaborationScore || 0) * 100,
+                  )}
+                  %
+                </span>
               </div>
             )}
           </article>

@@ -14,13 +14,18 @@ Integration with Active Inference Engine (ADR-005):
 
 import asyncio
 import logging
+import threading
+import time
+import uuid
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, List, Optional, Set
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional
 
 import numpy as np
 
-from agents.base.data_model import Agent
+from agents.base.data_model import Agent, Position
 from agents.base.markov_blanket import (
     AgentState,
     BoundaryMetrics,
@@ -28,7 +33,7 @@ from agents.base.markov_blanket import (
     BoundaryViolationEvent,
     MarkovBlanketFactory,
     PyMDPMarkovBlanket,
-    ViolationType,
+    MarkovBlanketInterface,
 )
 
 logger = logging.getLogger(__name__)

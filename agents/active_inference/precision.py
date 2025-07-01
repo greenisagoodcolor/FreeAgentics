@@ -40,11 +40,15 @@ class GradientPrecisionOptimizer:
 
     def optimize_precision(self, errors, context=None):
         """Optimize precision based on errors"""
-        if errors.dim() == 1:
-            errors = errors.unsqueeze(0)
+        # Ensure errors are 1D for this optimizer
+        if errors.dim() == 2:
+            errors = errors.squeeze(0)
 
         # Simple optimization - adjust precision based on error magnitude
-        error_magnitude = errors.abs().mean(dim=0)
+        if errors.dim() == 1:
+            error_magnitude = errors.abs()  # Keep individual values for 1D
+        else:
+            error_magnitude = errors.abs().mean(dim=0)  # Average batch for 2D
 
         # Update log precision
         learning_rate = self.config.learning_rate
@@ -68,7 +72,7 @@ class GradientPrecisionOptimizer:
             return torch.zeros(self.num_modalities)
 
         errors = torch.stack(self.error_history)
-        return errors.std(dim=0).mean(dim=0)
+        return errors.std(dim=0)
 
     def adapt_to_volatility(self):
         """Adapt precision based on volatility"""
@@ -133,6 +137,11 @@ class HierarchicalPrecisionOptimizer:
                 errors = pad_sequence([e[0] for e in error_history], batch_first=True)
                 log_abs_diff = torch.log(torch.abs(errors[1:] - errors[:-1]) + 1e-6)
                 volatility = torch.exp(torch.mean(log_abs_diff, dim=0))
+                # Ensure volatility has the correct shape (squeeze extra dimensions)
+                volatility = volatility.squeeze()
+                # Handle scalar case - if all dimensions collapsed to scalar, expand to expected shape
+                if volatility.dim() == 0:
+                    volatility = volatility.expand(self.level_dims[i])
                 volatilities.append(volatility)
         return volatilities
 
@@ -153,10 +162,10 @@ class MetaLearningPrecisionOptimizer:
         self.num_modalities = num_modalities
 
         # Meta-learning network
-        # extract_features produces: 6 error features
-        # (2 mean + 2 std + 2 max) + context features
+        # extract_features produces: num_modalities * 3 error features
+        # (mean + std + max for each modality) + context features
         # Use a larger input dimension to accommodate variable context size
-        max_input_dim = 6 + input_dim  # 6 error features + max context size
+        max_input_dim = num_modalities * 3 + input_dim  # error features + max context size
         self.meta_network = nn.Sequential(
             nn.Linear(max_input_dim, hidden_dim),
             nn.ReLU(),
@@ -199,16 +208,27 @@ class MetaLearningPrecisionOptimizer:
 
     def optimize_precision(self, errors, context=None):
         """Optimize precision using meta-learning"""
+        # Ensure errors are 2D for consistency
+        if errors.dim() == 1:
+            errors = errors.unsqueeze(0)
+            
         features = self.extract_features(errors, context)
 
         # Get precision adjustment from meta-network
         adjustment = self.meta_network(features)
+        
+        # Clamp adjustment to prevent overflow/underflow in exp()
+        adjustment = torch.clamp(adjustment, -10.0, 10.0)
 
         # Apply adjustment to base precision
         precision = self.base_precision * torch.exp(adjustment)
+        
+        # Handle NaN/inf values
+        precision = torch.where(torch.isfinite(precision), precision, self.base_precision)
+        
         precision = torch.clamp(precision, self.config.min_precision, self.config.max_precision)
 
-        # Update context buffer
+        # Update context buffer (store the 2D version)
         self.context_buffer.append((errors.detach().clone(), context))
         if len(self.context_buffer) > self.max_context_size:
             self.context_buffer.pop(0)

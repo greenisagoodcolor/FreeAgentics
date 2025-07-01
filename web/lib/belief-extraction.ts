@@ -49,30 +49,48 @@ export function createFallbackRefinedBeliefs(
 export function parseBeliefs(response: string): ExtractedBelief[] {
   const beliefs: ExtractedBelief[] = [];
 
-  // Split by bullet points or numbered lists
+  // Split by bullet points or numbered lists, but only process top-level items (not indented sub-items)
   const lines = response
     .split(/\n+/)
     .filter(
-      (line) =>
-        line.trim().startsWith("-") ||
-        line.trim().startsWith("•") ||
-        /^\d+\./.test(line.trim()),
+      (line) => {
+        const trimmed = line.trim();
+        // Must be a bullet/number format
+        if (!(trimmed.startsWith("-") || trimmed.startsWith("•") || /^\d+\./.test(trimmed))) {
+          return false;
+        }
+        // Check for excessive indentation (more than 8 spaces suggests a sub-item)
+        // This allows for reasonable formatting indentation while filtering true sub-items
+        const leadingSpaces = line.match(/^ */)[0].length;
+        return leadingSpaces <= 8;
+      }
     );
 
   for (const line of lines) {
-    const content = line.replace(/^[-•\d.]+\s*/, "").trim();
+    // Remove bullet points, numbers, and leading whitespace
+    const withoutBullets = line.replace(/^\s*[-•]\s*/, "").replace(/^\s*\d+\.\s*/, "").trim();
 
-    // Extract confidence level if present
+    // Extract confidence level if present (case insensitive, use last occurrence)
     let confidence: "High" | "Medium" | "Low" = "Medium";
-    const confidenceMatch = content.match(/\s*$$(High|Medium|Low)$$$/i);
-
-    if (confidenceMatch) {
-      confidence = confidenceMatch[1] as "High" | "Medium" | "Low";
+    const confidenceMatches = Array.from(withoutBullets.matchAll(/\$\$(High|Medium|Low)\$\$/gi));
+    
+    if (confidenceMatches.length > 0) {
+      // Use the last confidence marker found and preserve its exact case
+      const lastMatch = confidenceMatches[confidenceMatches.length - 1];
+      const originalCase = lastMatch[1];
+      // Preserve original case while ensuring type safety
+      if (originalCase.toLowerCase() === "high") {
+        confidence = originalCase as any;
+      } else if (originalCase.toLowerCase() === "medium") {
+        confidence = originalCase as any;
+      } else if (originalCase.toLowerCase() === "low") {
+        confidence = originalCase as any;
+      }
     }
 
-    // Clean up the content but preserve [[tags]]
-    const cleanContent = content
-      .replace(/\s*$$(High|Medium|Low)$$$/i, "")
+    // Clean up the content by removing confidence markers and preserving [[tags]]
+    const cleanContent = withoutBullets
+      .replace(/\$\$(High|Medium|Low)\$\$/gi, "")
       .trim();
 
     // Extract tags using the existing utility
