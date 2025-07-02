@@ -16,7 +16,7 @@ import time
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Callable, Dict, List, Optional
 
 from agents.base.data_model import (
     Agent,
@@ -77,7 +77,8 @@ class AgentFactory:
     ) -> Agent:
         """Create a basic test agent"""
         if position is None:
-            position = Position(random.uniform(-100, 100), random.uniform(-100, 100), 0)
+            position = Position(random.uniform(-100, 100),
+                                random.uniform(-100, 100), 0)
         if personality is None:
             personality = AgentPersonality(
                 openness=random.random(),
@@ -87,15 +88,24 @@ class AgentFactory:
                 neuroticism=random.random(),
             )
         if capabilities is None:
-            capabilities = {AgentCapability.MOVEMENT, AgentCapability.PERCEPTION}
+            capabilities = {
+                AgentCapability.MOVEMENT,
+                AgentCapability.PERCEPTION}
         return Agent(
             agent_id=agent_id,
             name=f"TestAgent_{agent_id}",
             position=position,
-            orientation=Orientation(0, 0, 0, 1),
+            orientation=Orientation(
+                0,
+                0,
+                0,
+                1),
             personality=personality,
             capabilities=capabilities,
-            resources=AgentResources(energy=100.0, health=100.0, memory_capacity=100),
+            resources=AgentResources(
+                energy=100.0,
+                health=100.0,
+                memory_capacity=100),
         )
 
     @staticmethod
@@ -112,9 +122,12 @@ class AgentFactory:
             position=agent.position,
             orientation=agent.orientation,
             personality=agent.personality,
-            capabilities=agent.capabilities | {AgentCapability.RESOURCE_MANAGEMENT},
+            capabilities=agent.capabilities | {
+                AgentCapability.RESOURCE_MANAGEMENT},
             resources=agent.resources,
-            managed_resources={rt: 100.0 for rt in resource_types},  # Convert list to dict
+            managed_resources={
+                rt: 100.0 for rt in resource_types},
+            # Convert list to dict
         )
 
     @staticmethod
@@ -135,7 +148,8 @@ class AgentFactory:
 class SimulationEnvironment:
     """Simulated environment for agent testing"""
 
-    def __init__(self, bounds: tuple[float, float, float, float], time_scale: float = 1.0) -> None:
+    def __init__(self, bounds: tuple[float, float, float,
+                 float], time_scale: float = 1.0) -> None:
         """
         Initialize simulation environment
 
@@ -161,7 +175,8 @@ class SimulationEnvironment:
     def add_agent(self, agent: Agent) -> None:
         """Add an agent to the simulation"""
         self.agents[agent.agent_id] = agent
-        self.state_manager.register_agent(agent)  # Register with main state manager
+        # Register with main state manager
+        self.state_manager.register_agent(agent)
 
         # Create a new state manager for this agent
         agent_state_manager = AgentStateManager()
@@ -190,9 +205,14 @@ class SimulationEnvironment:
         self.decision_systems[agent.agent_id] = decision_system
 
         # Create a memory system for this agent
-        self.memory_systems[agent.agent_id] = MemorySystem(agent_id=agent.agent_id)
+        self.memory_systems[agent.agent_id] = MemorySystem(
+            agent_id=agent.agent_id)
 
-    def add_resource(self, position: Position, resource_type: str, amount: float) -> None:
+    def add_resource(
+            self,
+            position: Position,
+            resource_type: str,
+            amount: float) -> None:
         """Add a resource to the environment"""
         if position not in self.resources:
             self.resources[position] = {}
@@ -209,7 +229,7 @@ class SimulationEnvironment:
         actual_delta = delta_time * self.time_scale
         self.current_time += actual_delta
         for agent_id, agent in self.agents.items():
-            percepts = self.perception_system.perceive(agent_id)
+            self.perception_system.perceive(agent_id)
             decision_system = self.decision_systems.get(agent_id)
             if decision_system:
                 action = decision_system.make_decision(agent_id)
@@ -281,11 +301,13 @@ class BehaviorValidator:
                     distance = positions[i].distance_to(positions[i - 1])
                 else:
                     distance = 0.0  # Fallback for None positions
-                time_delta = history[i].get("timestamp", 0) - history[i - 1].get("timestamp", 0)
+                time_delta = history[i].get(
+                    "timestamp", 0) - history[i - 1].get("timestamp", 0)
                 if time_delta > 0:
                     speed = distance / time_delta
                     if speed > 100:
-                        return (False, f"Impossible speed detected: {speed} units/s")
+                        return (
+                            False, f"Impossible speed detected: {speed} units/s")
         return (True, None)
 
     def _validate_decision_consistency(
@@ -341,7 +363,8 @@ class PerformanceBenchmark:
 
     def get_report(self) -> Dict[str, Dict[str, float]]:
         """Get full performance report"""
-        return {operation: self.get_statistics(operation) for operation in self.results}
+        return {operation: self.get_statistics(
+            operation) for operation in self.results}
 
 
 class AgentTestOrchestrator:
@@ -360,7 +383,9 @@ class AgentTestOrchestrator:
     def run_scenario(self, scenario: AgentTestScenario) -> AgentTestMetrics:
         """Run a single test scenario"""
         logger.info(f"Running scenario: {scenario.name}")
-        metrics = AgentTestMetrics(scenario_name=scenario.name, start_time=datetime.now())
+        metrics = AgentTestMetrics(
+            scenario_name=scenario.name,
+            start_time=datetime.now())
         try:
             env_config = scenario.environment_config
             environment = SimulationEnvironment(
@@ -387,7 +412,8 @@ class AgentTestOrchestrator:
                 if step % 10 == 0:
                     self._collect_metrics(environment, metrics)
             self._collect_metrics(environment, metrics)
-            metrics.success = self._evaluate_criteria(scenario.success_criteria, metrics)
+            metrics.success = self._evaluate_criteria(
+                scenario.success_criteria, metrics)
         except Exception as e:
             logger.error(f"Scenario failed: {e}")
             metrics.success = False
@@ -414,17 +440,22 @@ class AgentTestOrchestrator:
                 metrics.agent_metrics[agent_id] = {}
             metrics.agent_metrics[agent_id].update(
                 {
-                    "position": (agent.position.x, agent.position.y, agent.position.z),
+                    "position": (
+                        agent.position.x,
+                        agent.position.y,
+                        agent.position.z),
                     "status": agent.status.value,
                     "energy": agent.resources.energy,
                     "health": agent.resources.health,
-                    "relationships": len(agent.relationships),
-                }
-            )
+                    "relationships": len(
+                        agent.relationships),
+                })
         # Store benchmark report in environment metrics instead
-        metrics.environment_metrics["benchmark_report"] = self.benchmark.get_report()
+        metrics.environment_metrics["benchmark_report"] = self.benchmark.get_report(
+        )
 
-    def _evaluate_criteria(self, criteria: Dict[str, Any], metrics: AgentTestMetrics) -> bool:
+    def _evaluate_criteria(
+            self, criteria: Dict[str, Any], metrics: AgentTestMetrics) -> bool:
         """Evaluate success criteria"""
         return True
 

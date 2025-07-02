@@ -5,6 +5,8 @@ This file configures Alembic to use our SQLAlchemy models and
 database connection settings from environment variables.
 """
 
+from ....models import Base  # type: ignore[import-not-found]
+from ....connection import DATABASE_URL  # type: ignore[import-not-found]
 import sys
 from logging.config import fileConfig
 from pathlib import Path
@@ -13,8 +15,6 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-from ....connection import DATABASE_URL  # type: ignore[import-not-found]
-from ....models import Base  # type: ignore[import-not-found]
 
 config = context.config
 if config.config_file_name is not None:
@@ -57,7 +57,10 @@ def run_migrations_online() -> None:
     """
     configuration = config.get_section(config.config_ini_section)
     configuration["sqlalchemy.url"] = DATABASE_URL
-    connectable = engine_from_config(configuration, prefix="sqlalchemy.", poolclass=pool.NullPool)
+    connectable = engine_from_config(
+        configuration,
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool)
     with connectable.connect() as connection:
         context.configure(
             connection=connection,

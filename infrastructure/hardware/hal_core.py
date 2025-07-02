@@ -190,7 +190,9 @@ class BaseHardwareAdapter(abc.ABC):
             usage = self.get_resource_usage()
             if usage.get("compute_percent", 0) > 95:
                 return False, "Device overloaded"
-            if usage.get("memory_mb", 0) > self.get_capabilities().memory_size_mb * 0.95:
+            if usage.get(
+                "memory_mb",
+                    0) > self.get_capabilities().memory_size_mb * 0.95:
                 return False, "Memory nearly exhausted"
             return True, "Healthy"
         except Exception as e:
@@ -321,7 +323,8 @@ class HardwareAbstractionLayer:
         constraints"""
         # Determine device types that can handle the operation
         operation_category = self._categorize_operation(operation)
-        candidate_types = self._operation_routes.get(operation_category, [HardwareType.CPU])
+        candidate_types = self._operation_routes.get(
+            operation_category, [HardwareType.CPU])
 
         best_device = None
         best_score = -1
@@ -392,7 +395,8 @@ class HardwareAbstractionLayer:
         """Execute operation on a specific device"""
         try:
             # Submit to executor for async execution
-            future = self._executor.submit(device.execute_operation, operation, data, constraints)
+            future = self._executor.submit(
+                device.execute_operation, operation, data, constraints)
 
             # Wait with timeout
             timeout = constraints.timeout_seconds if constraints else 60.0
@@ -411,7 +415,12 @@ class HardwareAbstractionLayer:
         """Categorize an operation for routing"""
         operation_lower = operation.lower()
 
-        if any(term in operation_lower for term in ["compute", "calculate", "process", "infer"]):
+        if any(
+            term in operation_lower for term in [
+                "compute",
+                "calculate",
+                "process",
+                "infer"]):
             return "compute"
         elif any(term in operation_lower for term in ["store", "save", "write", "cache"]):
             return "store"

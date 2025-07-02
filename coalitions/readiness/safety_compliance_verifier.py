@@ -14,29 +14,22 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
-
-from agents.base.markov_blanket import BoundaryViolationEvent
-from agents.base.markov_blanket import ViolationType as BoundaryViolationType
 
 # Import safety infrastructure
 from infrastructure.safety.boundary_monitoring_service import (
     AlertConfiguration,
     BoundaryMonitoringService,
-    MonitoringEvent,
 )
 from infrastructure.safety.markov_blanket_verification import (
     MarkovBlanketVerificationService,
-    VerificationConfig,
 )
 from infrastructure.safety.safety_protocols import (
     MarkovBlanketSafetyProtocol,
     SafetyLevel,
     SafetyMetrics,
-    SafetyViolation,
-    ViolationType,
 )
 
 logger = logging.getLogger(__name__)
@@ -95,7 +88,9 @@ class ComplianceCheck:
     verification_timestamp: datetime = field(default_factory=datetime.now)
 
     def to_dict(self) -> Dict[str, Any]:
-        return {**asdict(self), "verification_timestamp": self.verification_timestamp.isoformat()}
+        return {
+            **asdict(self),
+            "verification_timestamp": self.verification_timestamp.isoformat()}
 
 
 @dataclass
@@ -268,7 +263,9 @@ class SafetyComplianceVerifier:
             description="Identify and catalog all edge deployment assets",
             severity=SafetyLevel.MEDIUM,
             verification_method="asset_inventory",
-            acceptance_criteria=("Complete asset inventory with security classifications",),
+            acceptance_criteria=(
+                "Complete asset inventory with security classifications",
+            ),
             edge_specific=True,
         )
 
@@ -279,7 +276,9 @@ class SafetyComplianceVerifier:
             description=("Implement protective safeguards for edge infrastructure"),
             severity=SafetyLevel.HIGH,
             verification_method="safeguard_verification",
-            acceptance_criteria=("All critical assets protected with appropriate controls",),
+            acceptance_criteria=(
+                "All critical assets protected with appropriate controls",
+            ),
         )
 
         # Edge-Specific Security Standard
@@ -302,7 +301,9 @@ class SafetyComplianceVerifier:
             description="Verify proper process isolation at edge locations",
             severity=SafetyLevel.HIGH,
             verification_method="isolation_testing",
-            acceptance_criteria=("Complete process isolation with no cross-contamination",),
+            acceptance_criteria=(
+                "Complete process isolation with no cross-contamination",
+            ),
             edge_specific=True,
         )
 
@@ -403,7 +404,8 @@ class SafetyComplianceVerifier:
         Returns:
             Comprehensive safety and compliance report
         """
-        logger.info(f"Starting safety and compliance verification for coalition {coalition_id}")
+        logger.info(
+            f"Starting safety and compliance verification for coalition {coalition_id}")
         start_time = time.time()
 
         try:
@@ -468,7 +470,10 @@ class SafetyComplianceVerifier:
                 boundary_verification_results=boundary_results,
                 compliance_checks=compliance_checks,
                 failsafe_protocol_status=list(failsafe_status.values()),
-                safety_metrics=(self._compile_safety_metrics(boundary_results, compliance_checks)),
+                safety_metrics=(
+                    self._compile_safety_metrics(
+                        boundary_results,
+                        compliance_checks)),
                 violation_summary=self._summarize_violations(boundary_results),
                 risk_assessment=risk_assessment,
                 critical_issues=recommendations["critical_issues"],
@@ -477,7 +482,11 @@ class SafetyComplianceVerifier:
                 deployment_approval=scores["overall"] >= 75.0,
                 assessment_duration=assessment_duration,
                 frameworks_checked=frameworks_to_check,
-                next_assessment_due=(datetime.now() + timedelta(days=30)),  # Monthly reassessment
+                next_assessment_due=(
+                    datetime.now() +
+                    timedelta(
+                        days=30)),
+                # Monthly reassessment
             )
 
             logger.info(
@@ -512,27 +521,31 @@ class SafetyComplianceVerifier:
             agent_ids = coalition_config.get("agents", [])
             if not agent_ids:
                 # Generate mock agent IDs for testing
-                agent_ids = [f"agent_{i}" for i in range(coalition_config.get("agent_count", 3))]
+                agent_ids = [
+                    f"agent_{i}" for i in range(
+                        coalition_config.get(
+                            "agent_count", 3))]
 
             total_integrity = 0.0
 
             for agent_id in agent_ids:
-                # Create mock agent for verification
-                agent_data = self._create_mock_agent_data(agent_id)
-
                 # Verify agent boundary
                 try:
                     # Simulate Markov blanket verification
-                    integrity_score = np.random.uniform(0.7, 0.95)  # Mock integrity score
-                    independence_measure = np.random.uniform(0.01, 0.08)  # Mock independence
+                    integrity_score = np.random.uniform(
+                        0.7, 0.95)  # Mock integrity score
+                    independence_measure = np.random.uniform(
+                        0.01, 0.08)  # Mock independence
 
                     agent_result = {
                         "agent_id": agent_id,
                         "boundary_integrity": integrity_score,
                         "conditional_independence": independence_measure,
-                        "verification_passed": integrity_score > 0.8
-                        and independence_measure < 0.05,
-                        "mathematical_proof": f"I(μ;η|s,a) = {independence_measure:.4f} < 0.05",
+                        "verification_passed": (
+                            integrity_score > 0.8 and independence_measure < 0.05
+                        ),
+                        "mathematical_proof": f"I(μ;η|s,a) = {
+                            independence_measure:.4f} < 0.05",
                         "timestamp": datetime.now().isoformat(),
                     }
 
@@ -544,19 +557,22 @@ class SafetyComplianceVerifier:
                         violation = {
                             "agent_id": agent_id,
                             "violation_type": (
-                                "boundary_integrity"
-                                if integrity_score < 0.8
+                                "boundary_integrity" if integrity_score < 0.8
                                 else "independence_failure"
                             ),
                             "severity": "high" if integrity_score < 0.6 else "medium",
-                            "details": f"Integrity: {integrity_score:.3f}, Independence: {independence_measure:.4f}",
+                            "details": f"Integrity: {
+                                integrity_score:.3f}, Independence: {
+                                independence_measure:.4f}",
                         }
                         results["violations"].append(violation)
 
-                    results["mathematical_proofs"].append(agent_result["mathematical_proof"])
+                    results["mathematical_proofs"].append(
+                        agent_result["mathematical_proof"])
 
                 except Exception as e:
-                    logger.error(f"Markov blanket verification failed for agent {agent_id}: {e}")
+                    logger.error(
+                        f"Markov blanket verification failed for agent {agent_id}: {e}")
                     agent_result = {
                         "agent_id": agent_id,
                         "boundary_integrity": 0.0,
@@ -575,8 +591,8 @@ class SafetyComplianceVerifier:
                 results["verification_status"] = "no_agents"
 
             logger.info(
-                f"Markov blanket verification completed. Overall integrity: {results['overall_integrity']:.3f}"
-            )
+                f"Markov blanket verification completed. Overall integrity: {
+                    results['overall_integrity']:.3f}")
 
         except Exception as e:
             logger.error(f"Markov blanket verification failed: {e}")
@@ -606,7 +622,10 @@ class SafetyComplianceVerifier:
             # Register agents for monitoring
             agent_ids = coalition_config.get("agents", [])
             if not agent_ids:
-                agent_ids = [f"agent_{i}" for i in range(coalition_config.get("agent_count", 3))]
+                agent_ids = [
+                    f"agent_{i}" for i in range(
+                        coalition_config.get(
+                            "agent_count", 3))]
 
             for agent_id in agent_ids:
                 self.boundary_monitor.register_agent(agent_id)
@@ -634,8 +653,8 @@ class SafetyComplianceVerifier:
             await self.boundary_monitor.stop_monitoring()
 
             logger.info(
-                f"Boundary verification completed. Violations: {results['violations_detected']}"
-            )
+                f"Boundary verification completed. Violations: {
+                    results['violations_detected']}")
 
         except Exception as e:
             logger.error(f"Boundary verification failed: {e}")
@@ -651,15 +670,15 @@ class SafetyComplianceVerifier:
         frameworks: List[ComplianceFramework],
     ) -> List[ComplianceCheck]:
         """Perform compliance checks for specified frameworks"""
-        logger.info(f"Performing compliance checks for frameworks: {[f.value for f in frameworks]}")
+        logger.info(
+            f"Performing compliance checks for frameworks: {[f.value for f in frameworks]}")
 
         compliance_checks = []
 
         for framework in frameworks:
             # Get requirements for this framework
             framework_requirements = [
-                req for req in self.compliance_requirements.values() if req.framework == framework
-            ]
+                req for req in self.compliance_requirements.values() if req.framework == framework]
 
             for requirement in framework_requirements:
                 check = await self._verify_compliance_requirement(
@@ -669,6 +688,127 @@ class SafetyComplianceVerifier:
 
         logger.info(f"Completed {len(compliance_checks)} compliance checks")
         return compliance_checks
+
+    def _verify_markov_blanket_compliance(
+        self, coalition_config: Dict[str, Any], deployment_context: Dict[str, Any]
+    ) -> Tuple[str, float, List[str], List[str], Dict[str, Any]]:
+        """Verify Markov blanket compliance requirements"""
+        agents_compliant = coalition_config.get("markov_blanket_compliance", True)
+        independence_threshold = deployment_context.get("independence_threshold", 0.05)
+
+        if agents_compliant:
+            return (
+                "passed",
+                95.0,
+                ["All agents meet Markov blanket integrity requirements"],
+                [],
+                {
+                    "independence_threshold": independence_threshold,
+                    "agents_compliant": agents_compliant,
+                },
+            )
+        else:
+            return (
+                "failed",
+                20.0,
+                ["Markov blanket violations detected"],
+                ["Recalibrate agent boundaries before deployment"],
+                {
+                    "independence_threshold": independence_threshold,
+                    "agents_compliant": agents_compliant,
+                },
+            )
+
+    def _verify_gdpr_data_minimization(
+        self, coalition_config: Dict[str, Any], deployment_context: Dict[str, Any]
+    ) -> Tuple[str, float, List[str], List[str], Dict[str, Any]]:
+        """Verify GDPR data minimization compliance"""
+        data_collection = coalition_config.get("data_collection", {})
+        minimal_collection = data_collection.get("minimal", False)
+
+        if minimal_collection:
+            return (
+                "passed",
+                90.0,
+                ["Data collection follows minimization principles"],
+                [],
+                data_collection,
+            )
+        else:
+            return (
+                "warning",
+                60.0,
+                ["Data collection may exceed minimal requirements"],
+                ["Review and reduce data collection scope"],
+                data_collection,
+            )
+
+    def _verify_iso_encryption(
+        self, coalition_config: Dict[str, Any], deployment_context: Dict[str, Any]
+    ) -> Tuple[str, float, List[str], List[str], Dict[str, Any]]:
+        """Verify ISO encryption compliance"""
+        encryption_config = deployment_context.get("encryption", {})
+        encryption_standard = encryption_config.get("standard", "AES-128")
+
+        if encryption_standard in ["AES-256", "ChaCha20-Poly1305"]:
+            return (
+                "passed",
+                100.0,
+                [f"Strong encryption standard: {encryption_standard}"],
+                [],
+                encryption_config,
+            )
+        elif encryption_standard == "AES-192":
+            return (
+                "passed",
+                85.0,
+                [f"Adequate encryption standard: {encryption_standard}"],
+                [],
+                encryption_config,
+            )
+        else:
+            return (
+                "failed",
+                30.0,
+                [f"Insufficient encryption standard: {encryption_standard}"],
+                ["Upgrade to AES-256 or equivalent"],
+                encryption_config,
+            )
+
+    def _verify_generic_requirement(
+        self,
+        requirement: ComplianceRequirement,
+        coalition_config: Dict[str, Any],
+        deployment_context: Dict[str, Any],
+    ) -> Tuple[str, float, List[str], List[str], Dict[str, Any]]:
+        """Verify generic compliance requirement"""
+        compliance_score = np.random.uniform(70, 95)  # Mock score
+        evidence = {"simulated_check": True, "framework": requirement.framework.value}
+
+        if compliance_score >= 80:
+            return (
+                "passed",
+                compliance_score,
+                [f"Requirement {requirement.title} is satisfied"],
+                [],
+                evidence,
+            )
+        elif compliance_score >= 60:
+            return (
+                "warning",
+                compliance_score,
+                [f"Requirement {requirement.title} partially satisfied"],
+                [f"Improve compliance for {requirement.title}"],
+                evidence,
+            )
+        else:
+            return (
+                "failed",
+                compliance_score,
+                [f"Requirement {requirement.title} not satisfied"],
+                [f"Address compliance gaps for {requirement.title}"],
+                evidence,
+            )
 
     async def _verify_compliance_requirement(
         self,
@@ -688,87 +828,37 @@ class SafetyComplianceVerifier:
         )
 
         try:
-            # Perform requirement-specific verification
-            if requirement.requirement_id == "edge_markov_blanket":
-                # Check Markov blanket compliance
-                agents_compliant = coalition_config.get("markov_blanket_compliance", True)
-                independence_threshold = deployment_context.get("independence_threshold", 0.05)
+            # Map requirement IDs to verification functions
+            verification_map = {
+                "edge_markov_blanket": self._verify_markov_blanket_compliance,
+                "gdpr_data_minimization": self._verify_gdpr_data_minimization,
+                "iso_encryption": self._verify_iso_encryption,
+            }
 
-                if agents_compliant:
-                    check.status = "passed"
-                    check.score = 95.0
-                    check.findings.append("All agents meet Markov blanket integrity requirements")
-                else:
-                    check.status = "failed"
-                    check.score = 20.0
-                    check.findings.append("Markov blanket violations detected")
-                    check.recommendations.append("Recalibrate agent boundaries before deployment")
+            # Get verification function or use generic
+            verify_func = verification_map.get(
+                requirement.requirement_id,
+                lambda config, context: self._verify_generic_requirement(
+                    requirement, config, context
+                ),
+            )
 
-                check.evidence = {
-                    "independence_threshold": independence_threshold,
-                    "agents_compliant": agents_compliant,
-                }
+            # Perform verification
+            status, score, findings, recommendations, evidence = verify_func(
+                coalition_config, deployment_context
+            )
 
-            elif requirement.requirement_id == "gdpr_data_minimization":
-                # Check data minimization compliance
-                data_collection = coalition_config.get("data_collection", {})
-                minimal_collection = data_collection.get("minimal", False)
-
-                if minimal_collection:
-                    check.status = "passed"
-                    check.score = 90.0
-                    check.findings.append("Data collection follows minimization principles")
-                else:
-                    check.status = "warning"
-                    check.score = 60.0
-                    check.findings.append("Data collection may exceed minimal requirements")
-                    check.recommendations.append("Review and reduce data collection scope")
-
-                check.evidence = data_collection
-
-            elif requirement.requirement_id == "iso_encryption":
-                # Check encryption compliance
-                encryption_config = deployment_context.get("encryption", {})
-                encryption_standard = encryption_config.get("standard", "AES-128")
-
-                if encryption_standard in ["AES-256", "ChaCha20-Poly1305"]:
-                    check.status = "passed"
-                    check.score = 100.0
-                    check.findings.append(f"Strong encryption standard: {encryption_standard}")
-                elif encryption_standard == "AES-192":
-                    check.status = "passed"
-                    check.score = 85.0
-                    check.findings.append(f"Adequate encryption standard: {encryption_standard}")
-                else:
-                    check.status = "failed"
-                    check.score = 30.0
-                    check.findings.append(
-                        f"Insufficient encryption standard: {encryption_standard}"
-                    )
-                    check.recommendations.append("Upgrade to AES-256 or equivalent")
-
-                check.evidence = encryption_config
-
-            else:
-                # Generic compliance check
-                compliance_score = np.random.uniform(70, 95)  # Mock score
-                if compliance_score >= 80:
-                    check.status = "passed"
-                    check.findings.append(f"Requirement {requirement.title} is satisfied")
-                elif compliance_score >= 60:
-                    check.status = "warning"
-                    check.findings.append(f"Requirement {requirement.title} partially satisfied")
-                    check.recommendations.append(f"Improve compliance for {requirement.title}")
-                else:
-                    check.status = "failed"
-                    check.findings.append(f"Requirement {requirement.title} not satisfied")
-                    check.recommendations.append(f"Address compliance gaps for {requirement.title}")
-
-                check.score = compliance_score
-                check.evidence = {"simulated_check": True, "framework": requirement.framework.value}
+            # Update check with results
+            check.status = status
+            check.score = score
+            check.findings.extend(findings)
+            check.recommendations.extend(recommendations)
+            check.evidence = evidence
 
         except Exception as e:
-            logger.error(f"Compliance check failed for {requirement.requirement_id}: {e}")
+            logger.error(
+                f"Compliance check failed for {
+                    requirement.requirement_id}: {e}")
             check.status = "failed"
             check.score = 0.0
             check.findings.append(f"Verification failed: {str(e)}")
@@ -798,7 +888,9 @@ class SafetyComplianceVerifier:
                 verified_protocols[protocol_id] = protocol
 
             except Exception as e:
-                logger.error(f"Failsafe protocol verification failed for {protocol.name}: {e}")
+                logger.error(
+                    f"Failsafe protocol verification failed for {
+                        protocol.name}: {e}")
                 protocol.last_tested = datetime.now()
                 protocol.test_successful = False
                 verified_protocols[protocol_id] = protocol
@@ -852,7 +944,8 @@ class SafetyComplianceVerifier:
         failed_checks = [c for c in compliance_checks if c.status == "failed"]
         if len(failed_checks) > 2:
             compliance_risk = "high"
-            risks["critical_risks"].append(f"{len(failed_checks)} compliance requirements failed")
+            risks["critical_risks"].append(
+                f"{len(failed_checks)} compliance requirements failed")
         elif len(failed_checks) > 0:
             compliance_risk = "medium"
             risks["mitigation_required"].append("Some compliance requirements not met")
@@ -862,13 +955,16 @@ class SafetyComplianceVerifier:
         risks["risk_categories"]["compliance"] = compliance_risk
 
         # Operational risks
-        failed_protocols = [p for p in failsafe_status.values() if not p.test_successful]
+        failed_protocols = [
+            p for p in failsafe_status.values() if not p.test_successful]
         if len(failed_protocols) > 1:
             operational_risk = "high"
-            risks["critical_risks"].append(f"{len(failed_protocols)} failsafe protocols failed")
+            risks["critical_risks"].append(
+                f"{len(failed_protocols)} failsafe protocols failed")
         elif len(failed_protocols) > 0:
             operational_risk = "medium"
-            risks["mitigation_required"].append("Some failsafe protocols need attention")
+            risks["mitigation_required"].append(
+                "Some failsafe protocols need attention")
         else:
             operational_risk = "low"
 
@@ -915,7 +1011,8 @@ class SafetyComplianceVerifier:
             compliance_score = 50.0  # Default if no checks performed
 
         # Operational score based on failsafe protocols
-        successful_protocols = sum(1 for p in failsafe_status.values() if p.test_successful)
+        successful_protocols = sum(
+            1 for p in failsafe_status.values() if p.test_successful)
         total_protocols = len(failsafe_status)
 
         if total_protocols > 0:
@@ -947,7 +1044,10 @@ class SafetyComplianceVerifier:
     ) -> Dict[str, List[str]]:
         """Generate safety and compliance recommendations"""
 
-        recommendations = {"critical_issues": [], "recommendations": [], "required_actions": []}
+        recommendations = {
+            "critical_issues": [],
+            "recommendations": [],
+            "required_actions": []}
 
         # Critical issues
         if markov_results.get("overall_integrity", 1.0) < 0.6:
@@ -970,7 +1070,8 @@ class SafetyComplianceVerifier:
                 f"Address {len(failed_compliance)} failed compliance requirements before deployment"
             )
 
-        failed_protocols = [p for p in failsafe_status.values() if not p.test_successful]
+        failed_protocols = [
+            p for p in failsafe_status.values() if not p.test_successful]
         if failed_protocols:
             recommendations["recommendations"].append(
                 f"Fix {len(failed_protocols)} failsafe protocols and retest"
@@ -993,7 +1094,8 @@ class SafetyComplianceVerifier:
 
         return recommendations
 
-    def _determine_compliance_level(self, scores: Dict[str, float]) -> SafetyComplianceLevel:
+    def _determine_compliance_level(
+            self, scores: Dict[str, float]) -> SafetyComplianceLevel:
         """Determine overall compliance level based on scores"""
         overall_score = scores["overall"]
 
@@ -1026,8 +1128,9 @@ class SafetyComplianceVerifier:
                 metrics.resolved_violations += 1
 
         metrics.total_violations = (
-            metrics.critical_violations + metrics.high_violations + metrics.medium_violations
-        )
+            metrics.critical_violations +
+            metrics.high_violations +
+            metrics.medium_violations)
 
         # Calculate metrics
         if compliance_checks:
@@ -1053,7 +1156,8 @@ class SafetyComplianceVerifier:
             severity = violation.get("severity", "medium")
             v_type = violation.get("violation_type", "unknown")
 
-            summary["by_severity"][severity] = summary["by_severity"].get(severity, 0) + 1
+            summary["by_severity"][severity] = summary["by_severity"].get(
+                severity, 0) + 1
             summary["by_type"][v_type] = summary["by_type"].get(v_type, 0) + 1
 
         return summary

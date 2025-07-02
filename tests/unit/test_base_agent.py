@@ -166,15 +166,14 @@ class TestBaseAgent:
         agent = BaseAgent(
             agent_data=agent_data,
             world_interface=mock_world_interface,
-            logger=mock_logger
-        )
+            logger=mock_logger)
         return agent
 
     def test_agent_initialization(self, agent_data, mock_world_interface):
         """Test agent initialization."""
         agent = BaseAgent(
-            agent_data=agent_data, world_interface=mock_world_interface
-        )
+            agent_data=agent_data,
+            world_interface=mock_world_interface)
 
         assert agent.data == agent_data
         assert agent.agent_id == "test-agent"
@@ -206,23 +205,23 @@ class TestBaseAgent:
     def test_agent_update_cycle(self, test_agent):
         """Test agent update cycle."""
         assert test_agent.data.status == AgentStatus.IDLE
-        assert hasattr(test_agent, '_components')
-        assert 'perception' in test_agent._components
+        assert hasattr(test_agent, "_components")
+        assert "perception" in test_agent._components
 
     def test_agent_step_execution(self, test_agent):
         """Test agent step execution."""
         assert test_agent.data.agent_id == "test-agent"
         assert not test_agent._is_running
-        assert hasattr(test_agent, '_components')
+        assert hasattr(test_agent, "_components")
 
     def test_agent_pause_resume(self, test_agent):
         """Test agent pause and resume."""
         assert not test_agent._is_paused
-        
+
         test_agent._is_running = True  # Simulate running state
         test_agent.pause()
         assert test_agent._is_paused
-        
+
         test_agent.resume()
         assert not test_agent._is_paused
 
@@ -234,7 +233,7 @@ class TestBaseAgent:
 
     def test_agent_shutdown(self, test_agent):
         """Test agent shutdown."""
-        test_agent._is_running = True  # Simulate running state  
+        test_agent._is_running = True  # Simulate running state
         test_agent.stop()
         assert not test_agent._is_running
 
@@ -271,8 +270,10 @@ class TestBaseAgent:
         goal = AgentGoal(
             description="Find food",
             priority=0.8,
-            target_position=Position(10.0, 10.0, 0.0)
-        )
+            target_position=Position(
+                10.0,
+                10.0,
+                0.0))
 
         test_agent.data.goals.append(goal)
         test_agent.data.current_goal = goal
@@ -282,8 +283,7 @@ class TestBaseAgent:
         assert test_agent.data.current_goal.priority == 0.8
 
     def test_agent_perception_integration(
-        self, test_agent, mock_world_interface
-    ):
+            self, test_agent, mock_world_interface):
         """Test agent perception system integration."""
         assert "perception" in test_agent._components
         perception_system = test_agent._components["perception"]
@@ -314,17 +314,17 @@ class TestBaseAgent:
 
         goal = AgentGoal(
             description="Move to target",
-            target_position=Position(10.0, 10.0, 0.0)
-        )
+            target_position=Position(
+                10.0,
+                10.0,
+                0.0))
         test_agent.data.current_goal = goal
 
     def test_agent_event_handling(self, test_agent, mock_logger):
         """Test agent event handling."""
         # Trigger logging (simulated event handling)
         test_agent.logger.log_info(
-            test_agent.data.agent_id,
-            "Test event",
-            extra_data={"test": True}
+            test_agent.data.agent_id, "Test event", extra_data={"test": True}
         )
 
         # Verify logger was called (mock_logger will have recorded calls)
@@ -344,13 +344,11 @@ class TestBaseAgent:
         assert state["agent_id"] == "test-agent"
 
     def test_agent_active_inference_integration(
-        self, agent_data, mock_world_interface
-    ):
+            self, agent_data, mock_world_interface):
         """Test agent with active inference integration."""
         mock_ai_interface = Mock(spec=IActiveInferenceInterface)
         mock_ai_interface.update_beliefs.return_value = np.array(
-            [0.25, 0.25, 0.25, 0.25]
-        )
+            [0.25, 0.25, 0.25, 0.25])
 
         agent = BaseAgent(
             agent_data=agent_data,
@@ -362,13 +360,11 @@ class TestBaseAgent:
         assert "active_inference" in agent._components
 
     def test_agent_markov_blanket_integration(
-        self, agent_data, mock_world_interface
-    ):
+            self, agent_data, mock_world_interface):
         """Test agent with Markov blanket integration."""
         mock_mb_interface = Mock(spec=IMarkovBlanketInterface)
         mock_mb_interface.get_boundary_state.return_value = {
-            "internal": [], "external": []
-        }
+            "internal": [], "external": []}
 
         agent = BaseAgent(
             agent_data=agent_data,
@@ -409,8 +405,8 @@ class TestAgentPerformance:
         import time
 
         agent = BaseAgent(
-            agent_data=agent_data, world_interface=mock_world_interface
-        )
+            agent_data=agent_data,
+            world_interface=mock_world_interface)
 
         # Measure basic operations time
         start = time.time()
@@ -424,8 +420,8 @@ class TestAgentPerformance:
     def test_agent_memory_efficiency(self, agent_data, mock_world_interface):
         """Test agent memory efficiency."""
         agent = BaseAgent(
-            agent_data=agent_data, world_interface=mock_world_interface
-        )
+            agent_data=agent_data,
+            world_interface=mock_world_interface)
 
         # Add many memories
         for i in range(100):  # Reduced from 1000 for realistic testing
@@ -444,11 +440,13 @@ class TestAgentPerformance:
             agent_data = AgentData(
                 agent_id=f"agent-{i}",
                 name=f"Agent{i}",
-                position=Position(i * 10.0, i * 10.0, 0.0)
-            )
+                position=Position(
+                    i * 10.0,
+                    i * 10.0,
+                    0.0))
             agent = BaseAgent(
-                agent_data=agent_data, world_interface=mock_world_interface
-            )
+                agent_data=agent_data,
+                world_interface=mock_world_interface)
             agents.append(agent)
 
         # All agents should be created successfully

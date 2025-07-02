@@ -825,10 +825,28 @@ describe("Advanced Dashboard Tests", () => {
       render(<MetricsPanel metrics={mockMetrics} />);
 
       // High network utilization should have warning/error color
-      const networkMetric = screen
-        .getByTestId("network-utilization")
-        .querySelector(".metric-value");
-      expect(networkMetric).toHaveStyle({ color: expect.any(String) });
+      const networkUtilizationElement = screen.getByTestId(
+        "network-utilization",
+      );
+      const metricValue =
+        networkUtilizationElement.querySelector(".metric-value");
+
+      // Check if the element exists and has some styling applied
+      expect(metricValue).toBeTruthy();
+
+      // Check for color coding - either via style or CSS class
+      const hasColorStyle =
+        metricValue && (metricValue as HTMLElement).style.color;
+      const hasWarningClass =
+        networkUtilizationElement.classList.contains("warning") ||
+        networkUtilizationElement.classList.contains("error") ||
+        networkUtilizationElement.classList.contains("high") ||
+        metricValue?.classList.contains("warning") ||
+        metricValue?.classList.contains("error") ||
+        metricValue?.classList.contains("high");
+
+      // Expect either inline style or CSS class for threshold indication
+      expect(hasColorStyle || hasWarningClass).toBeTruthy();
     });
   });
 

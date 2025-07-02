@@ -3,11 +3,10 @@ Module for FreeAgentics Active Inference implementation.
 """
 
 import logging
-from typing import Any, Tuple, Union
+from typing import Any, Union
 
 import numpy as np
 import torch
-import torch.nn as nn
 
 from .generative_model import DiscreteGenerativeModel, ModelDimensions, ModelParameters
 
@@ -26,7 +25,8 @@ class PyMDPGenerativeModel:
     in the format expected by pymdp.Agent.
     """
 
-    def __init__(self, dimensions: ModelDimensions, parameters: ModelParameters) -> None:
+    def __init__(self, dimensions: ModelDimensions,
+                 parameters: ModelParameters) -> None:
         self.dims = dimensions
         self.params = parameters
         # Initialize pymdp-compatible matrices as numpy arrays
@@ -50,7 +50,8 @@ class PyMDPGenerativeModel:
 
         # Create random observation model
         A = np.random.rand(self.dims.num_observations, self.dims.num_states)
-        # Normalize columns so each column sums to 1 (proper probability distribution)
+        # Normalize columns so each column sums to 1 (proper probability
+        # distribution)
         A = A / A.sum(axis=0, keepdims=True)
         return A
 
@@ -62,7 +63,10 @@ class PyMDPGenerativeModel:
                 B[s', s, a] = p(s'|s, a) - probability of next state s' given current state s and action a
         """
 
-        B = np.zeros((self.dims.num_states, self.dims.num_states, self.dims.num_actions))
+        B = np.zeros(
+            (self.dims.num_states,
+             self.dims.num_states,
+             self.dims.num_actions))
         for a in range(self.dims.num_actions):
             # Create random transition matrix for this action
             B_a = np.random.rand(self.dims.num_states, self.dims.num_states)
@@ -122,7 +126,8 @@ class PyMDPGenerativeModel:
         )}"
         # Ensure proper normalization for each action
         for a in range(self.dims.num_actions):
-            self.B[:, :, a] = B[:, :, a] / B[:, :, a].sum(axis=0, keepdims=True)
+            self.B[:, :, a] = B[:, :, a] / \
+                B[:, :, a].sum(axis=0, keepdims=True)
 
     def set_C_matrix(self, C: Union[np.ndarray, torch.Tensor]) -> None:
         """Set preference matrix from external source"""
@@ -162,7 +167,9 @@ class PyMDPGenerativeModel:
         return self.A, self.B, self.C, self.D
 
     @classmethod
-    def from_discrete_model(cls, discrete_model: DiscreteGenerativeModel) -> "PyMDPGenerativeModel":
+    def from_discrete_model(
+            cls,
+            discrete_model: DiscreteGenerativeModel) -> "PyMDPGenerativeModel":
         """
         Create PyMDPGenerativeModel from existing DiscreteGenerativeModel.
         Args:
@@ -175,12 +182,14 @@ class PyMDPGenerativeModel:
         # A matrix is already [obs, states] - correct for pymdp
         pymdp_model.set_A_matrix(discrete_model.A)
         # B matrix is [states, states, actions] but pymdp expects [s', s, a]
-        # Current format: B[s_next, s_curr, action] - this is already correct for pymdp!
+        # Current format: B[s_next, s_curr, action] - this is already correct
+        # for pymdp!
         pymdp_model.set_B_matrix(discrete_model.B)
         # C matrix might be 1D [obs] or 2D [obs, time]
         if discrete_model.C.dim() == 1:
             # Expand to [obs, time_horizon]
-            C_expanded = discrete_model.C.unsqueeze(1).repeat(1, discrete_model.dims.time_horizon)
+            C_expanded = discrete_model.C.unsqueeze(
+                1).repeat(1, discrete_model.dims.time_horizon)
             pymdp_model.set_C_matrix(C_expanded)
         else:
             pymdp_model.set_C_matrix(discrete_model.C)
@@ -196,16 +205,21 @@ class PyMDPGenerativeModelAdapter:
     breaking existing code.
     """
 
-    def __init__(self, base_model: Union[DiscreteGenerativeModel, PyMDPGenerativeModel]) -> None:
+    def __init__(self,
+                 base_model: Union[DiscreteGenerativeModel,
+                                   PyMDPGenerativeModel]) -> None:
         self.base_model = base_model
         if isinstance(base_model, DiscreteGenerativeModel):
-            self.pymdp_model = PyMDPGenerativeModel.from_discrete_model(base_model)
+            self.pymdp_model = PyMDPGenerativeModel.from_discrete_model(
+                base_model)
         elif isinstance(base_model, PyMDPGenerativeModel):
             self.pymdp_model = base_model
         else:
             raise ValueError(f"Unsupported model type: {type(base_model)}")
 
-    def observation_model(self, states: Union[np.ndarray, torch.Tensor]) -> np.ndarray:
+    def observation_model(self,
+                          states: Union[np.ndarray,
+                                        torch.Tensor]) -> np.ndarray:
         """Compute observations using pymdp format"""
         if isinstance(states, torch.Tensor):
             states = states.detach().cpu().numpy()
@@ -213,7 +227,10 @@ class PyMDPGenerativeModelAdapter:
         result: np.ndarray = self.pymdp_model.A @ states
         return result
 
-    def transition_model(self, states: Union[np.ndarray, torch.Tensor], action: int) -> np.ndarray:
+    def transition_model(self,
+                         states: Union[np.ndarray,
+                                       torch.Tensor],
+                         action: int) -> np.ndarray:
         """Compute state transitions using pymdp format"""
         if isinstance(states, torch.Tensor):
             states = states.detach().cpu().numpy()
@@ -291,9 +308,11 @@ def convert_torch_to_pymdp_matrices(
     if A.shape[0] != A.shape[1]:  # Not square, assume [obs, states]
         pass  # Already correct
     else:
-        # If square, we need to determine orientation - assume [states, obs] and transpose
+        # If square, we need to determine orientation - assume [states, obs] and
+        # transpose
         A = A.T
-    # B should be [s', s, a] - if it's [s, s', a], transpose first two dimensions
+    # B should be [s', s, a] - if it's [s, s', a], transpose first two
+    # dimensions
     if B.ndim == 3:
         # Assume current format is [s, s', a] and convert to [s', s, a]
         B = B.transpose(1, 0, 2)

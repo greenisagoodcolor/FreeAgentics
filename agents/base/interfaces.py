@@ -49,27 +49,22 @@ class IAgentLifecycle(ABC):
     @abstractmethod
     def start(self) -> None:
         """Start the agent and initialize all components"""
-        pass
 
     @abstractmethod
     def stop(self) -> None:
         """Stop the agent and cleanup resources"""
-        pass
 
     @abstractmethod
     def pause(self) -> None:
         """Pause agent execution"""
-        pass
 
     @abstractmethod
     def resume(self) -> None:
         """Resume agent execution"""
-        pass
 
     @abstractmethod
     def restart(self) -> None:
         """Restart the agent (stop and start)"""
-        pass
 
 
 class IAgentBehavior(ABC):
@@ -78,17 +73,14 @@ class IAgentBehavior(ABC):
     @abstractmethod
     def can_execute(self, agent: Agent, context: Dict[str, Any]) -> bool:
         """Check if this behavior can be executed in the current context"""
-        pass
 
     @abstractmethod
     def execute(self, agent: Agent, context: Dict[str, Any]) -> Dict[str, Any]:
         """Execute the behavior and return results"""
-        pass
 
     @abstractmethod
     def get_priority(self, agent: Agent, context: Dict[str, Any]) -> float:
         """Get the priority of this behavior in the current context"""
-        pass
 
 
 class IBehaviorTree(ABC):
@@ -97,17 +89,17 @@ class IBehaviorTree(ABC):
     @abstractmethod
     def add_behavior(self, behavior: IAgentBehavior) -> None:
         """Add a behavior to the tree"""
-        pass
 
     @abstractmethod
     def remove_behavior(self, behavior: IAgentBehavior) -> None:
         """Remove a behavior from the tree"""
-        pass
 
     @abstractmethod
-    def evaluate(self, agent: Agent, context: Dict[str, Any]) -> Optional[IAgentBehavior]:
+    def evaluate(self,
+                 agent: Agent,
+                 context: Dict[str,
+                               Any]) -> Optional[IAgentBehavior]:
         """Evaluate the tree and return the best behavior to execute"""
-        pass
 
 
 class IAgentFactory(ABC):
@@ -116,17 +108,14 @@ class IAgentFactory(ABC):
     @abstractmethod
     def create_agent(self, agent_type: str, **kwargs: Any) -> Agent:
         """Create an agent of the specified type"""
-        pass
 
     @abstractmethod
     def get_supported_types(self) -> List[str]:
         """Get list of supported agent types"""
-        pass
 
     @abstractmethod
     def register_type(self, agent_type: str, factory_func: Any) -> None:
         """Register a new agent type with its factory function"""
-        pass
 
 
 class IAgentRegistry(ABC):
@@ -135,53 +124,48 @@ class IAgentRegistry(ABC):
     @abstractmethod
     def register_agent(self, agent: Agent) -> None:
         """Register an agent in the registry"""
-        pass
 
     @abstractmethod
     def unregister_agent(self, agent_id: str) -> None:
         """Unregister an agent from the registry"""
-        pass
 
     @abstractmethod
     def get_agent(self, agent_id: str) -> Optional[Agent]:
         """Get an agent by ID"""
-        pass
 
     @abstractmethod
     def get_all_agents(self) -> List[Agent]:
         """Get all registered agents"""
-        pass
 
     @abstractmethod
     def find_agents_by_type(self, agent_type: str) -> List[Agent]:
         """Find agents by type"""
-        pass
 
     @abstractmethod
-    def find_agents_in_range(self, position: Position, radius: float) -> List[Agent]:
+    def find_agents_in_range(
+            self,
+            position: Position,
+            radius: float) -> List[Agent]:
         """Find agents within a specified range of a position"""
-        pass
 
 
 class ICommunicationProtocol(ABC):
     """Abstract interface for agent communication protocols"""
 
     @abstractmethod
-    def send_message(self, from_agent: str, to_agent: str, message: Dict[str, Any]) -> bool:
+    def send_message(self, from_agent: str, to_agent: str,
+                     message: Dict[str, Any]) -> bool:
         """Send a message from one agent to another"""
-        pass
 
     @abstractmethod
     def broadcast_message(
         self, from_agent: str, message: Dict[str, Any], radius: Optional[float] = None
     ) -> List[str]:
         """Broadcast a message to nearby agents"""
-        pass
 
     @abstractmethod
     def receive_messages(self, agent_id: str) -> List[Dict[str, Any]]:
         """Retrieve pending messages for an agent"""
-        pass
 
 
 class IWorldInterface(ABC):
@@ -190,51 +174,44 @@ class IWorldInterface(ABC):
     @abstractmethod
     def get_world_state(self) -> Dict[str, Any]:
         """Get current world state"""
-        pass
 
     @abstractmethod
     def can_move_to(self, agent: Agent, position: Position) -> bool:
         """Check if agent can move to specified position"""
-        pass
 
     @abstractmethod
     def move_agent(self, agent: Agent, new_position: Position) -> bool:
         """Move agent to new position"""
-        pass
 
     @abstractmethod
-    def get_nearby_objects(self, position: Position, radius: float) -> List[Dict[str, Any]]:
+    def get_nearby_objects(self, position: Position,
+                           radius: float) -> List[Dict[str, Any]]:
         """Get objects near a position"""
-        pass
 
     @abstractmethod
     def perform_action(self, agent: Agent, action: Action) -> Dict[str, Any]:
         """Perform an action in the world"""
-        pass
 
 
 class IActiveInferenceInterface(ABC):
     """Abstract interface for Active Inference integration"""
 
     @abstractmethod
-    def update_beliefs(self, agent: Agent, observations: NDArray[np.float64]) -> None:
+    def update_beliefs(self, agent: Agent,
+                       observations: NDArray[np.float64]) -> None:
         """Update agent beliefs based on observations"""
-        pass
 
     @abstractmethod
     def select_action(self, agent: Agent) -> Action:
         """Select best action using Active Inference"""
-        pass
 
     @abstractmethod
     def compute_free_energy(self, agent: Agent) -> float:
         """Compute variational free energy for agent"""
-        pass
 
     @abstractmethod
     def get_belief_state(self, agent: Agent) -> NDArray[np.float64]:
         """Get current belief state of agent"""
-        pass
 
 
 class IAgentEventHandler(ABC):
@@ -243,24 +220,24 @@ class IAgentEventHandler(ABC):
     @abstractmethod
     def on_agent_created(self, agent: Agent) -> None:
         """Handle agent creation event"""
-        pass
 
     @abstractmethod
     def on_agent_destroyed(self, agent: Agent) -> None:
         """Handle agent destruction event"""
-        pass
 
     @abstractmethod
-    def on_agent_moved(self, agent: Agent, old_position: Position, new_position: Position) -> None:
+    def on_agent_moved(
+            self,
+            agent: Agent,
+            old_position: Position,
+            new_position: Position) -> None:
         """Called when an agent moves"""
-        pass
 
     @abstractmethod
     def on_agent_status_changed(
         self, agent: Agent, old_status: AgentStatus, new_status: AgentStatus
     ) -> None:
         """Called when an agent's status changes."""
-        pass
 
 
 class IAgentPlugin(ABC):
@@ -269,27 +246,22 @@ class IAgentPlugin(ABC):
     @abstractmethod
     def get_name(self) -> str:
         """Get plugin name"""
-        pass
 
     @abstractmethod
     def get_version(self) -> str:
         """Get plugin version"""
-        pass
 
     @abstractmethod
     def initialize(self, agent: Agent) -> None:
         """Initialize plugin for agent"""
-        pass
 
     @abstractmethod
     def update(self, agent: Agent, delta_time: float) -> None:
         """Update plugin logic."""
-        pass
 
     @abstractmethod
     def cleanup(self, agent: Agent) -> None:
         """Cleanup plugin resources"""
-        pass
 
 
 class IConfigurationProvider(ABC):
@@ -298,22 +270,18 @@ class IConfigurationProvider(ABC):
     @abstractmethod
     def get_config(self, key: str, default: Any = None) -> Any:
         """Get configuration value"""
-        pass
 
     @abstractmethod
     def set_config(self, key: str, value: Any) -> None:
         """Set configuration value"""
-        pass
 
     @abstractmethod
     def get_all_config(self) -> Dict[str, Any]:
         """Get all configuration values."""
-        pass
 
     @abstractmethod
     def reload_config(self) -> None:
         """Reload configuration from source"""
-        pass
 
 
 # Protocol for extensible agent types
@@ -340,22 +308,18 @@ class IAgentLogger(ABC):
     @abstractmethod
     def log_debug(self, agent_id: str, message: str, **kwargs: Any) -> None:
         """Log debug message"""
-        pass
 
     @abstractmethod
     def log_info(self, agent_id: str, message: str, **kwargs: Any) -> None:
         """Log info message"""
-        pass
 
     @abstractmethod
     def log_warning(self, agent_id: str, message: str, **kwargs: Any) -> None:
         """Log warning message."""
-        pass
 
     @abstractmethod
     def log_error(self, agent_id: str, message: str, **kwargs: Any) -> None:
         """Log error message"""
-        pass
 
 
 class IMarkovBlanketInterface(ABC):
@@ -364,34 +328,31 @@ class IMarkovBlanketInterface(ABC):
     @abstractmethod
     def get_dimensions(self) -> "MarkovBlanketDimensions":
         """Get the current dimensions of the Markov blanket"""
-        pass
 
     @abstractmethod
-    def update_states(self, agent_state: Any, environment_state: np.ndarray) -> None:
+    def update_states(
+            self,
+            agent_state: Any,
+            environment_state: np.ndarray) -> None:
         """Update the internal and boundary states of the Markov blanket"""
-        pass
 
     @abstractmethod
     def verify_independence(self) -> Tuple[float, Dict[str, Any]]:
         """Verify statistical independence of the Markov blanket boundary"""
-        pass
 
     @abstractmethod
     def detect_violations(self) -> List["BoundaryViolationEvent"]:
         """Detect any boundary violations"""
-        pass
 
     @abstractmethod
     def get_metrics(self) -> "BoundaryMetrics":
         """Get current boundary integrity metrics"""
-        pass
 
     @abstractmethod
     def get_boundary_state(self) -> "BoundaryState":
         """Get the current state of the boundary"""
-        pass
 
     @abstractmethod
-    def set_violation_handler(self, handler: Callable[["BoundaryViolationEvent"], None]) -> None:
+    def set_violation_handler(
+            self, handler: Callable[["BoundaryViolationEvent"], None]) -> None:
         """Set a handler for boundary violation events"""
-        pass

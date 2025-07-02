@@ -14,7 +14,7 @@ Mathematical Foundation:
 """
 
 import logging
-from collections import defaultdict
+# from collections import defaultdict  # unused
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
@@ -24,7 +24,7 @@ import numpy as np
 import scipy.stats as stats
 
 from infrastructure.safety.markov_blanket_verification import BoundaryViolation
-from infrastructure.safety.safety_protocols import SafetyLevel, ViolationType
+from infrastructure.safety.safety_protocols import SafetyLevel
 
 logger = logging.getLogger(__name__)
 
@@ -135,7 +135,10 @@ class RiskMitigationAnalyzer:
         """Add a violation record for analysis"""
         self.violation_history.append(violation)
 
-    def add_integrity_measurement(self, timestamp: datetime, integrity_score: float) -> None:
+    def add_integrity_measurement(
+            self,
+            timestamp: datetime,
+            integrity_score: float) -> None:
         """Record boundary integrity measurement"""
         self.integrity_measurements.append((timestamp, integrity_score))
 
@@ -195,8 +198,10 @@ class RiskMitigationAnalyzer:
         if len(baseline_violations) > 0 or len(current_violations) > 0:
             # Use Poisson test for count data
             p_value = stats.poisson.pmf(
-                len(current_violations), len(baseline_violations) * current_days / baseline_days
-            )
+                len(current_violations),
+                len(baseline_violations) *
+                current_days /
+                baseline_days)
         else:
             p_value = 1.0
 
@@ -241,14 +246,12 @@ class RiskMitigationAnalyzer:
 
         # Calculate means
         current_mttd = np.mean([t.total_seconds() for t in current_times])
-        baseline_mttd = (
-            np.mean([t.total_seconds() for t in baseline_times]) if baseline_times else current_mttd
-        )
+        baseline_mttd = (np.mean(
+            [t.total_seconds() for t in baseline_times]) if baseline_times else current_mttd)
 
         # Calculate improvement
-        improvement_pct = (
-            ((baseline_mttd - current_mttd) / baseline_mttd * 100) if baseline_mttd > 0 else 0.0
-        )
+        improvement_pct = (((baseline_mttd - current_mttd) /
+                            baseline_mttd * 100) if baseline_mttd > 0 else 0.0)
 
         # Statistical test (t-test)
         if len(current_times) > 1 and len(baseline_times) > 1:
@@ -262,7 +265,8 @@ class RiskMitigationAnalyzer:
         # Confidence interval
         if len(current_times) > 1:
             se = stats.sem([t.total_seconds() for t in current_times])
-            ci_margin = se * stats.t.ppf((1 + self.confidence_level) / 2, len(current_times) - 1)
+            ci_margin = se * \
+                stats.t.ppf((1 + self.confidence_level) / 2, len(current_times) - 1)
             ci_lower = max(0, current_mttd - ci_margin)
             ci_upper = current_mttd + ci_margin
         else:
@@ -315,7 +319,8 @@ class RiskMitigationAnalyzer:
 
         # Confidence interval
         se = stats.sem(current_measurements)
-        ci_margin = se * stats.t.ppf((1 + self.confidence_level) / 2, len(current_measurements) - 1)
+        ci_margin = se * stats.t.ppf((1 + self.confidence_level) /
+                                     2, len(current_measurements) - 1)
         ci_lower = max(0, min(1, current_integrity - ci_margin))
         ci_upper = min(1, current_integrity + ci_margin)
 
@@ -364,8 +369,7 @@ class RiskMitigationAnalyzer:
         baseline_end = current_period[0]
         baseline_start = baseline_end - timedelta(days=self.baseline_period_days)
         baseline_violations = [
-            v for v in self.violation_history if baseline_start <= v.timestamp <= baseline_end
-        ]
+            v for v in self.violation_history if baseline_start <= v.timestamp <= baseline_end]
 
         baseline_risk = 0.0
         for violation in baseline_violations:
@@ -387,7 +391,8 @@ class RiskMitigationAnalyzer:
                 sample_violations = np.random.choice(
                     current_violations, size=len(current_violations), replace=True
                 )
-                sample_risk = sum(self.risk_weights.get(v.severity, 1.0) for v in sample_violations)
+                sample_risk = sum(self.risk_weights.get(v.severity, 1.0)
+                                  for v in sample_violations)
                 bootstrap_scores.append(sample_risk / period_days)
 
             ci_lower = np.percentile(bootstrap_scores, (1 - self.confidence_level) * 50)
@@ -404,11 +409,10 @@ class RiskMitigationAnalyzer:
             for _ in range(1000):
                 np.random.shuffle(all_violations)
                 perm_current = all_violations[: len(current_violations)]
-                perm_baseline = all_violations[len(current_violations) :]
+                perm_baseline = all_violations[len(current_violations):]
 
-                perm_current_risk = (
-                    sum(self.risk_weights.get(v.severity, 1.0) for v in perm_current) / period_days
-                )
+                perm_current_risk = (sum(self.risk_weights.get(v.severity, 1.0)
+                                         for v in perm_current) / period_days)
                 perm_baseline_risk = (
                     sum(self.risk_weights.get(v.severity, 1.0) for v in perm_baseline)
                     / self.baseline_period_days
@@ -456,12 +460,12 @@ class RiskMitigationAnalyzer:
         baseline_end = current_period[0]
         baseline_start = baseline_end - timedelta(days=self.baseline_period_days)
         baseline_violations = [
-            v for v in self.violation_history if baseline_start <= v.timestamp <= baseline_end
-        ]
+            v for v in self.violation_history if baseline_start <= v.timestamp <= baseline_end]
 
         # Calculate prevented incidents
         baseline_rate = len(baseline_violations) / self.baseline_period_days
-        expected_violations = baseline_rate * (current_period[1] - current_period[0]).days
+        expected_violations = baseline_rate * \
+            (current_period[1] - current_period[0]).days
         prevented_violations = max(0, expected_violations - len(current_violations))
 
         # Calculate cost savings
@@ -474,15 +478,18 @@ class RiskMitigationAnalyzer:
 
         # Cost-benefit ratio
         cost_benefit_ratio = (
-            cost_savings / implementation_cost if implementation_cost > 0 else float("inf")
-        )
+            cost_savings /
+            implementation_cost if implementation_cost > 0 else float("inf"))
 
         return RiskMetric(
             metric_type=MetricType.COST_EFFECTIVENESS,
             value=cost_benefit_ratio,
             baseline_value=1.0,  # Break-even point
             improvement_percentage=roi * 100,
-            confidence_interval=(cost_benefit_ratio * 0.8, cost_benefit_ratio * 1.2),  # Simplified
+            confidence_interval=(
+                cost_benefit_ratio * 0.8,
+                cost_benefit_ratio * 1.2),
+            # Simplified
             statistical_significance=0.05 if cost_benefit_ratio > 1.5 else 0.5,
             measurement_period=current_period[1] - current_period[0],
         )
@@ -534,7 +541,8 @@ class RiskMitigationAnalyzer:
         baseline_risk_score = risk_score_metric.baseline_value
         risk_reduction_percentage = risk_score_metric.improvement_percentage
 
-        # Regulatory compliance score (based on boundary integrity and violation frequency)
+        # Regulatory compliance score (based on boundary integrity and violation
+        # frequency)
         compliance_score = (
             integrity_metric.value * 0.5  # 50% weight on integrity
             + (1 - min(1, frequency_metric.value)) * 0.3  # 30% weight on low violations
@@ -564,8 +572,10 @@ class RiskMitigationAnalyzer:
         )
 
     def _generate_executive_summary(
-        self, metrics: List[RiskMetric], risk_reduction_pct: float, compliance_score: float
-    ) -> str:
+            self,
+            metrics: List[RiskMetric],
+            risk_reduction_pct: float,
+            compliance_score: float) -> str:
         """Generate executive summary for the report"""
         significant_improvements = sum(1 for m in metrics if m.is_significant())
 
@@ -577,7 +587,7 @@ in overall risk score during the reporting period. {significant_improvements} ou
 key metrics show statistically significant improvements.
 
 Key Achievements:
-- Regulatory compliance score: {compliance_score*100:.1f}%
+- Regulatory compliance score: {compliance_score * 100:.1f}%
 - Boundary integrity maintained above critical thresholds
 - Demonstrated cost-effectiveness with positive ROI
 
@@ -627,13 +637,14 @@ effective in reducing safety violations while maintaining system performance.
 
         return recommendations
 
-    def export_metrics_for_investors(self, report: RiskMitigationReport) -> Dict[str, Any]:
+    def export_metrics_for_investors(
+            self, report: RiskMitigationReport) -> Dict[str, Any]:
         """Export metrics in investor-friendly format"""
         return {
             "executive_summary": report.executive_summary,
             "key_metrics": {
                 "risk_reduction": f"{report.risk_reduction_percentage:.1f}%",
-                "compliance_score": f"{report.regulatory_compliance_score*100:.1f}%",
+                "compliance_score": f"{report.regulatory_compliance_score * 100:.1f}%",
                 "roi": f"{(report.cost_benefit_ratio - 1) * 100:.1f}%",
                 "system_reliability": "99.8%",  # Example
             },

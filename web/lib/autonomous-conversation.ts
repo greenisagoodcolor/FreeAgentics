@@ -592,9 +592,17 @@ export class AutonomousConversationSystem {
       id: "test-agent",
       name: "Test Agent",
       inConversation: false,
+      status: "idle" as const,
       position: { x: 0, y: 0 },
       color: "#000",
       knowledge: [],
+      personality: {
+        openness: 0.5,
+        conscientiousness: 0.5,
+        extraversion: 0.5,
+        agreeableness: 0.5,
+        neuroticism: 0.5,
+      },
       autonomyEnabled: true,
     };
   }

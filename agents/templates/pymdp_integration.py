@@ -18,7 +18,7 @@ Expert Committee Validation:
 """
 
 import warnings
-from typing import Dict, List, Tuple, Union
+from typing import Dict, Union
 
 import numpy as np
 from numpy.typing import NDArray
@@ -26,16 +26,14 @@ from numpy.typing import NDArray
 # Import pymdp with fallback handling
 try:
     from pymdp import Agent as PyMDPAgent
-    from pymdp.maths import dot, entropy, kl_divergence, softmax
-    from pymdp.utils import convert_observation_array_to_onehot, sample
+    from pymdp.maths import dot, entropy, kl_divergence
 
     PYMDP_AVAILABLE = True
 except ImportError:
     PYMDP_AVAILABLE = False
     warnings.warn(
         "pymdp library not available - mathematical operations will use "
-        "fallback implementations. For production use, install: pip install pymdp"
-    )
+        "fallback implementations. For production use, install: pip install pymdp")
 
 from .base_template import BeliefState, GenerativeModelParams, TemplateConfig
 
@@ -53,7 +51,10 @@ class PyMDPAgentWrapper:
         All free energy calculations follow: F = E_q[ln q(s) - ln p(o,s)]
     """
 
-    def __init__(self, model_params: GenerativeModelParams, config: TemplateConfig) -> None:
+    def __init__(
+            self,
+            model_params: GenerativeModelParams,
+            config: TemplateConfig) -> None:
         """
         Initialize pymdp agent wrapper.
 
@@ -101,7 +102,8 @@ class PyMDPAgentWrapper:
             self.current_beliefs = self.model_params.D.copy()
 
         except Exception as e:
-            warnings.warn(f"Failed to create pymdp agent: {e}. Using fallback.")
+            warnings.warn(
+                f"Failed to create pymdp agent: {e}. Using fallback.")
             self._create_fallback_agent()
 
     def _create_fallback_agent(self) -> None:
@@ -111,9 +113,12 @@ class PyMDPAgentWrapper:
 
         # Fallback mathematical operations
         self._fallback_softmax = lambda x: np.exp(x) / np.sum(np.exp(x))
-        self._fallback_kl_div = lambda p, q: np.sum(p * np.log((p + 1e-16) / (q + 1e-16)))
+        self._fallback_kl_div = lambda p, q: np.sum(
+            p * np.log((p + 1e-16) / (q + 1e-16)))
 
-    def update_beliefs(self, observation: Union[int, NDArray[np.float64]]) -> BeliefState:
+    def update_beliefs(self,
+                       observation: Union[int,
+                                          NDArray[np.float64]]) -> BeliefState:
         """
         Perform Bayesian belief update using pymdp.
 
@@ -136,7 +141,9 @@ class PyMDPAgentWrapper:
         else:
             return self._fallback_belief_update(observation)
 
-    def _pymdp_belief_update(self, observation: Union[int, NDArray[np.float64]]) -> BeliefState:
+    def _pymdp_belief_update(self,
+                             observation: Union[int,
+                                                NDArray[np.float64]]) -> BeliefState:
         """Perform belief update using official pymdp library"""
         try:
             # Convert observation to pymdp format
@@ -157,7 +164,8 @@ class PyMDPAgentWrapper:
             else:
                 beliefs = posterior_beliefs
 
-            # Ensure proper normalization (pymdp should handle this, but verify)
+            # Ensure proper normalization (pymdp should handle this, but
+            # verify)
             beliefs = beliefs / np.sum(beliefs)
 
             # Update current beliefs
@@ -165,7 +173,8 @@ class PyMDPAgentWrapper:
 
             # Create BeliefState with uniform policy distribution
             # (policies will be computed separately via infer_policies)
-            policies = np.ones(self.config.num_policies) / self.config.num_policies
+            policies = np.ones(self.config.num_policies) / \
+                self.config.num_policies
 
             # Create new belief state
             belief_state = BeliefState(
@@ -182,7 +191,8 @@ class PyMDPAgentWrapper:
             warnings.warn(f"PyMDP belief update failed: {e}. Using fallback.")
             return self._fallback_belief_update(observation)
 
-    def _fallback_belief_update(self, observation: Union[int, NDArray[np.float64]]) -> BeliefState:
+    def _fallback_belief_update(
+            self, observation: Union[int, NDArray[np.float64]]) -> BeliefState:
         """Fallback Bayesian belief update implementation"""
         # Extract observation likelihood
         if isinstance(observation, int):
@@ -217,9 +227,10 @@ class PyMDPAgentWrapper:
 
         return belief_state
 
-    def compute_free_energy(
-        self, beliefs: BeliefState, observation: Union[int, NDArray[np.float64]]
-    ) -> float:
+    def compute_free_energy(self,
+                            beliefs: BeliefState,
+                            observation: Union[int,
+                                               NDArray[np.float64]]) -> float:
         """
         Compute variational free energy using pymdp.
 
@@ -243,9 +254,10 @@ class PyMDPAgentWrapper:
         else:
             return self._fallback_free_energy(beliefs, observation)
 
-    def _pymdp_free_energy(
-        self, beliefs: BeliefState, observation: Union[int, NDArray[np.float64]]
-    ) -> float:
+    def _pymdp_free_energy(self,
+                           beliefs: BeliefState,
+                           observation: Union[int,
+                                              NDArray[np.float64]]) -> float:
         """Compute free energy using pymdp mathematical operations"""
         try:
             # KL divergence from prior: D_KL[q(s)||P(s)]
@@ -254,9 +266,8 @@ class PyMDPAgentWrapper:
             # Expected log-likelihood: E_q[ln P(o|s)]
             if isinstance(observation, int):
                 # Single observation
-                log_likelihood = dot(
-                    beliefs.beliefs, np.log(self.model_params.A[observation, :] + 1e-16)
-                )
+                log_likelihood = dot(beliefs.beliefs, np.log(
+                    self.model_params.A[observation, :] + 1e-16))
             else:
                 # Observation distribution
                 log_likelihood = 0.0
@@ -272,21 +283,22 @@ class PyMDPAgentWrapper:
             return float(free_energy)
 
         except Exception as e:
-            warnings.warn(f"PyMDP free energy computation failed: {e}. Using fallback.")
+            warnings.warn(
+                f"PyMDP free energy computation failed: {e}. Using fallback.")
             return self._fallback_free_energy(beliefs, observation)
 
-    def _fallback_free_energy(
-        self, beliefs: BeliefState, observation: Union[int, NDArray[np.float64]]
-    ) -> float:
+    def _fallback_free_energy(self,
+                              beliefs: BeliefState,
+                              observation: Union[int,
+                                                 NDArray[np.float64]]) -> float:
         """Fallback free energy computation"""
         # KL divergence from prior
         kl_prior = self._fallback_kl_div(beliefs.beliefs, self.model_params.D)
 
         # Expected log-likelihood
         if isinstance(observation, int):
-            log_likelihood = np.dot(
-                beliefs.beliefs, np.log(self.model_params.A[observation, :] + 1e-16)
-            )
+            log_likelihood = np.dot(beliefs.beliefs, np.log(
+                self.model_params.A[observation, :] + 1e-16))
         else:
             log_likelihood = 0.0
             for o in range(len(observation)):
@@ -318,7 +330,8 @@ class PyMDPAgentWrapper:
         else:
             return self._fallback_policy_inference(beliefs)
 
-    def _pymdp_policy_inference(self, beliefs: BeliefState) -> NDArray[np.float64]:
+    def _pymdp_policy_inference(self,
+                                beliefs: BeliefState) -> NDArray[np.float64]:
         """Infer policies using pymdp expected free energy"""
         try:
             # Update agent's internal beliefs
@@ -340,17 +353,20 @@ class PyMDPAgentWrapper:
             return policies
 
         except Exception as e:
-            warnings.warn(f"PyMDP policy inference failed: {e}. Using fallback.")
+            warnings.warn(
+                f"PyMDP policy inference failed: {e}. Using fallback.")
             return self._fallback_policy_inference(beliefs)
 
-    def _fallback_policy_inference(self, beliefs: BeliefState) -> NDArray[np.float64]:
+    def _fallback_policy_inference(
+            self, beliefs: BeliefState) -> NDArray[np.float64]:
         """Fallback policy inference using simplified expected free energy"""
         # Simplified expected free energy computation
         policy_values = np.zeros(self.config.num_policies)
 
         for pi in range(self.config.num_policies):
             # Predict next state using transition model
-            predicted_state = np.dot(self.model_params.B[:, :, pi], beliefs.beliefs)
+            predicted_state = np.dot(
+                self.model_params.B[:, :, pi], beliefs.beliefs)
 
             # Compute expected observation
             expected_obs = np.dot(self.model_params.A, predicted_state)
@@ -359,14 +375,16 @@ class PyMDPAgentWrapper:
             pragmatic_value = np.dot(expected_obs, self.model_params.C)
 
             # Epistemic value: expected information gain (simplified)
-            epistemic_value = entropy(predicted_state) - entropy(beliefs.beliefs)
+            epistemic_value = entropy(
+                predicted_state) - entropy(beliefs.beliefs)
 
             # Total expected free energy (negative because we minimize)
             policy_values[pi] = -(pragmatic_value + 0.1 * epistemic_value)
 
         # Convert to probabilities using precision-weighted softmax
         # π = softmax(-β * G)
-        policies = self._fallback_softmax(-self.model_params.precision_policy * policy_values)
+        policies = self._fallback_softmax(
+            -self.model_params.precision_policy * policy_values)
 
         return policies
 

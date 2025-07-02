@@ -6,8 +6,7 @@ ensuring proper event handling and PyMDP/GNN alignment.
 """
 
 from datetime import UTC, datetime, timezone
-from typing import Any, Dict, List
-from unittest.mock import Mock, call, patch
+from unittest.mock import Mock
 
 import pytest
 
@@ -108,7 +107,8 @@ class TestCoalitionFormationMonitor:
     def setup_method(self):
         """Set up test fixtures."""
         self.mock_engine = Mock()
-        self.monitor = CoalitionFormationMonitor(formation_engine=self.mock_engine)
+        self.monitor = CoalitionFormationMonitor(
+            formation_engine=self.mock_engine)
 
     def test_initialization_with_engine(self):
         """Test monitor initialization with provided engine."""
@@ -144,7 +144,8 @@ class TestCoalitionFormationMonitor:
         handler = Mock()
         self.monitor.register_event_handler(handler)
 
-        event = CoalitionMonitoringEvent(event_type="test_event", coalition_id="test_123")
+        event = CoalitionMonitoringEvent(
+            event_type="test_event", coalition_id="test_123")
 
         self.monitor._emit_event(event)
 

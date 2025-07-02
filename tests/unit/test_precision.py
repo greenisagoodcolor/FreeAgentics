@@ -56,7 +56,8 @@ class TestGradientPrecisionOptimizer:
     def setup_method(self) -> None:
         """Set up test environment"""
         self.config = PrecisionConfig(use_gpu=False, init_precision=1.0)
-        self.optimizer = GradientPrecisionOptimizer(self.config, num_modalities=2)
+        self.optimizer = GradientPrecisionOptimizer(
+            self.config, num_modalities=2)
 
     def test_initialization(self) -> None:
         """Test optimizer initialization"""
@@ -134,7 +135,8 @@ class TestHierarchicalPrecisionOptimizer:
         """Set up test environment"""
         self.config = PrecisionConfig(use_gpu=False)
         self.level_dims = [3, 2, 1]
-        self.optimizer = HierarchicalPrecisionOptimizer(self.config, self.level_dims)
+        self.optimizer = HierarchicalPrecisionOptimizer(
+            self.config, self.level_dims)
 
     def test_initialization(self) -> None:
         """Test hierarchical initialization"""
@@ -185,7 +187,8 @@ class TestHierarchicalPrecisionOptimizer:
             self.optimizer._optimize_precision_hierarchical(errors)
         # Transpose the error history
         error_history_per_level = list(zip(*error_history))
-        volatilities = self.optimizer._estimate_volatility_hierarchical(error_history_per_level)
+        volatilities = self.optimizer._estimate_volatility_hierarchical(
+            error_history_per_level)
         assert len(volatilities) == 3
         assert volatilities[0].shape == (3,)
         # Level 0 should have high volatility (alternating)
@@ -218,7 +221,8 @@ class TestMetaLearningPrecisionOptimizer:
         context = torch.randn(3)
         features = self.optimizer.extract_features(errors, context)
         # Should have correct dimension
-        assert features.shape[0] == (6 + self.optimizer.input_dim)  # 6 error stats + context
+        assert features.shape[0] == (
+            6 + self.optimizer.input_dim)  # 6 error stats + context
 
     def test_precision_optimization_with_context(self) -> None:
         """Test optimization with context"""
@@ -235,7 +239,8 @@ class TestMetaLearningPrecisionOptimizer:
             errors = torch.randn(5, 2)
             self.optimizer._optimize_precision_hierarchical(errors)
         # Check buffer size
-        assert len(self.optimizer.context_buffer) == self.optimizer.max_context_size
+        assert len(
+            self.optimizer.context_buffer) == self.optimizer.max_context_size
 
     def test_meta_update(self) -> None:
         """Test meta-learning update"""
@@ -248,7 +253,8 @@ class TestMetaLearningPrecisionOptimizer:
         # Perform meta update
         self.optimizer.meta_update(num_steps=1)
         # Check weights have changed
-        assert not torch.allclose(weights_before, self.optimizer.meta_network[0].weight.data)
+        assert not torch.allclose(weights_before,
+                                  self.optimizer.meta_network[0].weight.data)
 
     def test_volatility_from_buffer(self) -> None:
         """Test volatility estimation from context buffer"""
@@ -267,7 +273,8 @@ class TestAdaptivePrecisionController:
     def setup_method(self) -> None:
         """Set up test environment"""
         self.config = PrecisionConfig(use_gpu=False)
-        self.controller = AdaptivePrecisionController(self.config, num_modalities=2, context_dim=4)
+        self.controller = AdaptivePrecisionController(
+            self.config, num_modalities=2, context_dim=4)
 
     def test_initialization(self) -> None:
         """Test controller initialization"""
@@ -332,17 +339,20 @@ class TestPrecisionFactory:
 
     def test_create_hierarchical_optimizer(self) -> None:
         """Test creating hierarchical optimizer"""
-        optimizer = create_precision_optimizer("hierarchical", level_dims=[2, 2])
+        optimizer = create_precision_optimizer(
+            "hierarchical", level_dims=[2, 2])
         assert isinstance(optimizer, HierarchicalPrecisionOptimizer)
 
     def test_create_meta_optimizer(self) -> None:
         """Test creating meta-learning optimizer"""
-        optimizer = create_precision_optimizer("meta", input_dim=4, hidden_dim=16, num_modalities=2)
+        optimizer = create_precision_optimizer(
+            "meta", input_dim=4, hidden_dim=16, num_modalities=2)
         assert isinstance(optimizer, MetaLearningPrecisionOptimizer)
 
     def test_create_adaptive_controller(self) -> None:
         """Test creating adaptive controller"""
-        controller = create_precision_optimizer("adaptive", num_modalities=2, context_dim=4)
+        controller = create_precision_optimizer(
+            "adaptive", num_modalities=2, context_dim=4)
         assert isinstance(controller, AdaptivePrecisionController)
 
     def test_invalid_optimizer_type(self) -> None:
@@ -353,7 +363,8 @@ class TestPrecisionFactory:
     def test_custom_config(self) -> None:
         """Test creation with custom config"""
         config = PrecisionConfig(learning_rate=0.5)
-        optimizer = create_precision_optimizer("gradient", config=config, num_modalities=2)
+        optimizer = create_precision_optimizer(
+            "gradient", config=config, num_modalities=2)
         assert optimizer.config.learning_rate == 0.5
 
 

@@ -30,6 +30,7 @@ try:
     from inference.engine.policy_selection import PolicyConfig
     from inference.engine.precision import PrecisionConfig
     from inference.engine.temporal_planning import PlanningConfig
+
     ACTIVE_INFERENCE_AVAILABLE = True
 except (ImportError, RuntimeError) as e:
     # Handle PyTorch import errors or runtime errors
@@ -51,11 +52,11 @@ except (ImportError, RuntimeError) as e:
 
 # Import base agent components (these should not depend on PyTorch)
 from agents.base.data_model import Agent, AgentGoal, AgentStatus
-from agents.base.state_manager import AgentStateManager
-from agents.base.perception import PerceptionSystem, Percept, StimulusType
-from agents.base.decision_making import DecisionSystem, Action, ActionType
+from agents.base.decision_making import Action, ActionType, DecisionSystem
+from agents.base.memory import Memory, MemorySystem, MemoryType
 from agents.base.movement import MovementController
-from agents.base.memory import MemorySystem, Memory, MemoryType
+from agents.base.perception import Percept, PerceptionSystem, StimulusType
+from agents.base.state_manager import AgentStateManager
 
 """
 Active Inference Integration for Basic Agent System
@@ -121,7 +122,10 @@ class StateToBeliefMapper:
             "social": 10,
         }
 
-    def map_to_belief(self, agent: Agent, state_manager: AgentStateManager) -> np.ndarray:
+    def map_to_belief(
+            self,
+            agent: Agent,
+            state_manager: AgentStateManager) -> np.ndarray:
         """Convert agent state to belief vector"""
         belief_vector = []
         pos = agent.position
@@ -149,8 +153,10 @@ class StateToBeliefMapper:
         for i in range(max_goals):
             if i < len(goals):
                 goal = goals[i]
-                priority_map: Dict[str, float] = {"high": 1.0, "medium": 0.5, "low": 0.2}
-                priority_str = str(goal.priority) if goal.priority is not None else "medium"
+                priority_map: Dict[str, float] = {
+                    "high": 1.0, "medium": 0.5, "low": 0.2}
+                priority_str = str(
+                    goal.priority) if goal.priority is not None else "medium"
                 priority_val = priority_map.get(priority_str, 0.5)
                 features.append(priority_val)
             else:
@@ -164,8 +170,8 @@ class StateToBeliefMapper:
         if hasattr(agent, "relationships") and agent.relationships:
             # Assume relationships is a dict with trust-like values
             trust_values = [
-                float(v) for v in agent.relationships.values() if isinstance(v, (int, float))
-            ]
+                float(v) for v in agent.relationships.values() if isinstance(
+                    v, (int, float))]
             avg_trust = float(np.mean(trust_values)) if trust_values else 0.5
             features.append(avg_trust)
             relationship_density = min(len(agent.relationships) / 10.0, 1.0)
@@ -206,9 +212,12 @@ class PerceptionToObservationMapper:
     def map_to_observation(self, percepts: List[Percept]) -> np.ndarray:
         """Convert percepts to observation vector"""
         observation = np.zeros(self.config.num_observations)
-        visual_percepts = [p for p in percepts if p.stimulus.stimulus_type == StimulusType.OBJECT]
-        auditory_percepts = [p for p in percepts if p.stimulus.stimulus_type == StimulusType.SOUND]
-        proximity_percepts = [p for p in percepts if p.stimulus.stimulus_type == StimulusType.AGENT]
+        visual_percepts = [
+            p for p in percepts if p.stimulus.stimulus_type == StimulusType.OBJECT]
+        auditory_percepts = [
+            p for p in percepts if p.stimulus.stimulus_type == StimulusType.SOUND]
+        proximity_percepts = [
+            p for p in percepts if p.stimulus.stimulus_type == StimulusType.AGENT]
         idx = 0
         # Visual features
         visual_dim = self.observation_dimensions["visual"]
@@ -220,14 +229,16 @@ class PerceptionToObservationMapper:
         # Auditory features
         auditory_dim = self.observation_dimensions["auditory"]
         if auditory_dim > 0 and idx < len(observation):
-            auditory_features = self._encode_auditory_percepts(auditory_percepts)
+            auditory_features = self._encode_auditory_percepts(
+                auditory_percepts)
             end_idx = min(idx + auditory_dim, len(observation))
             observation[idx:end_idx] = auditory_features[: end_idx - idx]
             idx = end_idx
         # Proximity features
         proximity_dim = self.observation_dimensions["proximity"]
         if proximity_dim > 0 and idx < len(observation):
-            proximity_features = self._encode_proximity_percepts(proximity_percepts)
+            proximity_features = self._encode_proximity_percepts(
+                proximity_percepts)
             end_idx = min(idx + proximity_dim, len(observation))
             observation[idx:end_idx] = proximity_features[: end_idx - idx]
         return observation
@@ -251,10 +262,12 @@ class PerceptionToObservationMapper:
             if i * 3 < len(features):
                 features[i * 3] = percept.confidence
                 features[i * 3 + 1] = percept.confidence
-                features[i * 3 + 2] = getattr(percept.stimulus, "intensity", 0.5)
+                features[i * 3 +
+                         2] = getattr(percept.stimulus, "intensity", 0.5)
         return features
 
-    def _encode_proximity_percepts(self, percepts: List[Percept]) -> np.ndarray:
+    def _encode_proximity_percepts(
+            self, percepts: List[Percept]) -> np.ndarray:
         """Encode proximity percepts into feature vector"""
         features = np.zeros(self.observation_dimensions["proximity"])
         if percepts:
@@ -280,7 +293,8 @@ class ActionMapper:
 
     def map_to_agent_action(self, action_idx: int, agent: Agent) -> Action:
         """Convert active inference action index to agent action"""
-        action_type: ActionType = self.action_map.get(action_idx, ActionType.WAIT)
+        action_type: ActionType = self.action_map.get(
+            action_idx, ActionType.WAIT)
         action = Action(
             action_type=action_type,
             parameters=self._get_action_parameters(action_type, agent),
@@ -289,7 +303,8 @@ class ActionMapper:
         )
         return action
 
-    def _get_action_parameters(self, action_type: ActionType, agent: Agent) -> Dict[str, Any]:
+    def _get_action_parameters(self, action_type: ActionType,
+                               agent: Agent) -> Dict[str, Any]:
         """Generate appropriate parameters for action type"""
         params: Dict[str, Any] = {}
         if action_type == ActionType.MOVE:
@@ -329,9 +344,9 @@ class ActionMapper:
                 and hasattr(target, "x")
                 and hasattr(target, "y")
             ):
-                direction = np.array(
-                    [float(target.x) - float(current[0]), float(target.y) - float(current[1]), 0.0]
-                )
+                direction = np.array([float(target.x) -
+                                      float(current[0]), float(target.y) -
+                                      float(current[1]), 0.0])
             else:
                 direction = np.array([0.0, 0.0, 0.0])
             norm = np.linalg.norm(direction)
@@ -372,7 +387,9 @@ class ActiveInferenceIntegration:
         self.current_belief = None
         self.last_observation = None
         self.last_action = None
-        logger.info(f"Active Inference Integration initialized for agent {agent.agent_id}")
+        logger.info(
+            f"Active Inference Integration initialized for agent {
+                agent.agent_id}")
 
     def _initialize_active_inference(self):
         """Initialize all active inference components"""
@@ -392,8 +409,7 @@ class ActiveInferenceIntegration:
             ),
         )
         self.policy_selector = create_policy_selector(
-            "discrete", config=PolicyConfig(), inference_algorithm=self.inference
-        )
+            "discrete", config=PolicyConfig(), inference_algorithm=self.inference)
         self.planner = create_temporal_planner(
             self.config.planning_type,
             PlanningConfig(
@@ -408,16 +424,19 @@ class ActiveInferenceIntegration:
             PrecisionConfig(init_precision=self.config.initial_precision),
             num_modalities=self.config.num_observations,
         )
-        # Create a proper observation model instead of using generative model
-        observation_model = DirectGraphObservationModel(config=BeliefUpdateConfig())
+        # TODO: Create a proper observation model instead of using generative model
+        # observation_model = DirectGraphObservationModel(config=BeliefUpdateConfig())
         # Create belief updater with correct signature
-        self.belief_updater = create_belief_updater("standard", BeliefUpdateConfig())
+        self.belief_updater = create_belief_updater(
+            "standard", BeliefUpdateConfig())
 
     def update(self, dt: float) -> None:
         """Main update method called each timestep"""
-        current_state = self.state_mapper.map_to_belief(self.agent, self.state_manager)
+        current_state = self.state_mapper.map_to_belief(
+            self.agent, self.state_manager)
         percepts = self.perception_system.perceive(self.agent.agent_id)
-        current_observation = self.perception_mapper.map_to_observation(percepts)
+        current_observation = self.perception_mapper.map_to_observation(
+            percepts)
         if self.current_belief is None:
             self.current_belief = self._initialize_belief(current_state)
         else:
@@ -429,7 +448,8 @@ class ActiveInferenceIntegration:
             prediction_errors = current_observation - self.last_observation
         else:
             prediction_errors = current_observation  # First timestep
-        self.precision_optimizer.optimize(prediction_errors, current_observation)
+        self.precision_optimizer.optimize(
+            prediction_errors, current_observation)
         if self.config.mode == IntegrationMode.FULL:
             action = self._select_action_full()
         elif self.config.mode == IntegrationMode.HYBRID:
@@ -466,7 +486,8 @@ class ActiveInferenceIntegration:
             and len(trajectory.actions) > 0
         ):
             action_idx = int(trajectory.actions[0])  # Ensure int type
-            return self.action_mapper.map_to_agent_action(action_idx, self.agent)
+            return self.action_mapper.map_to_agent_action(
+                action_idx, self.agent)
         return None
 
     def _select_action_hybrid(self) -> Optional[Action]:
@@ -537,14 +558,18 @@ class ActiveInferenceIntegration:
         logger.debug(f"Executing action: {action.action_type}")
         self.decision_system.execute_action(self.agent.agent_id, action)
 
-    def _update_memory(self, state: np.ndarray, observation: np.ndarray, action: Optional[Action]):
+    def _update_memory(
+            self,
+            state: np.ndarray,
+            observation: np.ndarray,
+            action: Optional[Action]):
         """Update memory with experience"""
         # Convert PyTorch tensor to NumPy safely if needed
         if hasattr(self.current_belief, "detach"):
             belief_array = self.current_belief.detach().numpy()
         else:
             belief_array = np.array(self.current_belief)
-        
+
         memory = Memory(
             memory_id=f"{self.agent.agent_id}_{uuid.uuid4().hex[:8]}",
             memory_type=MemoryType.EPISODIC,
@@ -578,13 +603,14 @@ class ActiveInferenceIntegration:
             else:
                 belief_array = np.array(self.current_belief)
             belief_state_list = belief_array.tolist()
-            belief_entropy_val = -np.sum(belief_array * np.log(belief_array + 1e-10))
+            belief_entropy_val = - \
+                np.sum(belief_array * np.log(belief_array + 1e-10))
         return {
             "belief_state": belief_state_list,
             "last_observation": (
-                self.last_observation.tolist() if self.last_observation is not None else None
-            ),
-            "last_action": (self.last_action.action_type.value if self.last_action else None),
+                self.last_observation.tolist() if self.last_observation is not None else None),
+            "last_action": (
+                self.last_action.action_type.value if self.last_action else None),
             "mode": self.config.mode.value,
             "belief_entropy": belief_entropy_val,
         }

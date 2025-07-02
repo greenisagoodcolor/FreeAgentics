@@ -44,7 +44,7 @@ console.error = (...args) => {
 };
 
 // Global test timeout for coverage tests
-jest.setTimeout(30000);
+jest.setTimeout(10000);
 
 // Mock performance API for consistent testing
 global.performance = global.performance || {

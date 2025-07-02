@@ -128,8 +128,11 @@ class GNNLogger:
             self.logger.addHandler(json_handler)
 
     def log_operation(
-        self, operation: str, status: str, duration: Optional[float] = None, **kwargs: Any
-    ) -> None:
+            self,
+            operation: str,
+            status: str,
+            duration: Optional[float] = None,
+            **kwargs: Any) -> None:
         """Log an operation with structured data"""
         log_data = {
             "operation": operation,
@@ -139,19 +142,30 @@ class GNNLogger:
             **kwargs,
         }
         if status == "success":
-            self.logger.info(f"{operation} completed", extra={"structured": log_data})
+            self.logger.info(
+                f"{operation} completed", extra={
+                    "structured": log_data})
         elif status == "error":
-            self.logger.error(f"{operation} failed", extra={"structured": log_data})
+            self.logger.error(
+                f"{operation} failed", extra={
+                    "structured": log_data})
         else:
-            self.logger.warning(f"{operation} status: {status}", extra={"structured": log_data})
+            self.logger.warning(
+                f"{operation} status: {status}", extra={
+                    "structured": log_data})
 
     def log_performance(self, metrics: PerformanceMetrics) -> None:
         """Log performance metrics"""
         self.logger.info(
-            f"Performance: {metrics.operation}", extra={"structured": metrics.to_dict()}
-        )
+            f"Performance: {
+                metrics.operation}", extra={
+                "structured": metrics.to_dict()})
 
-    def log_error(self, error: Exception, operation: str, **context: Any) -> None:
+    def log_error(
+            self,
+            error: Exception,
+            operation: str,
+            **context: Any) -> None:
         """Log error with context"""
         error_data = {
             "operation": operation,
@@ -212,15 +226,15 @@ class PerformanceMonitor:
         """
         self.window_size = window_size
         self.metrics_history: defaultdict[str, deque[PerformanceMetrics]] = defaultdict(
-            lambda: deque(maxlen=window_size)
-        )
+            lambda: deque(maxlen=window_size))
         self.alert_thresholds = alert_thresholds or {
             "memory_mb": 8192,  # 8GB
             "processing_time": 300,  # 5 minutes
             "cpu_percent": 90,
             "gpu_memory_mb": 16384,  # 16GB
         }
-        self.alert_callbacks: List[Callable[[str, float, PerformanceMetrics], None]] = []
+        self.alert_callbacks: List[Callable[[
+            str, float, PerformanceMetrics], None]] = []
         self._lock = threading.Lock()
         # Start resource monitoring thread
         self._monitoring = True
@@ -248,7 +262,8 @@ class PerformanceMonitor:
             alerts.append(("processing_time", metrics.duration))
         if metrics.cpu_percent > self.alert_thresholds["cpu_percent"]:
             alerts.append(("cpu", metrics.cpu_percent))
-        if metrics.gpu_memory_mb and metrics.gpu_memory_mb > self.alert_thresholds["gpu_memory_mb"]:
+        if metrics.gpu_memory_mb and metrics.gpu_memory_mb > self.alert_thresholds[
+                "gpu_memory_mb"]:
             alerts.append(("gpu_memory", metrics.gpu_memory_mb))
         # Trigger callbacks
         for alert_type, value in alerts:
@@ -261,7 +276,8 @@ class PerformanceMonitor:
         """Add callback for alerts"""
         self.alert_callbacks.append(callback)
 
-    def get_statistics(self, operation: Optional[str] = None) -> Dict[str, Any]:
+    def get_statistics(
+            self, operation: Optional[str] = None) -> Dict[str, Any]:
         """Get performance statistics"""
         with self._lock:
             if operation:
@@ -283,9 +299,15 @@ class PerformanceMonitor:
                     "min": np.min(durations),
                     "max": np.max(durations),
                     "percentiles": {
-                        "50": np.percentile(durations, 50),
-                        "90": np.percentile(durations, 90),
-                        "99": np.percentile(durations, 99),
+                        "50": np.percentile(
+                            durations,
+                            50),
+                        "90": np.percentile(
+                            durations,
+                            90),
+                        "99": np.percentile(
+                            durations,
+                            99),
                     },
                 },
                 "memory_mb": {
@@ -293,7 +315,9 @@ class PerformanceMonitor:
                     "max": np.max(memory_usage),
                     "min": np.min(memory_usage),
                 },
-                "cpu_percent": {"mean": np.mean(cpu_usage), "max": np.max(cpu_usage)},
+                "cpu_percent": {
+                    "mean": np.mean(cpu_usage),
+                    "max": np.max(cpu_usage)},
             }
             # Add GPU stats if available
             gpu_memory = [m.gpu_memory_mb for m in metrics if m.gpu_memory_mb]
@@ -418,8 +442,10 @@ class MetricsVisualizer:
         self.monitor = monitor
 
     def plot_operation_timeline(
-        self, operation: str, metric: str = "duration", save_path: Optional[str] = None
-    ) -> None:
+            self,
+            operation: str,
+            metric: str = "duration",
+            save_path: Optional[str] = None) -> None:
         """Plot timeline of operation metrics"""
         try:
             import matplotlib.dates as mdates
@@ -468,7 +494,6 @@ class MetricsVisualizer:
     ) -> None:
         """Plot system resource usage"""
         try:
-            import matplotlib.dates as mdates
             import matplotlib.pyplot as plt
         except ImportError:
             logger.warning("Matplotlib not available for visualization")
@@ -480,7 +505,9 @@ class MetricsVisualizer:
             return
         # Filter by time window
         current_time = time.time()
-        system_metrics = [m for m in system_metrics if current_time - m.start_time <= time_window]
+        system_metrics = [
+            m for m in system_metrics if current_time -
+            m.start_time <= time_window]
         if not system_metrics:
             logger.warning("No recent system metrics")
             return
@@ -503,10 +530,12 @@ class MetricsVisualizer:
         ax2.grid(True, alpha=0.3)
         ax2.legend()
         # Add GPU if available
-        gpu_memory = [m.gpu_memory_mb for m in system_metrics if m.gpu_memory_mb]
+        gpu_memory = [
+            m.gpu_memory_mb for m in system_metrics if m.gpu_memory_mb]
         if gpu_memory:
             ax3 = ax2.twinx()
-            gpu_timestamps = [m.start_time for m in system_metrics if m.gpu_memory_mb]
+            gpu_timestamps = [
+                m.start_time for m in system_metrics if m.gpu_memory_mb]
             ax3.plot(gpu_timestamps, gpu_memory, "g-", label="GPU Memory")
             ax3.set_ylabel("GPU Memory (MB)", color="g")
             ax3.tick_params(axis="y", labelcolor="g")
@@ -541,7 +570,8 @@ _logger = None
 _monitor = None
 
 
-def get_logger(name: str = "gnn_processing", log_dir: Optional[str] = None) -> GNNLogger:
+def get_logger(name: str = "gnn_processing",
+               log_dir: Optional[str] = None) -> GNNLogger:
     """Get or create logger instance"""
     global _logger
     if _logger is None:
@@ -576,7 +606,8 @@ def monitor_performance(
     return decorator
 
 
-def log_operation(operation: str = None) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+def log_operation(
+        operation: str = None) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """Decorator to log operation execution"""
 
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -605,8 +636,12 @@ if __name__ == "__main__":
     monitor = get_monitor()
 
     # Add alert callback
-    def alert_callback(alert_type: str, value: float, metrics: PerformanceMetrics) -> None:
-        logger.logger.warning(f"Alert: {alert_type} exceeded threshold with value {value}")
+    def alert_callback(
+            alert_type: str,
+            value: float,
+            metrics: PerformanceMetrics) -> None:
+        logger.logger.warning(
+            f"Alert: {alert_type} exceeded threshold with value {value}")
 
     monitor.add_alert_callback(alert_callback)
 

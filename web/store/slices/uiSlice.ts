@@ -24,6 +24,8 @@ interface UIState {
     enabled: boolean;
     soundEnabled: boolean;
   };
+  // Add missing properties for compatibility
+  simulationRunning?: boolean;
 }
 
 const initialState: UIState = {
@@ -63,6 +65,7 @@ const initialState: UIState = {
     enabled: true,
     soundEnabled: false,
   },
+  simulationRunning: false,
 };
 
 const uiSlice = createSlice({
@@ -182,6 +185,11 @@ const uiSlice = createSlice({
       state.isSidebarCollapsed = false;
       state.isFullscreen = false;
     },
+    
+    // Simulation control
+    setSimulationRunning: (state, action: PayloadAction<boolean>) => {
+      state.simulationRunning = action.payload;
+    },
   },
 });
 
@@ -202,6 +210,7 @@ export const {
   toggleSoundNotifications,
   updateLayout,
   resetLayout,
+  setSimulationRunning,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

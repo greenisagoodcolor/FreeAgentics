@@ -6,16 +6,21 @@ trade negotiations, resource management, and behavioral economics for
 economic simulation and agent-based trading ecosystems.
 """
 
-import asyncio
-import random
-
 # Mock the missing base agent modules before importing
+from agents.merchant.merchant import (
+    Market,
+    MarketAnalysisBehavior,
+    MerchantAgent,
+    ResourceType,
+    TradeOffer,
+    TradeStatus,
+    TradingBehavior,
+    create_merchant_agent,
+    register_merchant_type,
+)
 import sys
 from datetime import datetime, timedelta
-from typing import Any, Dict, List
-from unittest.mock import MagicMock, Mock, patch
-
-import pytest
+from unittest.mock import Mock, patch
 
 # Mock base agent modules that may not be available
 sys.modules["agents.base"] = Mock()
@@ -101,7 +106,13 @@ class MockPosition:
 
 
 class MockAgentGoal:
-    def __init__(self, goal_id, description, priority, target_position, deadline):
+    def __init__(
+            self,
+            goal_id,
+            description,
+            priority,
+            target_position,
+            deadline):
         self.goal_id = goal_id
         self.description = description
         self.priority = priority
@@ -123,18 +134,6 @@ sys.modules["agents.base"].get_default_factory = Mock(return_value=Mock())
 sys.modules["agents.base.behaviors"].BaseBehavior = MockBaseBehavior
 sys.modules["agents.base.behaviors"].BehaviorPriority = MockBehaviorPriority
 sys.modules["agents.base.data_model"].AgentGoal = MockAgentGoal
-
-from agents.merchant.merchant import (
-    Market,
-    MarketAnalysisBehavior,
-    MerchantAgent,
-    ResourceType,
-    TradeOffer,
-    TradeStatus,
-    TradingBehavior,
-    create_merchant_agent,
-    register_merchant_type,
-)
 
 
 class TestTradeStatus:
@@ -244,10 +243,12 @@ class TestMarket:
         # Test trend modifier effect
         original_trend = self.market.market_trends[ResourceType.FOOD]
         self.market.market_trends[ResourceType.FOOD] = 0.5  # Positive trend
-        positive_value = self.market.get_resource_value(ResourceType.FOOD, 10.0)
+        positive_value = self.market.get_resource_value(
+            ResourceType.FOOD, 10.0)
 
         self.market.market_trends[ResourceType.FOOD] = -0.5  # Negative trend
-        negative_value = self.market.get_resource_value(ResourceType.FOOD, 10.0)
+        negative_value = self.market.get_resource_value(
+            ResourceType.FOOD, 10.0)
 
         assert positive_value > negative_value
 
@@ -341,7 +342,7 @@ class TestMarket:
 
     def test_update_market_trends(self):
         """Test market trend updates."""
-        original_trends = self.market.market_trends.copy()
+        self.market.market_trends.copy()
         original_prices = self.market.resource_prices.copy()
 
         # Update multiple times to see changes
@@ -355,8 +356,7 @@ class TestMarket:
 
         # Prices should have changed
         price_changed = any(
-            self.market.resource_prices[rt] != original_prices[rt] for rt in ResourceType
-        )
+            self.market.resource_prices[rt] != original_prices[rt] for rt in ResourceType)
         assert price_changed
 
 
@@ -534,7 +534,8 @@ class TestTradingBehavior:
 
     def test_evaluate_market_conditions(self):
         """Test market conditions evaluation."""
-        result = self.behavior._evaluate_market_conditions(self.agent, self.market)
+        result = self.behavior._evaluate_market_conditions(
+            self.agent, self.market)
 
         assert result["success"] is True
         assert result["action"] == "market_evaluated"
@@ -572,14 +573,16 @@ class TestMarketAnalysisBehavior:
         assert result is False
 
         # Add trading experience
-        self.agent.short_term_memory.append({"experience": {"event": "trade_completed"}})
+        self.agent.short_term_memory.append(
+            {"experience": {"event": "trade_completed"}})
 
         result = self.behavior._can_execute_custom(self.agent, context)
         assert result is True
 
         # Test with market analysis experience
         self.agent.short_term_memory.clear()
-        self.agent.long_term_memory.append({"experience": {"event": "market_analysis"}})
+        self.agent.long_term_memory.append(
+            {"experience": {"event": "market_analysis"}})
 
         result = self.behavior._can_execute_custom(self.agent, context)
         assert result is True
@@ -606,7 +609,8 @@ class TestMarketAnalysisBehavior:
 
     def test_analyze_market_patterns(self):
         """Test market pattern analysis."""
-        analysis = self.behavior._analyze_market_patterns(self.market, self.agent)
+        analysis = self.behavior._analyze_market_patterns(
+            self.market, self.agent)
 
         assert "price_volatility" in analysis
         assert "trade_volume" in analysis
@@ -709,7 +713,8 @@ class TestMerchantAgent:
         offered_resources = {ResourceType.FOOD: 10.0}
         wanted_resources = {ResourceType.TOOLS: 2.0}
 
-        offer_id = self.merchant.create_trade_offer(offered_resources, wanted_resources)
+        offer_id = self.merchant.create_trade_offer(
+            offered_resources, wanted_resources)
 
         assert offer_id is None
 
@@ -718,7 +723,8 @@ class TestMerchantAgent:
         # Create an offer first
         offered_resources = {ResourceType.FOOD: 10.0}
         wanted_resources = {ResourceType.TOOLS: 2.0}
-        offer_id = self.merchant.create_trade_offer(offered_resources, wanted_resources)
+        offer_id = self.merchant.create_trade_offer(
+            offered_resources, wanted_resources)
 
         # Evaluate the offer
         evaluation = self.merchant.evaluate_trade_opportunity(offer_id)
@@ -737,7 +743,8 @@ class TestMerchantAgent:
 
     def test_evaluate_trade_opportunity_not_found(self):
         """Test evaluating non-existent trade opportunity."""
-        evaluation = self.merchant.evaluate_trade_opportunity("non_existent_id")
+        evaluation = self.merchant.evaluate_trade_opportunity(
+            "non_existent_id")
 
         assert "error" in evaluation
         assert evaluation["error"] == "Offer not found"
@@ -745,12 +752,14 @@ class TestMerchantAgent:
     def test_evaluate_trade_opportunity_with_personality(self):
         """Test evaluating trade opportunity with personality profile."""
         # Add personality profile
-        self.merchant.data.metadata["personality_profile"] = MockPersonalityProfile()
+        self.merchant.data.metadata["personality_profile"] = MockPersonalityProfile(
+        )
 
         # Create and evaluate offer
         offered_resources = {ResourceType.FOOD: 10.0}
         wanted_resources = {ResourceType.TOOLS: 2.0}
-        offer_id = self.merchant.create_trade_offer(offered_resources, wanted_resources)
+        offer_id = self.merchant.create_trade_offer(
+            offered_resources, wanted_resources)
 
         evaluation = self.merchant.evaluate_trade_opportunity(offer_id)
 
@@ -825,7 +834,8 @@ class TestIntegrationScenarios:
         # Merchant1 creates a sell offer
         offered_resources = {ResourceType.FOOD: 20.0}
         wanted_resources = {ResourceType.TOOLS: 3.0}
-        offer_id = self.merchant1.create_trade_offer(offered_resources, wanted_resources)
+        offer_id = self.merchant1.create_trade_offer(
+            offered_resources, wanted_resources)
 
         assert offer_id in market.active_offers
         offer = market.active_offers[offer_id]
@@ -848,11 +858,11 @@ class TestIntegrationScenarios:
         market = self.merchant1.get_market()
 
         # Record initial prices
-        initial_food_price = market.resource_prices[ResourceType.FOOD]
+        market.resource_prices[ResourceType.FOOD]
 
         # Create multiple offers of same resource type
         for i in range(5):
-            offer_id = self.merchant1.create_trade_offer(
+            _ = self.merchant1.create_trade_offer(
                 {ResourceType.FOOD: 10.0}, {ResourceType.TOOLS: 1.0}
             )
 

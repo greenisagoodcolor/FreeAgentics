@@ -13,7 +13,23 @@ from typing import Any, Dict, List, Optional
 
 import torch
 import torch.quantization as quantization
-from onnxruntime.quantization import QuantType, quantize_dynamic
+
+# Optional ONNX Runtime dependency
+try:
+    from onnxruntime.quantization import QuantType, quantize_dynamic
+
+    ONNX_AVAILABLE = True
+except ImportError:
+    ONNX_AVAILABLE = False
+    # Create placeholder classes for when ONNX is not available
+
+    class QuantType:
+        QInt8 = "qint8"
+
+    def quantize_dynamic(*args, **kwargs):
+        raise ImportError(
+            "ONNX Runtime not available. Install with: pip install onnxruntime")
+
 
 """
 Model Quantization for Edge Deployment
@@ -63,7 +79,8 @@ class ModelQuantizer:
         self.config = config
         self.calibration_data = []
 
-    def quantize_model(self, model_path: Path, output_path: Path) -> Dict[str, Any]:
+    def quantize_model(self, model_path: Path,
+                       output_path: Path) -> Dict[str, Any]:
         """
         Quantize a model file.
         Args:
@@ -101,7 +118,8 @@ class ModelQuantizer:
                     return "ggml"
             return "unknown"
 
-    def _quantize_ggml(self, model_path: Path, output_path: Path) -> Dict[str, Any]:
+    def _quantize_ggml(self, model_path: Path,
+                       output_path: Path) -> Dict[str, Any]:
         """Quantize GGML format models"""
         # Map quantization types to GGML formats
         quant_map = {
@@ -114,7 +132,8 @@ class ModelQuantizer:
         quantize_cmd = shutil.which("quantize")
         if not quantize_cmd:
             # Fallback to manual quantization
-            return self._manual_ggml_quantize(model_path, output_path, quant_type)
+            return self._manual_ggml_quantize(
+                model_path, output_path, quant_type)
         try:
             # Run quantization
             cmd = [quantize_cmd, str(model_path), str(output_path), quant_type]
@@ -130,7 +149,7 @@ class ModelQuantizer:
                 "original_size": original_size,
                 "quantized_size": quantized_size,
                 "compression_ratio": original_size / quantized_size,
-                "size_reduction": f"{(1 - quantized_size/original_size) * 100:.1f}%",
+                "size_reduction": f"{(1 - quantized_size / original_size) * 100:.1f}%",
             }
         except Exception as e:
             logger.error(f"GGML quantization failed: {e}")
@@ -167,11 +186,13 @@ class ModelQuantizer:
             "quantization_type": quant_type,
             "original_size": len(model_data),
             "quantized_size": len(quantized_data),
-            "compression_ratio": len(model_data) / len(quantized_data),
+            "compression_ratio": len(model_data) /
+            len(quantized_data),
             "note": "Simplified quantization - use proper tools for production",
         }
 
-    def _quantize_pytorch(self, model_path: Path, output_path: Path) -> Dict[str, Any]:
+    def _quantize_pytorch(self, model_path: Path,
+                          output_path: Path) -> Dict[str, Any]:
         """Quantize PyTorch models"""
         # Load model
         model = torch.load(model_path, map_location="cpu")
@@ -199,12 +220,13 @@ class ModelQuantizer:
                 "original_size": original_size,
                 "quantized_size": quantized_size,
                 "compression_ratio": original_size / quantized_size,
-                "size_reduction": f"{(1 - quantized_size/original_size) * 100:.1f}%",
+                "size_reduction": f"{(1 - quantized_size / original_size) * 100:.1f}%",
             }
         else:
             raise ValueError("Invalid PyTorch model format")
 
-    def _pytorch_int4_quantize(self, model: torch.nn.Module) -> torch.nn.Module:
+    def _pytorch_int4_quantize(
+            self, model: torch.nn.Module) -> torch.nn.Module:
         """Custom INT4 quantization for PyTorch models"""
 
         # This is a placeholder - real INT4 quantization is more complex
@@ -220,7 +242,8 @@ class ModelQuantizer:
                 scale = weights.abs().max() / 7  # INT4 range: -8 to 7
                 self.register_buffer("scale", scale)
                 # Quantize and pack
-                quantized = torch.round(weights / scale).clamp(-8, 7).to(torch.int8)
+                quantized = torch.round(
+                    weights / scale).clamp(-8, 7).to(torch.int8)
                 self.register_buffer("quantized_weight", quantized)
                 # Keep bias as is
                 if original_layer.bias is not None:
@@ -245,11 +268,19 @@ class ModelQuantizer:
         replace_linear(quantized_model)
         return quantized_model
 
-    def _quantize_onnx(self, model_path: Path, output_path: Path) -> Dict[str, Any]:
+    def _quantize_onnx(self, model_path: Path,
+                       output_path: Path) -> Dict[str, Any]:
         """Quantize ONNX models"""
+        if not ONNX_AVAILABLE:
+            raise ImportError(
+                "ONNX Runtime not available. Install with: pip install onnxruntime")
+
         try:
             # Perform quantization
-            quantize_dynamic(str(model_path), str(output_path), weight_type=QuantType.QInt8)
+            quantize_dynamic(
+                str(model_path),
+                str(output_path),
+                weight_type=QuantType.QInt8)
             # Calculate statistics
             original_size = model_path.stat().st_size
             quantized_size = output_path.stat().st_size
@@ -259,11 +290,8 @@ class ModelQuantizer:
                 "original_size": original_size,
                 "quantized_size": quantized_size,
                 "compression_ratio": original_size / quantized_size,
-                "size_reduction": f"{(1 - quantized_size/original_size) * 100:.1f}%",
+                "size_reduction": f"{(1 - quantized_size / original_size) * 100:.1f}%",
             }
-        except ImportError:
-            logger.error("ONNX Runtime not installed")
-            raise
         except Exception as e:
             logger.error(f"ONNX quantization failed: {e}")
             raise
@@ -292,7 +320,10 @@ class ModelQuantizer:
             "quantized_ms": 3.2,
             "speedup": 3.28,
         }
-        results["accuracy"] = {"original": 0.95, "quantized": 0.93, "degradation": 0.02}
+        results["accuracy"] = {
+            "original": 0.95,
+            "quantized": 0.93,
+            "degradation": 0.02}
         results["memory_usage"] = {
             "original_mb": 100,
             "quantized_mb": 25,
@@ -367,7 +398,8 @@ class EdgeOptimizer:
         )
         # Perform quantization
         quantizer = ModelQuantizer(config)
-        output_path = output_dir / f"{model_path.stem}_{device_type}_optimized{model_path.suffix}"
+        output_path = output_dir / \
+            f"{model_path.stem}_{device_type}_optimized{model_path.suffix}"
         results = quantizer.quantize_model(model_path, output_path)
         # Add device-specific optimizations
         results["device_optimizations"] = {
@@ -375,10 +407,12 @@ class EdgeOptimizer:
             "recommended_batch_size": 1 if profile["ram_gb"] < 4 else 4,
             "recommended_threads": min(profile["cpu_cores"] - 1, 4),
             "gpu_offload": profile["has_gpu"],
-            "memory_limit_mb": int(profile["ram_gb"] * 1024 * 0.5),  # Use 50% of RAM
+            # Use 50% of RAM
+            "memory_limit_mb": int(profile["ram_gb"] * 1024 * 0.5),
         }
         # Create deployment package
-        self._create_deployment_package(output_path, device_type, profile, output_dir)
+        self._create_deployment_package(
+            output_path, device_type, profile, output_dir)
         return results
 
     def _create_deployment_package(
@@ -473,7 +507,8 @@ def auto_quantize(
     )
     # Quantize
     quantizer = ModelQuantizer(config)
-    output_path = model_path.parent / f"{model_path.stem}_quantized{model_path.suffix}"
+    output_path = model_path.parent / \
+        f"{model_path.stem}_quantized{model_path.suffix}"
     results = quantizer.quantize_model(model_path, output_path)
     logger.info(f"Auto-quantization results: {results}")
     return output_path

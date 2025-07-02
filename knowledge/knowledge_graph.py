@@ -9,7 +9,7 @@ import logging
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +58,8 @@ class KnowledgeGraph:
         self.agent_id = agent_id
         self.nodes: Dict[str, BeliefNode] = {}
         self.edges: Dict[str, KnowledgeEdge] = {}
-        self.node_relationships: Dict[str, Set[str]] = {}  # node_id -> connected_node_ids
+        # node_id -> connected_node_ids
+        self.node_relationships: Dict[str, Set[str]] = {}
         self.created_at = datetime.utcnow()
 
         logger.info(f"Created knowledge graph for agent {agent_id}")
@@ -181,7 +182,8 @@ class KnowledgeGraph:
         self.node_relationships[source_id].add(target_id)
         self.node_relationships[target_id].add(source_id)
 
-        logger.debug(f"Added relationship {relationship_type} between {source_id} and {target_id}")
+        logger.debug(
+            f"Added relationship {relationship_type} between {source_id} and {target_id}")
         return edge
 
     def query_beliefs(
@@ -236,9 +238,13 @@ class KnowledgeGraph:
             return []
 
         related_ids = self.node_relationships[node_id]
-        return [self.nodes[related_id] for related_id in related_ids if related_id in self.nodes]
+        return [self.nodes[related_id]
+                for related_id in related_ids if related_id in self.nodes]
 
-    def update_from_message(self, message_content: str, sender_id: str) -> List[BeliefNode]:
+    def update_from_message(
+            self,
+            message_content: str,
+            sender_id: str) -> List[BeliefNode]:
         """
         Update knowledge graph based on a received message.
 
@@ -256,13 +262,15 @@ class KnowledgeGraph:
         belief_statement = f"Agent {sender_id} communicated: {message_content}"
 
         # Check if similar belief exists
-        existing_beliefs = self.query_beliefs(pattern=f"Agent {sender_id} communicated")
+        existing_beliefs = self.query_beliefs(
+            pattern=f"Agent {sender_id} communicated")
 
         if existing_beliefs:
             # Update existing belief
             node = existing_beliefs[0]
             node.statement = belief_statement
-            node.confidence = min(1.0, node.confidence + 0.1)  # Increase confidence slightly
+            # Increase confidence slightly
+            node.confidence = min(1.0, node.confidence + 0.1)
             node.updated_at = datetime.utcnow()
             updated_nodes.append(node)
         else:
@@ -342,7 +350,8 @@ class KnowledgeGraph:
 class PatternExtractor:
     """Extract patterns and relationships from data for knowledge graphs"""
 
-    def __init__(self, min_support: float = 0.1, min_confidence: float = 0.5) -> None:
+    def __init__(self, min_support: float = 0.1,
+                 min_confidence: float = 0.5) -> None:
         """
         Initialize pattern extractor.
 
@@ -357,7 +366,8 @@ class PatternExtractor:
 
         logger.info("PatternExtractor initialized")
 
-    def extract_patterns(self, data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def extract_patterns(
+            self, data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
         Extract patterns from structured data.
 
@@ -407,7 +417,8 @@ class PatternExtractor:
         logger.info(f"Extracted {len(patterns)} patterns")
         return patterns
 
-    def extract_relationships(self, data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def extract_relationships(
+            self, data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
         Extract relationships between attributes.
 
@@ -431,7 +442,7 @@ class PatternExtractor:
 
             # Check all pairs of attributes
             for i, attr1 in enumerate(attributes):
-                for j, attr2 in enumerate(attributes[i + 1 :], i + 1):
+                for j, attr2 in enumerate(attributes[i + 1:], i + 1):
                     pair_key = f"{attr1}|{attr2}"
                     value_pair = f"{record[attr1]}|{record[attr2]}"
 

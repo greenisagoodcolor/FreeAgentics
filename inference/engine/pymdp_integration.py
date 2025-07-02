@@ -13,13 +13,12 @@ Key features:
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple, Union
 
 import numpy as np
 import torch
 
 from ..gnn.generator import GMNGenerator
-from ..gnn.model import GMNModel
 from ..gnn.parser import GMNParser
 from .active_inference import InferenceConfig, VariationalMessagePassing
 from .generative_model import (
@@ -41,9 +40,8 @@ class PyMDPActiveInference:
     align with pymdp library standards.
     """
 
-    def __init__(
-        self, generative_model: GenerativeModel, inference_config: Optional[InferenceConfig] = None
-    ):
+    def __init__(self, generative_model: GenerativeModel,
+                 inference_config: Optional[InferenceConfig] = None):
         """Initialize pymdp-compatible active inference."""
         self.generative_model = generative_model
         self.config = inference_config or InferenceConfig()
@@ -66,21 +64,25 @@ class PyMDPActiveInference:
             expected_shape = (dims.num_observations, dims.num_states)
             if A.shape != expected_shape:
                 logger.warning(
-                    f"A matrix shape {A.shape} doesn't match pymdp convention {expected_shape}"
-                )
+                    f"A matrix shape {
+                        A.shape} doesn't match pymdp convention {expected_shape}")
 
         # Check B matrix shape: should be (num_states, num_states, num_actions)
         if hasattr(self.generative_model, "B"):
             B = self.generative_model.B
-            expected_B_shape = (dims.num_states, dims.num_states, dims.num_actions)
+            expected_B_shape = (
+                dims.num_states,
+                dims.num_states,
+                dims.num_actions)
             if B.shape != expected_B_shape:
                 logger.warning(
-                    f"B matrix shape {B.shape} doesn't match pymdp convention {expected_B_shape}"
-                )
+                    f"B matrix shape {
+                        B.shape} doesn't match pymdp convention {expected_B_shape}")
 
-    def update_beliefs(
-        self, observations: Union[int, torch.Tensor], prior_beliefs: Optional[torch.Tensor] = None
-    ) -> torch.Tensor:
+    def update_beliefs(self,
+                       observations: Union[int,
+                                           torch.Tensor],
+                       prior_beliefs: Optional[torch.Tensor] = None) -> torch.Tensor:
         """
         Update beliefs using pymdp-compatible variational message passing.
 
@@ -109,9 +111,11 @@ class PyMDPActiveInference:
 
         return posterior
 
-    def compute_expected_free_energy(
-        self, beliefs: torch.Tensor, actions: Union[int, torch.Tensor], time_horizon: int = 1
-    ) -> torch.Tensor:
+    def compute_expected_free_energy(self,
+                                     beliefs: torch.Tensor,
+                                     actions: Union[int,
+                                                    torch.Tensor],
+                                     time_horizon: int = 1) -> torch.Tensor:
         """
         Compute expected free energy for action selection (pymdp style).
 
@@ -157,28 +161,31 @@ class PyMDPActiveInference:
                 # Handle batch
                 predicted_states = torch.zeros_like(current_beliefs)
                 for i in range(current_beliefs.shape[0]):
-                    predicted_states[i] = B[:, :, action_idx] @ current_beliefs[i]
+                    predicted_states[i] = B[:, :,
+                                            action_idx] @ current_beliefs[i]
 
             # Predict observations: P(o|s) (pymdp observation model)
-            predicted_obs = (
-                A @ predicted_states if predicted_states.dim() == 1 else (A @ predicted_states.T).T
-            )
+            predicted_obs = (A @ predicted_states if predicted_states.dim()
+                             == 1 else (A @ predicted_states.T).T)
 
             # Instrumental value: E_q[ln P(o|C)] (preference satisfaction)
             if predicted_obs.dim() == 1:
                 instrumental = torch.sum(predicted_obs * C)
             else:
-                instrumental = torch.sum(predicted_obs * C.unsqueeze(0), dim=1).sum()
+                instrumental = torch.sum(
+                    predicted_obs * C.unsqueeze(0), dim=1).sum()
 
             # Epistemic value: E_q[H[P(o|s)]] (information gain)
             if predicted_obs.dim() == 1:
-                entropy_obs = -torch.sum(predicted_obs * torch.log(predicted_obs + 1e-16))
+                entropy_obs = -torch.sum(predicted_obs *
+                                         torch.log(predicted_obs + 1e-16))
             else:
                 entropy_obs = -torch.sum(
                     predicted_obs * torch.log(predicted_obs + 1e-16), dim=1
                 ).sum()
 
-            # Expected free energy: G = -Instrumental - Epistemic (pymdp sign convention)
+            # Expected free energy: G = -Instrumental - Epistemic (pymdp sign
+            # convention)
             efe_t = -instrumental - entropy_obs
             total_efe += efe_t
 
@@ -209,7 +216,8 @@ class PyMDPActiveInference:
         # Compute expected free energy for each action
         efe_values = torch.zeros(num_actions)
         for action in range(num_actions):
-            efe_values[action] = self.compute_expected_free_energy(beliefs, action)
+            efe_values[action] = self.compute_expected_free_energy(
+                beliefs, action)
 
         # Select action with minimum expected free energy (pymdp convention)
         selected_action = torch.argmin(efe_values).item()
@@ -245,7 +253,7 @@ class GMNToPyMDPConverter:
         # For now, create a simplified GMN-inspired model
         # TODO: Integrate with full GMN generation when available
         agent_class = agent_config.get("agent_class", "Explorer")
-        personality = agent_config.get("personality", {})
+        agent_config.get("personality", {})
 
         # Determine model dimensions based on agent class
         if agent_class == "Explorer":
@@ -302,7 +310,8 @@ class GMNToPyMDPConverter:
         elif agent_class == "Merchant":
             # Merchants are better at detecting resource-related observations
             efficiency = personality.get("efficiency", 0.5)
-            model.A.data[1, :] *= 1.0 + efficiency * 0.3  # Enhance resource detection
+            model.A.data[1, :] *= 1.0 + efficiency * \
+                0.3  # Enhance resource detection
 
         elif agent_class == "Scholar":
             # Scholars have balanced observation capabilities
@@ -311,20 +320,26 @@ class GMNToPyMDPConverter:
         elif agent_class == "Guardian":
             # Guardians are better at detecting threats
             risk_awareness = 1.0 - personality.get("risk_tolerance", 0.5)
-            model.A.data[2, :] *= 1.0 + risk_awareness * 0.4  # Enhance threat detection
+            model.A.data[2, :] *= 1.0 + risk_awareness * \
+                0.4  # Enhance threat detection
 
         # Normalize A matrix (pymdp requirement)
-        model.A.data = model.A.data / (model.A.data.sum(dim=0, keepdim=True) + 1e-16)
+        model.A.data = model.A.data / \
+            (model.A.data.sum(dim=0, keepdim=True) + 1e-16)
 
         # Customize B matrix based on personality
         exploration = personality.get("exploration", 0.5)
-        cooperation = personality.get("cooperation", 0.5)
+        personality.get("cooperation", 0.5)
 
         # Adjust transition probabilities
         for a in range(model.dims.num_actions):
             # More exploratory agents have more random transitions
             randomness = exploration * 0.3
-            model.B.data[:, :, a] += torch.randn_like(model.B.data[:, :, a]) * randomness
+            model.B.data[:,
+                         :,
+                         a] += torch.randn_like(model.B.data[:,
+                                                             :,
+                                                             a]) * randomness
 
             # Normalize (pymdp requirement)
             model.B.data[:, :, a] = model.B.data[:, :, a] / (
@@ -334,16 +349,21 @@ class GMNToPyMDPConverter:
         # Set preferences based on agent class (pymdp C matrix)
         if agent_class == "Explorer":
             # Explorers prefer novel/uncertain states
-            model.C.data = torch.tensor([-0.5, 0.0, -1.0]).unsqueeze(1)  # Avoid known, seek novel
+            # Avoid known, seek novel
+            model.C.data = torch.tensor([-0.5, 0.0, -1.0]).unsqueeze(1)
         elif agent_class == "Merchant":
             # Merchants prefer resource-rich states
-            model.C.data = torch.tensor([0.0, 1.0, -0.5]).unsqueeze(1)  # Seek resources
+            model.C.data = torch.tensor(
+                [0.0, 1.0, -0.5]).unsqueeze(1)  # Seek resources
         elif agent_class == "Guardian":
             # Guardians prefer safe states
-            model.C.data = torch.tensor([0.5, 0.0, -2.0]).unsqueeze(1)  # Seek safety, avoid danger
+            # Seek safety, avoid danger
+            model.C.data = torch.tensor([0.5, 0.0, -2.0]).unsqueeze(1)
         else:
             # Default neutral preferences
-            model.C.data = torch.zeros(model.dims.num_observations, model.dims.time_horizon)
+            model.C.data = torch.zeros(
+                model.dims.num_observations,
+                model.dims.time_horizon)
 
 
 def create_pymdp_agent(agent_config: Dict[str, Any]) -> PyMDPActiveInference:
@@ -377,7 +397,8 @@ def create_pymdp_agent(agent_config: Dict[str, Any]) -> PyMDPActiveInference:
     agent = PyMDPActiveInference(generative_model, inference_config)
 
     logger.info(
-        f"Created pymdp-compatible agent: {agent_config['agent_name']} ({agent_config['agent_class']})"
+        f"Created pymdp-compatible agent: {agent_config['agent_name']} "
+        f"({agent_config['agent_class']})"
     )
 
     return agent
@@ -402,7 +423,8 @@ if __name__ == "__main__":
     agent = create_pymdp_agent(agent_config)
 
     # Example usage
-    observations = torch.tensor(1, dtype=torch.long)  # Observed something interesting
+    # Observed something interesting
+    observations = torch.tensor(1, dtype=torch.long)
     beliefs = agent.update_beliefs(observations)
     action, efe_values = agent.select_action(beliefs)
 

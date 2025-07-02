@@ -23,7 +23,6 @@ class GMNModel:
 
     def execute(self) -> None:
         """Execute the model"""
-        pass
 
 
 @dataclass

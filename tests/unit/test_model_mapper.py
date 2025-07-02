@@ -13,7 +13,6 @@ from inference.gnn.model_mapper import (
     GraphToModelMapper,
     MappingConfig,
     ModelArchitecture,
-    ModelConfig,
     ModelSelector,
 )
 
@@ -55,7 +54,8 @@ class TestGraphAnalyzer:
     def test_analyze_small_graph(self) -> None:
         """Test analyzing a small graph"""
         analyzer = GraphAnalyzer()
-        edge_index = torch.tensor([[0, 1, 2, 3], [1, 2, 3, 0]], dtype=torch.long)
+        edge_index = torch.tensor(
+            [[0, 1, 2, 3], [1, 2, 3, 0]], dtype=torch.long)
         props = analyzer.analyze_graph(edge_index, num_nodes=4)
         assert props.num_nodes == 4
         assert props.num_edges == 4
@@ -77,7 +77,8 @@ class TestGraphAnalyzer:
         analyzer = GraphAnalyzer()
         edge_index = torch.tensor([[0, 1, 2], [1, 2, 0]], dtype=torch.long)
         edge_weight = torch.tensor([0.5, 0.8, 0.3])
-        props = analyzer.analyze_graph(edge_index, num_nodes=3, edge_weight=edge_weight)
+        props = analyzer.analyze_graph(
+            edge_index, num_nodes=3, edge_weight=edge_weight)
         assert props.is_weighted
 
     def test_analyze_with_features(self) -> None:
@@ -100,14 +101,16 @@ class TestGraphAnalyzer:
     def test_analyze_disconnected_graph(self) -> None:
         """Test analyzing a disconnected graph"""
         analyzer = GraphAnalyzer()
-        edge_index = torch.tensor([[0, 1, 2, 3], [1, 0, 3, 2]], dtype=torch.long)
+        edge_index = torch.tensor(
+            [[0, 1, 2, 3], [1, 0, 3, 2]], dtype=torch.long)
         props = analyzer.analyze_graph(edge_index, num_nodes=4)
         assert props.num_connected_components == 2
 
     def test_analyze_bipartite_graph(self) -> None:
         """Test analyzing a bipartite graph"""
         analyzer = GraphAnalyzer()
-        edge_index = torch.tensor([[0, 0, 1, 1], [2, 3, 2, 3]], dtype=torch.long)
+        edge_index = torch.tensor(
+            [[0, 0, 1, 1], [2, 3, 2, 3]], dtype=torch.long)
         props = analyzer.analyze_graph(edge_index, num_nodes=4)
         assert props.is_bipartite
 
@@ -117,7 +120,9 @@ class TestModelSelector:
 
     def test_gcn_selection(self) -> None:
         """Test GCN architecture selection"""
-        config = MappingConfig(task_type=GraphTaskType.NODE_CLASSIFICATION, auto_select=True)
+        config = MappingConfig(
+            task_type=GraphTaskType.NODE_CLASSIFICATION,
+            auto_select=True)
         selector = ModelSelector(config)
         props = GraphProperties(
             num_nodes=100,
@@ -171,7 +176,9 @@ class TestModelSelector:
 
     def test_sage_selection_for_large_graphs(self) -> None:
         """Test SAGE selection for large sparse graphs"""
-        config = MappingConfig(task_type=GraphTaskType.NODE_CLASSIFICATION, auto_select=True)
+        config = MappingConfig(
+            task_type=GraphTaskType.NODE_CLASSIFICATION,
+            auto_select=True)
         selector = ModelSelector(config)
         props = GraphProperties(
             num_nodes=10000,
@@ -196,7 +203,9 @@ class TestModelSelector:
 
     def test_gin_selection_for_graph_classification(self) -> None:
         """Test GIN selection for graph classification"""
-        config = MappingConfig(task_type=GraphTaskType.GRAPH_CLASSIFICATION, auto_select=True)
+        config = MappingConfig(
+            task_type=GraphTaskType.GRAPH_CLASSIFICATION,
+            auto_select=True)
         selector = ModelSelector(config)
         props = GraphProperties(
             num_nodes=50,
@@ -251,8 +260,9 @@ class TestModelSelector:
     def test_layer_config_determination(self) -> None:
         """Test layer configuration determination"""
         config = MappingConfig(
-            task_type=GraphTaskType.NODE_CLASSIFICATION, max_layers=8, min_layers=2
-        )
+            task_type=GraphTaskType.NODE_CLASSIFICATION,
+            max_layers=8,
+            min_layers=2)
         selector = ModelSelector(config)
         props = GraphProperties(
             num_nodes=100,
@@ -317,16 +327,18 @@ class TestGraphToModelMapper:
 
     def test_map_simple_graph(self) -> None:
         """Test mapping a simple graph to model"""
-        config = MappingConfig(task_type=GraphTaskType.NODE_CLASSIFICATION, auto_select=True)
+        config = MappingConfig(
+            task_type=GraphTaskType.NODE_CLASSIFICATION,
+            auto_select=True)
         mapper = GraphToModelMapper(config)
-        edge_index = torch.tensor([[0, 1, 2, 3, 4], [1, 2, 3, 4, 0]], dtype=torch.long)
+        edge_index = torch.tensor(
+            [[0, 1, 2, 3, 4], [1, 2, 3, 4, 0]], dtype=torch.long)
         num_nodes = 5
         input_dim = 16
         output_dim = 3
         node_features = torch.randn(num_nodes, input_dim)
         model, model_config = mapper.map_graph_to_model(
-            edge_index, num_nodes, input_dim, output_dim, node_features=node_features
-        )
+            edge_index, num_nodes, input_dim, output_dim, node_features=node_features)
         assert isinstance(model, nn.Module)
         assert model_config.output_channels == output_dim
         output = model(node_features, edge_index)
@@ -335,8 +347,9 @@ class TestGraphToModelMapper:
     def test_map_large_graph(self) -> None:
         """Test mapping a large graph"""
         config = MappingConfig(
-            task_type=GraphTaskType.NODE_CLASSIFICATION, auto_select=True, max_layers=5
-        )
+            task_type=GraphTaskType.NODE_CLASSIFICATION,
+            auto_select=True,
+            max_layers=5)
         mapper = GraphToModelMapper(config)
         num_nodes = 1000
         num_edges = 5000
@@ -345,8 +358,7 @@ class TestGraphToModelMapper:
         output_dim = 10
         node_features = torch.randn(num_nodes, input_dim)
         model, model_config = mapper.map_graph_to_model(
-            edge_index, num_nodes, input_dim, output_dim, node_features=node_features
-        )
+            edge_index, num_nodes, input_dim, output_dim, node_features=node_features)
         assert model_config.architecture in [
             ModelArchitecture.SAGE,
             ModelArchitecture.GCN,
@@ -355,16 +367,18 @@ class TestGraphToModelMapper:
 
     def test_graph_level_task(self) -> None:
         """Test mapping for graph-level tasks"""
-        config = MappingConfig(task_type=GraphTaskType.GRAPH_CLASSIFICATION, auto_select=True)
+        config = MappingConfig(
+            task_type=GraphTaskType.GRAPH_CLASSIFICATION,
+            auto_select=True)
         mapper = GraphToModelMapper(config)
-        edge_index = torch.tensor([[0, 1, 2, 3], [1, 2, 3, 0]], dtype=torch.long)
+        edge_index = torch.tensor(
+            [[0, 1, 2, 3], [1, 2, 3, 0]], dtype=torch.long)
         num_nodes = 4
         input_dim = 8
         output_dim = 2
         node_features = torch.randn(num_nodes, input_dim)
         model, model_config = mapper.map_graph_to_model(
-            edge_index, num_nodes, input_dim, output_dim, node_features=node_features
-        )
+            edge_index, num_nodes, input_dim, output_dim, node_features=node_features)
         assert model_config.global_pool is not None
         batch = torch.zeros(num_nodes, dtype=torch.long)
         output = model(node_features, edge_index, batch)
@@ -380,19 +394,20 @@ class TestGraphToModelMapper:
         output_dim = 4
         node_features = torch.randn(num_nodes, input_dim)
         model, _ = mapper.map_graph_to_model(
-            edge_index, num_nodes, input_dim, output_dim, node_features=node_features
-        )
-        is_valid = mapper.validate_model_compatibility(model, edge_index, node_features)
+            edge_index, num_nodes, input_dim, output_dim, node_features=node_features)
+        is_valid = mapper.validate_model_compatibility(
+            model, edge_index, node_features)
         assert is_valid
         wrong_features = torch.randn(num_nodes, input_dim + 5)
-        is_valid = mapper.validate_model_compatibility(model, edge_index, wrong_features)
+        is_valid = mapper.validate_model_compatibility(
+            model, edge_index, wrong_features)
         assert not is_valid
 
     def test_performance_priority(self) -> None:
         """Test different performance priorities"""
         config_speed = MappingConfig(
-            task_type=GraphTaskType.NODE_CLASSIFICATION, performance_priority="speed"
-        )
+            task_type=GraphTaskType.NODE_CLASSIFICATION,
+            performance_priority="speed")
         mapper_speed = GraphToModelMapper(config_speed)
         edge_index = torch.tensor([[0, 1], [1, 0]], dtype=torch.long)
         node_features = torch.randn(2, 16)

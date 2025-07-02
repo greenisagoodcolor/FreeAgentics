@@ -6,7 +6,6 @@ import pytest
 import torch
 
 from inference.gnn.batch_processor import (
-    BatchedGraphData,
     DynamicBatchSampler,
     GraphBatchProcessor,
     GraphData,
@@ -59,7 +58,8 @@ class TestGraphBatchProcessor:
 
     def test_initialization(self) -> None:
         """Test processor initialization"""
-        processor = GraphBatchProcessor(pad_node_features=True, max_nodes_per_graph=50)
+        processor = GraphBatchProcessor(
+            pad_node_features=True, max_nodes_per_graph=50)
         assert processor.pad_node_features
         assert processor.max_nodes_per_graph == 50
 
@@ -117,8 +117,9 @@ class TestGraphBatchProcessor:
     def test_batch_with_padding(self) -> None:
         """Test batching with node feature padding"""
         processor = GraphBatchProcessor(
-            pad_node_features=True, max_nodes_per_graph=5, use_torch_geometric=False
-        )
+            pad_node_features=True,
+            max_nodes_per_graph=5,
+            use_torch_geometric=False)
         graphs = [
             GraphData(
                 node_features=torch.randn(3, 16),
@@ -133,10 +134,10 @@ class TestGraphBatchProcessor:
         assert batch.x.shape == (2, 5, 16)
         assert batch.mask is not None
         assert batch.mask.shape == (2, 5)
-        assert batch.mask[0, :3].all() == True
-        assert batch.mask[0, 3:].all() == False
-        assert batch.mask[1, :2].all() == True
-        assert batch.mask[1, 2:].all() == False
+        assert batch.mask[0, :3].all() is True
+        assert batch.mask[0, 3:].all() is False
+        assert batch.mask[1, :2].all() is True
+        assert batch.mask[1, 2:].all() is False
 
     def test_batch_with_targets(self) -> None:
         """Test batching with targets"""
@@ -161,7 +162,9 @@ class TestGraphBatchProcessor:
 
     def test_batch_with_graph_attributes(self) -> None:
         """Test batching with graph-level attributes"""
-        processor = GraphBatchProcessor(pad_graph_features=True, use_torch_geometric=False)
+        processor = GraphBatchProcessor(
+            pad_graph_features=True,
+            use_torch_geometric=False)
         graphs = [
             GraphData(
                 node_features=torch.randn(3, 16),
@@ -211,9 +214,10 @@ class TestGraphBatchProcessor:
         """Test collate function for DataLoader"""
         processor = GraphBatchProcessor()
         graphs = [
-            GraphData(node_features=torch.randn(5, 32), edge_index=torch.randint(0, 5, (2, 10)))
-            for _ in range(4)
-        ]
+            GraphData(
+                node_features=torch.randn(
+                    5, 32), edge_index=torch.randint(
+                    0, 5, (2, 10))) for _ in range(4)]
         batch = processor.collate_fn(graphs)
         assert batch.num_graphs == 4
         assert batch.x.shape[0] == 20
@@ -225,16 +229,22 @@ class TestDynamicBatchSampler:
     def test_initialization(self) -> None:
         """Test sampler initialization"""
         graph_sizes = [(10, 20), (12, 25), (50, 100), (55, 110)]
-        sampler = DynamicBatchSampler(graph_sizes=graph_sizes, batch_size=2, size_threshold=0.2)
+        sampler = DynamicBatchSampler(
+            graph_sizes=graph_sizes,
+            batch_size=2,
+            size_threshold=0.2)
         assert sampler.batch_size == 2
         assert len(sampler.size_groups) > 0
 
     def test_size_grouping(self) -> None:
         """Test grouping by similar sizes"""
-        graph_sizes = [(10, 20), (11, 22), (50, 100), (52, 105), (100, 200), (98, 195)]
+        graph_sizes = [(10, 20), (11, 22), (50, 100),
+                       (52, 105), (100, 200), (98, 195)]
         sampler = DynamicBatchSampler(
-            graph_sizes=graph_sizes, batch_size=2, size_threshold=0.2, shuffle=False
-        )
+            graph_sizes=graph_sizes,
+            batch_size=2,
+            size_threshold=0.2,
+            shuffle=False)
         assert len(sampler.size_groups) == 3
         for group in sampler.size_groups:
             assert len(group) == 2
@@ -242,7 +252,10 @@ class TestDynamicBatchSampler:
     def test_batch_generation(self) -> None:
         """Test batch generation"""
         graph_sizes = [(10, 20) for _ in range(10)]
-        sampler = DynamicBatchSampler(graph_sizes=graph_sizes, batch_size=3, shuffle=False)
+        sampler = DynamicBatchSampler(
+            graph_sizes=graph_sizes,
+            batch_size=3,
+            shuffle=False)
         batches = list(sampler)
         assert len(batches) == 4
         assert len(batches[0]) == 3
@@ -263,7 +276,8 @@ class TestStreamingBatchProcessor:
     def test_initialization(self) -> None:
         """Test streaming processor initialization"""
         base_processor = GraphBatchProcessor()
-        streaming = StreamingBatchProcessor(batch_processor=base_processor, buffer_size=100)
+        streaming = StreamingBatchProcessor(
+            batch_processor=base_processor, buffer_size=100)
         assert streaming.buffer_size == 100
         assert streaming.buffer == []
 
@@ -280,7 +294,10 @@ class TestStreamingBatchProcessor:
                     target=torch.tensor([i % 3]),
                 )
 
-        batches = list(streaming.process_stream(graph_generator(), batch_size=3))
+        batches = list(
+            streaming.process_stream(
+                graph_generator(),
+                batch_size=3))
         assert len(batches) == 4
         assert batches[0].num_graphs == 3
         assert batches[1].num_graphs == 3
@@ -303,8 +320,10 @@ class TestStreamingBatchProcessor:
             return batch.x.shape[0]
 
         results = list(
-            streaming.process_stream(graph_generator(), batch_size=2, process_fn=process_fn)
-        )
+            streaming.process_stream(
+                graph_generator(),
+                batch_size=2,
+                process_fn=process_fn))
         assert len(results) == 3
         assert results[0] == 6
         assert results[1] == 6
@@ -317,10 +336,12 @@ class TestUtilityFunctions:
     def test_create_mini_batches(self) -> None:
         """Test mini-batch creation"""
         graphs = [
-            GraphData(node_features=torch.randn(5, 16), edge_index=torch.randint(0, 5, (2, 10)))
-            for _ in range(10)
-        ]
-        batches = create_mini_batches(graphs, batch_size=3, shuffle=False, drop_last=False)
+            GraphData(
+                node_features=torch.randn(
+                    5, 16), edge_index=torch.randint(
+                    0, 5, (2, 10))) for _ in range(10)]
+        batches = create_mini_batches(
+            graphs, batch_size=3, shuffle=False, drop_last=False)
         assert len(batches) == 4
         assert len(batches[0]) == 3
         assert len(batches[1]) == 3
@@ -330,10 +351,12 @@ class TestUtilityFunctions:
     def test_create_mini_batches_drop_last(self) -> None:
         """Test mini-batch creation with drop_last"""
         graphs = [
-            GraphData(node_features=torch.randn(5, 16), edge_index=torch.randint(0, 5, (2, 10)))
-            for _ in range(10)
-        ]
-        batches = create_mini_batches(graphs, batch_size=3, shuffle=False, drop_last=True)
+            GraphData(
+                node_features=torch.randn(
+                    5, 16), edge_index=torch.randint(
+                    0, 5, (2, 10))) for _ in range(10)]
+        batches = create_mini_batches(
+            graphs, batch_size=3, shuffle=False, drop_last=True)
         assert len(batches) == 3
         for batch in batches:
             assert len(batch) == 3

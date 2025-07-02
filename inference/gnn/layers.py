@@ -7,7 +7,7 @@ Implements the GAT layer from Velickovic et al. (2018).
 """
 
 from enum import Enum
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, List, Optional
 
 import torch
 import torch.nn as nn
@@ -17,11 +17,8 @@ from torch_geometric.nn import (  # type: ignore[import-untyped]
     GATConv,
     GCNConv,
     GINConv,
-    MessagePassing,
     SAGEConv,
 )
-from torch_geometric.utils import degree  # type: ignore[import-untyped]
-from torch_geometric.utils import add_self_loops
 
 
 class AggregationType(Enum):
@@ -86,7 +83,6 @@ class GCNLayer(nn.Module):
             improved=improved,
             cached=cached,
             bias=bias,
-            normalize=normalize,
         )
 
     @property
@@ -104,9 +100,8 @@ class GCNLayer(nn.Module):
         self.conv.reset_parameters()
         self._cached_edge_index = None  # Reset cache
 
-    def forward(
-        self, x: torch.Tensor, edge_index: torch.Tensor, edge_weight: Optional[torch.Tensor] = None
-    ) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, edge_index: torch.Tensor,
+                edge_weight: Optional[torch.Tensor] = None) -> torch.Tensor:
         """Forward pass through GCN layer"""
         # Store cached edge index if caching enabled
         if self.cached:
@@ -114,7 +109,8 @@ class GCNLayer(nn.Module):
 
         # Pass edge_weight if provided
         if edge_weight is not None:
-            return self.conv(x, edge_index, edge_weight)  # type: ignore[no-any-return]
+            # type: ignore[no-any-return]
+            return self.conv(x, edge_index, edge_weight)
         else:
             return self.conv(x, edge_index)  # type: ignore[no-any-return]
 
@@ -236,12 +232,16 @@ class GNNStack(nn.Module):
 
             self.layers.append(layer)
 
-    def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
+    def forward(
+            self,
+            x: torch.Tensor,
+            edge_index: torch.Tensor) -> torch.Tensor:
         """Forward pass through the GNN stack"""
         for i, layer in enumerate(self.layers):
             x = layer(x, edge_index)
 
-            # Apply activation function (except for the last layer unless specified)
+            # Apply activation function (except for the last layer unless
+            # specified)
             if i < len(self.layers) - 1 or self.final_activation:
                 x = F.relu(x)
 
@@ -288,7 +288,8 @@ def scatter_add(
         size[dim] = int(index.max()) + 1
     out = torch.zeros(size, dtype=src.dtype, device=src.device)
     # Reshape index for scatter_add_
-    index = index.view(-1, 1).expand_as(src) if src.dim() > 1 and index.dim() == 1 else index
+    index = index.view(-1,
+                       1).expand_as(src) if src.dim() > 1 and index.dim() == 1 else index
     return out.scatter_add_(dim, index, src)
 
 
@@ -352,16 +353,15 @@ class SAGELayer(nn.Module):
 
         self.in_channels = in_channels
         self.out_channels = out_channels
-        self.aggregation = aggr if aggr is not None else aggregation  # Support both parameter names
+        # Support both parameter names
+        self.aggregation = aggr if aggr is not None else aggregation
         self.normalize_flag = normalize
 
         self.conv = SAGEConv(
             in_channels=in_channels,
             out_channels=out_channels,
             aggr=self.aggregation,
-            bias=bias,
-            normalize=normalize,
-        )
+            bias=bias)
 
         # Add expected attributes for test compatibility
         # lin_r is typically the right (neighbor) transformation matrix in SAGE
@@ -380,13 +380,17 @@ class SAGELayer(nn.Module):
     @property
     def lin_l(self) -> nn.Module:
         """Access left linear layer for compatibility (expected by tests)"""
-        return self.conv.lin_l if hasattr(self.conv, "lin_l") else self.conv.lin
+        return self.conv.lin_l if hasattr(
+            self.conv, "lin_l") else self.conv.lin
 
     def reset_parameters(self) -> None:
         """Reset layer parameters"""
         self.conv.reset_parameters()
 
-    def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
+    def forward(
+            self,
+            x: torch.Tensor,
+            edge_index: torch.Tensor) -> torch.Tensor:
         """Forward pass through SAGE layer"""
         return self.conv(x, edge_index)  # type: ignore[no-any-return]
 
@@ -447,7 +451,10 @@ class GINLayer(nn.Module):
         """Reset layer parameters"""
         self.conv.reset_parameters()
 
-    def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
+    def forward(
+            self,
+            x: torch.Tensor,
+            edge_index: torch.Tensor) -> torch.Tensor:
         """Forward pass through GIN layer"""
         return self.conv(x, edge_index)  # type: ignore[no-any-return]
 
@@ -497,7 +504,10 @@ class EdgeConvLayer(nn.Module):
         """Reset layer parameters"""
         self.conv.reset_parameters()
 
-    def forward(self, x: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
+    def forward(
+            self,
+            x: torch.Tensor,
+            edge_index: torch.Tensor) -> torch.Tensor:
         """Forward pass through EdgeConv layer"""
         return self.conv(x, edge_index)  # type: ignore[no-any-return]
 
@@ -526,11 +536,16 @@ class ResGNNLayer(nn.Module):
 
         # Residual connection
         if in_channels != out_channels:
-            self.residual: nn.Module = nn.Linear(in_channels, out_channels, bias=False)
+            self.residual: nn.Module = nn.Linear(
+                in_channels, out_channels, bias=False)
         else:
             self.residual = nn.Identity()
 
-    def forward(self, x: torch.Tensor, *args: Any, **kwargs: Any) -> torch.Tensor:
+    def forward(
+            self,
+            x: torch.Tensor,
+            *args: Any,
+            **kwargs: Any) -> torch.Tensor:
         """Forward pass with residual connection"""
         identity = self.residual(x)
         out = self.layer(x, *args, **kwargs)

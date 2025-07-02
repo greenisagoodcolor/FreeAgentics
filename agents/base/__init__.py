@@ -21,6 +21,20 @@ from .agent_template import (
     create_scholar_agent,
 )
 from .data_model import Agent, AgentCapability, AgentStatus, Position
+from .resource_business_model import (
+    IResourceConsumer,
+    IResourceProvider,
+    Market,
+    MarketCondition,
+    MarketPrice,
+    ResourceBusinessManager,
+    ResourceInventory,
+    ResourceType,
+    ResourceUnit,
+    TradeOffer,
+    Transaction,
+    TransactionType,
+)
 from .world_integration import AgentWorldManager
 
 __version__ = "0.1.0"
@@ -48,4 +62,17 @@ __all__: List[str] = [
     "create_guardian_agent",
     "create_merchant_agent",
     "create_scholar_agent",
+    # Resource Business Model
+    "IResourceConsumer",
+    "IResourceProvider",
+    "Market",
+    "MarketCondition",
+    "MarketPrice",
+    "ResourceBusinessManager",
+    "ResourceInventory",
+    "ResourceType",
+    "ResourceUnit",
+    "TradeOffer",
+    "Transaction",
+    "TransactionType",
 ]

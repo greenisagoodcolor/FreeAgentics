@@ -73,3 +73,62 @@ async def get_async_db():
     """
     # TODO: Implement async database support
     raise NotImplementedError("Async database support not yet implemented")
+
+
+class DatabaseManager:
+    """
+    Database manager class for chaos testing and connection management.
+
+    Provides a class-based interface to the database connection functionality
+    while maintaining compatibility with the existing function-based approach.
+    """
+
+    def __init__(self):
+        """Initialize the database manager."""
+        self.engine = engine
+        self.session_factory = SessionLocal
+
+    def get_session(self) -> Session:
+        """
+        Get a database session.
+
+        Returns:
+            Session: SQLAlchemy database session
+        """
+        return self.session_factory()
+
+    async def get_connection(self) -> Session:
+        """
+        Async method to get database connection for chaos testing.
+
+        Returns:
+            Session: Database session
+
+        Raises:
+            Exception: If database connection fails
+        """
+        try:
+            session = self.get_session()
+            # Test the connection
+            session.execute("SELECT 1")
+            return session
+        except Exception as e:
+            raise Exception(f"Database connection failed: {str(e)}")
+
+    def close_all_connections(self):
+        """Close all database connections."""
+        self.engine.dispose()
+
+    def is_connected(self) -> bool:
+        """
+        Check if database is connected.
+
+        Returns:
+            bool: True if connected, False otherwise
+        """
+        try:
+            with self.engine.connect() as conn:
+                conn.execute("SELECT 1")
+            return True
+        except Exception:
+            return False

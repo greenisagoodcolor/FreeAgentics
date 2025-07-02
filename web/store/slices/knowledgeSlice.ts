@@ -426,6 +426,19 @@ const knowledgeSlice = createSlice({
         }
       });
     },
+    
+    // Demo data actions for compatibility
+    setDemoKnowledgeGraph: (state, action: PayloadAction<KnowledgeGraph>) => {
+      state.graph = action.payload;
+    },
+    
+    clearKnowledgeGraph: (state) => {
+      state.graph.nodes = {};
+      state.graph.edges = {};
+      state.selectedNodeId = null;
+      state.selectedEdgeId = null;
+      state.hoveredNodeId = null;
+    },
   },
 });
 
@@ -453,6 +466,8 @@ export const {
   batchAddEdges,
   clearGraph,
   updateAgentKnowledge,
+  setDemoKnowledgeGraph,
+  clearKnowledgeGraph,
 } = knowledgeSlice.actions;
 
 export default knowledgeSlice.reducer;

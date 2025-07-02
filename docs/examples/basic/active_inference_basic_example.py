@@ -10,7 +10,7 @@ Usage:
     python docs/examples/active_inference_basic_example.py
 """
 
-from typing import List, Tuple
+from typing import List
 
 import matplotlib.pyplot as plt
 import torch
@@ -23,7 +23,6 @@ from inference.engine import (
     PolicyConfig,
     VariationalMessagePassing,
 )
-from inference.engine.pymdp_generative_model import PyMDPGenerativeModel
 from inference.engine.pymdp_policy_selector import PyMDPPolicySelector
 
 
@@ -164,11 +163,15 @@ def run_active_inference_episode(
     """Run one episode of Active Inference navigation"""
 
     # Set up inference
-    inference_config = InferenceConfig(num_iterations=10, convergence_threshold=1e-4)
+    inference_config = InferenceConfig(
+        num_iterations=10, convergence_threshold=1e-4)
     inference = VariationalMessagePassing(inference_config)
 
     # Set up policy selection
-    policy_config = PolicyConfig(precision=2.0, planning_horizon=3, exploration_bonus=0.1)
+    policy_config = PolicyConfig(
+        precision=2.0,
+        planning_horizon=3,
+        exploration_bonus=0.1)
     policy_selector = PyMDPPolicySelector(policy_config)
 
     # Initialize
@@ -210,12 +213,18 @@ def run_active_inference_episode(
 def visualize_beliefs(beliefs: List[torch.Tensor], env: SimpleGridWorld):
     """Visualize belief evolution over time"""
 
-    num_steps = len(beliefs)
+    len(beliefs)
     fig, axes = plt.subplots(2, 3, figsize=(15, 10))
     axes = axes.flatten()
 
     # Show beliefs at different time steps
-    steps_to_show = [0, 1, 2, len(beliefs) // 2, len(beliefs) - 2, len(beliefs) - 1]
+    steps_to_show = [
+        0,
+        1,
+        2,
+        len(beliefs) // 2,
+        len(beliefs) - 2,
+        len(beliefs) - 1]
 
     for i, step in enumerate(steps_to_show):
         if step >= len(beliefs):
@@ -224,7 +233,10 @@ def visualize_beliefs(beliefs: List[torch.Tensor], env: SimpleGridWorld):
         ax = axes[i]
         belief_grid = beliefs[step].reshape(env.size, env.size)
 
-        im = ax.imshow(belief_grid.numpy(), cmap="hot", interpolation="nearest")
+        im = ax.imshow(
+            belief_grid.numpy(),
+            cmap="hot",
+            interpolation="nearest")
         ax.set_title(f"Belief at Step {step}")
         ax.set_xlabel("Column")
         ax.set_ylabel("Row")
@@ -245,9 +257,9 @@ def visualize_beliefs(beliefs: List[torch.Tensor], env: SimpleGridWorld):
     plt.show()
 
 
-def plot_free_energy(
-    beliefs: List[torch.Tensor], observations: List[int], model: DiscreteGenerativeModel
-):
+def plot_free_energy(beliefs: List[torch.Tensor],
+                     observations: List[int],
+                     model: DiscreteGenerativeModel):
     """Plot free energy over time"""
 
     inference = VariationalMessagePassing(InferenceConfig())
@@ -275,7 +287,7 @@ def main():
     # Create environment
     env = SimpleGridWorld(size=4)
     print(f"Grid World: {env.size}x{env.size}")
-    print(f"Agent starts at position 0 (top-left)")
+    print("Agent starts at position 0 (top-left)")
     print(f"Goal is at position {env.reward_pos} (bottom-right)")
     print(f"Walls at positions: {env.walls}\n")
 

@@ -4,7 +4,7 @@ Module for FreeAgentics Active Inference implementation.
 
 import logging
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import numpy as np
 
@@ -53,12 +53,15 @@ class GMNExecutor:
         try:
             validation_result = self.validator.validate(gnn_model)
             if not validation_result.is_valid:
-                raise ValueError(f"Invalid GNN model: {validation_result.errors}")
+                raise ValueError(
+                    f"Invalid GNN model: {
+                        validation_result.errors}")
             state_space = gnn_model.state_space
             connections = gnn_model.connections
             update_equations = gnn_model.update_equations
             beliefs = self._initialize_beliefs(state_space, observation)
-            current_free_energy = self._calculate_free_energy(beliefs, observation, connections)
+            current_free_energy = self._calculate_free_energy(
+                beliefs, observation, connections)
             actions = self._get_available_actions(state_space)
             expected_free_energies = {}
             for action in actions:
@@ -66,7 +69,9 @@ class GMNExecutor:
                     beliefs, action, observation, connections, update_equations
                 )
                 expected_free_energies[action] = expected_fe
-            best_action = min(expected_free_energies.items(), key=lambda x: x[1])[0]
+            best_action = min(
+                expected_free_energies.items(),
+                key=lambda x: x[1])[0]
             updated_beliefs = self._update_beliefs(
                 beliefs, best_action, observation, update_equations
             )
@@ -91,7 +96,8 @@ class GMNExecutor:
             if state_name.startswith("S_"):
                 state_type = state_def.get("type", "Real[0, 1]")
                 if "Real" in state_type:
-                    range_match = state_type.split("[")[1].rstrip("]").split(", ")
+                    range_match = state_type.split(
+                        "[")[1].rstrip("]").split(", ")
                     min_val = float(range_match[0])
                     max_val = float(range_match[1])
                     obs_key = state_name.lower().replace("s_", "")
@@ -111,7 +117,9 @@ class GMNExecutor:
                 elif "Distribution" in state_type:
                     beliefs[state_name] = {
                         "type": "distribution",
-                        "values": self._initialize_distribution(state_type, observation),
+                        "values": self._initialize_distribution(
+                            state_type,
+                            observation),
                     }
         return beliefs
 
@@ -129,7 +137,8 @@ class GMNExecutor:
         free_energy = 0.0
         for state_name, belief in beliefs.items():
             if isinstance(belief, dict) and "variance" in belief:
-                entropy = 0.5 * np.log(2 * np.pi * np.e * (belief["variance"] + self._epsilon))
+                entropy = 0.5 * np.log(2 * np.pi * np.e *
+                                       (belief["variance"] + self._epsilon))
                 free_energy += entropy
         for obs_key, obs_value in observation.items():
             state_key = f"S_{obs_key}"
@@ -147,7 +156,8 @@ class GMNExecutor:
             if "preferences" in pref_func:
                 for pref_name, pref_weight in pref_func["preferences"].items():
                     if pref_name.lower() in observation:
-                        satisfaction = observation[pref_name.lower()] * pref_weight
+                        satisfaction = observation[pref_name.lower(
+                        )] * pref_weight
                         free_energy -= satisfaction
         return free_energy
 
@@ -160,7 +170,8 @@ class GMNExecutor:
         update_equations: Dict[str, Any],
     ) -> float:
         """Calculate expected free energy after taking an action"""
-        simulated_beliefs = self._simulate_belief_update(beliefs, action, update_equations)
+        simulated_beliefs = self._simulate_belief_update(
+            beliefs, action, update_equations)
         expected_surprise = 0.0
         expected_utility = 0.0
         for state_name, current_belief in beliefs.items():
@@ -221,7 +232,8 @@ class GMNExecutor:
                 if state_name in updated_beliefs:
                     if "prediction_error" in formula:
                         if state_name.replace("S_", "").lower() in observation:
-                            obs_value = observation[state_name.replace("S_", "").lower()]
+                            obs_value = observation[state_name.replace(
+                                "S_", "").lower()]
                             current_mean = updated_beliefs[state_name]["mean"]
                             current_var = updated_beliefs[state_name]["variance"]
                             prediction_error = obs_value - current_mean
@@ -258,10 +270,22 @@ class GMNExecutor:
         """Predict the effects of an action on preferences"""
         effects = {}
         action_mappings = {
-            "explore": {"Exploration": 0.8, "Resources": -0.1, "Social": 0.2},
-            "exploit": {"Exploration": 0.1, "Resources": 0.7, "Social": 0.1},
-            "communicate": {"Exploration": 0.2, "Resources": 0.0, "Social": 0.9},
-            "rest": {"Exploration": 0.0, "Resources": 0.3, "Social": 0.1},
+            "explore": {
+                "Exploration": 0.8,
+                "Resources": -0.1,
+                "Social": 0.2},
+            "exploit": {
+                "Exploration": 0.1,
+                "Resources": 0.7,
+                "Social": 0.1},
+            "communicate": {
+                "Exploration": 0.2,
+                "Resources": 0.0,
+                "Social": 0.9},
+            "rest": {
+                "Exploration": 0.0,
+                "Resources": 0.3,
+                "Social": 0.1},
         }
         for direction in ["north", "south", "east", "west"]:
             if direction in action:
@@ -273,7 +297,8 @@ class GMNExecutor:
                 break
         return effects
 
-    def _calculate_confidence(self, expected_free_energies: Dict[str, float]) -> float:
+    def _calculate_confidence(
+            self, expected_free_energies: Dict[str, float]) -> float:
         """Calculate confidence based on free energy differences"""
         if len(expected_free_energies) < 2:
             return 1.0
@@ -285,11 +310,15 @@ class GMNExecutor:
         confidence = 1.0 - np.exp(-difference)
         return float(np.clip(confidence, 0.0, 1.0))
 
-    def _initialize_distribution(self, dist_type: str, observation: Dict[str, Any]) -> List[float]:
+    def _initialize_distribution(
+            self, dist_type: str, observation: Dict[str, Any]) -> List[float]:
         """Initialize a distribution based on type and observation"""
         return [0.25, 0.25, 0.25, 0.25]
 
-    def execute_from_file(self, gnn_file_path: str, observation: Dict[str, Any]) -> InferenceResult:
+    def execute_from_file(self,
+                          gnn_file_path: str,
+                          observation: Dict[str,
+                                            Any]) -> InferenceResult:
         """
         Execute inference from a GNN file.
         Args:

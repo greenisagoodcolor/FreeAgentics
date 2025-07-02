@@ -51,19 +51,19 @@ class TestFrontendInvariants:
                     """
                     const data = require('./test_data.json');
                     const uniqueIds = new Set(data.nodes.map(n => n.id));
-                    
+
                     // Invariant 1: All node IDs must be unique
                     if (uniqueIds.size !== data.nodes.length) {
                         throw new Error('Duplicate node IDs detected');
                     }
-                    
+
                     // Invariant 2: All nodes must have valid types
                     const validTypes = ['agent', 'belief', 'knowledge'];
                     const invalidNodes = data.nodes.filter(n => !validTypes.includes(n.type));
                     if (invalidNodes.length > 0) {
                         throw new Error('Invalid node types detected');
                     }
-                    
+
                     console.log('All invariants satisfied');
                 """,
                 ],
@@ -72,7 +72,8 @@ class TestFrontendInvariants:
                 text=True,
             )
 
-            assert result.returncode == 0, f"Invariant check failed: {result.stderr}"
+            assert result.returncode == 0, f"Invariant check failed: {
+                result.stderr}"
             assert "All invariants satisfied" in result.stdout
 
         finally:
@@ -121,7 +122,11 @@ class TestFrontendInvariants:
         queue_size=st.integers(min_value=1, max_value=1000),
         reconnect_attempts=st.integers(min_value=0, max_value=10),
     )
-    def test_websocket_queue_invariants(self, message_count, queue_size, reconnect_attempts):
+    def test_websocket_queue_invariants(
+            self,
+            message_count,
+            queue_size,
+            reconnect_attempts):
         """
         Test WebSocket message queue invariants:
         1. Queue size bounds
@@ -142,14 +147,17 @@ class TestFrontendInvariants:
             loss_rate = messages_lost / message_count
             # Log warning if loss rate exceeds threshold
             if loss_rate > 0.1:
-                print(f"Warning: Message loss rate {loss_rate:.2%} exceeds 10% threshold")
+                print(
+                    f"Warning: Message loss rate {
+                        loss_rate:.2%} exceeds 10% threshold")
 
     @given(
         tokens_used=st.integers(min_value=0, max_value=1000000),
         rate_limit=st.integers(min_value=1000, max_value=100000),
         time_window=st.integers(min_value=1, max_value=3600),
     )
-    def test_llm_rate_limit_invariants(self, tokens_used, rate_limit, time_window):
+    def test_llm_rate_limit_invariants(
+            self, tokens_used, rate_limit, time_window):
         """
         Test LLM client rate limiting invariants:
         1. Token usage within limits
@@ -163,7 +171,8 @@ class TestFrontendInvariants:
         if tokens_per_second > limit_per_second and limit_per_second > 0:
             # Calculate required backoff
             # Fix: ensure calculation doesn't produce negative backoff
-            excess_tokens = max(0, tokens_used - (rate_limit * time_window / 60))
+            excess_tokens = max(
+                0, tokens_used - (rate_limit * time_window / 60))
             backoff_time = excess_tokens / limit_per_second if limit_per_second > 0 else 0
             assert backoff_time >= 0, "Backoff time must be non-negative"
 
@@ -174,7 +183,8 @@ class TestFrontendInvariants:
             actual_backoff = min(actual_backoff, 300)  # Max 5 min backoff
 
             # Backoff should cover the required time, but we accept that it may be capped at 300s
-            # If the required backoff exceeds our maximum, we accept the maximum backoff
+            # If the required backoff exceeds our maximum, we accept the
+            # maximum backoff
             expected_backoff = min(backoff_time, 300)
             tolerance = 0.1  # Small tolerance for practical applications
             assert actual_backoff >= (
@@ -226,12 +236,13 @@ class TestDashboardLayoutInvariants:
                     panel1 = row_panels[i]
                     panel2 = row_panels[j]
                     # Two panels overlap if one starts before the other ends
-                    overlap = not (
+                    _ = not (
                         panel1["x"] + panel1["width"] <= panel2["x"]
                         or panel2["x"] + panel2["width"] <= panel1["x"]
                     )
                     # For this test, we'll allow overlaps and just verify grid constraints
-                    # since preventing all overlaps would require complex placement logic
+                    # since preventing all overlaps would require complex placement
+                    # logic
 
         # Invariant 2: Grid constraints
         for panel in panels:
@@ -239,6 +250,8 @@ class TestDashboardLayoutInvariants:
             if panel["x"] + panel["width"] > grid_width:
                 panel["width"] = grid_width - panel["x"]
 
-            assert 0 <= panel["x"] < grid_width, f"Panel x position {panel['x']} out of grid"
-            assert panel["x"] + panel["width"] <= grid_width, f"Panel extends beyond grid boundary"
+            assert 0 <= panel["x"] < grid_width, f"Panel x position {
+                panel['x']} out of grid"
+            assert panel["x"] + \
+                panel["width"] <= grid_width, "Panel extends beyond grid boundary"
             assert panel["width"] > 0 and panel["height"] > 0, "Panel dimensions must be positive"

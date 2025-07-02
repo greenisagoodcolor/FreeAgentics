@@ -267,7 +267,7 @@ class OpportunityDetector:
         for resource in price_by_location:
             locations = list(price_by_location[resource].keys())
             for i, loc1 in enumerate(locations):
-                for loc2 in locations[i + 1 :]:
+                for loc2 in locations[i + 1:]:
                     price1 = price_by_location[resource][loc1]
                     price2 = price_by_location[resource][loc2]
                     price_diff = abs(price1 - price2)
@@ -278,7 +278,8 @@ class OpportunityDetector:
                         buy_loc = loc1 if price1 < price2 else loc2
                         sell_loc = loc2 if price1 < price2 else loc1
                         opp = BusinessOpportunity(
-                            id=f"arb_{resource}_{buy_loc}_{sell_loc}_{datetime.utcnow().timestamp()}",
+                            id=(f"arb_{resource}_{buy_loc}_{sell_loc}_"
+                                f"{datetime.utcnow().timestamp()}"),
                             type=OpportunityType.RESOURCE_ARBITRAGE,
                             name=f"Arbitrage: {resource}",
                             description=f"Buy {resource} at {buy_loc} for {min(price1, price2)}, "
@@ -286,7 +287,9 @@ class OpportunityDetector:
                             value_proposition=f"Exploit price differential of {margin:.1%}",
                         )
                         # Calculate metrics
-                        volume = resource_data.get("available_volume", {}).get(resource, 1000)
+                        volume = resource_data.get(
+                            "available_volume", {}).get(
+                            resource, 1000)
                         opp.metrics.potential_value = (
                             volume * price_diff * 0.7
                         )  # Account for market impact
@@ -294,9 +297,11 @@ class OpportunityDetector:
                             0.8 - margin
                         )  # Higher margins might indicate hidden costs
                         opp.metrics.risk_score = 0.3 + transport_cost / price_diff
-                        opp.metrics.time_to_realize = timedelta(days=7)  # Quick turnaround
+                        opp.metrics.time_to_realize = timedelta(
+                            days=7)  # Quick turnaround
                         # Requirements
-                        opp.required_capabilities.update(["transport", "trading", "market_access"])
+                        opp.required_capabilities.update(
+                            ["transport", "trading", "market_access"])
                         opp.metrics.resource_requirements = {
                             "capital": volume * min(price1, price2),
                             "transport": transport_cost * volume,
@@ -314,7 +319,7 @@ class OpportunityDetector:
         opportunities = []
         # Analyze agent capability combinations
         for i, agent1 in enumerate(agent_profiles):
-            for agent2 in agent_profiles[i + 1 :]:
+            for agent2 in agent_profiles[i + 1:]:
                 caps1 = set(agent1.get("capabilities", []))
                 caps2 = set(agent2.get("capabilities", []))
                 # Look for complementary capabilities
@@ -333,17 +338,22 @@ class OpportunityDetector:
                         synergy_score = len(unique_combination) / len(combined_caps)
                         if synergy_score > self.synergy_score_threshold:
                             opp = BusinessOpportunity(
-                                id=f"syn_{opp_name}_{agent1['agent_id']}_{agent2['agent_id']}",
+                                id=f"syn_{opp_name}_{
+                                    agent1['agent_id']}_{
+                                    agent2['agent_id']}",
                                 type=OpportunityType.CAPABILITY_SYNERGY,
                                 name=f"Synergy: {opp_name}",
-                                description=f"Combine capabilities of {agent1['agent_id']} and "
-                                f"{agent2['agent_id']} for {opp_name}",
-                                value_proposition="Unlock opportunity through capability combination",
+                                description=f"Combine capabilities of {
+                                    agent1['agent_id']} and " f"{
+                                    agent2['agent_id']} for {opp_name}",
+                                value_proposition=(
+                                    "Unlock opportunity through capability combination"
+                                ),
                             )
                             # Set metrics based on market data
-                            market_value = market_data.get("opportunity_values", {}).get(
-                                opp_name, 10000
-                            )
+                            market_value = market_data.get(
+                                "opportunity_values", {}).get(
+                                opp_name, 10000)
                             opp.metrics.potential_value = market_value
                             opp.metrics.success_probability = 0.7 * synergy_score
                             opp.metrics.innovation_score = synergy_score
@@ -370,22 +380,27 @@ class OpportunityDetector:
             if current_cost > optimal_cost * 1.2:  # At least 20% improvement possible
                 savings = (current_cost - optimal_cost) * volume
                 opp = BusinessOpportunity(
-                    id=f"eff_{process}_{datetime.utcnow().timestamp()}",
+                    id=f"eff_{process}_{
+                        datetime.utcnow().timestamp()}",
                     type=OpportunityType.EFFICIENCY_IMPROVEMENT,
                     name=f"Optimize: {process}",
                     description=f"Reduce {process} cost from {current_cost} to {optimal_cost}",
-                    value_proposition=f"Save {savings:.2f} through process optimization",
+                    value_proposition=f"Save {
+                        savings:.2f} through process optimization",
                 )
                 # Calculate metrics
                 opp.metrics.potential_value = savings * 0.8  # Share savings
                 opp.metrics.success_probability = 0.6  # Moderate success rate
                 opp.metrics.risk_score = 0.3  # Low risk
-                opp.metrics.time_to_realize = timedelta(days=60)  # Longer implementation
+                opp.metrics.time_to_realize = timedelta(
+                    days=60)  # Longer implementation
                 # Requirements from inefficiency data
                 opp.required_capabilities.update(
-                    inefficiency_data.get("required_capabilities", ["optimization", "analysis"])
-                )
-                implementation_cost = inefficiency_data.get("implementation_cost", savings * 0.3)
+                    inefficiency_data.get(
+                        "required_capabilities", [
+                            "optimization", "analysis"]))
+                implementation_cost = inefficiency_data.get(
+                    "implementation_cost", savings * 0.3)
                 opp.metrics.resource_requirements = {
                     "capital": implementation_cost,
                     "expertise": implementation_cost * 0.5,  # Consulting/expertise costs
@@ -480,13 +495,16 @@ class OpportunityValidator:
             details["reason"] = "Market size too small"
             return False, 0.0, details
         # Check demand trends
-        demand_trend = market_data.get("demand_trends", {}).get(opportunity.target_market, 0)
+        demand_trend = market_data.get(
+            "demand_trends", {}).get(
+            opportunity.target_market, 0)
         details["demand_trend"] = demand_trend
         if demand_trend < -0.2:  # Declining market
             details["reason"] = "Declining market demand"
             return False, 0.2, details
         # Score based on market attractiveness
-        score = min(1.0, (opportunity.metrics.market_size / 100000) * (1 + demand_trend))
+        score = min(1.0, (opportunity.metrics.market_size / 100000)
+                    * (1 + demand_trend))
         return True, score, details
 
     def _validate_resource_availability(

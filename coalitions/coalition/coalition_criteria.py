@@ -48,7 +48,8 @@ class CompatibilityMetric:
     threshold: float = 0.5
     bidirectional: bool = True
 
-    def calculate(self, agent1_profile: Dict[str, Any], agent2_profile: Dict[str, Any]) -> float:
+    def calculate(self, agent1_profile: Dict[str, Any],
+                  agent2_profile: Dict[str, Any]) -> float:
         """
         Calculate compatibility score between two agents.
         Returns:
@@ -68,7 +69,8 @@ class GoalAlignmentMetric(CompatibilityMetric):
             threshold=0.6,
         )
 
-    def calculate(self, agent1_profile: Dict[str, Any], agent2_profile: Dict[str, Any]) -> float:
+    def calculate(self, agent1_profile: Dict[str, Any],
+                  agent2_profile: Dict[str, Any]) -> float:
         """Calculate goal alignment score"""
         goals1 = set(agent1_profile.get("goals", []))
         goals2 = set(agent2_profile.get("goals", []))
@@ -91,12 +93,13 @@ class CapabilityComplementarityMetric(CompatibilityMetric):
             bidirectional=False,  # A complements B doesn't mean B complements A
         )
 
-    def calculate(self, agent1_profile: Dict[str, Any], agent2_profile: Dict[str, Any]) -> float:
+    def calculate(self, agent1_profile: Dict[str, Any],
+                  agent2_profile: Dict[str, Any]) -> float:
         """Calculate capability complementarity score"""
         caps1 = set(agent1_profile.get("capabilities", []))
         caps2 = set(agent2_profile.get("capabilities", []))
         needs1 = set(agent1_profile.get("capability_gaps", []))
-        needs2 = set(agent2_profile.get("capability_gaps", []))
+        set(agent2_profile.get("capability_gaps", []))
         # How well does agent2 fill agent1's gaps?
         filled_gaps = needs1.intersection(caps2)
         complementarity = len(filled_gaps) / len(needs1) if needs1 else 0.0
@@ -111,7 +114,8 @@ class ResourceBalanceMetric(CompatibilityMetric):
     def __init__(self) -> None:
         super().__init__(name="resource_balance", weight=1.0, threshold=0.3)
 
-    def calculate(self, agent1_profile: Dict[str, Any], agent2_profile: Dict[str, Any]) -> float:
+    def calculate(self, agent1_profile: Dict[str, Any],
+                  agent2_profile: Dict[str, Any]) -> float:
         """Calculate resource balance score"""
         resources1 = agent1_profile.get("resources", {})
         resources2 = agent2_profile.get("resources", {})
@@ -136,7 +140,8 @@ class TrustMetric(CompatibilityMetric):
     def __init__(self) -> None:
         super().__init__(name="trust", weight=1.8, threshold=0.5)
 
-    def calculate(self, agent1_profile: Dict[str, Any], agent2_profile: Dict[str, Any]) -> float:
+    def calculate(self, agent1_profile: Dict[str, Any],
+                  agent2_profile: Dict[str, Any]) -> float:
         """Calculate trust score based on interaction history"""
         # Get interaction history
         history = agent1_profile.get("interaction_history", {})
@@ -162,6 +167,65 @@ class TrustMetric(CompatibilityMetric):
             # Weight recent interactions more heavily
             return 0.3 * base_trust + 0.7 * recent_trust
         return base_trust
+
+
+class DissolutionChecker:
+    """Base class for dissolution condition checkers using Chain of Responsibility pattern"""
+    def check(self, coalition_state: Dict[str, Any]) -> Tuple[bool, Optional[DissolutionCondition]]:
+        raise NotImplementedError
+
+
+class TimeoutDissolutionChecker(DissolutionChecker):
+    """Check for coalition timeout"""
+    def __init__(self, max_duration: timedelta):
+        self.max_duration = max_duration
+    
+    def check(self, coalition_state: Dict[str, Any]) -> Tuple[bool, Optional[DissolutionCondition]]:
+        duration = datetime.utcnow() - coalition_state.get("start_time", datetime.utcnow())
+        if duration > self.max_duration:
+            return True, DissolutionCondition.TIMEOUT
+        return False, None
+
+
+class GoalAchievedDissolutionChecker(DissolutionChecker):
+    """Check for goal achievement"""
+    def check(self, coalition_state: Dict[str, Any]) -> Tuple[bool, Optional[DissolutionCondition]]:
+        if coalition_state.get("goals_achieved", False):
+            return True, DissolutionCondition.GOAL_ACHIEVED
+        return False, None
+
+
+class PerformanceDissolutionChecker(DissolutionChecker):
+    """Check for performance threshold breach"""
+    def __init__(self, min_performance_score: float):
+        self.min_performance_score = min_performance_score
+    
+    def check(self, coalition_state: Dict[str, Any]) -> Tuple[bool, Optional[DissolutionCondition]]:
+        if coalition_state.get("performance_score", 1.0) < self.min_performance_score:
+            return True, DissolutionCondition.PERFORMANCE_THRESHOLD
+        return False, None
+
+
+class MemberCountDissolutionChecker(DissolutionChecker):
+    """Check for insufficient member count"""
+    def __init__(self, min_members: int):
+        self.min_members = min_members
+    
+    def check(self, coalition_state: Dict[str, Any]) -> Tuple[bool, Optional[DissolutionCondition]]:
+        if coalition_state.get("member_count", 0) < self.min_members:
+            return True, DissolutionCondition.MEMBER_DEPARTURE
+        return False, None
+
+
+class ConsensusDissolutionChecker(DissolutionChecker):
+    """Check for consensus loss"""
+    def __init__(self, consensus_threshold: float):
+        self.consensus_threshold = consensus_threshold
+    
+    def check(self, coalition_state: Dict[str, Any]) -> Tuple[bool, Optional[DissolutionCondition]]:
+        if coalition_state.get("consensus_score", 1.0) < self.consensus_threshold:
+            return True, DissolutionCondition.CONSENSUS_LOST
+        return False, None
 
 
 @dataclass
@@ -191,11 +255,13 @@ class CoalitionFormationCriteria:
     )
     # Time constraints
     max_formation_time: timedelta = field(default_factory=lambda: timedelta(minutes=5))
-    min_coalition_duration: timedelta = field(default_factory=lambda: timedelta(hours=1))
+    min_coalition_duration: timedelta = field(
+        default_factory=lambda: timedelta(hours=1))
     max_coalition_duration: timedelta = field(default_factory=lambda: timedelta(days=7))
     # Performance thresholds
     min_performance_score: float = 0.3
-    performance_evaluation_interval: timedelta = field(default_factory=lambda: timedelta(hours=1))
+    performance_evaluation_interval: timedelta = field(
+        default_factory=lambda: timedelta(hours=1))
     # Resource requirements
     min_combined_resources: Dict[str, float] = field(default_factory=dict)
     # Voting and consensus
@@ -260,15 +326,20 @@ class CoalitionFormationCriteria:
         # Check size constraints
         if not evaluation["size_valid"]:
             evaluation["issues"].append(
-                f"Size {len(member_profiles)} outside range [{self.min_members}, {self.max_members}]"
-            )
+                f"Size {
+                    len(member_profiles)} outside range [{
+                    self.min_members}, {
+                    self.max_members}]")
         # Calculate pairwise compatibility
         compatibility_sum = 0.0
         compatibility_count = 0
         for i in range(len(member_profiles)):
             for j in range(i + 1, len(member_profiles)):
-                score, _ = self.calculate_compatibility(member_profiles[i], member_profiles[j])
-                pair_key = f"{member_profiles[i]['agent_id']}-{member_profiles[j]['agent_id']}"
+                score, _ = self.calculate_compatibility(
+                    member_profiles[i], member_profiles[j])
+                pair_key = f"{
+                    member_profiles[i]['agent_id']}-{
+                    member_profiles[j]['agent_id']}"
                 evaluation["compatibility_scores"][pair_key] = score
                 compatibility_sum += score
                 compatibility_count += 1
@@ -312,29 +383,36 @@ class CoalitionFormationCriteria:
         self, coalition_state: Dict[str, Any]
     ) -> Tuple[bool, Optional[DissolutionCondition]]:
         """
-        Check if any dissolution conditions are met.
+        Check if any dissolution conditions are met using Chain of Responsibility pattern.
         Returns:
             Tuple of (should_dissolve, condition_met)
         """
-        # Check timeout
-        if DissolutionCondition.TIMEOUT in self.dissolution_conditions:
-            duration = datetime.utcnow() - coalition_state.get("start_time", datetime.utcnow())
-            if duration > self.max_coalition_duration:
-                return True, DissolutionCondition.TIMEOUT
-        # Check goal achievement
-        if DissolutionCondition.GOAL_ACHIEVED in self.dissolution_conditions:
-            if coalition_state.get("goals_achieved", False):
-                return True, DissolutionCondition.GOAL_ACHIEVED
-        # Check performance
-        if DissolutionCondition.PERFORMANCE_THRESHOLD in self.dissolution_conditions:
-            if coalition_state.get("performance_score", 1.0) < self.min_performance_score:
-                return True, DissolutionCondition.PERFORMANCE_THRESHOLD
-        # Check member count
-        if DissolutionCondition.MEMBER_DEPARTURE in self.dissolution_conditions:
-            if coalition_state.get("member_count", 0) < self.min_members:
-                return True, DissolutionCondition.MEMBER_DEPARTURE
-        # Check consensus
-        if DissolutionCondition.CONSENSUS_LOST in self.dissolution_conditions:
-            if coalition_state.get("consensus_score", 1.0) < self.consensus_threshold:
-                return True, DissolutionCondition.CONSENSUS_LOST
+        dissolution_checkers = self._create_dissolution_checker_chain()
+        
+        for checker in dissolution_checkers:
+            should_dissolve, condition = checker.check(coalition_state)
+            if should_dissolve:
+                return True, condition
+                
         return False, None
+
+    def _create_dissolution_checker_chain(self) -> List['DissolutionChecker']:
+        """Create chain of dissolution condition checkers"""
+        checkers = []
+        
+        if DissolutionCondition.TIMEOUT in self.dissolution_conditions:
+            checkers.append(TimeoutDissolutionChecker(self.max_coalition_duration))
+        
+        if DissolutionCondition.GOAL_ACHIEVED in self.dissolution_conditions:
+            checkers.append(GoalAchievedDissolutionChecker())
+        
+        if DissolutionCondition.PERFORMANCE_THRESHOLD in self.dissolution_conditions:
+            checkers.append(PerformanceDissolutionChecker(self.min_performance_score))
+        
+        if DissolutionCondition.MEMBER_DEPARTURE in self.dissolution_conditions:
+            checkers.append(MemberCountDissolutionChecker(self.min_members))
+        
+        if DissolutionCondition.CONSENSUS_LOST in self.dissolution_conditions:
+            checkers.append(ConsensusDissolutionChecker(self.consensus_threshold))
+            
+        return checkers

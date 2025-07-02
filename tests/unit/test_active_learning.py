@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 import torch
 
-from inference.engine.active_inference import InferenceConfig
+from inference.engine.active_inference import InferenceConfig, VariationalMessagePassing
 from inference.engine.active_learning import (
     ActiveLearningAgent,
     ActiveLearningConfig,
@@ -14,7 +14,6 @@ from inference.engine.active_learning import (
     InformationGainPlanner,
     InformationMetric,
     MutualInformationSeeker,
-    VariationalMessagePassing,
     create_active_learner,
 )
 from inference.engine.generative_model import (
@@ -74,10 +73,14 @@ class TestEntropyBasedSeeker:
         entropy = seeker.compute_entropy(uniform_beliefs)
         assert entropy.shape == (2,)
         expected_entropy = -4 * (0.25 * np.log(0.25))
-        # Make sure tensor types match by converting expected_entropy to same dtype as entropy
+        # Make sure tensor types match by converting expected_entropy to same
+        # dtype as entropy
         assert torch.allclose(
-            entropy, torch.tensor(expected_entropy, dtype=entropy.dtype), atol=1e-05
-        )
+            entropy,
+            torch.tensor(
+                expected_entropy,
+                dtype=entropy.dtype),
+            atol=1e-05)
         deterministic_beliefs = torch.zeros(2, 4)
         deterministic_beliefs[:, 0] = 1.0
         entropy = seeker.compute_entropy(deterministic_beliefs)
@@ -88,10 +91,13 @@ class TestEntropyBasedSeeker:
         seeker, _, _ = setup_seeker
         beliefs = torch.softmax(torch.randn(2, 4), dim=-1)
         possible_observations = torch.randn(3, 3)
-        info_values = seeker.compute_information_value(beliefs, possible_observations)
+        info_values = seeker.compute_information_value(
+            beliefs, possible_observations)
         assert info_values.shape == (3,)
         # Information values can be slightly negative due to numerical issues
-        assert not torch.any(torch.isnan(info_values)) and not torch.any(torch.isinf(info_values))
+        assert not torch.any(
+            torch.isnan(info_values)) and not torch.any(
+            torch.isinf(info_values))
 
     def test_select_informative_action(self, setup_seeker) -> None:
         """Test informative action selection"""
@@ -147,7 +153,8 @@ class TestActiveLearningAgent:
         inference = VariationalMessagePassing(inf_config)
         pol_config = PolicyConfig(use_gpu=False)
         policy_selector = DiscreteExpectedFreeEnergy(pol_config, inference)
-        agent = ActiveLearningAgent(config, gen_model, inference, policy_selector)
+        agent = ActiveLearningAgent(
+            config, gen_model, inference, policy_selector)
         return (agent, config, gen_model)
 
     def test_initialization(self, setup_agent) -> None:
@@ -180,7 +187,10 @@ class TestActiveLearningAgent:
         agent, _, _ = setup_agent
         beliefs = torch.softmax(torch.randn(1, 4), dim=-1)
         preferences = torch.randn(3)
-        policies = [Policy(actions=[0], horizon=1), Policy(actions=[1], horizon=1)]
+        policies = [
+            Policy(
+                actions=[0], horizon=1), Policy(
+                actions=[1], horizon=1)]
         # Mock the policy selector to avoid shape issues
         original_compute = agent.policy_selector.compute_expected_free_energy
 
@@ -188,7 +198,8 @@ class TestActiveLearningAgent:
             return torch.tensor(0.5), torch.tensor(0.2), torch.tensor(0.3)
 
         agent.policy_selector.compute_expected_free_energy = mock_compute_efe
-        pragmatic_values = agent.compute_pragmatic_value(beliefs, policies, preferences)
+        pragmatic_values = agent.compute_pragmatic_value(
+            beliefs, policies, preferences)
         # Restore original method
         agent.policy_selector.compute_expected_free_energy = original_compute
         assert pragmatic_values.shape == (2,)
@@ -202,7 +213,8 @@ class TestActiveLearningAgent:
         original_select = agent.select_exploratory_action
 
         # Mock the entire method to avoid shape issues
-        def mock_select_exploratory_action(beliefs, available_actions, preferences=None):
+        def mock_select_exploratory_action(
+                beliefs, available_actions, preferences=None):
             info = {
                 "epistemic_value": 0.2,
                 "pragmatic_value": 0.5,
@@ -213,7 +225,8 @@ class TestActiveLearningAgent:
 
         agent.select_exploratory_action = mock_select_exploratory_action
         # Call the method with our mock
-        action, info = agent.select_exploratory_action(beliefs, available_actions)
+        action, info = agent.select_exploratory_action(
+            beliefs, available_actions)
         # Restore the original method
         agent.select_exploratory_action = original_select
         # Check the expected outputs
@@ -302,11 +315,14 @@ class TestFactoryFunction:
 
     def test_create_planner(self) -> None:
         """Test creating information gain planner"""
-        config = ActiveLearningConfig(information_metric=InformationMetric.ENTROPY, use_gpu=False)
+        config = ActiveLearningConfig(
+            information_metric=InformationMetric.ENTROPY,
+            use_gpu=False)
         dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
         params = ModelParameters(use_gpu=False)
         gen_model = DiscreteGenerativeModel(dims, params)
-        planner = create_active_learner("planner", config, generative_model=gen_model)
+        planner = create_active_learner(
+            "planner", config, generative_model=gen_model)
         assert isinstance(planner, InformationGainPlanner)
 
     def test_invalid_learner_type(self) -> None:

@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 """
 GMN Parser Module
@@ -121,8 +121,10 @@ class GMNLexer:
                 if match:
                     value = match.group(0)
                     # Skip whitespace and comments
-                    if token_type not in ["WHITESPACE", "COMMENT", "MULTILINE_COMMENT"]:
-                        token = Token(token_type, value, self.line, self.column)
+                    if token_type not in [
+                            "WHITESPACE", "COMMENT", "MULTILINE_COMMENT"]:
+                        token = Token(
+                            token_type, value, self.line, self.column)
                         self.tokens.append(token)
                     # Update position
                     self.position = match.end()
@@ -209,7 +211,9 @@ class GMNParser:
         for i, line in enumerate(lines):
             if line.strip() == "```gnn" or line.strip() == "```gmn":
                 if in_gmn_block:
-                    errors.append(f"Line {i+1}: Nested GMN blocks not allowed")
+                    errors.append(
+                        f"Line {
+                            i + 1}: Nested GMN blocks not allowed")
                 in_gmn_block = True
                 block_start_line = i + 1
             elif line.strip() == "```" and in_gmn_block:
@@ -274,7 +278,8 @@ class GMNParser:
                     value = parts[1].strip()
                     # Parse specific metadata fields
                     if key == "tags":
-                        self.metadata[key] = [tag.strip() for tag in value.strip("[]").split(", ")]
+                        self.metadata[key] = [tag.strip()
+                                              for tag in value.strip("[]").split(", ")]
                     elif key in ["created", "modified"]:
                         try:
                             self.metadata[key] = datetime.fromisoformat(
@@ -285,7 +290,8 @@ class GMNParser:
                     else:
                         self.metadata[key] = value
 
-    def _extract_gmn_block(self, content_lines: List[str]) -> tuple[Optional[str], int]:
+    def _extract_gmn_block(
+            self, content_lines: List[str]) -> tuple[Optional[str], int]:
         """Extract GMN code block from section content"""
         gmn_content = []
         i = 0
@@ -309,7 +315,8 @@ class GMNParser:
             return "\n".join(gmn_content), i + 1
         return None, i
 
-    def _parse_gmn_block(self, content: str, section_name: str) -> Dict[str, Any]:
+    def _parse_gmn_block(self, content: str,
+                         section_name: str) -> Dict[str, Any]:
         """Parse GMN block content into structured data"""
         if not content.strip():
             return {}
@@ -336,7 +343,9 @@ class GMNParser:
 
             return parsed
         except (GMNSyntaxError, Exception) as e:
-            self.errors.append(f"Error parsing {section_name} section: {str(e)}")
+            self.errors.append(
+                f"Error parsing {section_name} section: {
+                    str(e)}")
             return {}
 
     def _validate_sections(self) -> None:
@@ -357,8 +366,9 @@ class GMNParser:
         for section_name, section_data in self.sections.items():
             section_node = ASTNode(section_name, 0, 0)
             section_node.attributes = (
-                section_data if isinstance(section_data, dict) else {"content": section_data}
-            )
+                section_data if isinstance(
+                    section_data, dict) else {
+                    "content": section_data})
             root.children.append(section_node)
 
 
@@ -386,78 +396,108 @@ class GMNBlockParser:
         """Expect a specific token type"""
         if not self.current_token or self.current_token.type != token_type:
             raise GMNSyntaxError(
-                f"Expected {token_type}, got {self.current_token.type if self.current_token else 'EOF'}"
-            )
+                f"Expected {token_type}, got {
+                    self.current_token.type if self.current_token else 'EOF'}")
         token = self.current_token
         self._advance()
         return token
 
     def _parse_object(self) -> Dict[str, Any]:
-        """Parse an object {...}"""
+        """Parse an object {...} using Template Method pattern"""
         result = {}
-        # Handle both with and without braces
-        if self.current_token and self.current_token.type == "LBRACE":
-            self._advance()  # Skip {
-            while self.current_token and self.current_token.type != "RBRACE":
-                # Skip newlines within object
-                while self.current_token and self.current_token.type == "NEWLINE":
-                    self._advance()
-
-                # Parse key
-                if self.current_token and self.current_token.type == "IDENTIFIER":
-                    key = self.current_token.value
-                    self._advance()
-
-                    # Check if this is a nested object (key followed by {)
-                    if self.current_token and self.current_token.type == "LBRACE":
-                        value = self._parse_object()
-                    elif self.current_token and self.current_token.type == "COLON":
-                        self._advance()
-                        value = self._parse_value()
-                    else:
-                        value = True  # Boolean flag
-
-                    result[key] = value
-
-                    # Optional comma
-                    if self.current_token and self.current_token.type == "COMMA":
-                        self._advance()
-
-                    # Skip newlines after comma
-                    while self.current_token and self.current_token.type == "NEWLINE":
-                        self._advance()
-                else:
-                    break
-            if self.current_token and self.current_token.type == "RBRACE":
-                self._advance()  # Skip }
+        
+        if self._has_opening_brace():
+            result = self._parse_braced_object()
         else:
-            # Parse without braces (top-level)
-            while self.current_token:
-                # Skip newlines
-                while self.current_token and self.current_token.type == "NEWLINE":
-                    self._advance()
-
-                if self.current_token and self.current_token.type == "IDENTIFIER":
-                    key = self.current_token.value
-                    self._advance()
-
-                    # Handle both: and { after identifier
-                    if self.current_token and self.current_token.type == "COLON":
-                        self._advance()
-                        value = self._parse_value()
-                    elif self.current_token and self.current_token.type == "LBRACE":
-                        value = self._parse_object()
-                    else:
-                        value = True  # Boolean flag
-
-                    result[key] = value
-
-                    # Skip newlines
-                    while self.current_token and self.current_token.type == "NEWLINE":
-                        self._advance()
-                else:
-                    self._advance()
+            result = self._parse_top_level_object()
+        
         return result
+
+    def _has_opening_brace(self) -> bool:
+        """Check if object starts with opening brace"""
+        return self.current_token and self.current_token.type == "LBRACE"
+
+    def _parse_braced_object(self) -> Dict[str, Any]:
+        """Parse object enclosed in braces"""
+        result = {}
+        self._advance()  # Skip {
+        
+        while self.current_token and self.current_token.type != "RBRACE":
+            self._skip_newlines()
+            
+            if not self._has_identifier():
+                break
+            
+            key_value_pair = self._parse_key_value_pair()
+            if key_value_pair:
+                key, value = key_value_pair
+                result[key] = value
+            
+            self._handle_optional_comma()
+            self._skip_newlines()
+        
+        self._consume_closing_brace()
+        return result
+
+    def _parse_top_level_object(self) -> Dict[str, Any]:
+        """Parse object without braces (top-level)"""
+        result = {}
+        
+        while self.current_token:
+            self._skip_newlines()
+            
+            if not self._has_identifier():
+                self._advance()
+                continue
+            
+            key_value_pair = self._parse_key_value_pair()
+            if key_value_pair:
+                key, value = key_value_pair
+                result[key] = value
+            
+            self._skip_newlines()
+        
+        return result
+
+    def _skip_newlines(self) -> None:
+        """Skip any newline tokens"""
+        while self.current_token and self.current_token.type == "NEWLINE":
+            self._advance()
+
+    def _has_identifier(self) -> bool:
+        """Check if current token is an identifier"""
+        return self.current_token and self.current_token.type == "IDENTIFIER"
+
+    def _parse_key_value_pair(self) -> Optional[tuple[str, Any]]:
+        """Parse a key-value pair from current position"""
+        if not self._has_identifier():
+            return None
+        
+        key = self.current_token.value
+        self._advance()
+        
+        value = self._parse_value_for_key()
+        return key, value
+
+    def _parse_value_for_key(self) -> Any:
+        """Parse value based on following token type"""
+        if self.current_token and self.current_token.type == "LBRACE":
+            return self._parse_object()
+        elif self.current_token and self.current_token.type == "COLON":
+            self._advance()
+            return self._parse_value()
+        else:
+            return True  # Boolean flag
+
+    def _handle_optional_comma(self) -> None:
+        """Handle optional comma after key-value pair"""
+        if self.current_token and self.current_token.type == "COMMA":
+            self._advance()
+
+    def _consume_closing_brace(self) -> None:
+        """Consume closing brace if present"""
+        if self.current_token and self.current_token.type == "RBRACE":
+            self._advance()
 
     def _parse_value(self) -> Any:
         """Parse a value (string, number, object, array, etc.)"""
@@ -485,7 +525,9 @@ class GMNBlockParser:
         elif self.current_token.type == "LBRACKET":
             return self._parse_array()
         else:
-            raise GMNSyntaxError(f"Unexpected token: {self.current_token.type}")
+            raise GMNSyntaxError(
+                f"Unexpected token: {
+                    self.current_token.type}")
 
     def _parse_array(self) -> List[Any]:
         """Parse an array [...]"""

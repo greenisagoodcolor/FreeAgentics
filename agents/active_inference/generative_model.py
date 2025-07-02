@@ -78,7 +78,8 @@ class DiscreteGenerativeModel(nn.Module):
                 else:
                     # action is one-hot encoded
                     action_idx = torch.argmax(action[i]).item()
-                next_states[i] = torch.matmul(self.B[:, :, action_idx], state[i])
+                next_states[i] = torch.matmul(
+                    self.B[:, :, action_idx], state[i])
             return next_states
 
     def set_preferences(self, preferences, timestep=None) -> None:
@@ -106,8 +107,10 @@ class ContinuousGenerativeModel(nn.Module):
     """Continuous generative model for active inference"""
 
     def __init__(
-        self, dims: ModelDimensions, params: ModelParameters, hidden_dim: int = 32
-    ) -> None:
+            self,
+            dims: ModelDimensions,
+            params: ModelParameters,
+            hidden_dim: int = 32) -> None:
         """Initialize continuous generative model"""
         super().__init__()
         self.dims = dims
@@ -136,7 +139,7 @@ class ContinuousGenerativeModel(nn.Module):
             state = state.unsqueeze(0)
         output = self.obs_net(state)
         mean = output[:, : self.dims.num_observations]
-        log_var = output[:, self.dims.num_observations :]
+        log_var = output[:, self.dims.num_observations:]
         var = torch.exp(log_var)
         if state.shape[0] == 1:
             return mean.squeeze(0), var.squeeze(0)
@@ -174,7 +177,7 @@ class ContinuousGenerativeModel(nn.Module):
         state_action = torch.cat([state, action], dim=-1)
         output = self.trans_net(state_action)
         mean = output[:, : self.dims.num_states]
-        log_var = output[:, self.dims.num_states :]
+        log_var = output[:, self.dims.num_states:]
         var = torch.exp(log_var)
         if state.shape[0] == 1:
             return mean.squeeze(0), var.squeeze(0)
@@ -195,25 +198,30 @@ class ContinuousGenerativeModel(nn.Module):
 class HierarchicalGenerativeModel(nn.Module):
     """Hierarchical generative model"""
 
-    def __init__(self, dims_list: List[ModelDimensions], params: ModelParameters) -> None:
+    def __init__(
+        self, dims_list: List[ModelDimensions], params: ModelParameters
+    ) -> None:
         """Initialize hierarchical generative model"""
         super().__init__()
         if not dims_list:
-            raise IndexError("HierarchicalGenerativeModel requires at least one level")
+            raise IndexError(
+                "HierarchicalGenerativeModel requires at least one level")
         self.dims_list = dims_list
         self.params = params
         self.num_levels = len(dims_list)
         # Create models for each level
-        self.levels = nn.ModuleList([DiscreteGenerativeModel(dims, params) for dims in dims_list])
+        self.levels = nn.ModuleList([
+            DiscreteGenerativeModel(dims, params) for dims in dims_list
+        ])
         # Inter-level connection matrices
         self.E_matrices = {}
         for i in range(self.num_levels - 1):
             lower_states = dims_list[i].num_actions
             upper_states = dims_list[i].num_states
-            self.E_matrices[(i, i + 1)] = torch.rand(lower_states, upper_states)
-            self.E_matrices[(i, i + 1)] = self.E_matrices[(i, i + 1)] / self.E_matrices[
-                (i, i + 1)
-            ].sum(dim=1, keepdim=True)
+            self.E_matrices[(i, i + 1)
+                            ] = torch.rand(lower_states, upper_states)
+            self.E_matrices[(i, i + 1)] = self.E_matrices[(i, i + 1)] / \
+                self.E_matrices[(i, i + 1)].sum(dim=1, keepdim=True)
 
     def hierarchical_observation_model(self, states):
         """Compute observations for all levels"""
@@ -226,7 +234,8 @@ class HierarchicalGenerativeModel(nn.Module):
     def hierarchical_transition_model(self, states, actions):
         """Compute transitions for all levels"""
         next_states = []
-        for _i, (level, state, action) in enumerate(zip(self.levels, states, actions)):
+        for _i, (level, state, action) in enumerate(
+                zip(self.levels, states, actions)):
             next_state = level.transition_model(state, action)
             next_states.append(next_state)
         return next_states
@@ -323,7 +332,9 @@ def create_generative_model(model_type: str, **kwargs) -> nn.Module:
         params = kwargs.get("params", ModelParameters())
         return HierarchicalGenerativeModel(dims_list=dims_list, params=params)
     elif model_type == "factorized":
-        factor_dims = kwargs.get("factor_dims", kwargs.get("factor_dimensions"))
+        factor_dims = kwargs.get(
+            "factor_dims",
+            kwargs.get("factor_dimensions"))
         num_obs = kwargs.get("num_obs", kwargs.get("num_observations"))
         num_actions = kwargs.get("num_actions", 4)  # default
         params = kwargs.get("params", ModelParameters())

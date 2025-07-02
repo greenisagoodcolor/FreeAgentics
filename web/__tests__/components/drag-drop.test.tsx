@@ -8,7 +8,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { jest } from "@jest/globals";
 
 // Mock DOM methods that might be missing
-Object.defineProperty(Element.prototype, 'getBoundingClientRect', {
+Object.defineProperty(Element.prototype, "getBoundingClientRect", {
   writable: true,
   value: jest.fn(() => ({
     bottom: 0,
@@ -19,7 +19,7 @@ Object.defineProperty(Element.prototype, 'getBoundingClientRect', {
     width: 0,
     x: 0,
     y: 0,
-  }))
+  })),
 });
 
 // Drag and Drop System
@@ -98,10 +98,16 @@ const DragDropProvider: React.FC<{
   const registerDropZone = React.useCallback(
     (id: string, accepts: string[]) => {
       dropZoneConfig.current.set(id, accepts);
-      setDragState((prev) => ({
-        ...prev,
-        dropZones: [...prev.dropZones, id],
-      }));
+      setDragState((prev) => {
+        // Prevent duplicate registrations
+        if (prev.dropZones.includes(id)) {
+          return prev;
+        }
+        return {
+          ...prev,
+          dropZones: [...prev.dropZones, id],
+        };
+      });
     },
     [],
   );
@@ -200,7 +206,7 @@ const Droppable: React.FC<DroppableProps> = ({
         }, 0);
       };
     }
-  }, [context, id]);
+  }, [context, id, accepts]);
 
   const handleMouseUp = () => {
     if (context?.dragState.isDragging) {
@@ -418,7 +424,7 @@ describe("Drag and Drop System", () => {
 
     // Valid zone should have valid-drop class
     expect(validZone).toHaveClass("valid-drop");
-    
+
     // Invalid zone should not have valid-drop class
     expect(invalidZone).not.toHaveClass("valid-drop");
   });

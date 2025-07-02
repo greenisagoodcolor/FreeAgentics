@@ -391,7 +391,7 @@ export const MarkovBlanketDashboard: React.FC<MarkovBlanketDashboardProps> = ({
         agent_id: v.agent_id,
         violation_type: v.violation_type,
         timestamp: v.timestamp,
-        severity: parseFloat(v.severity) || 0.5,
+        severity: v.severity || 0.5,
         independence_measure: v.independence_measure,
         threshold_violated: v.threshold,
         free_energy: 0,

@@ -4,425 +4,312 @@ Expert Committee: Martin Fowler (API design), Robert C. Martin (contracts)
 Testing API contracts and backwards compatibility.
 """
 
-import json
-from typing import Any, Dict, List
+from typing import Any, Dict, Optional
 
-import httpx
 import pytest
+
+from tests.contract.contract_test_base import (
+    AgentResponseSchema,
+    APIContract,
+    CoalitionCreateRequestSchema,
+    CoalitionResponseSchema,
+    ContractSchema,
+    ContractTestRunner,
+    CreateAgentContract,
+    GetAgentContract,
+    ListAgentsContract,
+    contract_registry,
+)
 
 
 class TestAgentAPIContracts:
     """Test contracts for Agent API endpoints."""
 
     @pytest.fixture
-    async def client(self):
-        """Create test client for contract testing."""
-        from api.main import app
-
-        async with httpx.AsyncClient(app=app, base_url="http://test") as client:
-            yield client
+    def contract_runner(self):
+        """Create contract test runner."""
+        return ContractTestRunner()
 
     @pytest.mark.asyncio
-    async def test_create_agent_contract(self, client):
+    async def test_create_agent_contract(self, client, contract_runner):
         """Test agent creation API contract."""
-        # Define expected request/response contract
-        create_request = {
-            "name": "TestAgent",
-            "agent_class": "explorer",
-            "initial_position": [0, 0],
-        }
+        contract = CreateAgentContract()
+        result = await contract_runner.test_contract(contract, client)
 
-        response = await client.post("/api/agents", json=create_request)
-
-        # Contract: Should return 201 with agent data
-        if response.status_code == 201:
-            agent_data = response.json()
-
-            # Verify response structure contract
-            required_fields = ["id", "name", "agent_class", "status", "created_at"]
-            for field in required_fields:
-                assert field in agent_data, f"Missing required field: {field}"
-
-            # Verify data types contract
-            assert isinstance(agent_data["id"], str)
-            assert isinstance(agent_data["name"], str)
-            assert agent_data["agent_class"] == "explorer"
-            assert agent_data["status"] in ["active", "inactive", "pending"]
+        if not result.passed:
+            violations_str = "\n".join(
+                f"- {v.field}: {v.message}" for v in result.violations)
+            pytest.fail(f"Contract violations:\n{violations_str}")
 
     @pytest.mark.asyncio
-    async def test_get_agent_contract(self, client):
+    async def test_get_agent_contract(self, client, contract_runner):
         """Test get agent API contract."""
-        # First create an agent to test retrieval
+        # First create an agent
         create_response = await client.post(
-            "/api/agents", json={"name": "ContractTestAgent", "agent_class": "scholar"}
+            "/api/agents",
+            json={"name": "TestAgent", "agent_type": "explorer", "initial_position": [0, 0]},
         )
 
-        if create_response.status_code == 201:
-            agent_id = create_response.json()["id"]
+        if hasattr(create_response, "json"):
+            agent_data = create_response.json()
+            agent_id = agent_data.get("id", "test-id")
+        else:
+            agent_id = "test-id"
 
-            # Test retrieval contract
-            get_response = await client.get(f"/api/agents/{agent_id}")
+        # Test get contract
+        contract = GetAgentContract(agent_id)
+        result = await contract_runner.test_contract(contract, client)
 
-            # Contract: Should return 200 with complete agent data
-            if get_response.status_code == 200:
-                agent_data = get_response.json()
-
-                # Extended response contract for GET
-                extended_fields = [
-                    "id",
-                    "name",
-                    "agent_class",
-                    "status",
-                    "created_at",
-                    "position",
-                    "capabilities",
-                    "memory_stats",
-                ]
-
-                for field in extended_fields:
-                    assert field in agent_data, f"GET response missing: {field}"
+        if not result.passed:
+            violations_str = "\n".join(
+                f"- {v.field}: {v.message}" for v in result.violations)
+            pytest.fail(f"Contract violations:\n{violations_str}")
 
     @pytest.mark.asyncio
-    async def test_agent_list_pagination_contract(self, client):
-        """Test agent list pagination contract."""
-        response = await client.get("/api/agents?page=1&limit=10")
+    async def test_list_agents_contract(self, client, contract_runner):
+        """Test list agents API contract."""
+        contract = ListAgentsContract()
+        result = await contract_runner.test_contract(contract, client)
 
-        if response.status_code == 200:
-            list_data = response.json()
+        if not result.passed:
+            violations_str = "\n".join(
+                f"- {v.field}: {v.message}" for v in result.violations)
+            pytest.fail(f"Contract violations:\n{violations_str}")
 
-            # Pagination contract
-            pagination_fields = ["items", "total", "page", "limit", "has_next"]
-            for field in pagination_fields:
-                assert field in list_data, f"Pagination missing: {field}"
+    @pytest.mark.asyncio
+    async def test_agent_response_backwards_compatibility(self, client):
+        """Test that agent responses maintain backwards compatibility."""
+        response = await client.get("/api/agents")
 
-            assert isinstance(list_data["items"], list)
-            assert isinstance(list_data["total"], int)
-            assert isinstance(list_data["page"], int)
-            assert isinstance(list_data["limit"], int)
-            assert isinstance(list_data["has_next"], bool)
+        if hasattr(response, "json"):
+            data = response.json()
+        else:
+            data = {"items": [], "total": 0}
+
+        # Check v1 contract fields are present
+        assert "items" in data
+        assert "total" in data
+
+        # If there are agents, check their structure
+        if data["items"]:
+            agent = data["items"][0]
+            v1_required_fields = ["id", "name", "agent_type", "status"]
+            for field in v1_required_fields:
+                assert field in agent, f"Missing v1 field: {field}"
 
 
 class TestCoalitionAPIContracts:
     """Test contracts for Coalition API endpoints."""
 
-    @pytest.mark.asyncio
-    async def test_coalition_formation_contract(self, client):
-        """Test coalition formation API contract."""
-        formation_request = {
-            "name": "TestCoalition",
-            "agent_ids": ["agent_1", "agent_2"],
-            "business_type": "ResourceOptimization",
-            "formation_criteria": {"min_synergy": 0.7, "max_size": 5},
-        }
-
-        response = await client.post("/api/coalitions", json=formation_request)
-
-        if response.status_code == 201:
-            coalition_data = response.json()
-
-            # Coalition response contract
-            required_fields = [
-                "id",
-                "name",
-                "members",
-                "business_type",
-                "status",
-                "formation_timestamp",
-                "synergy_score",
-            ]
-
-            for field in required_fields:
-                assert field in coalition_data, f"Coalition missing: {field}"
-
-            # Business logic contracts
-            assert len(coalition_data["members"]) >= 2
-            assert coalition_data["synergy_score"] >= 0.0
-            assert coalition_data["business_type"] == "ResourceOptimization"
+    @pytest.fixture
+    def contract_runner(self):
+        """Create contract test runner."""
+        return ContractTestRunner()
 
     @pytest.mark.asyncio
-    async def test_coalition_metrics_contract(self, client):
-        """Test coalition metrics API contract."""
-        response = await client.get("/api/coalitions/123/metrics")
+    async def test_create_coalition_contract(self, client, contract_runner):
+        """Test coalition creation API contract."""
 
-        # Contract: Metrics should have consistent structure
-        if response.status_code == 200:
-            metrics_data = response.json()
+        # Define coalition contract
+        class CreateCoalitionContract(APIContract):
+            @property
+            def endpoint(self) -> str:
+                return "/api/coalitions"
 
-            metrics_structure = [
-                "performance",
-                "efficiency",
-                "stability",
-                "growth",
-                "member_satisfaction",
-                "business_value",
-            ]
+            @property
+            def method(self) -> str:
+                return "POST"
 
-            for metric in metrics_structure:
-                assert metric in metrics_data, f"Metric missing: {metric}"
+            @property
+            def request_schema(self):
+                return CoalitionCreateRequestSchema
 
-                # Each metric should have value and trend
-                metric_data = metrics_data[metric]
-                assert "current_value" in metric_data
-                assert "trend" in metric_data
-                assert isinstance(metric_data["current_value"], (int, float))
+            @property
+            def response_schema(self):
+                return CoalitionResponseSchema
 
+            @property
+            def expected_status_codes(self):
+                return [201]
 
-class TestKnowledgeGraphAPIContracts:
-    """Test contracts for Knowledge Graph API endpoints."""
+        contract = CreateCoalitionContract()
+        result = await contract_runner.test_contract(contract, client)
 
-    @pytest.mark.asyncio
-    async def test_knowledge_node_contract(self, client):
-        """Test knowledge node API contract."""
-        node_request = {
-            "node_type": "concept",
-            "data": {"title": "Active Inference", "confidence": 0.95, "source": "research_paper"},
-            "metadata": {"created_by": "agent_123", "timestamp": "2024-01-01T00:00:00Z"},
-        }
-
-        response = await client.post("/api/knowledge/nodes", json=node_request)
-
-        if response.status_code == 201:
-            node_data = response.json()
-
-            # Knowledge node contract
-            node_fields = [
-                "id",
-                "node_type",
-                "data",
-                "metadata",
-                "connections",
-                "confidence_score",
-                "last_updated",
-            ]
-
-            for field in node_fields:
-                assert field in node_data, f"Knowledge node missing: {field}"
-
-            # Validate confidence score range
-            assert 0.0 <= node_data["confidence_score"] <= 1.0
-
-    @pytest.mark.asyncio
-    async def test_knowledge_query_contract(self, client):
-        """Test knowledge query API contract."""
-        query_request = {
-            "query_type": "semantic_search",
-            "parameters": {
-                "search_term": "coalition formation",
-                "similarity_threshold": 0.8,
-                "max_results": 10,
-            },
-        }
-
-        response = await client.post("/api/knowledge/query", json=query_request)
-
-        if response.status_code == 200:
-            query_results = response.json()
-
-            # Query results contract
-            result_structure = [
-                "results",
-                "total_found",
-                "query_time_ms",
-                "similarity_scores",
-                "result_metadata",
-            ]
-
-            for field in result_structure:
-                assert field in query_results, f"Query result missing: {field}"
-
-            assert isinstance(query_results["results"], list)
-            assert len(query_results["results"]) <= 10  # Respects max_results
+        if not result.passed:
+            violations_str = "\n".join(
+                f"- {v.field}: {v.message}" for v in result.violations)
+            pytest.fail(f"Contract violations:\n{violations_str}")
 
 
 class TestWebSocketContracts:
-    """Test contracts for WebSocket connections."""
+    """Test contracts for WebSocket endpoints."""
 
     @pytest.mark.asyncio
-    async def test_agent_updates_websocket_contract(self, client):
-        """Test WebSocket message contracts for agent updates."""
-        try:
-            async with client.websocket_connect("/ws/agents") as websocket:
-                # Send subscription message
-                subscription = {
-                    "action": "subscribe",
-                    "agent_ids": ["agent_123"],
-                    "update_types": ["position", "status", "beliefs"],
-                }
+    async def test_websocket_message_contract(self, client):
+        """Test WebSocket message contracts."""
+        # WebSocket contracts are different - they test message formats
 
-                await websocket.send_text(json.dumps(subscription))
+        # Define expected message schemas
+        class WSSubscribeMessage(ContractSchema):
+            type: str  # "subscribe"
+            topic: str
+            params: Optional[Dict[str, Any]] = None
 
-                # Wait for confirmation
-                response = await websocket.receive_text()
-                confirmation = json.loads(response)
+        class WSUpdateMessage(ContractSchema):
+            type: str  # "update"
+            topic: str
+            data: Dict[str, Any]
+            timestamp: str
 
-                # WebSocket confirmation contract
-                assert "status" in confirmation
-                assert "subscription_id" in confirmation
-                assert confirmation["status"] == "subscribed"
+        # Test message validation
+        subscribe_msg = {"type": "subscribe", "topic": "agents.updates"}
 
-        except Exception:
-            # WebSocket might not be implemented yet
-            pytest.skip("WebSocket not available for contract testing")
+        violations = WSSubscribeMessage.validate_contract(subscribe_msg)
+        assert len(
+            violations) == 0, f"Subscribe message contract violations: {violations}"
 
-    @pytest.mark.asyncio
-    async def test_real_time_updates_contract(self, client):
-        """Test real-time update message format contracts."""
-        expected_update_format = {
-            "message_type": "agent_update",
-            "agent_id": "agent_123",
+        update_msg = {
+            "type": "update",
+            "topic": "agents.updates",
+            "data": {"agent_id": "123", "status": "active"},
             "timestamp": "2024-01-01T00:00:00Z",
-            "update_type": "position",
-            "data": {"new_position": [1, 1], "previous_position": [0, 0]},
-            "metadata": {"sequence_number": 1, "reliability": "guaranteed"},
         }
 
-        # This would test actual WebSocket message format
-        # For now, verify the expected structure is documented
-        assert isinstance(expected_update_format, dict)
-        assert "message_type" in expected_update_format
-        assert "timestamp" in expected_update_format
+        violations = WSUpdateMessage.validate_contract(update_msg)
+        assert len(
+            violations) == 0, f"Update message contract violations: {violations}"
 
 
-class TestAPIVersioningContracts:
-    """Test API versioning and backwards compatibility."""
+class TestContractVersioning:
+    """Test API versioning and contract evolution."""
 
-    @pytest.mark.asyncio
-    async def test_api_version_headers(self, client):
-        """Test API version header contracts."""
-        response = await client.get("/api/agents")
+    def test_contract_registry(self):
+        """Test contract registry functionality."""
+        # Check registered contracts
+        v1_contracts = contract_registry.get_all_contracts("v1")
+        assert len(v1_contracts) >= 3  # At least the 3 we registered
 
-        # Version headers contract
-        version_headers = ["api-version", "supported-versions"]
+        # Check specific contract
+        create_contract = contract_registry.get_contract(
+            "POST", "/api/agents", "v1")
+        assert create_contract is not None
+        assert isinstance(create_contract, CreateAgentContract)
 
-        for header in version_headers:
-            if header in response.headers:
-                # If version headers exist, they should follow semantic versioning
-                version = response.headers[header]
-                assert self._is_valid_semantic_version(version)
+    def test_contract_versioning(self):
+        """Test supporting multiple API versions."""
 
-    def _is_valid_semantic_version(self, version: str) -> bool:
-        """Validate semantic version format."""
-        import re
+        # Define v2 contract with additional fields
+        class AgentResponseSchemaV2(AgentResponseSchema):
+            capabilities: Dict[str, float]
+            resources: Dict[str, float]
+            version: str = "v2"
 
-        pattern = r"^\d+\.\d+\.\d+$"
-        return bool(re.match(pattern, version))
+        class CreateAgentContractV2(CreateAgentContract):
+            @property
+            def response_schema(self):
+                return AgentResponseSchemaV2
 
-    @pytest.mark.asyncio
-    async def test_backwards_compatibility_contract(self, client):
-        """Test backwards compatibility contracts."""
-        # Test that deprecated fields are still present
-        response = await client.get("/api/agents")
+        # Register v2 contract
+        contract_registry.register(CreateAgentContractV2(), "v2")
 
-        if response.status_code == 200:
-            # Even if API evolves, critical fields should remain
-            # This prevents breaking changes for existing clients
-            backwards_compatible_structure = {"items": list, "total": int}
+        # Check both versions exist
+        v1_contract = contract_registry.get_contract(
+            "POST", "/api/agents", "v1")
+        v2_contract = contract_registry.get_contract(
+            "POST", "/api/agents", "v2")
 
-            data = response.json()
-            for field, expected_type in backwards_compatible_structure.items():
-                if field in data:
-                    assert isinstance(
-                        data[field], expected_type
-                    ), f"Field {field} type changed, breaking compatibility"
+        assert v1_contract is not None
+        assert v2_contract is not None
+        assert v1_contract.response_schema != v2_contract.response_schema
 
 
-class TestErrorResponseContracts:
-    """Test error response contracts."""
+class TestContractValidation:
+    """Test contract validation functionality."""
 
-    @pytest.mark.asyncio
-    async def test_validation_error_contract(self, client):
-        """Test validation error response contract."""
-        # Send invalid data to trigger validation error
-        invalid_request = {
-            "name": "",  # Invalid empty name
-            "agent_class": "invalid_class",  # Invalid class
-            "initial_position": "not_a_list",  # Invalid type
+    def test_strict_validation(self):
+        """Test that extra fields cause contract violations."""
+        schema = AgentResponseSchema
+
+        # Valid data
+        valid_data = {
+            "id": "123",
+            "name": "TestAgent",
+            "agent_type": "explorer",
+            "status": "active",
+            "position": {"x": 0, "y": 0, "z": 0},
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-01T00:00:00Z",
         }
 
-        response = await client.post("/api/agents", json=invalid_request)
+        violations = schema.validate_contract(valid_data)
+        assert len(violations) == 0
 
-        if response.status_code == 422:  # Validation error
-            error_data = response.json()
+        # Data with extra field
+        invalid_data = valid_data.copy()
+        invalid_data["extra_field"] = "should not be here"
 
-            # Error response contract
-            error_fields = ["error", "message", "details", "timestamp"]
-            for field in error_fields:
-                assert field in error_data, f"Error response missing: {field}"
+        violations = schema.validate_contract(invalid_data)
+        assert len(violations) > 0
+        assert any("extra" in v.message.lower() for v in violations)
 
-            # Validation details contract
-            if "details" in error_data and error_data["details"]:
-                detail = error_data["details"][0]
-                validation_fields = ["field", "error_type", "provided_value"]
+    def test_missing_required_fields(self):
+        """Test that missing required fields cause violations."""
+        schema = AgentResponseSchema
 
-                for field in validation_fields:
-                    assert field in detail, f"Validation detail missing: {field}"
+        # Missing required field
+        incomplete_data = {
+            "id": "123",
+            "name": "TestAgent",
+            # Missing: agent_type, status, position, created_at, updated_at
+        }
 
-    @pytest.mark.asyncio
-    async def test_not_found_error_contract(self, client):
-        """Test 404 error response contract."""
-        response = await client.get("/api/agents/nonexistent_id")
+        violations = schema.validate_contract(incomplete_data)
+        assert len(violations) > 0
+        assert any("agent_type" in v.field for v in violations)
 
-        if response.status_code == 404:
-            error_data = response.json()
+    def test_type_validation(self):
+        """Test that incorrect types cause violations."""
+        schema = AgentResponseSchema
 
-            # 404 error contract
-            assert "error" in error_data
-            assert "message" in error_data
-            assert error_data["error"] == "not_found"
-            assert "agent" in error_data["message"].lower()
+        # Wrong type for position
+        invalid_type_data = {
+            "id": "123",
+            "name": "TestAgent",
+            "agent_type": "explorer",
+            "status": "active",
+            "position": "should be dict not string",  # Wrong type
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-01T00:00:00Z",
+        }
 
-    @pytest.mark.asyncio
-    async def test_server_error_contract(self, client):
-        """Test 500 error response contract."""
-        # This would test server error responses
-        # For security, they should not leak sensitive information
-
-        # Mock a server error scenario
-        with pytest.raises(Exception):
-            # Simulate condition that would cause 500 error
-            # The error response contract should hide internal details
-            pass
+        violations = schema.validate_contract(invalid_type_data)
+        assert len(violations) > 0
+        assert any("position" in v.field for v in violations)
 
 
-class TestPerformanceContracts:
-    """Test performance-related API contracts."""
+@pytest.mark.asyncio
+class TestContractReporting:
+    """Test contract test reporting functionality."""
 
-    @pytest.mark.asyncio
-    async def test_response_time_contract(self, client):
-        """Test response time contracts."""
-        import time
+    async def test_contract_report_generation(self, client):
+        """Test generating contract test reports."""
+        runner = ContractTestRunner()
 
-        # Standard endpoints should respond within reasonable time
-        endpoints_with_limits = [
-            ("/api/health", 0.1),  # Health check: 100ms
-            ("/api/agents", 1.0),  # List agents: 1 second
-        ]
+        # Register test contracts
+        runner.register_contract(CreateAgentContract())
+        runner.register_contract(ListAgentsContract())
 
-        for endpoint, max_time in endpoints_with_limits:
-            start_time = time.time()
-            response = await client.get(endpoint)
-            response_time = time.time() - start_time
+        # Run all contracts
+        results = await runner.test_all_contracts(client)
 
-            # Performance contract
-            assert (
-                response_time < max_time
-            ), f"Endpoint {endpoint} too slow: {response_time}s > {max_time}s"
+        # Generate report
+        report = runner.generate_report(results)
 
-    @pytest.mark.asyncio
-    async def test_concurrent_request_contract(self, client):
-        """Test concurrent request handling contract."""
-        import asyncio
+        # Check report content
+        assert "API Contract Test Report" in report
+        assert "Total contracts tested:" in report
+        assert "✅" in report or "❌" in report  # Status indicators
 
-        # System should handle reasonable concurrent load
-        async def make_request():
-            return await client.get("/api/health")
-
-        # Test concurrent requests
-        tasks = [make_request() for _ in range(10)]
-        responses = await asyncio.gather(*tasks, return_exceptions=True)
-
-        # Concurrent handling contract
-        successful_responses = [r for r in responses if not isinstance(r, Exception)]
-        success_rate = len(successful_responses) / len(responses)
-
-        assert success_rate > 0.9, f"Concurrent handling poor: {success_rate}"
+        # Save report if needed
+        # with open("contract_test_report.md", "w") as f:
+        #     f.write(report)

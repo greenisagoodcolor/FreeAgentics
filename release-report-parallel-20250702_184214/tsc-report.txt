@@ -1,0 +1,568 @@
+__tests__/app/dashboard/components/panels/AgentPanel.test.tsx(59,7): error TS2353: Object literal may only specify known properties, and 'agents' does not exist in type 'Reducer<{ agents: any; }, UnknownAction, any>'.
+__tests__/components/chat/ChatWindow.integration.test.tsx(197,9): error TS2741: Property 'endTime' is missing in type '{ id: string; name: string; type: string; participants: string[]; messages: ({ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { ...; })[]; startTime: number; lastActivity: number; messageRate: number; isActive: boolean; }' but required in type 'Conversation'.
+__tests__/components/chat/ChatWindow.integration.test.tsx(198,9): error TS2322: Type '{ id: string; name: string; type: string; status: string; personality: { openness: number; conscientiousness: number; extraversion: number; agreeableness: number; neuroticism: number; }; capabilities: string[]; ... 5 more ...; updated_at: string; }[]' is not assignable to type 'Agent[]'.
+  Type '{ id: string; name: string; type: string; status: string; personality: { openness: number; conscientiousness: number; extraversion: number; agreeableness: number; neuroticism: number; }; capabilities: string[]; ... 5 more ...; updated_at: string; }' is missing the following properties from type 'Agent': inConversation, color, knowledge, autonomyEnabled
+__tests__/components/chat/ChatWindow.integration.test.tsx(332,24): error TS2345: Argument of type '{ messages: ({ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { id: string; conversationId: string; ... 5 more ...; status: string; } | { ...; })[]; ... 7 more ...; isActive: boolean; }' is not assignable to parameter of type '{ id: string; name: string; type: string; participants: string[]; messages: ({ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { ...; })[]; startTime: number; lastActivity: number; messageRate: number; isActive: boolean; }'.
+  Types of property 'messages' are incompatible.
+    Type '({ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { id: string; conversationId: string; agentId: string; ... 4 more ...; status: string; } | { ...; })[]' is not assignable to type '({ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { id: string; conversationId: string; agentId: string; ... 4 more ...; status: string; })[]'.
+      Type '{ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { id: string; conversationId: string; agentId: string; ... 4 more ...; status: string; } | { ...; }' is not assignable to type '{ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { id: string; conversationId: string; agentId: string; ... 4 more ...; status: string; }'.
+        Type '{ id: string; content: string; senderId: string; timestamp: Date; }' is not assignable to type '{ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { id: string; conversationId: string; agentId: string; ... 4 more ...; status: string; }'.
+          Type '{ id: string; content: string; senderId: string; timestamp: Date; }' is missing the following properties from type '{ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; metadata: { isGeneratedByLLM: boolean; }; status: string; }': conversationId, agentId, type, metadata, status
+__tests__/components/chat/ChatWindow.integration.test.tsx(356,24): error TS2345: Argument of type '{ messages: ({ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { id: string; conversationId: string; ... 5 more ...; status: string; } | { ...; })[]; ... 7 more ...; isActive: boolean; }' is not assignable to parameter of type '{ id: string; name: string; type: string; participants: string[]; messages: ({ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { ...; })[]; startTime: number; lastActivity: number; messageRate: number; isActive: boolean; }'.
+  Types of property 'messages' are incompatible.
+    Type '({ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { id: string; conversationId: string; agentId: string; ... 4 more ...; status: string; } | { ...; })[]' is not assignable to type '({ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { id: string; conversationId: string; agentId: string; ... 4 more ...; status: string; })[]'.
+      Type '{ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { id: string; conversationId: string; agentId: string; ... 4 more ...; status: string; } | { ...; }' is not assignable to type '{ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { id: string; conversationId: string; agentId: string; ... 4 more ...; status: string; }'.
+        Type '{ id: string; content: string; senderId: string; timestamp: Date; metadata: { isSystemMessage: boolean; }; }' is not assignable to type '{ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { id: string; conversationId: string; agentId: string; ... 4 more ...; status: string; }'.
+          Type '{ id: string; content: string; senderId: string; timestamp: Date; metadata: { isSystemMessage: boolean; }; }' is missing the following properties from type '{ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; metadata: { isGeneratedByLLM: boolean; }; status: string; }': conversationId, agentId, type, status
+__tests__/components/chat/ChatWindow.integration.test.tsx(750,24): error TS2345: Argument of type '{ messages: ({ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { id: string; conversationId: string; ... 5 more ...; status: string; } | { ...; })[]; ... 7 more ...; isActive: boolean; }' is not assignable to parameter of type '{ id: string; name: string; type: string; participants: string[]; messages: ({ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { ...; })[]; startTime: number; lastActivity: number; messageRate: number; isActive: boolean; }'.
+  Types of property 'messages' are incompatible.
+    Type '({ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { id: string; conversationId: string; agentId: string; ... 4 more ...; status: string; } | { ...; })[]' is not assignable to type '({ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { id: string; conversationId: string; agentId: string; ... 4 more ...; status: string; })[]'.
+      Type '{ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { id: string; conversationId: string; agentId: string; ... 4 more ...; status: string; } | { ...; }' is not assignable to type '{ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { id: string; conversationId: string; agentId: string; ... 4 more ...; status: string; }'.
+        Type '{ id: string; content: string; senderId: string; timestamp: Date; metadata: { isGeneratedByLLM: boolean; respondingTo: string; }; }' is not assignable to type '{ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { id: string; conversationId: string; agentId: string; ... 4 more ...; status: string; }'.
+          Type '{ id: string; content: string; senderId: string; timestamp: Date; metadata: { isGeneratedByLLM: boolean; respondingTo: string; }; }' is missing the following properties from type '{ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; metadata: { isGeneratedByLLM: boolean; }; status: string; }': conversationId, agentId, type, status
+__tests__/components/chat/ChatWindow.integration.test.tsx(797,24): error TS2345: Argument of type '{ messages: { id: string; content: string; senderId: string; timestamp: Date; }[]; id: string; name: string; type: string; participants: string[]; startTime: number; lastActivity: number; messageRate: number; isActive: boolean; }' is not assignable to parameter of type '{ id: string; name: string; type: string; participants: string[]; messages: ({ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { ...; })[]; startTime: number; lastActivity: number; messageRate: number; isActive: boolean; }'.
+  Types of property 'messages' are incompatible.
+    Type '{ id: string; content: string; senderId: string; timestamp: Date; }[]' is not assignable to type '({ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { id: string; conversationId: string; agentId: string; ... 4 more ...; status: string; })[]'.
+      Type '{ id: string; content: string; senderId: string; timestamp: Date; }' is not assignable to type '{ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; status: string; metadata?: undefined; } | { id: string; conversationId: string; agentId: string; ... 4 more ...; status: string; }'.
+        Type '{ id: string; content: string; senderId: string; timestamp: Date; }' is missing the following properties from type '{ id: string; conversationId: string; agentId: string; content: string; timestamp: number; type: string; metadata: { isGeneratedByLLM: boolean; }; status: string; }': conversationId, agentId, type, metadata, status
+__tests__/components/chat/ChatWindow.integration.test.tsx(834,11): error TS2741: Property 'endTime' is missing in type '{ id: string; messages: any[]; name: string; type: string; participants: string[]; startTime: number; lastActivity: number; messageRate: number; isActive: boolean; }' but required in type 'Conversation'.
+__tests__/components/chat/ChatWindow.integration.test.tsx(835,11): error TS2322: Type '{ id: string; name: string; type: string; status: string; personality: { openness: number; conscientiousness: number; extraversion: number; agreeableness: number; neuroticism: number; }; capabilities: string[]; ... 5 more ...; updated_at: string; }[]' is not assignable to type 'Agent[]'.
+  Type '{ id: string; name: string; type: string; status: string; personality: { openness: number; conscientiousness: number; extraversion: number; agreeableness: number; neuroticism: number; }; capabilities: string[]; ... 5 more ...; updated_at: string; }' is missing the following properties from type 'Agent': inConversation, color, knowledge, autonomyEnabled
+__tests__/components/conversation/conversation-orchestration.test.tsx(219,11): error TS2322: Type '({ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; })[]' is not assignable to type 'Agent[]'.
+  Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; }' is not assignable to type 'Agent'.
+    Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; }' is missing the following properties from type 'Agent': inConversation, knowledge, autonomyEnabled
+__tests__/components/conversation/conversation-orchestration.test.tsx(234,11): error TS2322: Type '({ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; })[]' is not assignable to type 'Agent[]'.
+  Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; }' is not assignable to type 'Agent'.
+    Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; }' is missing the following properties from type 'Agent': inConversation, knowledge, autonomyEnabled
+__tests__/components/conversation/conversation-orchestration.test.tsx(252,11): error TS2322: Type '({ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; })[]' is not assignable to type 'Agent[]'.
+  Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; }' is not assignable to type 'Agent'.
+    Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; }' is missing the following properties from type 'Agent': inConversation, knowledge, autonomyEnabled
+__tests__/components/conversation/conversation-orchestration.test.tsx(267,11): error TS2322: Type '({ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; })[]' is not assignable to type 'Agent[]'.
+  Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; }' is not assignable to type 'Agent'.
+    Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; }' is missing the following properties from type 'Agent': inConversation, knowledge, autonomyEnabled
+__tests__/components/conversation/conversation-orchestration.test.tsx(290,11): error TS2322: Type '({ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; })[]' is not assignable to type 'Agent[]'.
+  Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; }' is not assignable to type 'Agent'.
+    Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; }' is missing the following properties from type 'Agent': inConversation, knowledge, autonomyEnabled
+__tests__/components/conversation/conversation-orchestration.test.tsx(303,11): error TS2322: Type '({ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; })[]' is not assignable to type 'Agent[]'.
+  Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; }' is not assignable to type 'Agent'.
+    Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; }' is missing the following properties from type 'Agent': inConversation, knowledge, autonomyEnabled
+__tests__/components/conversation/conversation-orchestration.test.tsx(321,13): error TS2322: Type '({ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; })[]' is not assignable to type 'Agent[]'.
+  Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; }' is not assignable to type 'Agent'.
+    Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; }' is missing the following properties from type 'Agent': inConversation, knowledge, autonomyEnabled
+__tests__/components/conversation/conversation-orchestration.test.tsx(359,11): error TS2322: Type '({ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; })[]' is not assignable to type 'Agent[]'.
+  Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; }' is not assignable to type 'Agent'.
+    Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; }' is missing the following properties from type 'Agent': inConversation, knowledge, autonomyEnabled
+__tests__/components/conversation/conversation-orchestration.test.tsx(372,11): error TS2322: Type '({ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; })[]' is not assignable to type 'Agent[]'.
+  Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; }' is not assignable to type 'Agent'.
+    Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; }' is missing the following properties from type 'Agent': inConversation, knowledge, autonomyEnabled
+__tests__/components/conversation/conversation-orchestration.test.tsx(386,11): error TS2322: Type '({ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; })[]' is not assignable to type 'Agent[]'.
+  Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; }' is not assignable to type 'Agent'.
+    Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; }' is missing the following properties from type 'Agent': inConversation, knowledge, autonomyEnabled
+__tests__/components/conversation/conversation-orchestration.test.tsx(399,11): error TS2322: Type '({ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; })[]' is not assignable to type 'Agent[]'.
+  Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; }' is not assignable to type 'Agent'.
+    Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; }' is missing the following properties from type 'Agent': inConversation, knowledge, autonomyEnabled
+__tests__/components/conversation/conversation-orchestration.test.tsx(422,11): error TS2322: Type '({ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; })[]' is not assignable to type 'Agent[]'.
+  Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; }' is not assignable to type 'Agent'.
+    Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; }' is missing the following properties from type 'Agent': inConversation, knowledge, autonomyEnabled
+__tests__/components/conversation/conversation-orchestration.test.tsx(439,11): error TS2322: Type '({ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; })[]' is not assignable to type 'Agent[]'.
+  Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; }' is not assignable to type 'Agent'.
+    Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; }' is missing the following properties from type 'Agent': inConversation, knowledge, autonomyEnabled
+__tests__/components/conversation/conversation-orchestration.test.tsx(458,11): error TS2322: Type '({ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; })[]' is not assignable to type 'Agent[]'.
+  Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; }' is not assignable to type 'Agent'.
+    Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; }' is missing the following properties from type 'Agent': inConversation, knowledge, autonomyEnabled
+__tests__/components/conversation/conversation-orchestration.test.tsx(474,11): error TS2322: Type '({ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; })[]' is not assignable to type 'Agent[]'.
+  Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; }' is not assignable to type 'Agent'.
+    Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; }' is missing the following properties from type 'Agent': inConversation, knowledge, autonomyEnabled
+__tests__/components/conversation/conversation-orchestration.test.tsx(585,11): error TS2322: Type '({ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; })[]' is not assignable to type 'Agent[]'.
+  Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; }' is not assignable to type 'Agent'.
+    Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; }' is missing the following properties from type 'Agent': inConversation, knowledge, autonomyEnabled
+__tests__/components/conversation/conversation-orchestration.test.tsx(620,11): error TS2322: Type '({ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; })[]' is not assignable to type 'Agent[]'.
+  Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; }' is not assignable to type 'Agent'.
+    Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; }' is missing the following properties from type 'Agent': inConversation, knowledge, autonomyEnabled
+__tests__/components/conversation/conversation-orchestration.test.tsx(657,11): error TS2322: Type '({ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; })[]' is not assignable to type 'Agent[]'.
+  Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; }' is not assignable to type 'Agent'.
+    Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; }' is missing the following properties from type 'Agent': inConversation, knowledge, autonomyEnabled
+__tests__/components/conversation/conversation-orchestration.test.tsx(682,26): error TS2339: Property 'value' does not exist on type 'HTMLElement'.
+__tests__/components/conversation/conversation-orchestration.test.tsx(691,11): error TS2322: Type '({ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; })[]' is not assignable to type 'Agent[]'.
+  Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; }' is not assignable to type 'Agent'.
+    Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; }' is missing the following properties from type 'Agent': inConversation, knowledge, autonomyEnabled
+__tests__/components/conversation/conversation-orchestration.test.tsx(714,15): error TS2322: Type '({ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; })[]' is not assignable to type 'Agent[]'.
+  Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; }' is not assignable to type 'Agent'.
+    Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; }' is missing the following properties from type 'Agent': inConversation, knowledge, autonomyEnabled
+__tests__/components/conversation/conversation-orchestration.test.tsx(733,11): error TS2322: Type '({ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; })[]' is not assignable to type 'Agent[]'.
+  Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; } | { id: string; name: string; status: "active"; type: "scholar"; avatar: string; position: { ...; }; color: string; } | { ...; } | { ...; }' is not assignable to type 'Agent'.
+    Type '{ id: string; name: string; status: "active"; type: "explorer"; avatar: string; position: { x: number; y: number; }; color: string; }' is missing the following properties from type 'Agent': inConversation, knowledge, autonomyEnabled
+__tests__/components/conversation/conversation-orchestration.test.tsx(760,26): error TS2339: Property 'value' does not exist on type 'HTMLElement'.
+__tests__/components/dashboard/AgentPanel.integration.test.tsx(124,37): error TS2339: Property 'agents' does not exist on type '{}'.
+__tests__/components/dashboard/AgentPanel.integration.test.tsx(126,30): error TS2339: Property 'conversations' does not exist on type '{}'.
+__tests__/components/dashboard/AgentPanel.integration.test.tsx(128,33): error TS2339: Property 'ui' does not exist on type '{}'.
+__tests__/components/dashboard/AgentPanel.integration.test.tsx(130,30): error TS2339: Property 'connection' does not exist on type '{}'.
+__tests__/components/dashboard/AgentPanel.integration.test.tsx(132,40): error TS2339: Property 'knowledge' does not exist on type '{}'.
+__tests__/components/dashboard/AgentPanel.integration.test.tsx(134,40): error TS2339: Property 'analytics' does not exist on type '{}'.
+__tests__/components/dashboard/ConversationPanel.integration.test.tsx(440,15): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+__tests__/components/dashboard/ConversationPanel.integration.test.tsx(473,9): error TS2300: Duplicate identifier 'scrollTop'.
+__tests__/components/dashboard/ConversationPanel.integration.test.tsx(475,13): error TS1119: An object literal cannot have property and accessor with the same name.
+__tests__/components/dashboard/ConversationPanel.integration.test.tsx(475,13): error TS2300: Duplicate identifier 'scrollTop'.
+__tests__/components/dashboard/ConversationPanel.integration.test.tsx(478,13): error TS2300: Duplicate identifier 'scrollTop'.
+__tests__/components/dashboard/KnowledgePanel.integration.test.tsx(67,40): error TS2339: Property 'knowledge' does not exist on type '{}'.
+__tests__/components/dashboard/KnowledgePanel.integration.test.tsx(69,37): error TS2339: Property 'agents' does not exist on type '{}'.
+__tests__/components/dashboard/KnowledgePanel.integration.test.tsx(71,30): error TS2339: Property 'conversations' does not exist on type '{}'.
+__tests__/components/dashboard/KnowledgePanel.integration.test.tsx(73,33): error TS2339: Property 'ui' does not exist on type '{}'.
+__tests__/components/dashboard/KnowledgePanel.integration.test.tsx(75,30): error TS2339: Property 'connection' does not exist on type '{}'.
+__tests__/components/dashboard/KnowledgePanel.integration.test.tsx(77,40): error TS2339: Property 'analytics' does not exist on type '{}'.
+__tests__/components/dashboard/KnowledgePanel.integration.test.tsx(176,19): error TS2540: Cannot assign to 'NODE_ENV' because it is a read-only property.
+__tests__/components/dashboard/KnowledgePanel.integration.test.tsx(448,35): error TS2339: Property 'mockImplementationOnce' does not exist on type 'FC<KnowledgeGraphVisualizationProps>'.
+__tests__/components/dashboard/KnowledgePanel.integration.test.tsx(561,19): error TS2540: Cannot assign to 'NODE_ENV' because it is a read-only property.
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(97,37): error TS2339: Property 'agents' does not exist on type '{}'.
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(99,30): error TS2339: Property 'conversations' does not exist on type '{}'.
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(101,40): error TS2339: Property 'analytics' does not exist on type '{}'.
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(103,40): error TS2339: Property 'knowledge' does not exist on type '{}'.
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(105,33): error TS2339: Property 'ui' does not exist on type '{}'.
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(107,30): error TS2339: Property 'connection' does not exist on type '{}'.
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(133,23): error TS2345: Argument of type '{ agents: { agents: {}; }; conversations: { conversations: {}; }; analytics: { metrics: {}; }; }' is not assignable to parameter of type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }'.
+  Type '{ agents: { agents: {}; }; conversations: { conversations: {}; }; analytics: { metrics: {}; }; }' is missing the following properties from type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }': ui, connection, knowledge
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(214,25): error TS2345: Argument of type '{ agents: { agents: { "agent-1": { id: string; name: string; status: string; }; "agent-2": { id: string; name: string; status: string; }; "agent-3": { id: string; name: string; status: string; }; }; }; conversations: { ...; }; analytics: { ...; }; }' is not assignable to parameter of type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }'.
+  Type '{ agents: { agents: { "agent-1": { id: string; name: string; status: string; }; "agent-2": { id: string; name: string; status: string; }; "agent-3": { id: string; name: string; status: string; }; }; }; conversations: { ...; }; analytics: { ...; }; }' is missing the following properties from type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }': ui, connection, knowledge
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(236,25): error TS2345: Argument of type '{ agents: { agents: { "agent-1": { id: string; name: string; status: string; }; "agent-2": { id: string; name: string; status: string; }; "agent-3": { id: string; name: string; status: string; }; }; }; conversations: { ...; }; analytics: { ...; }; }' is not assignable to parameter of type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }'.
+  Type '{ agents: { agents: { "agent-1": { id: string; name: string; status: string; }; "agent-2": { id: string; name: string; status: string; }; "agent-3": { id: string; name: string; status: string; }; }; }; conversations: { ...; }; analytics: { ...; }; }' is missing the following properties from type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }': ui, connection, knowledge
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(270,25): error TS2345: Argument of type '{ agents: { agents: {}; }; conversations: { conversations: { "conv-1": { id: string; messages: { id: string; content: string; }[]; }; "conv-2": { id: string; messages: { id: string; content: string; }[]; }; }; }; analytics: { ...; }; }' is not assignable to parameter of type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }'.
+  Type '{ agents: { agents: {}; }; conversations: { conversations: { "conv-1": { id: string; messages: { id: string; content: string; }[]; }; "conv-2": { id: string; messages: { id: string; content: string; }[]; }; }; }; analytics: { ...; }; }' is missing the following properties from type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }': ui, connection, knowledge
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(289,25): error TS2345: Argument of type '{ agents: { agents: {}; }; conversations: { conversations: {}; }; analytics: { metrics: { averageResponseTime: number; }; }; }' is not assignable to parameter of type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }'.
+  Type '{ agents: { agents: {}; }; conversations: { conversations: {}; }; analytics: { metrics: { averageResponseTime: number; }; }; }' is missing the following properties from type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }': ui, connection, knowledge
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(314,25): error TS2345: Argument of type '{ agents: { agents: {}; agentOrder: any[]; selectedAgentId: any; typingAgents: any[]; }; conversations: { conversations: {}; active: any; }; analytics: { metrics: {}; }; }' is not assignable to parameter of type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }'.
+  Type '{ agents: { agents: {}; agentOrder: any[]; selectedAgentId: any; typingAgents: any[]; }; conversations: { conversations: {}; active: any; }; analytics: { metrics: {}; }; }' is missing the following properties from type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }': ui, connection, knowledge
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(337,25): error TS2345: Argument of type '{ agents: { agents: {}; }; conversations: { conversations: { "conv-1": { id: string; }; }; }; analytics: { metrics: {}; }; }' is not assignable to parameter of type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }'.
+  Type '{ agents: { agents: {}; }; conversations: { conversations: { "conv-1": { id: string; }; }; }; analytics: { metrics: {}; }; }' is missing the following properties from type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }': ui, connection, knowledge
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(410,59): error TS2322: Type 'string' is not assignable to type 'DashboardView'.
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(427,25): error TS2345: Argument of type '{ agents: { agents: { "agent-1": { id: string; status: string; }; }; }; conversations: { conversations: {}; }; analytics: { metrics: {}; }; }' is not assignable to parameter of type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }'.
+  Type '{ agents: { agents: { "agent-1": { id: string; status: string; }; }; }; conversations: { conversations: {}; }; analytics: { metrics: {}; }; }' is missing the following properties from type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }': ui, connection, knowledge
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(433,50): error TS2322: Type 'string' is not assignable to type 'DashboardView'.
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(454,25): error TS2345: Argument of type '{ agents: { agents: { "agent-1": { id: string; status: string; }; }; }; conversations: { conversations: {}; }; analytics: { metrics: {}; }; }' is not assignable to parameter of type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }'.
+  Type '{ agents: { agents: { "agent-1": { id: string; status: string; }; }; }; conversations: { conversations: {}; }; analytics: { metrics: {}; }; }' is missing the following properties from type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }': ui, connection, knowledge
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(475,25): error TS2345: Argument of type '{ agents: { agents: { "agent-1": { id: string; status: string; }; "agent-2": { id: string; status: string; }; }; }; conversations: { conversations: {}; }; analytics: { metrics: {}; }; }' is not assignable to parameter of type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }'.
+  Type '{ agents: { agents: { "agent-1": { id: string; status: string; }; "agent-2": { id: string; status: string; }; }; }; conversations: { conversations: {}; }; analytics: { metrics: {}; }; }' is missing the following properties from type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }': ui, connection, knowledge
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(491,25): error TS2345: Argument of type '{ agents: any; conversations: any; analytics: any; }' is not assignable to parameter of type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }'.
+  Type '{ agents: any; conversations: any; analytics: any; }' is missing the following properties from type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }': ui, connection, knowledge
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(540,25): error TS2345: Argument of type '{ agents: { agents: {}; }; conversations: { conversations: {}; }; analytics: { metrics: {}; }; }' is not assignable to parameter of type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }'.
+  Type '{ agents: { agents: {}; }; conversations: { conversations: {}; }; analytics: { metrics: {}; }; }' is missing the following properties from type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }': ui, connection, knowledge
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(578,25): error TS2345: Argument of type '{ agents: { agents: {}; }; conversations: { conversations: {}; }; analytics: { metrics: {}; }; }' is not assignable to parameter of type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }'.
+  Type '{ agents: { agents: {}; }; conversations: { conversations: {}; }; analytics: { metrics: {}; }; }' is missing the following properties from type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }': ui, connection, knowledge
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(598,25): error TS2345: Argument of type '{ agents: { agents: {}; }; conversations: { conversations: {}; }; analytics: { metrics: {}; }; }' is not assignable to parameter of type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }'.
+  Type '{ agents: { agents: {}; }; conversations: { conversations: {}; }; analytics: { metrics: {}; }; }' is missing the following properties from type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }': ui, connection, knowledge
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(614,27): error TS2345: Argument of type '{ agents: { agents: { [x: string]: { id: string; status: string; }; }; }; conversations: { conversations: {}; }; analytics: { metrics: {}; }; }' is not assignable to parameter of type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }'.
+  Type '{ agents: { agents: { [x: string]: { id: string; status: string; }; }; }; conversations: { conversations: {}; }; analytics: { metrics: {}; }; }' is missing the following properties from type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }': ui, connection, knowledge
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(691,25): error TS2345: Argument of type '{ agents: { agents: { "agent-1": { id: string; status: string; }; }; }; conversations: { conversations: {}; }; analytics: { metrics: {}; }; }' is not assignable to parameter of type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }'.
+  Type '{ agents: { agents: { "agent-1": { id: string; status: string; }; }; }; conversations: { conversations: {}; }; analytics: { metrics: {}; }; }' is missing the following properties from type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }': ui, connection, knowledge
+__tests__/components/dashboard/MetricsPanel.integration.test.tsx(719,25): error TS2345: Argument of type '{ agents: { agents: {}; }; conversations: { conversations: { "conv-1": { id: string; messages: any[]; }; }; }; analytics: { metrics: {}; }; }' is not assignable to parameter of type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }'.
+  Type '{ agents: { agents: {}; }; conversations: { conversations: { "conv-1": { id: string; messages: any[]; }; }; }; analytics: { metrics: {}; }; }' is missing the following properties from type '{ agents: AgentState; conversations: ConversationState; ui: UIState; connection: ConnectionState; knowledge: KnowledgeState; analytics: AnalyticsState; }': ui, connection, knowledge
+__tests__/components/global-knowledge-graph.test.tsx(238,3): error TS2353: Object literal may only specify known properties, and 'source' does not exist in type 'KnowledgeEntry'.
+__tests__/components/global-knowledge-graph.test.tsx(306,18): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(callback: () => void, delay?: number): Timeout', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type '() => void'.
+      Type '{}' provides no match for the signature '(): void'.
+  Overload 2 of 3, '(callback: (_: void) => void, delay?: number): Timeout', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type '(_: void) => void'.
+      Type '{}' provides no match for the signature '(_: void): void'.
+  Overload 3 of 3, '(handler: TimerHandler, timeout?: number, ...arguments: any[]): number', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'TimerHandler'.
+__tests__/components/global-knowledge-graph.test.tsx(338,18): error TS2339: Property 'querySelector' does not exist on type 'unknown'.
+__tests__/components/global-knowledge-graph.test.tsx(339,18): error TS2339: Property 'querySelector' does not exist on type 'unknown'.
+__tests__/components/global-knowledge-graph.test.tsx(340,18): error TS2339: Property 'title' does not exist on type 'unknown'.
+__tests__/components/global-knowledge-graph.test.tsx(341,18): error TS2339: Property 'title' does not exist on type 'unknown'.
+__tests__/components/global-knowledge-graph.test.tsx(345,18): error TS2339: Property 'querySelector' does not exist on type 'unknown'.
+__tests__/components/global-knowledge-graph.test.tsx(346,18): error TS2339: Property 'querySelector' does not exist on type 'unknown'.
+__tests__/components/global-knowledge-graph.test.tsx(347,18): error TS2339: Property 'title' does not exist on type 'unknown'.
+__tests__/components/global-knowledge-graph.test.tsx(348,18): error TS2339: Property 'title' does not exist on type 'unknown'.
+__tests__/components/global-knowledge-graph.test.tsx(475,18): error TS2339: Property 'querySelector' does not exist on type 'unknown'.
+__tests__/components/global-knowledge-graph.test.tsx(476,18): error TS2339: Property 'querySelector' does not exist on type 'unknown'.
+__tests__/components/global-knowledge-graph.test.tsx(477,18): error TS2339: Property 'title' does not exist on type 'unknown'.
+__tests__/components/global-knowledge-graph.test.tsx(478,18): error TS2339: Property 'title' does not exist on type 'unknown'.
+__tests__/components/global-knowledge-graph.test.tsx(486,27): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Element | Node | Document | Window'.
+__tests__/components/global-knowledge-graph.test.tsx(506,18): error TS2339: Property 'querySelector' does not exist on type 'unknown'.
+__tests__/components/global-knowledge-graph.test.tsx(507,18): error TS2339: Property 'querySelector' does not exist on type 'unknown'.
+__tests__/components/global-knowledge-graph.test.tsx(508,18): error TS2339: Property 'title' does not exist on type 'unknown'.
+__tests__/components/global-knowledge-graph.test.tsx(509,18): error TS2339: Property 'title' does not exist on type 'unknown'.
+__tests__/components/global-knowledge-graph.test.tsx(516,27): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Element | Node | Document | Window'.
+__tests__/components/infinite-scroll.test.tsx(11,1): error TS2322: Type 'Mock<UnknownFunction>' is not assignable to type '{ new (callback: IntersectionObserverCallback, options?: IntersectionObserverInit): IntersectionObserver; prototype: IntersectionObserver; }'.
+  Type '{}' is missing the following properties from type 'IntersectionObserver': root, rootMargin, thresholds, disconnect, and 3 more.
+__tests__/components/infinite-scroll.test.tsx(105,52): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'never'.
+__tests__/components/infinite-scroll.test.tsx(108,23): error TS2322: Type 'Mock<UnknownFunction>' is not assignable to type '() => Promise<void>'.
+  Type '{}' is missing the following properties from type 'Promise<void>': then, catch, finally, [Symbol.toStringTag]
+__tests__/components/infinite-scroll.test.tsx(122,23): error TS2322: Type 'Mock<UnknownFunction>' is not assignable to type '() => Promise<void>'.
+  Type '{}' is missing the following properties from type 'Promise<void>': then, catch, finally, [Symbol.toStringTag]
+__tests__/components/infinite-scroll.test.tsx(135,52): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'never'.
+__tests__/components/infinite-scroll.test.tsx(138,23): error TS2322: Type 'Mock<UnknownFunction>' is not assignable to type '() => Promise<void>'.
+  Type '{}' is missing the following properties from type 'Promise<void>': then, catch, finally, [Symbol.toStringTag]
+__tests__/components/infinite-scroll.test.tsx(151,7): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+__tests__/components/infinite-scroll.test.tsx(158,52): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'never'.
+__tests__/components/infinite-scroll.test.tsx(162,9): error TS2322: Type 'Mock<UnknownFunction>' is not assignable to type '() => Promise<void>'.
+  Type '{}' is missing the following properties from type 'Promise<void>': then, catch, finally, [Symbol.toStringTag]
+__tests__/components/infinite-scroll.test.tsx(175,52): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'never'.
+__tests__/components/infinite-scroll.test.tsx(178,23): error TS2322: Type 'Mock<UnknownFunction>' is not assignable to type '() => Promise<void>'.
+  Type '{}' is missing the following properties from type 'Promise<void>': then, catch, finally, [Symbol.toStringTag]
+__tests__/components/infinite-scroll.test.tsx(202,23): error TS2322: Type 'Mock<UnknownFunction>' is not assignable to type '() => Promise<void>'.
+  Type '{}' is missing the following properties from type 'Promise<void>': then, catch, finally, [Symbol.toStringTag]
+__tests__/components/infinite-scroll.test.tsx(213,7): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+__tests__/components/infinite-scroll.test.tsx(227,7): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+__tests__/components/infinite-scroll.test.tsx(243,23): error TS2322: Type 'Mock<UnknownFunction>' is not assignable to type '() => Promise<void>'.
+  Type '{}' is missing the following properties from type 'Promise<void>': then, catch, finally, [Symbol.toStringTag]
+__tests__/components/infinite-scroll.test.tsx(254,7): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+__tests__/components/infinite-scroll.test.tsx(265,52): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'never'.
+__tests__/components/infinite-scroll.test.tsx(270,9): error TS2322: Type 'Mock<UnknownFunction>' is not assignable to type '() => Promise<void>'.
+  Type '{}' is missing the following properties from type 'Promise<void>': then, catch, finally, [Symbol.toStringTag]
+__tests__/components/infinite-scroll.test.tsx(288,52): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'never'.
+__tests__/components/infinite-scroll.test.tsx(301,23): error TS2322: Type 'Mock<UnknownFunction>' is not assignable to type '() => Promise<void>'.
+  Type '{}' is missing the following properties from type 'Promise<void>': then, catch, finally, [Symbol.toStringTag]
+__tests__/components/infinite-scroll.test.tsx(312,52): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'never'.
+__tests__/components/infinite-scroll.test.tsx(315,23): error TS2322: Type 'Mock<UnknownFunction>' is not assignable to type '() => Promise<void>'.
+  Type '{}' is missing the following properties from type 'Promise<void>': then, catch, finally, [Symbol.toStringTag]
+__tests__/components/infinite-scroll.test.tsx(324,23): error TS2322: Type 'Mock<UnknownFunction>' is not assignable to type '() => Promise<void>'.
+  Type '{}' is missing the following properties from type 'Promise<void>': then, catch, finally, [Symbol.toStringTag]
+__tests__/components/infinite-scroll.test.tsx(336,52): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'never'.
+__tests__/components/infinite-scroll.test.tsx(341,9): error TS2322: Type 'Mock<UnknownFunction>' is not assignable to type '() => Promise<void>'.
+  Type '{}' is missing the following properties from type 'Promise<void>': then, catch, finally, [Symbol.toStringTag]
+__tests__/components/infinite-scroll.test.tsx(354,52): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'never'.
+__tests__/components/infinite-scroll.test.tsx(357,23): error TS2322: Type 'Mock<UnknownFunction>' is not assignable to type '() => Promise<void>'.
+  Type '{}' is missing the following properties from type 'Promise<void>': then, catch, finally, [Symbol.toStringTag]
+__tests__/components/infinite-scroll.test.tsx(366,5): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+__tests__/components/infinite-scroll.test.tsx(372,52): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'never'.
+__tests__/components/infinite-scroll.test.tsx(377,9): error TS2322: Type 'Mock<UnknownFunction>' is not assignable to type '() => Promise<void>'.
+  Type '{}' is missing the following properties from type 'Promise<void>': then, catch, finally, [Symbol.toStringTag]
+__tests__/components/infinite-scroll.test.tsx(390,9): error TS2322: Type 'Mock<UnknownFunction>' is not assignable to type '() => Promise<void>'.
+  Type '{}' is missing the following properties from type 'Promise<void>': then, catch, finally, [Symbol.toStringTag]
+__tests__/components/infinite-scroll.test.tsx(400,52): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'never'.
+__tests__/components/infinite-scroll.test.tsx(403,23): error TS2322: Type 'Mock<UnknownFunction>' is not assignable to type '() => Promise<void>'.
+  Type '{}' is missing the following properties from type 'Promise<void>': then, catch, finally, [Symbol.toStringTag]
+__tests__/components/infinite-scroll.test.tsx(413,5): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+__tests__/components/infinite-scroll.test.tsx(419,53): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'never'.
+__tests__/components/infinite-scroll.test.tsx(420,53): error TS2345: Argument of type 'undefined' is not assignable to parameter of type 'never'.
+__tests__/components/infinite-scroll.test.tsx(424,25): error TS2322: Type 'Mock<UnknownFunction>' is not assignable to type '() => Promise<void>'.
+  Type '{}' is missing the following properties from type 'Promise<void>': then, catch, finally, [Symbol.toStringTag]
+__tests__/components/infinite-scroll.test.tsx(427,25): error TS2322: Type 'Mock<UnknownFunction>' is not assignable to type '() => Promise<void>'.
+  Type '{}' is missing the following properties from type 'Promise<void>': then, catch, finally, [Symbol.toStringTag]
+__tests__/components/integration-ui.test.tsx(11,1): error TS2322: Type 'Mock<UnknownFunction>' is not assignable to type '{ new (callback: IntersectionObserverCallback, options?: IntersectionObserverInit): IntersectionObserver; prototype: IntersectionObserver; }'.
+  Type '{}' is missing the following properties from type 'IntersectionObserver': root, rootMargin, thresholds, disconnect, and 3 more.
+__tests__/components/integration-ui.test.tsx(21,14): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(callback: () => void, delay?: number): Timeout', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type '() => void'.
+      Type '{}' provides no match for the signature '(): void'.
+  Overload 2 of 3, '(callback: (_: void) => void, delay?: number): Timeout', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type '(_: void) => void'.
+      Type '{}' provides no match for the signature '(_: void): void'.
+  Overload 3 of 3, '(handler: TimerHandler, timeout?: number, ...arguments: any[]): number', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'TimerHandler'.
+__tests__/components/KnowledgeGraph.test.tsx(313,5): error TS2322: Type 'Mock<{ clearRect: Mock<any, any, any>; fillRect: Mock<any, any, any>; strokeRect: Mock<any, any, any>; fillText: Mock<any, any, any>; strokeText: Mock<any, any, any>; ... 45 more ...; direction: string; }, [contextType: ...], any>' is not assignable to type '{ (contextId: "2d", options?: CanvasRenderingContext2DSettings): CanvasRenderingContext2D; (contextId: "bitmaprenderer", options?: ImageBitmapRenderingContextSettings): ImageBitmapRenderingContext; (contextId: "webgl", options?: WebGLContextAttributes): WebGLRenderingContext; (contextId: "webgl2", options?: WebGLCon...'.
+  Type '{ clearRect: Mock<any, any, any>; fillRect: Mock<any, any, any>; strokeRect: Mock<any, any, any>; fillText: Mock<any, any, any>; strokeText: Mock<any, any, any>; ... 45 more ...; direction: string; }' is missing the following properties from type 'CanvasRenderingContext2D': clip, isPointInPath, isPointInStroke, createConicGradient, and 17 more.
+__tests__/components/KnowledgeGraph.test.tsx(423,16): error TS2339: Property 'querySelector' does not exist on type 'unknown'.
+__tests__/components/KnowledgeGraph.test.tsx(426,16): error TS2339: Property 'querySelector' does not exist on type 'unknown'.
+__tests__/components/KnowledgeGraph.test.tsx(435,27): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Element | Node | Document | Window'.
+__tests__/components/KnowledgeGraph.test.tsx(436,27): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Element | Node | Document | Window'.
+__tests__/components/markov-blanket-config-focused.test.tsx(394,30): error TS2322: Type '{ initialConfig: { precision: number; complexity: number; adaptation: number; }; onConfigChange: Mock<UnknownFunction>; onSave: Mock<UnknownFunction>; onReset: Mock<...>; }' is not assignable to type 'MarkovBlanketConfigurationUIProps'.
+  The types returned by 'onSave(...)' are incompatible between these types.
+    Type '{}' is missing the following properties from type 'Promise<void>': then, catch, finally, [Symbol.toStringTag]
+__tests__/components/markov-blanket-config-focused.test.tsx(416,30): error TS2322: Type '{ onSave: Mock<UnknownFunction>; onReset: Mock<UnknownFunction>; }' is not assignable to type 'MarkovBlanketConfigurationUIProps'.
+  The types returned by 'onSave(...)' are incompatible between these types.
+    Type '{}' is missing the following properties from type 'Promise<void>': then, catch, finally, [Symbol.toStringTag]
+__tests__/components/markov-blanket-config-focused.test.tsx(492,37): error TS2559: Type '{ mode: string; configurationLevel: string; }' has no properties in common with type 'IntrinsicAttributes & MarkovBlanketConfigurationUIProps'.
+__tests__/components/markov-blanket-config-focused.test.tsx(502,59): error TS2345: Argument of type '{ success: boolean; }' is not assignable to parameter of type 'never'.
+__tests__/components/markov-blanket-config-focused.test.tsx(512,30): error TS2559: Type '{ onConfigSubmit: Mock<UnknownFunction>; onValidate: Mock<UnknownFunction>; }' has no properties in common with type 'IntrinsicAttributes & MarkovBlanketConfigurationUIProps'.
+__tests__/components/markov-blanket-config-focused.test.tsx(527,26): error TS2345: Argument of type 'Error' is not assignable to parameter of type 'never'.
+__tests__/components/markov-blanket-config-focused.test.tsx(537,30): error TS2559: Type '{ onError: Mock<UnknownFunction>; onConfigSubmit: Mock<UnknownFunction>; }' has no properties in common with type 'IntrinsicAttributes & MarkovBlanketConfigurationUIProps'.
+__tests__/components/markov-blanket-config-focused.test.tsx(608,39): error TS2322: Type '{ configuration: { states: string[]; transitions: { from: string; to: string; probability: number; }[]; }; }' is not assignable to type 'IntrinsicAttributes & MarkovBlanketConfigurationUIProps'.
+  Property 'configuration' does not exist on type 'IntrinsicAttributes & MarkovBlanketConfigurationUIProps'.
+__tests__/components/memoryviewer-deep-interactions.test.tsx(22,10): error TS2614: Module '"../utils/unified-ui-mocks"' has no exported member 'selectTestUtils'. Did you mean to use 'import selectTestUtils from "../utils/unified-ui-mocks"' instead?
+__tests__/components/memoryviewer-deep-interactions.test.tsx(34,43): error TS2339: Property 'toISOString' does not exist on type 'unknown'.
+__tests__/components/memoryviewer-deep-interactions.test.tsx(35,57): error TS2339: Property 'match' does not exist on type 'unknown'.
+__tests__/components/memoryviewer-deep-interactions.test.tsx(205,3): error TS2353: Object literal may only specify known properties, and 'source' does not exist in type 'KnowledgeEntry'.
+__tests__/components/memoryviewer-deep-interactions.test.tsx(262,7): error TS2353: Object literal may only specify known properties, and 'type' does not exist in type 'Message'.
+__tests__/components/memoryviewer-deep-interactions.test.tsx(306,13): error TS2339: Property 'useToast' does not exist on type '{}'.
+__tests__/components/memoryviewer-deep-interactions.test.tsx(307,13): error TS2339: Property 'useLLM' does not exist on type '{}'.
+__tests__/components/memoryviewer-deep-interactions.test.tsx(308,13): error TS2339: Property 'formatTimestamp' does not exist on type '{}'.
+__tests__/components/memoryviewer-deep-interactions.test.tsx(308,30): error TS2339: Property 'extractTagsFromMarkdown' does not exist on type '{}'.
+__tests__/components/memoryviewer-deep-interactions.test.tsx(499,43): error TS2345: Argument of type 'Error' is not assignable to parameter of type 'never'.
+__tests__/components/memoryviewer-deep-interactions.test.tsx(798,9): error TS2345: Argument of type 'Error' is not assignable to parameter of type 'never'.
+__tests__/components/memoryviewer-deep-interactions.test.tsx(831,28): error TS2345: Argument of type '"Extracted beliefs text"' is not assignable to parameter of type 'never'.
+__tests__/components/memoryviewer-deep-interactions.test.tsx(915,28): error TS2345: Argument of type 'Error' is not assignable to parameter of type 'never'.
+__tests__/components/memoryviewer-deep-interactions.test.tsx(1082,15): error TS2339: Property 'exportAgentKnowledge' does not exist on type '{}'.
+__tests__/components/memoryviewer-deep-interactions.test.tsx(1111,15): error TS2339: Property 'exportAgentKnowledge' does not exist on type '{}'.
+__tests__/components/memoryviewer-focused.test.tsx(317,35): error TS2322: Type '{ selectedAgent: { id: string; name: string; biography: string; color: string; position: { x: number; y: number; }; knowledge: any[]; toolPermissions: { internetSearch: boolean; webScraping: boolean; wikipediaAccess: boolean; ... 17 more ...; conversationAnalysis: boolean; }; autonomyEnabled: boolean; inConversation...' is not assignable to type 'MemoryViewerProps'.
+  Types of property 'conversationHistory' are incompatible.
+    Type '{ id: string; participants: string[]; messages: { id: string; conversationId: string; senderId: string; content: string; timestamp: Date; type: "text"; metadata: {}; }[]; createdAt: Date; updatedAt: Date; title: string; metadata: {}; }[]' is not assignable to type 'Conversation[]'.
+      Type '{ id: string; participants: string[]; messages: { id: string; conversationId: string; senderId: string; content: string; timestamp: Date; type: "text"; metadata: {}; }[]; createdAt: Date; updatedAt: Date; title: string; metadata: {}; }' is missing the following properties from type 'Conversation': startTime, endTime
+__tests__/components/ui/checkbox.test.tsx(376,15): error TS2322: Type 'Dispatch<SetStateAction<boolean>>' is not assignable to type '(checked: CheckedState) => void'.
+  Types of parameters 'value' and 'checked' are incompatible.
+    Type 'CheckedState' is not assignable to type 'SetStateAction<boolean>'.
+      Type '"indeterminate"' is not assignable to type 'SetStateAction<boolean>'.
+__tests__/components/ui/input.test.tsx(78,20): error TS2339: Property 'type' does not exist on type 'HTMLElement'.
+__tests__/hooks/useToast.integration.test.tsx(70,11): error TS2739: Type '{ altText: string; }' is missing the following properties from type 'ReactElement<ForwardRefExoticComponent<Omit<ToastActionProps & RefAttributes<HTMLButtonElement>, "ref"> & RefAttributes<HTMLButtonElement>>, string | JSXElementConstructor<...>>': type, props, key
+__tests__/hooks/useToast.integration.test.tsx(490,11): error TS2322: Type 'Element' is not assignable to type 'string & ReactNode'.
+  Type 'ReactElement<any, any>' is not assignable to type 'string & ReactPortal'.
+    Type 'ReactElement<any, any>' is not assignable to type 'string'.
+__tests__/hooks/useWebSocket.integration.test.tsx(93,45): error TS2559: Type '"ws://test.com"' has no properties in common with type 'UseWebSocketOptions'.
+__tests__/import-only-coverage.test.ts(134,24): error TS2345: Argument of type 'number' is not assignable to parameter of type 'number & Function'.
+  Type 'number' is not assignable to type 'Function'.
+__tests__/import-only-coverage.test.ts(138,13): error TS2345: Argument of type '(x: number) => number' is not assignable to parameter of type 'number & Function'.
+  Type '(x: number) => number' is not assignable to type 'number'.
+__tests__/import-only-coverage.test.ts(140,18): error TS2349: This expression is not callable.
+  No constituent of type 'string | number | boolean | Function | { transformed: any; }' is callable.
+__tests__/import-only-coverage.test.ts(142,11): error TS2555: Expected at least 2 arguments, but got 1.
+__tests__/import-only-coverage.test.ts(143,11): error TS2555: Expected at least 2 arguments, but got 1.
+__tests__/import-only-coverage.test.ts(144,11): error TS2555: Expected at least 2 arguments, but got 1.
+__tests__/lib/api-key-migration.test.ts(174,39): error TS2352: Conversion of type '{ json: () => Promise<never>; }' to type 'Response' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ json: () => Promise<never>; }' is missing the following properties from type 'Response': headers, ok, redirected, status, and 11 more.
+__tests__/lib/api-key-service-server.test.ts(168,19): error TS2540: Cannot assign to 'NODE_ENV' because it is a read-only property.
+__tests__/lib/api-key-storage.test.ts(78,19): error TS2540: Cannot assign to 'NODE_ENV' because it is a read-only property.
+__tests__/lib/api-key-storage.test.ts(101,19): error TS2540: Cannot assign to 'NODE_ENV' because it is a read-only property.
+__tests__/lib/api-key-storage.test.ts(466,50): error TS2554: Expected 1 arguments, but got 0.
+__tests__/lib/conversation-orchestrator.test.ts(15,51): error TS2345: Argument of type '"Generated response"' is not assignable to parameter of type 'never'.
+__tests__/lib/conversation-orchestrator.test.ts(25,51): error TS2345: Argument of type '"Secure response"' is not assignable to parameter of type 'never'.
+__tests__/lib/conversation-orchestrator.test.ts(88,11): error TS2353: Object literal may only specify known properties, and 'conversationId' does not exist in type 'Message'.
+__tests__/lib/conversation-orchestrator.test.ts(107,9): error TS2322: Type '"active"' is not assignable to type '"error" | "idle" | "offline" | "learning" | "planning" | "moving" | "interacting" | "executing"'.
+__tests__/lib/conversation-orchestrator.test.ts(121,9): error TS2322: Type '"active"' is not assignable to type '"error" | "idle" | "offline" | "learning" | "planning" | "moving" | "interacting" | "executing"'.
+__tests__/lib/conversation-orchestrator.test.ts(138,56): error TS2345: Argument of type '{ id: string; title: string; content: string; tags: string[]; timestamp: Date; }[]' is not assignable to parameter of type 'never'.
+__tests__/lib/conversation-orchestrator.test.ts(243,9): error TS2353: Object literal may only specify known properties, and 'conversationId' does not exist in type 'Message'.
+__tests__/lib/conversation-orchestrator.test.ts(250,26): error TS2339: Property 'handleNewMessage' does not exist on type 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(272,9): error TS2353: Object literal may only specify known properties, and 'conversationId' does not exist in type 'Message'.
+__tests__/lib/conversation-orchestrator.test.ts(278,26): error TS2339: Property 'handleNewMessage' does not exist on type 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(296,9): error TS2353: Object literal may only specify known properties, and 'conversationId' does not exist in type 'Message'.
+__tests__/lib/conversation-orchestrator.test.ts(303,26): error TS2339: Property 'handleNewMessage' does not exist on type 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(330,9): error TS2353: Object literal may only specify known properties, and 'conversationId' does not exist in type 'Message'.
+__tests__/lib/conversation-orchestrator.test.ts(347,26): error TS2339: Property 'handleNewMessage' does not exist on type 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(368,9): error TS2345: Argument of type 'Error' is not assignable to parameter of type 'never'.
+__tests__/lib/conversation-orchestrator.test.ts(373,9): error TS2353: Object literal may only specify known properties, and 'conversationId' does not exist in type 'Message'.
+__tests__/lib/conversation-orchestrator.test.ts(380,26): error TS2339: Property 'handleNewMessage' does not exist on type 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(410,26): error TS2341: Property 'generateAgentResponse' is private and only accessible within class 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(410,48): error TS2345: Argument of type 'Agent' is not assignable to parameter of type 'string'.
+__tests__/lib/conversation-orchestrator.test.ts(434,26): error TS2341: Property 'generateAgentResponse' is private and only accessible within class 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(434,48): error TS2345: Argument of type 'Agent' is not assignable to parameter of type 'string'.
+__tests__/lib/conversation-orchestrator.test.ts(454,26): error TS2341: Property 'generateAgentResponse' is private and only accessible within class 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(454,48): error TS2345: Argument of type 'Agent' is not assignable to parameter of type 'string'.
+__tests__/lib/conversation-orchestrator.test.ts(477,26): error TS2341: Property 'generateAgentResponse' is private and only accessible within class 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(477,48): error TS2345: Argument of type 'Agent' is not assignable to parameter of type 'string'.
+__tests__/lib/conversation-orchestrator.test.ts(479,37): error TS2339: Property 'getRelatedKnowledge' does not exist on type 'KnowledgeRetriever'.
+__tests__/lib/conversation-orchestrator.test.ts(497,26): error TS2341: Property 'generateAgentResponse' is private and only accessible within class 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(497,26): error TS2554: Expected 2-3 arguments, but got 1.
+__tests__/lib/conversation-orchestrator.test.ts(515,44): error TS2339: Property 'getAvailableRespondents' does not exist on type 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(531,9): error TS2353: Object literal may only specify known properties, and 'conversationId' does not exist in type 'Message'.
+__tests__/lib/conversation-orchestrator.test.ts(538,44): error TS2339: Property 'getAvailableRespondents' does not exist on type 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(556,44): error TS2339: Property 'getAvailableRespondents' does not exist on type 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(574,9): error TS2353: Object literal may only specify known properties, and 'conversationId' does not exist in type 'Message'.
+__tests__/lib/conversation-orchestrator.test.ts(581,26): error TS2339: Property 'handleNewMessage' does not exist on type 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(603,9): error TS2353: Object literal may only specify known properties, and 'conversationId' does not exist in type 'Message'.
+__tests__/lib/conversation-orchestrator.test.ts(610,26): error TS2339: Property 'handleNewMessage' does not exist on type 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(634,26): error TS2339: Property 'handleNewMessage' does not exist on type 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(643,26): error TS2339: Property 'handleNewMessage' does not exist on type 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(687,39): error TS2345: Argument of type '{ messages: (Message | { id: string; conversationId: string; agentId: string; content: string; timestamp: Date; tags: any[]; })[]; id: string; participants: string[]; startTime: Date; ... 7 more ...; conversationMetrics?: { totalMessages: number; averageResponseTime: number; participationRates: Record<string, number...' is not assignable to parameter of type 'Conversation'.
+  Types of property 'messages' are incompatible.
+    Type '(Message | { id: string; conversationId: string; agentId: string; content: string; timestamp: Date; tags: any[]; })[]' is not assignable to type 'Message[]'.
+      Type 'Message | { id: string; conversationId: string; agentId: string; content: string; timestamp: Date; tags: any[]; }' is not assignable to type 'Message'.
+        Property 'senderId' is missing in type '{ id: string; conversationId: string; agentId: string; content: string; timestamp: Date; tags: any[]; }' but required in type 'Message'.
+__tests__/lib/conversation-orchestrator.test.ts(727,9): error TS2322: Type '"active"' is not assignable to type '"error" | "idle" | "offline" | "learning" | "planning" | "moving" | "interacting" | "executing"'.
+__tests__/lib/conversation-orchestrator.test.ts(758,26): error TS2339: Property 'handleNewMessage' does not exist on type 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(767,20): error TS2339: Property 'clearQueue' does not exist on type 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(785,20): error TS2339: Property 'destroy' does not exist on type 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(807,9): error TS2345: Argument of type 'Error' is not assignable to parameter of type 'never'.
+__tests__/lib/conversation-orchestrator.test.ts(811,26): error TS2341: Property 'generateAgentResponse' is private and only accessible within class 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(811,26): error TS2554: Expected 2-3 arguments, but got 1.
+__tests__/lib/conversation-orchestrator.test.ts(834,22): error TS2551: Property 'streamGenerateResponse' does not exist on type 'LLMClient'. Did you mean 'generateResponse'?
+__tests__/lib/conversation-orchestrator.test.ts(846,26): error TS2341: Property 'generateAgentResponse' is private and only accessible within class 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(846,48): error TS2345: Argument of type 'Agent' is not assignable to parameter of type 'string'.
+__tests__/lib/conversation-orchestrator.test.ts(869,9): error TS2322: Type '"active"' is not assignable to type '"error" | "idle" | "offline" | "learning" | "planning" | "moving" | "interacting" | "executing"'.
+__tests__/lib/conversation-orchestrator.test.ts(880,26): error TS2341: Property 'generateAgentResponse' is private and only accessible within class 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(880,26): error TS2554: Expected 2-3 arguments, but got 1.
+__tests__/lib/conversation-orchestrator.test.ts(886,31): error TS2339: Property 'getRelatedKnowledge' does not exist on type 'KnowledgeRetriever'.
+__tests__/lib/conversation-orchestrator.test.ts(887,9): error TS2345: Argument of type 'undefined[]' is not assignable to parameter of type 'never'.
+__tests__/lib/conversation-orchestrator.test.ts(902,26): error TS2341: Property 'generateAgentResponse' is private and only accessible within class 'ConversationOrchestrator'.
+__tests__/lib/conversation-orchestrator.test.ts(902,48): error TS2345: Argument of type 'Agent' is not assignable to parameter of type 'string'.
+__tests__/lib/conversation-orchestrator.test.ts(918,9): error TS2353: Object literal may only specify known properties, and 'conversationId' does not exist in type 'Message'.
+__tests__/lib/conversation-orchestrator.test.ts(929,26): error TS2339: Property 'handleNewMessage' does not exist on type 'ConversationOrchestrator'.
+__tests__/lib/llm-service.test.ts(109,11): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+__tests__/lib/llm-service.test.ts(112,38): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(message?: string, options?: ErrorOptions): Error', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'string'.
+  Overload 2 of 2, '(message?: string): Error', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'string'.
+__tests__/lib/llm-service.test.ts(113,24): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'number'.
+__tests__/lib/llm-service.test.ts(130,43): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'number'.
+__tests__/lib/llm-service.test.ts(135,17): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+__tests__/lib/llm-service.test.ts(183,22): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+__tests__/lib/llm-service.test.ts(312,24): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+__tests__/lib/llm-service.test.ts(325,1): error TS2741: Property '__promisify__' is missing in type 'Mock<UnknownFunction>' but required in type 'typeof setTimeout'.
+__tests__/lib/llm-service.test.ts(327,29): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(callback: () => void, delay?: number): Timeout', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type '() => void'.
+      Type '{}' provides no match for the signature '(): void'.
+  Overload 2 of 3, '(callback: (_: void) => void, delay?: number): Timeout', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type '(_: void) => void'.
+      Type '{}' provides no match for the signature '(_: void): void'.
+  Overload 3 of 3, '(handler: TimerHandler, timeout?: number, ...arguments: any[]): number', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'TimerHandler'.
+__tests__/lib/llm-service.test.ts(327,42): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'number'.
+__tests__/lib/llm-service.test.ts(332,1): error TS2322: Type 'Mock<UnknownFunction>' is not assignable to type '{ <T>(values: Iterable<T | PromiseLike<T>>): Promise<Awaited<T>>; <T extends readonly unknown[] | []>(values: T): Promise<Awaited<T[number]>>; }'.
+  Type '{}' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+__tests__/lib/llm-service.test.ts(487,33): error TS2345: Argument of type 'Response' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(541,57): error TS2345: Argument of type '"success"' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(543,38): error TS2345: Argument of type 'Mock<UnknownFunction>' is not assignable to parameter of type '() => Promise<unknown>'.
+  Type '{}' is missing the following properties from type 'Promise<unknown>': then, catch, finally, [Symbol.toStringTag]
+__tests__/lib/llm-service.test.ts(552,32): error TS2345: Argument of type 'Error' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(553,32): error TS2345: Argument of type '"success"' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(555,38): error TS2345: Argument of type 'Mock<UnknownFunction>' is not assignable to parameter of type '() => Promise<unknown>'.
+  Type '{}' is missing the following properties from type 'Promise<unknown>': then, catch, finally, [Symbol.toStringTag]
+__tests__/lib/llm-service.test.ts(571,28): error TS2345: Argument of type 'Error' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(600,57): error TS2345: Argument of type '"String error"' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(602,38): error TS2345: Argument of type 'Mock<UnknownFunction>' is not assignable to parameter of type '() => Promise<unknown>'.
+  Type '{}' is missing the following properties from type 'Promise<unknown>': then, catch, finally, [Symbol.toStringTag]
+__tests__/lib/llm-service.test.ts(616,32): error TS2345: Argument of type 'Error' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(617,32): error TS2345: Argument of type 'Error' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(618,32): error TS2345: Argument of type '"success"' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(647,57): error TS2345: Argument of type 'Error' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(649,30): error TS2345: Argument of type 'Mock<UnknownFunction>' is not assignable to parameter of type '() => Promise<unknown>'.
+  Type '{}' is missing the following properties from type 'Promise<unknown>': then, catch, finally, [Symbol.toStringTag]
+__tests__/lib/llm-service.test.ts(656,42): error TS2345: Argument of type '{ text: string; }' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(670,39): error TS2345: Argument of type '{ ok: boolean; json: () => Promise<{ choices: { message: { content: string; }; }[]; }>; }' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(719,39): error TS2345: Argument of type '{ ok: boolean; status: number; headers: Headers; json: () => Promise<{ error: { message: string; }; }>; text: () => Promise<string>; }' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(729,15): error TS2339: Property 'NetworkError' does not exist on type '{}'.
+__tests__/lib/llm-service.test.ts(732,23): error TS2339: Property 'ok' does not exist on type 'unknown'.
+__tests__/lib/llm-service.test.ts(733,44): error TS2339: Property 'text' does not exist on type 'unknown'.
+__tests__/lib/llm-service.test.ts(735,47): error TS2339: Property 'status' does not exist on type 'unknown'.
+__tests__/lib/llm-service.test.ts(735,66): error TS2339: Property 'statusText' does not exist on type 'unknown'.
+__tests__/lib/llm-service.test.ts(746,39): error TS2345: Argument of type '{ ok: boolean; status: number; statusText: string; text: () => Promise<string>; }' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(754,15): error TS2339: Property 'NetworkError' does not exist on type '{}'.
+__tests__/lib/llm-service.test.ts(757,23): error TS2339: Property 'ok' does not exist on type 'unknown'.
+__tests__/lib/llm-service.test.ts(758,44): error TS2339: Property 'text' does not exist on type 'unknown'.
+__tests__/lib/llm-service.test.ts(760,47): error TS2339: Property 'status' does not exist on type 'unknown'.
+__tests__/lib/llm-service.test.ts(760,66): error TS2339: Property 'statusText' does not exist on type 'unknown'.
+__tests__/lib/llm-service.test.ts(774,42): error TS2345: Argument of type '{ text: string; }' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(784,42): error TS2345: Argument of type '{ text: string; }' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(836,40): error TS2345: Argument of type '{ textStream: { [Symbol.asyncIterator]: () => AsyncGenerator<"Hello " | "world", void, unknown>; }; }' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(896,40): error TS2345: Argument of type 'Error' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(898,42): error TS2345: Argument of type '{ text: string; }' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(949,39): error TS2345: Argument of type 'Response' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(987,39): error TS2345: Argument of type 'Error' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(989,39): error TS2345: Argument of type '{ ok: boolean; json: () => Promise<{ choices: { message: { content: string; }; }[]; }>; }' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(1043,39): error TS2345: Argument of type '{ ok: boolean; body: null; }' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(1086,39): error TS2345: Argument of type 'Response' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(1233,42): error TS2345: Argument of type '{ text: string; }' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(1262,42): error TS2345: Argument of type 'Error' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(1462,39): error TS2345: Argument of type 'Response' is not assignable to parameter of type 'never'.
+__tests__/lib/llm-service.test.ts(1508,39): error TS2345: Argument of type 'Response' is not assignable to parameter of type 'never'.
+__tests__/lib/performance/memoization.test.ts(259,40): error TS2554: Expected 0 arguments, but got 1.
+__tests__/lib/performance/memoization.test.ts(260,40): error TS2554: Expected 0 arguments, but got 1.
+__tests__/lib/performance/performance-monitor.test.ts(618,11): error TS2353: Object literal may only specify known properties, and 'memoryUsage' does not exist in type '{ dataSize?: number; errors?: string[]; compressionRatio?: number; }'.
+__tests__/lib/performance/performance-monitor.test.ts(654,11): error TS2353: Object literal may only specify known properties, and 'storageUsage' does not exist in type '{ dataSize?: number; errors?: string[]; compressionRatio?: number; }'.
+__tests__/lib/performance/performance-monitor.test.ts(714,11): error TS2353: Object literal may only specify known properties, and 'memoryUsage' does not exist in type '{ dataSize?: number; errors?: string[]; compressionRatio?: number; }'.
+__tests__/lib/performance/performance-monitor.test.ts(746,11): error TS2353: Object literal may only specify known properties, and 'memoryUsage' does not exist in type '{ dataSize?: number; errors?: string[]; compressionRatio?: number; }'.
+__tests__/lib/prompt-templates.test.ts(29,9): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(iterable?: Iterable<readonly [string, Agent]>): Map<string, Agent>', gave the following error.
+    Argument of type '[string, { id: string; name: string; type: string; status: "active"; systemPrompt: string; biography: string; knowledgeIds: undefined[]; conversationIds: undefined[]; beliefs: undefined[]; preferences: {}; capabilities: undefined[]; created: Date; updated: Date; }][]' is not assignable to parameter of type 'Iterable<readonly [string, Agent]>'.
+      The types returned by '[Symbol.iterator]().next(...)' are incompatible between these types.
+        Type 'IteratorResult<[string, { id: string; name: string; type: string; status: "active"; systemPrompt: string; biography: string; knowledgeIds: undefined[]; conversationIds: undefined[]; beliefs: undefined[]; preferences: {}; capabilities: undefined[]; created: Date; updated: Date; }], any>' is not assignable to type 'IteratorResult<readonly [string, Agent], any>'.
+          Type 'IteratorYieldResult<[string, { id: string; name: string; type: string; status: "active"; systemPrompt: string; biography: string; knowledgeIds: undefined[]; conversationIds: undefined[]; beliefs: undefined[]; preferences: {}; capabilities: undefined[]; created: Date; updated: Date; }]>' is not assignable to type 'IteratorResult<readonly [string, Agent], any>'.
+            Type 'IteratorYieldResult<[string, { id: string; name: string; type: string; status: "active"; systemPrompt: string; biography: string; knowledgeIds: undefined[]; conversationIds: undefined[]; beliefs: undefined[]; preferences: {}; capabilities: undefined[]; created: Date; updated: Date; }]>' is not assignable to type 'IteratorYieldResult<readonly [string, Agent]>'.
+              Type '[string, { id: string; name: string; type: string; status: "active"; systemPrompt: string; biography: string; knowledgeIds: undefined[]; conversationIds: undefined[]; beliefs: undefined[]; preferences: {}; capabilities: undefined[]; created: Date; updated: Date; }]' is not assignable to type 'readonly [string, Agent]'.
+                Type at position 1 in source is not compatible with type at position 1 in target.
+                  Object literal may only specify known properties, and 'systemPrompt' does not exist in type 'Agent'.
+__tests__/lib/prompt-templates.test.ts(63,7): error TS2353: Object literal may only specify known properties, and 'conversationId' does not exist in type 'Message'.
+__tests__/lib/prompt-templates.test.ts(71,7): error TS2353: Object literal may only specify known properties, and 'conversationId' does not exist in type 'Message'.
+__tests__/lib/prompt-templates.test.ts(80,7): error TS2353: Object literal may only specify known properties, and 'conversationId' does not exist in type 'Message'.
+__tests__/lib/prompt-templates.test.ts(135,11): error TS2353: Object literal may only specify known properties, and 'conversationId' does not exist in type 'Message'.
+__tests__/lib/session-management.test.ts(280,39): error TS2345: Argument of type '{ ok: boolean; json: () => Promise<{ apiKey: string; }>; }' is not assignable to parameter of type 'never'.
+__tests__/lib/session-management.test.ts(312,39): error TS2345: Argument of type '{ ok: boolean; status: number; }' is not assignable to parameter of type 'never'.
+__tests__/lib/session-management.test.ts(324,39): error TS2345: Argument of type 'Error' is not assignable to parameter of type 'never'.
+__tests__/lib/session-management.test.ts(337,39): error TS2345: Argument of type '{ ok: boolean; json: () => Promise<never>; }' is not assignable to parameter of type 'never'.
+__tests__/lib/session-management.test.ts(355,39): error TS2345: Argument of type '{ ok: boolean; json: () => Promise<{ success: boolean; }>; }' is not assignable to parameter of type 'never'.
+__tests__/lib/settings-export.test.ts(95,39): error TS2345: Argument of type 'null' is not assignable to parameter of type 'never'.
+__tests__/lib/settings-export.test.ts(103,39): error TS2345: Argument of type 'Error' is not assignable to parameter of type 'never'.
+__tests__/lib/utils.test.ts(21,25): error TS2873: This kind of expression is always falsy.
+__tests__/lib/utils.test.ts(22,25): error TS2873: This kind of expression is always falsy.
+__tests__/lib/utils.test.ts(24,25): error TS2873: This kind of expression is always falsy.
+__tests__/lib/utils.test.ts(25,25): error TS2872: This kind of expression is always truthy.
+__tests__/services/specialized-services.test.ts(26,41): error TS2339: Property 'id' does not exist on type 'unknown'.
+__tests__/services/specialized-services.test.ts(739,20): error TS2339: Property 'onerror' does not exist on type 'unknown'.
+__tests__/test-utils/websocket-harness.ts(1,20): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+__tests__/workers/web-workers.test.ts(89,17): error TS2339: Property 'type' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(96,15): error TS2698: Spread types may only be created from object types.
+__tests__/workers/web-workers.test.ts(105,17): error TS2339: Property 'type' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(107,56): error TS2339: Property 'data' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(110,23): error TS2339: Property 'data' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(120,36): error TS2339: Property 'data' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(1058,20): error TS2339: Property 'onmessage' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(1077,20): error TS2339: Property 'onmessage' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(1096,20): error TS2339: Property 'onmessage' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(1115,20): error TS2339: Property 'onmessage' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(1138,20): error TS2339: Property 'onmessage' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(1161,20): error TS2339: Property 'onmessage' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(1230,20): error TS2339: Property 'onmessage' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(1250,20): error TS2339: Property 'onmessage' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(1269,20): error TS2339: Property 'onmessage' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(1284,20): error TS2339: Property 'onmessage' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(1299,20): error TS2339: Property 'onmessage' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(1318,20): error TS2339: Property 'onmessage' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(1337,20): error TS2339: Property 'onmessage' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(1387,74): error TS2339: Property 'port' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(1403,74): error TS2339: Property 'port' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(1417,74): error TS2339: Property 'port' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(1448,74): error TS2339: Property 'port' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(1470,74): error TS2339: Property 'port' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(1490,74): error TS2339: Property 'port' does not exist on type 'unknown'.
+__tests__/workers/web-workers.test.ts(1513,74): error TS2339: Property 'port' does not exist on type 'unknown'.
+components/markov-blanket-visualization.tsx(167,31): error TS2345: Argument of type '{ internal_dimension: any; sensory_dimension: any; active_dimension: any; external_dimension: any; }' is not assignable to parameter of type 'SetStateAction<MarkovBlanketDimensions>'.
+  Type '{ internal_dimension: any; sensory_dimension: any; active_dimension: any; external_dimension: any; }' is missing the following properties from type 'MarkovBlanketDimensions': internal_states, sensory_states, active_states, external_states
+components/markov-blanket-visualization.tsx(480,27): error TS2339: Property 'acknowledged' does not exist on type 'BoundaryViolation | BoundaryViolationEvent'.
+  Property 'acknowledged' does not exist on type 'BoundaryViolation'.
+components/markov-blanket-visualization.tsx(498,85): error TS2339: Property 'toFixed' does not exist on type 'string | number'.
+  Property 'toFixed' does not exist on type 'string'.
+components/markov-blanket-visualization.tsx(543,64): error TS2339: Property 'acknowledged' does not exist on type 'BoundaryViolation | BoundaryViolationEvent'.
+  Property 'acknowledged' does not exist on type 'BoundaryViolation'.
+components/markov-blanket-visualization.tsx(545,12): error TS2365: Operator '>=' cannot be applied to types 'string | number' and 'number'.
+components/markov-blanket-visualization.tsx(687,38): error TS2339: Property 'event_id' does not exist on type 'BoundaryViolation | BoundaryViolationEvent'.
+  Property 'event_id' does not exist on type 'BoundaryViolation'.
+components/markov-blanket-visualization.tsx(696,59): error TS2339: Property 'toFixed' does not exist on type 'string | number'.
+  Property 'toFixed' does not exist on type 'string'.
+components/markov-blanket-visualization.tsx(703,66): error TS2339: Property 'event_id' does not exist on type 'BoundaryViolation | BoundaryViolationEvent'.
+  Property 'event_id' does not exist on type 'BoundaryViolation'.
+lib/hooks/use-dashboard-data.ts(13,10): error TS2614: Module '"@/store/slices/uiSlice"' has no exported member 'setSimulationRunning'. Did you mean to use 'import setSimulationRunning from "@/store/slices/uiSlice"' instead?
+lib/hooks/use-dashboard-data.ts(82,26): error TS2345: Argument of type 'import("/Users/matthewmoroney/builds/FreeAgentics/web/lib/types").Agent[]' is not assignable to parameter of type 'import("/Users/matthewmoroney/builds/FreeAgentics/web/store/slices/agentSlice").Agent[]'.
+  Type 'Agent' is missing the following properties from type 'Agent': templateId, knowledgeDomains, parameters, avatarUrl, and 3 more.
+lib/hooks/use-dashboard-data.ts(97,27): error TS2345: Argument of type 'import("/Users/matthewmoroney/builds/FreeAgentics/web/lib/types").Agent' is not assignable to parameter of type 'import("/Users/matthewmoroney/builds/FreeAgentics/web/store/slices/agentSlice").Agent'.
+  Type 'Agent' is missing the following properties from type 'Agent': templateId, knowledgeDomains, parameters, avatarUrl, and 3 more.
+lib/hooks/use-dashboard-data.ts(119,27): error TS2345: Argument of type 'import("/Users/matthewmoroney/builds/FreeAgentics/web/lib/types").Agent' is not assignable to parameter of type 'import("/Users/matthewmoroney/builds/FreeAgentics/web/store/slices/agentSlice").Agent'.
+  Type 'Agent' is missing the following properties from type 'Agent': templateId, knowledgeDomains, parameters, avatarUrl, and 3 more.
+lib/hooks/use-dashboard-data.ts(138,18): error TS2554: Expected 2 arguments, but got 1.
+lib/hooks/use-dashboard-data.ts(138,18): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'Promise<Agent>' is not assignable to parameter of type 'UnknownAction'.
+      Property 'type' is missing in type 'Promise<Agent>' but required in type 'UnknownAction'.
+lib/hooks/use-dashboard-data.ts(141,18): error TS2554: Expected 2 arguments, but got 1.
+lib/hooks/use-dashboard-data.ts(141,18): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'Promise<Agent>' is not assignable to parameter of type 'UnknownAction'.
+      Property 'type' is missing in type 'Promise<Agent>' but required in type 'UnknownAction'.
+lib/hooks/use-dashboard-data.ts(175,18): error TS2554: Expected 2 arguments, but got 1.
+lib/hooks/use-dashboard-data.ts(175,18): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'Promise<void>' is not assignable to parameter of type 'UnknownAction'.
+      Property 'type' is missing in type 'Promise<void>' but required in type 'UnknownAction'.
+lib/hooks/use-dashboard-data.ts(196,18): error TS2554: Expected 2 arguments, but got 1.
+lib/hooks/use-dashboard-data.ts(196,18): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'Promise<void>' is not assignable to parameter of type 'UnknownAction'.
+      Property 'type' is missing in type 'Promise<void>' but required in type 'UnknownAction'.
+lib/hooks/use-dashboard-data.ts(340,25): error TS2339: Property 'simulationRunning' does not exist on type 'UIState'.
+lib/services/agent-creation-service.ts(3,35): error TS2307: Cannot find module '../stores/dashboard-store' or its corresponding type declarations.
+providers/DemoDataProvider.tsx(5,10): error TS2614: Module '"@/store/slices/agentSlice"' has no exported member 'setDemoAgent'. Did you mean to use 'import setDemoAgent from "@/store/slices/agentSlice"' instead?
+providers/DemoDataProvider.tsx(5,24): error TS2614: Module '"@/store/slices/agentSlice"' has no exported member 'clearAgents'. Did you mean to use 'import clearAgents from "@/store/slices/agentSlice"' instead?
+providers/DemoDataProvider.tsx(7,3): error TS2724: '"@/store/slices/conversationSlice"' has no exported member named 'setDemoConversation'. Did you mean 'createConversation'?
+providers/DemoDataProvider.tsx(8,3): error TS2724: '"@/store/slices/conversationSlice"' has no exported member named 'clearConversations'. Did you mean 'clearConversation'?
+providers/DemoDataProvider.tsx(11,3): error TS2724: '"@/store/slices/knowledgeSlice"' has no exported member named 'setDemoKnowledgeGraph'. Did you mean 'KnowledgeGraph'?
+providers/DemoDataProvider.tsx(12,3): error TS2724: '"@/store/slices/knowledgeSlice"' has no exported member named 'clearKnowledgeGraph'. Did you mean 'KnowledgeGraph'?

@@ -8,7 +8,6 @@ import tempfile
 import time
 import unittest
 from pathlib import Path
-from typing import Optional
 from unittest.mock import Mock, patch
 
 import torch
@@ -296,7 +295,10 @@ class TestParallelProcessor(unittest.TestCase):
         processor = ParallelProcessor(config)
 
         # Create dummy dataset
-        dataset = torch.utils.data.TensorDataset(torch.randn(100, 10), torch.randint(0, 2, (100,)))
+        dataset = torch.utils.data.TensorDataset(
+            torch.randn(
+                100, 10), torch.randint(
+                0, 2, (100,)))
 
         loader = processor.create_data_loader(dataset, batch_size=16)
 
@@ -313,7 +315,8 @@ class TestParallelProcessor(unittest.TestCase):
         graphs = [{"id": i, "data": torch.randn(10)} for i in range(10)]
 
         # Extract features
-        results = processor.parallel_feature_extraction(graphs, extract_features_standalone)
+        results = processor.parallel_feature_extraction(
+            graphs, extract_features_standalone)
 
         assert len(results) == 10
         for i, result in enumerate(results):

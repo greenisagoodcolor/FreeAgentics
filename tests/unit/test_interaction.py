@@ -13,7 +13,6 @@ from agents.base.interaction import (
     CommunicationProtocol,
     ConflictResolver,
     InteractionRequest,
-    InteractionResult,
     InteractionSystem,
     InteractionType,
     Message,
@@ -78,7 +77,10 @@ class TestInteractionRequest:
         assert not req.is_expired()
 
     def test_request_expiration(self) -> None:
-        req = InteractionRequest(initiator_id="agent1", target_id="agent2", timeout=0.1)
+        req = InteractionRequest(
+            initiator_id="agent1",
+            target_id="agent2",
+            timeout=0.1)
         assert not req.is_expired()
         time.sleep(0.2)
         assert req.is_expired()
@@ -152,7 +154,11 @@ class TestCommunicationProtocol:
 
     def test_send_and_receive_message(self) -> None:
         protocol = CommunicationProtocol()
-        msg = Message(sender_id="agent1", receiver_id="agent2", content={"text": "hello"})
+        msg = Message(
+            sender_id="agent1",
+            receiver_id="agent2",
+            content={
+                "text": "hello"})
         success = protocol.send_message(msg)
         assert success
         messages = protocol.receive_messages("agent2")
@@ -164,8 +170,10 @@ class TestCommunicationProtocol:
     def test_broadcast_message(self) -> None:
         protocol = CommunicationProtocol()
         broadcast = Message(
-            sender_id="agent1", receiver_id=None, content={"announcement": "global"}
-        )
+            sender_id="agent1",
+            receiver_id=None,
+            content={
+                "announcement": "global"})
         protocol.send_message(broadcast)
         messages1 = protocol.receive_messages("agent2")
         messages2 = protocol.receive_messages("agent3")
@@ -175,8 +183,16 @@ class TestCommunicationProtocol:
 
     def test_conversation_history(self) -> None:
         protocol = CommunicationProtocol()
-        msg1 = Message(sender_id="agent1", receiver_id="agent2", content={"text": "hi"})
-        msg2 = Message(sender_id="agent2", receiver_id="agent1", content={"text": "hello"})
+        msg1 = Message(
+            sender_id="agent1",
+            receiver_id="agent2",
+            content={
+                "text": "hi"})
+        msg2 = Message(
+            sender_id="agent2",
+            receiver_id="agent1",
+            content={
+                "text": "hello"})
         protocol.send_message(msg1)
         protocol.send_message(msg2)
         history = protocol.get_conversation_history("agent1", "agent2")
@@ -245,7 +261,10 @@ class TestResourceManager:
 
     def test_cancel_exchange(self) -> None:
         manager = ResourceManager()
-        exchange = ResourceExchange(from_agent_id="agent1", to_agent_id="agent2", amount=10.0)
+        exchange = ResourceExchange(
+            from_agent_id="agent1",
+            to_agent_id="agent2",
+            amount=10.0)
         exchange_id = manager.propose_exchange(exchange)
         success = manager.cancel_exchange(exchange_id)
         assert success
@@ -270,13 +289,15 @@ class TestResourceManager:
             resources=AgentResources(energy=50.0),
         )
         exchange1 = ResourceExchange(
-            from_agent_id=agent1.agent_id, to_agent_id=agent2.agent_id, amount=10.0
-        )
+            from_agent_id=agent1.agent_id,
+            to_agent_id=agent2.agent_id,
+            amount=10.0)
         id1 = manager.propose_exchange(exchange1)
         manager.execute_exchange(id1, agent1, agent2)
         exchange2 = ResourceExchange(
-            from_agent_id=agent2.agent_id, to_agent_id=agent3.agent_id, amount=5.0
-        )
+            from_agent_id=agent2.agent_id,
+            to_agent_id=agent3.agent_id,
+            amount=5.0)
         id2 = manager.propose_exchange(exchange2)
         manager.execute_exchange(id2, agent2, agent3)
         history1 = manager.get_exchange_history("agent1")
@@ -302,10 +323,12 @@ class TestConflictResolver:
             position=Position(1, 1),
             resources=AgentResources(energy=50.0),
         )
-        resolution = resolver.resolve_resource_conflict(agent1, agent2, ResourceType.ENERGY, 100.0)
+        resolution = resolver.resolve_resource_conflict(
+            agent1, agent2, ResourceType.ENERGY, 100.0)
         assert agent1.agent_id in resolution
         assert agent2.agent_id in resolution
-        assert resolution[agent1.agent_id] + resolution[agent2.agent_id] == pytest.approx(100.0)
+        assert resolution[agent1.agent_id] + \
+            resolution[agent2.agent_id] == pytest.approx(100.0)
         assert len(resolver.conflict_history) == 1
         assert resolver.conflict_history[0]["type"] == "resource_conflict"
 
@@ -322,7 +345,8 @@ class TestConflictResolver:
             position=Position(8, 8),
             resources=AgentResources(energy=30.0),
         )
-        winner = resolver.resolve_spatial_conflict(agent1, agent2, disputed_pos)
+        winner = resolver.resolve_spatial_conflict(
+            agent1, agent2, disputed_pos)
         assert winner == agent1.agent_id
         assert len(resolver.conflict_history) == 1
         assert resolver.conflict_history[0]["type"] == "spatial_conflict"
@@ -385,7 +409,8 @@ class TestInteractionSystem:
         assert result.success
         assert "exchange_id" in result.outcome
         exchange_id = result.outcome["exchange_id"]
-        success = system.resource_manager.execute_exchange(exchange_id, agent1, agent2)
+        success = system.resource_manager.execute_exchange(
+            exchange_id, agent1, agent2)
         assert success
         assert agent1.resources.energy == 75.0
         assert agent2.resources.energy == 75.0
@@ -429,7 +454,10 @@ class TestInteractionSystem:
     def test_cleanup_expired_interactions(self) -> None:
         system = InteractionSystem()
         for i in range(3):
-            request = InteractionRequest(initiator_id=f"agent{i}", target_id="target", timeout=0.1)
+            request = InteractionRequest(
+                initiator_id=f"agent{i}",
+                target_id="target",
+                timeout=0.1)
             system.initiate_interaction(request)
         assert len(system.active_interactions) == 3
         time.sleep(0.2)
@@ -445,7 +473,8 @@ class TestInteractionSystem:
         def test_callback(request) -> None:
             callback_called.append(request.id)
 
-        system.register_interaction_callback(InteractionType.COMMUNICATION, test_callback)
+        system.register_interaction_callback(
+            InteractionType.COMMUNICATION, test_callback)
         request = InteractionRequest(
             initiator_id="agent1",
             target_id="agent2",
@@ -472,7 +501,9 @@ class TestInteractionSystem:
 
         threads = []
         for i in range(10):
-            thread = threading.Thread(target=run_interaction, args=(f"agent{i}",))
+            thread = threading.Thread(
+                target=run_interaction, args=(
+                    f"agent{i}",))
             threads.append(thread)
             thread.start()
         for thread in threads:

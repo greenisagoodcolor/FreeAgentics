@@ -35,6 +35,7 @@ def sample_memory() -> Memory:
         timestamp=datetime.now(),
         importance=0.7,
         context={"agent_state": "exploring", "energy": 80},
+        constraints={},
     )
 
 
@@ -47,6 +48,7 @@ def sample_experience() -> Experience:
         outcome={"position": "x10_y10", "energy": 70},
         reward=0.5,
         next_state={"position": "x10_y10", "energy": 70},
+        constraints={},
     )
 
 
@@ -61,13 +63,14 @@ def sample_pattern() -> Pattern:
         confidence=0.8,
         occurrences=10,
         successes=8,
+        constraints={},
     )
 
 
 @pytest.fixture
 def memory_system() -> MemorySystem:
     """Create a memory system for testing"""
-    return MemorySystem("test_agent_1")
+    return MemorySystem("test_agent_1", constraints={})
 
 
 class TestMemory:
@@ -113,7 +116,7 @@ class TestPattern:
 
     def test_pattern_update(self, sample_pattern) -> None:
         """Test pattern update with new observations"""
-        initial_confidence = sample_pattern.confidence
+        sample_pattern.confidence
         initial_occurrences = sample_pattern.occurrences
         initial_successes = sample_pattern.successes
         sample_pattern.update(success=True)
@@ -147,6 +150,7 @@ class TestInMemoryStorage:
             memory_type=MemoryType.SEMANTIC,
             content={"fact": "resources regenerate"},
             timestamp=datetime.now(),
+            constraints={},
         )
         storage.store(semantic_memory)
         episodic_results = storage.search({"memory_type": MemoryType.EPISODIC})
@@ -166,6 +170,7 @@ class TestInMemoryStorage:
             content={"event": "minor"},
             timestamp=datetime.now(),
             importance=0.3,
+            constraints={},
         )
         storage.store(low_importance)
         important_results = storage.search({"min_importance": 0.5})
@@ -180,6 +185,7 @@ class TestInMemoryStorage:
             memory_type=MemoryType.EPISODIC,
             content={"event": "old"},
             timestamp=datetime.now() - timedelta(days=2),
+            constraints={},
         )
         storage.store(old_memory)
         recent_memory = Memory(
@@ -187,6 +193,7 @@ class TestInMemoryStorage:
             memory_type=MemoryType.EPISODIC,
             content={"event": "recent"},
             timestamp=datetime.now(),
+            constraints={},
         )
         storage.store(recent_memory)
         cutoff = datetime.now() - timedelta(days=1)
@@ -208,7 +215,7 @@ class TestWorkingMemory:
 
     def test_capacity_limit(self) -> None:
         """Test working memory capacity limit"""
-        wm = WorkingMemory(capacity=3)
+        wm = WorkingMemory(capacity=3, constraints={})
         for i in range(5):
             wm.add(f"item_{i}")
         assert len(wm.items) == 3
@@ -218,7 +225,7 @@ class TestWorkingMemory:
 
     def test_attention_weights(self) -> None:
         """Test attention weight management"""
-        wm = WorkingMemory()
+        wm = WorkingMemory(constraints={})
         item1 = "important_item"
         item2 = "normal_item"
         wm.add(item1, weight=0.9)
@@ -229,7 +236,7 @@ class TestWorkingMemory:
 
     def test_update_attention(self) -> None:
         """Test updating attention weights"""
-        wm = WorkingMemory()
+        wm = WorkingMemory(constraints={})
         item = "test_item"
         wm.add(item, weight=0.5)
         wm.update_attention(item, 0.3)
@@ -244,13 +251,15 @@ class TestMemoryConsolidator:
 
     def test_consolidation_evaluation(self, sample_memory) -> None:
         """Test evaluation for consolidation"""
-        consolidator = MemoryConsolidator(consolidation_threshold=0.7)
+        consolidator = MemoryConsolidator(
+            consolidation_threshold=0.7, constraints={})
         low_memory = Memory(
             memory_id="low_1",
             memory_type=MemoryType.EPISODIC,
             content={"event": "minor"},
             timestamp=datetime.now(),
             importance=0.2,
+            constraints={},
         )
         assert not consolidator.evaluate_for_consolidation(low_memory)
         sample_memory.access_count = 10
@@ -264,13 +273,14 @@ class TestMemoryConsolidator:
             importance=0.4,
             access_count=15,
             associations=["related1", "related2", "related3", "related4"],
+            constraints={},
         )
         accessed_memory.importance = 0.5
         assert consolidator.evaluate_for_consolidation(accessed_memory)
 
     def test_memory_grouping(self) -> None:
         """Test grouping similar memories"""
-        consolidator = MemoryConsolidator()
+        consolidator = MemoryConsolidator(constraints={})
         memories = [
             Memory(
                 memory_id=f"mem_{i}",
@@ -278,6 +288,7 @@ class TestMemoryConsolidator:
                 content={"action": "gather", "result": "success"},
                 timestamp=datetime.now(),
                 context={"location": "forest", "resource": "food"},
+                constraints={},
             )
             for i in range(3)
         ]
@@ -288,6 +299,7 @@ class TestMemoryConsolidator:
                 content={"action": "flee", "result": "success"},
                 timestamp=datetime.now(),
                 context={"location": "plains", "threat": "predator"},
+                constraints={},
             )
         )
         groups = consolidator._group_similar_memories(memories)
@@ -296,7 +308,7 @@ class TestMemoryConsolidator:
 
     def test_abstract_memory_creation(self) -> None:
         """Test creating abstract memory from group"""
-        consolidator = MemoryConsolidator()
+        consolidator = MemoryConsolidator(constraints={})
         memories = [
             Memory(
                 memory_id=f"mem_{i}",
@@ -305,6 +317,7 @@ class TestMemoryConsolidator:
                 timestamp=datetime.now(),
                 importance=0.6,
                 context={"location": "forest", "resource": "food", "success": True},
+                constraints={},
             )
             for i in range(3)
         ]
@@ -322,7 +335,10 @@ class TestReinforcementLearner:
 
     def test_q_learning(self, sample_experience) -> None:
         """Test Q-learning updates"""
-        learner = ReinforcementLearner(learning_rate=0.1, discount_factor=0.9)
+        learner = ReinforcementLearner(
+            learning_rate=0.1,
+            discount_factor=0.9,
+            constraints={})
         learner.learn(sample_experience)
         state_key = learner._state_to_key(sample_experience.state)
         action_key = learner._action_to_key(sample_experience.action)
@@ -332,7 +348,7 @@ class TestReinforcementLearner:
 
     def test_prediction(self, sample_experience) -> None:
         """Test action prediction"""
-        learner = ReinforcementLearner()
+        learner = ReinforcementLearner(constraints={})
         assert learner.predict({"new_state": True}) is None
         learner.learn(sample_experience)
         better_experience = Experience(
@@ -341,6 +357,7 @@ class TestReinforcementLearner:
             outcome={"energy": 75},
             reward=1.0,
             next_state={"position": "x5_y5", "energy": 75},
+            constraints={},
         )
         learner.learn(better_experience)
         prediction = learner.predict(sample_experience.state)
@@ -352,7 +369,7 @@ class TestPatternRecognizer:
 
     def test_pattern_extraction(self) -> None:
         """Test extracting patterns from experiences"""
-        recognizer = PatternRecognizer()
+        recognizer = PatternRecognizer(constraints={})
         experiences = []
         for i in range(5):
             exp = Experience(
@@ -361,6 +378,7 @@ class TestPatternRecognizer:
                 outcome={"resource_gained": True, "energy_cost": 5},
                 reward=1.0,
                 next_state={"location": "forest", "has_resource": True},
+                constraints={},
             )
             experiences.append(exp)
         exp_fail = Experience(
@@ -369,17 +387,19 @@ class TestPatternRecognizer:
             outcome={"resource_gained": False},
             reward=-0.5,
             next_state={"location": "desert"},
+            constraints={},
         )
         experiences.append(exp_fail)
         patterns = recognizer.extract_patterns(experiences)
         assert len(patterns) > 0
-        gather_pattern = next((p for p in patterns if p.conditions.get("action") == "gather"), None)
+        gather_pattern = next(
+            (p for p in patterns if p.conditions.get("action") == "gather"), None)
         assert gather_pattern is not None
         assert gather_pattern.confidence > 0.6
 
     def test_pattern_matching(self, sample_pattern) -> None:
         """Test pattern matching"""
-        recognizer = PatternRecognizer()
+        recognizer = PatternRecognizer(constraints={})
         recognizer.patterns[sample_pattern.pattern_id] = sample_pattern
         matches = recognizer.match_pattern({"action": "move"})
         assert len(matches) == 1
@@ -393,12 +413,16 @@ class TestMemorySystem:
 
     def test_store_and_retrieve_memory(self, memory_system) -> None:
         """Test storing and retrieving memories"""
-        memory = memory_system.store_memory(
-            content={"event": "test"}, memory_type=MemoryType.EPISODIC, importance=0.8
+        _ = memory_system.store_memory(
+            content={"event": "test"},
+            memory_type=MemoryType.EPISODIC,
+            importance=0.8,
+            constraints={},
         )
         assert memory_system.total_memories == 1
         assert memory_system.memory_types_count[MemoryType.EPISODIC] == 1
-        retrieved = memory_system.retrieve_memories({"memory_type": MemoryType.EPISODIC})
+        retrieved = memory_system.retrieve_memories(
+            {"memory_type": MemoryType.EPISODIC})
         assert len(retrieved) == 1
         assert retrieved[0].content["event"] == "test"
 
@@ -416,12 +440,14 @@ class TestMemorySystem:
             memory_type=MemoryType.PROCEDURAL,
             importance=0.9,
             context={"percept_types": ["danger"]},
+            constraints={},
         )
         memory_system.store_memory(
             content={"action": "gather", "resource": "food"},
             memory_type=MemoryType.PROCEDURAL,
             importance=0.5,
             context={"percept_types": ["object"]},
+            constraints={},
         )
         threat_percept = Percept(
             stimulus=Stimulus(
@@ -432,30 +458,39 @@ class TestMemorySystem:
             perception_type=PerceptionType.VISUAL,
             distance=5.0,
         )
-        agent = Agent(agent_id="test")
+        agent = Agent(agent_id="test", constraints={})
         context = DecisionContext(
             agent=agent,
             percepts=[threat_percept],
             current_goal=None,
             available_actions=[],
+            constraints={},
         )
         relevant = memory_system.get_relevant_memories(context)
         assert len(relevant) > 0
-        procedural_memories = [m for m in relevant if m.memory_type == MemoryType.PROCEDURAL]
+        procedural_memories = [
+            m for m in relevant if m.memory_type == MemoryType.PROCEDURAL]
         assert len(procedural_memories) > 0
 
     def test_memory_consolidation(self, memory_system) -> None:
         """Test memory consolidation process"""
         for i in range(5):
             memory_system.store_memory(
-                content={"action": "gather", "result": "success", "variant": i},
+                content={
+                    "action": "gather",
+                    "result": "success",
+                    "variant": i},
                 memory_type=MemoryType.EPISODIC,
                 importance=0.8,
-                context={"location": "forest", "resource": "food"},
+                context={
+                    "location": "forest",
+                    "resource": "food"},
+                constraints={},
             )
         initial_count = memory_system.total_memories
         memory_system.consolidate_memories()
-        semantic_memories = memory_system.retrieve_memories({"memory_type": MemoryType.SEMANTIC})
+        _ = memory_system.retrieve_memories(
+            {"memory_type": MemoryType.SEMANTIC})
         assert memory_system.total_memories >= initial_count
 
     def test_pattern_extraction(self, memory_system) -> None:
@@ -467,11 +502,13 @@ class TestMemorySystem:
                 outcome={"energy": 45, "has_food": True},
                 reward=1.0,
                 next_state={"energy": 45, "location": "forest"},
+                constraints={},
             )
             memory_system.store_experience(exp)
         patterns = memory_system.extract_patterns()
         assert len(patterns) > 0
-        procedural = memory_system.retrieve_memories({"memory_type": MemoryType.PROCEDURAL})
+        procedural = memory_system.retrieve_memories(
+            {"memory_type": MemoryType.PROCEDURAL})
         assert len(procedural) > 0
 
     def test_outcome_prediction(self, memory_system) -> None:
@@ -483,6 +520,7 @@ class TestMemorySystem:
                 outcome={"found_food": True},
                 reward=1.0,
                 next_state={"location": "forest", "energy": 70},
+                constraints={},
             )
             memory_system.store_experience(exp)
         memory_system.extract_patterns()
@@ -500,6 +538,7 @@ class TestMemorySystem:
             timestamp=datetime.now() - timedelta(days=40),
             importance=0.1,
             decay_rate=0.1,
+            constraints={},
         )
         old_memory.last_accessed = datetime.now() - timedelta(days=40)
         memory_system.storage.store(old_memory)
@@ -509,6 +548,7 @@ class TestMemorySystem:
             content={"event": "important"},
             memory_type=MemoryType.EPISODIC,
             importance=0.9,
+            constraints={},
         )
         initial_count = memory_system.total_memories
         forgotten = memory_system.forget_old_memories(max_age_days=30)
@@ -518,7 +558,10 @@ class TestMemorySystem:
     def test_save_and_load(self, memory_system) -> None:
         """Test saving and loading memory system"""
         memory_system.store_memory(
-            content={"test": "data"}, memory_type=MemoryType.SEMANTIC, importance=0.7
+            content={"test": "data"},
+            memory_type=MemoryType.SEMANTIC,
+            importance=0.7,
+            constraints={},
         )
         for i in range(15):
             exp = Experience(
@@ -527,6 +570,7 @@ class TestMemorySystem:
                 outcome={"result": "ok"},
                 reward=0.5,
                 next_state={"test": i % 3},
+                constraints={},
             )
             memory_system.store_experience(exp)
         patterns = memory_system.extract_patterns()
@@ -534,7 +578,7 @@ class TestMemorySystem:
         with tempfile.NamedTemporaryFile(suffix=".pkl", delete=False) as f:
             temp_path = Path(f.name)
         memory_system.save_to_disk(temp_path)
-        new_system = MemorySystem("test_agent_2")
+        new_system = MemorySystem("test_agent_2", constraints={})
         new_system.load_from_disk(temp_path)
         assert new_system.total_memories == memory_system.total_memories
         assert len(new_system.pattern_recognizer.patterns) > 0
@@ -543,11 +587,17 @@ class TestMemorySystem:
     def test_memory_summary(self, memory_system) -> None:
         """Test getting memory system summary"""
         memory_system.store_memory(
-            content={"test": 1}, memory_type=MemoryType.EPISODIC, importance=0.5
-        )
+            content={
+                "test": 1},
+            memory_type=MemoryType.EPISODIC,
+            importance=0.5,
+            constraints={})
         memory_system.store_memory(
-            content={"test": 2}, memory_type=MemoryType.SEMANTIC, importance=0.8
-        )
+            content={
+                "test": 2},
+            memory_type=MemoryType.SEMANTIC,
+            importance=0.8,
+            constraints={})
         summary = memory_system.get_memory_summary()
         assert summary["total_memories"] == 2
         assert summary["memory_types"][MemoryType.EPISODIC] == 1

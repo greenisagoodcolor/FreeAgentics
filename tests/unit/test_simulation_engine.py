@@ -9,9 +9,7 @@ capabilities for the FreeAgentics multi-agent system.
 import asyncio
 import json
 import tempfile
-import time
 from pathlib import Path
-from typing import Any, Dict, List
 from unittest.mock import AsyncMock, Mock, patch
 
 import numpy as np
@@ -48,13 +46,11 @@ class TestSimulationConfig:
     def test_simulation_config_custom(self):
         """Test creating simulation config with custom values."""
         config = SimulationConfig(
-            max_cycles=500,
-            time_step=0.5,
-            random_seed=42,
-            world={"resolution": 7, "size": 50},
-            agents={"count": 20, "distribution": {"explorer": 10, "merchant": 10}},
-            performance={"max_memory_mb": 4096, "max_cycle_time": 10.0},
-        )
+            max_cycles=500, time_step=0.5, random_seed=42, world={
+                "resolution": 7, "size": 50}, agents={
+                "count": 20, "distribution": {
+                    "explorer": 10, "merchant": 10}}, performance={
+                    "max_memory_mb": 4096, "max_cycle_time": 10.0}, )
 
         assert config.max_cycles == 500
         assert config.time_step == 0.5
@@ -163,7 +159,9 @@ class TestActiveInferenceAgent:
 
     def test_agent_creation_basic(self):
         """Test creating basic Active Inference agent."""
-        agent = ActiveInferenceAgent("test_agent", "explorer", {"communication_rate": 1.0})
+        agent = ActiveInferenceAgent(
+            "test_agent", "explorer", {
+                "communication_rate": 1.0})
 
         assert agent.agent_id == "test_agent"
         assert agent.agent_class == "explorer"
@@ -179,20 +177,22 @@ class TestActiveInferenceAgent:
         classes = ["explorer", "merchant", "scholar", "guardian"]
 
         for agent_class in classes:
-            agent = ActiveInferenceAgent(f"test_{agent_class}", agent_class, {})
+            agent = ActiveInferenceAgent(
+                f"test_{agent_class}", agent_class, {})
             assert agent.agent_class == agent_class
             assert agent.alive is True
 
     @patch("world.simulation.engine.PYMDP_AVAILABLE", True)
     @patch("world.simulation.engine.utils")
     @patch("world.simulation.engine.PyMDPAgent")
-    def test_agent_pymdp_initialization_explorer(self, mock_pymdp_agent, mock_utils):
+    def test_agent_pymdp_initialization_explorer(
+            self, mock_pymdp_agent, mock_utils):
         """Test pymdp initialization for explorer agent."""
         mock_utils.random_A_matrix.return_value = "A_matrix"
         mock_utils.random_B_matrix.return_value = "B_matrix"
         mock_utils.obj_array_uniform.return_value = "C_vector"
 
-        agent = ActiveInferenceAgent("explorer_1", "explorer", {})
+        ActiveInferenceAgent("explorer_1", "explorer", {})
 
         # Should call pymdp initialization
         assert mock_utils.random_A_matrix.called
@@ -203,7 +203,8 @@ class TestActiveInferenceAgent:
     @patch("world.simulation.engine.PYMDP_AVAILABLE", True)
     @patch("world.simulation.engine.utils")
     @patch("world.simulation.engine.PyMDPAgent")
-    def test_agent_pymdp_initialization_different_classes(self, mock_pymdp_agent, mock_utils):
+    def test_agent_pymdp_initialization_different_classes(
+            self, mock_pymdp_agent, mock_utils):
         """Test pymdp initialization for different agent classes."""
         mock_utils.random_A_matrix.return_value = "A_matrix"
         mock_utils.random_B_matrix.return_value = "B_matrix"
@@ -213,7 +214,7 @@ class TestActiveInferenceAgent:
 
         for agent_class in classes:
             mock_pymdp_agent.reset_mock()
-            agent = ActiveInferenceAgent(f"test_{agent_class}", agent_class, {})
+            ActiveInferenceAgent(f"test_{agent_class}", agent_class, {})
 
             # Each class should initialize pymdp agent
             mock_pymdp_agent.assert_called_once()
@@ -221,7 +222,8 @@ class TestActiveInferenceAgent:
     @patch("world.simulation.engine.PYMDP_AVAILABLE", True)
     @patch("world.simulation.engine.utils")
     @patch("world.simulation.engine.PyMDPAgent")
-    def test_agent_pymdp_initialization_failure(self, mock_pymdp_agent, mock_utils):
+    def test_agent_pymdp_initialization_failure(
+            self, mock_pymdp_agent, mock_utils):
         """Test handling of pymdp initialization failure."""
         mock_utils.random_A_matrix.side_effect = Exception("PyMDP error")
 
@@ -234,11 +236,15 @@ class TestActiveInferenceAgent:
     async def test_agent_update_basic(self):
         """Test basic agent update functionality."""
         agent = ActiveInferenceAgent("test_agent", "explorer", {})
-        world_state = {"position_obs": 1, "resource_obs": 2, "market_obs": 0, "inventory_obs": 1}
+        world_state = {
+            "position_obs": 1,
+            "resource_obs": 2,
+            "market_obs": 0,
+            "inventory_obs": 1}
 
-        initial_wealth = agent.wealth
-        initial_knowledge = agent.knowledge_nodes
-        initial_goals = agent.goals_achieved
+        agent.wealth
+        agent.knowledge_nodes
+        agent.goals_achieved
 
         # Mock random to ensure some progression
         with patch(
@@ -359,7 +365,8 @@ class TestActiveInferenceAgent:
 
         metrics = agent.get_performance_metrics()
 
-        assert metrics["goal_achievement"] == 1.0  # goals_achieved / max(total_goals, 1)
+        # goals_achieved / max(total_goals, 1)
+        assert metrics["goal_achievement"] == 1.0
 
 
 class TestSimulationEngineInitialization:
@@ -413,7 +420,8 @@ class TestSimulationEngineInitialization:
 
     @patch("world.simulation.engine.H3World")
     @patch("world.simulation.engine.MessageSystem")
-    def test_simulation_engine_initialize(self, mock_message_system, mock_h3_world):
+    def test_simulation_engine_initialize(
+            self, mock_message_system, mock_h3_world):
         """Test simulation engine initialization."""
         engine = SimulationEngine()
 
@@ -482,7 +490,10 @@ class TestSimulationEngineInitialization:
 
     def test_create_agents_zero_distribution(self):
         """Test agent creation with zero distribution."""
-        config = SimulationConfig(agents={"count": 5, "distribution": {}})  # Empty distribution
+        config = SimulationConfig(
+            agents={
+                "count": 5,
+                "distribution": {}})  # Empty distribution
         engine = SimulationEngine(config)
         engine._create_agents()
 
@@ -497,7 +508,8 @@ class TestSimulationEngineInitialization:
         config = SimulationConfig(
             agents={
                 "count": 10,
-                "distribution": {"explorer": 2, "merchant": 2},  # Only 4 specified, need 10
+                # Only 4 specified, need 10
+                "distribution": {"explorer": 2, "merchant": 2},
             }
         )
         engine = SimulationEngine(config)
@@ -633,7 +645,8 @@ class TestSimulationEngineExecution:
 
         # Mock agent update to raise error
         for agent in engine.agents.values():
-            agent.update = AsyncMock(side_effect=Exception("Agent update failed"))
+            agent.update = AsyncMock(
+                side_effect=Exception("Agent update failed"))
 
         with pytest.raises(Exception, match="Agent update failed"):
             await engine.step()
@@ -704,7 +717,8 @@ class TestSimulationEngineWorldAndMessages:
         assert len(engine.message_latencies) == 1
 
         # May have communication events if agents were selected
-        communication_events = [e for e in engine.event_history if e.get("type") == "communication"]
+        communication_events = [
+            e for e in engine.event_history if e.get("type") == "communication"]
         assert len(communication_events) <= 1
 
 
@@ -723,7 +737,8 @@ class TestSimulationEngineSocialNetworks:
 
     @patch("numpy.random.random")
     @patch("numpy.random.choice")
-    def test_update_social_networks_trade_relationships(self, mock_choice, mock_random):
+    def test_update_social_networks_trade_relationships(
+            self, mock_choice, mock_random):
         """Test trade relationship formation."""
         engine = SimulationEngine()
         engine.initialize()
@@ -731,7 +746,9 @@ class TestSimulationEngineSocialNetworks:
         # Set up agents
         merchant_agent = ActiveInferenceAgent("merchant_1", "merchant", {})
         explorer_agent = ActiveInferenceAgent("explorer_1", "explorer", {})
-        engine.agents = {"merchant_1": merchant_agent, "explorer_1": explorer_agent}
+        engine.agents = {
+            "merchant_1": merchant_agent,
+            "explorer_1": explorer_agent}
 
         # Mock random to trigger trade relationship
         mock_random.return_value = 0.05  # Less than 0.1 threshold
@@ -746,7 +763,8 @@ class TestSimulationEngineSocialNetworks:
     @patch("numpy.random.random")
     @patch("numpy.random.choice")
     @patch("numpy.random.randint")
-    def test_update_social_networks_knowledge_sharing(self, mock_randint, mock_choice, mock_random):
+    def test_update_social_networks_knowledge_sharing(
+            self, mock_randint, mock_choice, mock_random):
         """Test knowledge sharing network formation."""
         engine = SimulationEngine()
         engine.initialize()
@@ -763,7 +781,8 @@ class TestSimulationEngineSocialNetworks:
 
         # Mock random to trigger knowledge sharing
         mock_random.return_value = 0.2  # Less than 0.25 threshold
-        mock_choice.side_effect = [scholar_agent, np.array([explorer_agent, merchant_agent])]
+        mock_choice.side_effect = [scholar_agent,
+                                   np.array([explorer_agent, merchant_agent])]
         mock_randint.return_value = 2  # Connect to 2 agents
 
         engine._update_social_networks()
@@ -785,7 +804,9 @@ class TestSimulationEngineSocialNetworks:
         # Set up agents
         guardian_agent = ActiveInferenceAgent("guardian_1", "guardian", {})
         explorer_agent = ActiveInferenceAgent("explorer_1", "explorer", {})
-        engine.agents = {"guardian_1": guardian_agent, "explorer_1": explorer_agent}
+        engine.agents = {
+            "guardian_1": guardian_agent,
+            "explorer_1": explorer_agent}
 
         # Mock random to trigger protection alliance
         mock_random.return_value = 0.1  # Less than 0.15 threshold
@@ -798,7 +819,8 @@ class TestSimulationEngineSocialNetworks:
         assert "explorer_1" in engine.protection_alliances["guardian_1"]
 
         # Should record alliance event
-        alliance_events = [e for e in engine.event_history if e.get("type") == "alliance_formed"]
+        alliance_events = [
+            e for e in engine.event_history if e.get("type") == "alliance_formed"]
         assert len(alliance_events) > 0
         assert alliance_events[0]["guardian"] == "guardian_1"
         assert alliance_events[0]["protected"] == "explorer_1"
@@ -806,7 +828,8 @@ class TestSimulationEngineSocialNetworks:
 
     @patch("numpy.random.random")
     @patch("numpy.random.choice")
-    def test_update_social_networks_trade_events(self, mock_choice, mock_random):
+    def test_update_social_networks_trade_events(
+            self, mock_choice, mock_random):
         """Test trade event recording."""
         engine = SimulationEngine()
         engine.initialize()
@@ -818,13 +841,15 @@ class TestSimulationEngineSocialNetworks:
         engine.agents = {"agent_1": agent1, "agent_2": agent2}
 
         # Mock random to trigger trade event
-        mock_random.side_effect = [0.5, 0.5, 0.5, 0.11]  # Only last call triggers trade event
+        # Only last call triggers trade event
+        mock_random.side_effect = [0.5, 0.5, 0.5, 0.11]
         mock_choice.side_effect = [agent1, agent2]
 
         engine._update_social_networks()
 
         # Should record trade event
-        trade_events = [e for e in engine.event_history if e.get("type") == "trade"]
+        trade_events = [
+            e for e in engine.event_history if e.get("type") == "trade"]
         assert len(trade_events) == 1
         assert trade_events[0]["trader1"] == "agent_1"
         assert trade_events[0]["trader2"] == "agent_2"
@@ -832,7 +857,8 @@ class TestSimulationEngineSocialNetworks:
 
     @patch("numpy.random.random")
     @patch("numpy.random.choice")
-    def test_update_social_networks_resource_sharing(self, mock_choice, mock_random):
+    def test_update_social_networks_resource_sharing(
+            self, mock_choice, mock_random):
         """Test resource sharing event recording."""
         engine = SimulationEngine()
         engine.initialize()
@@ -844,13 +870,15 @@ class TestSimulationEngineSocialNetworks:
         engine.agents = {"agent_1": agent1, "agent_2": agent2}
 
         # Mock random to trigger resource sharing
-        mock_random.side_effect = [0.5, 0.5, 0.5, 0.5, 0.07]  # Only last call triggers sharing
+        # Only last call triggers sharing
+        mock_random.side_effect = [0.5, 0.5, 0.5, 0.5, 0.07]
         mock_choice.side_effect = [agent1, agent2]
 
         engine._update_social_networks()
 
         # Should record resource sharing event
-        sharing_events = [e for e in engine.event_history if e.get("type") == "resource_share"]
+        sharing_events = [
+            e for e in engine.event_history if e.get("type") == "resource_share"]
         assert len(sharing_events) == 1
         assert sharing_events[0]["sharer"] == "agent_1"
         assert sharing_events[0]["receiver"] == "agent_2"
@@ -869,9 +897,12 @@ class TestSimulationEngineSocialNetworks:
         engine._record_cycle_events()
 
         # Should record events for each type
-        trade_events = [e for e in engine.event_history if e.get("type") == "trade"]
-        knowledge_events = [e for e in engine.event_history if e.get("type") == "knowledge_share"]
-        alliance_events = [e for e in engine.event_history if e.get("type") == "alliance_formed"]
+        trade_events = [
+            e for e in engine.event_history if e.get("type") == "trade"]
+        knowledge_events = [
+            e for e in engine.event_history if e.get("type") == "knowledge_share"]
+        alliance_events = [
+            e for e in engine.event_history if e.get("type") == "alliance_formed"]
 
         assert len(trade_events) == 1
         assert len(knowledge_events) == 1
@@ -888,7 +919,8 @@ class TestSimulationEngineSocialNetworks:
 
         engine._record_communication("sender_1", "receiver_1")
 
-        communication_events = [e for e in engine.event_history if e.get("type") == "communication"]
+        communication_events = [
+            e for e in engine.event_history if e.get("type") == "communication"]
         assert len(communication_events) == 1
         assert communication_events[0]["sender"] == "sender_1"
         assert communication_events[0]["receiver"] == "receiver_1"
@@ -921,7 +953,8 @@ class TestSimulationEngineSystemHealth:
 
         health = await engine.get_system_health()
 
-        assert health["agent_count"] == len(engine.agents) - len(engine.failed_agents)
+        assert health["agent_count"] == len(
+            engine.agents) - len(engine.failed_agents)
         assert health["agent_count"] >= 0
         assert health["status"] in ["healthy", "degraded", "critical"]
 
@@ -941,7 +974,8 @@ class TestSimulationEngineSystemHealth:
         health = await engine.get_system_health()
 
         assert len(health["errors"]) > 0
-        assert any("High agent failure rate" in error for error in health["errors"])
+        assert any(
+            "High agent failure rate" in error for error in health["errors"])
         assert health["status"] == "critical"
 
     @pytest.mark.asyncio
@@ -957,7 +991,8 @@ class TestSimulationEngineSystemHealth:
 
             assert health["memory_usage_mb"] > 2048  # Above threshold
             assert health["status"] == "degraded"
-            assert any("High memory usage" in error for error in health["errors"])
+            assert any(
+                "High memory usage" in error for error in health["errors"])
 
     @pytest.mark.asyncio
     async def test_get_system_health_slow_cycle(self):
@@ -1051,7 +1086,8 @@ class TestSimulationEngineEcosystemMetrics:
         engine.event_history = [
             {"type": "trade", "cycle": 5, "trader1": "agent1", "trader2": "agent2"},
             {"type": "trade", "cycle": 4, "trader1": "agent3", "trader2": "agent4"},
-            {"type": "trade", "cycle": 1, "trader1": "agent1", "trader2": "agent3"},  # Old cycle
+            {"type": "trade", "cycle": 1, "trader1": "agent1",
+                "trader2": "agent3"},  # Old cycle
         ]
 
         metrics = await engine.get_ecosystem_metrics()
@@ -1120,8 +1156,10 @@ class TestSimulationEngineSocialNetworkAnalysis:
 
         if len(agent_ids) >= 3:
             # Central agent should have higher centrality
-            central_centrality = network.centrality_scores.get(central_agent, 0)
-            other_centralities = [network.centrality_scores.get(aid, 0) for aid in agent_ids[1:]]
+            central_centrality = network.centrality_scores.get(
+                central_agent, 0)
+            other_centralities = [network.centrality_scores.get(
+                aid, 0) for aid in agent_ids[1:]]
 
             assert central_centrality >= max(other_centralities, default=0)
 
@@ -1302,7 +1340,8 @@ class TestSimulationEngineFaultTolerance:
 
         # Check if failure affects system health
         health = await engine.get_system_health()
-        assert health["agent_count"] == len(engine.agents) - len(engine.failed_agents)
+        assert health["agent_count"] == len(
+            engine.agents) - len(engine.failed_agents)
 
     @pytest.mark.asyncio
     async def test_simulate_agent_failure_nonexistent(self):

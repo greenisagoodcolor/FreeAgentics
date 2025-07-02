@@ -43,7 +43,8 @@ class TestGNNStructure(unittest.TestCase):
         ]
         for dir_path in required_dirs:
             full_path = self.root_dir / dir_path
-            self.assertTrue(full_path.exists(), f"Required directory '{dir_path}' does not exist")
+            self.assertTrue(full_path.exists(),
+                            f"Required directory '{dir_path}' does not exist")
 
     def test_documentation_files_exist(self) -> None:
         """Test that key documentation files exist"""
@@ -62,7 +63,9 @@ class TestGNNStructure(unittest.TestCase):
     def test_main_pipeline_exists(self) -> None:
         """Test that simulation engine exists as main orchestrator"""
         main_path = self.root_dir / "world" / "simulation" / "engine.py"
-        self.assertTrue(main_path.exists(), "Simulation engine 'engine.py' does not exist")
+        self.assertTrue(
+            main_path.exists(),
+            "Simulation engine 'engine.py' does not exist")
         # Check for key simulation components
         with open(main_path) as f:
             content = f.read()
@@ -72,15 +75,20 @@ class TestGNNStructure(unittest.TestCase):
         """Test that GNN model documentation exists"""
         # Check for GNN documentation instead of model files
         gnn_docs = self.root_dir / "docs" / "gnn"
-        self.assertTrue(gnn_docs.exists(), "GNN documentation directory does not exist")
+        self.assertTrue(
+            gnn_docs.exists(),
+            "GNN documentation directory does not exist")
 
     def test_active_inference_components_exist(self) -> None:
         """Test that Active Inference components exist"""
         inference_dir = self.root_dir / "inference"
-        self.assertTrue(inference_dir.exists(), "Inference directory does not exist")
+        self.assertTrue(
+            inference_dir.exists(),
+            "Inference directory does not exist")
         # Check for key inference components
         engine_path = inference_dir / "engine"
-        self.assertTrue(engine_path.exists(), "Inference engine directory does not exist")
+        self.assertTrue(engine_path.exists(),
+                        "Inference engine directory does not exist")
 
     def test_knowledge_modules_can_be_imported(self) -> None:
         """Test that knowledge modules can be imported"""
@@ -103,7 +111,8 @@ class TestGNNStructure(unittest.TestCase):
             "fix_docstrings.py",
             "fix_triple_quotes.py",
         ]
-        unexpected_files = [f for f in root_files if f.name not in allowed_root_files]
+        unexpected_files = [
+            f for f in root_files if f.name not in allowed_root_files]
         self.assertEqual(
             len(unexpected_files),
             0,
@@ -114,17 +123,27 @@ class TestGNNStructure(unittest.TestCase):
         """Test that GNN models are properly documented"""
         # Check for GNN model documentation instead of model files
         gnn_docs_dir = self.root_dir / "docs" / "gnn"
-        self.assertTrue(gnn_docs_dir.exists(), "GNN models documentation directory should exist")
+        self.assertTrue(gnn_docs_dir.exists(),
+                        "GNN models documentation directory should exist")
         # Check for GNN documentation files
         model_format_doc = gnn_docs_dir / "model-format.md"
-        self.assertTrue(model_format_doc.exists(), "GNN model format documentation should exist")
+        self.assertTrue(model_format_doc.exists(),
+                        "GNN model format documentation should exist")
 
     def test_architecture_screams_active_inference(self) -> None:
         """Test that the architecture clearly shows this is an Active Inference platform"""
         ai_indicators = [
-            self.root_dir / "agents" / "active_inference",
-            self.root_dir / "docs" / "active-inference" / "active-inference-guide.md",
-            self.root_dir / "inference" / "engine" / "active_inference.py",
+            self.root_dir /
+            "agents" /
+            "active_inference",
+            self.root_dir /
+            "docs" /
+            "active-inference" /
+            "active-inference-guide.md",
+            self.root_dir /
+            "inference" /
+            "engine" /
+            "active_inference.py",
         ]
         for indicator in ai_indicators:
             self.assertTrue(

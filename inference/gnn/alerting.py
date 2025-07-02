@@ -116,7 +116,10 @@ class LoggerChannel(AlertChannel):
     def send_alert(self, alert: Alert) -> bool:
         """Log the alert"""
         try:
-            log_message = f"ALERT [{alert.severity.value.upper()}] - {alert.title}: {alert.message}"
+            log_message = f"ALERT [{
+                alert.severity.value.upper()}] - {
+                alert.title}: {
+                alert.message}"
             if alert.severity == AlertSeverity.CRITICAL:
                 logger.critical(log_message)
             elif alert.severity == AlertSeverity.ERROR:
@@ -170,7 +173,11 @@ class EmailChannel(AlertChannel):
             msg["From"] = self.from_email
             msg["To"] = ", ".join(self.to_emails)
             msg["Subject"] = f"[{alert.severity.value.upper()}] {alert.title}"
-            body = f"\nAlert Details:\n--------------\nSeverity: {alert.severity.value}\nType: {alert.alert_type.value}\nTime: {alert.timestamp.strftime('%Y-%m-%d %H:%M:%S')}\n\nMessage:\n{alert.message}\n\n"
+            body = f"\nAlert Details:\n--------------\nSeverity: {
+                alert.severity.value}\nType: {
+                alert.alert_type.value}\nTime: {
+                alert.timestamp.strftime('%Y-%m-%d %H:%M:%S')}\n\nMessage:\n{
+                alert.message}\n\n"
             if alert.metric_value is not None:
                 body += f"Metric Value: {alert.metric_value}\n"
             if alert.threshold is not None:
@@ -194,7 +201,8 @@ class EmailChannel(AlertChannel):
 class WebhookChannel(AlertChannel):
     """Webhook-based alert channel"""
 
-    def __init__(self, webhook_url: str, headers: Optional[Dict[str, str]] = None) -> None:
+    def __init__(self, webhook_url: str,
+                 headers: Optional[Dict[str, str]] = None) -> None:
         """
         Initialize webhook channel.
         Args:
@@ -209,8 +217,10 @@ class WebhookChannel(AlertChannel):
         try:
             payload = alert.to_dict()
             response = requests.post(
-                self.webhook_url, json=payload, headers=self.headers, timeout=10
-            )
+                self.webhook_url,
+                json=payload,
+                headers=self.headers,
+                timeout=10)
             response.raise_for_status()
             return True
         except Exception as e:
@@ -229,7 +239,8 @@ class AlertManager:
     - Auto-resolution
     """
 
-    def __init__(self, max_history: int = 1000, check_interval: int = 30) -> None:
+    def __init__(self, max_history: int = 1000,
+                 check_interval: int = 30) -> None:
         """
         Initialize alert manager.
         Args:
@@ -323,7 +334,8 @@ class AlertManager:
         """Add alert rule"""
         with self._lock:
             self.rules.append(rule)
-            self.rule_state[rule.name] = {"breach_count": 0, "last_alert_time": None}
+            self.rule_state[rule.name] = {
+                "breach_count": 0, "last_alert_time": None}
 
     def add_channel(self, channel: AlertChannel) -> None:
         """Add notification channel"""
@@ -381,19 +393,24 @@ class AlertManager:
                     state["breach_count"] += 1
                     if state["breach_count"] >= rule.consecutive_breaches:
                         if state["last_alert_time"]:
-                            cooldown_end = state["last_alert_time"] + timedelta(
-                                minutes=rule.cooldown_minutes
-                            )
+                            cooldown_end = state["last_alert_time"] + \
+                                timedelta(minutes=rule.cooldown_minutes)
                             if datetime.utcnow() < cooldown_end:
                                 continue
                         self.create_alert(
                             severity=rule.severity,
                             alert_type=rule.alert_type,
-                            title=f"{rule.name} threshold breached",
-                            message=f"Metric '{rule.metric}' value {metric_value:.2f} {rule.comparison} threshold {rule.threshold}",
+                            title=f"{
+                                rule.name} threshold breached",
+                            message=f"Metric '{
+                                rule.metric}' value {
+                                metric_value:.2f} {
+                                rule.comparison} threshold {
+                                rule.threshold}",
                             metric_value=metric_value,
                             threshold=rule.threshold,
-                            context={"rule_name": rule.name},
+                            context={
+                                "rule_name": rule.name},
                         )
                         state["last_alert_time"] = datetime.utcnow()
                         state["breach_count"] = 0
@@ -415,9 +432,12 @@ class AlertManager:
                         timestamp=datetime.utcnow(),
                         severity=AlertSeverity.INFO,
                         alert_type=alert.alert_type,
-                        title=f"Alert Resolved: {alert.title}",
-                        message=f"The alert '{alert.title}' has been resolved.",
-                        context={"original_alert_id": alert_id},
+                        title=f"Alert Resolved: {
+                            alert.title}",
+                        message=f"The alert '{
+                            alert.title}' has been resolved.",
+                        context={
+                            "original_alert_id": alert_id},
                     )
                     self._send_alert(resolution_alert)
                     break

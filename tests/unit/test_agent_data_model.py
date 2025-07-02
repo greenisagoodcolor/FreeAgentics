@@ -3,22 +3,12 @@ Module for FreeAgentics Active Inference implementation.
 """
 
 import unittest
-from datetime import datetime, timedelta
 
 import numpy as np
 
 from agents.base.data_model import (
-    Agent,
-    AgentCapability,
-    AgentGoal,
-    AgentPersonality,
-    AgentResources,
-    AgentStatus,
     Orientation,
     Position,
-    ResourceAgent,
-    SocialAgent,
-    SocialRelationship,
 )
 
 """

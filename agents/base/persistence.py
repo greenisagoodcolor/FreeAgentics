@@ -38,6 +38,83 @@ logger = logging.getLogger(__name__)
 AGENT_SCHEMA_VERSION = "1.0.0"
 
 
+class DatabaseAgentDeserializer:
+    """Builder class for deserializing agents from database representation"""
+
+    def __init__(self, persistence: "AgentPersistence", agent: Agent) -> None:
+        self.persistence = persistence
+        self.agent = agent
+
+    def set_basic_properties(self, db_agent) -> None:
+        """Set basic agent properties from database agent"""
+        self.agent.agent_id = db_agent.uuid
+        self.agent.name = db_agent.name
+        self.agent.agent_type = db_agent.type
+        self.agent.created_at = db_agent.created_at
+        self.agent.last_updated = db_agent.updated_at or datetime.now()
+
+    def set_state_properties(self, state: Dict[str, Any]) -> None:
+        """Set state-related properties from database state"""
+        if "position" in state:
+            self.agent.position = Position(**state["position"])
+        if "orientation" in state:
+            self.agent.orientation = Orientation(**state["orientation"])
+        if "velocity" in state:
+            self.agent.velocity = np.array(state["velocity"])
+        if "status" in state:
+            self.agent.status = AgentStatus(state["status"])
+        if "resources" in state:
+            self.agent.resources = AgentResources(**state["resources"])
+        if "current_goal" in state and state["current_goal"]:
+            self.agent.current_goal = self.persistence._deserialize_goal(
+                state["current_goal"])
+        if "short_term_memory" in state:
+            self.agent.short_term_memory = state["short_term_memory"]
+        if "experience_count" in state:
+            self.agent.experience_count = state["experience_count"]
+
+    def set_config_properties(self, config: Dict[str, Any]) -> None:
+        """Set configuration properties from database config"""
+        if "capabilities" in config:
+            self.agent.capabilities = {
+                AgentCapability(cap) for cap in config["capabilities"]}
+        if "personality" in config:
+            self.agent.personality = AgentPersonality(**config["personality"])
+        if "metadata" in config:
+            self.agent.metadata = config["metadata"]
+
+    def set_belief_properties(self, beliefs: Dict[str, Any]) -> None:
+        """Set belief-related properties from database beliefs"""
+        self._set_relationships(beliefs)
+        self._set_goals(beliefs)
+        self._set_memory_and_beliefs(beliefs)
+
+    def _set_relationships(self, beliefs: Dict[str, Any]) -> None:
+        """Set relationships from beliefs data"""
+        if "relationships" in beliefs:
+            for agent_id, rel_data in beliefs["relationships"].items():
+                relationship = self.persistence._create_relationship_from_db_data(
+                    rel_data)
+                self.agent.relationships[agent_id] = relationship
+
+    def _set_goals(self, beliefs: Dict[str, Any]) -> None:
+        """Set goals from beliefs data"""
+        if "goals" in beliefs:
+            self.agent.goals = [
+                self.persistence._deserialize_goal(goal_data)
+                for goal_data in beliefs["goals"]
+            ]
+
+    def _set_memory_and_beliefs(self, beliefs: Dict[str, Any]) -> None:
+        """Set memory and belief state from beliefs data"""
+        if "long_term_memory" in beliefs:
+            self.agent.long_term_memory = beliefs["long_term_memory"]
+        if "generative_model_params" in beliefs:
+            self.agent.generative_model_params = beliefs["generative_model_params"]
+        if "belief_state" in beliefs:
+            self.agent.belief_state = np.array(beliefs["belief_state"])
+
+
 class AgentPersistence:
     """Handles persistence operations for agents"""
 
@@ -66,7 +143,8 @@ class AgentPersistence:
         """
         session = self._get_session()
         try:
-            db_agent = session.query(DBAgent).filter_by(uuid=agent.agent_id).first()
+            db_agent = session.query(DBAgent).filter_by(
+                uuid=agent.agent_id).first()
             if db_agent and (not update_if_exists):
                 logger.error(f"Agent {agent.agent_id} already exists")
                 return False
@@ -162,7 +240,9 @@ class AgentPersistence:
                     agent = self._deserialize_agent(db_agent)
                     agents.append(agent)
                 except Exception as e:
-                    logger.error(f"Error deserializing agent {db_agent.uuid}: {e}")
+                    logger.error(
+                        f"Error deserializing agent {
+                            db_agent.uuid}: {e}")
             logger.info(f"Loaded {len(agents)} agents")
             return agents
         except Exception as e:
@@ -265,71 +345,41 @@ class AgentPersistence:
         }
 
     def _deserialize_agent(self, db_agent) -> Agent:
-        """Deserialize agent from database representation
-        Args:
-            db_agent: Database agent model
-        Returns:
-            Agent instance
-        """
-        agent_class = Agent
-        if db_agent.type == "resource_management":
-            agent_class = ResourceAgent
-        elif db_agent.type == "social_interaction":
-            agent_class = SocialAgent
-        agent = agent_class()
-        agent.agent_id = db_agent.uuid
-        agent.name = db_agent.name
-        agent.agent_type = db_agent.type
-        agent.created_at = db_agent.created_at
-        agent.last_updated = db_agent.updated_at or datetime.now()
-        state = db_agent.state or {}
-        if "position" in state:
-            agent.position = Position(**state["position"])
-        if "orientation" in state:
-            agent.orientation = Orientation(**state["orientation"])
-        if "velocity" in state:
-            agent.velocity = np.array(state["velocity"])
-        if "status" in state:
-            agent.status = AgentStatus(state["status"])
-        if "resources" in state:
-            agent.resources = AgentResources(**state["resources"])
-        if "current_goal" in state and state["current_goal"]:
-            agent.current_goal = self._deserialize_goal(state["current_goal"])
-        if "short_term_memory" in state:
-            agent.short_term_memory = state["short_term_memory"]
-        if "experience_count" in state:
-            agent.experience_count = state["experience_count"]
-        config = db_agent.config or {}
-        if "capabilities" in config:
-            agent.capabilities = {AgentCapability(cap) for cap in config["capabilities"]}
-        if "personality" in config:
-            agent.personality = AgentPersonality(**config["personality"])
-        if "metadata" in config:
-            agent.metadata = config["metadata"]
-        beliefs = db_agent.beliefs or {}
-        if "relationships" in beliefs:
-            for agent_id, rel_data in beliefs["relationships"].items():
-                rel = SocialRelationship(
-                    target_agent_id=rel_data["target_agent_id"],
-                    relationship_type=rel_data["relationship_type"],
-                    trust_level=rel_data["trust_level"],
-                    interaction_count=rel_data["interaction_count"],
-                    last_interaction=(
-                        datetime.fromisoformat(rel_data["last_interaction"])
-                        if rel_data["last_interaction"]
-                        else None
-                    ),
-                )
-                agent.relationships[agent_id] = rel
-        if "goals" in beliefs:
-            agent.goals = [self._deserialize_goal(goal_data) for goal_data in beliefs["goals"]]
-        if "long_term_memory" in beliefs:
-            agent.long_term_memory = beliefs["long_term_memory"]
-        if "generative_model_params" in beliefs:
-            agent.generative_model_params = beliefs["generative_model_params"]
-        if "belief_state" in beliefs:
-            agent.belief_state = np.array(beliefs["belief_state"])
+        """Deserialize agent from database representation using Builder pattern"""
+        agent = self._create_agent_instance(db_agent.type)
+        deserializer = DatabaseAgentDeserializer(self, agent)
+
+        deserializer.set_basic_properties(db_agent)
+        deserializer.set_state_properties(db_agent.state or {})
+        deserializer.set_config_properties(db_agent.config or {})
+        deserializer.set_belief_properties(db_agent.beliefs or {})
+
         return agent
+
+    def _create_agent_instance(self, agent_type: str) -> Agent:
+        """Create appropriate agent instance based on type"""
+        if agent_type == "resource_management":
+            return ResourceAgent()
+        elif agent_type == "social_interaction":
+            return SocialAgent()
+        else:
+            return Agent()
+
+    def _create_relationship_from_db_data(
+            self, rel_data: Dict[str, Any]) -> SocialRelationship:
+        """Create relationship from database relationship data"""
+        last_interaction = None
+        if rel_data.get("last_interaction"):
+            last_interaction = datetime.fromisoformat(
+                rel_data["last_interaction"])
+
+        return SocialRelationship(
+            target_agent_id=rel_data["target_agent_id"],
+            relationship_type=rel_data["relationship_type"],
+            trust_level=rel_data["trust_level"],
+            interaction_count=rel_data["interaction_count"],
+            last_interaction=last_interaction,
+        )
 
     def _serialize_goal(self, goal: AgentGoal) -> Dict[str, Any]:
         """Serialize AgentGoal to dictionary"""
@@ -341,7 +391,8 @@ class AgentPersistence:
         """Deserialize dictionary to AgentGoal"""
         goal_id = goal_data.pop("goal_id", None)
         if "target_position" in goal_data and goal_data["target_position"]:
-            goal_data["target_position"] = Position(**goal_data["target_position"])
+            goal_data["target_position"] = Position(
+                **goal_data["target_position"])
         goal = AgentGoal(**goal_data)
         if goal_id:
             goal.goal_id = goal_id
@@ -381,10 +432,15 @@ class AgentSnapshot:
         agent.metadata["snapshots"].append(snapshot_data)
         agent.metadata["snapshots"] = agent.metadata["snapshots"][-10:]
         self.persistence.save_agent(agent)
-        logger.info(f"Created snapshot {snapshot_id} for agent {agent.agent_id}")
+        logger.info(
+            f"Created snapshot {snapshot_id} for agent {
+                agent.agent_id}")
         return snapshot_id
 
-    def restore_snapshot(self, agent_id: str, snapshot_id: str) -> Optional[Agent]:
+    def restore_snapshot(
+            self,
+            agent_id: str,
+            snapshot_id: str) -> Optional[Agent]:
         """Restore agent from a snapshot
         Args:
             agent_id: Agent UUID
@@ -397,9 +453,11 @@ class AgentSnapshot:
             logger.error(f"Agent {agent_id} not found")
             return None
         snapshots = current_agent.metadata.get("snapshots", [])
-        snapshot = next((s for s in snapshots if s["snapshot_id"] == snapshot_id), None)
+        snapshot = next(
+            (s for s in snapshots if s["snapshot_id"] == snapshot_id), None)
         if not snapshot:
-            logger.error(f"Snapshot {snapshot_id} not found for agent {agent_id}")
+            logger.error(
+                f"Snapshot {snapshot_id} not found for agent {agent_id}")
             return None
         agent = Agent.from_dict(snapshot["agent_data"])
         logger.info(f"Restored agent {agent_id} from snapshot {snapshot_id}")

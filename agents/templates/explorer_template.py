@@ -55,7 +55,8 @@ class ExplorerTemplate(ActiveInferenceTemplate):
         self.curiosity_factor = 2.0  # Amplify curiosity preferences
         self.uncertainty_threshold = 0.5  # Minimum uncertainty to explore
 
-    def create_generative_model(self, config: TemplateConfig) -> GenerativeModelParams:
+    def create_generative_model(
+            self, config: TemplateConfig) -> GenerativeModelParams:
         """
         Create generative model optimized for exploration.
 
@@ -105,7 +106,8 @@ class ExplorerTemplate(ActiveInferenceTemplate):
 
                     # Small probability of staying or random transition
                     transition_matrix[s, s] = 0.1
-                    remaining_prob = 0.1 / (num_states - 2) if num_states > 2 else 0
+                    remaining_prob = 0.1 / \
+                        (num_states - 2) if num_states > 2 else 0
                     for s_prime in range(num_states):
                         if s_prime != s and s_prime != next_state:
                             transition_matrix[s_prime, s] = remaining_prob
@@ -196,7 +198,8 @@ class ExplorerTemplate(ActiveInferenceTemplate):
 
                 # This is a simplified computation - in practice would use
                 # the full observation model from the generative model
-                likelihood = np.ones(len(beliefs.beliefs))  # Uniform likelihood
+                # Uniform likelihood
+                likelihood = np.ones(len(beliefs.beliefs))
                 likelihood[o % len(beliefs.beliefs)] *= 2.0  # Slight bias
 
                 posterior = beliefs.beliefs * likelihood
@@ -223,8 +226,7 @@ class ExplorerTemplate(ActiveInferenceTemplate):
             "exploration. Seeks novel observations, reduces uncertainty, and "
             "prioritizes epistemic value over immediate rewards. Exhibits high "
             "exploration tendency with preference for uncertain states and "
-            "informative actions."
-        )
+            "informative actions.")
 
     def _validate_template_specific_constraints(
         self, model: GenerativeModelParams, config: TemplateConfig
@@ -243,8 +245,8 @@ class ExplorerTemplate(ActiveInferenceTemplate):
             import warnings
 
             warnings.warn(
-                "Explorer template: C vector has low variance - " "may not encourage exploration"
-            )
+                "Explorer template: C vector has low variance - "
+                "may not encourage exploration")
 
         # Check transition model allows exploration
         for policy in range(model.B.shape[2]):
@@ -268,9 +270,17 @@ class ExplorerTemplate(ActiveInferenceTemplate):
             dict: Exploration metrics
         """
         return {
-            "belief_entropy": entropy(beliefs.beliefs),
+            "belief_entropy": entropy(
+                beliefs.beliefs),
             "confidence": beliefs.confidence,
-            "uncertainty": 1.0 - np.max(beliefs.beliefs),
-            "exploration_readiness": (entropy(beliefs.beliefs) > self.uncertainty_threshold),
-            "epistemic_motivation": (self.epistemic_bonus * entropy(beliefs.beliefs)),
+            "uncertainty": 1.0 -
+            np.max(
+                beliefs.beliefs),
+            "exploration_readiness": (
+                entropy(
+                    beliefs.beliefs) > self.uncertainty_threshold),
+            "epistemic_motivation": (
+                self.epistemic_bonus *
+                entropy(
+                    beliefs.beliefs)),
         }

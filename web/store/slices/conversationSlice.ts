@@ -24,6 +24,7 @@ export interface Conversation {
   participants: string[]; // Agent IDs
   messages: Message[];
   startTime: number;
+  endTime: number | null; // Add missing endTime field
   lastActivity: number;
   messageRate: number; // messages per minute
   isActive: boolean;
@@ -141,6 +142,7 @@ const initialState: ConversationState = {
       ],
       messages: demoMessages, // ← NOW HAS DEMO MESSAGES
       startTime: Date.now() - 1800000,
+      endTime: null, // Add missing endTime field
       lastActivity: Date.now() - 300000,
       messageRate: 4.2, // messages per minute
       isActive: true,
@@ -271,6 +273,7 @@ const conversationSlice = createSlice({
         participants,
         messages: [],
         startTime: Date.now(),
+        endTime: null,
         lastActivity: Date.now(),
         messageRate: 0,
         isActive: true,
@@ -405,6 +408,19 @@ const conversationSlice = createSlice({
         }
       }
     },
+    
+    // Demo data actions for compatibility
+    setDemoConversation: (state, action: PayloadAction<Conversation>) => {
+      const conversation = action.payload;
+      state.conversations[conversation.id] = conversation;
+    },
+    
+    clearConversations: (state) => {
+      state.conversations = { main: state.conversations.main }; // Keep main conversation
+      state.unreadCounts = {};
+      state.typingIndicators = {};
+      state.activeConversationId = "main";
+    },
   },
 });
 
@@ -422,6 +438,8 @@ export const {
   batchAddMessages,
   clearConversation,
   deleteConversation,
+  setDemoConversation,
+  clearConversations,
 } = conversationSlice.actions;
 
 export default conversationSlice.reducer;

@@ -58,8 +58,7 @@ class DeploymentScriptGenerator:
 
         # Filter templates for platform
         templates = [
-            t for t in self.templates if t.platform is None or t.platform == target_platform
-        ]
+            t for t in self.templates if t.platform is None or t.platform == target_platform]
 
         # Generate each script
         for template in templates:
@@ -84,11 +83,17 @@ class DeploymentScriptGenerator:
 
         # Generate platform-specific extras
         if target_platform == "raspberrypi":
-            generated_files.extend(self._generate_raspberry_pi_extras(output_dir, hardware_config))
+            generated_files.extend(
+                self._generate_raspberry_pi_extras(
+                    output_dir, hardware_config))
         elif target_platform == "mac":
-            generated_files.extend(self._generate_mac_extras(output_dir, hardware_config))
+            generated_files.extend(
+                self._generate_mac_extras(
+                    output_dir, hardware_config))
         elif target_platform == "jetson":
-            generated_files.extend(self._generate_jetson_extras(output_dir, hardware_config))
+            generated_files.extend(
+                self._generate_jetson_extras(
+                    output_dir, hardware_config))
 
         return generated_files
 
@@ -146,7 +151,8 @@ class DeploymentScriptGenerator:
             if isinstance(value, dict):
                 # Handle nested dicts
                 for subkey, subvalue in value.items():
-                    template = template.replace(f"{{{{{key}.{subkey}}}}}", str(subvalue))
+                    template = template.replace(
+                        f"{{{{{key}.{subkey}}}}}", str(subvalue))
             else:
                 template = template.replace(f"{{{{{key}}}}}", str(value))
 
@@ -686,7 +692,10 @@ fi
 
         return extras
 
-    def _generate_mac_extras(self, output_dir: Path, hardware_config: Dict[str, Any]) -> List[Path]:
+    def _generate_mac_extras(self,
+                             output_dir: Path,
+                             hardware_config: Dict[str,
+                                                   Any]) -> List[Path]:
         """Generate macOS specific files"""
         extras = []
 

@@ -5,9 +5,6 @@ Tests coalition formation, proposal management, and value evaluation
 with proper PyMDP alignment and GNN notation support.
 """
 
-from typing import Any, Dict, List
-from unittest.mock import Mock, patch
-
 import pytest
 
 from coalitions.formation.coalition_builder import Coalition, CoalitionBuilder
@@ -19,8 +16,11 @@ class TestCoalition:
     def test_coalition_initialization_minimal(self):
         """Test creating coalition with minimal parameters."""
         coalition = Coalition(
-            id="test_coalition", members=["agent1", "agent2"], type="resource_sharing"
-        )
+            id="test_coalition",
+            members=[
+                "agent1",
+                "agent2"],
+            type="resource_sharing")
 
         assert coalition.id == "test_coalition"
         assert coalition.members == ["agent1", "agent2"]
@@ -47,14 +47,23 @@ class TestCoalition:
 
     def test_coalition_post_init_metadata(self):
         """Test that metadata is initialized to empty dict if None."""
-        coalition = Coalition(id="test", members=["agent1"], type="exploration", metadata=None)
+        coalition = Coalition(
+            id="test",
+            members=["agent1"],
+            type="exploration",
+            metadata=None)
 
         assert coalition.metadata == {}
         assert isinstance(coalition.metadata, dict)
 
     def test_coalition_members_mutability(self):
         """Test that coalition members list is mutable."""
-        coalition = Coalition(id="test", members=["agent1", "agent2"], type="trade")
+        coalition = Coalition(
+            id="test",
+            members=[
+                "agent1",
+                "agent2"],
+            type="trade")
 
         # Add new member
         coalition.members.append("agent3")
@@ -82,7 +91,8 @@ class TestCoalition:
         coalition1 = Coalition(id="same_id", members=["agent1"], type="type1")
 
         coalition2 = Coalition(
-            id="same_id", members=["agent2"], type="type2"  # Different members  # Different type
+            # Different members  # Different type
+            id="same_id", members=["agent2"], type="type2"
         )
 
         # Should be equal based on id
@@ -129,7 +139,8 @@ class TestCoalitionBuilder:
         members = ["explorer2", "explorer3"]
         coalition_type = "exploration"
 
-        coalition = self.builder.propose_coalition(proposer, members, coalition_type)
+        coalition = self.builder.propose_coalition(
+            proposer, members, coalition_type)
 
         assert coalition.type == "exploration"
         assert coalition.members == ["explorer1", "explorer2", "explorer3"]
@@ -141,7 +152,8 @@ class TestCoalitionBuilder:
         assert coalition1.id == "coalition_0"
 
         # Second coalition
-        coalition2 = self.builder.propose_coalition("agent3", ["agent4", "agent5"])
+        coalition2 = self.builder.propose_coalition(
+            "agent3", ["agent4", "agent5"])
         assert coalition2.id == "coalition_1"
 
         # Third coalition
@@ -150,7 +162,8 @@ class TestCoalitionBuilder:
 
         # Check all are stored
         assert len(self.builder.coalitions) == 3
-        assert all(f"coalition_{i}" in self.builder.coalitions for i in range(3))
+        assert all(
+            f"coalition_{i}" in self.builder.coalitions for i in range(3))
 
     def test_propose_coalition_empty_members(self):
         """Test proposing coalition with no additional members."""
@@ -162,7 +175,8 @@ class TestCoalitionBuilder:
     def test_accept_proposal_valid(self):
         """Test accepting a valid coalition proposal."""
         # Create proposal
-        coalition = self.builder.propose_coalition("agent1", ["agent2", "agent3"])
+        coalition = self.builder.propose_coalition(
+            "agent1", ["agent2", "agent3"])
         coalition_id = coalition.id
 
         # Accept by a member
@@ -182,7 +196,8 @@ class TestCoalitionBuilder:
 
     def test_accept_proposal_invalid_coalition(self):
         """Test accepting proposal for non-existent coalition."""
-        result = self.builder.accept_proposal("non_existent_coalition", "agent1")
+        result = self.builder.accept_proposal(
+            "non_existent_coalition", "agent1")
 
         assert result is False
 
@@ -198,7 +213,13 @@ class TestCoalitionBuilder:
 
     def test_evaluate_coalition_value_basic(self):
         """Test basic coalition value evaluation."""
-        coalition = Coalition(id="test", members=["agent1", "agent2", "agent3"], type="trade")
+        coalition = Coalition(
+            id="test",
+            members=[
+                "agent1",
+                "agent2",
+                "agent3"],
+            type="trade")
 
         value = self.builder.evaluate_coalition_value(coalition)
 
@@ -227,7 +248,8 @@ class TestCoalitionBuilder:
         # Step 1: Propose coalition
         proposer = "leader_agent"
         members = ["worker1", "worker2", "worker3"]
-        coalition = self.builder.propose_coalition(proposer, members, "construction")
+        coalition = self.builder.propose_coalition(
+            proposer, members, "construction")
 
         assert coalition.status == "proposed"
         assert len(self.builder.coalitions) == 1
@@ -271,7 +293,8 @@ class TestCoalitionBuilder:
         assert self.builder.coalitions["coalition_4"].status == "active"
 
         # Evaluate all coalitions
-        total_value = sum(self.builder.evaluate_coalition_value(c) for c in coalitions)
+        total_value = sum(self.builder.evaluate_coalition_value(c)
+                          for c in coalitions)
         assert total_value == 150.0  # 5 coalitions * 3 members each * 10.0
 
     def test_coalition_builder_state_persistence(self):
@@ -356,7 +379,8 @@ class TestCoalitionBuilderEdgeCases:
         ]
 
         for i, ctype in enumerate(types):
-            coalition = self.builder.propose_coalition(f"leader{i}", [f"member{i}"], ctype)
+            coalition = self.builder.propose_coalition(
+                f"leader{i}", [f"member{i}"], ctype)
             assert coalition.type == ctype
             assert coalition.id == f"coalition_{i}"
 
@@ -374,16 +398,17 @@ class TestCoalitionBuilderEdgeCases:
             self.builder.accept_proposal(f"coalition_{i}", f"leader{i}")
 
         # Count active vs proposed
-        active_count = sum(1 for c in self.builder.coalitions.values() if c.status == "active")
-        proposed_count = sum(1 for c in self.builder.coalitions.values() if c.status == "proposed")
+        active_count = sum(1 for c in self.builder.coalitions.values()
+                           if c.status == "active")
+        proposed_count = sum(
+            1 for c in self.builder.coalitions.values() if c.status == "proposed")
 
         assert active_count == 50
         assert proposed_count == 50
 
         # Calculate total value
-        total_value = sum(
-            self.builder.evaluate_coalition_value(c) for c in self.builder.coalitions.values()
-        )
+        total_value = sum(self.builder.evaluate_coalition_value(c)
+                          for c in self.builder.coalitions.values())
 
         # Should be sum of (i % 5 + 2) * 10 for i in range(100)
         # where +2 accounts for leader + members
@@ -425,8 +450,8 @@ class TestCoalitionBuilderIntegration:
 
         # Create coalition for notation standardization
         notation_coalition = builder.propose_coalition(
-            "notation_expert", ["analyst1", "analyst2", "analyst3"], "notation_standardization"
-        )
+            "notation_expert", [
+                "analyst1", "analyst2", "analyst3"], "notation_standardization")
 
         # Add GNN metadata
         notation_coalition.metadata["notation_system"] = "GNN"

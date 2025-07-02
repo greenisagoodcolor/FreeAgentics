@@ -71,7 +71,8 @@ const MockMarkovBlanketVisualization: React.FC<any> = (props) => {
       {/* Critical Violations Alert */}
       {criticalViolations.length > 0 && (
         <div data-testid="critical-alert">
-          {criticalViolations.length} critical boundary violation{criticalViolations.length > 1 ? 's' : ''} detected
+          {criticalViolations.length} critical boundary violation
+          {criticalViolations.length > 1 ? "s" : ""} detected
         </div>
       )}
 
@@ -79,12 +80,15 @@ const MockMarkovBlanketVisualization: React.FC<any> = (props) => {
       {showViolations && violations.length > 0 && (
         <div data-testid="violations-list">
           {violations.map((violation: any) => (
-            <div key={violation.event_id} data-testid={`violation-${violation.event_id}`}>
+            <div
+              key={violation.event_id}
+              data-testid={`violation-${violation.event_id}`}
+            >
               <div>Type: {violation.violation_type}</div>
               <div>Severity: {violation.severity}</div>
               <div>Agent: {violation.agent_id}</div>
               {!violation.acknowledged && (
-                <button 
+                <button
                   onClick={() => onViolationAcknowledge?.(violation.event_id)}
                   data-testid={`acknowledge-${violation.event_id}`}
                 >
@@ -175,7 +179,9 @@ describe("MarkovBlanketVisualization - Basic Tests", () => {
 
   test("renders component", () => {
     render(<MockMarkovBlanketVisualization {...mockProps} />);
-    expect(screen.getByTestId("markov-blanket-visualization")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("markov-blanket-visualization"),
+    ).toBeInTheDocument();
   });
 
   test("displays metrics", () => {
@@ -205,28 +211,28 @@ describe("MarkovBlanketVisualization - Basic Tests", () => {
     };
 
     render(
-      <MockMarkovBlanketVisualization 
-        {...mockProps} 
-        agentPosition={outsideBoundaryPosition} 
-      />
+      <MockMarkovBlanketVisualization
+        {...mockProps}
+        agentPosition={outsideBoundaryPosition}
+      />,
     );
 
     expect(screen.getByTestId("boundary-violation-badge")).toBeInTheDocument();
   });
 
   test("shows critical violations alert", () => {
-    const criticalViolations = [
-      { ...mockViolation, severity: 0.9 }
-    ];
+    const criticalViolations = [{ ...mockViolation, severity: 0.9 }];
 
     render(
-      <MockMarkovBlanketVisualization 
-        {...mockProps} 
-        violations={criticalViolations} 
-      />
+      <MockMarkovBlanketVisualization
+        {...mockProps}
+        violations={criticalViolations}
+      />,
     );
 
-    expect(screen.getByText("1 critical boundary violation detected")).toBeInTheDocument();
+    expect(
+      screen.getByText("1 critical boundary violation detected"),
+    ).toBeInTheDocument();
   });
 
   test("shows plural message for multiple critical violations", () => {
@@ -236,37 +242,38 @@ describe("MarkovBlanketVisualization - Basic Tests", () => {
     ];
 
     render(
-      <MockMarkovBlanketVisualization 
-        {...mockProps} 
-        violations={criticalViolations} 
-      />
+      <MockMarkovBlanketVisualization
+        {...mockProps}
+        violations={criticalViolations}
+      />,
     );
 
-    expect(screen.getByText("2 critical boundary violations detected")).toBeInTheDocument();
+    expect(
+      screen.getByText("2 critical boundary violations detected"),
+    ).toBeInTheDocument();
   });
 
   test("displays violations when showViolations is true", () => {
     render(
-      <MockMarkovBlanketVisualization 
-        {...mockProps} 
-        showViolations={true} 
-      />
+      <MockMarkovBlanketVisualization {...mockProps} showViolations={true} />,
     );
 
     expect(screen.getByTestId("violations-list")).toBeInTheDocument();
-    expect(screen.getByText("Type: conditional_independence")).toBeInTheDocument();
+    expect(
+      screen.getByText("Type: conditional_independence"),
+    ).toBeInTheDocument();
     expect(screen.getByText("Severity: 0.7")).toBeInTheDocument();
   });
 
   test("calls onViolationAcknowledge when acknowledge button is clicked", () => {
     const mockAcknowledge = jest.fn();
-    
+
     render(
-      <MockMarkovBlanketVisualization 
-        {...mockProps} 
+      <MockMarkovBlanketVisualization
+        {...mockProps}
         showViolations={true}
-        onViolationAcknowledge={mockAcknowledge} 
-      />
+        onViolationAcknowledge={mockAcknowledge}
+      />,
     );
 
     fireEvent.click(screen.getByTestId("acknowledge-violation-1"));
@@ -284,18 +291,20 @@ describe("MarkovBlanketVisualization - Basic Tests", () => {
 
   test("handles missing props gracefully", () => {
     render(<MockMarkovBlanketVisualization />);
-    expect(screen.getByTestId("markov-blanket-visualization")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("markov-blanket-visualization"),
+    ).toBeInTheDocument();
   });
 
   test("handles empty violations array", () => {
     render(
-      <MockMarkovBlanketVisualization 
-        {...mockProps} 
-        violations={[]} 
-        showViolations={true} 
-      />
+      <MockMarkovBlanketVisualization
+        {...mockProps}
+        violations={[]}
+        showViolations={true}
+      />,
     );
-    
+
     expect(screen.queryByTestId("violations-list")).not.toBeInTheDocument();
     expect(screen.queryByTestId("critical-alert")).not.toBeInTheDocument();
   });

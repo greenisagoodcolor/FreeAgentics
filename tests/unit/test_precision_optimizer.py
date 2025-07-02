@@ -1,6 +1,5 @@
 """Test precision optimizer implementations"""
 
-import pytest
 import torch
 
 from inference.engine.precision import GradientPrecisionOptimizer, PrecisionConfig
@@ -12,8 +11,10 @@ class TestGradientPrecisionOptimizer:
     def test_initialization(self):
         """Test proper initialization of precision optimizer"""
         config = PrecisionConfig(
-            init_precision=2.0, learning_rate=0.01, min_precision=0.1, max_precision=10.0
-        )
+            init_precision=2.0,
+            learning_rate=0.01,
+            min_precision=0.1,
+            max_precision=10.0)
 
         num_modalities = 3
         optimizer = GradientPrecisionOptimizer(config, num_modalities)
@@ -21,13 +22,18 @@ class TestGradientPrecisionOptimizer:
         # Check initial precision values
         initial_precision = torch.exp(optimizer.log_precision).detach()
         assert initial_precision.shape == (num_modalities,)
-        assert torch.allclose(initial_precision, torch.ones(num_modalities) * config.init_precision)
+        assert torch.allclose(
+            initial_precision,
+            torch.ones(num_modalities) *
+            config.init_precision)
 
     def test_optimize_precision(self):
         """Test precision optimization with various error patterns"""
         config = PrecisionConfig(
-            init_precision=1.0, learning_rate=0.1, min_precision=0.1, max_precision=5.0
-        )
+            init_precision=1.0,
+            learning_rate=0.1,
+            min_precision=0.1,
+            max_precision=5.0)
 
         optimizer = GradientPrecisionOptimizer(config, num_modalities=2)
 
@@ -36,7 +42,7 @@ class TestGradientPrecisionOptimizer:
         initial = torch.exp(optimizer.log_precision).detach().clone()
 
         for _ in range(5):
-            optimized = optimizer.optimize_precision(small_errors)
+            optimizer.optimize_precision(small_errors)
 
         # Precision should have increased for small errors
         final = torch.exp(optimizer.log_precision).detach()
@@ -47,7 +53,7 @@ class TestGradientPrecisionOptimizer:
         initial = torch.exp(optimizer.log_precision).detach().clone()
 
         for _ in range(5):
-            optimized = optimizer.optimize_precision(large_errors)
+            optimizer.optimize_precision(large_errors)
 
         final = torch.exp(optimizer.log_precision).detach()
         # Precision should have decreased for large errors
@@ -119,7 +125,9 @@ class TestGradientPrecisionOptimizer:
 
     def test_gradient_clipping(self):
         """Test that gradient clipping prevents instability"""
-        config = PrecisionConfig(learning_rate=1.0, gradient_clip=0.1)  # Small clip value
+        config = PrecisionConfig(
+            learning_rate=1.0,
+            gradient_clip=0.1)  # Small clip value
 
         optimizer = GradientPrecisionOptimizer(config, num_modalities=1)
 
@@ -128,7 +136,7 @@ class TestGradientPrecisionOptimizer:
         initial = torch.exp(optimizer.log_precision).detach().clone()
 
         # Should not explode due to gradient clipping
-        precision = optimizer.optimize_precision(extreme_errors)
+        optimizer.optimize_precision(extreme_errors)
         final = torch.exp(optimizer.log_precision).detach()
 
         # Change should be limited by gradient clipping

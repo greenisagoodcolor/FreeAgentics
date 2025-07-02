@@ -8,7 +8,6 @@ All calculations are documented for business intelligence review and
 """
 
 import logging
-import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
@@ -94,10 +93,11 @@ class BusinessValueCalculationEngine:
                 coalition, formation_result, agent_profiles
             )
             metrics.methodology_notes["synergy"] = (
-                "Coalition value exceeds sum of individual agent values through capability complementarity"
-            )
+                "Coalition value exceeds sum of individual agent values through "
+                "capability complementarity")
 
-            metrics.risk_reduction = self._calculate_risk_reduction(coalition, agent_profiles)
+            metrics.risk_reduction = self._calculate_risk_reduction(
+                coalition, agent_profiles)
             metrics.methodology_notes["risk_reduction"] = (
                 "Diversification across capabilities and resources reduces operational risk"
             )
@@ -117,15 +117,13 @@ class BusinessValueCalculationEngine:
             )
 
             metrics.operational_efficiency = self._calculate_operational_efficiency(
-                coalition, agent_profiles
-            )
+                coalition, agent_profiles)
             metrics.methodology_notes["operational_efficiency"] = (
                 "Resource utilization and capability optimization"
             )
 
             metrics.innovation_potential = self._calculate_innovation_potential(
-                coalition, agent_profiles
-            )
+                coalition, agent_profiles)
             metrics.methodology_notes["innovation_potential"] = (
                 "Capability diversity and novel combinations"
             )
@@ -134,15 +132,17 @@ class BusinessValueCalculationEngine:
             metrics.total_value = self._calculate_total_value(metrics)
 
             # Calculate confidence level
-            metrics.confidence_level = self._calculate_confidence(formation_result, agent_profiles)
+            metrics.confidence_level = self._calculate_confidence(
+                formation_result, agent_profiles)
 
             # Store in history
             self.calculation_history.append(metrics)
 
             logger.info(
-                f"Calculated business value for coalition {coalition.coalition_id}: "
-                f"total={metrics.total_value:.3f}, confidence={metrics.confidence_level:.3f}"
-            )
+                f"Calculated business value for coalition {
+                    coalition.coalition_id}: " f"total={
+                    metrics.total_value:.3f}, confidence={
+                    metrics.confidence_level:.3f}")
 
         except Exception as e:
             logger.error(f"Error calculating business value: {e}")
@@ -171,7 +171,8 @@ class BusinessValueCalculationEngine:
         individual_values = []
         for profile in agent_profiles:
             capability_value = len(profile.capabilities) * 2.0
-            resource_value = sum(profile.resources.values()) * 0.1 if profile.resources else 0.0
+            resource_value = sum(profile.resources.values()) * \
+                0.1 if profile.resources else 0.0
             reliability_value = profile.reliability_score * 5.0
             individual_value = capability_value + resource_value + reliability_value
             individual_values.append(individual_value)
@@ -180,7 +181,8 @@ class BusinessValueCalculationEngine:
 
         # Estimate coalition value
         # Base value from formation score
-        coalition_base_value = formation_result.score * 10.0 if formation_result.success else 0.0
+        coalition_base_value = formation_result.score * \
+            10.0 if formation_result.success else 0.0
 
         # Capability complementarity bonus
         all_capabilities = set()
@@ -188,8 +190,10 @@ class BusinessValueCalculationEngine:
             all_capabilities.update(profile.capabilities)
 
         unique_capabilities = len(all_capabilities)
-        total_individual_capabilities = sum(len(p.capabilities) for p in agent_profiles)
-        complementarity_ratio = unique_capabilities / max(1, total_individual_capabilities)
+        total_individual_capabilities = sum(
+            len(p.capabilities) for p in agent_profiles)
+        complementarity_ratio = unique_capabilities / \
+            max(1, total_individual_capabilities)
         complementarity_bonus = complementarity_ratio * 20.0
 
         # Resource diversity bonus
@@ -199,11 +203,13 @@ class BusinessValueCalculationEngine:
 
         resource_diversity_bonus = len(all_resource_types) * 3.0
 
-        coalition_value = coalition_base_value + complementarity_bonus + resource_diversity_bonus
+        coalition_value = coalition_base_value + \
+            complementarity_bonus + resource_diversity_bonus
 
         # Calculate synergy
         if sum_individual > 0:
-            synergy = max(0.0, (coalition_value - sum_individual) / sum_individual)
+            synergy = max(
+                0.0, (coalition_value - sum_individual) / sum_individual)
             return min(1.0, synergy)  # Cap at 100% synergy
         else:
             return 0.0
@@ -229,12 +235,14 @@ class BusinessValueCalculationEngine:
 
         for profile in agent_profiles:
             for capability in profile.capabilities:
-                capability_counts[capability] = capability_counts.get(capability, 0) + 1
+                capability_counts[capability] = capability_counts.get(
+                    capability, 0) + 1
                 total_capabilities += 1
 
         if total_capabilities > 0:
             # Calculate HHI (lower = more diversified)
-            hhi = sum((count / total_capabilities) ** 2 for count in capability_counts.values())
+            hhi = sum((count / total_capabilities) **
+                      2 for count in capability_counts.values())
             capability_diversity = 1.0 - hhi  # Convert to diversity score
         else:
             capability_diversity = 0.0
@@ -250,17 +258,24 @@ class BusinessValueCalculationEngine:
         # Reliability distribution (prefer mix of high/medium reliability)
         reliabilities = [p.reliability_score for p in agent_profiles]
         if reliabilities:
-            # Calculate standard deviation (some variance is good for risk management)
+            # Calculate standard deviation (some variance is good for risk
+            # management)
             mean_reliability = sum(reliabilities) / len(reliabilities)
-            variance = sum((r - mean_reliability) ** 2 for r in reliabilities) / len(reliabilities)
-            reliability_diversity = min(1.0, variance * 4.0)  # Scale appropriately
+            variance = sum((r - mean_reliability) **
+                           2 for r in reliabilities) / len(reliabilities)
+            reliability_diversity = min(
+                1.0, variance * 4.0)  # Scale appropriately
         else:
             reliability_diversity = 0.0
 
         # Combine diversification measures
         risk_reduction = (
-            capability_diversity * 0.5 + resource_diversity * 0.3 + reliability_diversity * 0.2
-        )
+            capability_diversity *
+            0.5 +
+            resource_diversity *
+            0.3 +
+            reliability_diversity *
+            0.2)
 
         return min(1.0, risk_reduction)
 
@@ -290,8 +305,7 @@ class BusinessValueCalculationEngine:
         }
 
         strategy_name = (
-            formation_result.strategy_used.value if formation_result.strategy_used else "unknown"
-        )
+            formation_result.strategy_used.value if formation_result.strategy_used else "unknown")
         base_score = strategy_scores.get(strategy_name, 0.5)
 
         # Formation speed bonus (agility indicator)
@@ -299,7 +313,8 @@ class BusinessValueCalculationEngine:
         if formation_result.formation_time > 0:
             # Faster formation = higher agility = better positioning
             # Scale: under 1 second = max bonus, over 10 seconds = no bonus
-            speed_factor = max(0.0, (10.0 - formation_result.formation_time) / 10.0)
+            speed_factor = max(
+                0.0, (10.0 - formation_result.formation_time) / 10.0)
             speed_bonus = speed_factor * 0.2
 
         # Market context alignment
@@ -350,15 +365,19 @@ class BusinessValueCalculationEngine:
             total_resources = {}
             for profile in agent_profiles:
                 for resource, amount in profile.resources.items():
-                    total_resources[resource] = total_resources.get(resource, 0) + amount
+                    total_resources[resource] = total_resources.get(
+                        resource, 0) + amount
 
             if total_resources:
                 # Check if we have diverse, sufficient resources
                 resource_types = len(total_resources)
-                avg_resource_amount = sum(total_resources.values()) / len(total_resources)
+                avg_resource_amount = sum(
+                    total_resources.values()) / len(total_resources)
 
-                diversity_score = min(1.0, resource_types / 5.0)  # Assume 5 types is good
-                sufficiency_score = min(1.0, avg_resource_amount / 10.0)  # Assume 10 is sufficient
+                diversity_score = min(
+                    1.0, resource_types / 5.0)  # Assume 5 types is good
+                sufficiency_score = min(
+                    1.0, avg_resource_amount / 10.0)  # Assume 10 is sufficient
 
                 resource_balance = (diversity_score + sufficiency_score) / 2.0
 
@@ -397,13 +416,17 @@ class BusinessValueCalculationEngine:
             return 0.0
 
         # Resource utilization efficiency
-        total_resources = sum(sum(profile.resources.values()) for profile in agent_profiles)
+        total_resources = sum(sum(profile.resources.values())
+                              for profile in agent_profiles)
         total_agents = len(agent_profiles)
 
         if total_agents > 0:
             resource_per_agent = total_resources / total_agents
             # Higher resource per agent = higher efficiency potential
-            efficiency = min(1.0, resource_per_agent / 20.0)  # Assume 20 is optimal
+            efficiency = min(
+                1.0,
+                resource_per_agent /
+                20.0)  # Assume 20 is optimal
         else:
             efficiency = 0.0
 
@@ -422,29 +445,32 @@ class BusinessValueCalculationEngine:
             all_capabilities.update(profile.capabilities)
 
         # Innovation potential increases with capability diversity
-        innovation_score = min(1.0, len(all_capabilities) / 10.0)  # Assume 10+ is highly innovative
+        # Assume 10+ is highly innovative
+        innovation_score = min(1.0, len(all_capabilities) / 10.0)
 
         return innovation_score
 
     def _calculate_total_value(self, metrics: BusinessValueMetrics) -> float:
         """Calculate total business value as weighted sum of all metrics"""
-        total = (
-            metrics.synergy_score * self.metric_weights[BusinessMetricType.SYNERGY]
-            + metrics.risk_reduction * self.metric_weights[BusinessMetricType.RISK_REDUCTION]
-            + metrics.market_positioning
-            * self.metric_weights[BusinessMetricType.MARKET_POSITIONING]
-            + metrics.sustainability_score * self.metric_weights[BusinessMetricType.SUSTAINABILITY]
-            + metrics.operational_efficiency
-            * self.metric_weights[BusinessMetricType.OPERATIONAL_EFFICIENCY]
-            + metrics.innovation_potential
-            * self.metric_weights[BusinessMetricType.INNOVATION_POTENTIAL]
-        )
+        total = (metrics.synergy_score *
+                 self.metric_weights[BusinessMetricType.SYNERGY] +
+                 metrics.risk_reduction *
+                 self.metric_weights[BusinessMetricType.RISK_REDUCTION] +
+                 metrics.market_positioning *
+                 self.metric_weights[BusinessMetricType.MARKET_POSITIONING] +
+                 metrics.sustainability_score *
+                 self.metric_weights[BusinessMetricType.SUSTAINABILITY] +
+                 metrics.operational_efficiency *
+                 self.metric_weights[BusinessMetricType.OPERATIONAL_EFFICIENCY] +
+                 metrics.innovation_potential *
+                 self.metric_weights[BusinessMetricType.INNOVATION_POTENTIAL])
 
         return max(0.0, min(1.0, total))
 
     def _calculate_confidence(
-        self, formation_result: FormationResult, agent_profiles: List[AgentProfile]
-    ) -> float:
+            self,
+            formation_result: FormationResult,
+            agent_profiles: List[AgentProfile]) -> float:
         """Calculate confidence level in the business value calculation"""
         confidence_factors = []
 
@@ -460,10 +486,12 @@ class BusinessValueCalculationEngine:
             result_quality = min(1.0, formation_result.score / 5.0)
             confidence_factors.append(result_quality)
         else:
-            confidence_factors.append(0.1)  # Low confidence for failed formations
+            # Low confidence for failed formations
+            confidence_factors.append(0.1)
 
         # Sample size factor
-        sample_factor = min(1.0, len(agent_profiles) / 3.0)  # 3+ agents for good confidence
+        # 3+ agents for good confidence
+        sample_factor = min(1.0, len(agent_profiles) / 3.0)
         confidence_factors.append(sample_factor)
 
         if confidence_factors:
@@ -472,11 +500,13 @@ class BusinessValueCalculationEngine:
         else:
             return 0.0
 
-    def get_calculation_history(self, limit: int = 100) -> List[BusinessValueMetrics]:
+    def get_calculation_history(
+            self, limit: int = 100) -> List[BusinessValueMetrics]:
         """Get recent business value calculations"""
         return self.calculation_history[-limit:]
 
-    def export_metrics_for_investors(self, metrics: BusinessValueMetrics) -> Dict[str, Any]:
+    def export_metrics_for_investors(
+            self, metrics: BusinessValueMetrics) -> Dict[str, Any]:
         """Export metrics in investor-friendly format"""
         return {
             "executive_summary": {
@@ -501,7 +531,8 @@ class BusinessValueCalculationEngine:
             ),
         }
 
-    def _identify_key_strengths(self, metrics: BusinessValueMetrics) -> List[str]:
+    def _identify_key_strengths(
+            self, metrics: BusinessValueMetrics) -> List[str]:
         """Identify the top strengths of the coalition"""
         metric_scores = [
             ("Synergy", metrics.synergy_score),
@@ -513,7 +544,10 @@ class BusinessValueCalculationEngine:
         ]
 
         # Sort by score and return top 3
-        sorted_metrics = sorted(metric_scores, key=lambda x: x[1], reverse=True)
+        sorted_metrics = sorted(
+            metric_scores,
+            key=lambda x: x[1],
+            reverse=True)
         return [name for name, score in sorted_metrics[:3] if score > 0.6]
 
 
@@ -521,4 +555,7 @@ class BusinessValueCalculationEngine:
 business_value_engine = BusinessValueCalculationEngine()
 
 # Export for use by monitoring system
-__all__ = ["BusinessValueCalculationEngine", "BusinessValueMetrics", "business_value_engine"]
+__all__ = [
+    "BusinessValueCalculationEngine",
+    "BusinessValueMetrics",
+    "business_value_engine"]

@@ -40,6 +40,7 @@ export default function ChatWindow({
     Record<string, boolean>
   >({});
   const processedMessageRef = useRef<string | null>(null);
+  const sendTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Use the conversation orchestrator with the onSendMessage callback
   const {
@@ -113,7 +114,10 @@ export default function ChatWindow({
         onSendMessage(messageContent, userAgentId);
 
         // Wait a brief moment to ensure the conversation state updates
-        setTimeout(() => {
+        if (sendTimeoutRef.current) {
+          clearTimeout(sendTimeoutRef.current);
+        }
+        sendTimeoutRef.current = setTimeout(() => {
           try {
             // Double-check that conversation still exists
             if (!conversation) {
@@ -146,6 +150,15 @@ export default function ChatWindow({
       }
     }
   };
+
+  // Cleanup for timers on unmount
+  useEffect(() => {
+    return () => {
+      if (sendTimeoutRef.current) {
+        clearTimeout(sendTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Check for direct mentions to prompt immediate responses
   useEffect(() => {

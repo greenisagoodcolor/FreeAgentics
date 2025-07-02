@@ -10,7 +10,7 @@ import struct
 import zlib
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, Tuple
+from typing import Any, Dict
 
 import numpy as np
 
@@ -233,17 +233,16 @@ class ModelCompressor:
                 # Simple importance based on parameter magnitude
                 importance = 0.0
                 if "parameters" in node:
-                    values = [
-                        abs(v) for v in node["parameters"].values() if isinstance(v, (int, float))
-                    ]
+                    values = [abs(v) for v in node["parameters"].values()
+                              if isinstance(v, (int, float))]
                     importance = np.mean(values) if values else 0.0
                 node_importance[node["id"]] = importance
 
             # Prune nodes below threshold
             original_count = len(gnn["nodes"])
             gnn["nodes"] = [
-                node for node in gnn["nodes"] if node_importance.get(node["id"], 0) >= threshold
-            ]
+                node for node in gnn["nodes"] if node_importance.get(
+                    node["id"], 0) >= threshold]
             stats["nodes_pruned"] = original_count - len(gnn["nodes"])
 
             # Get remaining node IDs
@@ -448,11 +447,13 @@ class ModelCompressor:
             # Check critical nodes (e.g., input/output nodes)
             critical_node_types = {"input", "output", "memory"}
             orig_critical = {
-                n["id"] for n in orig_gnn.get("nodes", []) if n.get("type") in critical_node_types
-            }
+                n["id"] for n in orig_gnn.get(
+                    "nodes",
+                    []) if n.get("type") in critical_node_types}
             comp_critical = {
-                n["id"] for n in comp_gnn.get("nodes", []) if n.get("type") in critical_node_types
-            }
+                n["id"] for n in comp_gnn.get(
+                    "nodes",
+                    []) if n.get("type") in critical_node_types}
 
             if orig_critical != comp_critical:
                 results["critical_nodes_present"] = False
@@ -460,7 +461,8 @@ class ModelCompressor:
             # Check edge connectivity
             comp_nodes = {n["id"] for n in comp_gnn.get("nodes", [])}
             for edge in comp_gnn.get("edges", []):
-                if edge.get("source") not in comp_nodes or edge.get("target") not in comp_nodes:
+                if edge.get("source") not in comp_nodes or edge.get(
+                        "target") not in comp_nodes:
                     results["edge_connectivity"] = False
                     break
 

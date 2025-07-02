@@ -50,30 +50,37 @@ export function parseBeliefs(response: string): ExtractedBelief[] {
   const beliefs: ExtractedBelief[] = [];
 
   // Split by bullet points or numbered lists, but only process top-level items (not indented sub-items)
-  const lines = response
-    .split(/\n+/)
-    .filter(
-      (line) => {
-        const trimmed = line.trim();
-        // Must be a bullet/number format
-        if (!(trimmed.startsWith("-") || trimmed.startsWith("•") || /^\d+\./.test(trimmed))) {
-          return false;
-        }
-        // Check for excessive indentation (more than 8 spaces suggests a sub-item)
-        // This allows for reasonable formatting indentation while filtering true sub-items
-        const leadingSpaces = line.match(/^ */)[0].length;
-        return leadingSpaces <= 8;
-      }
-    );
+  const lines = response.split(/\n+/).filter((line) => {
+    const trimmed = line.trim();
+    // Must be a bullet/number format
+    if (
+      !(
+        trimmed.startsWith("-") ||
+        trimmed.startsWith("•") ||
+        /^\d+\./.test(trimmed)
+      )
+    ) {
+      return false;
+    }
+    // Check for excessive indentation (more than 8 spaces suggests a sub-item)
+    // This allows for reasonable formatting indentation while filtering true sub-items
+    const leadingSpaces = line.match(/^ */)[0].length;
+    return leadingSpaces <= 8;
+  });
 
   for (const line of lines) {
     // Remove bullet points, numbers, and leading whitespace
-    const withoutBullets = line.replace(/^\s*[-•]\s*/, "").replace(/^\s*\d+\.\s*/, "").trim();
+    const withoutBullets = line
+      .replace(/^\s*[-•]\s*/, "")
+      .replace(/^\s*\d+\.\s*/, "")
+      .trim();
 
     // Extract confidence level if present (case insensitive, use last occurrence)
     let confidence: "High" | "Medium" | "Low" = "Medium";
-    const confidenceMatches = Array.from(withoutBullets.matchAll(/\$\$(High|Medium|Low)\$\$/gi));
-    
+    const confidenceMatches = Array.from(
+      withoutBullets.matchAll(/\$\$(High|Medium|Low)\$\$/gi),
+    );
+
     if (confidenceMatches.length > 0) {
       // Use the last confidence marker found and preserve its exact case
       const lastMatch = confidenceMatches[confidenceMatches.length - 1];

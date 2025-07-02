@@ -6,6 +6,9 @@ Tests the export validation, hardware compatibility, and deployment verification
 modules.
 """
 
+from deployment.hardware_compatibility import CompatibilityTester
+from deployment.export_validator import ExportValidator, HardwarePlatform
+from deployment.deployment_verification import DeploymentVerifier
 import asyncio
 import json
 import logging
@@ -16,9 +19,6 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.append(str(Path(__file__).parent.parent))
 
-from deployment.deployment_verification import DeploymentVerifier
-from deployment.export_validator import ExportValidator, HardwarePlatform
-from deployment.hardware_compatibility import CompatibilityTester
 
 # Configure logging
 logging.basicConfig(
@@ -157,8 +157,7 @@ def test_export_validation() -> None:
 
             # Show only platform-specific results
             platform_results = [
-                r for r in results if "platform" in r.check_name or "hardware" in r.check_name
-            ]
+                r for r in results if "platform" in r.check_name or "hardware" in r.check_name]
 
             for result in platform_results:
                 print(f"    {result.check_name}: {result.status.value}")
@@ -203,7 +202,13 @@ def test_hardware_compatibility() -> None:
         # Show test results
         for test_result in results["test_results"]:
             status = test_result["status"]
-            icon = {"passed": "✓", "failed": "✗", "skipped": "○", "timeout": "⏱"}.get(status, "?")
+            icon = {
+                "passed": "✓",
+                "failed": "✗",
+                "skipped": "○",
+                "timeout": "⏱"}.get(
+                status,
+                "?")
 
             print(f"  {icon} {test_result['test_name']}: {test_result['message']}")
 
@@ -334,7 +339,9 @@ def test_package_compression() -> None:
         results = validator.validate_package(zip_path)
 
         # Check summary
-        summary = next((r for r in results if r.check_name == "validation_summary"), None)
+        summary = next(
+            (r for r in results if r.check_name == "validation_summary"),
+            None)
         if summary:
             print(f"  Validation: {summary.status.value}")
             print(f"  {summary.message}")

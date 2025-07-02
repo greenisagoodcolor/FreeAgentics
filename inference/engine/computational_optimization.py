@@ -68,21 +68,37 @@ class SparseOperations:
         )
 
     def sparsify_tensor(self, tensor: torch.Tensor) -> torch.sparse.Tensor:
-        """Convert dense tensor to sparse format"""
+        """
+        Convert dense tensor to sparse format.
+        """
+        # Ensure threshold is a float
+        threshold = (
+            self.config.sparsity_threshold.item()
+            if isinstance(self.config.sparsity_threshold, torch.Tensor)
+            else float(self.config.sparsity_threshold)
+        )
         # Apply threshold
-        mask = torch.abs(tensor) > self.config.sparsity_threshold
+        mask = torch.abs(tensor) > threshold
         indices = torch.nonzero(mask).t()
         values = tensor[mask]
         sparse_tensor = torch.sparse_coo_tensor(
-            indices, values, tensor.shape, dtype=tensor.dtype, device=tensor.device
-        )
+            indices,
+            values,
+            tensor.shape,
+            dtype=tensor.dtype,
+            device=tensor.device)
         return sparse_tensor
 
-    def sparse_matmul(self, sparse_a: torch.sparse.Tensor, dense_b: torch.Tensor) -> torch.Tensor:
+    def sparse_matmul(self, sparse_a: torch.sparse.Tensor,
+                      dense_b: torch.Tensor) -> torch.Tensor:
         """Efficient sparse-dense matrix multiplication"""
-        return torch.sparse.mm(sparse_a, dense_b)  # type: ignore[no-any-return]
+        return torch.sparse.mm(
+            sparse_a, dense_b)  # type: ignore[no-any-return]
 
-    def sparse_log_sum_exp(self, sparse_tensor: torch.sparse.Tensor, dim: int) -> torch.Tensor:
+    def sparse_log_sum_exp(
+            self,
+            sparse_tensor: torch.sparse.Tensor,
+            dim: int) -> torch.Tensor:
         """Compute log-sum-exp for sparse tensors"""
         # Convert to dense for stability (can be optimized further)
         dense = sparse_tensor.to_dense()
@@ -109,13 +125,16 @@ class SparseOperations:
             obs_idx = int(torch.argmax(observation).item())
             likelihood = sparse_A[obs_idx]
         else:
-            # Multi-dimensional observation - weighted sum for soft observations
-            likelihood = torch.sparse.mm(sparse_A.t(), observation.view(-1, 1)).squeeze()
+            # Multi-dimensional observation - weighted sum for soft
+            # observations
+            likelihood = torch.sparse.mm(
+                sparse_A.t(), observation.view(-1, 1)).squeeze()
         # Convert sparse likelihood to dense for computation
         if likelihood.is_sparse:
             likelihood = likelihood.to_dense()
         # Posterior computation
-        log_posterior = torch.log(likelihood + self.config.eps) + torch.log(prior + self.config.eps)
+        log_posterior = torch.log(likelihood + self.config.eps) + \
+            torch.log(prior + self.config.eps)
         posterior = F.softmax(log_posterior, dim=0)
         return posterior
 
@@ -128,7 +147,8 @@ class ParallelInference:
     def __init__(self, config: OptimizationConfig) -> None:
         self.config = config
         self.thread_pool = ThreadPoolExecutor(max_workers=config.num_threads)
-        self.process_pool = ProcessPoolExecutor(max_workers=config.num_processes)
+        self.process_pool = ProcessPoolExecutor(
+            max_workers=config.num_processes)
 
     def parallel_belief_updates(
         self,
@@ -145,7 +165,8 @@ class ParallelInference:
         # Use thread pool for GPU operations
         futures = []
         for belief, obs, A in zip(beliefs, observations, A_matrices):
-            future = self.thread_pool.submit(self._single_belief_update, belief, obs, A)
+            future = self.thread_pool.submit(
+                self._single_belief_update, belief, obs, A)
             futures.append(future)
         # Collect results
         updated_beliefs = [future.result() for future in futures]
@@ -176,11 +197,13 @@ class ParallelInference:
     ) -> torch.Tensor:
         """Parallel computation of expected free energy for multiple actions"""
         if not self.config.use_parallel_processing:
-            return torch.stack([self._single_efe(qs, A, B, C, action) for action in actions])
+            return torch.stack([self._single_efe(qs, A, B, C, action)
+                               for action in actions])
         # Parallel EFE computation
         futures = []
         for action in actions:
-            future = self.thread_pool.submit(self._single_efe, qs, A, B, C, action)
+            future = self.thread_pool.submit(
+                self._single_efe, qs, A, B, C, action)
             futures.append(future)
         # Collect results
         efe_values = torch.stack([future.result() for future in futures])
@@ -203,7 +226,12 @@ class ParallelInference:
         H_A_given_s = -torch.sum(A * torch.log(A + self.config.eps), dim=0)
         epistemic = torch.sum(qs_future * H_A_given_s)
         # Pragmatic value
-        pragmatic = torch.sum(qo_future * torch.log(qo_future / C + self.config.eps))
+        pragmatic = torch.sum(
+            qo_future *
+            torch.log(
+                qo_future /
+                C +
+                self.config.eps))
         return epistemic + pragmatic
 
     def cleanup(self) -> None:
@@ -326,11 +354,13 @@ class GPUOptimizer:
             "cuda" if config.use_gpu and torch.cuda.is_available() else "cpu"
         )
         # Mixed precision training
-        self.scaler = GradScaler() if config.use_mixed_precision else None
+        self.scaler = GradScaler(
+            "cuda") if config.use_mixed_precision else None
         # CUDA graphs cache
         self.graph_cache = {}
 
-    def optimize_tensor_operations(self, tensors: List[torch.Tensor]) -> List[torch.Tensor]:
+    def optimize_tensor_operations(
+            self, tensors: List[torch.Tensor]) -> List[torch.Tensor]:
         """Move tensors to GPU and optimize memory layout"""
         optimized = []
         for tensor in tensors:
@@ -342,8 +372,11 @@ class GPUOptimizer:
             optimized.append(gpu_tensor)
         return optimized
 
-    @torch.amp.autocast('cuda')
-    def mixed_precision_inference(self, model: nn.Module, inputs: torch.Tensor) -> torch.Tensor:
+    @torch.amp.autocast("cuda")
+    def mixed_precision_inference(
+            self,
+            model: nn.Module,
+            inputs: torch.Tensor) -> torch.Tensor:
         """Run inference with mixed precision"""
         if not self.config.use_mixed_precision:
             return model(inputs)
@@ -394,9 +427,12 @@ class BatchProcessor:
         self.pending_requests = []
         self.results = {}
 
-    def add_request(
-        self, request_id: str, computation: Callable[..., Any], *args: Any, **kwargs: Any
-    ) -> None:
+    def add_request(self,
+                    request_id: str,
+                    computation: Callable[...,
+                                          Any],
+                    *args: Any,
+                    **kwargs: Any) -> None:
         """Add computation request to batch"""
         self.pending_requests.append(
             {
@@ -427,7 +463,8 @@ class BatchProcessor:
         # Clear pending requests
         self.pending_requests = []
 
-    def _process_computation_group(self, requests: List[Dict[str, Any]]) -> None:
+    def _process_computation_group(
+            self, requests: List[Dict[str, Any]]) -> None:
         """Process a group of similar computations"""
         # Stack inputs
         computation = requests[0]["computation"]
@@ -439,7 +476,8 @@ class BatchProcessor:
         else:
             # Fallback to individual processing
             for request in requests:
-                result = request["computation"](*request["args"], **request["kwargs"])
+                result = request["computation"](
+                    *request["args"], **request["kwargs"])
                 self.results[request["id"]] = result
 
     def _batch_belief_updates(self, requests: List[Dict[str, Any]]) -> None:
@@ -449,9 +487,11 @@ class BatchProcessor:
         observations = torch.stack([r["args"][1] for r in requests])
         A_matrices = torch.stack([r["args"][2] for r in requests])
         # Batch computation
-        likelihoods = torch.matmul(A_matrices.transpose(1, 2), observations.unsqueeze(2)).squeeze()
+        likelihoods = torch.matmul(A_matrices.transpose(
+            1, 2), observations.unsqueeze(2)).squeeze()
         posteriors = likelihoods * beliefs
-        posteriors = posteriors / (posteriors.sum(dim=1, keepdim=True) + self.config.eps)
+        posteriors = posteriors / \
+            (posteriors.sum(dim=1, keepdim=True) + self.config.eps)
         # Store results
         for i, request in enumerate(requests):
             self.results[request["id"]] = posteriors[i]
@@ -459,9 +499,9 @@ class BatchProcessor:
     def _batch_efe_computations(self, requests: List[Dict[str, Any]]) -> None:
         """Batch process EFE computations"""
         # Similar batching logic for EFE
-        pass
 
-    def get_result(self, request_id: str, timeout: float = 1.0) -> Optional[torch.Tensor]:
+    def get_result(self, request_id: str,
+                   timeout: float = 1.0) -> Optional[torch.Tensor]:
         """Get computation result"""
         start_time = time.time()
         while request_id not in self.results:
@@ -506,12 +546,12 @@ class ComputationalOptimizer:
         # Move to GPU if available
         if self.config.use_gpu:
             belief, observation, A = self.gpu_optimizer.optimize_tensor_operations(
-                [belief, observation, A]
-            )
+                [belief, observation, A])
         # Use appropriate method
         if use_sparse:
             sparse_A = self.sparse_ops.sparsify_tensor(A)
-            result = self.sparse_ops.optimize_belief_update(sparse_A, observation, belief)
+            result = self.sparse_ops.optimize_belief_update(
+                sparse_A, observation, belief)
         else:
             result = self.cache.cached_belief_update(belief, observation, A)
         # Track timing
@@ -531,10 +571,12 @@ class ComputationalOptimizer:
         start_time = time.time()
         # Move to GPU
         if self.config.use_gpu:
-            qs, A, B, C = self.gpu_optimizer.optimize_tensor_operations([qs, A, B, C])
+            qs, A, B, C = self.gpu_optimizer.optimize_tensor_operations([
+                                                                        qs, A, B, C])
         # Parallel EFE computation
         actions = list(range(num_actions))
-        G_values = self.parallel.parallel_expected_free_energy(qs, A, B, C, actions)
+        G_values = self.parallel.parallel_expected_free_energy(
+            qs, A, B, C, actions)
         # Select action
         action_probs = F.softmax(-G_values, dim=0)
         # Track timing
@@ -572,7 +614,8 @@ class ComputationalOptimizer:
         }
         # Process timing stats
         for op, stats in self.timing_stats.items():
-            avg_time = stats["total_time"] / stats["count"] if stats["count"] > 0 else 0
+            avg_time = stats["total_time"] / \
+                stats["count"] if stats["count"] > 0 else 0
             report["timing_stats"][op] = {
                 "count": stats["count"],
                 "avg_time_ms": avg_time * 1000,
@@ -601,7 +644,8 @@ if __name__ == "__main__":
     # Example belief update
     belief = torch.tensor([0.25, 0.25, 0.25, 0.25])
     observation = torch.tensor([0.0, 1.0, 0.0])
-    A = torch.tensor([[0.9, 0.1, 0.0, 0.0], [0.1, 0.8, 0.1, 0.0], [0.0, 0.1, 0.9, 0.0]])
+    A = torch.tensor(
+        [[0.9, 0.1, 0.0, 0.0], [0.1, 0.8, 0.1, 0.0], [0.0, 0.1, 0.9, 0.0]])
     # Optimized computation
     updated_belief = optimizer.optimized_belief_update(belief, observation, A)
     print(f"Updated belief: {updated_belief}")

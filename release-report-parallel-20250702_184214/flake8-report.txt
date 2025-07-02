@@ -1,0 +1,656 @@
+./agents/base/agent.py:413:5: C901 'BaseAgent._update_cycle' is too complex (11)
+    async def _update_cycle(self) -> None:
+    ^
+./agents/base/belief_synchronization.py:1:1: W391 blank line at end of file
+
+^
+./agents/base/data_model.py:426:5: C901 'Agent.from_dict' is too complex (15)
+    def from_dict(cls, data: Dict[str, Any]) -> "Agent":
+    ^
+./agents/base/decision_making.py:18:5: F401 '...agents.active_inference.create_generative_model' imported but unused
+    from ...agents.active_inference import (
+    ^
+./agents/base/decision_making.py:18:5: F401 '...agents.active_inference.create_policy_selector' imported but unused
+    from ...agents.active_inference import (
+    ^
+./agents/base/decision_making.py:604:5: C901 'DecisionSystem.execute_action' is too complex (12)
+    def execute_action(self, agent_id: str, action: Action) -> bool:
+    ^
+./agents/base/markov_blanket.py:279:5: C901 'BoundaryMetrics.update_from_pymdp_agent' is too complex (14)
+    def update_from_pymdp_agent(self, pymdp_agent: "PyMDPAgent") -> None:
+    ^
+./agents/base/markov_blanket.py:460:5: C901 'PyMDPMarkovBlanket.update_states' is too complex (12)
+    def update_states(self, agent_state: AgentState, environment_state: np.ndarray) -> None:
+    ^
+./agents/base/markov_blanket.py:839:5: C901 'ActiveInferenceMarkovBlanket.check_boundary_violations' is too complex (20)
+    def check_boundary_violations(self) -> List[BoundaryViolationEvent]:
+    ^
+./agents/base/memory.py:166:5: C901 'InMemoryStorage.search' is too complex (11)
+    def search(self, criteria: Dict[str, Any]) -> List[Memory]:
+    ^
+./agents/base/persistence.py:267:5: C901 'AgentPersistence._deserialize_agent' is too complex (20)
+    def _deserialize_agent(self, db_agent) -> Agent:
+    ^
+./agents/core/movement_perception.py:333:5: C901 'MovementPerceptionSystem.find_path_astar' is too complex (12)
+    def find_path_astar(
+    ^
+./agents/explorer/explorer_behavior.py:1:1: W391 blank line at end of file
+
+^
+./agents/explorer/test_explorer.py:1:1: W391 blank line at end of file
+
+^
+./agents/guardian/__init__.py:1:1: W391 blank line at end of file
+
+^
+./agents/guardian/guardian.py:1:1: W391 blank line at end of file
+
+^
+./agents/guardian/guardian_behavior.py:1:1: W391 blank line at end of file
+
+^
+./agents/guardian/test_guardian.py:1:1: W391 blank line at end of file
+
+^
+./agents/merchant/merchant_behavior.py:1:1: W391 blank line at end of file
+
+^
+./agents/merchant/test_merchant.py:1:1: W391 blank line at end of file
+
+^
+./agents/scholar/__init__.py:1:1: W391 blank line at end of file
+
+^
+./agents/scholar/scholar.py:1:1: W391 blank line at end of file
+
+^
+./agents/scholar/scholar_behavior.py:1:1: W391 blank line at end of file
+
+^
+./agents/scholar/test_scholar.py:1:1: W391 blank line at end of file
+
+^
+./api/graphql/schema.py:1:1: W391 blank line at end of file
+
+^
+./api/websocket/markov_blanket_monitoring.py:227:17: E128 continuation line under-indented for visual indent
+                {}).get('client_id')}"
+                ^
+./api/websocket/markov_blanket_monitoring.py:403:1: C901 'handle_client_message' is too complex (16)
+async def handle_client_message(websocket: WebSocket, message: Dict):
+^
+./coalitions/coalition/coalition_criteria.py:311:5: C901 'CoalitionFormationCriteria.check_dissolution_conditions' is too complex (11)
+    def check_dissolution_conditions(
+    ^
+./coalitions/deployment/deployment_manifest.py:1:1: W391 blank line at end of file
+
+^
+./coalitions/deployment/edge_packager.py:1:1: W391 blank line at end of file
+
+^
+./coalitions/formation/coalition_formation_algorithms.py:141:5: C901 'ActiveInferenceFormation.form_coalition' is too complex (13)
+    def form_coalition(
+    ^
+./coalitions/formation/coalition_formation_algorithms.py:375:5: C901 'ResourceOptimizationFormation.form_coalition' is too complex (14)
+    def form_coalition(
+    ^
+./coalitions/readiness/__init__.py:1:1: W391 blank line at end of file
+
+^
+./coalitions/readiness/technical_readiness_validator.py:454:5: C901 'EdgePerformanceBenchmarker._benchmark_thermal_stability' is too complex (11)
+    async def _benchmark_thermal_stability(
+    ^
+./coalitions/readiness/technical_readiness_validator.py:905:5: C901 'TechnicalReadinessValidator._analyze_issues_and_recommendations' is too complex (13)
+    def _analyze_issues_and_recommendations(
+    ^
+./coalitions/readiness/technical_readiness_validator.py:1036:13: F402 import 'platform' from line 11 shadowed by loop variable
+        for platform in EdgePlatform:
+            ^
+./docs/examples/basic/active_inference_basic_example.py:87:1: C901 'create_grid_world_model' is too complex (11)
+def create_grid_world_model(env: SimpleGridWorld) -> DiscreteGenerativeModel:
+^
+./docs/examples/basic/active_inference_basic_example.py:277:11: F541 f-string is missing placeholders
+    print(f"Agent starts at position 0 (top-left)")
+          ^
+./docs/examples/basic/active_inference_gnn_example.py:482:11: F541 f-string is missing placeholders
+    print(f"\nEpisode Results:")
+          ^
+./docs/examples/basic/active_inference_gnn_example.py:502:11: F541 f-string is missing placeholders
+    print(f"\nComparison Results:")
+          ^
+./docs/examples/basic/active_inference_gnn_example.py:503:11: F541 f-string is missing placeholders
+    print(f"Standard Active Inference:")
+          ^
+./docs/examples/basic/active_inference_gnn_example.py:506:11: F541 f-string is missing placeholders
+    print(f"GNN-Enhanced Active Inference:")
+          ^
+./inference/engine/active_inference.py:113:5: C901 'InferenceAlgorithm.validate_pymdp_matrices' is too complex (13)
+    def validate_pymdp_matrices(self, generative_model: GenerativeModel) -> bool:
+    ^
+./inference/engine/active_inference.py:189:5: C901 'VariationalMessagePassing.infer_states' is too complex (18)
+    def infer_states(
+    ^
+./inference/engine/active_inference.py:331:5: C901 'VariationalMessagePassing.compute_free_energy' is too complex (11)
+    def compute_free_energy(
+    ^
+./inference/engine/diagnostics.py:458:9: F841 local variable 'lines' is assigned to but never used
+        lines: Dict[str, Any] = {}
+        ^
+./inference/engine/gnn_integration.py:355:5: C901 'GraphFeatureAggregator.aggregate' is too complex (13)
+    def aggregate(self, node_features: torch.Tensor, batch: torch.Tensor) -> torch.Tensor:
+    ^
+./inference/engine/graphnn_integration.py:407:5: C901 'GraphFeatureAggregator.aggregate' is too complex (13)
+    def aggregate(self, node_features: torch.Tensor, batch: torch.Tensor) -> torch.Tensor:
+    ^
+./inference/engine/pymdp_policy_selector.py:119:5: C901 'PyMDPPolicySelector.compute_expected_free_energy' is too complex (16)
+    def compute_expected_free_energy(
+    ^
+./inference/engine/pymdp_policy_selector.py:244:5: C901 'PyMDPPolicyAdapter.__init__' is too complex (14)
+    def __init__(self, config: PolicyConfig, second_arg: Any = None) -> None:
+    ^
+./inference/engine/pymdp_policy_selector.py:430:5: C901 'PyMDPPolicyAdapter.compute_expected_free_energy' is too complex (21)
+    def compute_expected_free_energy(self, *args: Any, **kwargs: Any) -> Any:
+    ^
+./inference/gnn/cache_manager.py:367:18: F821 undefined name 'concurrent'
+            with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+                 ^
+./inference/gnn/cache_manager.py:369:31: F821 undefined name 'concurrent'
+                for future in concurrent.futures.as_completed(futures):
+                              ^
+./inference/gnn/edge_processor.py:214:5: C901 'EdgeProcessor._extract_edge_features' is too complex (13)
+    def _extract_edge_features(self, edges: List[Edge]) -> Optional[torch.Tensor]:
+    ^
+./inference/gnn/feature_extractor.py:220:5: C901 'NodeFeatureExtractor.extract_features' is too complex (13)
+    def extract_features(
+    ^
+./inference/gnn/feature_extractor.py:577:5: C901 'NodeFeatureExtractor._normalize_features' is too complex (11)
+    def _normalize_features(
+    ^
+./inference/gnn/generator.py:144:5: C901 'GMNGenerator._generate_state_space' is too complex (11)
+    def _generate_state_space(
+    ^
+./inference/gnn/generator.py:291:5: C901 'GMNGenerator._apply_pattern_to_model' is too complex (13)
+    def _apply_pattern_to_model(
+    ^
+./inference/gnn/model_mapper.py:119:5: C901 'GraphAnalyzer.analyze_graph' is too complex (16)
+    def analyze_graph(
+    ^
+./inference/gnn/model_mapper.py:252:9: E731 do not assign a lambda expression, use a def
+        is_large = lambda p: p.num_nodes >= 1000 or p.num_edges >= 5000
+        ^
+./inference/gnn/model_mapper.py:253:9: E731 do not assign a lambda expression, use a def
+        is_small = lambda p: p.num_nodes < 100
+        ^
+./inference/gnn/model_mapper.py:254:9: E731 do not assign a lambda expression, use a def
+        is_dense = lambda p: p.density > 0.1
+        ^
+./inference/gnn/model_mapper.py:255:9: E731 do not assign a lambda expression, use a def
+        is_sparse = lambda p: p.density < 0.01
+        ^
+./inference/gnn/model_mapper.py:256:9: F841 local variable 'has_high_degree' is assigned to but never used
+        has_high_degree = lambda p: p.max_degree > 50
+        ^
+./inference/gnn/model_mapper.py:256:9: E731 do not assign a lambda expression, use a def
+        has_high_degree = lambda p: p.max_degree > 50
+        ^
+./inference/gnn/model_mapper.py:257:9: E731 do not assign a lambda expression, use a def
+        is_deep = lambda p: p.diameter is not None and p.diameter > 5
+        ^
+./inference/gnn/model_mapper.py:258:9: E731 do not assign a lambda expression, use a def
+        prefer_attention = lambda p: self.config.prefer_attention
+        ^
+./inference/gnn/model_mapper.py:259:9: E731 do not assign a lambda expression, use a def
+        is_graph_task = lambda p: "graph" in self.config.task_type.value
+        ^
+./inference/gnn/monitoring_dashboard.py:126:13: F821 undefined name 'werkzeug'
+            werkzeug.serving.run_simple(
+            ^
+./inference/gnn/parser.py:395:5: C901 'GMNBlockParser._parse_object' is too complex (16)
+    def _parse_object(self) -> Dict[str, Any]:
+    ^
+./inference/gnn/validator.py:364:5: C901 'GMNValidator._validate_real_constraints' is too complex (12)
+    def _validate_real_constraints(
+    ^
+./inference/gnn/validator.py:710:5: C901 'GMNValidator._check_circular_dependencies' is too complex (12)
+    def _check_circular_dependencies(
+    ^
+./inference/llm/belief_integration.py:1:1: W391 blank line at end of file
+
+^
+./inference/llm/ollama_integration.py:149:5: C901 'OllamaManager.pull_model' is too complex (11)
+    async def pull_model(
+    ^
+./infrastructure/deployment/export_validator.py:517:5: C901 'ExportValidator._check_dependencies' is too complex (12)
+    def _check_dependencies(self, package_dir: Path) -> List[ValidationResult]:
+    ^
+./infrastructure/deployment/export_validator.py:677:5: C901 'ExportValidator._check_hardware_compatibility' is too complex (11)
+    def _check_hardware_compatibility(
+    ^
+./infrastructure/deployment/export_validator.py:897:5: C901 'DeploymentVerifier._check_health_endpoint' is too complex (14)
+    def _check_health_endpoint(self, package_dir: Path) -> List[ValidationResult]:
+    ^
+./infrastructure/deployment/hardware_compatibility.py:408:13: F841 local variable 'result' is assigned to but never used
+            result = np.sum(c)
+            ^
+./infrastructure/deployment/hardware_compatibility.py:620:5: C901 'CompatibilityTester._test_gpu' is too complex (11)
+    def _test_gpu(
+    ^
+./infrastructure/export/hardware_config.py:119:5: C901 'HardwareDetector.detect_capabilities' is too complex (11)
+    def detect_capabilities() -> HardwareCapabilities:
+    ^
+./infrastructure/export/hardware_config.py:168:5: C901 'HardwareDetector._detect_gpu' is too complex (14)
+    def _detect_gpu() -> tuple[bool, Optional[str], Optional[float]]:
+    ^
+./infrastructure/export/model_compression.py:13:1: F401 'typing.Tuple' imported but unused
+from typing import Any, Dict, Tuple
+^
+./infrastructure/export/model_compression.py:419:5: C901 'ModelCompressor.validate_compressed_model' is too complex (11)
+    def validate_compressed_model(
+    ^
+./infrastructure/hardware/device_discovery.py:169:5: C901 'DeviceDiscovery._discover_cpu' is too complex (19)
+    def _discover_cpu(self) -> List[DeviceInfo]:
+    ^
+./infrastructure/hardware/device_discovery.py:244:5: C901 'DeviceDiscovery._discover_gpu_nvidia' is too complex (13)
+    def _discover_gpu_nvidia(self) -> List[DeviceInfo]:
+    ^
+./infrastructure/safety/__init__.py:1:1: W391 blank line at end of file
+
+^
+./infrastructure/safety/boundary_monitoring_service.py:469:23: F541 f-string is missing placeholders
+        proofs.append(f"Markov Blanket Verification")
+                      ^
+./infrastructure/safety/boundary_monitoring_service.py:470:23: F541 f-string is missing placeholders
+        proofs.append(f"Mathematical Condition: p(μ,η|s,a) = p(μ|s,a)p(η|s,a)")
+                      ^
+./infrastructure/safety/markov_blanket_verification.py:19:1: F401 'enum.Enum' imported but unused
+from enum import Enum
+^
+./infrastructure/safety/markov_blanket_verification.py:24:1: F401 'agents.base.data_model.Position' imported but unused
+from agents.base.data_model import Agent, Position
+^
+./infrastructure/safety/markov_blanket_verification.py:25:1: F401 'agents.base.markov_blanket.MarkovBlanketInterface' imported but unused
+from agents.base.markov_blanket import (
+^
+./infrastructure/safety/risk_mitigation_metrics.py:17:1: F401 'collections.defaultdict' imported but unused
+from collections import defaultdict
+^
+./infrastructure/safety/risk_mitigation_metrics.py:27:1: F401 'infrastructure.safety.safety_protocols.ViolationType' imported but unused
+from infrastructure.safety.safety_protocols import SafetyLevel, ViolationType
+^
+./infrastructure/safety/safety_protocols.py:12:1: F401 'typing.Union' imported but unused
+from typing import Any, Dict, List, Optional, Union
+^
+./infrastructure/scripts/testing/test_runner_setup.py:23:1: F401 'typing.Tuple' imported but unused
+from typing import Any, Dict, List, Optional, Tuple, Union
+^
+./knowledge/knowledge_graph.py:12:1: F401 'typing.Tuple' imported but unused
+from typing import Any, Dict, List, Optional, Set, Tuple
+^
+./main.py:15:1: F401 'fastapi.Response' imported but unused
+from fastapi import FastAPI, Request, Response
+^
+./scripts/fix_unused_imports.py:73:1: C901 'get_type_annotation_names' is too complex (17)
+def get_type_annotation_names(tree: ast.AST) -> Set[str]:
+^
+./scripts/fix_unused_imports.py:171:1: C901 'fix_file' is too complex (21)
+def fix_file(filepath: Path) -> int:
+^
+./scripts/systematic_test_fixer.py:185:5: C901 'TestAnalyzer.generate_report' is too complex (14)
+    def generate_report(self) -> str:
+    ^
+./scripts/systematic_test_fixer.py:289:15: F541 f-string is missing placeholders
+        print(f"\nResults saved to:")
+              ^
+./tests/behavior/test_agent_scenarios.py:270:1: C901 'agents_explore_independently' is too complex (11)
+def agents_explore_independently(world_with_unknown_territories, exploration_context, timesteps):
+^
+./tests/chaos/test_failure_injection.py:128:13: F841 local variable 'result' is assigned to but never used
+            result = await asyncio.wait_for(slow_operation(), timeout=0.1)
+            ^
+./tests/chaos/test_failure_injection.py:276:14: F821 undefined name 'concurrent'
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+             ^
+./tests/chaos/test_failure_injection.py:286:27: F821 undefined name 'concurrent'
+            for future in concurrent.futures.as_completed(futures, timeout=5.0):
+                          ^
+./tests/conftest.py:57:5: E722 do not use bare 'except'
+    except:
+    ^
+./tests/conftest.py:270:1: C901 'client' is too complex (16)
+async def client():
+^
+./tests/conftest.py:387:1: C901 'agent_factory' is too complex (11)
+def agent_factory():
+^
+./tests/conftest.py:425:21: E722 do not use bare 'except'
+                    except:
+                    ^
+./tests/contract/contract_test_base.py:488:5: C901 'ContractTestRunner._generate_sample_data' is too complex (12)
+    def _generate_sample_data(self, schema: Type[ContractSchema]) -> Dict[str, Any]:
+    ^
+./tests/fixtures/active_inference_fixtures.py:80:1: C901 'simple_generative_model' is too complex (16)
+def simple_generative_model(model_dimensions, model_parameters):
+^
+./tests/fixtures/active_inference_fixtures.py:256:1: C901 'hierarchical_generative_model' is too complex (14)
+def hierarchical_generative_model(model_parameters):
+^
+./tests/integration/run_integration_tests.py:37:5: C901 'IntegrationTestRunner.run_test_suite' is too complex (11)
+    def run_test_suite(
+    ^
+./tests/integration/test_active_inference_integration.py:382:13: F841 local variable 'active_learner' is assigned to but never used
+            active_learner = ActiveLearningAgent(
+            ^
+./tests/integration/test_agent_integration.py:128:5: C901 'Agent.send_message' is too complex (11)
+    async def send_message(self, recipient_id, message_type, content):
+    ^
+./tests/integration/test_agent_integration.py:677:9: F841 local variable 'corrupted_after_cleanup' is assigned to but never used
+        corrupted_after_cleanup = agent.knowledge_graph.query_beliefs(pattern="corrupted_1")
+        ^
+./tests/integration/test_websocket_integration.py:147:17: E722 do not use bare 'except'
+                except:
+                ^
+./tests/integration/test_websocket_integration.py:177:9: F841 local variable 'test_content' is assigned to but never used
+        test_content = """
+import { renderHook } from '@testing-library/react';
+import { useWebSocket } from '@/hooks/useWebSocket';
+
+test('WebSocket integration', async () => {
+    const { result } = renderHook(() =>
+        useWebSocket('ws://localhost:8765', {
+            reconnect: true,
+            reconnectInterval: 1000
+        })
+    );
+
+    // Verify initial state
+    expect(result.current.isConnected).toBe(false);
+    expect(result.current.readyState).toBe(WebSocket.CONNECTING);
+});
+"""
+        ^
+./tests/property/test_active_inference_invariants.py:221:9: F841 local variable 'non_members' is assigned to but never used
+        non_members = agents[coalition_size:]
+        ^
+./tests/property/test_frontend_invariants.py:229:21: F841 local variable 'overlap' is assigned to but never used
+                    overlap = not (
+                    ^
+./tests/property/test_frontend_invariants.py:243:63: F541 f-string is missing placeholders
+            assert panel["x"] + panel["width"] <= grid_width, f"Panel extends beyond grid boundary"
+                                                              ^
+./tests/security/test_api_security.py:116:9: F841 local variable 'rate_limited_responses' is assigned to but never used
+        rate_limited_responses = [r for r in responses if r == 429]
+        ^
+./tests/unit/test_active_inference_engine_comprehensive.py:359:5: C901 'TestActiveInferenceEngine.test_engine_mock' is too complex (11)
+    def test_engine_mock(self):
+    ^
+./tests/unit/test_active_learning_temporal.py:17:1: C901 'TryExcept 17' is too complex (11)
+try:
+^
+./tests/unit/test_agent_template.py:14:1: C901 'TryExcept 14' is too complex (13)
+try:
+^
+./tests/unit/test_api_main.py:15:1: C901 'TryExcept 15' is too complex (11)
+try:
+^
+./tests/unit/test_api_main.py:385:17: F841 local variable 'security_headers' is assigned to but never used
+                security_headers = [
+                ^
+./tests/unit/test_base_template.py:561:9: F841 local variable 'config_single' is assigned to but never used
+        config_single = TemplateConfig(
+        ^
+./tests/unit/test_base_template.py:574:9: F841 local variable 'config_large' is assigned to but never used
+        config_large = TemplateConfig(
+        ^
+./tests/unit/test_belief_visualization.py:17:1: C901 'TryExcept 17' is too complex (12)
+try:
+^
+./tests/unit/test_cloud_integration_comprehensive.py:357:5: C901 'TestCloudResourceManager.test_cloud_resource_manager_mock' is too complex (11)
+    def test_cloud_resource_manager_mock(self, cloud_config):
+    ^
+./tests/unit/test_cloud_integration_comprehensive.py:550:5: C901 'TestCloudComputeManager.test_cloud_compute_manager_mock' is too complex (11)
+    def test_cloud_compute_manager_mock(self, cloud_config):
+    ^
+./tests/unit/test_cloud_integration_comprehensive.py:788:5: C901 'TestCloudCostOptimizer.test_cloud_cost_optimizer_mock' is too complex (11)
+    def test_cloud_cost_optimizer_mock(self, cloud_config):
+    ^
+./tests/unit/test_coalition_dynamics_temporal.py:19:1: C901 'TryExcept 19' is too complex (14)
+try:
+^
+./tests/unit/test_coalition_dynamics_temporal.py:940:9: F841 local variable 'stable_state' is assigned to but never used
+        stable_state = self.manager.update_coalition(
+        ^
+./tests/unit/test_coalition_dynamics_temporal.py:1002:9: F841 local variable 'final_state' is assigned to but never used
+        final_state = self.manager.update_coalition(
+        ^
+./tests/unit/test_coalition_formation_advanced.py:22:1: C901 'TryExcept 22' is too complex (18)
+try:
+^
+./tests/unit/test_coalition_formation_advanced.py:751:9: F841 local variable 'expected_coalitions' is assigned to but never used
+        expected_coalitions = 2**num_agents - 1  # All non-empty subsets
+        ^
+./tests/unit/test_coalition_governance_advanced.py:20:1: C901 'TryExcept 20' is too complex (20)
+try:
+^
+./tests/unit/test_coalition_governance_advanced.py:591:54: F541 f-string is missing placeholders
+        self.governance_engine.cast_vote("member_5", f"member_5", {"choice": "abstain"})
+                                                     ^
+./tests/unit/test_coalition_readiness_comprehensive.py:20:1: C901 'TryExcept 20' is too complex (20)
+try:
+^
+./tests/unit/test_coalition_readiness_comprehensive.py:50:5: F811 redefinition of unused 'TechnicalReadinessValidator' from line 21
+    from coalitions.readiness.technical_readiness_validator import TechnicalReadinessValidator
+    ^
+./tests/unit/test_distributed_systems.py:19:1: C901 'TryExcept 19' is too complex (50)
+try:
+^
+./tests/unit/test_generative_model.py:448:9: F841 local variable 'factor_states' is assigned to but never used
+        factor_states = [
+        ^
+./tests/unit/test_gnn_comprehensive_integration.py:17:1: C901 'TryExcept 17' is too complex (13)
+try:
+^
+./tests/unit/test_gnn_edge_model.py:21:1: C901 'TryExcept 21' is too complex (13)
+try:
+^
+./tests/unit/test_gnn_edge_model.py:47:9: F811 redefinition of unused 'torch' from line 17
+        import torch
+        ^
+./tests/unit/test_gnn_model_mapper.py:998:9: F841 local variable 'model_id' is assigned to but never used
+        model_id = registry.register_model(model_v1, "versioned_model", version="1.0")
+        ^
+./tests/unit/test_gnn_model_mapper.py:1538:9: F841 local variable 'model_id' is assigned to but never used
+        model_id = registry.register_model(
+        ^
+./tests/unit/test_gnn_optimization_advanced.py:20:1: C901 'TryExcept 20' is too complex (13)
+try:
+^
+./tests/unit/test_gnn_processing.py:18:1: C901 'TryExcept 18' is too complex (11)
+try:
+^
+./tests/unit/test_gnn_processing.py:898:13: E722 do not use bare 'except'
+            except:
+            ^
+./tests/unit/test_gnn_temporal_dynamics.py:1138:9: F841 local variable 'easy_lr' is assigned to but never used
+        easy_lr = np.mean(learning_rates[:5])
+        ^
+./tests/unit/test_gnn_temporal_dynamics.py:1139:9: F841 local variable 'hard_lr' is assigned to but never used
+        hard_lr = np.mean(learning_rates[10:])
+        ^
+./tests/unit/test_graphnn_advanced_integration.py:19:1: C901 'TryExcept 19' is too complex (12)
+try:
+^
+./tests/unit/test_incremental_backend_imports.py:166:1: C901 'test_memory_imports' is too complex (11)
+def test_memory_imports():
+^
+./tests/unit/test_incremental_backend_imports.py:201:1: C901 'test_perception_imports' is too complex (11)
+def test_perception_imports():
+^
+./tests/unit/test_incremental_backend_imports.py:304:12: F821 undefined name 'ModelDimensions'
+    dims = ModelDimensions(num_states=5, num_observations=3, num_actions=2)
+           ^
+./tests/unit/test_incremental_backend_imports.py:306:17: F821 undefined name 'DiscreteGenerativeModel'
+    gen_model = DiscreteGenerativeModel(dims, params)
+                ^
+./tests/unit/test_incremental_backend_imports.py:321:17: F821 undefined name 'ModelDimensions'
+    test_dims = ModelDimensions(num_states=4, num_observations=2, num_actions=2)
+                ^
+./tests/unit/test_incremental_backend_imports.py:323:22: F821 undefined name 'DiscreteGenerativeModel'
+    discrete_model = DiscreteGenerativeModel(test_dims, test_params)
+                     ^
+./tests/unit/test_incremental_backend_imports.py:401:11: F541 f-string is missing placeholders
+    print(f"✓ MemorySystem basic functionality works")
+          ^
+./tests/unit/test_infrastructure_deployment_comprehensive.py:19:1: C901 'TryExcept 19' is too complex (16)
+try:
+^
+./tests/unit/test_interfaces.py:14:1: C901 'TryExcept 14' is too complex (13)
+try:
+^
+./tests/unit/test_interfaces.py:410:5: C901 'TestAgentInterfaces.test_interface_factory_pattern' is too complex (12)
+    def test_interface_factory_pattern(self):
+    ^
+./tests/unit/test_knowledge_graph.py:855:9: F841 local variable 'weather_belief' is assigned to but never used
+        weather_belief = self.graph.add_belief("Weather forecast: sunny", 0.6)
+        ^
+./tests/unit/test_llm_gnn_integration.py:18:1: C901 'TryExcept 18' is too complex (15)
+try:
+^
+./tests/unit/test_llm_integration.py:15:1: C901 'TryExcept 15' is too complex (17)
+try:
+^
+./tests/unit/test_llm_integration.py:927:9: F841 local variable 'config' is assigned to but never used
+        config = ModelConfig("test-model", "/test/path", quantization_bits=8)
+        ^
+./tests/unit/test_llm_provider_interface.py:16:1: C901 'TryExcept 16' is too complex (12)
+try:
+^
+./tests/unit/test_llm_provider_interface.py:851:13: F841 local variable 'manager' is assigned to but never used
+            manager = ProviderManager(config_path=config_file)
+            ^
+./tests/unit/test_llm_quantization.py:16:1: C901 'TryExcept 16' is too complex (12)
+try:
+^
+./tests/unit/test_llm_quantization.py:1029:9: E722 do not use bare 'except'
+        except:
+        ^
+./tests/unit/test_llm_quantization.py:1234:9: E722 do not use bare 'except'
+        except:
+        ^
+./tests/unit/test_memory.py:411:9: F841 local variable 'memory' is assigned to but never used
+        memory = memory_system.store_memory(
+        ^
+./tests/unit/test_memory.py:480:9: F841 local variable 'semantic_memories' is assigned to but never used
+        semantic_memories = memory_system.retrieve_memories({"memory_type": MemoryType.SEMANTIC})
+        ^
+./tests/unit/test_merchant.py:849:13: F841 local variable 'offer_id' is assigned to but never used
+            offer_id = self.merchant1.create_trade_offer(
+            ^
+./tests/unit/test_model_quantization.py:465:9: F841 local variable 'config_used' is assigned to but never used
+        config_used = mock_quantize.call_args[0][0]  # ModelQuantizer was called with config
+        ^
+./tests/unit/test_model_quantization.py:556:9: F841 local variable 'config_used' is assigned to but never used
+        config_used = mock_quantize.call_args[0][0]  # First argument should be the model path
+        ^
+./tests/unit/test_model_quantization.py:557:9: F841 local variable 'quantizer_used' is assigned to but never used
+        quantizer_used = mock_quantize.call_args[0][1]  # Second argument should be the output path
+        ^
+./tests/unit/test_monitoring_observability_advanced.py:20:1: C901 'TryExcept 20' is too complex (35)
+try:
+^
+./tests/unit/test_movement_perception_comprehensive.py:450:5: C901 'TestMovementPerceptionSystem.test_movement_perception_mock' is too complex (13)
+    def test_movement_perception_mock(self):
+    ^
+./tests/unit/test_performance_optimization_advanced.py:23:1: C901 'TryExcept 23' is too complex (38)
+try:
+^
+./tests/unit/test_performance_optimization_advanced.py:1337:13: F841 local variable 'performance_improved' is assigned to but never used
+            performance_improved = (
+            ^
+./tests/unit/test_performance_optimization_advanced.py:1504:9: F841 local variable 'overall_improvement' is assigned to but never used
+        overall_improvement = (
+        ^
+./tests/unit/test_performance_optimization_advanced.py:1511:9: F841 local variable 'performance_metrics_improved' is assigned to but never used
+        performance_metrics_improved = (
+        ^
+./tests/unit/test_persistence.py:321:9: F841 local variable 'agents' is assigned to but never used
+        agents = self.persistence.load_all_agents(agent_type="explorer", status="idle")
+        ^
+./tests/unit/test_personality_system.py:629:17: F841 local variable 'original_traits' is assigned to but never used
+                original_traits = {name: trait.value for name, trait in profile.traits.items()}
+                ^
+./tests/unit/test_pymdp_generative_model_engine.py:16:1: C901 'TryExcept 16' is too complex (11)
+try:
+^
+./tests/unit/test_pymdp_integration.py:13:1: C901 'TryExcept 13' is too complex (13)
+try:
+^
+./tests/unit/test_scalability_resilience_comprehensive.py:21:1: C901 'TryExcept 21' is too complex (37)
+try:
+^
+./tests/unit/test_security_compliance_comprehensive.py:21:1: C901 'TryExcept 21' is too complex (26)
+try:
+^
+./tests/unit/test_state_manager.py:221:5: C901 'TestAgentStateManager.test_thread_safety' is too complex (16)
+    def test_thread_safety(self) -> None:
+    ^
+./tests/unit/test_uncertainty_quantification.py:522:13: F841 local variable 'metrics' is assigned to but never used
+            metrics = quantifier.calculate_convergence_metrics(
+            ^
+./tests/unit/test_utils.py:148:9: F841 local variable 'total' is assigned to but never used
+        total = -1.0 + 2.0 + 3.0  # = 4.0
+        ^
+./tests/unit/test_world_simulation_engine.py:327:5: C901 'TestWorldSimulationEngine.test_performance_monitoring' is too complex (11)
+    def test_performance_monitoring(self, mock_engine):
+    ^
+./tests/unit/test_world_simulation_engine.py:502:5: C901 'TestWorldSimulationEngine.test_simulation_state_consistency' is too complex (11)
+    def test_simulation_state_consistency(self, mock_engine):
+    ^
+./tests/unit/test_world_simulation_engine.py:525:28: E721 do not compare types, for exact checks use `is` / `is not`, for instance checks use `isinstance()`
+                    assert type(initial_state) == type(new_state)
+                           ^
+./world/grid/hex_world.py:1:1: W391 blank line at end of file
+
+^
+./world/grid/spatial_index.py:1:1: W391 blank line at end of file
+
+^
+./world/h3_world.py:179:5: C901 'H3World._calculate_biome' is too complex (12)
+    def _calculate_biome(self, temperature: float, moisture: float, elevation: float) -> Biome:
+    ^
+./world/simulation/engine.py:382:5: C901 'SimulationEngine.step' is too complex (11)
+    async def step(self) -> None:
+    ^
+./world/simulation/engine.py:469:5: C901 'SimulationEngine._update_social_networks' is too complex (13)
+    def _update_social_networks(self) -> None:
+    ^
+./world/simulation/engine.py:1169:34: F541 f-string is missing placeholders
+            dockerfile_content = f"""FROM python:3.9-slim
+WORKDIR /app
+# Copy requirements first for better caching
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+# Copy application files
+COPY . .
+# Make scripts executable
+RUN chmod +x run.sh health_check.py install.sh uninstall.sh
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \\
+    CMD python3 health_check.py
+# Expose port
+EXPOSE 8080
+# Run the agent
+CMD ["./run.sh"]
+"""
+                                 ^
+94    C901 'BaseAgent._update_cycle' is too complex (11)
+1     E128 continuation line under-indented for visual indent
+1     E721 do not compare types, for exact checks use `is` / `is not`, for instance checks use `isinstance()`
+6     E722 do not use bare 'except'
+8     E731 do not assign a lambda expression, use a def
+12    F401 '...agents.active_inference.create_generative_model' imported but unused
+1     F402 import 'platform' from line 11 shadowed by loop variable
+12    F541 f-string is missing placeholders
+2     F811 redefinition of unused 'TechnicalReadinessValidator' from line 21
+9     F821 undefined name 'concurrent'
+37    F841 local variable 'lines' is assigned to but never used
+21    W391 blank line at end of file

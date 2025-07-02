@@ -80,9 +80,13 @@ class MarkovBlanketWebSocketManager:
         }
 
         # Register handlers with boundary service
-        # Note: Handlers will be called synchronously from the monitoring service
+        # Note: Handlers will be called synchronously from the monitoring
+        # service
 
-    async def connect(self, websocket: WebSocket, client_id: Optional[str] = None):
+    async def connect(
+            self,
+            websocket: WebSocket,
+            client_id: Optional[str] = None):
         """Accept and register a new WebSocket connection."""
         await websocket.accept()
         self.active_connections.add(websocket)
@@ -152,7 +156,8 @@ class MarkovBlanketWebSocketManager:
         for websocket in self.active_connections:
             try:
                 subscription = self.subscriptions.get(websocket)
-                if subscription and self._should_send_event(event, subscription):
+                if subscription and self._should_send_event(
+                        event, subscription):
                     await websocket.send_json(event_dict)
                     if websocket in self.connection_metadata:
                         self.connection_metadata[websocket]["message_count"] += 1
@@ -167,8 +172,9 @@ class MarkovBlanketWebSocketManager:
             self.disconnect(websocket)
 
     def _should_send_event(
-        self, event: MarkovBlanketEvent, subscription: MarkovBlanketSubscription
-    ) -> bool:
+            self,
+            event: MarkovBlanketEvent,
+            subscription: MarkovBlanketSubscription) -> bool:
         """Determine if an event should be sent to a subscribed client."""
         # Check agent filter
         if subscription.agent_ids and event.agent_id not in subscription.agent_ids:
@@ -188,7 +194,10 @@ class MarkovBlanketWebSocketManager:
 
         return True
 
-    async def update_subscription(self, websocket: WebSocket, subscription_data: Dict):
+    async def update_subscription(
+            self,
+            websocket: WebSocket,
+            subscription_data: Dict):
         """Update client subscription preferences."""
         if websocket not in self.subscriptions:
             return
@@ -205,7 +214,8 @@ class MarkovBlanketWebSocketManager:
 
         # Update severity levels
         if "severity_levels" in subscription_data:
-            subscription.severity_levels = set(subscription_data["severity_levels"])
+            subscription.severity_levels = set(
+                subscription_data["severity_levels"])
 
         # Update flags
         if "include_mathematical_proofs" in subscription_data:
@@ -223,11 +233,13 @@ class MarkovBlanketWebSocketManager:
             subscription.real_time_updates = subscription_data["real_time_updates"]
 
         logger.info(
-            f"Updated subscription for client {self.connection_metadata.get(websocket,
-                {}).get('client_id')}"
-        )
+            f"Updated subscription for client {
+                self.connection_metadata.get(
+                    websocket,
+                    {}).get('client_id')}")
 
-    async def _handle_boundary_violation(self, violation: BoundaryViolationEvent):
+    async def _handle_boundary_violation(
+            self, violation: BoundaryViolationEvent):
         """Handle boundary violations from the monitoring service."""
         event = MarkovBlanketEvent(
             type="boundary_violation",
@@ -242,15 +254,20 @@ class MarkovBlanketWebSocketManager:
                 "evidence": violation.evidence,
             },
             metadata={
-                "violation_id": f"boundary_{violation.agent_id}_{violation.timestamp}",
-                "requires_immediate_attention": violation.severity.value in ["HIGH", "CRITICAL"],
+                "violation_id": f"boundary_{
+                    violation.agent_id}_{
+                    violation.timestamp}",
+                "requires_immediate_attention": violation.severity.value in [
+                    "HIGH",
+                    "CRITICAL"],
             },
         )
 
         await self.broadcast_markov_event(event)
         self.monitoring_stats["active_violations"] += 1
 
-    async def _handle_monitoring_event(self, monitoring_event: MonitoringEvent):
+    async def _handle_monitoring_event(
+            self, monitoring_event: MonitoringEvent):
         """Handle general monitoring events from the boundary service."""
         # Map monitoring event to Markov Blanket event
         event_type_mapping = {
@@ -260,7 +277,9 @@ class MarkovBlanketWebSocketManager:
         }
 
         event = MarkovBlanketEvent(
-            type=event_type_mapping.get(monitoring_event.event_type, "monitoring_update"),
+            type=event_type_mapping.get(
+                monitoring_event.event_type,
+                "monitoring_update"),
             timestamp=monitoring_event.timestamp,
             agent_id=monitoring_event.agent_id,
             severity=monitoring_event.severity.value.lower(),
@@ -295,7 +314,9 @@ class MarkovBlanketWebSocketManager:
 
     def get_connection_stats(self) -> Dict:
         """Get statistics about current connections and monitoring."""
-        uptime = (datetime.utcnow() - self.monitoring_stats["uptime_start"]).total_seconds()
+        uptime = (
+            datetime.utcnow() -
+            self.monitoring_stats["uptime_start"]).total_seconds()
 
         return {
             "total_connections": len(self.active_connections),
@@ -325,7 +346,9 @@ ws_manager = MarkovBlanketWebSocketManager(boundary_service)
 
 
 @router.websocket("/ws/markov-blanket")
-async def markov_blanket_websocket_endpoint(websocket: WebSocket, client_id: Optional[str] = None):
+async def markov_blanket_websocket_endpoint(
+        websocket: WebSocket,
+        client_id: Optional[str] = None):
     """
     WebSocket endpoint for real-time Markov Blanket monitoring.
 
@@ -395,21 +418,27 @@ async def markov_blanket_websocket_endpoint(websocket: WebSocket, client_id: Opt
     except WebSocketDisconnect:
         pass
     except Exception as e:
-        logger.error(f"Unexpected error in Markov Blanket WebSocket connection: {e}")
+        logger.error(
+            f"Unexpected error in Markov Blanket WebSocket connection: {e}")
     finally:
         ws_manager.disconnect(websocket)
 
 
-async def handle_client_message(websocket: WebSocket, message: Dict):
-    """Handle incoming messages from WebSocket clients."""
-    message_type = message.get("type", "")
+class MessageHandler:
+    """Base class for WebSocket message handlers using Command pattern"""
 
-    if message_type == "ping":
+    async def handle(self, websocket: WebSocket, message: Dict) -> None:
+        raise NotImplementedError
+
+
+class PingHandler(MessageHandler):
+    async def handle(self, websocket: WebSocket, message: Dict) -> None:
         await ws_manager.send_personal_message(
-            {"type": "pong", "timestamp": datetime.utcnow().isoformat()}, websocket
-        )
+            {"type": "pong", "timestamp": datetime.utcnow().isoformat()}, websocket)
 
-    elif message_type == "subscribe":
+
+class SubscribeHandler(MessageHandler):
+    async def handle(self, websocket: WebSocket, message: Dict) -> None:
         subscription_data = message.get("subscription", {})
         await ws_manager.update_subscription(websocket, subscription_data)
         await ws_manager.send_personal_message(
@@ -421,10 +450,14 @@ async def handle_client_message(websocket: WebSocket, message: Dict):
             websocket,
         )
 
-    elif message_type == "get_monitoring_status":
+
+class MonitoringStatusHandler(MessageHandler):
+    async def handle(self, websocket: WebSocket, message: Dict) -> None:
         await ws_manager._send_monitoring_status(websocket)
 
-    elif message_type == "get_agent_violations":
+
+class AgentViolationsHandler(MessageHandler):
+    async def handle(self, websocket: WebSocket, message: Dict) -> None:
         agent_id = message.get("agent_id")
         if agent_id:
             violations = boundary_service.get_agent_violations(agent_id)
@@ -438,41 +471,43 @@ async def handle_client_message(websocket: WebSocket, message: Dict):
                 websocket,
             )
 
-    elif message_type == "register_agent":
+
+class RegisterAgentHandler(MessageHandler):
+    async def handle(self, websocket: WebSocket, message: Dict) -> None:
         agent_id = message.get("agent_id")
         if agent_id:
             boundary_service.register_agent(agent_id)
-
-            # Broadcast agent registration event
             event = MarkovBlanketEvent(
                 type="agent_registered",
                 timestamp=datetime.utcnow(),
                 agent_id=agent_id,
-                data={"message": f"Agent {agent_id} registered for monitoring"},
+                data={
+                    "message": f"Agent {agent_id} registered for monitoring"},
                 severity="info",
             )
             await ws_manager.broadcast_markov_event(event)
 
-    elif message_type == "unregister_agent":
+
+class UnregisterAgentHandler(MessageHandler):
+    async def handle(self, websocket: WebSocket, message: Dict) -> None:
         agent_id = message.get("agent_id")
         if agent_id:
             boundary_service.unregister_agent(agent_id)
-
-            # Broadcast agent unregistration event
             event = MarkovBlanketEvent(
                 type="agent_unregistered",
                 timestamp=datetime.utcnow(),
                 agent_id=agent_id,
-                data={"message": f"Agent {agent_id} unregistered from monitoring"},
+                data={
+                    "message": f"Agent {agent_id} unregistered from monitoring"},
                 severity="info",
             )
             await ws_manager.broadcast_markov_event(event)
 
-    elif message_type == "start_monitoring":
+
+class StartMonitoringHandler(MessageHandler):
+    async def handle(self, websocket: WebSocket, message: Dict) -> None:
         if not boundary_service.monitoring_active:
             await boundary_service.start_monitoring()
-
-            # Broadcast monitoring started event
             event = MarkovBlanketEvent(
                 type="monitoring_started",
                 timestamp=datetime.utcnow(),
@@ -482,11 +517,11 @@ async def handle_client_message(websocket: WebSocket, message: Dict):
             )
             await ws_manager.broadcast_markov_event(event)
 
-    elif message_type == "stop_monitoring":
+
+class StopMonitoringHandler(MessageHandler):
+    async def handle(self, websocket: WebSocket, message: Dict) -> None:
         if boundary_service.monitoring_active:
             await boundary_service.stop_monitoring()
-
-            # Broadcast monitoring stopped event
             event = MarkovBlanketEvent(
                 type="monitoring_stopped",
                 timestamp=datetime.utcnow(),
@@ -496,7 +531,9 @@ async def handle_client_message(websocket: WebSocket, message: Dict):
             )
             await ws_manager.broadcast_markov_event(event)
 
-    elif message_type == "get_stats":
+
+class StatsHandler(MessageHandler):
+    async def handle(self, websocket: WebSocket, message: Dict) -> None:
         stats = ws_manager.get_connection_stats()
         await ws_manager.send_personal_message(
             {
@@ -507,7 +544,9 @@ async def handle_client_message(websocket: WebSocket, message: Dict):
             websocket,
         )
 
-    elif message_type == "get_compliance_report":
+
+class ComplianceReportHandler(MessageHandler):
+    async def handle(self, websocket: WebSocket, message: Dict) -> None:
         agent_id = message.get("agent_id")
         report = boundary_service.export_compliance_report(agent_id)
         await ws_manager.send_personal_message(
@@ -520,7 +559,10 @@ async def handle_client_message(websocket: WebSocket, message: Dict):
             websocket,
         )
 
-    else:
+
+class UnknownMessageHandler(MessageHandler):
+    async def handle(self, websocket: WebSocket, message: Dict) -> None:
+        message_type = message.get("type", "")
         await ws_manager.send_personal_message(
             {
                 "type": "error",
@@ -529,6 +571,28 @@ async def handle_client_message(websocket: WebSocket, message: Dict):
             },
             websocket,
         )
+
+
+# Message handler registry using Command pattern
+MESSAGE_HANDLERS = {
+    "ping": PingHandler(),
+    "subscribe": SubscribeHandler(),
+    "get_monitoring_status": MonitoringStatusHandler(),
+    "get_agent_violations": AgentViolationsHandler(),
+    "register_agent": RegisterAgentHandler(),
+    "unregister_agent": UnregisterAgentHandler(),
+    "start_monitoring": StartMonitoringHandler(),
+    "stop_monitoring": StopMonitoringHandler(),
+    "get_stats": StatsHandler(),
+    "get_compliance_report": ComplianceReportHandler(),
+}
+
+
+async def handle_client_message(websocket: WebSocket, message: Dict):
+    """Handle incoming messages from WebSocket clients using Command pattern"""
+    message_type = message.get("type", "")
+    handler = MESSAGE_HANDLERS.get(message_type, UnknownMessageHandler())
+    await handler.handle(websocket, message)
 
 
 # Public API functions for broadcasting events
@@ -562,7 +626,9 @@ async def broadcast_integrity_update(agent_id: str, integrity_data: Dict):
         type="integrity_update",
         timestamp=datetime.utcnow(),
         agent_id=agent_id,
-        severity="info" if integrity_data.get("boundary_integrity", 0) > 0.8 else "warning",
+        severity="info" if integrity_data.get(
+            "boundary_integrity",
+            0) > 0.8 else "warning",
         data=integrity_data,
     )
     await ws_manager.broadcast_markov_event(event)

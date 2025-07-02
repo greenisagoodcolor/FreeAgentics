@@ -1,0 +1,146 @@
+Product Requirements Document: FreeAgentics Test Coverage Recovery Initiative
+
+Project: FreeAgentics - Test Coverage Infrastructure Repair & Improvement
+Goal: Fix broken coverage toolchain and increase coverage from 32% to 80%
+
+EXPERT COMMITTEE FINDINGS:
+After thorough analysis by senior engineering experts, we've identified critical infrastructure issues that must be addressed before any coverage improvement can succeed.
+
+ROOT CAUSES IDENTIFIED:
+1. No coverage configuration file (.coveragerc or pyproject.toml section)
+2. Multiple scattered .coverage databases causing inconsistent reporting
+3. Import path issues preventing proper module coverage tracking
+4. Over-mocking in tests creating false coverage metrics
+5. No CI/CD enforcement allowing coverage regression
+6. Technical debt from months of workarounds instead of fixes
+
+CURRENT STATE:
+- Coverage shows 19.32% in pytest output but different in reports
+- 19 files with 0% coverage despite having test files
+- 73 files tracked out of 229 Python files (156 missing)
+- Tests are failing with import errors and hanging on coverage checks
+- Coverage toolchain is fundamentally broken
+
+PHASE 1: INFRASTRUCTURE REPAIR (Critical - Must Complete First)
+1. Create comprehensive coverage configuration
+   - Create .coveragerc with proper source paths
+   - Configure coverage to track all Python files
+   - Set up proper omit patterns for test files
+   - Centralize coverage database location
+
+2. Fix Python import paths and module discovery
+   - Ensure PYTHONPATH is correctly set
+   - Fix __init__.py files in all packages
+   - Resolve circular import issues
+   - Configure pytest to find all modules
+
+3. Audit and repair existing tests
+   - Identify tests that only mock without testing
+   - Fix tests with import errors
+   - Remove or fix hanging tests
+   - Ensure tests actually import and exercise code
+
+4. Set up proper coverage toolchain
+   - Single coverage run command in Makefile
+   - Unified coverage reporting
+   - HTML, XML, and JSON output generation
+   - Coverage badge generation
+
+5. Implement CI/CD coverage gates
+   - Coverage must not decrease
+   - New code must have 80% coverage
+   - Failed coverage blocks merges
+   - Automated coverage reports on PRs
+
+PHASE 2: ZERO COVERAGE ELIMINATION (High Priority)
+Target the 19 files with 0% coverage:
+- agents/active_inference/__init__.py
+- agents/active_inference/generative_model.py
+- agents/active_inference/precision.py
+- agents/core/__init__.py
+- agents/core/active_inference.py
+- agents/core/movement_perception.py
+- agents/templates/__init__.py
+- agents/templates/base_template.py
+- agents/templates/explorer_template.py
+- agents/templates/pymdp_integration.py
+- agents/testing/__init__.py
+- agents/testing/agent_test_framework.py
+- knowledge/__init__.py
+- knowledge/knowledge_graph.py
+- main.py
+- Plus 4 other critical files
+
+Requirements:
+- Write comprehensive unit tests for each file
+- Achieve minimum 80% coverage on first implementation
+- No placeholder or mock-only tests
+- Test actual functionality and edge cases
+- Include integration tests where appropriate
+
+PHASE 3: LOW COVERAGE IMPROVEMENT (Medium Priority)
+Target files with <40% coverage:
+- coalitions/formation/coalition_formation_algorithms.py (21.7%)
+- agents/merchant/merchant.py (22.5%)
+- inference/engine/graphnn_integration.py (23.1%)
+- agents/explorer/explorer.py (24.5%)
+- And 26 other files
+
+Requirements:
+- Increase each file to minimum 80% coverage
+- Add edge case and error handling tests
+- Include negative test scenarios
+- Test all public APIs thoroughly
+- Add performance tests for critical paths
+
+PHASE 4: MODERATE COVERAGE ENHANCEMENT (Lower Priority)
+Target files between 40-80% coverage:
+- Focus on branch coverage gaps
+- Add property-based tests
+- Include stress and chaos tests
+- Document testing patterns
+- Create reusable test fixtures
+
+TECHNICAL REQUIREMENTS:
+1. Testing Standards:
+   - Use pytest with maximum verbosity (-vvv --tb=long)
+   - Follow AAA pattern (Arrange, Act, Assert)
+   - One test per behavior/scenario
+   - Clear, descriptive test names
+   - Comprehensive docstrings
+
+2. Coverage Standards:
+   - Line coverage: minimum 80%
+   - Branch coverage: minimum 75%
+   - Function coverage: 100% for public APIs
+   - No regression allowed
+
+3. Code Quality:
+   - Tests must run in <0.1s each (unit tests)
+   - No flaky tests allowed
+   - Proper use of fixtures and markers
+   - Thread-safe test execution
+   - No side effects or external dependencies
+
+4. Documentation:
+   - Update testing guides
+   - Document test patterns
+   - Create coverage dashboard
+   - Maintain test inventory
+
+SUCCESS METRICS:
+- Coverage toolchain fully functional
+- Overall coverage reaches 80%+
+- Zero files with 0% coverage
+- All tests pass consistently
+- Test execution <5 minutes total
+- Coverage reports accurate and unified
+- CI/CD gates preventing regression
+
+DELIVERABLES:
+1. Fixed coverage infrastructure
+2. Comprehensive test suite
+3. Coverage dashboard
+4. Testing documentation
+5. CI/CD integration
+6. No technical debt 

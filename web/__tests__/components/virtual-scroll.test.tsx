@@ -362,7 +362,7 @@ describe("Virtual Scrolling", () => {
     );
 
     const startTime = performance.now();
-    
+
     render(
       <VirtualScroll
         items={items}

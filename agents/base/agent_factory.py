@@ -135,7 +135,8 @@ class AgentFactory(IAgentFactory):
         # Create the agent
         agent = self._agent_types[agent_type](**config)
         # Create and attach personality profile
-        self._attach_personality_profile(agent, agent_type, config.get("personality_traits"))
+        self._attach_personality_profile(
+            agent, agent_type, config.get("personality_traits"))
         self.logger.info(f"Created {agent_type} agent: {agent.agent_id}")
         return agent
 
@@ -154,7 +155,8 @@ class AgentFactory(IAgentFactory):
             )
             # Store the personality profile in agent metadata
             agent.data.metadata["personality_profile"] = personality_profile
-            # Also update the legacy personality field for backward compatibility
+            # Also update the legacy personality field for backward
+            # compatibility
             big_five_traits = [
                 "openness",
                 "conscientiousness",
@@ -174,18 +176,21 @@ class AgentFactory(IAgentFactory):
             self.logger.warning(
                 "Personality system not available, skipping personality profile creation"
             )
-            pass
 
     def get_supported_types(self) -> List[str]:
         """Get list of supported agent types"""
         return list(self._agent_types.keys())
 
-    def register_type(self, agent_type: str, factory_func: Callable[..., BaseAgent]) -> None:
+    def register_type(self,
+                      agent_type: str,
+                      factory_func: Callable[...,
+                                             BaseAgent]) -> None:
         """Register a new agent type with its factory function"""
         self._agent_types[agent_type] = factory_func
         self.logger.info(f"Registered agent type: {agent_type}")
 
-    def set_default_config(self, agent_type: str, config: Dict[str, Any]) -> None:
+    def set_default_config(self, agent_type: str,
+                           config: Dict[str, Any]) -> None:
         """Set default configuration for an agent type"""
         self._default_configs[agent_type] = config
 
@@ -203,7 +208,8 @@ class AgentFactory(IAgentFactory):
         agent = create_agent(agent_type="explorer", **kwargs)
         # Add exploration-specific behaviors
         behavior_tree = create_behavior_tree("explorer")
-        agent.get_component("behavior_tree").behaviors = behavior_tree.behaviors
+        agent.get_component(
+            "behavior_tree").behaviors = behavior_tree.behaviors
         return agent
 
     def _create_merchant_agent(self, **kwargs) -> BaseAgent:
@@ -252,7 +258,9 @@ class AgentRegistry(IAgentRegistry):
         """Register an agent in the registry"""
         with self._lock:
             if agent.agent_id in self._agents:
-                self.logger.warning(f"Agent {agent.agent_id} is already registered")
+                self.logger.warning(
+                    f"Agent {
+                        agent.agent_id} is already registered")
                 return
             # Add to main registry
             self._agents[agent.agent_id] = agent
@@ -263,7 +271,10 @@ class AgentRegistry(IAgentRegistry):
             # Notify event handlers
             for handler in self._event_handlers:
                 handler.on_agent_created(agent.data)
-            self.logger.info(f"Registered agent: {agent.agent_id} ({agent.data.agent_type})")
+            self.logger.info(
+                f"Registered agent: {
+                    agent.agent_id} ({
+                    agent.data.agent_type})")
 
     def unregister_agent(self, agent_id: str) -> None:
         """Unregister an agent from the registry"""
@@ -299,7 +310,10 @@ class AgentRegistry(IAgentRegistry):
         with self._lock:
             return list(self._agents_by_type.get(agent_type, []))
 
-    def find_agents_in_range(self, position: Position, radius: float) -> List[BaseAgent]:
+    def find_agents_in_range(
+            self,
+            position: Position,
+            radius: float) -> List[BaseAgent]:
         """Find agents within a specified range of a position"""
         with self._lock:
             nearby_agents = []
@@ -323,9 +337,14 @@ class AgentRegistry(IAgentRegistry):
     def get_agent_count_by_type(self) -> Dict[str, int]:
         """Get agent count by type"""
         with self._lock:
-            return {agent_type: len(agents) for agent_type, agents in self._agents_by_type.items()}
+            return {
+                agent_type: len(agents) for agent_type,
+                agents in self._agents_by_type.items()}
 
-    def update_agent_position(self, agent_id: str, new_position: Position) -> None:
+    def update_agent_position(
+            self,
+            agent_id: str,
+            new_position: Position) -> None:
         """Update an agent's position in the spatial index"""
         with self._lock:
             agent = self._agents.get(agent_id)
@@ -372,7 +391,10 @@ class AgentRegistry(IAgentRegistry):
         cell_y = int(position.y // self._spatial_resolution)
         return (cell_x, cell_y)
 
-    def _get_spatial_cells_in_range(self, position: Position, radius: float) -> List[tuple]:
+    def _get_spatial_cells_in_range(
+            self,
+            position: Position,
+            radius: float) -> List[tuple]:
         """Get all spatial cells that might contain agents within range"""
         cells = []
         # Calculate cell range
@@ -388,17 +410,15 @@ class AgentRegistry(IAgentRegistry):
         """Get registry statistics"""
         with self._lock:
             return {
-                "total_agents": len(self._agents),
+                "total_agents": len(
+                    self._agents),
                 "agents_by_type": self.get_agent_count_by_type(),
-                "spatial_cells_used": len(self._spatial_index),
+                "spatial_cells_used": len(
+                    self._spatial_index),
                 "average_agents_per_cell": (
-                    (
-                        sum(len(agents) for agents in self._spatial_index.values())
-                        / len(self._spatial_index)
-                    )
-                    if self._spatial_index
-                    else 0
-                ),
+                    (sum(
+                        len(agents) for agents in self._spatial_index.values()) / len(
+                        self._spatial_index)) if self._spatial_index else 0),
             }
 
 

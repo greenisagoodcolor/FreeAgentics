@@ -75,7 +75,9 @@ class StateSnapshot:
         """Add a state component with automatic checksum"""
         self.components[component_type] = data
         # Calculate checksum
-        data_str = json.dumps(data, sort_keys=True) if not isinstance(data, bytes) else data
+        data_str = json.dumps(
+            data, sort_keys=True) if not isinstance(
+            data, bytes) else data
         checksum = hashlib.sha256(
             data_str.encode() if isinstance(data_str, str) else data_str
         ).hexdigest()
@@ -84,7 +86,9 @@ class StateSnapshot:
     def verify_integrity(self) -> bool:
         """Verify integrity of all components using checksums"""
         for component_type, data in self.components.items():
-            data_str = json.dumps(data, sort_keys=True) if not isinstance(data, bytes) else data
+            data_str = json.dumps(
+                data, sort_keys=True) if not isinstance(
+                data, bytes) else data
             checksum = hashlib.sha256(
                 data_str.encode() if isinstance(data_str, str) else data_str
             ).hexdigest()
@@ -200,7 +204,9 @@ class SerializationRequirementsManager:
             ),
         }
 
-    def get_requirement(self, component_type: StateComponent) -> SerializationRequirement:
+    def get_requirement(
+            self,
+            component_type: StateComponent) -> SerializationRequirement:
         """Get serialization requirement for a component type"""
         return self.requirements.get(component_type)
 
@@ -229,7 +235,10 @@ class SerializationRequirementsManager:
 
         return order
 
-    def validate_component_data(self, component_type: StateComponent, data: Any) -> bool:
+    def validate_component_data(
+            self,
+            component_type: StateComponent,
+            data: Any) -> bool:
         """Validate component data against its requirements"""
         requirement = self.get_requirement(component_type)
         if not requirement:
@@ -386,7 +395,8 @@ class StateDataCatalog:
 
         return list(related)
 
-    def generate_serialization_plan(self, components: List[StateComponent]) -> Dict[str, Any]:
+    def generate_serialization_plan(
+            self, components: List[StateComponent]) -> Dict[str, Any]:
         """Generate a detailed serialization plan for given components"""
         plan = {
             "components": {},
@@ -422,7 +432,8 @@ class StateDataCatalog:
                     plan["relationships"][struct_name] = related
 
                     # Estimate size (placeholder - would need actual implementation)
-                    plan["estimated_size"][struct_name] = self._estimate_structure_size(struct_name)
+                    plan["estimated_size"][struct_name] = self._estimate_structure_size(
+                        struct_name)
 
         return plan
 
@@ -443,4 +454,6 @@ class StateDataCatalog:
             "world_state": {"min": 102400, "max": 1073741824, "typical": 10485760},
         }
 
-        return size_estimates.get(structure_name, {"min": 1024, "max": 10240, "typical": 5120})
+        return size_estimates.get(
+            structure_name, {
+                "min": 1024, "max": 10240, "typical": 5120})

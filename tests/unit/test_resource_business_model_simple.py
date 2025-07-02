@@ -71,7 +71,10 @@ class TestResourceBusinessModel(unittest.TestCase):
 
     def test_market_price_dynamics(self) -> None:
         """Test market price updates based on supply and demand"""
-        price = MarketPrice(resource_type=ResourceType.FOOD, base_price=2.0, current_price=2.0)
+        price = MarketPrice(
+            resource_type=ResourceType.FOOD,
+            base_price=2.0,
+            current_price=2.0)
         # High demand, low supply should increase price
         price.update_price(supply=10.0, demand=50.0)
         self.assertGreater(price.current_price, 2.0)
@@ -122,8 +125,9 @@ class TestResourceBusinessModel(unittest.TestCase):
         self.assertIn("offer1", market.active_offers)
         # Test finding matching offers
         matches = market.find_matching_offers(
-            agent_id="agent2", wanted={ResourceType.WATER: 40.0}, offered={ResourceType.FOOD: 30.0}
-        )
+            agent_id="agent2", wanted={
+                ResourceType.WATER: 40.0}, offered={
+                ResourceType.FOOD: 30.0})
         self.assertEqual(len(matches), 1)
         self.assertEqual(matches[0].offer_id, "offer1")
 
@@ -154,16 +158,20 @@ class TestResourceBusinessModel(unittest.TestCase):
     def test_resource_degradation(self) -> None:
         """Test resource degradation over time"""
         unit = ResourceUnit(
-            resource_type=ResourceType.TOOLS, quantity=1.0, quality=1.0, durability=1.0
-        )
+            resource_type=ResourceType.TOOLS,
+            quantity=1.0,
+            quality=1.0,
+            durability=1.0)
         # Tools should degrade in durability
         unit.degrade(rate=0.1)
         self.assertEqual(unit.durability, 0.9)
         self.assertEqual(unit.quality, 1.0)  # Quality unchanged for tools
         # Food should degrade in quality
         food = ResourceUnit(
-            resource_type=ResourceType.FOOD, quantity=10.0, quality=1.0, durability=1.0
-        )
+            resource_type=ResourceType.FOOD,
+            quantity=10.0,
+            quality=1.0,
+            durability=1.0)
         food.degrade(rate=0.1)
         self.assertEqual(food.quality, 0.99)  # Quality degrades slower
         self.assertEqual(food.durability, 1.0)  # Durability unchanged for food

@@ -8,7 +8,6 @@ import torch.nn as nn
 
 from inference.engine.active_inference import InferenceConfig, VariationalMessagePassing
 from inference.engine.generative_model import (
-    ContinuousGenerativeModel,
     DiscreteGenerativeModel,
     ModelDimensions,
     ModelParameters,
@@ -58,8 +57,10 @@ class TestHierarchicalState:
         errors = torch.randn(2, 8)
         precision = torch.ones(2, 8)
         state = HierarchicalState(
-            beliefs=beliefs, predictions=predictions, errors=errors, precision=precision
-        )
+            beliefs=beliefs,
+            predictions=predictions,
+            errors=errors,
+            precision=precision)
         assert torch.equal(state.beliefs, beliefs)
         assert torch.equal(state.predictions, predictions)
         assert torch.equal(state.errors, errors)
@@ -113,7 +114,11 @@ class TestHierarchicalLevel:
         assert state.predictions.shape == (3, 8)
         assert state.errors.shape == (3, 8)
         assert state.precision.shape == (3, 8)
-        assert torch.allclose(state.beliefs.sum(dim=-1), torch.ones(3), atol=1e-06)
+        assert torch.allclose(
+            state.beliefs.sum(
+                dim=-1),
+            torch.ones(3),
+            atol=1e-06)
 
     def test_compute_prediction_error(self, setup_level) -> None:
         """Test prediction error computation"""
@@ -133,7 +138,11 @@ class TestHierarchicalLevel:
         top_down_input = torch.randn(2, 32)
         updated_beliefs = level.update_beliefs(bottom_up_input, top_down_input)
         assert updated_beliefs.shape == (2, 8)
-        assert torch.allclose(updated_beliefs.sum(dim=-1), torch.ones(2), atol=1e-06)
+        assert torch.allclose(
+            updated_beliefs.sum(
+                dim=-1),
+            torch.ones(2),
+            atol=1e-06)
         assert torch.equal(updated_beliefs, level.state.beliefs)
 
     def test_temporal_buffer(self, setup_level) -> None:
@@ -151,7 +160,9 @@ class TestHierarchicalInference:
     @pytest.fixture
     def setup_hierarchical_system(self) -> None:
         """Setup hierarchical inference system"""
-        config = HierarchicalConfig(num_levels=3, level_dims=[8, 16, 32], use_gpu=False)
+        config = HierarchicalConfig(
+            num_levels=3, level_dims=[
+                8, 16, 32], use_gpu=False)
         models = []
         algorithms = []
         optimizers = []
@@ -198,8 +209,13 @@ class TestHierarchicalInference:
         beliefs = system.step(observations)
         assert len(beliefs) == 3
         for i, level_beliefs in enumerate(beliefs):
-            assert level_beliefs.shape == (batch_size, system.config.level_dims[i])
-            assert torch.allclose(level_beliefs.sum(dim=-1), torch.ones(batch_size), atol=1e-06)
+            assert level_beliefs.shape == (
+                batch_size, system.config.level_dims[i])
+            assert torch.allclose(
+                level_beliefs.sum(
+                    dim=-1),
+                torch.ones(batch_size),
+                atol=1e-06)
 
     def test_timescale_updates(self, setup_hierarchical_system) -> None:
         """Test that levels update according to their timescales"""
@@ -207,11 +223,16 @@ class TestHierarchicalInference:
         batch_size = 2
         system.initialize(batch_size)
         observations = torch.randn(batch_size, 4)
-        initial_beliefs = [level.state.beliefs.clone() for level in system.levels]
+        initial_beliefs = [level.state.beliefs.clone()
+                           for level in system.levels]
         for _ in range(4):
             system.step(observations)
-        assert not torch.allclose(system.levels[0].state.beliefs, initial_beliefs[0])
-        assert not torch.allclose(system.levels[1].state.beliefs, initial_beliefs[1])
+        assert not torch.allclose(
+            system.levels[0].state.beliefs,
+            initial_beliefs[0])
+        assert not torch.allclose(
+            system.levels[1].state.beliefs,
+            initial_beliefs[1])
 
     def test_hierarchical_free_energy(self, setup_hierarchical_system) -> None:
         """Test free energy computation"""
@@ -232,7 +253,11 @@ class TestHierarchicalInference:
         system.initialize(batch_size)
         effective_beliefs = system.get_effective_beliefs(target_level=0)
         assert effective_beliefs.shape == (batch_size, 8)
-        assert torch.allclose(effective_beliefs.sum(dim=-1), torch.ones(batch_size), atol=1e-06)
+        assert torch.allclose(
+            effective_beliefs.sum(
+                dim=-1),
+            torch.ones(batch_size),
+            atol=1e-06)
         with pytest.raises(ValueError):
             system.get_effective_beliefs(target_level=5)
 
@@ -281,7 +306,11 @@ class TestTemporalHierarchicalInference:
         assert len(predictions) == 3
         for pred in predictions:
             assert pred.shape == (batch_size, 8)
-            assert torch.allclose(pred.sum(dim=-1), torch.ones(batch_size), atol=1e-06)
+            assert torch.allclose(
+                pred.sum(
+                    dim=-1),
+                torch.ones(batch_size),
+                atol=1e-06)
 
     def test_hierarchical_planning(self, setup_temporal_system) -> None:
         """Test hierarchical planning"""
@@ -304,7 +333,11 @@ class TestTemporalHierarchicalInference:
         assert beliefs[0].shape == (batch_size, 8)
         assert beliefs[1].shape == (batch_size, 16)
         for level_beliefs in beliefs:
-            assert torch.allclose(level_beliefs.sum(dim=-1), torch.ones(batch_size), atol=1e-06)
+            assert torch.allclose(
+                level_beliefs.sum(
+                    dim=-1),
+                torch.ones(batch_size),
+                atol=1e-06)
 
 
 class TestFactoryFunction:
@@ -314,7 +347,10 @@ class TestFactoryFunction:
         models = []
         algorithms = []
         for i in range(2):
-            dims = ModelDimensions(num_states=8, num_observations=4, num_actions=2)
+            dims = ModelDimensions(
+                num_states=8,
+                num_observations=4,
+                num_actions=2)
             params = ModelParameters(use_gpu=False)
             models.append(DiscreteGenerativeModel(dims, params))
             inf_config = InferenceConfig(use_gpu=False)
@@ -334,7 +370,10 @@ class TestFactoryFunction:
         models = []
         algorithms = []
         for i in range(2):
-            dims = ModelDimensions(num_states=8, num_observations=4, num_actions=2)
+            dims = ModelDimensions(
+                num_states=8,
+                num_observations=4,
+                num_actions=2)
             params = ModelParameters(use_gpu=False)
             models.append(DiscreteGenerativeModel(dims, params))
             inf_config = InferenceConfig(use_gpu=False)
@@ -359,8 +398,10 @@ class TestFactoryFunction:
         algorithms = [VariationalMessagePassing(inf_config)]
         with pytest.raises(ValueError, match="Unknown inference type"):
             create_hierarchical_inference(
-                "invalid", config, generative_models=models, inference_algorithms=algorithms
-            )
+                "invalid",
+                config,
+                generative_models=models,
+                inference_algorithms=algorithms)
 
     def test_missing_required_params(self) -> None:
         """Test missing required parameters"""

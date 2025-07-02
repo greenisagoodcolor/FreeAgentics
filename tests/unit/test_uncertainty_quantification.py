@@ -6,7 +6,6 @@ and uncertainty propagation for Active Inference visualizations.
 """
 
 from datetime import datetime
-from unittest.mock import Mock, patch
 
 import numpy as np
 import pytest
@@ -160,9 +159,15 @@ class TestUncertaintyPropagation:
 
     def test_uncertainty_propagation_creation(self):
         """Test creating uncertainty propagation structure."""
-        input_uncertainties = {"belief_state": 0.1, "observation": 0.05, "action": 0.08}
+        input_uncertainties = {
+            "belief_state": 0.1,
+            "observation": 0.05,
+            "action": 0.08}
 
-        sensitivity_analysis = {"belief_state": 0.7, "observation": 0.2, "action": 0.1}
+        sensitivity_analysis = {
+            "belief_state": 0.7,
+            "observation": 0.2,
+            "action": 0.1}
 
         uncertainty_breakdown = {
             UncertaintyType.ALEATORIC: 0.06,
@@ -201,7 +206,8 @@ class TestUncertaintyPropagation:
             uncertainty_breakdown=uncertainty_breakdown,
         )
 
-        # Total uncertainty should be at least as large as individual components
+        # Total uncertainty should be at least as large as individual
+        # components
         assert (
             propagation.uncertainty_breakdown[UncertaintyType.TOTAL]
             >= propagation.uncertainty_breakdown[UncertaintyType.ALEATORIC]
@@ -223,8 +229,7 @@ class TestStatisticalValidation:
         expected = np.random.normal(0.1, 1, 1000)  # Slightly different mean
 
         is_significant, p_value = StatisticalValidation.kolmogorov_smirnov_test(
-            observed, expected, alpha=0.05
-        )
+            observed, expected, alpha=0.05)
 
         assert isinstance(is_significant, bool)
         assert isinstance(p_value, float)
@@ -236,8 +241,7 @@ class TestStatisticalValidation:
         data = np.random.normal(0, 1, 1000)
 
         is_significant, p_value = StatisticalValidation.kolmogorov_smirnov_test(
-            data, data, alpha=0.05
-        )
+            data, data, alpha=0.05)
 
         # Identical distributions should not be significantly different
         assert is_significant is False
@@ -278,8 +282,7 @@ class TestStatisticalValidation:
         expected = np.array([24, 24, 24, 24, 24])  # Uniform expected
 
         is_good_fit, p_value = StatisticalValidation.chi_squared_goodness_of_fit(
-            observed, expected, alpha=0.05
-        )
+            observed, expected, alpha=0.05)
 
         assert isinstance(is_good_fit, bool)
         assert isinstance(p_value, float)
@@ -291,8 +294,7 @@ class TestStatisticalValidation:
         data = np.array([25, 25, 25, 25])
 
         is_good_fit, p_value = StatisticalValidation.chi_squared_goodness_of_fit(
-            data, data, alpha=0.05
-        )
+            data, data, alpha=0.05)
 
         # Perfect fit should have high p-value
         assert is_good_fit is True
@@ -321,8 +323,7 @@ class TestUncertaintyQuantificationEngine:
         belief_distribution = np.random.dirichlet([1, 1, 1])
 
         ci = self.quantifier.calculate_bayesian_confidence_intervals(
-            belief_distribution, confidence_level=ConfidenceLevel.CI_95, method="hdi"
-        )
+            belief_distribution, confidence_level=ConfidenceLevel.CI_95, method="hdi")
 
         assert isinstance(ci, ConfidenceInterval)
         assert ci.confidence_level == 0.95
@@ -336,8 +337,7 @@ class TestUncertaintyQuantificationEngine:
         belief_distribution = np.random.dirichlet([2, 3, 1])
 
         ci = self.quantifier.calculate_bayesian_confidence_intervals(
-            belief_distribution, confidence_level=ConfidenceLevel.CI_95, method="quantile"
-        )
+            belief_distribution, confidence_level=ConfidenceLevel.CI_95, method="quantile")
 
         assert isinstance(ci, ConfidenceInterval)
         assert ci.confidence_level == 0.95
@@ -353,8 +353,9 @@ class TestUncertaintyQuantificationEngine:
         current_belief = np.random.dirichlet([1, 1, 1])
 
         metrics = self.quantifier.calculate_convergence_metrics(
-            agent_id=agent_id, current_belief=current_belief, confidence_level=ConfidenceLevel.CI_95
-        )
+            agent_id=agent_id,
+            current_belief=current_belief,
+            confidence_level=ConfidenceLevel.CI_95)
 
         assert isinstance(metrics, ConvergenceMetrics)
         assert metrics.kl_divergence >= 0.0
@@ -390,7 +391,8 @@ class TestUncertaintyQuantificationEngine:
         assert isinstance(propagation.input_uncertainties, dict)
         assert propagation.propagated_uncertainty >= 0.0
         assert isinstance(propagation.sensitivity_analysis, dict)
-        assert all(k in propagation.uncertainty_breakdown for k in UncertaintyType)
+        assert all(
+            k in propagation.uncertainty_breakdown for k in UncertaintyType)
         assert propagation.monte_carlo_samples is not None
         assert len(propagation.monte_carlo_samples) == 100
 
@@ -413,7 +415,8 @@ class TestUncertaintyQuantificationEngine:
         assert "chi_squared_goodness_of_fit" in validation_results
         assert "anderson_darling_normality" in validation_results
 
-        # Each result should be a tuple of (is_significant/is_good_fit, statistic/p_value)
+        # Each result should be a tuple of (is_significant/is_good_fit,
+        # statistic/p_value)
         for test_name, result in validation_results.items():
             assert isinstance(result, tuple)
             assert len(result) == 2
@@ -470,14 +473,14 @@ class TestUncertaintyQuantificationIntegration:
 
             # Calculate convergence metrics for each step
             metrics = quantifier.calculate_convergence_metrics(
-                agent_id=agent_id, current_belief=belief, confidence_level=ConfidenceLevel.CI_95
-            )
+                agent_id=agent_id, current_belief=belief, confidence_level=ConfidenceLevel.CI_95)
 
         # 3. Compute confidence intervals for final beliefs
         final_belief = belief_states[-1]
         ci = quantifier.calculate_bayesian_confidence_intervals(
-            belief_distribution=final_belief, confidence_level=ConfidenceLevel.CI_95, method="hdi"
-        )
+            belief_distribution=final_belief,
+            confidence_level=ConfidenceLevel.CI_95,
+            method="hdi")
 
         # 4. Test uncertainty propagation
         model_params = {
@@ -511,7 +514,8 @@ class TestUncertaintyQuantificationIntegration:
         quantifier = UncertaintyQuantificationEngine()
         agent_id = "active_inference_agent"
 
-        # Simulate Active Inference belief evolution with decreasing uncertainty
+        # Simulate Active Inference belief evolution with decreasing
+        # uncertainty
         for t in range(15):
             # Beliefs become more concentrated over time (learning)
             concentration_base = 1.0 + t * 0.2
@@ -520,9 +524,10 @@ class TestUncertaintyQuantificationIntegration:
             )
 
             # Calculate convergence metrics
-            metrics = quantifier.calculate_convergence_metrics(
-                agent_id=agent_id, current_belief=belief, confidence_level=ConfidenceLevel.CI_95
-            )
+            _ = quantifier.calculate_convergence_metrics(
+                agent_id=agent_id,
+                current_belief=belief,
+                confidence_level=ConfidenceLevel.CI_95)
 
         # Test statistical significance validation
         final_belief = quantifier.historical_data[agent_id][-1]

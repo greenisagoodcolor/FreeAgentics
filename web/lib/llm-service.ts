@@ -58,7 +58,10 @@ export async function withRetry<T>(
       // Don't delay on the last attempt
       if (attempt < maxRetries) {
         console.log(`Retrying in ${delay}ms...`);
-        await new Promise((resolve) => setTimeout(resolve, delay));
+        // Use shorter delays in test environment to prevent hanging
+        const actualDelay =
+          process.env.NODE_ENV === "test" ? Math.min(delay, 10) : delay;
+        await new Promise((resolve) => setTimeout(resolve, actualDelay));
         delay *= 2; // Exponential backoff
       }
     }
@@ -219,7 +222,9 @@ export async function generateResponse(
 
     // Check if API key is available
     if (!completeSettings.apiKey) {
-      throw new ApiKeyError(completeSettings.provider);
+      throw new ApiKeyError(
+        `API key required for ${completeSettings.provider}`,
+      );
     }
 
     // For OpenRouter, use our direct implementation

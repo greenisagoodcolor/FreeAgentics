@@ -8,7 +8,6 @@ multi-agent system with Active Inference capabilities.
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 
 # Create the FastAPI application
 app = FastAPI(
@@ -44,7 +43,10 @@ async def root():
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
-    return {"status": "healthy", "service": "FreeAgentics API", "version": "2.1.0"}
+    return {
+        "status": "healthy",
+        "service": "FreeAgentics API",
+        "version": "2.1.0"}
 
 
 @app.get("/api/status")
@@ -55,7 +57,12 @@ async def api_status():
         "agents": {
             "total": 0,
             "active": 0,
-            "templates": ["Explorer", "Merchant", "Scholar", "Guardian", "Generalist"],
+            "templates": [
+                "Explorer",
+                "Merchant",
+                "Scholar",
+                "Guardian",
+                "Generalist"],
         },
         "system": {
             "active_inference": "ready",

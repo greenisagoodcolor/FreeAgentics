@@ -6,7 +6,6 @@ Simple test that imports modules and exercises basic functionality to boost cove
 import numpy as np
 import pytest
 import torch
-import torch.nn as nn
 
 
 def test_agent_imports_exercise():
@@ -31,15 +30,16 @@ def test_agent_imports_exercise():
     assert MemoryImportance.HIGH in MemoryImportance
 
     # Test memory classes import
-    from agents.base.memory import InMemoryStorage, Memory, MemorySystem, WorkingMemory
-
     # Test memory instances
     from datetime import datetime
+
+    from agents.base.memory import InMemoryStorage, Memory, WorkingMemory
+
     memory = Memory(
         memory_id="test_memory",
         memory_type=MemoryType.WORKING,
         content={"test": "data"},
-        timestamp=datetime.now()
+        timestamp=datetime.now(),
     )
     assert memory is not None
 
@@ -118,7 +118,7 @@ def test_inference_imports_exercise():
     assert layer_config is not None
 
     # Test GNN layer classes
-    from inference.gnn.layers import GATLayer, GCNLayer, GNNStack
+    from inference.gnn.layers import GATLayer, GCNLayer
 
     # Create simple GCN layer - just test instantiation
     gcn = GCNLayer(in_channels=4, out_channels=8)
@@ -285,12 +285,18 @@ def test_exercise_enum_values():
     # Agent memory enums
     from agents.base.memory import MemoryImportance, MemoryType
 
-    memory_types = [MemoryType.WORKING, MemoryType.EPISODIC, MemoryType.SEMANTIC]
+    memory_types = [
+        MemoryType.WORKING,
+        MemoryType.EPISODIC,
+        MemoryType.SEMANTIC]
     for mem_type in memory_types:
         assert mem_type in MemoryType
         assert isinstance(mem_type.value, str)
 
-    importance_levels = [MemoryImportance.LOW, MemoryImportance.MEDIUM, MemoryImportance.HIGH]
+    importance_levels = [
+        MemoryImportance.LOW,
+        MemoryImportance.MEDIUM,
+        MemoryImportance.HIGH]
     for importance in importance_levels:
         assert importance in MemoryImportance
         assert isinstance(importance.value, (int, float, str))
@@ -298,12 +304,18 @@ def test_exercise_enum_values():
     # Perception enums
     from agents.base.perception import PerceptionType, StimulusType
 
-    perception_types = [PerceptionType.VISUAL, PerceptionType.AUDITORY, PerceptionType.TACTILE]
+    perception_types = [
+        PerceptionType.VISUAL,
+        PerceptionType.AUDITORY,
+        PerceptionType.TACTILE]
     for perc_type in perception_types:
         assert perc_type in PerceptionType
         assert isinstance(perc_type.value, str)
 
-    stimulus_types = [StimulusType.LIGHT, StimulusType.SOUND, StimulusType.MOVEMENT]
+    stimulus_types = [
+        StimulusType.LIGHT,
+        StimulusType.SOUND,
+        StimulusType.MOVEMENT]
     for stim_type in stimulus_types:
         assert stim_type in StimulusType
         assert isinstance(stim_type.value, str)
@@ -311,7 +323,10 @@ def test_exercise_enum_values():
     # GNN aggregation types
     from inference.gnn.layers import AggregationType
 
-    agg_types = [AggregationType.MEAN, AggregationType.SUM, AggregationType.MAX]
+    agg_types = [
+        AggregationType.MEAN,
+        AggregationType.SUM,
+        AggregationType.MAX]
     for agg_type in agg_types:
         assert agg_type in AggregationType
         assert isinstance(agg_type.value, str)

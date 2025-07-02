@@ -11,9 +11,7 @@ from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional
 
 from .coalition_formation_algorithms import (
-    AgentProfile,
     CoalitionFormationEngine,
-    FormationResult,
     FormationStrategy,
 )
 
@@ -36,15 +34,19 @@ class CoalitionMonitoringEvent:
 class CoalitionFormationMonitor:
     """Monitors coalition formation processes and provides real-time events"""
 
-    def __init__(self, formation_engine: Optional[CoalitionFormationEngine] = None) -> None:
+    def __init__(
+            self,
+            formation_engine: Optional[CoalitionFormationEngine] = None) -> None:
         self.formation_engine = formation_engine or CoalitionFormationEngine()
-        self.event_handlers: List[Callable[[CoalitionMonitoringEvent], None]] = []
+        self.event_handlers: List[Callable[[
+            CoalitionMonitoringEvent], None]] = []
         self.active_formations: Dict[str, Dict[str, Any]] = {}
 
-    def register_event_handler(self, handler: Callable[[CoalitionMonitoringEvent], None]) -> None:
+    def register_event_handler(
+            self, handler: Callable[[CoalitionMonitoringEvent], None]) -> None:
         """Register a handler for coalition formation events"""
         self.event_handlers.append(handler)
-        logger.info(f"Registered coalition formation event handler")
+        logger.info("Registered coalition formation event handler")
 
     def _emit_event(self, event: CoalitionMonitoringEvent):
         """Emit an event to all registered handlers"""

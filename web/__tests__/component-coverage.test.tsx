@@ -32,15 +32,17 @@ jest.mock("@/hooks/useWebSocket", () => ({
 describe("Component Complete Coverage", () => {
   describe("Dashboard Components", () => {
     test("ActiveAgentsList", () => {
-      const { ActiveAgentsList } =
-        require("@/components/dashboard/ActiveAgentsList");
+      const {
+        ActiveAgentsList,
+      } = require("@/components/dashboard/ActiveAgentsList");
       const { container } = render(<ActiveAgentsList />);
       expect(container).toBeTruthy();
     });
 
     test("AnalyticsWidgetGrid", () => {
-      const { AnalyticsWidgetGrid } =
-        require("@/components/dashboard/AnalyticsWidgetGrid");
+      const {
+        AnalyticsWidgetGrid,
+      } = require("@/components/dashboard/AnalyticsWidgetGrid");
       const { container } = render(<AnalyticsWidgetGrid />);
       expect(container).toBeTruthy();
     });
@@ -53,22 +55,25 @@ describe("Component Complete Coverage", () => {
     });
 
     test("BeliefExtractionPanel", () => {
-      const { BeliefExtractionPanel } =
-        require("@/components/dashboard/BeliefExtractionPanel");
+      const {
+        BeliefExtractionPanel,
+      } = require("@/components/dashboard/BeliefExtractionPanel");
       const { container } = render(<BeliefExtractionPanel />);
       expect(container).toBeTruthy();
     });
 
     test("ConversationFeed", () => {
-      const { ConversationFeed } =
-        require("@/components/dashboard/ConversationFeed");
+      const {
+        ConversationFeed,
+      } = require("@/components/dashboard/ConversationFeed");
       const { container } = render(<ConversationFeed />);
       expect(container).toBeTruthy();
     });
 
     test("ConversationOrchestration", () => {
-      const { ConversationOrchestration } =
-        require("@/components/dashboard/ConversationOrchestration");
+      const {
+        ConversationOrchestration,
+      } = require("@/components/dashboard/ConversationOrchestration");
       const { container } = render(<ConversationOrchestration />);
       expect(container).toBeTruthy();
     });

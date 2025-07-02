@@ -12,7 +12,7 @@ import sys
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
@@ -21,7 +21,10 @@ from fastapi.responses import JSONResponse
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler("freeagentics.log")],
+    handlers=[
+        logging.StreamHandler(
+            sys.stdout),
+        logging.FileHandler("freeagentics.log")],
 )
 
 logger = logging.getLogger(__name__)
@@ -80,7 +83,10 @@ app = FastAPI(
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3030"],  # Next.js dev/demo
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3030"],
+    # Next.js dev/demo
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -184,7 +190,12 @@ try:
         coalition_ws_router, prefix="/ws/coalitions", tags=["websockets", "coalitions"]
     )
 
-    app.include_router(markov_ws_router, prefix="/ws/markov-blanket", tags=["websockets", "safety"])
+    app.include_router(
+        markov_ws_router,
+        prefix="/ws/markov-blanket",
+        tags=[
+            "websockets",
+            "safety"])
 
     logger.info("✅ WebSocket routers registered successfully")
 

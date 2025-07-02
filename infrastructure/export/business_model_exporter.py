@@ -12,9 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from coalitions.formation.business_value_engine import BusinessValueMetrics, business_value_engine
-
-from .coalition_packaging import StateComponent, StateSnapshot
+from coalitions.formation.business_value_engine import BusinessValueMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -100,11 +98,13 @@ class CoalitionBusinessModelExporter:
                 }
             )
 
-            logger.info(f"Successfully exported business model for coalition {coalition_id}")
+            logger.info(
+                f"Successfully exported business model for coalition {coalition_id}")
             return export_result
 
         except Exception as e:
-            logger.error(f"Error exporting business model for coalition {coalition_id}: {e}")
+            logger.error(
+                f"Error exporting business model for coalition {coalition_id}: {e}")
             return {"success": False, "error": str(e), "coalition_id": coalition_id}
 
     def _prepare_business_model(
@@ -255,7 +255,8 @@ class CoalitionBusinessModelExporter:
             return self._export_markdown(business_model, coalition_id, timestamp)
         else:
             # For formats requiring additional libraries (xlsx, pdf, pptx)
-            return self._export_placeholder(business_model, coalition_id, timestamp, export_format)
+            return self._export_placeholder(
+                business_model, coalition_id, timestamp, export_format)
 
     def _export_json(
         self, business_model: Dict[str, Any], coalition_id: str, timestamp: str
@@ -287,9 +288,11 @@ class CoalitionBusinessModelExporter:
         # Executive summary
         exec_summary = business_model.get("executive_summary", {})
         csv_data.append(["Coalition Name", exec_summary.get("coalition_name", "")])
-        csv_data.append(["Total Business Value", exec_summary.get("total_business_value", "")])
+        csv_data.append(
+            ["Total Business Value", exec_summary.get("total_business_value", "")])
         csv_data.append(["Confidence Level", exec_summary.get("confidence_level", "")])
-        csv_data.append(["Investment Readiness", exec_summary.get("investment_readiness", "")])
+        csv_data.append(
+            ["Investment Readiness", exec_summary.get("investment_readiness", "")])
 
         # Business metrics
         business_metrics = business_model.get("business_metrics", {})
@@ -408,7 +411,10 @@ class CoalitionBusinessModelExporter:
                     md.append(f"- **{metric.replace('_', ' ').title()}:** {value}\n")
 
         # Additional sections...
-        for section_name in ["financial_projections", "strategic_analysis", "risk_assessment"]:
+        for section_name in [
+            "financial_projections",
+            "strategic_analysis",
+                "risk_assessment"]:
             if section_name in business_model:
                 md.append(f"\n## {section_name.replace('_', ' ').title()}\n")
                 section_data = business_model[section_name]
@@ -419,19 +425,26 @@ class CoalitionBusinessModelExporter:
 
     # Additional analysis methods (simplified implementations)
     def _calculate_value_creation(self, metrics: BusinessValueMetrics) -> str:
-        return f"${int(metrics.synergy_score * 1000000):,} estimated value creation potential"
+        return f"${int(metrics.synergy_score *
+                       1000000):,} estimated value creation potential"
 
     def _analyze_capability_synergy(self, agent_profiles: List[Dict]) -> str:
         unique_caps = set()
         for profile in agent_profiles:
             unique_caps.update(profile.get("capabilities", []))
-        return f"{len(unique_caps)} unique capabilities across {len(agent_profiles)} members"
+        return f"{
+            len(unique_caps)} unique capabilities across {
+            len(agent_profiles)} members"
 
     def _analyze_diversification(self, agent_profiles: List[Dict]) -> str:
-        return f"Diversified across {len(agent_profiles)} agents with complementary skill sets"
+        return f"Diversified across {
+            len(agent_profiles)} agents with complementary skill sets"
 
     def _identify_risk_mitigations(self, agent_profiles: List[Dict]) -> List[str]:
-        return ["Capability redundancy", "Resource pooling", "Distributed decision making"]
+        return [
+            "Capability redundancy",
+            "Resource pooling",
+            "Distributed decision making"]
 
     def _identify_competitive_advantages(
         self, formation_result: Dict, agent_profiles: List
@@ -460,8 +473,14 @@ class CoalitionBusinessModelExporter:
 
     def _extract_performance_indicators(self, formation_result: Dict) -> Dict[str, str]:
         return {
-            "formation_time": f"{formation_result.get('formation_time', 0):.2f} seconds",
-            "formation_score": f"{formation_result.get('score', 0):.2f}",
+            "formation_time": f"{
+                formation_result.get(
+                    'formation_time',
+                    0):.2f} seconds",
+            "formation_score": f"{
+                formation_result.get(
+                    'score',
+                    0):.2f}",
             "success_rate": "100%" if formation_result.get("success") else "0%",
         }
 
@@ -472,13 +491,16 @@ class CoalitionBusinessModelExporter:
         return list(set(all_caps))[:5]  # Top 5 unique capabilities
 
     def _assess_creative_potential(self, agent_profiles: List[Dict]) -> str:
-        capability_count = len(set().union(*(p.get("capabilities", []) for p in agent_profiles)))
-        return (
-            "High" if capability_count > 10 else "Medium" if capability_count > 5 else "Developing"
-        )
+        capability_count = len(set().union(
+            *(p.get("capabilities", []) for p in agent_profiles)))
+        return ("High" if capability_count >
+                10 else "Medium" if capability_count > 5 else "Developing")
 
     # More analysis methods would be implemented here...
-    def _project_revenue_model(self, metrics: BusinessValueMetrics, profiles: List) -> Dict:
+    def _project_revenue_model(
+            self,
+            metrics: BusinessValueMetrics,
+            profiles: List) -> Dict:
         return {"projection": "Revenue model based on capability monetization"}
 
     def _analyze_cost_structure(self, profiles: List) -> Dict:
@@ -488,9 +510,8 @@ class CoalitionBusinessModelExporter:
         return {"timeline": "12-18 months to profitability"}
 
     def _assess_scaling_potential(self, metrics: BusinessValueMetrics) -> str:
-        return (
-            "High scaling potential" if metrics.total_value > 0.7 else "Moderate scaling potential"
-        )
+        return ("High scaling potential" if metrics.total_value >
+                0.7 else "Moderate scaling potential")
 
     def _calculate_roi_projections(self, metrics: BusinessValueMetrics) -> Dict:
         return {"12_month_roi": f"{metrics.total_value * 100:.0f}%"}
@@ -514,22 +535,35 @@ class CoalitionBusinessModelExporter:
     def _assess_strategic_fit(self, metrics: BusinessValueMetrics) -> str:
         return "Excellent strategic fit" if metrics.total_value > 0.7 else "Good strategic fit"
 
-    def _identify_growth_opportunities(self, metrics: BusinessValueMetrics) -> List[str]:
+    def _identify_growth_opportunities(
+            self, metrics: BusinessValueMetrics) -> List[str]:
         return ["Market expansion", "Capability enhancement", "Resource optimization"]
 
     def _calculate_overall_risk(self, metrics: BusinessValueMetrics) -> str:
         risk_score = 1.0 - metrics.risk_reduction
         return "Low" if risk_score < 0.3 else "Medium" if risk_score < 0.6 else "High"
 
-    def _identify_key_risks(self, profiles: List, metrics: BusinessValueMetrics) -> List[str]:
+    def _identify_key_risks(
+            self,
+            profiles: List,
+            metrics: BusinessValueMetrics) -> List[str]:
         return ["Market volatility", "Resource constraints", "Coordination challenges"]
 
     def _recommend_mitigations(self, metrics: BusinessValueMetrics) -> List[str]:
-        return ["Diversification strategy", "Contingency planning", "Regular monitoring"]
+        return [
+            "Diversification strategy",
+            "Contingency planning",
+            "Regular monitoring"]
 
     def _suggest_contingencies(self, profiles: List) -> List[str]:
-        return ["Backup resource allocation", "Alternative coordination methods", "Exit strategies"]
+        return [
+            "Backup resource allocation",
+            "Alternative coordination methods",
+            "Exit strategies"]
 
 
 # Export the main class for use by monitoring system
-__all__ = ["CoalitionBusinessModelExporter", "BusinessModelExportFormat", "InvestorReportTemplate"]
+__all__ = [
+    "CoalitionBusinessModelExporter",
+    "BusinessModelExportFormat",
+    "InvestorReportTemplate"]

@@ -139,7 +139,8 @@ def create_conversations(session: Session, agents: List[Agent]) -> List[Conversa
     return conversations
 
 
-def create_knowledge_graphs(session: Session, agents: List[Agent]) -> List[KnowledgeGraph]:
+def create_knowledge_graphs(session: Session,
+                            agents: List[Agent]) -> List[KnowledgeGraph]:
     """Create sample knowledge graphs"""
     graphs = []
     for agent in agents[:5]:
@@ -246,7 +247,8 @@ def create_coalitions(session: Session, agents: List[Agent]) -> List[Coalition]:
         coalitions.append(coalition)
         session.add(coalition)
         member_count = randint(3, min(7, len(agents)))
-        members = fake.random_elements(elements=agents, length=member_count, unique=True)
+        members = fake.random_elements(
+            elements=agents, length=member_count, unique=True)
         for idx, agent in enumerate(members):
             member = CoalitionMember(
                 coalition=coalition,
@@ -301,9 +303,9 @@ def seed_development_data():
         print("Creating conversations...")
         conversations = create_conversations(session, agents)
         print("Creating knowledge graphs...")
-        knowledge_graphs = create_knowledge_graphs(session, agents)
+        _ = create_knowledge_graphs(session, agents)
         print("Creating coalitions...")
-        coalitions = create_coalitions(session, agents)
+        _ = create_coalitions(session, agents)
         print("Creating system logs...")
         create_system_logs(session, agents, conversations)
         print("Development data seeded successfully!")

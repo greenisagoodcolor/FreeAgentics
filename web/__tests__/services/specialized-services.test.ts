@@ -7,16 +7,28 @@
 
 import { jest } from "@jest/globals";
 
-// Set short timeout for all tests
-jest.setTimeout(1000);
+// Set timeout for all tests
+jest.setTimeout(10000);
 
-// Mock Worker for compression service
-global.Worker = jest.fn(() => ({
-  postMessage: jest.fn(),
-  terminate: jest.fn(),
-  onmessage: null,
-  onerror: null,
-})) as any;
+// Mock Worker for compression service with proper message handling
+const workerInstances: any[] = [];
+global.Worker = jest.fn(() => {
+  const mockWorker = {
+    postMessage: jest.fn(),
+    terminate: jest.fn(),
+    onmessage: null,
+    onerror: null,
+    _lastMessageId: null,
+  };
+
+  // Override postMessage to capture the ID for this specific worker instance
+  mockWorker.postMessage = jest.fn((message) => {
+    mockWorker._lastMessageId = message.id;
+  });
+
+  workerInstances.push(mockWorker);
+  return mockWorker;
+}) as any;
 
 // Mock IndexedDB for storage services
 global.indexedDB = {
@@ -624,6 +636,10 @@ describe("Specialized Services", () => {
     let compressionWorker: CompressionWorker;
 
     beforeEach(() => {
+      // Clear worker instances from previous tests
+      workerInstances.length = 0;
+      // Clear Jest mocks to ensure clean state
+      jest.clearAllMocks();
       compressionWorker = new CompressionWorker();
     });
 
@@ -644,18 +660,23 @@ describe("Specialized Services", () => {
         chunkSize: 1024,
       };
 
-      // Mock successful compression
-      const mockWorker = (Worker as jest.Mock).mock.results[0].value;
+      // Mock successful compression - use the worker instance directly
+      const mockWorker = workerInstances[0];
+      const resultPromise = compressionWorker.compress(testData, options);
+
+      // Simulate async worker response with correct ID
       setTimeout(() => {
-        mockWorker.onmessage({
-          data: {
-            id: expect.any(String),
-            result: new ArrayBuffer(8),
-          },
-        });
+        if (mockWorker.onmessage && mockWorker._lastMessageId) {
+          mockWorker.onmessage({
+            data: {
+              id: mockWorker._lastMessageId,
+              result: new ArrayBuffer(8),
+            },
+          });
+        }
       }, 10);
 
-      const result = await compressionWorker.compress(testData, options);
+      const result = await resultPromise;
       expect(result).toBeInstanceOf(ArrayBuffer);
     });
 
@@ -663,18 +684,23 @@ describe("Specialized Services", () => {
       const testData = new ArrayBuffer(8);
       const algorithm = "gzip";
 
-      // Mock successful decompression
-      const mockWorker = (Worker as jest.Mock).mock.results[0].value;
+      // Mock successful decompression - use the worker instance directly
+      const mockWorker = workerInstances[0];
+      const resultPromise = compressionWorker.decompress(testData, algorithm);
+
+      // Simulate async worker response with correct ID
       setTimeout(() => {
-        mockWorker.onmessage({
-          data: {
-            id: expect.any(String),
-            result: "Hello, World!",
-          },
-        });
+        if (mockWorker.onmessage && mockWorker._lastMessageId) {
+          mockWorker.onmessage({
+            data: {
+              id: mockWorker._lastMessageId,
+              result: "Hello, World!",
+            },
+          });
+        }
       }, 10);
 
-      const result = await compressionWorker.decompress(testData, algorithm);
+      const result = await resultPromise;
       expect(result).toBe("Hello, World!");
     });
 
@@ -686,20 +712,23 @@ describe("Specialized Services", () => {
         chunkSize: 1024,
       };
 
-      // Mock compression error
-      const mockWorker = (Worker as jest.Mock).mock.results[0].value;
+      // Mock compression error - use the worker instance directly
+      const mockWorker = workerInstances[0];
+      const resultPromise = compressionWorker.compress(testData, options);
+
+      // Simulate async worker error response with correct ID
       setTimeout(() => {
-        mockWorker.onmessage({
-          data: {
-            id: expect.any(String),
-            error: "Compression failed",
-          },
-        });
+        if (mockWorker.onmessage && mockWorker._lastMessageId) {
+          mockWorker.onmessage({
+            data: {
+              id: mockWorker._lastMessageId,
+              error: "Compression failed",
+            },
+          });
+        }
       }, 10);
 
-      await expect(
-        compressionWorker.compress(testData, options),
-      ).rejects.toThrow("Compression failed");
+      await expect(resultPromise).rejects.toThrow("Compression failed");
     });
 
     test("should handle worker errors", () => {
@@ -996,23 +1025,33 @@ describe("Specialized Services", () => {
         compressed: true,
       };
 
-      // Mock compression worker
-      const mockWorker = (Worker as jest.Mock).mock.results[0].value;
-      setTimeout(() => {
-        mockWorker.onmessage({
-          data: {
-            id: expect.any(String),
-            result: new ArrayBuffer(100),
-          },
-        });
-      }, 10);
-
-      const result = await exportService.exportGraph(
+      // Mock compression worker - this may be a different worker instance
+      const resultPromise = exportService.exportGraph(
         mockNodes,
         mockEdges,
         options,
       );
 
+      // Find the most recent worker instance (the one created for compression)
+      const latestWorker = workerInstances[workerInstances.length - 1];
+
+      // Simulate async worker response with correct ID
+      setTimeout(() => {
+        if (
+          latestWorker &&
+          latestWorker.onmessage &&
+          latestWorker._lastMessageId
+        ) {
+          latestWorker.onmessage({
+            data: {
+              id: latestWorker._lastMessageId,
+              result: new ArrayBuffer(100),
+            },
+          });
+        }
+      }, 10);
+
+      const result = await resultPromise;
       expect(result).toBeInstanceOf(ArrayBuffer);
     });
 

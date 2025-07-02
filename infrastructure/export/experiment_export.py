@@ -110,7 +110,8 @@ class StateCollector:
         self.agent_registry = AgentRegistry()
         self.state_manager = AgentStateManager()
 
-    async def collect_agent_state(self, agent_ids: Optional[List[str]] = None) -> Dict[str, Any]:
+    async def collect_agent_state(
+            self, agent_ids: Optional[List[str]] = None) -> Dict[str, Any]:
         """Collect complete agent state from agents module"""
         agents_data = {}
 
@@ -139,8 +140,7 @@ class StateCollector:
                 "created_at": db_agent.created_at.isoformat() if db_agent.created_at else None,
                 "updated_at": db_agent.updated_at.isoformat() if db_agent.updated_at else None,
                 "last_active_at": (
-                    db_agent.last_active_at.isoformat() if db_agent.last_active_at else None
-                ),
+                    db_agent.last_active_at.isoformat() if db_agent.last_active_at else None),
             }
 
             # Add runtime state if agent is active
@@ -159,17 +159,29 @@ class StateCollector:
             state = self.state_manager.get_agent_state(agent_instance.agent_id)
 
             return {
-                "current_goals": getattr(agent_instance, "goals", []),
-                "active_behaviors": getattr(agent_instance, "active_behaviors", []),
-                "memory": getattr(agent_instance, "memory", {}),
-                "performance_metrics": getattr(agent_instance, "performance_metrics", {}),
+                "current_goals": getattr(
+                    agent_instance,
+                    "goals",
+                    []),
+                "active_behaviors": getattr(
+                    agent_instance,
+                    "active_behaviors",
+                    []),
+                "memory": getattr(
+                    agent_instance,
+                    "memory",
+                    {}),
+                "performance_metrics": getattr(
+                    agent_instance,
+                    "performance_metrics",
+                    {}),
                 "active_inference_state": self._collect_ai_state(agent_instance),
                 "state_snapshot": state,
             }
         except Exception as e:
             logger.warning(
-                f"Failed to collect runtime state for agent " f"{agent_instance.agent_id}: {e}"
-            )
+                f"Failed to collect runtime state for agent " f"{
+                    agent_instance.agent_id}: {e}")
             return {}
 
     def _collect_ai_state(self, agent_instance) -> Dict[str, Any]:
@@ -484,9 +496,11 @@ class ExperimentExport:
 
         logger.info(f"Successfully exported experiment {export_id} to {export_path}")
         logger.info(
-            f"Export stats: {metadata.total_agents} agents, {metadata.total_conversations} conversations, "
-            f"{metadata.total_messages} messages, {metadata.total_coalitions} coalitions"
-        )
+            f"Export stats: {
+                metadata.total_agents} agents, {
+                metadata.total_conversations} conversations, " f"{
+                metadata.total_messages} messages, {
+                    metadata.total_coalitions} coalitions")
 
         return export_id
 
@@ -500,7 +514,8 @@ class ExperimentExport:
                     export_data = json.load(f)
                     export_info = export_data.get("metadata", {})
                     export_info["file_path"] = str(export_path)
-                    export_info["file_size_mb"] = export_path.stat().st_size / (1024 * 1024)
+                    export_info["file_size_mb"] = export_path.stat().st_size / \
+                        (1024 * 1024)
                     exports.append(export_info)
             except Exception as e:
                 logger.warning(f"Failed to read export {export_path}: {e}")

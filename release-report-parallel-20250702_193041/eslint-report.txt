@@ -1,0 +1,21 @@
+
+./components/dashboard/MobileEnhancements.tsx
+526:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./components/dashboard/RealTimeDataSimulator.tsx
+536:1  Warning: Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+./components/markov-blanket-visualization.tsx
+223:9  Warning: The 'violations' conditional could make the dependencies of useEffect Hook (at line 511) change on every render. To fix this, wrap the initialization of 'violations' in its own useMemo() Hook.  react-hooks/exhaustive-deps
+
+./lib/hooks/use-dashboard-data.ts
+130:5  Warning: React Hook useCallback has a missing dependency: 'dispatch'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+150:5  Warning: React Hook useCallback has a missing dependency: 'dispatch'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+167:5  Warning: React Hook useCallback has a missing dependency: 'dispatch'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+188:5  Warning: React Hook useCallback has a missing dependency: 'dispatch'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+209:5  Warning: React Hook useCallback has a missing dependency: 'dispatch'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./lib/performance/memoization.ts
+245:5  Warning: React Hook useCallback has an unnecessary dependency: 'depsString'. Either exclude it or remove the dependency array.  react-hooks/exhaustive-deps
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules

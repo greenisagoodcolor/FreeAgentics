@@ -2,6 +2,14 @@
 Module for FreeAgentics Active Inference implementation.
 """
 
+from .generative_model import (
+    DiscreteGenerativeModel,
+    GenerativeModel,
+    ModelDimensions,
+    ModelParameters,
+)
+from .active_inference import InferenceAlgorithm, InferenceConfig, VariationalMessagePassing
+from inference.gnn.layers import GATLayer, GCNLayer, SAGELayer
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -20,17 +28,9 @@ logger = logging.getLogger(__name__)
 
 # Note: Some imports commented out due to missing modules
 # from ...gnn.feature_extractor import FeatureExtractor
-from inference.gnn.layers import GATLayer, GCNLayer, SAGELayer
 
-from .active_inference import InferenceAlgorithm, InferenceConfig, VariationalMessagePassing
 
 # from .active_inference import InferenceAlgorithm
-from .generative_model import (
-    DiscreteGenerativeModel,
-    GenerativeModel,
-    ModelDimensions,
-    ModelParameters,
-)
 
 
 @dataclass
@@ -66,15 +66,12 @@ class GraphToStateMapper(ABC):
         self, graph_features: torch.Tensor, node_indices: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
         """Map graph features to state representation"""
-        pass
 
     @abstractmethod
     def map_to_observations(
         self, graph_features: torch.Tensor, node_indices: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
         """Map graph features to observation representation"""
-
-        pass
 
 
 class DirectGraphMapper(GraphToStateMapper):
@@ -83,7 +80,11 @@ class DirectGraphMapper(GraphToStateMapper):
     Assumes graph features directly correspond to state dimensions.
     """
 
-    def __init__(self, config: GNNIntegrationConfig, state_dim: int, observation_dim: int) -> None:
+    def __init__(
+            self,
+            config: GNNIntegrationConfig,
+            state_dim: int,
+            observation_dim: int) -> None:
         super().__init__(config)
         self.state_dim = state_dim
         self.observation_dim = observation_dim
@@ -92,11 +93,16 @@ class DirectGraphMapper(GraphToStateMapper):
         self.obs_projection: Optional[nn.Linear]
 
         if config.output_dim != state_dim:
-            self.state_projection = nn.Linear(config.output_dim, state_dim).to(self.device)
+            self.state_projection = nn.Linear(
+                config.output_dim, state_dim).to(
+                self.device)
         else:
             self.state_projection = None
         if config.output_dim != observation_dim:
-            self.obs_projection = nn.Linear(config.output_dim, observation_dim).to(self.device)
+            self.obs_projection = nn.Linear(
+                config.output_dim,
+                observation_dim).to(
+                self.device)
         else:
             self.obs_projection = None
 
@@ -132,7 +138,11 @@ class LearnedGraphMapper(GraphToStateMapper):
     Uses neural networks to learn the transformation.
     """
 
-    def __init__(self, config: GNNIntegrationConfig, state_dim: int, observation_dim: int) -> None:
+    def __init__(
+            self,
+            config: GNNIntegrationConfig,
+            state_dim: int,
+            observation_dim: int) -> None:
         super().__init__(config)
         self.state_dim = state_dim
         self.observation_dim = observation_dim
@@ -206,11 +216,14 @@ class GNNActiveInferenceAdapter:
             self.state_dim = generative_model.dims.num_states
             self.obs_dim = generative_model.dims.num_observations
         if config.state_mapping == "direct":
-            self.mapper = DirectGraphMapper(config, self.state_dim, self.obs_dim)
+            self.mapper = DirectGraphMapper(
+                config, self.state_dim, self.obs_dim)
         elif config.state_mapping == "learned":
-            self.mapper = LearnedGraphMapper(config, self.state_dim, self.obs_dim)
+            self.mapper = LearnedGraphMapper(
+                config, self.state_dim, self.obs_dim)
         else:
-            self.mapper = LearnedGraphMapper(config, self.state_dim, self.obs_dim)
+            self.mapper = LearnedGraphMapper(
+                config, self.state_dim, self.obs_dim)
         self.aggregator = GraphFeatureAggregator(config)
 
     def process_graph(
@@ -237,11 +250,14 @@ class GNNActiveInferenceAdapter:
         if batch is not None:
             batch = batch.to(self.device)
         with torch.no_grad():
-            graph_features = self.gnn_model(node_features, edge_index, edge_features)
+            graph_features = self.gnn_model(
+                node_features, edge_index, edge_features)
         if batch is not None:
-            aggregated_features = self.aggregator.aggregate(graph_features, batch)
+            aggregated_features = self.aggregator.aggregate(
+                graph_features, batch)
         else:
-            aggregated_features = self.aggregator.aggregate_single(graph_features)
+            aggregated_features = self.aggregator.aggregate_single(
+                graph_features)
         return {
             "node_features": graph_features,
             "graph_features": aggregated_features,
@@ -287,7 +303,8 @@ class GNNActiveInferenceAdapter:
             features = graph_data["graph_features"]
         else:
             features = graph_data["node_features"]
-        observations = self.mapper.map_to_observations(features, observation_node_indices)
+        observations = self.mapper.map_to_observations(
+            features, observation_node_indices)
         return observations
 
     def update_beliefs_with_graph(
@@ -305,7 +322,8 @@ class GNNActiveInferenceAdapter:
         Returns:
             Updated beliefs
         """
-        observations = self.graph_to_observations(graph_data, agent_node_indices)
+        observations = self.graph_to_observations(
+            graph_data, agent_node_indices)
         if isinstance(self.generative_model, DiscreteGenerativeModel):
             updated_beliefs = self.inference.infer_states(
                 observations, self.generative_model, current_beliefs
@@ -334,8 +352,42 @@ class GNNActiveInferenceAdapter:
         Returns:
             Expected free energy
         """
-        beliefs = self.graph_to_beliefs(graph_data)
+        self.graph_to_beliefs(graph_data)
         return torch.tensor(0.0, device=self.device)
+
+
+class AggregationStrategy:
+    """Base strategy for node feature aggregation"""
+    def aggregate(self, node_features: torch.Tensor) -> torch.Tensor:
+        raise NotImplementedError
+
+
+class MeanAggregationStrategy(AggregationStrategy):
+    """Mean aggregation strategy"""
+    def aggregate(self, node_features: torch.Tensor) -> torch.Tensor:
+        return node_features.mean(dim=0)
+
+
+class MaxAggregationStrategy(AggregationStrategy):
+    """Max aggregation strategy"""
+    def aggregate(self, node_features: torch.Tensor) -> torch.Tensor:
+        return node_features.max(dim=0)[0]
+
+
+class SumAggregationStrategy(AggregationStrategy):
+    """Sum aggregation strategy"""
+    def aggregate(self, node_features: torch.Tensor) -> torch.Tensor:
+        return node_features.sum(dim=0)
+
+
+class AttentionAggregationStrategy(AggregationStrategy):
+    """Attention-based aggregation strategy"""
+    def __init__(self, attention_module):
+        self.attention = attention_module
+    
+    def aggregate(self, node_features: torch.Tensor) -> torch.Tensor:
+        attention_weights = F.softmax(self.attention(node_features), dim=0)
+        return (attention_weights * node_features).sum(dim=0)
 
 
 class GraphFeatureAggregator:
@@ -355,9 +407,10 @@ class GraphFeatureAggregator:
                 nn.Linear(config.hidden_dim, 1),
             ).to(self.device)
 
-    def aggregate(self, node_features: torch.Tensor, batch: torch.Tensor) -> torch.Tensor:
+    def aggregate(self, node_features: torch.Tensor,
+                  batch: torch.Tensor) -> torch.Tensor:
         """
-        Aggregate node features by batch assignment.
+        Aggregate node features by batch assignment using Strategy pattern.
         Args:
             node_features: Node features [num_nodes x feature_dim]
             batch: Batch assignment [num_nodes]
@@ -367,29 +420,27 @@ class GraphFeatureAggregator:
         num_graphs = batch.max().item() + 1
         feature_dim = node_features.shape[1]
         aggregated = torch.zeros(num_graphs, feature_dim, device=self.device)
-        if self.config.aggregation_method == "mean":
-            for i in range(num_graphs):
-                mask = batch == i
-                if mask.any():
-                    aggregated[i] = node_features[mask].mean(dim=0)
-        elif self.config.aggregation_method == "max":
-            for i in range(num_graphs):
-                mask = batch == i
-                if mask.any():
-                    aggregated[i] = node_features[mask].max(dim=0)[0]
-        elif self.config.aggregation_method == "sum":
-            for i in range(num_graphs):
-                mask = batch == i
-                if mask.any():
-                    aggregated[i] = node_features[mask].sum(dim=0)
-        elif self.config.aggregation_method == "attention":
-            for i in range(num_graphs):
-                mask = batch == i
-                if mask.any():
-                    graph_nodes = node_features[mask]
-                    attention_weights = F.softmax(self.attention(graph_nodes), dim=0)
-                    aggregated[i] = (attention_weights * graph_nodes).sum(dim=0)
+        
+        aggregation_strategy = self._get_aggregation_strategy()
+        
+        for i in range(num_graphs):
+            mask = batch == i
+            if mask.any():
+                graph_nodes = node_features[mask]
+                aggregated[i] = aggregation_strategy.aggregate(graph_nodes)
+                
         return aggregated
+
+    def _get_aggregation_strategy(self) -> 'AggregationStrategy':
+        """Get aggregation strategy based on configuration"""
+        strategy_map = {
+            "mean": MeanAggregationStrategy(),
+            "max": MaxAggregationStrategy(),
+            "sum": SumAggregationStrategy(),
+            "attention": AttentionAggregationStrategy(self.attention)
+        }
+        
+        return strategy_map.get(self.config.aggregation_method, MeanAggregationStrategy())
 
     def aggregate_single(self, node_features: torch.Tensor) -> torch.Tensor:
         """
@@ -419,7 +470,8 @@ class HierarchicalGraphIntegration:
     Processes graphs at multiple scales for hierarchical inference.
     """
 
-    def __init__(self, config: GNNIntegrationConfig, level_configs: List[Dict[str, Any]]) -> None:
+    def __init__(self, config: GNNIntegrationConfig,
+                 level_configs: List[Dict[str, Any]]) -> None:
         self.config = config
         self.num_levels = len(level_configs)
         self.device = torch.device(
@@ -465,7 +517,8 @@ class HierarchicalGraphIntegration:
         inference_algorithms: List[InferenceAlgorithm],
     ) -> None:
         """Set generative models and create adapters for each level"""
-        for i, (gen_model, inf_algo) in enumerate(zip(generative_models, inference_algorithms)):
+        for i, (gen_model, inf_algo) in enumerate(
+                zip(generative_models, inference_algorithms)):
             self.level_adapters[i] = GNNActiveInferenceAdapter(
                 self.config, self.level_gnns[i], gen_model, inf_algo
             )
@@ -481,7 +534,8 @@ class HierarchicalGraphIntegration:
             Processed features for each level
         """
         processed_levels = []
-        for i, (graph_data, adapter) in enumerate(zip(graph_data_per_level, self.level_adapters)):
+        for i, (graph_data, adapter) in enumerate(
+                zip(graph_data_per_level, self.level_adapters)):
             if adapter is not None:
                 processed = adapter.process_graph(
                     graph_data["node_features"],
@@ -588,16 +642,17 @@ class GNNActiveInferenceIntegration:
                         matrices["D"], dtype=torch.float32, device=self.device
                     )
         else:
-            raise NotImplementedError(f"Model type {gnn_spec['model_type']} not yet implemented")
+            raise NotImplementedError(
+                f"Model type {
+                    gnn_spec['model_type']} not yet implemented")
         # Create inference algorithm
         inf_config = InferenceConfig(use_gpu=self.config.use_gpu)
         inference = VariationalMessagePassing(inf_config)
 
         # Return a simple object with the required attributes
         class ActiveInferenceModel:
-            def __init__(
-                self, generative_model: GenerativeModel, inference: InferenceAlgorithm
-            ) -> None:
+            def __init__(self, generative_model: GenerativeModel,
+                         inference: InferenceAlgorithm) -> None:
                 self.generative_model = generative_model
                 self.inference = inference
 
@@ -626,7 +681,8 @@ def create_gnn_adapter(
             raise ValueError(
                 "Standard adapter requires gnn_model, generative_model, and inference_algorithm"
             )
-        return GNNActiveInferenceAdapter(config, gnn_model, generative_model, inference_algorithm)
+        return GNNActiveInferenceAdapter(
+            config, gnn_model, generative_model, inference_algorithm)
     elif adapter_type == "hierarchical":
         level_configs = kwargs.get("level_configs", [])
         if not level_configs:
@@ -635,7 +691,8 @@ def create_gnn_adapter(
         generative_models = kwargs.get("generative_models")
         inference_algorithms = kwargs.get("inference_algorithms")
         if generative_models and inference_algorithms:
-            adapter.set_generative_models(generative_models, inference_algorithms)
+            adapter.set_generative_models(
+                generative_models, inference_algorithms)
         return adapter
     else:
         raise ValueError(f"Unknown adapter type: {adapter_type}")
@@ -643,8 +700,11 @@ def create_gnn_adapter(
 
 if __name__ == "__main__":
     config = GNNIntegrationConfig(
-        gnn_type="gcn", num_layers=3, hidden_dim=64, output_dim=32, use_gpu=False
-    )
+        gnn_type="gcn",
+        num_layers=3,
+        hidden_dim=64,
+        output_dim=32,
+        use_gpu=False)
 
     class DummyGNN(nn.Module):
         def __init__(self, input_dim, hidden_dim, output_dim) -> None:
@@ -669,7 +729,8 @@ if __name__ == "__main__":
     gen_model = DiscreteGenerativeModel(dims, params)
     inf_config = InferenceConfig(use_gpu=False)
     inference = VariationalMessagePassing(inf_config)
-    adapter = GNNActiveInferenceAdapter(config, gnn_model, gen_model, inference)
+    adapter = GNNActiveInferenceAdapter(
+        config, gnn_model, gen_model, inference)
     node_features = torch.randn(5, 10)
     edge_index = torch.tensor([[0, 1, 2, 3, 4], [1, 2, 3, 4, 0]])
     graph_data = adapter.process_graph(node_features, edge_index)

@@ -2,7 +2,6 @@
 Tests for inference engine utility functions.
 """
 
-import numpy as np
 import pytest
 import torch
 
@@ -50,7 +49,8 @@ class TestToOneHot:
         num_classes = 3
         one_hot = to_one_hot(indices, num_classes)
 
-        expected = torch.tensor([[[1, 0, 0], [0, 1, 0]], [[0, 0, 1], [1, 0, 0]]])
+        expected = torch.tensor(
+            [[[1, 0, 0], [0, 1, 0]], [[0, 0, 1], [1, 0, 0]]])
 
         assert torch.equal(one_hot, expected)
         assert one_hot.shape == (2, 2, 3)
@@ -101,7 +101,8 @@ class TestNormalizeBeliefs:
 
     def test_batch_normalization(self):
         """Test batch belief normalization."""
-        beliefs = torch.tensor([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [0.1, 0.2, 0.7]])
+        beliefs = torch.tensor(
+            [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [0.1, 0.2, 0.7]])
         normalized = normalize_beliefs(beliefs)
 
         # Each row should sum to 1
@@ -110,9 +111,12 @@ class TestNormalizeBeliefs:
         assert torch.allclose(row_sums, expected_sums)
 
         # Check specific values
-        assert torch.allclose(normalized[0], torch.tensor([1.0 / 6.0, 2.0 / 6.0, 3.0 / 6.0]))
-        assert torch.allclose(normalized[1], torch.tensor([4.0 / 15.0, 5.0 / 15.0, 6.0 / 15.0]))
-        assert torch.allclose(normalized[2], torch.tensor([0.1, 0.2, 0.7]))  # Already normalized
+        assert torch.allclose(normalized[0], torch.tensor(
+            [1.0 / 6.0, 2.0 / 6.0, 3.0 / 6.0]))
+        assert torch.allclose(normalized[1], torch.tensor(
+            [4.0 / 15.0, 5.0 / 15.0, 6.0 / 15.0]))
+        assert torch.allclose(normalized[2], torch.tensor(
+            [0.1, 0.2, 0.7]))  # Already normalized
 
     def test_zero_beliefs(self):
         """Test normalization of zero beliefs."""
@@ -146,14 +150,15 @@ class TestNormalizeBeliefs:
         assert torch.allclose(normalized.sum(), torch.tensor(1.0))
 
         # Check proportions
-        total = -1.0 + 2.0 + 3.0  # = 4.0
+        _ = -1.0 + 2.0 + 3.0  # = 4.0
         expected = torch.tensor([-1.0 / 4.0, 2.0 / 4.0, 3.0 / 4.0])
         assert torch.allclose(normalized, expected)
 
     def test_multidimensional_normalization(self):
         """Test normalization of multidimensional tensors."""
         # 3D tensor
-        beliefs = torch.tensor([[[1.0, 2.0], [3.0, 4.0]], [[5.0, 6.0], [7.0, 8.0]]])
+        beliefs = torch.tensor(
+            [[[1.0, 2.0], [3.0, 4.0]], [[5.0, 6.0], [7.0, 8.0]]])
         normalized = normalize_beliefs(beliefs)
 
         # Last dimension should sum to 1
@@ -224,7 +229,8 @@ class TestUtilsIntegration:
 
     def test_normalize_then_one_hot_argmax(self):
         """Test normalize then convert back via argmax."""
-        beliefs = torch.tensor([[0.1, 0.8, 0.1], [0.6, 0.3, 0.1], [0.2, 0.2, 0.6]])
+        beliefs = torch.tensor(
+            [[0.1, 0.8, 0.1], [0.6, 0.3, 0.1], [0.2, 0.2, 0.6]])
 
         normalized = normalize_beliefs(beliefs)
         argmax_indices = torch.argmax(normalized, dim=-1)
@@ -268,7 +274,12 @@ class TestUtilsIntegration:
         assert torch.equal(most_likely_states, expected_states)
 
         # One-hot should be proper categorical distributions
-        assert torch.equal(one_hot_states.sum(dim=-1), torch.ones(num_timesteps, dtype=torch.long))
+        assert torch.equal(
+            one_hot_states.sum(
+                dim=-1),
+            torch.ones(
+                num_timesteps,
+                dtype=torch.long))
 
 
 if __name__ == "__main__":

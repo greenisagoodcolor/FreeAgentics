@@ -6,7 +6,13 @@
  */
 
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 // Mock conversation orchestration components
@@ -486,7 +492,7 @@ describe("Conversation Orchestration Components", () => {
         />,
       );
 
-      const formatSelect = screen.getByDisplayValue("text");
+      const formatSelect = screen.getByLabelText("Response Format");
       fireEvent.change(formatSelect, { target: { value: "json" } });
 
       expect(mockOnSettingsChange).toHaveBeenCalledWith({
@@ -637,8 +643,10 @@ describe("Conversation Orchestration Components", () => {
       const nameInput = screen.getByPlaceholderText("Preset name");
       const saveButton = screen.getByText("Save Current as Preset");
 
-      await user.type(nameInput, "My Custom Preset");
-      await user.click(saveButton);
+      await act(async () => {
+        await user.type(nameInput, "My Custom Preset");
+        await user.click(saveButton);
+      });
 
       expect(mockHandlers.onSavePreset).toHaveBeenCalledWith(
         "My Custom Preset",
@@ -659,8 +667,10 @@ describe("Conversation Orchestration Components", () => {
       const nameInput = screen.getByPlaceholderText("Preset name");
       const saveButton = screen.getByText("Save Current as Preset");
 
-      await user.type(nameInput, "Test Preset");
-      await user.click(saveButton);
+      await act(async () => {
+        await user.type(nameInput, "Test Preset");
+        await user.click(saveButton);
+      });
 
       expect(nameInput).toHaveValue("");
     });
@@ -710,10 +720,16 @@ describe("Conversation Orchestration Components", () => {
     it("displays participant information", () => {
       render(<RealTimePreview previewData={mockPreviewData} isActive={true} />);
 
-      expect(screen.getByText("Agent Alpha")).toBeInTheDocument();
+      // Check for agent names (there may be multiple instances)
+      const agentAlphaElements = screen.getAllByText("Agent Alpha");
+      expect(agentAlphaElements.length).toBeGreaterThan(0);
       expect(screen.getByText("thinking")).toBeInTheDocument();
-      expect(screen.getByText("Agent Beta")).toBeInTheDocument();
+
+      const agentBetaElements = screen.getAllByText("Agent Beta");
+      expect(agentBetaElements.length).toBeGreaterThan(0);
       expect(screen.getByText("responding")).toBeInTheDocument();
+      expect(screen.getByText("Agent Gamma")).toBeInTheDocument();
+      expect(screen.getByText("listening")).toBeInTheDocument();
     });
 
     it("displays next messages queue", () => {
@@ -772,7 +788,8 @@ describe("Conversation Orchestration Components", () => {
 
       expect(screen.getByText("1000ms")).toBeInTheDocument();
       expect(screen.getByText("2000ms")).toBeInTheDocument();
-      expect(screen.getByDisplayValue("round-robin")).toBeInTheDocument();
+      const strategySelect = screen.getByLabelText("Turn-taking Strategy");
+      expect(strategySelect).toHaveValue("round-robin");
     });
 
     it("handles response delay changes", () => {
@@ -817,7 +834,7 @@ describe("Conversation Orchestration Components", () => {
         />,
       );
 
-      const strategySelect = screen.getByDisplayValue("round-robin");
+      const strategySelect = screen.getByLabelText("Turn-taking Strategy");
       fireEvent.change(strategySelect, { target: { value: "weighted" } });
 
       expect(mockOnDynamicsChange).toHaveBeenCalledWith({
@@ -926,7 +943,9 @@ describe("Conversation Orchestration Components", () => {
         />,
       );
 
-      const durationInput = screen.getByDisplayValue("30");
+      const durationInput = screen.getByLabelText(
+        "Conversation Duration (minutes)",
+      );
       fireEvent.change(durationInput, { target: { value: "45" } });
 
       expect(mockOnTimingChange).toHaveBeenCalledWith({
@@ -1047,7 +1066,8 @@ describe("Conversation Orchestration Components", () => {
       );
 
       // Test cross-component interactions
-      const temperatureSlider = screen.getByRole("slider");
+      const sliders = screen.getAllByRole("slider");
+      const temperatureSlider = sliders[0]; // First slider is the temperature slider
       fireEvent.change(temperatureSlider, { target: { value: "0.9" } });
 
       expect(handlers.onSettingsChange).toHaveBeenCalled();

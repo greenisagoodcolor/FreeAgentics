@@ -1,4 +1,0 @@
-
-> freeagentics@0.1.0 test
-> jest --coverage --watchAll=false --coverageReporters=text --coverageReporters=html --coverageReporters=json --coverageDirectory=../test-reports/20250701_144706/frontend --passWithNoTests
-

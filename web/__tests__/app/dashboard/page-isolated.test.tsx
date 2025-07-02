@@ -15,7 +15,11 @@ jest.mock("../../../app/dashboard/components/panels/AgentPanel", () => {
 
 jest.mock("../../../app/dashboard/components/panels/ConversationPanel", () => {
   return function ConversationPanel({ view }: { view: string }) {
-    return <div data-testid="conversation-panel-mock">Conversation Panel Mock - {view}</div>;
+    return (
+      <div data-testid="conversation-panel-mock">
+        Conversation Panel Mock - {view}
+      </div>
+    );
   };
 });
 
@@ -27,13 +31,19 @@ jest.mock("../../../app/dashboard/components/panels/GoalPanel", () => {
 
 jest.mock("../../../app/dashboard/components/panels/KnowledgePanel", () => {
   return function KnowledgePanel({ view }: { view: string }) {
-    return <div data-testid="knowledge-panel-mock">Knowledge Panel Mock - {view}</div>;
+    return (
+      <div data-testid="knowledge-panel-mock">
+        Knowledge Panel Mock - {view}
+      </div>
+    );
   };
 });
 
 jest.mock("../../../app/dashboard/components/panels/MetricsPanel", () => {
   return function MetricsPanel({ view }: { view: string }) {
-    return <div data-testid="metrics-panel-mock">Metrics Panel Mock - {view}</div>;
+    return (
+      <div data-testid="metrics-panel-mock">Metrics Panel Mock - {view}</div>
+    );
   };
 });
 
@@ -56,7 +66,7 @@ describe("HomePage (Isolated Test)", () => {
 
   test("renders without crashing with mocked components", () => {
     render(<HomePage />);
-    
+
     // Check that mocked components are rendered
     expect(screen.getByTestId("agent-panel-mock")).toBeInTheDocument();
     expect(screen.getByTestId("conversation-panel-mock")).toBeInTheDocument();
@@ -67,9 +77,13 @@ describe("HomePage (Isolated Test)", () => {
 
   test("dashboard panels receive correct view prop", () => {
     render(<HomePage />);
-    
+
     // Check that panels receive the default view
-    expect(screen.getByText(/Agent Panel Mock - executive/)).toBeInTheDocument();
-    expect(screen.getByText(/Conversation Panel Mock - executive/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Agent Panel Mock - executive/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Conversation Panel Mock - executive/),
+    ).toBeInTheDocument();
   });
 });

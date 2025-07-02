@@ -28,8 +28,6 @@ logger = logging.getLogger(__name__)
 class StateTransitionError(Exception):
     """Exception raised when an invalid state transition is attempted"""
 
-    pass
-
 
 class StateEventType(Enum):
     """Types of state events"""
@@ -107,7 +105,8 @@ class StateTransitionValidator:
     }
 
     @classmethod
-    def is_valid_transition(cls, from_status: AgentStatus, to_status: AgentStatus) -> bool:
+    def is_valid_transition(cls, from_status: AgentStatus,
+                            to_status: AgentStatus) -> bool:
         """Check if a state transition is valid"""
         if from_status == to_status:
             return True
@@ -115,7 +114,8 @@ class StateTransitionValidator:
         return to_status in valid_targets
 
     @classmethod
-    def get_valid_transitions(cls, from_status: AgentStatus) -> set[AgentStatus]:
+    def get_valid_transitions(
+            cls, from_status: AgentStatus) -> set[AgentStatus]:
         """Get all valid transitions from a given status"""
         return cls.VALID_TRANSITIONS.get(from_status, set()).copy()
 
@@ -233,8 +233,9 @@ class AgentStateManager:
                 old_status, new_status
             ):
                 raise StateTransitionError(
-                    f"Invalid transition from {old_status.value} to {new_status.value}"
-                )
+                    f"Invalid transition from {
+                        old_status.value} to {
+                        new_status.value}")
             agent.update_status(new_status)
             event = StateEvent(
                 event_type=StateEventType.STATUS_CHANGE,
@@ -243,10 +244,14 @@ class AgentStateManager:
                 new_value=new_status,
             )
             self._notify_observers(event)
-            self._execute_transition_callbacks(agent_id, old_status, new_status)
+            self._execute_transition_callbacks(
+                agent_id, old_status, new_status)
             self._create_snapshot(agent)
 
-    def update_agent_position(self, agent_id: str, new_position: Position) -> None:
+    def update_agent_position(
+            self,
+            agent_id: str,
+            new_position: Position) -> None:
         """
         Update an agent's position
         Args:
@@ -259,7 +264,8 @@ class AgentStateManager:
         with self._locks[agent_id]:
             old_position = agent.position
             agent.update_position(new_position)
-            if agent.status == AgentStatus.IDLE and old_position.distance_to(new_position) > 0.1:
+            if agent.status == AgentStatus.IDLE and old_position.distance_to(
+                    new_position) > 0.1:
                 self.update_agent_status(agent_id, AgentStatus.MOVING)
             event = StateEvent(
                 event_type=StateEventType.POSITION_UPDATE,
@@ -294,16 +300,17 @@ class AgentStateManager:
                 else:
                     agent.resources.restore_energy(energy_delta)
             if health_delta is not None:
-                new_health = max(0.0, min(100.0, agent.resources.health + health_delta))
+                new_health = max(
+                    0.0, min(
+                        100.0, agent.resources.health + health_delta))
                 agent.resources.health = new_health
             if agent.resources.energy <= 0 or agent.resources.health <= 0:
-                self.update_agent_status(agent_id, AgentStatus.ERROR, force=True)
+                self.update_agent_status(
+                    agent_id, AgentStatus.ERROR, force=True)
             event = StateEvent(
-                event_type=StateEventType.RESOURCE_UPDATE,
-                agent_id=agent_id,
-                old_value={"energy": old_energy, "health": old_health},
-                new_value={"energy": agent.resources.energy, "health": agent.resources.health},
-            )
+                event_type=StateEventType.RESOURCE_UPDATE, agent_id=agent_id, old_value={
+                    "energy": old_energy, "health": old_health}, new_value={
+                    "energy": agent.resources.energy, "health": agent.resources.health}, )
             self._notify_observers(event)
 
     def register_transition_callback(
@@ -360,7 +367,10 @@ class AgentStateManager:
             events = [e for e in events if e.event_type == event_type]
         return events[-limit:]
 
-    def get_state_snapshots(self, agent_id: str, limit: int = 10) -> List[StateSnapshot]:
+    def get_state_snapshots(
+            self,
+            agent_id: str,
+            limit: int = 10) -> List[StateSnapshot]:
         """
 
         Get state snapshots for an agent
@@ -416,7 +426,8 @@ class AgentStateManager:
         """
         sorted_updates = sorted(updates, key=lambda u: u["agent_id"])
         agent_ids = list({u["agent_id"] for u in sorted_updates})
-        locks = [self._locks.get(aid) for aid in agent_ids if aid in self._locks]
+        locks = [self._locks.get(aid)
+                 for aid in agent_ids if aid in self._locks]
         for lock in locks:
             if lock is not None:
                 lock.acquire()

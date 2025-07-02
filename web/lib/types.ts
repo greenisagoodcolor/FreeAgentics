@@ -45,48 +45,128 @@ export interface AgentToolPermissions {
   conversationAnalysis: boolean;
 }
 
+// Comprehensive Agent interface that unifies all different agent representations
 export interface Agent {
+  // Core identification
   id: string;
   name: string;
-  biography?: string;
-  class?: string; // Agent class/type (Explorer, Merchant, Scholar, Guardian, etc.)
+  
+  // Template/class information
+  templateId?: string; // For Redux store compatibility
+  class?: string; // Legacy agent class/type
+  type?: string; // Agent type string
+  role?: string; // Agent role in conversations
+  
+  // Visual and presentation
   avatar?: string; // Optional avatar image URL
-  inConversation: boolean;
-  position: Position;
+  avatarUrl?: string; // Alternative naming for API compatibility
   color: string;
+  
+  // Agent description and domains
+  biography?: string;
+  knowledgeDomains?: string[]; // For Redux store compatibility
   knowledge: KnowledgeEntry[];
-  autonomyEnabled: boolean; // New property to track if agent can engage in autonomous conversations
-  toolPermissions?: AgentToolPermissions; // Optional to maintain backward compatibility
-
-  // Additional properties needed by components
-  status?:
+  
+  // Status and state
+  status:
     | "idle"
+    | "active"
     | "moving"
     | "interacting"
     | "planning"
     | "executing"
     | "learning"
+    | "processing"
+    | "typing"
     | "error"
     | "offline";
-  type?: string; // Agent type
-  role?: string; // Agent role in conversations
-  personality?: {
+  
+  // Positioning
+  position: Position;
+  proximityRadius?: number;
+  
+  // Behavior and configuration
+  inConversation: boolean;
+  autonomyEnabled: boolean;
+  
+  // Personality traits (consolidated)
+  personality: {
     openness: number;
     conscientiousness: number;
     extraversion: number;
     agreeableness: number;
     neuroticism: number;
-  }; // Agent personality traits
+  };
+  
+  // Agent parameters for conversation control
+  parameters?: {
+    responseThreshold: number; // 0-1
+    turnTakingProbability: number; // 0-1
+    conversationEngagement: number; // 0-1
+  };
+  
+  // Capabilities and permissions
+  capabilities?: string[]; // For API compatibility
+  toolPermissions?: AgentToolPermissions;
+  
+  // Resources and performance
+  resources?: {
+    energy: number; // 0-100
+    health: number; // 0-100
+    memory_used: number;
+    memory_capacity: number;
+  };
+  
   performance?: {
     taskCompletion?: number;
     collaborationScore?: number;
   };
+  
+  // Activity tracking
+  activityMetrics?: {
+    messagesCount: number;
+    beliefCount: number;
+    responseTime: number[];
+  };
+  
+  // Timestamps
+  createdAt?: number | string;
+  lastActive?: number | string;
+  created_at?: string; // API format
+  updated_at?: string; // API format
+  
+  // Agent state (consolidated)
   state?: {
     energy?: number;
     beliefs?: Record<string, any>;
     safety?: number;
     attention?: number;
   };
+  
+  // Metadata
+  tags?: string[];
+  metadata?: Record<string, any>;
+  
+  // Goals and beliefs (for detailed agents)
+  beliefs?: Array<{
+    id: string;
+    content: string;
+    confidence: number;
+  }>;
+  
+  goals?: Array<{
+    id: string;
+    description: string;
+    priority: number;
+    deadline: string | null;
+  }>;
+  
+  // Relationships
+  relationships?: Array<{
+    agent_id: string;
+    trust_level: number;
+    last_interaction: string;
+  }>;
 }
 
 // Enhanced Message interface for real-time conversation monitoring

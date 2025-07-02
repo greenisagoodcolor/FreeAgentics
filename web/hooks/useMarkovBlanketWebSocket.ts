@@ -20,14 +20,16 @@ export interface MarkovBlanketSubscription {
 }
 
 export interface BoundaryViolation {
+  event_id: string;
   agent_id: string;
   violation_type: string;
   independence_measure: number;
   threshold: number;
   mathematical_justification: string;
   evidence: any;
-  severity: string;
+  severity: number;
   timestamp: string;
+  acknowledged: boolean;
 }
 
 export interface MonitoringStatus {
@@ -198,6 +200,7 @@ export function useMarkovBlanketWebSocket(
           // Monitoring events
           case "boundary_violation":
             const violation: BoundaryViolation = {
+              event_id: `violation-${Date.now()}-${Math.random()}`,
               agent_id: data.agent_id,
               violation_type: data.data.violation_type,
               independence_measure: data.data.independence_measure,
@@ -206,6 +209,7 @@ export function useMarkovBlanketWebSocket(
               evidence: data.data.evidence,
               severity: data.severity,
               timestamp: data.timestamp,
+              acknowledged: false,
             };
             setState((prev) => ({
               ...prev,

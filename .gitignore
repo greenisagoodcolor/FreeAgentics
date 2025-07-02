@@ -168,3 +168,31 @@ docs/_build/
 # ==========================================
 # tasks.json
 # tasks/
+
+# ==========================================
+# Repository Optimization Patterns
+# ==========================================
+# Test execution artifacts
+test-reports/
+coverage_output.txt
+*_test_output*.log
+isinstance_typeerror_traceback.txt
+freeagentics@*
+
+# Development artifacts  
+web/fix-*.js
+web/suppress-*.js
+web/debug-*.js
+web/*-debug.log
+web/coverage-*/
+web/comprehensive-ux-test.js
+
+# Build system artifacts
+*.tsbuildinfo
+.jest-cache/
+
+# Additional coverage patterns
+htmlcov/
+coverage-massive/
+coverage.json
+.coverage.*

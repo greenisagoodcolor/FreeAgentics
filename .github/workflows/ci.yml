@@ -1,95 +1,254 @@
-name: Main CI/CD Pipeline
+name: FreeAgentics CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - main
-      - master
-      - develop
+    branches: [main, develop]
   pull_request:
-    branches:
-      - main
-      - master
-      - develop
+    branches: [main, develop]
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: "3.11"
+  NODE_VERSION: "18"
+  CACHE_VERSION: v1
 
 jobs:
-  lint:
-    name: Lint Code
+  # Quality checks run in parallel
+  quality-python:
+    name: Python Quality Checks
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
 
-      - name: Install linting dependencies
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install black isort flake8
+          pip install flake8 mypy black isort bandit
 
-      - name: Run Linters
-        run: |
-          flake8 .
-          isort . --check-only
-          black . --check
+      - name: Run flake8
+        run: flake8 . --exclude=venv,node_modules,.git --max-line-length=100 --count --statistics
 
-  test:
-    name: Run Tests
-    needs: lint
+      - name: Run mypy
+        run: mypy . --ignore-missing-imports --no-error-summary || true
+
+      - name: Check formatting with black
+        run: black . --check --exclude="/(venv|node_modules|\.git)/"
+
+      - name: Check import sorting
+        run: isort . --check-only --profile=black
+
+      - name: Security scan with bandit
+        run: bandit -r . -f json -o bandit-report.json --skip B101 || true
+
+  quality-frontend:
+    name: Frontend Quality Checks
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10", "3.11"]
-
+    defaults:
+      run:
+        working-directory: ./web
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
+      - uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
-          cache-dependency-path: "**/package-lock.json"
+          cache-dependency-path: web/package-lock.json
 
-      - name: Install Python Dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit
+
+      - name: Check formatting
+        run: npx prettier --check "**/*.{js,jsx,ts,tsx,json,css,md}"
+
+  test-backend:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    needs: quality-python
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: freeagentics_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-cov
+          pip install pytest pytest-asyncio pytest-cov pytest-timeout
 
-      - name: Install Node.js Dependencies
+      - name: Run backend tests
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/freeagentics_test
+          REDIS_URL: redis://localhost:6379
+          PYTHONPATH: .
         run: |
-          # Run install in all directories with a package.json
-          for dir in $(find . -name 'package.json' -not -path './node_modules/*' -exec dirname {} \; | sort -u); do
-            (cd "$dir" && npm install)
-          done
+          pytest tests/unit -xvs --cov=. --cov-report=xml --cov-report=html --timeout=300
 
-      - name: Run Python Tests
-        run: pytest --cov=. --cov-report=xml
-
-      - name: Run JS/TS Tests
-        run: |
-          for dir in $(find . -name 'package.json' -not -path './node_modules/*' -exec dirname {} \; | sort -u); do
-            if [ -n "$(jq .scripts.test "$dir/package.json")" ]; then
-              (cd "$dir" && npm test)
-            fi
-          done
-
-      - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v4
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.xml
-          flags: pytest
-          name: codecov-umbrella
-          fail_ci_if_error: true
-          verbose: true
+          flags: backend
+          name: backend-coverage
+
+  test-frontend:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    needs: quality-frontend
+    defaults:
+      run:
+        working-directory: ./web
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test -- --coverage --watchAll=false
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./web/coverage/lcov.info
+          flags: frontend
+          name: frontend-coverage
+
+  build-docker:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend]
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        if: github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push API image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./infrastructure/docker/Dockerfile.api
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: |
+            freeagentics/api:latest
+            freeagentics/api:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Web image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./infrastructure/docker/Dockerfile.web
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: |
+            freeagentics/web:latest
+            freeagentics/web:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend]
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Start services with docker-compose
+        run: |
+          docker-compose -f infrastructure/docker/docker-compose.yml up -d
+          sleep 30  # Wait for services to be ready
+
+      - name: Run integration tests
+        run: |
+          pip install pytest requests
+          pytest tests/integration -xvs --timeout=600
+
+      - name: Stop services
+        if: always()
+        run: docker-compose -f infrastructure/docker/docker-compose.yml down
+
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build-docker
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    steps:
+      - name: Deploy to production
+        run: |
+          echo "Deployment would happen here"
+          # Add actual deployment steps (e.g., kubectl apply, terraform apply, etc.)

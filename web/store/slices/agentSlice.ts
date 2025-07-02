@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { nanoid } from "nanoid";
+import type { Agent } from "@/lib/types";
 
 // Types from PRD
 export interface AgentTemplate {
@@ -18,32 +19,8 @@ export interface AgentTemplate {
   color: string;
 }
 
-export interface Agent {
-  id: string;
-  name: string;
-  templateId: string;
-  biography: string;
-  knowledgeDomains: string[];
-  parameters: {
-    responseThreshold: number;
-    turnTakingProbability: number;
-    conversationEngagement: number;
-  };
-  status: "idle" | "active" | "processing" | "typing" | "error" | "offline";
-  avatarUrl: string;
-  color: string;
-  createdAt: number;
-  lastActive: number;
-  position?: { x: number; y: number }; // For spatial grid
-  proximityRadius?: number;
-  inConversation: boolean;
-  autonomyEnabled: boolean;
-  activityMetrics: {
-    messagesCount: number;
-    beliefCount: number;
-    responseTime: number[];
-  };
-}
+// Use the unified Agent interface from @/lib/types
+// The Agent interface is now imported from the main types file
 
 interface AgentState {
   agents: Record<string, Agent>;
@@ -461,6 +438,73 @@ const agentSlice = createSlice({
         state.agentOrder.push(agentId);
       });
     },
+
+    // Generic update agent
+    updateAgent: (
+      state,
+      action: PayloadAction<{
+        id: string;
+        updates: Partial<Agent>;
+      }>,
+    ) => {
+      const { id, updates } = action.payload;
+      if (state.agents[id]) {
+        state.agents[id] = {
+          ...state.agents[id],
+          ...updates,
+          lastActive: Date.now(),
+        };
+      }
+    },
+
+    // Add agent
+    addAgent: (state, action: PayloadAction<Agent>) => {
+      const agent = action.payload;
+      state.agents[agent.id] = agent;
+      if (!state.agentOrder.includes(agent.id)) {
+        state.agentOrder.push(agent.id);
+      }
+    },
+
+    // Remove agent (alias for deleteAgent)
+    removeAgent: (state, action: PayloadAction<string>) => {
+      const agentId = action.payload;
+      delete state.agents[agentId];
+      state.agentOrder = state.agentOrder.filter((id) => id !== agentId);
+      if (state.selectedAgentId === agentId) {
+        state.selectedAgentId = null;
+      }
+    },
+
+    // Set all agents (for bulk updates)
+    setAgents: (state, action: PayloadAction<Agent[]>) => {
+      state.agents = {};
+      state.agentOrder = [];
+      action.payload.forEach((agent) => {
+        state.agents[agent.id] = agent;
+        state.agentOrder.push(agent.id);
+      });
+    },
+
+    // Set selected agent
+    setSelectedAgent: (state, action: PayloadAction<Agent | null>) => {
+      state.selectedAgentId = action.payload?.id || null;
+    },
+    
+    // Demo data actions for compatibility
+    setDemoAgent: (state, action: PayloadAction<Agent>) => {
+      const agent = action.payload;
+      state.agents[agent.id] = agent;
+      if (!state.agentOrder.includes(agent.id)) {
+        state.agentOrder.push(agent.id);
+      }
+    },
+    
+    clearAgents: (state) => {
+      state.agents = {};
+      state.agentOrder = [];
+      state.selectedAgentId = null;
+    },
   },
 });
 
@@ -476,6 +520,13 @@ export const {
   reorderAgents,
   deleteAgent,
   quickStartAgents,
+  updateAgent,
+  addAgent,
+  removeAgent,
+  setAgents,
+  setSelectedAgent,
+  setDemoAgent,
+  clearAgents,
 } = agentSlice.actions;
 
 export default agentSlice.reducer;

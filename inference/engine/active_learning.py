@@ -68,15 +68,12 @@ class InformationSeeker(ABC):
         self, beliefs: torch.Tensor, possible_observations: torch.Tensor
     ) -> torch.Tensor:
         """Compute the value of potential observations for reducing uncertainty"""
-        pass
 
     @abstractmethod
     def select_informative_action(
         self, beliefs: torch.Tensor, available_actions: torch.Tensor
     ) -> torch.Tensor:
         """Select action that maximizes information gain"""
-
-        pass
 
 
 class EntropyBasedSeeker(InformationSeeker):
@@ -85,7 +82,8 @@ class EntropyBasedSeeker(InformationSeeker):
     Seeks observations that would maximally reduce belief entropy.
     """
 
-    def __init__(self, config: ActiveLearningConfig, generative_model: GenerativeModel) -> None:
+    def __init__(self, config: ActiveLearningConfig,
+                 generative_model: GenerativeModel) -> None:
         super().__init__(config)
         self.generative_model = generative_model
 
@@ -115,7 +113,8 @@ class EntropyBasedSeeker(InformationSeeker):
             for i in range(num_obs):
                 likelihood = A_matrix[i]
                 posterior = likelihood * beliefs
-                posterior = posterior / (posterior.sum(dim=-1, keepdim=True) + self.config.eps)
+                posterior = posterior / \
+                    (posterior.sum(dim=-1, keepdim=True) + self.config.eps)
                 posterior_entropy = self.compute_entropy(posterior)
                 expected_entropies[i] = posterior_entropy.mean()
         else:
@@ -143,7 +142,8 @@ class EntropyBasedSeeker(InformationSeeker):
             for a in range(num_actions):
                 next_beliefs = torch.matmul(beliefs, B_matrix[:, :, a].T)
                 expected_entropy = self.compute_entropy(next_beliefs)
-                expected_info_gains[a] = beliefs.shape[0] - expected_entropy.mean()
+                expected_info_gains[a] = beliefs.shape[0] - \
+                    expected_entropy.mean()
             best_action = torch.argmax(expected_info_gains)
             return best_action
         else:
@@ -177,15 +177,14 @@ class MutualInformationSeeker(InformationSeeker):
         Returns:
             Mutual information value
         """
-        belief_entropy = -torch.sum(beliefs * torch.log(beliefs + self.config.eps), dim=-1)
+        belief_entropy = - \
+            torch.sum(beliefs * torch.log(beliefs + self.config.eps), dim=-1)
         if isinstance(self.generative_model, DiscreteGenerativeModel):
             A_matrix = self.generative_model.A
             joint = A_matrix.unsqueeze(0) * beliefs.unsqueeze(1).unsqueeze(2)
             marginal_obs = joint.sum(dim=2)
-            conditional_entropy = -torch.sum(
-                joint
-                * torch.log(joint / (marginal_obs.unsqueeze(2) + self.config.eps) + self.config.eps)
-            ).mean()
+            conditional_entropy = -torch.sum(joint * torch.log(joint / (
+                marginal_obs.unsqueeze(2) + self.config.eps) + self.config.eps)).mean()
         else:
             conditional_entropy = belief_entropy * 0.7
         mutual_info = belief_entropy.mean() - conditional_entropy
@@ -214,9 +213,11 @@ class MutualInformationSeeker(InformationSeeker):
             A_matrix = self.generative_model.A
             for a in range(num_actions):
                 next_beliefs = torch.matmul(beliefs, B_matrix[:, :, a].T)
-                expected_obs_dist = torch.matmul(next_beliefs, A_matrix.sum(dim=0).T)
+                expected_obs_dist = torch.matmul(
+                    next_beliefs, A_matrix.sum(dim=0).T)
                 expected_obs_dist = expected_obs_dist / expected_obs_dist.sum()
-                expected_mi[a] = self.compute_mutual_information(next_beliefs, expected_obs_dist)
+                expected_mi[a] = self.compute_mutual_information(
+                    next_beliefs, expected_obs_dist)
         return torch.argmax(expected_mi)
 
 
@@ -273,8 +274,7 @@ class ActiveLearningAgent:
         epistemic_values = torch.zeros(num_policies, device=self.device)
         for i, policy in enumerate(policies):
             _, epistemic, _ = self.policy_selector.compute_expected_free_energy(
-                policy, beliefs, self.generative_model
-            )
+                policy, beliefs, self.generative_model)
             epistemic_values[i] = epistemic
         return epistemic_values
 
@@ -300,8 +300,7 @@ class ActiveLearningAgent:
         pragmatic_values = []
         for policy in policies:
             _, _, pragmatic = self.policy_selector.compute_expected_free_energy(
-                policy, beliefs, self.generative_model, preferences
-            )
+                policy, beliefs, self.generative_model, preferences)
             pragmatic_values.append(pragmatic)
         return torch.tensor(pragmatic_values, device=self.device)
 
@@ -321,7 +320,8 @@ class ActiveLearningAgent:
             Selected action index and info dict
         """
         policies = self._generate_policies(available_actions)
-        pragmatic_values = self.compute_pragmatic_value(beliefs, policies, preferences)
+        pragmatic_values = self.compute_pragmatic_value(
+            beliefs, policies, preferences)
         epistemic_values = self.compute_epistemic_value(beliefs, policies)
         novelty_bonus = self._compute_novelty_bonus(beliefs, policies)
         combined_values = (
@@ -330,8 +330,10 @@ class ActiveLearningAgent:
             + self.config.novelty_weight * novelty_bonus
         )
         action_probabilities = F.softmax(combined_values, dim=0)
-        selected_policy_index = torch.multinomial(action_probabilities, 1).item()
-        selected_action_index = policies[selected_policy_index].actions[0].item()
+        selected_policy_index = torch.multinomial(
+            action_probabilities, 1).item()
+        selected_action_index = policies[selected_policy_index].actions[0].item(
+        )
         info = {
             "pragmatic_value": pragmatic_values[selected_policy_index].item(),
             "epistemic_value": epistemic_values[selected_policy_index].item(),
@@ -341,7 +343,10 @@ class ActiveLearningAgent:
         }
         return selected_action_index, info
 
-    def _simulate_policy_observations(self, beliefs: torch.Tensor, policy: Policy) -> torch.Tensor:
+    def _simulate_policy_observations(
+            self,
+            beliefs: torch.Tensor,
+            policy: Policy) -> torch.Tensor:
         """Simulate expected observations from executing a policy"""
         current_beliefs = beliefs.clone()
         observations = []
@@ -349,24 +354,35 @@ class ActiveLearningAgent:
             B_matrix = self.generative_model.B
             A_matrix = self.generative_model.A
             for action in policy.actions[: self.config.planning_horizon]:
-                next_beliefs = torch.matmul(current_beliefs, B_matrix[:, :, action].T)
-                expected_obs = torch.matmul(next_beliefs, A_matrix.sum(dim=0).T)
+                next_beliefs = torch.matmul(
+                    current_beliefs, B_matrix[:, :, action].T)
+                expected_obs = torch.matmul(
+                    next_beliefs, A_matrix.sum(dim=0).T)
                 observations.append(expected_obs)
                 current_beliefs = next_beliefs
         if observations:
             return torch.stack(observations)
         else:
-            return torch.zeros(1, self.generative_model.dims.num_observations, device=self.device)
+            return torch.zeros(
+                1,
+                self.generative_model.dims.num_observations,
+                device=self.device)
 
-    def _generate_policies(self, available_actions: torch.Tensor) -> List[Policy]:
+    def _generate_policies(
+            self,
+            available_actions: torch.Tensor) -> List[Policy]:
         """Generate a list of single-step policies for each available action"""
         action_indices = torch.argmax(available_actions, dim=1)
         policies = []
         for action_index in action_indices:
-            policies.append(Policy(actions=torch.tensor([action_index.item()])))
+            policies.append(
+                Policy(actions=torch.tensor([action_index.item()])))
         return policies
 
-    def _compute_novelty_bonus(self, beliefs: torch.Tensor, policies: List[Policy]) -> torch.Tensor:
+    def _compute_novelty_bonus(
+            self,
+            beliefs: torch.Tensor,
+            policies: List[Policy]) -> torch.Tensor:
         """Compute novelty bonus for each policy based on state visitation"""
         novelty_values = torch.zeros(len(policies), device=self.device)
         for i, policy in enumerate(policies):
@@ -380,11 +396,15 @@ class ActiveLearningAgent:
         discretized = (beliefs * 100).round().int()
         return str(discretized.tolist())
 
-    def update_novelty_memory(self, beliefs: torch.Tensor, observation: torch.Tensor) -> None:
+    def update_novelty_memory(
+            self,
+            beliefs: torch.Tensor,
+            observation: torch.Tensor) -> None:
         """Update novelty memory with new experience"""
 
         state_hash = self._hash_belief_state(beliefs)
-        self.visit_counts[state_hash] = self.visit_counts.get(state_hash, 0) + 1
+        self.visit_counts[state_hash] = self.visit_counts.get(
+            state_hash, 0) + 1
         self.novelty_memory.append((beliefs.clone(), observation.clone()))
         if len(self.novelty_memory) > 1000:
             self.novelty_memory.pop(0)
@@ -427,7 +447,8 @@ class InformationGainPlanner:
         planned_actions = []
         beliefs = current_beliefs.clone()
         for step in range(max_steps):
-            entropy = -torch.sum(beliefs * torch.log(beliefs + self.config.eps), dim=-1).mean()
+            entropy = -torch.sum(beliefs * torch.log(beliefs +
+                                 self.config.eps), dim=-1).mean()
             if entropy < target_uncertainty:
                 break
             if isinstance(self.generative_model, DiscreteGenerativeModel):
@@ -468,7 +489,11 @@ def create_active_learner(
             raise ValueError(
                 "Agent requires generative_model, inference_algorithm, and policy_selector"
             )
-        return ActiveLearningAgent(config, generative_model, inference_algorithm, policy_selector)
+        return ActiveLearningAgent(
+            config,
+            generative_model,
+            inference_algorithm,
+            policy_selector)
     elif learner_type == "planner":
         generative_model = kwargs.get("generative_model")
         if generative_model is None:
@@ -478,8 +503,10 @@ def create_active_learner(
         else:
             inference_algorithm = kwargs.get("inference_algorithm")
             if inference_algorithm is None:
-                raise ValueError("Mutual information seeker requires inference_algorithm")
-            info_seeker = MutualInformationSeeker(config, generative_model, inference_algorithm)
+                raise ValueError(
+                    "Mutual information seeker requires inference_algorithm")
+            info_seeker = MutualInformationSeeker(
+                config, generative_model, inference_algorithm)
         return InformationGainPlanner(config, generative_model, info_seeker)
     else:
         raise ValueError(f"Unknown learner type: {learner_type}")
@@ -487,7 +514,8 @@ def create_active_learner(
 
 if __name__ == "__main__":
     # Example usage
-    from .generative_model import DiscreteGenerativeModel, ModelDimensions, ModelParameters
+    # DiscreteGenerativeModel, ModelDimensions, ModelParameters already
+    # imported above
 
     config = ActiveLearningConfig(
         exploration_weight=0.3,
@@ -504,11 +532,13 @@ if __name__ == "__main__":
     pol_config = PolicyConfig(use_gpu=False)
     policy_selector = DiscreteExpectedFreeEnergy(pol_config)
 
-    learner = ActiveLearningAgent(config, gen_model, inference, policy_selector)
+    learner = ActiveLearningAgent(
+        config, gen_model, inference, policy_selector)
 
     beliefs = torch.softmax(torch.randn(1, 4), dim=-1)
     available_actions = torch.eye(2)
 
-    action, info = learner.select_exploratory_action(beliefs, available_actions)
+    action, info = learner.select_exploratory_action(
+        beliefs, available_actions)
     print(f"Selected action: {action}")
     print(f"Info: {info}")

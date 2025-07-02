@@ -25,7 +25,7 @@ global.requestAnimationFrame = jest.fn((callback) => {
 // Simple Responsive Hook
 const useResponsive = () => {
   const [width, setWidth] = React.useState(1024);
-  
+
   React.useEffect(() => {
     const handleResize = () => setWidth(window.innerWidth);
     window.addEventListener("resize", handleResize);
@@ -164,7 +164,7 @@ const IntegratedUITest: React.FC = () => {
   const [items, setItems] = React.useState(["Item 1", "Item 2", "Item 3"]);
   const [droppedItems, setDroppedItems] = React.useState<string[]>([]);
   const [virtualItems] = React.useState(
-    Array.from({ length: 100 }, (_, i) => `Virtual Item ${i + 1}`)
+    Array.from({ length: 100 }, (_, i) => `Virtual Item ${i + 1}`),
   );
   const responsive = useResponsive();
 
@@ -181,8 +181,7 @@ const IntegratedUITest: React.FC = () => {
       <div data-testid="integrated-ui" style={{ padding: "20px" }}>
         {/* Responsive Info */}
         <div data-testid="responsive-info">
-          Width: {responsive.width} |{" "}
-          {responsive.isMobile && "Mobile"}
+          Width: {responsive.width} | {responsive.isMobile && "Mobile"}
           {responsive.isTablet && "Tablet"}
           {responsive.isDesktop && "Desktop"}
         </div>
@@ -292,7 +291,7 @@ describe("Integration UI Tests", () => {
     render(<IntegratedUITest />);
 
     const addButton = screen.getByTestId("add-item");
-    
+
     // Should start with 3 items
     expect(screen.getByTestId("draggable-item-0")).toBeInTheDocument();
     expect(screen.getByTestId("draggable-item-1")).toBeInTheDocument();
@@ -349,8 +348,12 @@ describe("Integration UI Tests", () => {
     expect(virtualList).toBeInTheDocument();
 
     // Should render some visible items
-    expect(screen.getByTestId("list-item-0")).toHaveTextContent("Virtual Item 1");
-    expect(screen.getByTestId("list-item-1")).toHaveTextContent("Virtual Item 2");
+    expect(screen.getByTestId("list-item-0")).toHaveTextContent(
+      "Virtual Item 1",
+    );
+    expect(screen.getByTestId("list-item-1")).toHaveTextContent(
+      "Virtual Item 2",
+    );
   });
 
   test("should handle virtual list scrolling", () => {

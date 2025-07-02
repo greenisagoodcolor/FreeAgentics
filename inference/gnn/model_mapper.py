@@ -5,7 +5,7 @@ Module for FreeAgentics Active Inference implementation.
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Union
 
 import networkx as nx
 import numpy as np
@@ -15,13 +15,8 @@ import torch.nn.functional as F
 
 from .layers import (
     AggregationType,
-    EdgeConvLayer,
-    GATLayer,
-    GCNLayer,
-    GINLayer,
     GNNStack,
     LayerConfig,
-    SAGELayer,
 )
 
 """
@@ -130,7 +125,7 @@ class GraphAnalyzer:
         edge_weight: Optional[torch.Tensor] = None,
     ) -> GraphProperties:
         """
-        Analyze graph structure and extract properties.
+        Analyze graph structure and extract properties using Template Method pattern.
         Args:
             edge_index: Graph connectivity
             num_nodes: Number of nodes
@@ -141,77 +136,112 @@ class GraphAnalyzer:
             GraphProperties object with analyzed properties
         """
         G = self._to_networkx(edge_index, num_nodes, edge_weight)
+        
+        basic_properties = self._extract_basic_properties(edge_index, num_nodes, edge_weight, G)
+        feature_properties = self._extract_feature_properties(node_features, edge_features)
+        structural_properties = self._extract_structural_properties(G, num_nodes)
+        advanced_properties = self._extract_advanced_properties(G, num_nodes)
+        
+        return GraphProperties(
+            **basic_properties,
+            **feature_properties,
+            **structural_properties,
+            **advanced_properties
+        )
+
+    def _extract_basic_properties(self, edge_index: torch.Tensor, num_nodes: int, 
+                                 edge_weight: Optional[torch.Tensor], G) -> Dict[str, Any]:
+        """Extract basic graph properties"""
         num_edges = edge_index.shape[1]
-        density = num_edges / (num_nodes * (num_nodes - 1))
+        density = num_edges / (num_nodes * (num_nodes - 1)) if num_nodes > 1 else 0
         degrees = [G.degree(n) for n in G.nodes()]
-        avg_degree = np.mean(degrees) if degrees else 0
-        max_degree = max(degrees) if degrees else 0
-        is_directed = isinstance(G, nx.DiGraph)
-        is_weighted = edge_weight is not None
-        has_self_loops = any((u == v for u, v in G.edges()))
+        
+        return {
+            'num_nodes': num_nodes,
+            'num_edges': num_edges,
+            'density': density,
+            'avg_degree': np.mean(degrees) if degrees else 0,
+            'max_degree': max(degrees) if degrees else 0,
+            'is_directed': isinstance(G, nx.DiGraph),
+            'is_weighted': edge_weight is not None,
+            'has_self_loops': any((u == v for u, v in G.edges()))
+        }
+
+    def _extract_feature_properties(self, node_features: Optional[torch.Tensor], 
+                                   edge_features: Optional[torch.Tensor]) -> Dict[str, Any]:
+        """Extract feature-related properties"""
         has_node_features = node_features is not None
         has_edge_features = edge_features is not None
-        node_feature_dim = (
-            node_features.shape[1] if has_node_features and node_features is not None else 0
-        )
-        edge_feature_dim = (
-            edge_features.shape[1] if has_edge_features and edge_features is not None else 0
-        )
+        
+        return {
+            'has_node_features': has_node_features,
+            'has_edge_features': has_edge_features,
+            'node_feature_dim': node_features.shape[1] if has_node_features else 0,
+            'edge_feature_dim': edge_features.shape[1] if has_edge_features else 0
+        }
+
+    def _extract_structural_properties(self, G, num_nodes: int) -> Dict[str, Any]:
+        """Extract structural properties"""
+        is_directed = isinstance(G, nx.DiGraph)
+        
         if is_directed:
             num_components = nx.number_weakly_connected_components(G)
         else:
             num_components = nx.number_connected_components(G)
+        
         try:
             avg_clustering = nx.average_clustering(G)
         except Exception:
             avg_clustering = 0.0
-        is_bipartite = nx.is_bipartite(G)
-        has_cycles = not nx.is_forest(G)
-        diameter = None
-        if num_nodes < 1000:
-            if is_directed:
-                # For directed graphs, check if strongly connected
-                if nx.is_strongly_connected(G):
-                    try:
-                        diameter = nx.diameter(G)
-                    except Exception:
-                        pass
-            else:
-                # For undirected graphs, check if connected
-                if nx.is_connected(G):
-                    try:
-                        diameter = nx.diameter(G)
-                    except Exception:
-                        pass
-        spectral_gap = None
-        if num_nodes < 500:
-            try:
-                eigenvalues = nx.laplacian_spectrum(G)
-                if len(eigenvalues) > 1:
-                    eigenvalues = sorted(eigenvalues)
-                    spectral_gap = eigenvalues[1]
-            except Exception:
-                pass
-        return GraphProperties(
-            num_nodes=num_nodes,
-            num_edges=num_edges,
-            density=density,
-            avg_degree=avg_degree,
-            max_degree=max_degree,
-            is_directed=is_directed,
-            is_weighted=is_weighted,
-            has_self_loops=has_self_loops,
-            has_node_features=has_node_features,
-            has_edge_features=has_edge_features,
-            node_feature_dim=node_feature_dim,
-            edge_feature_dim=edge_feature_dim,
-            num_connected_components=num_components,
-            avg_clustering_coefficient=avg_clustering,
-            is_bipartite=is_bipartite,
-            has_cycles=has_cycles,
-            diameter=diameter,
-            spectral_gap=spectral_gap,
-        )
+        
+        return {
+            'num_connected_components': num_components,
+            'avg_clustering_coefficient': avg_clustering,
+            'is_bipartite': nx.is_bipartite(G),
+            'has_cycles': not nx.is_forest(G)
+        }
+
+    def _extract_advanced_properties(self, G, num_nodes: int) -> Dict[str, Any]:
+        """Extract advanced graph properties"""
+        diameter = self._calculate_diameter(G, num_nodes)
+        spectral_gap = self._calculate_spectral_gap(G, num_nodes)
+        
+        return {
+            'diameter': diameter,
+            'spectral_gap': spectral_gap
+        }
+
+    def _calculate_diameter(self, G, num_nodes: int) -> Optional[float]:
+        """Calculate graph diameter if feasible"""
+        if num_nodes >= 1000:
+            return None
+        
+        is_directed = isinstance(G, nx.DiGraph)
+        
+        try:
+            if is_directed and nx.is_strongly_connected(G):
+                return nx.diameter(G)
+            elif not is_directed and nx.is_connected(G):
+                return nx.diameter(G)
+        except Exception:
+            pass
+        
+        return None
+
+    def _calculate_spectral_gap(self, G, num_nodes: int) -> Optional[float]:
+        """Calculate spectral gap if feasible"""
+        if num_nodes >= 500:
+            return None
+        
+        try:
+            eigenvalues = nx.laplacian_spectrum(G)
+            if len(eigenvalues) > 1:
+                eigenvalues = sorted(eigenvalues)
+                return eigenvalues[1]
+        except Exception:
+            pass
+        
+        return None
 
     def _to_networkx(
         self,
@@ -254,14 +284,14 @@ class ModelSelector:
     def _initialize_rules(self) -> Dict[str, Any]:
         """Initializes architecture selection rules"""
         # Conditions (lambda functions for graph properties)
-        is_large = lambda p: p.num_nodes >= 1000 or p.num_edges >= 5000
-        is_small = lambda p: p.num_nodes < 100
-        is_dense = lambda p: p.density > 0.1
-        is_sparse = lambda p: p.density < 0.01
-        has_high_degree = lambda p: p.max_degree > 50
-        is_deep = lambda p: p.diameter is not None and p.diameter > 5
-        prefer_attention = lambda p: self.config.prefer_attention
-        is_graph_task = lambda p: "graph" in self.config.task_type.value
+        def is_large(p): return p.num_nodes >= 1000 or p.num_edges >= 5000
+        def is_small(p): return p.num_nodes < 100
+        def is_dense(p): return p.density > 0.1
+        def is_sparse(p): return p.density < 0.01
+        def has_high_degree(p): return p.max_degree > 50
+        def is_deep(p): return p.diameter is not None and p.diameter > 5
+        def prefer_attention(p): return self.config.prefer_attention
+        def is_graph_task(p): return "graph" in self.config.task_type.value
         balanced_rules = [
             {
                 "condition": prefer_attention,
@@ -334,7 +364,9 @@ class ModelSelector:
             "accuracy": accuracy_rules,
         }
 
-    def select_architecture(self, graph_properties: GraphProperties) -> ModelArchitecture:
+    def select_architecture(
+            self,
+            graph_properties: GraphProperties) -> ModelArchitecture:
         """
         Select the best architecture for given graph properties.
         Args:
@@ -343,7 +375,8 @@ class ModelSelector:
             Selected model architecture
         """
         if not self.config.auto_select and "architecture" in self.config.manual_overrides:
-            return ModelArchitecture(self.config.manual_overrides["architecture"])
+            return ModelArchitecture(
+                self.config.manual_overrides["architecture"])
         # Get rules based on performance priority
         priority = self.config.performance_priority
         if priority not in self.selection_rules:
@@ -401,7 +434,10 @@ class ModelSelector:
             output_channels=output_dim,
         )
         if architecture == ModelArchitecture.GAT:
-            config.heads = min(8, max(1, int(graph_properties.avg_degree // 5)))
+            config.heads = min(
+                8, max(
+                    1, int(
+                        graph_properties.avg_degree // 5)))
             config.dropout = 0.6 if graph_properties.density > 0.1 else 0.3
         elif architecture == ModelArchitecture.SAGE:
             config.aggregation = AggregationType.MEAN
@@ -428,7 +464,9 @@ class ModelSelector:
             num_layers = min(graph_properties.diameter, self.config.max_layers)
         else:
             num_layers = int(np.log2(graph_properties.num_nodes))
-        num_layers = max(self.config.min_layers, min(num_layers, self.config.max_layers))
+        num_layers = max(
+            self.config.min_layers, min(
+                num_layers, self.config.max_layers))
         if graph_properties.density > 0.5:
             num_layers = min(num_layers, 3)
         return num_layers
@@ -449,10 +487,15 @@ class ModelSelector:
             hidden_dims.append(current_dim)
             if i >= num_layers // 2:
                 reduction_factor = 0.75
-                current_dim = max(output_dim, int(current_dim * reduction_factor))
+                current_dim = max(
+                    output_dim, int(
+                        current_dim * reduction_factor))
         return hidden_dims
 
-    def _determine_dropout(self, graph_properties: GraphProperties, num_layers: int) -> float:
+    def _determine_dropout(
+            self,
+            graph_properties: GraphProperties,
+            num_layers: int) -> float:
         """Determine appropriate dropout rate"""
         base_dropout = 0.5
         if graph_properties.density > 0.3:
@@ -514,12 +557,15 @@ class GraphToModelMapper:
             layer_config = LayerConfig(
                 in_channels=current_in,
                 out_channels=hidden_dim,
-                dropout=config.dropout if i < len(config.hidden_channels) - 1 else 0.0,
+                dropout=config.dropout if i < len(
+                    config.hidden_channels) -
+                1 else 0.0,
                 activation=config.activation,
                 aggregation=config.aggregation,
             )
             layer_configs.append(layer_config)
-            if config.architecture == ModelArchitecture.GAT and config.heads and (config.heads > 1):
+            if config.architecture == ModelArchitecture.GAT and config.heads and (
+                    config.heads > 1):
                 current_in = hidden_dim * config.heads
             else:
                 current_in = hidden_dim
@@ -547,14 +593,21 @@ class GraphToModelMapper:
 
         return model
 
-    def _add_batch_norm(self, model: nn.Module, config: ModelConfig) -> nn.Module:
+    def _add_batch_norm(
+            self,
+            model: nn.Module,
+            config: ModelConfig) -> nn.Module:
         """Add batch normalization to model"""
 
         class BatchNormGNN(nn.Module):
-            def __init__(self, base_model: nn.Module, hidden_dims: List[int]) -> None:
+            def __init__(
+                    self,
+                    base_model: nn.Module,
+                    hidden_dims: List[int]) -> None:
                 super().__init__()
                 self.model = base_model
-                self.batch_norms = nn.ModuleList([nn.BatchNorm1d(dim) for dim in hidden_dims])
+                self.batch_norms = nn.ModuleList(
+                    [nn.BatchNorm1d(dim) for dim in hidden_dims])
 
             def forward(
                 self,
@@ -563,7 +616,8 @@ class GraphToModelMapper:
                 batch: Optional[torch.Tensor] = None,
                 **kwargs: Any,
             ) -> torch.Tensor:
-                for i, (layer, bn) in enumerate(zip(self.model.layers[:-1], self.batch_norms)):
+                for i, (layer, bn) in enumerate(
+                        zip(self.model.layers[:-1], self.batch_norms)):
                     x = layer(x, edge_index, **kwargs)
                     x = bn(x)
                     x = F.relu(x)
@@ -575,14 +629,21 @@ class GraphToModelMapper:
 
         return BatchNormGNN(model, config.hidden_channels)
 
-    def _add_layer_norm(self, model: nn.Module, config: ModelConfig) -> nn.Module:
+    def _add_layer_norm(
+            self,
+            model: nn.Module,
+            config: ModelConfig) -> nn.Module:
         """Add layer normalization to model"""
 
         class LayerNormGNN(nn.Module):
-            def __init__(self, base_model: nn.Module, hidden_dims: List[int]) -> None:
+            def __init__(
+                    self,
+                    base_model: nn.Module,
+                    hidden_dims: List[int]) -> None:
                 super().__init__()
                 self.model = base_model
-                self.layer_norms = nn.ModuleList([nn.LayerNorm(dim) for dim in hidden_dims])
+                self.layer_norms = nn.ModuleList(
+                    [nn.LayerNorm(dim) for dim in hidden_dims])
 
             def forward(
                 self,
@@ -591,7 +652,8 @@ class GraphToModelMapper:
                 batch: Optional[torch.Tensor] = None,
                 **kwargs: Any,
             ) -> torch.Tensor:
-                for i, (layer, ln) in enumerate(zip(self.model.layers[:-1], self.layer_norms)):
+                for i, (layer, ln) in enumerate(
+                        zip(self.model.layers[:-1], self.layer_norms)):
                     x = layer(x, edge_index, **kwargs)
                     x = ln(x)
                     x = F.relu(x)
@@ -603,7 +665,10 @@ class GraphToModelMapper:
 
         return LayerNormGNN(model, config.hidden_channels)
 
-    def _add_graph_pooling(self, model: nn.Module, config: ModelConfig) -> nn.Module:
+    def _add_graph_pooling(
+            self,
+            model: nn.Module,
+            config: ModelConfig) -> nn.Module:
         """Add graph-level pooling wrapper"""
         from .layers import global_add_pool, global_max_pool, global_mean_pool
 
@@ -629,7 +694,9 @@ class GraphToModelMapper:
                     elif self.pool_type == "max":
                         x = global_max_pool(x, batch)
                     else:
-                        raise ValueError(f"Unknown pooling type: {self.pool_type}")
+                        raise ValueError(
+                            f"Unknown pooling type: {
+                                self.pool_type}")
                 return x
 
         return GraphPoolingGNN(model, config.global_pool)
@@ -672,14 +739,14 @@ if __name__ == "__main__":
         max_layers=6,
     )
     mapper = GraphToModelMapper(mapping_config)
-    edge_index = torch.tensor([[0, 1, 2, 3, 4], [1, 2, 3, 4, 0]], dtype=torch.long)
+    edge_index = torch.tensor(
+        [[0, 1, 2, 3, 4], [1, 2, 3, 4, 0]], dtype=torch.long)
     num_nodes = 5
     input_dim = 32
     output_dim = 10
     node_features = torch.randn(num_nodes, input_dim)
     model, config = mapper.map_graph_to_model(
-        edge_index, num_nodes, input_dim, output_dim, node_features=node_features
-    )
+        edge_index, num_nodes, input_dim, output_dim, node_features=node_features)
     print(f"Selected architecture: {config.architecture}")
     print(f"Model layers: {config.num_layers}")
     print(f"Hidden dimensions: {config.hidden_channels}")

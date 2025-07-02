@@ -177,7 +177,9 @@ class ExportValidator:
             results.extend(self._check_scripts(extract_dir))
 
             if target_platform:
-                results.extend(self._check_hardware_compatibility(extract_dir, target_platform))
+                results.extend(
+                    self._check_hardware_compatibility(
+                        extract_dir, target_platform))
 
             # Generate summary
             results.append(self._generate_summary(results))
@@ -377,11 +379,12 @@ class ExportValidator:
                 ValidationResult(
                     check_name="file_integrity",
                     status=ValidationStatus.FAILED,
-                    message=f"File integrity check failed: {', '.join(corrupted_files)}",
-                    details={"corrupted_files": corrupted_files},
+                    message=f"File integrity check failed: {
+                        ', '.join(corrupted_files)}",
+                    details={
+                        "corrupted_files": corrupted_files},
                     severity="critical",
-                )
-            )
+                ))
         else:
             results.append(
                 ValidationResult(
@@ -705,10 +708,11 @@ class ExportValidator:
                         ValidationResult(
                             check_name="platform_match",
                             status=ValidationStatus.WARNING,
-                            message=f"Package built for {manifest.get('platform')}, target is {target_platform.value}",
+                            message=f"Package built for {
+                                manifest.get('platform')}, target is {
+                                target_platform.value}",
                             severity="warning",
-                        )
-                    )
+                        ))
 
                 # Check architecture
                 if "architecture" in manifest:
@@ -741,20 +745,22 @@ class ExportValidator:
                             ValidationResult(
                                 check_name="memory_requirements",
                                 status=ValidationStatus.WARNING,
-                                message=f"Package requires {pkg_reqs['min_ram_mb']}MB RAM, platform has {requirements.min_ram_mb}MB",
+                                message=f"Package requires {
+                                    pkg_reqs['min_ram_mb']}MB RAM, platform has {
+                                    requirements.min_ram_mb}MB",
                                 severity="warning",
-                            )
-                        )
+                            ))
 
-                    if pkg_reqs.get("gpu_required", False) and not requirements.gpu_required:
+                    if pkg_reqs.get(
+                        "gpu_required",
+                            False) and not requirements.gpu_required:
                         results.append(
                             ValidationResult(
                                 check_name="gpu_requirements",
                                 status=ValidationStatus.FAILED,
                                 message="Package requires GPU but platform doesn't have one",
                                 severity="critical",
-                            )
-                        )
+                            ))
 
             except Exception as e:
                 results.append(
@@ -926,7 +932,8 @@ class DeploymentVerifier:
             try:
                 import requests  # type: ignore[import-untyped]
 
-                response = requests.get(f"http://localhost:{health_port}/health", timeout=5)
+                response = requests.get(
+                    f"http://localhost:{health_port}/health", timeout=5)
 
                 if response.status_code == 200:
                     results.append(
@@ -967,7 +974,9 @@ class DeploymentVerifier:
 
         return results
 
-    def _check_resource_usage(self, platform: HardwarePlatform) -> List[ValidationResult]:
+    def _check_resource_usage(
+            self,
+            platform: HardwarePlatform) -> List[ValidationResult]:
         """Check resource usage on platform"""
         results = []
 

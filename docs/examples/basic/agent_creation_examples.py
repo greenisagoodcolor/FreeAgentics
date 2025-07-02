@@ -177,7 +177,12 @@ async def example_4_error_handling():
             errors.append("Agent name must be at least 3 characters")
 
         # Type validation
-        valid_types = ["explorer", "monitor", "coordinator", "specialist", "guardian"]
+        valid_types = [
+            "explorer",
+            "monitor",
+            "coordinator",
+            "specialist",
+            "guardian"]
         if config.get("agent_type") not in valid_types:
             errors.append(f"Invalid agent type: {config.get('agent_type')}")
 
@@ -236,14 +241,17 @@ async def example_5_performance():
             batch_end = min(i + batch_size, count)
             batch_count = batch_end - i
 
-            print(f"  Processing batch: agents {i+1}-{batch_end}")
+            print(f"  Processing batch: agents {i + 1}-{batch_end}")
 
             # Simulate agent creation
             for j in range(batch_count):
                 agent_id = str(uuid4())
-                agent_name = f"Batch-Agent-{i+j+1:03d}"
+                agent_name = f"Batch-Agent-{i + j + 1:03d}"
 
-                result = {"agent_id": agent_id, "name": agent_name, "status": "created"}
+                result = {
+                    "agent_id": agent_id,
+                    "name": agent_name,
+                    "status": "created"}
                 results.append(result)
                 await asyncio.sleep(0.01)  # Simulate processing time
 
@@ -258,7 +266,7 @@ async def example_5_performance():
 
     duration = (end_time - start_time).total_seconds()
     print(f"Created {len(batch_results)} agents in {duration:.2f} seconds")
-    print(f"Average: {duration/len(batch_results):.3f} seconds per agent")
+    print(f"Average: {duration / len(batch_results):.3f} seconds per agent")
 
     # Configuration templates
     templates = {

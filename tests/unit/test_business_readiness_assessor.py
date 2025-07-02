@@ -1,27 +1,12 @@
 """
 Comprehensive tests for Business Readiness Assessment for Edge Deployment.
 
-Tests the sophisticated business readiness evaluation system that assesses 
-business readiness for edge deployment by quantifying value proposition, 
+Tests the sophisticated business readiness evaluation system that assesses
+business readiness for edge deployment by quantifying value proposition,
 risk assessment, and market fit using business intelligence outputs.
 """
 
-import asyncio
-
 # Mock the missing business intelligence modules before importing
-import sys
-from datetime import datetime
-from typing import Any, Dict
-from unittest.mock import AsyncMock, Mock, patch
-
-import pytest
-
-# Mock business intelligence modules that may not be available
-sys.modules["coalitions.business_intelligence"] = Mock()
-sys.modules["coalitions.business_intelligence.risk_engine"] = Mock()
-sys.modules["coalitions.business_intelligence.market_engine"] = Mock()
-sys.modules["coalitions.business_intelligence.roi_engine"] = Mock()
-
 from coalitions.readiness.business_readiness_assessor import (
     BusinessReadinessAssessor,
     BusinessReadinessLevel,
@@ -31,6 +16,17 @@ from coalitions.readiness.business_readiness_assessor import (
     OperationalReadiness,
     ValueProposition,
 )
+import sys
+from datetime import datetime
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
+
+# Mock business intelligence modules that may not be available
+sys.modules["coalitions.business_intelligence"] = Mock()
+sys.modules["coalitions.business_intelligence.risk_engine"] = Mock()
+sys.modules["coalitions.business_intelligence.market_engine"] = Mock()
+sys.modules["coalitions.business_intelligence.roi_engine"] = Mock()
 
 
 class TestBusinessReadinessLevel:
@@ -112,7 +108,8 @@ class TestValueProposition:
         score = vp.calculate_total_value_score()
 
         # Expected: (20 + 30 + 10 + 10 + 1 + 25 + 75 + 20 + 15 + 35) / 10 = 24.1
-        expected_score = (20.0 + 30.0 + 10.0 + 10.0 + 1.0 + 25.0 + 75.0 + 20.0 + 15.0 + 35.0) / 10
+        expected_score = (20.0 + 30.0 + 10.0 + 10.0 + 1.0 +
+                          25.0 + 75.0 + 20.0 + 15.0 + 35.0) / 10
         assert abs(score - expected_score) < 0.1
 
     def test_calculate_total_value_score_without_compliance(self):
@@ -133,7 +130,8 @@ class TestValueProposition:
         score = vp.calculate_total_value_score()
 
         # Data sovereignty compliance contributes 0 instead of 20
-        expected_score = (20.0 + 30.0 + 5.0 + 10.0 + 0.5 + 25.0 + 75.0 + 0.0 + 15.0 + 35.0) / 10
+        expected_score = (20.0 + 30.0 + 5.0 + 10.0 + 0.5 +
+                          25.0 + 75.0 + 0.0 + 15.0 + 35.0) / 10
         assert abs(score - expected_score) < 0.1
 
     def test_confidence_intervals_default(self):
@@ -231,7 +229,7 @@ class TestMarketFitAssessment:
             data_locality_requirements_score=85.0,
         )
 
-        score = mfa.calculate_market_fit_score()
+        mfa.calculate_market_fit_score()
 
         # Market size should be normalized to 10.0 (100M / 10M baseline)
         # Market: (10.0 + 25.0 + 10.0 + 70.0) / 4 = 28.75
@@ -376,7 +374,13 @@ class TestBusinessReadinessReport:
         """Test creating business readiness report."""
         report = BusinessReadinessReport(
             coalition_id="test-coalition-001",
-            assessment_timestamp=datetime(2024, 1, 15, 10, 30, 0),
+            assessment_timestamp=datetime(
+                2024,
+                1,
+                15,
+                10,
+                30,
+                0),
             value_proposition=self.sample_value_prop,
             market_fit=self.sample_market_fit,
             operational_readiness=self.sample_operational,
@@ -387,12 +391,24 @@ class TestBusinessReadinessReport:
             operational_score=85.0,
             risk_score=40.0,
             recommended_strategy=DeploymentStrategy.REGIONAL_ROLLOUT,
-            investment_requirements={"initial": 1000000.0, "operational": 500000.0},
-            timeline_recommendations={"phase1": "6 months", "phase2": "12 months"},
-            risk_mitigation_strategies=["diversify_partnerships", "gradual_rollout"],
-            roi_projections={"3_year_roi": 35.0, "payback_period": 24},
-            market_analysis={"market_attractiveness": 75.0, "competitive_position": 80.0},
-            risk_assessment={"overall_risk": 40.0, "high_risk_factors": ["market_volatility"]},
+            investment_requirements={
+                "initial": 1000000.0,
+                "operational": 500000.0},
+            timeline_recommendations={
+                "phase1": "6 months",
+                "phase2": "12 months"},
+            risk_mitigation_strategies=[
+                "diversify_partnerships",
+                "gradual_rollout"],
+            roi_projections={
+                "3_year_roi": 35.0,
+                "payback_period": 24},
+            market_analysis={
+                "market_attractiveness": 75.0,
+                "competitive_position": 80.0},
+            risk_assessment={
+                "overall_risk": 40.0,
+                "high_risk_factors": ["market_volatility"]},
             assessment_duration=45.0,
             confidence_level=85.0,
         )
@@ -618,10 +634,13 @@ class TestBusinessReadinessAssessor:
         # Mock the opportunity and market engines
         self.assessor.opportunity_engine.detect_opportunities = Mock(
             return_value={
-                "opportunities": ["edge_expansion", "new_verticals"],
-                "opportunity_scores": {"edge_expansion": 80.0, "new_verticals": 65.0},
-            }
-        )
+                "opportunities": [
+                    "edge_expansion",
+                    "new_verticals"],
+                "opportunity_scores": {
+                    "edge_expansion": 80.0,
+                    "new_verticals": 65.0},
+            })
 
         self.assessor.market_engine.evaluate_market_opportunity = Mock(
             return_value={
@@ -667,9 +686,10 @@ class TestBusinessReadinessAssessor:
                     "operational_risk": 40.0,
                     "financial_risk": 35.0,
                 },
-                "high_risk_factors": ["market_volatility", "technical_complexity"],
-            }
-        )
+                "high_risk_factors": [
+                    "market_volatility",
+                    "technical_complexity"],
+            })
 
         result = await self.assessor._analyze_business_risks(
             self.sample_coalition_config, self.sample_business_context, self.sample_market_data
@@ -695,8 +715,9 @@ class TestBusinessReadinessAssessor:
     def test_market_fit_evaluation(self):
         """Test market fit evaluation."""
         result = self.assessor._evaluate_market_fit(
-            self.sample_coalition_config, self.sample_business_context, self.sample_market_data
-        )
+            self.sample_coalition_config,
+            self.sample_business_context,
+            self.sample_market_data)
 
         assert isinstance(result, MarketFitAssessment)
         assert hasattr(result, "target_market_size_usd")
@@ -787,8 +808,7 @@ class TestBusinessReadinessAssessor:
         market_analysis = {"market_attractiveness": 85.0}
 
         strategy_high = self.assessor._recommend_deployment_strategy(
-            BusinessReadinessLevel.INVESTMENT_READY, scores_high, market_analysis
-        )
+            BusinessReadinessLevel.INVESTMENT_READY, scores_high, market_analysis)
         assert strategy_high == DeploymentStrategy.FULL_SCALE
 
         scores_medium = {"market": 75.0, "operational": 75.0, "overall": 75.0}
@@ -805,7 +825,12 @@ class TestBusinessReadinessAssessor:
 
     def test_generate_recommendations(self):
         """Test recommendations generation."""
-        scores = {"value": 60.0, "market": 55.0, "operational": 65.0, "risk": 70.0, "overall": 62.0}
+        scores = {
+            "value": 60.0,
+            "market": 55.0,
+            "operational": 65.0,
+            "risk": 70.0,
+            "overall": 62.0}
         value_prop = ValueProposition(
             cost_reduction_percent=25.0,
             performance_improvement_percent=40.0,

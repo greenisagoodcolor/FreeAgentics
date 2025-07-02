@@ -192,8 +192,9 @@ class TestCoalitionFormation:
         engine = CoalitionFormationEngine()
         agents = self.create_test_agents()
         result = engine.form_coalition(
-            agents=agents, strategy=FormationStrategy.ACTIVE_INFERENCE, max_size=3
-        )
+            agents=agents,
+            strategy=FormationStrategy.ACTIVE_INFERENCE,
+            max_size=3)
         assert result.success
         assert result.coalition is not None
         assert len(result.participants) >= 2
@@ -202,7 +203,9 @@ class TestCoalitionFormation:
         assert result.formation_time > 0
         # Check coalition properties
         coalition = result.coalition
-        assert coalition.status in [CoalitionStatus.FORMING, CoalitionStatus.ACTIVE]
+        assert coalition.status in [
+            CoalitionStatus.FORMING,
+            CoalitionStatus.ACTIVE]
         assert coalition.leader_id in result.participants
 
     def test_capability_based_formation(self) -> None:
@@ -211,15 +214,17 @@ class TestCoalitionFormation:
         agents = self.create_test_agents()
         required_capabilities = {"technical", "communication", "planning"}
         result = engine.form_coalition(
-            agents=agents, strategy=FormationStrategy.CAPABILITY_BASED, max_size=4
-        )
+            agents=agents,
+            strategy=FormationStrategy.CAPABILITY_BASED,
+            max_size=4)
         assert result.success
         assert result.coalition is not None
         # Check if required capabilities are covered
         coalition = result.coalition
         covered_capabilities = coalition.combined_capabilities
         # Should cover most or all required capabilities
-        coverage = len(covered_capabilities & required_capabilities) / len(required_capabilities)
+        coverage = len(covered_capabilities & required_capabilities) / \
+            len(required_capabilities)
         assert coverage > 0.5  # At least 50% coverage
 
     def test_resource_optimization_formation(self) -> None:
@@ -227,15 +232,17 @@ class TestCoalitionFormation:
         engine = CoalitionFormationEngine()
         agents = self.create_test_agents()
         result = engine.form_coalition(
-            agents=agents, strategy=FormationStrategy.RESOURCE_OPTIMIZATION, max_size=3
-        )
+            agents=agents,
+            strategy=FormationStrategy.RESOURCE_OPTIMIZATION,
+            max_size=3)
         assert result.success
         assert result.coalition is not None
         # Check resource diversity
         coalition = result.coalition
         total_resources = coalition.total_resources
         assert len(total_resources) > 0  # Should have diverse resources
-        assert sum(total_resources.values()) > 0  # Should have significant resources
+        # Should have significant resources
+        assert sum(total_resources.values()) > 0
 
     def test_multiple_strategy_formation(self) -> None:
         """Test trying multiple formation strategies"""
@@ -246,7 +253,8 @@ class TestCoalitionFormation:
             FormationStrategy.CAPABILITY_BASED,
             FormationStrategy.RESOURCE_OPTIMIZATION,
         ]
-        result = engine.try_multiple_strategies(agents=agents, strategies=strategies, max_size=3)
+        result = engine.try_multiple_strategies(
+            agents=agents, strategies=strategies, max_size=3)
         assert result.success
         assert result.coalition is not None
         assert result.strategy_used in strategies
@@ -260,13 +268,16 @@ class TestCoalitionFormation:
         # Set constraints on some agents
         agents[1].max_coalitions = 0  # Agent2 unavailable
         agents[2].availability = 0.5  # Agent3 partially available
-        result = engine.form_coalition(agents=agents, strategy=FormationStrategy.ACTIVE_INFERENCE)
+        result = engine.form_coalition(
+            agents=agents, strategy=FormationStrategy.ACTIVE_INFERENCE)
         # Should still succeed with remaining agents
         if result.success:
             assert "agent2" not in result.participants  # Should exclude unavailable agent
         else:
-            # If formation fails, it should be due to insufficient viable agents
-            assert len([a for a in agents if a.current_coalitions < a.max_coalitions]) < 2
+            # If formation fails, it should be due to insufficient viable
+            # agents
+            assert len(
+                [a for a in agents if a.current_coalitions < a.max_coalitions]) < 2
 
 
 class TestCoalitionIntegration:
@@ -315,7 +326,7 @@ class TestCoalitionIntegration:
             assert member.goals_completed == 1
         # Test resource allocation
         allocation = {"main_goal": {"compute": 200, "storage": 50}}
-        success = coalition.allocate_resources(allocation)
+        coalition.allocate_resources(allocation)
         # Should succeed if coalition has enough resources
         # Get status summary
         summary = coalition.get_status_summary()
@@ -375,14 +386,16 @@ class TestCoalitionIntegration:
         # Equal distribution
         coalition.value_distribution_model = "equal"
         equal_dist = coalition.distribute_value(total_value)
-        assert all(
-            value == pytest.approx(total_value / 3, rel=1e-2) for value in equal_dist.values()
-        )
+        assert all(value == pytest.approx(total_value / 3, rel=1e-2)
+                   for value in equal_dist.values())
         # Contribution-based distribution
         coalition.value_distribution_model = "contribution-based"
         contrib_dist = coalition.distribute_value(total_value)
-        assert sum(contrib_dist.values()) == pytest.approx(total_value, rel=1e-2)
-        assert contrib_dist["agent1"] > contrib_dist["agent2"]  # Leader gets more
+        assert sum(
+            contrib_dist.values()) == pytest.approx(
+            total_value, rel=1e-2)
+        # Leader gets more
+        assert contrib_dist["agent1"] > contrib_dist["agent2"]
 
 
 if __name__ == "__main__":

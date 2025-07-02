@@ -1,0 +1,19 @@
+[run]
+branch = True
+source =
+    agents
+    api
+    inference
+    coalitions
+    infrastructure
+    knowledge
+    world
+
+[report]
+omit =
+    */tests/*
+    */venv/*
+    */migrations/*
+    */__init__.py
+fail_under = 80
+show_missing = True 

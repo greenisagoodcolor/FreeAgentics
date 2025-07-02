@@ -24,6 +24,8 @@ const customJestConfig = {
     // Mock lodash-es to use lodash instead
     "^lodash-es$": "lodash",
     "^lodash-es/(.*)$": "lodash/$1",
+    // Mock nanoid for Jest compatibility
+    "^nanoid$": "<rootDir>/__mocks__/nanoid.js",
   },
 
   // Coverage configuration
@@ -43,20 +45,20 @@ const customJestConfig = {
   // Coverage thresholds
   coverageThreshold: {
     global: {
-      branches: 50,
-      functions: 50,
-      lines: 50,
-      statements: 50,
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
     },
   },
 
   // Test patterns - exclude E2E tests and setup files
   testMatch: [
     "**/__tests__/**/*.(test|spec).(ts|tsx|js)",
-    "**/*.(test|spec).(ts|tsx|js)"
+    "**/*.(test|spec).(ts|tsx|js)",
   ],
 
-  // Ignore patterns - exclude E2E tests, setup files, and problematic test files
+  // Ignore patterns - exclude E2E tests, setup files only
   testPathIgnorePatterns: [
     "<rootDir>/.next/",
     "<rootDir>/node_modules/",
@@ -64,25 +66,16 @@ const customJestConfig = {
     "<rootDir>/test-results/",
     "<rootDir>/__tests__/setup/", // Exclude setup files
     "<rootDir>/__tests__/test-helpers/", // Exclude helper files
-    "massive",
-    "boost", 
-    "comprehensive",
-    "ultra",
   ],
 
   // Transform patterns - handle ESM modules properly
   transformIgnorePatterns: [
-    "node_modules/(?!(lodash-es|@?[^/]+/.*\\.(m)?js$))"
+    "node_modules/(?!(lodash-es|nanoid|uuid|@?[^/]+/.*\\.(m)?js$))",
   ],
 
   // Transform patterns
   transform: {
-    "^.+\\.(ts|tsx)$": [
-      "ts-jest",
-      {
-        tsconfig: "tsconfig.json",
-      },
-    ],
+    "^.+\\.(ts|tsx)$": "ts-jest",
   },
 
   // Module file extensions
@@ -97,15 +90,19 @@ const customJestConfig = {
   verbose: true,
 
   // Performance optimizations from comprehensive testing strategy
-  testTimeout: 15000, // Increased slightly for React component rendering
-  maxWorkers: "50%", // Use half of available CPU cores
-  
+  testTimeout: 3000, // Aggressive timeout to prevent hanging tests
+  maxWorkers: 1, // Force single worker to prevent resource contention and hanging
+
   // Cache configuration for faster subsequent runs
   cacheDirectory: "<rootDir>/.jest-cache",
-  
+
   // Optimize test execution
   passWithNoTests: true,
-  
+
+  // Force exit and detect open handles to prevent hanging
+  forceExit: true,
+  detectOpenHandles: true,
+
   // Reduce memory usage
   logHeapUsage: true,
 };

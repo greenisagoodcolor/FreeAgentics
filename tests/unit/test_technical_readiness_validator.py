@@ -6,16 +6,16 @@ technical readiness for edge deployment, integrating with hardware infrastructur
 and providing detailed performance benchmarks.
 """
 
-import asyncio
-
 # Mock infrastructure modules before importing the main module
+from coalitions.readiness.technical_readiness_validator import (
+    EdgePerformanceBenchmarker,
+    EdgePlatform,
+    ReadinessLevel,
+    ResourceRequirements,
+    TechnicalReadinessValidator,
+)
 import sys
-import tempfile
-import time
-from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, List
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -29,7 +29,14 @@ sys.modules["infrastructure.deployment.hardware_compatibility"] = Mock()
 
 # Create mock classes for the imports
 class MockHardwareProfile:
-    def __init__(self, name, architecture, cpu_count, memory_gb, disk_gb, accelerators):
+    def __init__(
+            self,
+            name,
+            architecture,
+            cpu_count,
+            memory_gb,
+            disk_gb,
+            accelerators):
         self.name = name
         self.architecture = architecture
         self.cpu_count = cpu_count
@@ -49,7 +56,14 @@ class MockTestStatus:
 
 
 class MockTestResult:
-    def __init__(self, test_name, status, duration, message, details=None, error=None):
+    def __init__(
+            self,
+            test_name,
+            status,
+            duration,
+            message,
+            details=None,
+            error=None):
         self.test_name = test_name
         self.status = status
         self.duration = duration
@@ -62,8 +76,16 @@ class MockTestResult:
 class MockCompatibilityTester:
     async def run_tests(self, *args, **kwargs):
         return [
-            MockTestResult("python_version", MockTestStatus.PASSED, 0.1, "Python version OK"),
-            MockTestResult("memory_test", MockTestStatus.PASSED, 0.2, "Memory test OK"),
+            MockTestResult(
+                "python_version",
+                MockTestStatus.PASSED,
+                0.1,
+                "Python version OK"),
+            MockTestResult(
+                "memory_test",
+                MockTestStatus.PASSED,
+                0.2,
+                "Memory test OK"),
         ]
 
 
@@ -74,31 +96,19 @@ class MockHardwareDetector:
 
 # Set up mock modules with required classes
 sys.modules["infrastructure.deployment.hardware_compatibility"].HardwareProfile = (
-    MockHardwareProfile
-)
+    MockHardwareProfile)
 sys.modules["infrastructure.deployment.hardware_compatibility"].TestResult = MockTestResult
 sys.modules["infrastructure.deployment.hardware_compatibility"].TestStatus = MockTestStatus
 sys.modules["infrastructure.deployment.hardware_compatibility"].CompatibilityTester = (
-    MockCompatibilityTester
-)
+    MockCompatibilityTester)
 sys.modules["infrastructure.deployment.hardware_compatibility"].HardwareDetector = (
-    MockHardwareDetector
-)
+    MockHardwareDetector)
 sys.modules["infrastructure.hardware.device_discovery"].DeviceDiscovery = Mock
 sys.modules["infrastructure.hardware.device_discovery"].DeviceType = Mock
 sys.modules["infrastructure.hardware.hal_core"].HardwareAbstractionLayer = Mock
 sys.modules["infrastructure.hardware.hal_core"].HardwareType = Mock
 sys.modules["infrastructure.hardware.hal_core"].ResourceConstraints = Mock
 
-from coalitions.readiness.technical_readiness_validator import (
-    EdgePerformanceBenchmarker,
-    EdgePlatform,
-    PerformanceBenchmark,
-    ReadinessLevel,
-    ResourceRequirements,
-    TechnicalReadinessReport,
-    TechnicalReadinessValidator,
-)
 
 # Use mock classes in tests
 HardwareProfile = MockHardwareProfile
@@ -111,7 +121,11 @@ class TestReadinessLevel:
 
     def test_all_readiness_levels_defined(self):
         """Test that all expected readiness levels are defined."""
-        expected_levels = {"NOT_READY", "BASIC_READY", "PRODUCTION_READY", "ENTERPRISE_READY"}
+        expected_levels = {
+            "NOT_READY",
+            "BASIC_READY",
+            "PRODUCTION_READY",
+            "ENTERPRISE_READY"}
 
         actual_levels = {level.name for level in ReadinessLevel}
         assert actual_levels == expected_levels
@@ -333,12 +347,15 @@ class TestTechnicalReadinessValidator:
         validator = TechnicalReadinessValidator()
 
         # Create hardware profile that matches Intel NUC
-        hardware_profile = HardwareProfile("Intel NUC", "x86_64", 8, 16.0, 512.0, [])
+        hardware_profile = HardwareProfile(
+            "Intel NUC", "x86_64", 8, 16.0, 512.0, [])
 
         platform = validator._determine_target_platform(hardware_profile)
 
         # Should detect as Intel NUC or generic x86_64
-        assert platform in [EdgePlatform.INTEL_NUC, EdgePlatform.GENERIC_X86_64]
+        assert platform in [
+            EdgePlatform.INTEL_NUC,
+            EdgePlatform.GENERIC_X86_64]
 
     @pytest.mark.asyncio
     async def test_assess_technical_readiness_basic(self):
@@ -347,7 +364,8 @@ class TestTechnicalReadinessValidator:
 
         # Mock the hardware detector to return a known profile
         with patch.object(validator.hardware_detector, "detect_hardware") as mock_detect:
-            mock_detect.return_value = HardwareProfile("TestDevice", "x86_64", 8, 16.0, 256.0, [])
+            mock_detect.return_value = HardwareProfile(
+                "TestDevice", "x86_64", 8, 16.0, 256.0, [])
 
             # Mock compatibility tester
             with patch.object(validator.compatibility_tester, "run_tests") as mock_compat:
@@ -365,6 +383,7 @@ class TestTechnicalReadinessValidator:
                 assert report.coalition_id == "test_coalition"
                 assert report.platform in EdgePlatform
                 assert report.readiness_level in ReadinessLevel
-                assert report.overall_score >= 0  # Score can exceed 100 if performance is excellent
+                # Score can exceed 100 if performance is excellent
+                assert report.overall_score >= 0
                 assert isinstance(report.deployment_ready, bool)
                 assert report.assessment_duration > 0

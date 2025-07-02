@@ -158,9 +158,11 @@ class Orientation:
     def to_euler(self) -> Tuple[float, float, float]:
         """Convert quaternion to Euler angles (roll, pitch, yaw)"""
         # Conversion formula
-        roll = np.arctan2(2 * (self.w * self.x + self.y * self.z), 1 - 2 * (self.x**2 + self.y**2))
+        roll = np.arctan2(2 * (self.w * self.x + self.y * self.z),
+                          1 - 2 * (self.x**2 + self.y**2))
         pitch = np.arcsin(2 * (self.w * self.y - self.z * self.x))
-        yaw = np.arctan2(2 * (self.w * self.z + self.x * self.y), 1 - 2 * (self.y**2 + self.z**2))
+        yaw = np.arctan2(2 * (self.w * self.z + self.x * self.y),
+                         1 - 2 * (self.y**2 + self.z**2))
         return roll, pitch, yaw
 
 
@@ -255,6 +257,68 @@ class AgentGoal:
         return datetime.now() > self.deadline
 
 
+class AgentBuilder:
+    """Builder class for Agent deserialization using Builder pattern"""
+
+    def __init__(self, agent: "Agent") -> None:
+        self.agent = agent
+
+    def set_basic_properties(self, data: Dict[str, Any]) -> None:
+        """Set basic agent properties from data"""
+        self.agent.agent_id = data.get("agent_id", self.agent.agent_id)
+        self.agent.name = data.get("name", self.agent.name)
+        self.agent.agent_type = data.get("agent_type", self.agent.agent_type)
+
+    def set_spatial_properties(self, data: Dict[str, Any]) -> None:
+        """Set spatial properties (position, orientation, velocity)"""
+        if "position" in data:
+            self.agent.position = Position(**data["position"])
+        if "orientation" in data:
+            self.agent.orientation = Orientation(**data["orientation"])
+        if "velocity" in data:
+            self.agent.velocity = np.array(data["velocity"], dtype=np.float64)
+
+    def set_status_and_capabilities(self, data: Dict[str, Any]) -> None:
+        """Set status and capabilities from data"""
+        if "status" in data:
+            self.agent.status = AgentStatus(data["status"])
+        if "capabilities" in data:
+            self.agent.capabilities = {
+                AgentCapability(cap) for cap in data["capabilities"]}
+
+    def set_personality_and_resources(self, data: Dict[str, Any]) -> None:
+        """Set personality and resources from data"""
+        if "personality" in data:
+            self.agent.personality = AgentPersonality(**data["personality"])
+        if "resources" in data:
+            self.agent.resources = AgentResources(**data["resources"])
+
+    def set_goals(self, data: Dict[str, Any]) -> None:
+        """Set goals from data"""
+        if "goals" in data:
+            for goal_data in data["goals"]:
+                goal = self.agent._create_goal_from_data(goal_data)
+                self.agent.goals.append(goal)
+
+    def set_relationships(self, data: Dict[str, Any]) -> None:
+        """Set relationships from data"""
+        if "relationships" in data:
+            for agent_id, rel_data in data["relationships"].items():
+                relationship = self.agent._create_relationship_from_data(
+                    rel_data)
+                self.agent.relationships[agent_id] = relationship
+
+    def set_metadata(self, data: Dict[str, Any]) -> None:
+        """Set metadata and timestamps from data"""
+        self.agent.experience_count = data.get("experience_count", 0)
+        if "created_at" in data:
+            self.agent.created_at = datetime.fromisoformat(data["created_at"])
+        if "last_updated" in data:
+            self.agent.last_updated = datetime.fromisoformat(
+                data["last_updated"])
+        self.agent.metadata = data.get("metadata", {})
+
+
 @dataclass
 class Agent:
     """Core agent data model"""
@@ -328,13 +392,15 @@ class Agent:
     def select_next_goal(self) -> Optional[AgentGoal]:
         """Select the next goal to pursue"""
         # Filter out completed and expired goals
-        active_goals = [g for g in self.goals if not g.completed and not g.is_expired()]
+        active_goals = [
+            g for g in self.goals if not g.completed and not g.is_expired()]
         if active_goals:
             self.current_goal = active_goals[0]
             return self.current_goal
         return None
 
-    def add_to_memory(self, experience: Dict[str, Any], is_important: bool = False) -> None:
+    def add_to_memory(self, experience: Dict[str, Any],
+                      is_important: bool = False) -> None:
         """Add an experience to memory"""
         timestamped_experience = {
             "timestamp": datetime.now(),
@@ -424,63 +490,45 @@ class Agent:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Agent":
-        """Create agent from dictionary"""
+        """Create agent from dictionary using Builder pattern"""
         agent = cls()
-        # Basic properties
-        agent.agent_id = data.get("agent_id", agent.agent_id)
-        agent.name = data.get("name", agent.name)
-        agent.agent_type = data.get("agent_type", agent.agent_type)
-        # Position and orientation
-        if "position" in data:
-            agent.position = Position(**data["position"])
-        if "orientation" in data:
-            agent.orientation = Orientation(**data["orientation"])
-        if "velocity" in data:
-            agent.velocity = np.array(data["velocity"], dtype=np.float64)
-        # Status and capabilities
-        if "status" in data:
-            agent.status = AgentStatus(data["status"])
-        if "capabilities" in data:
-            agent.capabilities = {AgentCapability(cap) for cap in data["capabilities"]}
-        # Personality
-        if "personality" in data:
-            agent.personality = AgentPersonality(**data["personality"])
-        # Resources
-        if "resources" in data:
-            agent.resources = AgentResources(**data["resources"])
-        # Goals
-        if "goals" in data:
-            for goal_data in data["goals"]:
-                goal = AgentGoal(
-                    goal_id=goal_data["goal_id"],
-                    description=goal_data["description"],
-                    priority=goal_data["priority"],
-                    completed=goal_data["completed"],
-                    progress=goal_data["progress"],
-                )
-                agent.goals.append(goal)
-        # Relationships
-        if "relationships" in data:
-            for agent_id, rel_data in data["relationships"].items():
-                last_interaction = None
-                if rel_data.get("last_interaction"):
-                    last_interaction = datetime.fromisoformat(rel_data["last_interaction"])
-                relationship = SocialRelationship(
-                    target_agent_id=rel_data["target_agent_id"],
-                    relationship_type=rel_data["relationship_type"],
-                    trust_level=rel_data["trust_level"],
-                    interaction_count=rel_data["interaction_count"],
-                    last_interaction=last_interaction,
-                )
-                agent.relationships[agent_id] = relationship
-        # Metadata
-        agent.experience_count = data.get("experience_count", 0)
-        if "created_at" in data:
-            agent.created_at = datetime.fromisoformat(data["created_at"])
-        if "last_updated" in data:
-            agent.last_updated = datetime.fromisoformat(data["last_updated"])
-        agent.metadata = data.get("metadata", {})
+        builder = AgentBuilder(agent)
+
+        builder.set_basic_properties(data)
+        builder.set_spatial_properties(data)
+        builder.set_status_and_capabilities(data)
+        builder.set_personality_and_resources(data)
+        builder.set_goals(data)
+        builder.set_relationships(data)
+        builder.set_metadata(data)
+
         return agent
+
+    def _create_goal_from_data(self, goal_data: Dict[str, Any]) -> AgentGoal:
+        """Create a goal from goal data dictionary"""
+        return AgentGoal(
+            goal_id=goal_data["goal_id"],
+            description=goal_data["description"],
+            priority=goal_data["priority"],
+            completed=goal_data["completed"],
+            progress=goal_data["progress"],
+        )
+
+    def _create_relationship_from_data(
+            self, rel_data: Dict[str, Any]) -> SocialRelationship:
+        """Create a relationship from relationship data dictionary"""
+        last_interaction = None
+        if rel_data.get("last_interaction"):
+            last_interaction = datetime.fromisoformat(
+                rel_data["last_interaction"])
+
+        return SocialRelationship(
+            target_agent_id=rel_data["target_agent_id"],
+            relationship_type=rel_data["relationship_type"],
+            trust_level=rel_data["trust_level"],
+            interaction_count=rel_data["interaction_count"],
+            last_interaction=last_interaction,
+        )
 
 
 @dataclass

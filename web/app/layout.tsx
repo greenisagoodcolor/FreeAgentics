@@ -1,21 +1,22 @@
 import type React from "react";
 import "../styles/globals.css";
 import "../styles/design-tokens.css";
-import { Inter, JetBrains_Mono } from "next/font/google";
+// import { Inter, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/themeprovider";
 import { LLMProvider } from "@/contexts/llm-context";
 import { IsSendingProvider } from "@/contexts/is-sending-context";
 import { ReduxProvider } from "@/providers/ReduxProvider";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
+// Use system fonts for production build
+// const inter = Inter({
+//   subsets: ["latin"],
+//   variable: "--font-inter",
+// });
 
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-jetbrains-mono",
-});
+// const jetbrainsMono = JetBrains_Mono({
+//   subsets: ["latin"],
+//   variable: "--font-jetbrains-mono",
+// });
 
 export default function RootLayout({
   children,
@@ -25,8 +26,8 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${inter.variable} ${jetbrainsMono.variable} dark bg-[var(--bg-primary)] text-[var(--text-primary)]`}
-        style={{ fontFamily: "var(--font-primary)" }}
+        className="dark bg-[var(--bg-primary)] text-[var(--text-primary)]"
+        style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}
       >
         <ReduxProvider>
           <ThemeProvider

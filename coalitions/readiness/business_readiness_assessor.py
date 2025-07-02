@@ -26,17 +26,11 @@ if TYPE_CHECKING:
     class RiskAssessmentEngine:
         """Risk assessment engine for type checking."""
 
-        pass
-
     class MarketEvaluationEngine:
         """Market evaluation engine for type checking."""
 
-        pass
-
     class ROIProjectionEngine:
         """ROI projection engine for type checking."""
-
-        pass
 
 else:
     # Stub implementations for runtime
@@ -198,7 +192,8 @@ class MarketFitAssessment:
         solution_score = sum(solution_metrics) / len(solution_metrics)
         edge_score = sum(edge_metrics) / len(edge_metrics)
 
-        return market_score * 0.3 + customer_score * 0.3 + solution_score * 0.25 + edge_score * 0.15
+        return market_score * 0.3 + customer_score * \
+            0.3 + solution_score * 0.25 + edge_score * 0.15
 
 
 @dataclass
@@ -382,7 +377,8 @@ class BusinessReadinessAssessor:
         Returns:
             Comprehensive business readiness report
         """
-        logger.info(f"Starting business readiness assessment for coalition " f"{coalition_id}")
+        logger.info(
+            f"Starting business readiness assessment for coalition " f"{coalition_id}")
         start_time = time.time()
 
         try:
@@ -405,7 +401,8 @@ class BusinessReadinessAssessor:
             )
 
             # Step 3: Evaluate market fit
-            market_fit = self._evaluate_market_fit(market_analysis, business_context, market_data)
+            market_fit = self._evaluate_market_fit(
+                market_analysis, business_context, market_data)
 
             # Step 4: Assess operational readiness
             operational_readiness = self._assess_operational_readiness(
@@ -419,12 +416,12 @@ class BusinessReadinessAssessor:
 
             # Step 6: Determine readiness level and strategy
             readiness_level = self._determine_readiness_level(scores["overall"])
-            strategy = self._recommend_deployment_strategy(readiness_level, scores, market_analysis)
+            strategy = self._recommend_deployment_strategy(
+                readiness_level, scores, market_analysis)
 
             # Step 7: Generate recommendations
             recommendations = self._generate_recommendations(
-                scores, value_proposition, market_fit, operational_readiness, risk_analysis
-            )
+                scores, value_proposition, market_fit, operational_readiness, risk_analysis)
 
             # Step 8: Compile final report
             assessment_duration = time.time() - start_time
@@ -478,7 +475,8 @@ class BusinessReadinessAssessor:
 
             for scenario in scenarios:
                 # Modify parameters based on scenario
-                scenario_params = self._adjust_scenario_parameters(business_context, scenario)
+                scenario_params = self._adjust_scenario_parameters(
+                    business_context, scenario)
 
                 # Get ROI projections from engine
                 roi_projection = await self.roi_engine.project_roi(
@@ -512,13 +510,13 @@ class BusinessReadinessAssessor:
             )
 
             return {
-                "market_size": market_evaluation.get("market_size", {}),
-                "competitive_landscape": market_evaluation.get("competitive_analysis", {}),
-                "customer_segments": market_evaluation.get("customer_analysis", {}),
-                "growth_projections": market_evaluation.get("growth_analysis", {}),
-                "barriers_to_entry": market_evaluation.get("barriers", []),
-                "market_timing": market_evaluation.get("timing_analysis", {}),
-            }
+                "market_size": market_evaluation.get(
+                    "market_size", {}), "competitive_landscape": market_evaluation.get(
+                    "competitive_analysis", {}), "customer_segments": market_evaluation.get(
+                    "customer_analysis", {}), "growth_projections": market_evaluation.get(
+                    "growth_analysis", {}), "barriers_to_entry": market_evaluation.get(
+                        "barriers", []), "market_timing": market_evaluation.get(
+                            "timing_analysis", {}), }
 
         except Exception as e:
             logger.warning(f"Market analysis failed: {str(e)}")
@@ -538,12 +536,12 @@ class BusinessReadinessAssessor:
             )
 
             return {
-                "overall_risk_score": risk_assessment.get("overall_risk", 50),
-                "risk_categories": risk_assessment.get("risk_breakdown", {}),
-                "mitigation_strategies": risk_assessment.get("mitigation_strategies", []),
-                "risk_factors": risk_assessment.get("key_risks", []),
-                "confidence_intervals": risk_assessment.get("confidence_intervals", {}),
-            }
+                "overall_risk_score": risk_assessment.get(
+                    "overall_risk", 50), "risk_categories": risk_assessment.get(
+                    "risk_breakdown", {}), "mitigation_strategies": risk_assessment.get(
+                    "mitigation_strategies", []), "risk_factors": risk_assessment.get(
+                    "key_risks", []), "confidence_intervals": risk_assessment.get(
+                        "confidence_intervals", {}), }
 
         except Exception as e:
             logger.warning(f"Risk analysis failed: {str(e)}")
@@ -561,9 +559,11 @@ class BusinessReadinessAssessor:
 
         # Calculate edge-specific value metrics
         cost_reduction = self._calculate_cost_reduction(coalition_config, baseline_roi)
-        performance_improvement = self._calculate_performance_improvement(coalition_config)
+        performance_improvement = self._calculate_performance_improvement(
+            coalition_config)
         latency_reduction = self._calculate_latency_reduction(coalition_config)
-        availability_improvement = self._calculate_availability_improvement(coalition_config)
+        availability_improvement = self._calculate_availability_improvement(
+            coalition_config)
 
         # Business impact metrics
         revenue_opportunity = baseline_roi.get("revenue_projection", 0)
@@ -575,7 +575,9 @@ class BusinessReadinessAssessor:
         )
 
         # Edge-specific benefits
-        data_sovereignty = coalition_config.get("edge_features", {}).get("data_sovereignty", False)
+        data_sovereignty = coalition_config.get(
+            "edge_features", {}).get(
+            "data_sovereignty", False)
         bandwidth_savings = self._calculate_bandwidth_savings(coalition_config)
         offline_value = self._calculate_offline_capability_value(coalition_config)
 
@@ -607,24 +609,46 @@ class BusinessReadinessAssessor:
         addressable_percent = market_analysis.get("market_size", {}).get(
             "serviceable_addressable_market_percent", 10
         )
-        growth_rate = market_analysis.get("growth_projections", {}).get("annual_growth_rate", 15)
-        competition = market_analysis.get("competitive_landscape", {}).get("intensity_score", 60)
+        growth_rate = market_analysis.get(
+            "growth_projections", {}).get(
+            "annual_growth_rate", 15)
+        competition = market_analysis.get(
+            "competitive_landscape", {}).get(
+            "intensity_score", 60)
 
         # Customer readiness (estimated from market data)
-        customer_demand = market_data.get("customer_readiness", {}).get("demand_score", 70)
-        adoption_readiness = market_data.get("customer_readiness", {}).get("adoption_score", 60)
-        pain_severity = business_context.get("customer_pain_points", {}).get("severity_score", 75)
-        willingness_to_pay = market_data.get("pricing", {}).get("willingness_to_pay_score", 65)
+        customer_demand = market_data.get(
+            "customer_readiness", {}).get(
+            "demand_score", 70)
+        adoption_readiness = market_data.get(
+            "customer_readiness", {}).get(
+            "adoption_score", 60)
+        pain_severity = business_context.get(
+            "customer_pain_points", {}).get(
+            "severity_score", 75)
+        willingness_to_pay = market_data.get(
+            "pricing", {}).get(
+            "willingness_to_pay_score", 65)
 
         # Solution fit
-        product_fit = business_context.get("solution_fit", {}).get("product_market_fit_score", 70)
-        completeness = business_context.get("solution_fit", {}).get("completeness_score", 80)
-        scalability = business_context.get("solution_fit", {}).get("scalability_score", 85)
+        product_fit = business_context.get(
+            "solution_fit", {}).get(
+            "product_market_fit_score", 70)
+        completeness = business_context.get(
+            "solution_fit", {}).get(
+            "completeness_score", 80)
+        scalability = business_context.get(
+            "solution_fit", {}).get(
+            "scalability_score", 85)
 
         # Edge-specific factors
-        edge_readiness = market_data.get("infrastructure", {}).get("edge_readiness_score", 60)
+        edge_readiness = market_data.get(
+            "infrastructure", {}).get(
+            "edge_readiness_score", 60)
         regulatory = business_context.get("compliance", {}).get("regulatory_score", 80)
-        data_locality = business_context.get("data_requirements", {}).get("locality_score", 70)
+        data_locality = business_context.get(
+            "data_requirements", {}).get(
+            "locality_score", 70)
 
         return MarketFitAssessment(
             target_market_size_usd=market_size,
@@ -648,26 +672,45 @@ class BusinessReadinessAssessor:
     ) -> OperationalReadiness:
         """Assess operational readiness for edge deployment."""
         # Team readiness
-        technical_expertise = business_context.get("team", {}).get("technical_score", 75)
-        operational_capability = business_context.get("team", {}).get("operational_score", 70)
-        support_infrastructure = business_context.get("support", {}).get("infrastructure_score", 65)
+        technical_expertise = business_context.get(
+            "team", {}).get("technical_score", 75)
+        operational_capability = business_context.get(
+            "team", {}).get("operational_score", 70)
+        support_infrastructure = business_context.get(
+            "support", {}).get("infrastructure_score", 65)
         training_readiness = business_context.get("team", {}).get("training_score", 60)
 
         # Process maturity
-        deployment_maturity = business_context.get("processes", {}).get("deployment_score", 70)
-        monitoring_capabilities = business_context.get("monitoring", {}).get("capability_score", 75)
-        incident_response = business_context.get("processes", {}).get("incident_response_score", 65)
-        compliance_process = business_context.get("compliance", {}).get("process_score", 80)
+        deployment_maturity = business_context.get(
+            "processes", {}).get(
+            "deployment_score", 70)
+        monitoring_capabilities = business_context.get(
+            "monitoring", {}).get("capability_score", 75)
+        incident_response = business_context.get(
+            "processes", {}).get(
+            "incident_response_score", 65)
+        compliance_process = business_context.get(
+            "compliance", {}).get(
+            "process_score", 80)
 
         # Resource availability
         budget_adequacy = business_context.get("resources", {}).get("budget_score", 75)
-        timeline_feasibility = business_context.get("resources", {}).get("timeline_score", 70)
-        resource_allocation = business_context.get("resources", {}).get("allocation_score", 65)
+        timeline_feasibility = business_context.get(
+            "resources", {}).get("timeline_score", 70)
+        resource_allocation = business_context.get(
+            "resources", {}).get(
+            "allocation_score", 65)
 
         # Scalability readiness
-        scaling_maturity = business_context.get("scalability", {}).get("process_score", 60)
-        automation_readiness = business_context.get("automation", {}).get("readiness_score", 55)
-        partnership_ecosystem = business_context.get("partnerships", {}).get("ecosystem_score", 70)
+        scaling_maturity = business_context.get(
+            "scalability", {}).get(
+            "process_score", 60)
+        automation_readiness = business_context.get(
+            "automation", {}).get(
+            "readiness_score", 55)
+        partnership_ecosystem = business_context.get(
+            "partnerships", {}).get(
+            "ecosystem_score", 70)
 
         return OperationalReadiness(
             technical_expertise_score=technical_expertise,
@@ -717,7 +760,8 @@ class BusinessReadinessAssessor:
             "risk": risk_score,
         }
 
-    def _determine_readiness_level(self, overall_score: float) -> BusinessReadinessLevel:
+    def _determine_readiness_level(
+            self, overall_score: float) -> BusinessReadinessLevel:
         """Determine business readiness level based on overall score."""
         if overall_score >= 85.0:
             return BusinessReadinessLevel.INVESTMENT_READY
@@ -760,7 +804,8 @@ class BusinessReadinessAssessor:
         risk_analysis: Dict[str, Any],
     ) -> Dict[str, Any]:
         """Generate strategic recommendations based on assessment."""
-        recommendations: Dict[str, Any] = {"investment": {}, "timeline": {}, "risk_mitigation": []}
+        recommendations: Dict[str, Any] = {
+            "investment": {}, "timeline": {}, "risk_mitigation": []}
 
         # Investment requirements
         base_investment = 100000  # Base $100k
@@ -786,16 +831,17 @@ class BusinessReadinessAssessor:
         if risk_analysis.get("overall_risk_score", 50) > 60:
             recommendations["risk_mitigation"].extend(
                 [
-                    "Implement comprehensive risk monitoring and " "early warning systems",
-                    "Develop detailed contingency plans for " "high-risk scenarios",
+                    "Implement comprehensive risk monitoring and "
+                    "early warning systems",
+                    "Develop detailed contingency plans for "
+                    "high-risk scenarios",
                     "Consider phased deployment to minimize exposure",
-                ]
-            )
+                ])
 
         if scores["operational"] < 70:
             recommendations["risk_mitigation"].append(
-                "Invest in operational training and process improvement " "before scaling"
-            )
+                "Invest in operational training and process improvement "
+                "before scaling")
 
         return recommendations
 
@@ -804,25 +850,36 @@ class BusinessReadinessAssessor:
         self, coalition_config: Dict[str, Any], roi_data: Dict[str, Any]
     ) -> float:
         """Calculate cost reduction percentage from edge deployment."""
-        cloud_costs = coalition_config.get("current_costs", {}).get("cloud_infrastructure", 10000)
+        cloud_costs = coalition_config.get(
+            "current_costs", {}).get(
+            "cloud_infrastructure", 10000)
         edge_costs = coalition_config.get("edge_costs", {}).get("infrastructure", 7000)
         return max(0, ((cloud_costs - edge_costs) / cloud_costs) * 100)
 
-    def _calculate_performance_improvement(self, coalition_config: Dict[str, Any]) -> float:
+    def _calculate_performance_improvement(
+            self, coalition_config: Dict[str, Any]) -> float:
         """Calculate performance improvement percentage."""
         current_performance = coalition_config.get("current_performance", {}).get(
             "baseline_score", 70
         )
-        edge_performance = coalition_config.get("edge_performance", {}).get("projected_score", 90)
-        return max(0, ((edge_performance - current_performance) / current_performance) * 100)
+        edge_performance = coalition_config.get(
+            "edge_performance", {}).get(
+            "projected_score", 90)
+        return max(
+            0, ((edge_performance - current_performance) / current_performance) * 100)
 
     def _calculate_latency_reduction(self, coalition_config: Dict[str, Any]) -> float:
         """Calculate latency reduction in milliseconds."""
-        current_latency = coalition_config.get("current_performance", {}).get("latency_ms", 200)
-        edge_latency = coalition_config.get("edge_performance", {}).get("latency_ms", 50)
+        current_latency = coalition_config.get(
+            "current_performance", {}).get(
+            "latency_ms", 200)
+        edge_latency = coalition_config.get(
+            "edge_performance", {}).get(
+            "latency_ms", 50)
         return max(0, current_latency - edge_latency)
 
-    def _calculate_availability_improvement(self, coalition_config: Dict[str, Any]) -> float:
+    def _calculate_availability_improvement(
+            self, coalition_config: Dict[str, Any]) -> float:
         """Calculate availability improvement percentage."""
         current_availability = coalition_config.get("current_performance", {}).get(
             "availability_percent", 99.0
@@ -844,15 +901,21 @@ class BusinessReadinessAssessor:
 
     def _calculate_bandwidth_savings(self, coalition_config: Dict[str, Any]) -> float:
         """Calculate bandwidth cost savings percentage."""
-        current_bandwidth_cost = coalition_config.get("current_costs", {}).get("bandwidth", 5000)
-        edge_bandwidth_cost = coalition_config.get("edge_costs", {}).get("bandwidth", 2000)
+        current_bandwidth_cost = coalition_config.get(
+            "current_costs", {}).get("bandwidth", 5000)
+        edge_bandwidth_cost = coalition_config.get(
+            "edge_costs", {}).get("bandwidth", 2000)
         if current_bandwidth_cost > 0:
-            return ((current_bandwidth_cost - edge_bandwidth_cost) / current_bandwidth_cost) * 100
+            return ((current_bandwidth_cost - edge_bandwidth_cost) /
+                    current_bandwidth_cost) * 100
         return 0
 
-    def _calculate_offline_capability_value(self, coalition_config: Dict[str, Any]) -> float:
+    def _calculate_offline_capability_value(
+            self, coalition_config: Dict[str, Any]) -> float:
         """Calculate value of offline capability."""
-        has_offline = coalition_config.get("edge_features", {}).get("offline_capability", False)
+        has_offline = coalition_config.get(
+            "edge_features", {}).get(
+            "offline_capability", False)
         business_criticality = coalition_config.get("business_context", {}).get(
             "uptime_criticality", 50
         )

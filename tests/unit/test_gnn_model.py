@@ -5,8 +5,6 @@ Comprehensive test suite for GMN (Generalized Model Notation) and GNN model data
 used in the FreeAgentics Active Inference implementation.
 """
 
-from typing import Any, Dict, List
-
 import pytest
 
 from inference.gnn.model import GMNModel, GNNModel
@@ -81,13 +79,22 @@ class TestGMNModel:
         assert "action_selection" in model.update_equations
 
         # Set preferences
-        model.preferences = {"goal_state": [1, 0, 0], "precision": 1.0, "temperature": 0.1}
+        model.preferences = {
+            "goal_state": [
+                1,
+                0,
+                0],
+            "precision": 1.0,
+            "temperature": 0.1}
         assert len(model.preferences) == 3
         assert model.preferences["goal_state"] == [1, 0, 0]
         assert model.preferences["precision"] == 1.0
 
         # Set metadata
-        model.metadata = {"created": "2024-01-01", "version": "1.0", "author": "FreeAgentics"}
+        model.metadata = {
+            "created": "2024-01-01",
+            "version": "1.0",
+            "author": "FreeAgentics"}
         assert len(model.metadata) == 3
         assert model.metadata["version"] == "1.0"
 
@@ -135,8 +142,10 @@ class TestGMNModel:
 
         # Verify complex data is stored correctly
         assert "hierarchical_beliefs" in model.state_space
-        assert model.state_space["hierarchical_beliefs"]["level_1"]["prior"] == [0.5, 0.5]
-        assert model.observations["sensory"]["visual"]["rgb"]["shape"] == [3, 224, 224]
+        assert model.state_space["hierarchical_beliefs"]["level_1"]["prior"] == [
+            0.5, 0.5]
+        assert model.observations["sensory"]["visual"]["rgb"]["shape"] == [
+            3, 224, 224]
         assert model.observations["proprioceptive"]["joint_angles"]["dim"] == 7
 
     def test_gmn_model_name_variations(self):
@@ -206,11 +215,19 @@ class TestGNNModel:
             {"from": "hidden", "to": "output", "weight": 0.8},
         ]
 
-        update_equations = {"forward": "h = tanh(Wx + b)", "backward": "dW = h.T @ delta"}
+        update_equations = {
+            "forward": "h = tanh(Wx + b)",
+            "backward": "dW = h.T @ delta"}
 
-        preferences = {"learning_rate": 0.001, "batch_size": 32, "regularization": 0.01}
+        preferences = {
+            "learning_rate": 0.001,
+            "batch_size": 32,
+            "regularization": 0.01}
 
-        metadata = {"architecture": "feedforward", "layers": 3, "parameters": 1024}
+        metadata = {
+            "architecture": "feedforward",
+            "layers": 3,
+            "parameters": 1024}
 
         model = GNNModel(
             name="full_model",
@@ -309,7 +326,8 @@ class TestGNNModel:
 
         # Modify deep copy
         deep.state_space["state"]["value"] = 2
-        assert original.state_space["state"]["value"] == 1  # Original unchanged
+        # Original unchanged
+        assert original.state_space["state"]["value"] == 1
         assert deep.state_space["state"]["value"] == 2  # Deep copy changed
 
 

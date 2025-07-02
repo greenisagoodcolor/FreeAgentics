@@ -97,13 +97,10 @@ class ParameterLearner(ABC):
         self, experiences: List[Experience], generative_model: GenerativeModel
     ) -> Dict[str, float]:
         """Update model parameters from experiences"""
-        pass
 
     @abstractmethod
     def get_learning_rates(self) -> Dict[str, float]:
         """Get current learning rates"""
-
-        pass
 
 
 class DiscreteParameterLearner(ParameterLearner):
@@ -112,16 +109,19 @@ class DiscreteParameterLearner(ParameterLearner):
     Uses Bayesian learning with Dirichlet priors for discrete distributions.
     """
 
-    def __init__(self, config: LearningConfig, model_dims: Dict[str, int]) -> None:
+    def __init__(self, config: LearningConfig,
+                 model_dims: Dict[str, int]) -> None:
         super().__init__(config)
         self.num_states = model_dims["num_states"]
         self.num_observations = model_dims["num_observations"]
         self.num_actions = model_dims["num_actions"]
         if config.use_bayesian_learning:
             self.pA = (
-                torch.ones(self.num_observations, self.num_states, device=self.device)
-                * config.concentration_A
-            )
+                torch.ones(
+                    self.num_observations,
+                    self.num_states,
+                    device=self.device) *
+                config.concentration_A)
             self.pB = (
                 torch.ones(
                     self.num_states,
@@ -131,7 +131,8 @@ class DiscreteParameterLearner(ParameterLearner):
                 )
                 * config.concentration_B
             )
-            self.pD = torch.ones(self.num_states, device=self.device) * config.concentration_D
+            self.pD = torch.ones(self.num_states,
+                                 device=self.device) * config.concentration_D
         self.lr_A = config.learning_rate_A
         self.lr_B = config.learning_rate_B
         self.lr_D = config.learning_rate_D
@@ -149,9 +150,15 @@ class DiscreteParameterLearner(ParameterLearner):
         """
         metrics = {}
         if self.config.use_bayesian_learning:
-            metrics.update(self._bayesian_update(experiences, generative_model))
+            metrics.update(
+                self._bayesian_update(
+                    experiences,
+                    generative_model))
         else:
-            metrics.update(self._gradient_update(experiences, generative_model))
+            metrics.update(
+                self._gradient_update(
+                    experiences,
+                    generative_model))
         self._decay_learning_rates()
         self.update_count += 1
         return metrics
@@ -193,8 +200,9 @@ class DiscreteParameterLearner(ParameterLearner):
             obs_idx = obs_idx.item() if hasattr(obs_idx, "item") else obs_idx
             action_idx = action_idx.item() if hasattr(action_idx, "item") else action_idx
             next_state_idx = (
-                next_state_idx.item() if hasattr(next_state_idx, "item") else next_state_idx
-            )
+                next_state_idx.item() if hasattr(
+                    next_state_idx,
+                    "item") else next_state_idx)
             A_counts[obs_idx, state_idx] += 1
             B_counts[next_state_idx, state_idx, action_idx] += 1
             if exp.timestamp == 0:
@@ -274,9 +282,15 @@ class DiscreteParameterLearner(ParameterLearner):
 
     def _decay_learning_rates(self) -> None:
         """Apply learning rate decay"""
-        self.lr_A = max(self.lr_A * self.config.decay_rate, self.config.min_learning_rate)
-        self.lr_B = max(self.lr_B * self.config.decay_rate, self.config.min_learning_rate)
-        self.lr_D = max(self.lr_D * self.config.decay_rate, self.config.min_learning_rate)
+        self.lr_A = max(
+            self.lr_A * self.config.decay_rate,
+            self.config.min_learning_rate)
+        self.lr_B = max(
+            self.lr_B * self.config.decay_rate,
+            self.config.min_learning_rate)
+        self.lr_D = max(
+            self.lr_D * self.config.decay_rate,
+            self.config.min_learning_rate)
 
     def get_learning_rates(self) -> Dict[str, float]:
         """Get current learning rates"""
@@ -289,7 +303,10 @@ class ContinuousParameterLearner(ParameterLearner):
     Uses gradient-based optimization for neural network parameters.
     """
 
-    def __init__(self, config: LearningConfig, model: ContinuousGenerativeModel) -> None:
+    def __init__(
+            self,
+            config: LearningConfig,
+            model: ContinuousGenerativeModel) -> None:
         super().__init__(config)
         self.model = model
         self.optimizers = {}
@@ -332,7 +349,8 @@ class ContinuousParameterLearner(ParameterLearner):
             )
             metrics["transition_loss"] = trans_loss
         if "observation" in self.optimizers:
-            obs_loss = self._update_observation_model(states, observations, generative_model)
+            obs_loss = self._update_observation_model(
+                states, observations, generative_model)
             metrics["observation_loss"] = obs_loss
         if "prior" in self.optimizers:
             prior_loss = self._update_prior_model(states, generative_model)
@@ -377,13 +395,17 @@ class ContinuousParameterLearner(ParameterLearner):
         self.optimizers["observation"].step()
         return loss.item()
 
-    def _update_prior_model(self, states: torch.Tensor, model: ContinuousGenerativeModel) -> float:
+    def _update_prior_model(
+            self,
+            states: torch.Tensor,
+            model: ContinuousGenerativeModel) -> float:
         """Update prior network"""
         self.optimizers["prior"].zero_grad()
         prior_params = model.prior_net(torch.zeros(1, model.dims.num_states))
         prior_mean = prior_params[:, : model.dims.num_states]
-        prior_log_var = prior_params[:, model.dims.num_states :]
-        kl_loss = -0.5 * torch.sum(1 + prior_log_var - prior_mean.pow(2) - prior_log_var.exp())
+        prior_log_var = prior_params[:, model.dims.num_states:]
+        kl_loss = -0.5 * torch.sum(1 + prior_log_var -
+                                   prior_mean.pow(2) - prior_log_var.exp())
         kl_loss.backward()
         self.optimizers["prior"].step()
         return kl_loss.item()
@@ -462,11 +484,14 @@ class OnlineParameterLearner:
         ):
             experiences = self.replay_buffer.sample(self.config.batch_size)
         else:
-            experiences = [self.replay_buffer.buffer[-1]] if self.replay_buffer else []
+            experiences = [self.replay_buffer.buffer[-1]
+                           ] if self.replay_buffer else []
         if experiences:
-            metrics = self.parameter_learner.update_parameters(experiences, self.generative_model)
+            metrics = self.parameter_learner.update_parameters(
+                experiences, self.generative_model)
             metrics["total_experiences"] = self.total_experiences
-            metrics["buffer_size"] = len(self.replay_buffer) if self.replay_buffer else 0
+            metrics["buffer_size"] = len(
+                self.replay_buffer) if self.replay_buffer else 0
             return metrics
         return {}
 
@@ -483,8 +508,10 @@ class OnlineParameterLearner:
         """Get learning statistics"""
         stats = {
             "total_experiences": self.total_experiences,
-            "buffer_size": len(self.replay_buffer) if self.replay_buffer else 0,
-            "num_updates": len(self.update_metrics),
+            "buffer_size": len(
+                self.replay_buffer) if self.replay_buffer else 0,
+            "num_updates": len(
+                self.update_metrics),
             "learning_rates": self.parameter_learner.get_learning_rates(),
         }
         if self.update_metrics:
@@ -532,7 +559,8 @@ def create_parameter_learner(
             }
             param_learner = DiscreteParameterLearner(config, model_dims)
         else:
-            param_learner = ContinuousParameterLearner(config, generative_model)
+            param_learner = ContinuousParameterLearner(
+                config, generative_model)
         return OnlineParameterLearner(config, generative_model, param_learner)
     else:
         raise ValueError(f"Unknown learner type: {learner_type}")
@@ -554,7 +582,8 @@ if __name__ == "__main__":
     dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
     params = ModelParameters(use_gpu=False)
     gen_model = DiscreteGenerativeModel(dims, params)
-    learner = create_parameter_learner("online", config, generative_model=gen_model)
+    learner = create_parameter_learner(
+        "online", config, generative_model=gen_model)
     state = torch.tensor([1, 0, 0, 0], dtype=torch.float32)
     action = torch.tensor([0, 1], dtype=torch.float32)
     observation = torch.tensor([0, 1, 0], dtype=torch.float32)

@@ -7,7 +7,6 @@ import torch
 
 from inference.gnn.edge_processor import (
     Edge,
-    EdgeBatch,
     EdgeConfig,
     EdgeFeatureType,
     EdgeProcessor,
@@ -81,7 +80,10 @@ class TestEdgeProcessor:
 
     def test_initialization(self) -> None:
         """Test processor initialization"""
-        config = EdgeConfig(feature_types=[EdgeFeatureType.WEIGHT, EdgeFeatureType.DISTANCE])
+        config = EdgeConfig(
+            feature_types=[
+                EdgeFeatureType.WEIGHT,
+                EdgeFeatureType.DISTANCE])
         processor = EdgeProcessor(config)
         assert processor.config == config
         assert len(processor.scalers) > 0
@@ -139,11 +141,14 @@ class TestEdgeProcessor:
         edges = [Edge(source=0, target=1), Edge(source=1, target=2)]
         batch = processor.process_edges(edges, num_nodes=3)
         assert batch.edge_index.shape[1] == 5
-        assert batch.metadata["has_self_loops"] == True
+        assert batch.metadata["has_self_loops"] is True
 
     def test_weight_features(self) -> None:
         """Test weight feature extraction"""
-        config = EdgeConfig(feature_types=[EdgeFeatureType.WEIGHT], normalize_weights=True)
+        config = EdgeConfig(
+            feature_types=[
+                EdgeFeatureType.WEIGHT],
+            normalize_weights=True)
         processor = EdgeProcessor(config)
         edges = [
             Edge(source=0, target=1, weight=0.5),
@@ -191,9 +196,11 @@ class TestEdgeProcessor:
         config = EdgeConfig(feature_types=[EdgeFeatureType.TEMPORAL])
         processor = EdgeProcessor(config)
         edges = [
-            Edge(source=0, target=1, features={"timestamp": 1642000000}),
-            Edge(source=1, target=2, features={"timestamp": "2022-01-12T17:00:00"}),
-        ]
+            Edge(
+                source=0, target=1, features={
+                    "timestamp": 1642000000}), Edge(
+                source=1, target=2, features={
+                    "timestamp": "2022-01-12T17:00:00"}), ]
         batch = processor.process_edges(edges, num_nodes=3)
         assert batch.edge_attr is not None
         assert batch.edge_attr.shape == (2, 7)
@@ -203,10 +210,13 @@ class TestEdgeProcessor:
         config = EdgeConfig(feature_types=[EdgeFeatureType.EMBEDDING])
         processor = EdgeProcessor(config)
         edges = [
-            Edge(source=0, target=1, features={"embedding": [0.1, 0.2, 0.3, 0.4]}),
-            Edge(source=1, target=2),
-            Edge(source=2, target=0, features={"embedding": "edge_123"}),
-        ]
+            Edge(
+                source=0, target=1, features={
+                    "embedding": [
+                        0.1, 0.2, 0.3, 0.4]}), Edge(
+                    source=1, target=2), Edge(
+                        source=2, target=0, features={
+                            "embedding": "edge_123"}), ]
         batch = processor.process_edges(edges, num_nodes=3)
         assert batch.edge_attr is not None
         assert batch.edge_attr.shape[1] >= 4
@@ -243,7 +253,9 @@ class TestEdgeProcessor:
 
     def test_edge_sampling_random(self) -> None:
         """Test random edge sampling"""
-        config = EdgeConfig(max_edges_per_node=2, edge_sampling_strategy="random")
+        config = EdgeConfig(
+            max_edges_per_node=2,
+            edge_sampling_strategy="random")
         processor = EdgeProcessor(config)
         edges = [Edge(source=0, target=i) for i in range(1, 6)]
         batch = processor.process_edges(edges, num_nodes=6)
@@ -253,7 +265,9 @@ class TestEdgeProcessor:
 
     def test_edge_sampling_topk(self) -> None:
         """Test top-k edge sampling by weight"""
-        config = EdgeConfig(max_edges_per_node=2, edge_sampling_strategy="topk")
+        config = EdgeConfig(
+            max_edges_per_node=2,
+            edge_sampling_strategy="topk")
         processor = EdgeProcessor(config)
         edges = [
             Edge(source=0, target=1, weight=0.1),

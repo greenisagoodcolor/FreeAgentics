@@ -7,7 +7,7 @@ import math
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from ..coalition.coalition_criteria import CoalitionFormationCriteria
 from ..coalition.coalition_models import Coalition, CoalitionGoal, CoalitionRole
@@ -41,13 +41,15 @@ class AgentProfile:
     agent_id: str
     capabilities: Set[str] = field(default_factory=set)
     resources: Dict[str, float] = field(default_factory=dict)
-    preferences: Dict[str, float] = field(default_factory=dict)  # agent_id -> preference score
+    preferences: Dict[str, float] = field(
+        default_factory=dict)  # agent_id -> preference score
     # Active inference parameters
     beliefs: Dict[str, float] = field(default_factory=dict)
     observations: Dict[str, float] = field(default_factory=dict)
     # Performance metrics
     reliability_score: float = 1.0
-    cooperation_history: Dict[str, float] = field(default_factory=dict)  # agent_id -> success rate
+    cooperation_history: Dict[str, float] = field(
+        default_factory=dict)  # agent_id -> success rate
     # Constraints
     max_coalitions: int = 3
     current_coalitions: int = 0
@@ -88,7 +90,8 @@ class ActiveInferenceFormation:
         """
         if not agent_beliefs or not coalition_observations:
             return float("inf")
-        # Likelihood term: how well agent beliefs predict coalition observations
+        # Likelihood term: how well agent beliefs predict coalition
+        # observations
         likelihood = 0.0
         for key in coalition_observations:
             if key in agent_beliefs:
@@ -102,7 +105,8 @@ class ActiveInferenceFormation:
             prior += abs(belief_value - 0.5) * 2.0
         return likelihood + prior
 
-    def calculate_coalition_beliefs(self, agent_profiles: List[AgentProfile]) -> Dict[str, float]:
+    def calculate_coalition_beliefs(
+            self, agent_profiles: List[AgentProfile]) -> Dict[str, float]:
         """Calculate emergent coalition beliefs from member beliefs"""
         if not agent_profiles:
             return {}
@@ -133,7 +137,8 @@ class ActiveInferenceFormation:
         # Calculate current coalition beliefs
         coalition_beliefs = self.calculate_coalition_beliefs(existing_members)
         # Calculate free energy for agent joining
-        free_energy = self.calculate_free_energy(agent.beliefs, coalition_beliefs)
+        free_energy = self.calculate_free_energy(
+            agent.beliefs, coalition_beliefs)
         # Convert to fitness score (lower free energy = higher fitness)
         fitness = math.exp(-free_energy / self.temperature)
         return fitness
@@ -144,80 +149,140 @@ class ActiveInferenceFormation:
         goal: Optional[CoalitionGoal] = None,
         max_size: int = 5,
     ) -> FormationResult:
-        """Form coalition using active inference principles"""
+        """Form coalition using active inference principles with Template Method pattern"""
         start_time = datetime.utcnow()
+        
         if not agents:
-            return FormationResult(
-                coalition=None,
-                success=False,
-                score=0.0,
-                formation_time=0.0,
-                strategy_used=FormationStrategy.ACTIVE_INFERENCE,
-                participants=[],
-            )
+            return self._create_empty_coalition_result(start_time)
 
-        # Start with the agent with strongest beliefs (lowest entropy)
+        selected_agents = self._select_strongest_belief_agent(agents)
+        remaining_agents = self._filter_remaining_agents(agents, selected_agents[0])
+        selected_agents = self._expand_coalition_by_free_energy(
+            selected_agents, remaining_agents, max_size)
+        
+        formation_time = (datetime.utcnow() - start_time).total_seconds()
+        return self._create_coalition_result(selected_agents, remaining_agents, goal, formation_time)
+
+    def _create_empty_coalition_result(self, start_time: datetime) -> FormationResult:
+        """Create result for empty agent list"""
+        return FormationResult(
+            coalition=None,
+            success=False,
+            score=0.0,
+            formation_time=0.0,
+            strategy_used=FormationStrategy.ACTIVE_INFERENCE,
+            participants=[],
+        )
+
+    def _select_strongest_belief_agent(self, agents: List[AgentProfile]) -> List[AgentProfile]:
+        """Select agent with strongest beliefs (lowest entropy)"""
         def belief_strength(agent: AgentProfile) -> float:
             if not agent.beliefs:
                 return 0.0
             return sum(abs(b - 0.5) for b in agent.beliefs.values())
 
-        selected_agents = [max(agents, key=belief_strength)]
-        remaining_agents = [a for a in agents if a.agent_id != selected_agents[0].agent_id]
-        # Iteratively add agents that minimize collective free energy
+        return [max(agents, key=belief_strength)]
+
+    def _filter_remaining_agents(self, agents: List[AgentProfile], 
+                               selected_agent: AgentProfile) -> List[AgentProfile]:
+        """Filter remaining available agents"""
+        return [a for a in agents if a.agent_id != selected_agent.agent_id]
+
+    def _expand_coalition_by_free_energy(self, selected_agents: List[AgentProfile],
+                                       remaining_agents: List[AgentProfile],
+                                       max_size: int) -> List[AgentProfile]:
+        """Iteratively add agents that minimize collective free energy"""
         while len(selected_agents) < max_size and remaining_agents:
-            best_agent = None
-            best_score = -float("inf")
-            for candidate in remaining_agents:
-                # Check availability
-                if candidate.current_coalitions >= candidate.max_coalitions:
-                    continue
-                fitness = self.evaluate_coalition_fit(candidate, selected_agents)
-                # Bonus for complementary capabilities
-                existing_capabilities = set()
-                for member in selected_agents:
-                    existing_capabilities.update(member.capabilities)
-                new_capabilities = candidate.capabilities - existing_capabilities
-                capability_bonus = len(new_capabilities) * 0.1
-                total_score = fitness + capability_bonus
-                if total_score > best_score:
-                    best_score = total_score
-                    best_agent = candidate
+            best_agent, best_score = self._find_best_free_energy_candidate(
+                selected_agents, remaining_agents)
+            
             if best_agent and best_score > 0.1:  # Minimum threshold
                 selected_agents.append(best_agent)
                 remaining_agents.remove(best_agent)
             else:
                 break
-        # Create coalition if we have enough members
+                
+        return selected_agents
+
+    def _find_best_free_energy_candidate(self, selected_agents: List[AgentProfile],
+                                       remaining_agents: List[AgentProfile]) -> Tuple[Optional[AgentProfile], float]:
+        """Find candidate that best minimizes free energy"""
+        best_agent = None
+        best_score = -float("inf")
+        
+        for candidate in remaining_agents:
+            if candidate.current_coalitions >= candidate.max_coalitions:
+                continue
+                
+            fitness = self.evaluate_coalition_fit(candidate, selected_agents)
+            capability_bonus = self._calculate_capability_bonus(candidate, selected_agents)
+            total_score = fitness + capability_bonus
+            
+            if total_score > best_score:
+                best_score = total_score
+                best_agent = candidate
+                
+        return best_agent, best_score
+
+    def _calculate_capability_bonus(self, candidate: AgentProfile,
+                                  selected_agents: List[AgentProfile]) -> float:
+        """Calculate bonus for complementary capabilities"""
+        existing_capabilities = set()
+        for member in selected_agents:
+            existing_capabilities.update(member.capabilities)
+        
+        new_capabilities = candidate.capabilities - existing_capabilities
+        return len(new_capabilities) * 0.1
+
+    def _create_coalition_result(self, selected_agents: List[AgentProfile],
+                               remaining_agents: List[AgentProfile],
+                               goal: Optional[CoalitionGoal],
+                               formation_time: float) -> FormationResult:
+        """Create final coalition result"""
         if len(selected_agents) >= 2:
-            coalition = Coalition(
-                coalition_id=f"coalition_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
-                name=f"Active Inference Coalition",
-                description=("Coalition formed through active inference belief alignment",),
+            return self._create_successful_coalition(selected_agents, remaining_agents, goal, formation_time)
+        else:
+            return self._create_failed_coalition(selected_agents + remaining_agents, formation_time)
+
+    def _create_successful_coalition(self, selected_agents: List[AgentProfile],
+                                   remaining_agents: List[AgentProfile],
+                                   goal: Optional[CoalitionGoal],
+                                   formation_time: float) -> FormationResult:
+        """Create successful coalition result"""
+        coalition = Coalition(
+            coalition_id=f"coalition_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
+            name="Active Inference Coalition",
+            description="Coalition formed through active inference belief alignment",
+        )
+
+        for i, agent in enumerate(selected_agents):
+            role = CoalitionRole.LEADER if i == 0 else CoalitionRole.CONTRIBUTOR
+            coalition.add_member(
+                agent_id=agent.agent_id,
+                role=role,
+                capabilities=agent.capabilities,
+                resources=agent.resources,
             )
-            # Add members
-            for i, agent in enumerate(selected_agents):
-                role = CoalitionRole.LEADER if i == 0 else CoalitionRole.CONTRIBUTOR
-                coalition.add_member(
-                    agent_id=agent.agent_id,
-                    role=role,
-                    capabilities=agent.capabilities,
-                    resources=agent.resources,
-                )
-            # Add goal if provided
-            if goal:
-                coalition.add_goal(goal)
-            formation_time = (datetime.utcnow() - start_time).total_seconds()
-            return FormationResult(
-                coalition=coalition,
-                success=True,
-                score=best_score,
-                formation_time=formation_time,
-                strategy_used=FormationStrategy.ACTIVE_INFERENCE,
-                participants=[a.agent_id for a in selected_agents],
-                rejected_agents=[a.agent_id for a in remaining_agents],
-            )
-        formation_time = (datetime.utcnow() - start_time).total_seconds()
+
+        if goal:
+            coalition.add_goal(goal)
+
+        # Calculate final score based on the best candidate found
+        best_score = self.evaluate_coalition_fit(selected_agents[-1], selected_agents[:-1]) if len(selected_agents) > 1 else 1.0
+
+        return FormationResult(
+            coalition=coalition,
+            success=True,
+            score=best_score,
+            formation_time=formation_time,
+            strategy_used=FormationStrategy.ACTIVE_INFERENCE,
+            participants=[a.agent_id for a in selected_agents],
+            rejected_agents=[a.agent_id for a in remaining_agents],
+        )
+
+    def _create_failed_coalition(self, all_agents: List[AgentProfile],
+                               formation_time: float) -> FormationResult:
+        """Create failed coalition result"""
         return FormationResult(
             coalition=None,
             success=False,
@@ -225,14 +290,15 @@ class ActiveInferenceFormation:
             formation_time=formation_time,
             strategy_used=FormationStrategy.ACTIVE_INFERENCE,
             participants=[],
-            rejected_agents=[a.agent_id for a in agents],
+            rejected_agents=[a.agent_id for a in all_agents],
         )
 
 
 class CapabilityBasedFormation:
     """Coalition formation based on capability complementarity"""
 
-    def __init__(self, coverage_weight: float = 0.6, redundancy_penalty: float = 0.3) -> None:
+    def __init__(self, coverage_weight: float = 0.6,
+                 redundancy_penalty: float = 0.3) -> None:
         self.coverage_weight = coverage_weight
         self.redundancy_penalty = redundancy_penalty
 
@@ -254,8 +320,8 @@ class CapabilityBasedFormation:
         if required_capabilities:
             covered_required = len(all_capabilities & required_capabilities)
             coverage_score = (
-                covered_required / len(required_capabilities) if required_capabilities else 1.0
-            )
+                covered_required /
+                len(required_capabilities) if required_capabilities else 1.0)
         # Redundancy penalty
         redundancy_score = 0.0
         for count in capability_counts.values():
@@ -280,23 +346,25 @@ class CapabilityBasedFormation:
                 strategy_used=FormationStrategy.CAPABILITY_BASED,
                 participants=[],
             )
-        # Greedy algorithm: iteratively add agents that improve capability score
+        # Greedy algorithm: iteratively add agents that improve capability
+        # score
         selected_agents = []
-        remaining_agents = [a for a in agents if a.current_coalitions < a.max_coalitions]
+        remaining_agents = [
+            a for a in agents if a.current_coalitions < a.max_coalitions]
         while len(selected_agents) < max_size and remaining_agents:
             best_agent = None
             best_score = -float("inf")
             for candidate in remaining_agents:
                 test_group = selected_agents + [candidate]
-                score = self.calculate_capability_score(test_group, required_capabilities)
+                score = self.calculate_capability_score(
+                    test_group, required_capabilities)
                 if score > best_score:
                     best_score = score
                     best_agent = candidate
             if best_agent and (
-                not selected_agents
-                or best_score
-                > self.calculate_capability_score(selected_agents, required_capabilities)
-            ):
+                not selected_agents or best_score > self.calculate_capability_score(
+                    selected_agents,
+                    required_capabilities)):
                 selected_agents.append(best_agent)
                 remaining_agents.remove(best_agent)
             else:
@@ -304,12 +372,15 @@ class CapabilityBasedFormation:
         # Create coalition if viable
         if len(selected_agents) >= 2:
             coalition = Coalition(
-                coalition_id=f"coalition_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
+                coalition_id=f"coalition_{
+                    datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
                 name="Capability-Based Coalition",
                 description="Coalition formed based on capability complementarity",
             )
             # Assign roles based on capability breadth
-            sorted_agents = sorted(selected_agents, key=lambda a: len(a.capabilities), reverse=True)
+            sorted_agents = sorted(
+                selected_agents, key=lambda a: len(
+                    a.capabilities), reverse=True)
             for i, agent in enumerate(sorted_agents):
                 role = CoalitionRole.LEADER if i == 0 else CoalitionRole.CONTRIBUTOR
                 coalition.add_member(
@@ -343,11 +414,13 @@ class CapabilityBasedFormation:
 class ResourceOptimizationFormation:
     """Coalition formation based on resource optimization and efficiency"""
 
-    def __init__(self, efficiency_weight: float = 0.5, balance_weight: float = 0.3) -> None:
+    def __init__(self, efficiency_weight: float = 0.5,
+                 balance_weight: float = 0.3) -> None:
         self.efficiency_weight = efficiency_weight
         self.balance_weight = balance_weight
 
-    def calculate_resource_efficiency(self, agents: List[AgentProfile]) -> float:
+    def calculate_resource_efficiency(
+            self, agents: List[AgentProfile]) -> float:
         """Calculate resource utilization efficiency"""
         if not agents:
             return 0.0
@@ -355,7 +428,8 @@ class ResourceOptimizationFormation:
         total_resources = {}
         for agent in agents:
             for resource, amount in agent.resources.items():
-                total_resources[resource] = total_resources.get(resource, 0) + amount
+                total_resources[resource] = total_resources.get(
+                    resource, 0) + amount
         # Efficiency based on resource diversity and quantity
         diversity_score = len(total_resources)
         quantity_score = sum(total_resources.values())
@@ -378,86 +452,146 @@ class ResourceOptimizationFormation:
         resource_requirements: Optional[Dict[str, float]] = None,
         max_size: int = 5,
     ) -> FormationResult:
-        """Form coalition by optimizing resource allocation"""
+        """Form coalition by optimizing resource allocation using Template Method pattern"""
         start_time = datetime.utcnow()
+        
         if not agents:
-            return FormationResult(
-                coalition=None,
-                success=False,
-                score=0.0,
-                formation_time=0.0,
-                strategy_used=FormationStrategy.RESOURCE_OPTIMIZATION,
-                participants=[],
-            )
+            return self._create_empty_result(start_time)
 
-        # Start with agent having the most diverse resources
+        selected_agents = self._select_initial_agent(agents)
+        remaining_agents = self._filter_available_agents(agents, selected_agents[0])
+        selected_agents = self._expand_coalition(
+            selected_agents, remaining_agents, resource_requirements, max_size)
+        
+        formation_time = (datetime.utcnow() - start_time).total_seconds()
+        return self._create_final_result(selected_agents, remaining_agents, formation_time)
+
+    def _create_empty_result(self, start_time: datetime) -> FormationResult:
+        """Create result for empty agent list"""
+        return FormationResult(
+            coalition=None,
+            success=False,
+            score=0.0,
+            formation_time=0.0,
+            strategy_used=FormationStrategy.RESOURCE_OPTIMIZATION,
+            participants=[],
+        )
+
+    def _select_initial_agent(self, agents: List[AgentProfile]) -> List[AgentProfile]:
+        """Select initial agent with most diverse resources"""
         def resource_diversity(agent: AgentProfile) -> float:
             return len(agent.resources) + sum(agent.resources.values()) * 0.1
 
-        selected_agents = [max(agents, key=resource_diversity)]
-        remaining_agents = [
-            a
-            for a in agents
-            if a.agent_id != selected_agents[0].agent_id and a.current_coalitions < a.max_coalitions
+        return [max(agents, key=resource_diversity)]
+
+    def _filter_available_agents(self, agents: List[AgentProfile], 
+                               initial_agent: AgentProfile) -> List[AgentProfile]:
+        """Filter agents available for coalition"""
+        return [
+            a for a in agents
+            if a.agent_id != initial_agent.agent_id and a.current_coalitions < a.max_coalitions
         ]
+
+    def _expand_coalition(self, selected_agents: List[AgentProfile], 
+                         remaining_agents: List[AgentProfile],
+                         resource_requirements: Optional[Dict[str, float]], 
+                         max_size: int) -> List[AgentProfile]:
+        """Expand coalition by adding best candidates"""
         while len(selected_agents) < max_size and remaining_agents:
-            best_agent = None
-            best_score = -float("inf")
-            for candidate in remaining_agents:
-                test_group = selected_agents + [candidate]
-                score = self.calculate_resource_efficiency(test_group)
-                # Bonus for meeting resource requirements
-                if resource_requirements:
-                    total_resources = {}
-                    for agent in test_group:
-                        for resource, amount in agent.resources.items():
-                            total_resources[resource] = total_resources.get(resource, 0) + amount
-                    requirement_bonus = 0.0
-                    for resource, required in resource_requirements.items():
-                        if resource in total_resources:
-                            coverage = min(1.0, total_resources[resource] / required)
-                            requirement_bonus += (
-                                coverage * 50
-                            )  # Significant bonus for meeting requirements
-                    score += requirement_bonus
-                if score > best_score:
-                    best_score = score
-                    best_agent = candidate
-            if best_agent and best_score > self.calculate_resource_efficiency(selected_agents):
+            best_agent, best_score = self._find_best_candidate(
+                selected_agents, remaining_agents, resource_requirements)
+            
+            if (best_agent and 
+                best_score > self.calculate_resource_efficiency(selected_agents)):
                 selected_agents.append(best_agent)
                 remaining_agents.remove(best_agent)
             else:
                 break
-        # Create coalition
+        
+        return selected_agents
+
+    def _find_best_candidate(self, selected_agents: List[AgentProfile],
+                           remaining_agents: List[AgentProfile],
+                           resource_requirements: Optional[Dict[str, float]]) -> Tuple[Optional[AgentProfile], float]:
+        """Find best candidate agent for coalition"""
+        best_agent = None
+        best_score = -float("inf")
+        
+        for candidate in remaining_agents:
+            test_group = selected_agents + [candidate]
+            score = self.calculate_resource_efficiency(test_group)
+            score += self._calculate_requirement_bonus(test_group, resource_requirements)
+            
+            if score > best_score:
+                best_score = score
+                best_agent = candidate
+                
+        return best_agent, best_score
+
+    def _calculate_requirement_bonus(self, test_group: List[AgentProfile],
+                                   resource_requirements: Optional[Dict[str, float]]) -> float:
+        """Calculate bonus for meeting resource requirements"""
+        if not resource_requirements:
+            return 0.0
+
+        total_resources = {}
+        for agent in test_group:
+            for resource, amount in agent.resources.items():
+                total_resources[resource] = total_resources.get(resource, 0) + amount
+
+        requirement_bonus = 0.0
+        for resource, required in resource_requirements.items():
+            if resource in total_resources:
+                coverage = min(1.0, total_resources[resource] / required)
+                requirement_bonus += coverage * 50
+
+        return requirement_bonus
+
+    def _create_final_result(self, selected_agents: List[AgentProfile],
+                           remaining_agents: List[AgentProfile],
+                           formation_time: float) -> FormationResult:
+        """Create final formation result"""
         if len(selected_agents) >= 2:
-            coalition = Coalition(
-                coalition_id=f"coalition_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
-                name="Resource-Optimized Coalition",
-                description=("Coalition formed for optimal resource utilization",),
+            return self._create_successful_result(selected_agents, remaining_agents, formation_time)
+        else:
+            return self._create_failed_result(selected_agents + remaining_agents, formation_time)
+
+    def _create_successful_result(self, selected_agents: List[AgentProfile],
+                                remaining_agents: List[AgentProfile],
+                                formation_time: float) -> FormationResult:
+        """Create successful coalition result"""
+        coalition = Coalition(
+            coalition_id=f"coalition_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
+            name="Resource-Optimized Coalition",
+            description="Coalition formed for optimal resource utilization",
+        )
+
+        sorted_agents = sorted(selected_agents, 
+                              key=lambda a: sum(a.resources.values()), reverse=True)
+        
+        for i, agent in enumerate(sorted_agents):
+            role = CoalitionRole.LEADER if i == 0 else CoalitionRole.CONTRIBUTOR
+            coalition.add_member(
+                agent_id=agent.agent_id,
+                role=role,
+                capabilities=agent.capabilities,
+                resources=agent.resources,
             )
-            # Assign roles based on resource contribution
-            sorted_agents = sorted(
-                selected_agents, key=lambda a: sum(a.resources.values()), reverse=True
-            )
-            for i, agent in enumerate(sorted_agents):
-                role = CoalitionRole.LEADER if i == 0 else CoalitionRole.CONTRIBUTOR
-                coalition.add_member(
-                    agent_id=agent.agent_id,
-                    role=role,
-                    capabilities=agent.capabilities,
-                    resources=agent.resources,
-                )
-            formation_time = (datetime.utcnow() - start_time).total_seconds()
-            return FormationResult(
-                coalition=coalition,
-                success=True,
-                score=best_score,
-                formation_time=formation_time,
-                strategy_used=FormationStrategy.RESOURCE_OPTIMIZATION,
-                participants=[a.agent_id for a in selected_agents],
-                rejected_agents=[a.agent_id for a in remaining_agents],
-            )
-        formation_time = (datetime.utcnow() - start_time).total_seconds()
+
+        best_score = self.calculate_resource_efficiency(selected_agents)
+        return FormationResult(
+            coalition=coalition,
+            success=True,
+            score=best_score,
+            formation_time=formation_time,
+            strategy_used=FormationStrategy.RESOURCE_OPTIMIZATION,
+            participants=[a.agent_id for a in selected_agents],
+            rejected_agents=[a.agent_id for a in remaining_agents],
+        )
+
+    def _create_failed_result(self, all_agents: List[AgentProfile],
+                            formation_time: float) -> FormationResult:
+        """Create failed coalition result"""
         return FormationResult(
             coalition=None,
             success=False,
@@ -465,7 +599,7 @@ class ResourceOptimizationFormation:
             formation_time=formation_time,
             strategy_used=FormationStrategy.RESOURCE_OPTIMIZATION,
             participants=[],
-            rejected_agents=[a.agent_id for a in agents],
+            rejected_agents=[a.agent_id for a in all_agents],
         )
 
 
@@ -482,7 +616,10 @@ class CoalitionFormationEngine:
         }
         self.formation_history: List[FormationResult] = []
 
-    def register_strategy(self, strategy: FormationStrategy, implementation: Any) -> None:
+    def register_strategy(
+            self,
+            strategy: FormationStrategy,
+            implementation: Any) -> None:
         """Register a custom formation strategy"""
         self.strategies[strategy] = implementation
 
@@ -519,7 +656,9 @@ class CoalitionFormationEngine:
                 f"using {strategy.value} strategy (score: {result.score:.2f})"
             )
         else:
-            logger.warning(f"Failed to form coalition using {strategy.value} strategy")
+            logger.warning(
+                f"Failed to form coalition using {
+                    strategy.value} strategy")
         return result
 
     def try_multiple_strategies(
@@ -549,7 +688,8 @@ class CoalitionFormationEngine:
                     criteria=criteria,
                     max_size=max_size,
                 )
-                if result.success and (best_result is None or result.score > best_result.score):
+                if result.success and (
+                        best_result is None or result.score > best_result.score):
                     best_result = result
             except Exception as e:
                 logger.error(f"Error with strategy {strategy.value}: {e}")
@@ -559,16 +699,19 @@ class CoalitionFormationEngine:
             success=False,
             score=0.0,
             formation_time=0.0,
-            strategy_used=(strategies[0] if strategies else FormationStrategy.ACTIVE_INFERENCE),
+            strategy_used=(
+                strategies[0] if strategies else FormationStrategy.ACTIVE_INFERENCE),
             participants=[],
-            rejected_agents=[a.agent_id for a in agents],
+            rejected_agents=[
+                a.agent_id for a in agents],
         )
 
     def get_formation_statistics(self) -> Dict[str, Any]:
         """Get statistics about coalition formation performance"""
         if not self.formation_history:
             return {}
-        successful_formations = [r for r in self.formation_history if r.success]
+        successful_formations = [
+            r for r in self.formation_history if r.success]
         stats = {
             "total_attempts": len(self.formation_history),
             "successful_formations": len(successful_formations),
@@ -581,7 +724,8 @@ class CoalitionFormationEngine:
         }
         # Strategy-specific statistics
         for strategy in FormationStrategy:
-            strategy_results = [r for r in self.formation_history if r.strategy_used == strategy]
+            strategy_results = [
+                r for r in self.formation_history if r.strategy_used == strategy]
             if strategy_results:
                 successful = [r for r in strategy_results if r.success]
                 stats["strategy_performance"][strategy.value] = {

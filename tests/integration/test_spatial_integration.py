@@ -3,7 +3,6 @@ Module for FreeAgentics Active Inference implementation.
 """
 
 import time
-from typing import Optional
 
 import pytest
 
@@ -23,9 +22,16 @@ class TestSpatialIntegration:
     @pytest.fixture
     def h3_world(self):
         """Create an H3World instance"""
-        return H3World(center_lat=37.7749, center_lng=-122.4194, resolution=7, num_rings=5, seed=42)
+        return H3World(
+            center_lat=37.7749,
+            center_lng=-
+            122.4194,
+            resolution=7,
+            num_rings=5,
+            seed=42)
 
-    def test_api_world_coordinate_consistency(self, spatial_api, h3_world) -> None:
+    def test_api_world_coordinate_consistency(
+            self, spatial_api, h3_world) -> None:
         """Test that coordinates are consistent between API and world"""
         center_hex = h3_world.center_hex
         world_coords = h3_world.get_cell(center_hex).coordinates
@@ -45,22 +51,25 @@ class TestSpatialIntegration:
         cells = list(h3_world.cells.keys())
         start_hex = cells[0]
         end_hex = cells[10]
-        movement_costs = {hex_id: cell.movement_cost for hex_id, cell in h3_world.cells.items()}
+        movement_costs = {
+            hex_id: cell.movement_cost for hex_id,
+            cell in h3_world.cells.items()}
         obstacles = {
-            hex_id for hex_id, cell in h3_world.cells.items() if cell.terrain == TerrainType.WATER
-        }
-        path = spatial_api.find_path_astar(start_hex, end_hex, movement_costs, obstacles)
+            hex_id for hex_id,
+            cell in h3_world.cells.items() if cell.terrain == TerrainType.WATER}
+        path = spatial_api.find_path_astar(
+            start_hex, end_hex, movement_costs, obstacles)
         if path:
             for hex_id in path:
                 assert hex_id not in obstacles
             total_cost = sum(movement_costs.get(h, 1.0) for h in path[1:])
             assert total_cost > 0
 
-    def test_resource_distribution_in_world(self, spatial_api, h3_world) -> None:
+    def test_resource_distribution_in_world(
+            self, spatial_api, h3_world) -> None:
         """Test resource distribution across world hexes"""
-        forest_centers = [
-            hex_id for hex_id, cell in h3_world.cells.items() if cell.biome == Biome.FOREST
-        ][:3]
+        forest_centers = [hex_id for hex_id, cell in h3_world.cells.items(
+        ) if cell.biome == Biome.FOREST][:3]
         food_dist = ResourceDistribution(
             resource_type=ResourceType.FOOD,
             base_amount=50.0,
@@ -84,7 +93,9 @@ class TestSpatialIntegration:
                 break
         if mountain_hex:
             mountain_cell = h3_world.get_cell(mountain_hex)
-            terrain_heights = {hex_id: cell.elevation for hex_id, cell in h3_world.cells.items()}
+            terrain_heights = {
+                hex_id: cell.elevation for hex_id,
+                cell in h3_world.cells.items()}
             obs_model = ObservationModel(base_range=2, elevation_bonus=0.002)
             spatial_api.set_observation_model(obs_model)
             visible = spatial_api.get_visible_hexes(
@@ -104,7 +115,8 @@ class TestSpatialIntegration:
                 if mountain_cell.elevation > flat_cell.elevation + 500:
                     assert len(visible) >= len(flat_visible)
 
-    def test_find_nearest_resource_in_world(self, spatial_api, h3_world) -> None:
+    def test_find_nearest_resource_in_world(
+            self, spatial_api, h3_world) -> None:
         """Test finding nearest resource using world data"""
         world_resources = {}
         for hex_id, cell in h3_world.cells.items():
@@ -132,7 +144,8 @@ class TestSpatialIntegration:
             cell = h3_world.get_cell(hex_id)
             return cell and cell.biome == Biome.FOREST
 
-        forest_hexes = spatial_api.query_region(center_hex, radius_hexes=3, filter_func=is_forest)
+        forest_hexes = spatial_api.query_region(
+            center_hex, radius_hexes=3, filter_func=is_forest)
         for hex_id in forest_hexes:
             cell = h3_world.get_cell(hex_id)
             assert cell.biome == Biome.FOREST
@@ -144,7 +157,9 @@ class TestSpatialIntegration:
         end = cells[20]
         simple_path = spatial_api.find_path_simple(start, end)
         simple_cost = h3_world.get_total_path_cost(simple_path)
-        movement_costs = {hex_id: cell.movement_cost for hex_id, cell in h3_world.cells.items()}
+        movement_costs = {
+            hex_id: cell.movement_cost for hex_id,
+            cell in h3_world.cells.items()}
         optimal_path = spatial_api.find_path_astar(start, end, movement_costs)
         if optimal_path:
             optimal_cost = h3_world.get_total_path_cost(optimal_path)
@@ -161,7 +176,7 @@ class TestSpatialIntegration:
         start_time = time.time()
         for hex_id in hexes:
             _ = spatial_api.get_neighbors(hex_id, use_cache=True)
-        first_cache_time = time.time() - start_time
+        time.time() - start_time
         start_time = time.time()
         for hex_id in hexes:
             _ = spatial_api.get_neighbors(hex_id, use_cache=True)
@@ -178,7 +193,8 @@ class TestSpatialIntegration:
                 if cell.resources.get("food", 0) > 30:
                     food_hexes.append(hex_id)
         if len(food_hexes) > 5:
-            clusters = spatial_api.find_clusters(food_hexes, min_cluster_size=2, max_distance=3)
+            clusters = spatial_api.find_clusters(
+                food_hexes, min_cluster_size=2, max_distance=3)
             assert len(clusters) > 0
             for cluster in clusters:
                 assert len(cluster) >= 2

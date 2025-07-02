@@ -9,7 +9,7 @@ import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -63,8 +63,7 @@ class SafetyViolation:
             "resolved": self.resolved,
             "timestamp": self.timestamp.isoformat(),
             "resolution_timestamp": (
-                self.resolution_timestamp.isoformat() if self.resolution_timestamp else None
-            ),
+                self.resolution_timestamp.isoformat() if self.resolution_timestamp else None),
         }
 
 
@@ -185,7 +184,8 @@ class MarkovBlanketSafetyProtocol(SafetyProtocol):
 
         if independence_measure > self.independence_threshold:
             violation = SafetyViolation(
-                violation_id=f"mb_{agent_id}_{datetime.now().timestamp()}",
+                violation_id=f"mb_{agent_id}_{
+                    datetime.now().timestamp()}",
                 violation_type=ViolationType.BOUNDARY_VIOLATION,
                 severity=SafetyLevel.HIGH if independence_measure > 0.1 else SafetyLevel.MEDIUM,
                 description=f"Markov blanket boundary violation detected for agent {agent_id}",
@@ -227,7 +227,7 @@ class MarkovBlanketSafetyProtocol(SafetyProtocol):
 
         violation.mitigation_actions = actions
         logger.warning(
-            f"Handling Markov blanket violation for agent {violation.agent_id}: {actions}"
-        )
+            f"Handling Markov blanket violation for agent {
+                violation.agent_id}: {actions}")
 
         return actions

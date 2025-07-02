@@ -137,10 +137,6 @@ describe("Lib Functions Complete Coverage", () => {
     });
   });
 
-  describe("Stores", () => {
-    test("dashboard store", () => {
-      const store = require("@/lib/stores/dashboard-store");
-      expect(store).toBeDefined();
-    });
-  });
+  // Stores section removed - Zustand dashboard store has been removed
+  // All state management is now unified under Redux
 });

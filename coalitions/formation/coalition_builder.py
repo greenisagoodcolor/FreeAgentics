@@ -33,8 +33,10 @@ class CoalitionBuilder:
         self.pending_proposals: List[Dict[str, Any]] = []
 
     def propose_coalition(
-        self, proposer_id: str, member_ids: List[str], coalition_type: str = "resource_sharing"
-    ) -> Coalition:
+            self,
+            proposer_id: str,
+            member_ids: List[str],
+            coalition_type: str = "resource_sharing") -> Coalition:
         """Propose a new coalition."""
         coalition_id = f"coalition_{len(self.coalitions)}"
         coalition = Coalition(

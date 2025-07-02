@@ -15,13 +15,10 @@ from .perception import Percept, PerceptionSystem, StimulusType
 from .state_manager import AgentStateManager
 
 try:
-    from ...agents.active_inference import (
-        DiscreteExpectedFreeEnergy,
-        DiscreteGenerativeModel,
-        create_generative_model,
-        create_policy_selector,
-    )
-
+    # from ...agents.active_inference import (
+    #     create_generative_model,
+    #     create_policy_selector,
+    # )
     ACTIVE_INFERENCE_AVAILABLE = True
 except ImportError:
     ACTIVE_INFERENCE_AVAILABLE = False
@@ -79,7 +76,10 @@ class Action:
 
     def __hash__(self):
         """Make Action hashable for use in sets"""
-        return hash((self.action_type, str(self.target), tuple(self.parameters.items())))
+        return hash(
+            (self.action_type, str(
+                self.target), tuple(
+                self.parameters.items())))
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert action to dictionary for serialization"""
@@ -113,15 +113,19 @@ class DecisionContext:
 
     def get_perceived_threats(self) -> List[Percept]:
         """Get perceived threats from percepts"""
-        return [p for p in self.percepts if p.stimulus.stimulus_type == StimulusType.DANGER]
+        return [p for p in self.percepts if p.stimulus.stimulus_type ==
+                StimulusType.DANGER]
 
     def get_perceived_agents(self) -> List[Percept]:
         """Get perceived agents from percepts"""
-        return [p for p in self.percepts if p.stimulus.stimulus_type == StimulusType.AGENT]
+        return [p for p in self.percepts if p.stimulus.stimulus_type ==
+                StimulusType.AGENT]
 
     def get_perceived_resources(self) -> List[Percept]:
         """Get perceived resources from percepts"""
-        return [p for p in self.percepts if p.stimulus.metadata.get("is_resource", False)]
+        return [
+            p for p in self.percepts if p.stimulus.metadata.get(
+                "is_resource", False)]
 
 
 class UtilityFunction:
@@ -146,8 +150,10 @@ class SafetyUtility(UtilityFunction):
         if action.action_type == ActionType.MOVE and action.target:
             agent_pos = context.agent.position
             for threat in threats:
-                threat_distance = agent_pos.distance_to(threat.stimulus.position)
-                target_distance = action.target.distance_to(threat.stimulus.position)
+                threat_distance = agent_pos.distance_to(
+                    threat.stimulus.position)
+                target_distance = action.target.distance_to(
+                    threat.stimulus.position)
                 if target_distance > threat_distance:
                     utility += 5.0
                 else:
@@ -167,7 +173,8 @@ class GoalUtility(UtilityFunction):
         utility = 0.0
         goal = context.current_goal
         if action.action_type == ActionType.MOVE and goal.target_position:
-            current_distance = context.agent.position.distance_to(goal.target_position)
+            current_distance = context.agent.position.distance_to(
+                goal.target_position)
             if action.target:
                 new_distance = action.target.distance_to(goal.target_position)
                 progress = current_distance - new_distance
@@ -200,7 +207,8 @@ class ResourceUtility(UtilityFunction):
                 current_distance = context.agent.position.distance_to(
                     closest_resource.stimulus.position
                 )
-                new_distance = action.target.distance_to(closest_resource.stimulus.position)
+                new_distance = action.target.distance_to(
+                    closest_resource.stimulus.position)
                 if new_distance < current_distance:
                     utility += (1.0 - energy_ratio) * 5.0
         if agent.resources.energy < action.cost * 2:
@@ -231,7 +239,8 @@ class SocialUtility(UtilityFunction):
             and action.target is not None
             and hasattr(action.target, "agent_id")
         ):
-            relationship = context.agent.get_relationship(action.target.agent_id)
+            relationship = context.agent.get_relationship(
+                action.target.agent_id)
             if relationship:
                 utility += (relationship.trust_level - 0.5) * 10.0
         return utility
@@ -240,7 +249,9 @@ class SocialUtility(UtilityFunction):
 class DecisionMaker:
     """Base class for decision-making systems"""
 
-    def __init__(self, strategy: DecisionStrategy = DecisionStrategy.UTILITY_BASED) -> None:
+    def __init__(
+            self,
+            strategy: DecisionStrategy = DecisionStrategy.UTILITY_BASED) -> None:
         self.strategy = strategy
         self.utility_functions: List[UtilityFunction] = [
             SafetyUtility(),
@@ -268,7 +279,8 @@ class DecisionMaker:
         else:
             return self._hybrid_decision(context)
 
-    def _utility_based_decision(self, context: DecisionContext) -> Optional[Action]:
+    def _utility_based_decision(
+            self, context: DecisionContext) -> Optional[Action]:
         """Make decision based on utility maximization"""
         if not context.available_actions:
             return None
@@ -283,13 +295,15 @@ class DecisionMaker:
             if context.time_pressure > 0.5 and action.duration > 2.0:
                 total_utility *= 1.0 - context.time_pressure * 0.5
             action.utility = total_utility
-            action.expected_utility = total_utility  # Set expected utility for decision making
+            # Set expected utility for decision making
+            action.expected_utility = total_utility
             if total_utility > best_utility:
                 best_utility = total_utility
                 best_action = action
         return best_action
 
-    def _goal_oriented_decision(self, context: DecisionContext) -> Optional[Action]:
+    def _goal_oriented_decision(
+            self, context: DecisionContext) -> Optional[Action]:
         """Make decision focused on current goal"""
         if not context.current_goal or not context.available_actions:
             return self._utility_based_decision(context)
@@ -308,20 +322,20 @@ class DecisionMaker:
         threats = context.get_perceived_threats()
         if threats:
             flee_actions = [
-                a for a in context.available_actions if a.action_type == ActionType.FLEE
-            ]
+                a for a in context.available_actions if a.action_type == ActionType.FLEE]
             if flee_actions:
                 return flee_actions[0]
         if context.agent.resources.energy < 20:
             gather_actions = [
-                a for a in context.available_actions if a.action_type == ActionType.GATHER
-            ]
+                a for a in context.available_actions if a.action_type == ActionType.GATHER]
             if gather_actions:
                 return gather_actions[0]
-        wait_actions = [a for a in context.available_actions if a.action_type == ActionType.WAIT]
+        wait_actions = [
+            a for a in context.available_actions if a.action_type == ActionType.WAIT]
         return wait_actions[0] if wait_actions else None
 
-    def _active_inference_decision(self, context: DecisionContext) -> Optional[Action]:
+    def _active_inference_decision(
+            self, context: DecisionContext) -> Optional[Action]:
         """Make decision using Active Inference if available"""
         if not ACTIVE_INFERENCE_AVAILABLE:
             return self._utility_based_decision(context)
@@ -330,18 +344,19 @@ class DecisionMaker:
         num_actions = len(context.available_actions)
         if num_actions == 0:
             return None
-        model = create_generative_model(
-            model_type="discrete",
-            num_states=num_states,
-            num_observations=num_observations,
-            num_actions=num_actions,
-        )
-        _policy_selector = create_policy_selector(
-            selector_type="discrete", generative_model=model, planning_horizon=3
-        )
-        _belief = np.ones(num_states) / num_states
+        # TODO: Use policy selector for informed action selection
+        # model = create_generative_model(
+        #     model_type="discrete",
+        #     num_states=num_states,
+        #     num_observations=num_observations,
+        #     num_actions=num_actions,
+        # )
+        # policy_selector = create_policy_selector(
+        #     selector_type="discrete", generative_model=model, planning_horizon=3
+        # )
+        np.ones(num_states) / num_states
         if context.percepts:
-            _observation_idx = min(len(context.percepts), num_observations - 1)
+            min(len(context.percepts), num_observations - 1)
         action_idx = np.random.choice(num_actions)
         return context.available_actions[action_idx]
 
@@ -436,7 +451,8 @@ class ConditionNode(BehaviorNode):
 class ActionNode(BehaviorNode):
     """Leaf node that returns an action"""
 
-    def __init__(self, action_generator: Callable[[DecisionContext], Optional[Action]]) -> None:
+    def __init__(self, action_generator: Callable[[
+                 DecisionContext], Optional[Action]]) -> None:
         self.action_generator = action_generator
 
     def execute(self, context: DecisionContext) -> Optional[Action]:
@@ -447,10 +463,15 @@ class ActionNode(BehaviorNode):
 class ActionGenerator:
     """Generates available actions based on agent state and environment"""
 
-    def __init__(self, movement_controller: Optional[MovementController] = None) -> None:
+    def __init__(
+            self,
+            movement_controller: Optional[MovementController] = None) -> None:
         self.movement_controller = movement_controller
 
-    def generate_actions(self, agent: Agent, percepts: List[Percept]) -> List[Action]:
+    def generate_actions(
+            self,
+            agent: Agent,
+            percepts: List[Percept]) -> List[Action]:
         """Generate all available actions for an agent"""
         actions = []
         actions.append(Action(ActionType.WAIT, cost=0.1))
@@ -459,15 +480,25 @@ class ActionGenerator:
         if agent.has_capability(AgentCapability.SOCIAL_INTERACTION):
             actions.extend(self._generate_interaction_actions(agent, percepts))
         if agent.has_capability(AgentCapability.COMMUNICATION):
-            actions.extend(self._generate_communication_actions(agent, percepts))
+            actions.extend(
+                self._generate_communication_actions(
+                    agent, percepts))
         if agent.has_capability(AgentCapability.RESOURCE_MANAGEMENT):
             actions.extend(self._generate_resource_actions(agent, percepts))
         return actions
 
-    def _generate_movement_actions(self, agent: Agent, percepts: List[Percept]) -> List[Action]:
+    def _generate_movement_actions(
+            self,
+            agent: Agent,
+            percepts: List[Percept]) -> List[Action]:
         """Generate movement-related actions"""
         actions = []
-        actions.append(Action(ActionType.EXPLORE, cost=agent.resources.energy * 0.05, duration=5.0))
+        actions.append(
+            Action(
+                ActionType.EXPLORE,
+                cost=agent.resources.energy *
+                0.05,
+                duration=5.0))
         for percept in percepts[:5]:
             move_action = Action(
                 ActionType.MOVE,
@@ -476,7 +507,8 @@ class ActionGenerator:
                 duration=percept.distance / 5.0,
             )
             actions.append(move_action)
-        threats = [p for p in percepts if p.stimulus.stimulus_type == StimulusType.DANGER]
+        threats = [
+            p for p in percepts if p.stimulus.stimulus_type == StimulusType.DANGER]
         if threats:
             actions.append(
                 Action(
@@ -488,10 +520,14 @@ class ActionGenerator:
             )
         return actions
 
-    def _generate_interaction_actions(self, agent: Agent, percepts: List[Percept]) -> List[Action]:
+    def _generate_interaction_actions(
+            self,
+            agent: Agent,
+            percepts: List[Percept]) -> List[Action]:
         """Generate interaction actions"""
         actions = []
-        agent_percepts = [p for p in percepts if p.stimulus.stimulus_type == StimulusType.AGENT]
+        agent_percepts = [
+            p for p in percepts if p.stimulus.stimulus_type == StimulusType.AGENT]
         for percept in agent_percepts[:3]:
             if percept.distance < 5.0:
                 actions.append(
@@ -535,10 +571,15 @@ class ActionGenerator:
             )
         return actions
 
-    def _generate_resource_actions(self, agent: Agent, percepts: List[Percept]) -> List[Action]:
+    def _generate_resource_actions(
+            self,
+            agent: Agent,
+            percepts: List[Percept]) -> List[Action]:
         """Generate resource-related actions"""
         actions = []
-        resource_percepts = [p for p in percepts if p.stimulus.metadata.get("is_resource", False)]
+        resource_percepts = [
+            p for p in percepts if p.stimulus.metadata.get(
+                "is_resource", False)]
         for percept in resource_percepts:
             if percept.distance < 2.0:
                 actions.append(
@@ -568,11 +609,14 @@ class DecisionSystem:
         self.action_generator = ActionGenerator(movement_controller)
         self.decision_makers: Dict[str, DecisionMaker] = {}
         self.behavior_trees: Dict[str, BehaviorTree] = {}
-        self.decision_history: Dict[str, List[Tuple[DecisionContext, Action]]] = defaultdict(list)
+        self.decision_history: Dict[str,
+                                    List[Tuple[DecisionContext,
+                                               Action]]] = defaultdict(list)
 
     def register_agent(
-        self, agent: Agent, strategy: DecisionStrategy = DecisionStrategy.HYBRID
-    ) -> None:
+            self,
+            agent: Agent,
+            strategy: DecisionStrategy = DecisionStrategy.HYBRID) -> None:
         """Register an agent with the decision system"""
         self.decision_makers[agent.agent_id] = DecisionMaker(strategy)
         tree = self._create_default_behavior_tree()
@@ -584,7 +628,8 @@ class DecisionSystem:
         if not agent:
             return None
         percepts = self.perception_system.perceive(agent_id)
-        available_actions = self.action_generator.generate_actions(agent, percepts)
+        available_actions = self.action_generator.generate_actions(
+            agent, percepts)
         context = DecisionContext(
             agent=agent,
             percepts=percepts,
@@ -603,44 +648,120 @@ class DecisionSystem:
         return action
 
     def execute_action(self, agent_id: str, action: Action) -> bool:
-        """Execute a decided action"""
+        """Execute a decided action using Command pattern"""
         agent = self.state_manager.get_agent(agent_id)
         if not agent:
             return False
         if not self._check_prerequisites(agent, action):
             return False
-        if action.cost > 0:
-            self.state_manager.update_agent_resources(agent_id, energy_delta=-action.cost)
-        success = False
-        if action.action_type == ActionType.MOVE and action.target:
-            success = self.movement_controller.set_destination(agent_id, action.target)
-        elif action.action_type == ActionType.WAIT:
-            self.state_manager.update_agent_status(agent_id, AgentStatus.IDLE)
-            success = True
-        elif action.action_type == ActionType.FLEE:
-            threats = [
-                p
-                for p in self.perception_system.perceive(agent_id)
-                if p.stimulus.stimulus_type == StimulusType.DANGER
-            ]
-            if threats:
-                nearest_threat = min(threats, key=lambda t: t.distance)
-                threat_dir = nearest_threat.stimulus.position.to_array() - agent.position.to_array()
-                flee_dir = -threat_dir / np.linalg.norm(threat_dir) * 20.0
-                flee_pos = Position(
-                    agent.position.x + flee_dir[0],
-                    agent.position.y + flee_dir[1],
-                    agent.position.z,
-                )
-                success = self.movement_controller.set_destination(agent_id, flee_pos)
-        elif action.action_type == ActionType.INTERACT:
-            self.state_manager.update_agent_status(agent_id, AgentStatus.INTERACTING)
-            success = True
-        if success and action.effects:
-            for effect_type, value in action.effects.items():
-                if effect_type == "energy":
-                    self.state_manager.update_agent_resources(agent_id, energy_delta=value)
+
+        self._deduct_action_cost(agent_id, action)
+        success = self._execute_action_by_type(agent_id, action, agent)
+
+        if success:
+            self._apply_action_effects(agent_id, action)
+
         return success
+
+    def _deduct_action_cost(self, agent_id: str, action: Action) -> None:
+        """Deduct action cost from agent resources"""
+        if action.cost > 0:
+            self.state_manager.update_agent_resources(
+                agent_id, energy_delta=-action.cost)
+
+    def _execute_action_by_type(
+            self,
+            agent_id: str,
+            action: Action,
+            agent: Agent) -> bool:
+        """Execute action based on its type using Command pattern"""
+        action_handlers = {
+            ActionType.MOVE: self._execute_move_action,
+            ActionType.WAIT: self._execute_wait_action,
+            ActionType.FLEE: self._execute_flee_action,
+            ActionType.INTERACT: self._execute_interact_action,
+        }
+
+        handler = action_handlers.get(action.action_type)
+        if handler:
+            return handler(agent_id, action, agent)
+        return False
+
+    def _execute_move_action(
+            self,
+            agent_id: str,
+            action: Action,
+            agent: Agent) -> bool:
+        """Execute move action"""
+        if action.target:
+            return self.movement_controller.set_destination(
+                agent_id, action.target)
+        return False
+
+    def _execute_wait_action(
+            self,
+            agent_id: str,
+            action: Action,
+            agent: Agent) -> bool:
+        """Execute wait action"""
+        self.state_manager.update_agent_status(agent_id, AgentStatus.IDLE)
+        return True
+
+    def _execute_flee_action(
+            self,
+            agent_id: str,
+            action: Action,
+            agent: Agent) -> bool:
+        """Execute flee action"""
+        threats = self._get_perceived_threats(agent_id)
+        if not threats:
+            return False
+
+        flee_position = self._calculate_flee_position(agent, threats)
+        return self.movement_controller.set_destination(
+            agent_id, flee_position)
+
+    def _execute_interact_action(
+            self,
+            agent_id: str,
+            action: Action,
+            agent: Agent) -> bool:
+        """Execute interact action"""
+        self.state_manager.update_agent_status(
+            agent_id, AgentStatus.INTERACTING)
+        return True
+
+    def _get_perceived_threats(self, agent_id: str) -> list:
+        """Get all perceived threats for an agent"""
+        return [
+            p for p in self.perception_system.perceive(agent_id)
+            if p.stimulus.stimulus_type == StimulusType.DANGER
+        ]
+
+    def _calculate_flee_position(
+            self,
+            agent: Agent,
+            threats: list) -> Position:
+        """Calculate position to flee to based on nearest threat"""
+        nearest_threat = min(threats, key=lambda t: t.distance)
+        threat_dir = nearest_threat.stimulus.position.to_array() - agent.position.to_array()
+        flee_dir = -threat_dir / np.linalg.norm(threat_dir) * 20.0
+
+        return Position(
+            agent.position.x + flee_dir[0],
+            agent.position.y + flee_dir[1],
+            agent.position.z,
+        )
+
+    def _apply_action_effects(self, agent_id: str, action: Action) -> None:
+        """Apply action effects to agent"""
+        if not action.effects:
+            return
+
+        for effect_type, value in action.effects.items():
+            if effect_type == "energy":
+                self.state_manager.update_agent_resources(
+                    agent_id, energy_delta=value)
 
     def _check_prerequisites(self, agent: Agent, action: Action) -> bool:
         """Check if action prerequisites are met"""
@@ -721,7 +842,10 @@ class DecisionSystem:
         history = self.decision_history.get(agent_id, [])
         return history[-limit:]
 
-    def set_decision_strategy(self, agent_id: str, strategy: DecisionStrategy) -> None:
+    def set_decision_strategy(
+            self,
+            agent_id: str,
+            strategy: DecisionStrategy) -> None:
         """Change decision strategy for an agent"""
         if agent_id in self.decision_makers:
             self.decision_makers[agent_id].strategy = strategy

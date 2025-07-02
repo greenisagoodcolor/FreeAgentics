@@ -3,7 +3,7 @@ Module for FreeAgentics Active Inference implementation.
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 import torch
 import torch.nn as nn
@@ -75,10 +75,11 @@ class HierarchicalLevel(nn.Module):
         self.state_dim = generative_model.dims.num_states
         self.obs_dim = generative_model.dims.num_observations
         # Set timescale for this level
-        self.timescale = config.timescales[level_id] if level_id < len(config.timescales) else 1.0
+        self.timescale = config.timescales[level_id] if level_id < len(
+            config.timescales) else 1.0
         self.prediction_horizon = (
-            config.prediction_horizon[level_id] if level_id < len(config.prediction_horizon) else 1
-        )
+            config.prediction_horizon[level_id] if level_id < len(
+                config.prediction_horizon) else 1)
         # Determine input dimension for this level
         if input_dim is None:
             input_dim = self.state_dim if level_id > 0 else self.obs_dim
@@ -135,16 +136,19 @@ class HierarchicalLevel(nn.Module):
     ) -> torch.Tensor:
         """Update beliefs based on bottom-up and top-down inputs"""
         if self.state is None:
-            raise ValueError("State not initialized. Call initialize_state first.")
+            raise ValueError(
+                "State not initialized. Call initialize_state first.")
         current_beliefs = self.state.beliefs
         # Process inputs
         if bottom_up_input is not None:
             projected_input = self.input_projection(bottom_up_input)
-            bottom_up_processed = torch.sigmoid(self.bottom_up_net(projected_input))
+            bottom_up_processed = torch.sigmoid(
+                self.bottom_up_net(projected_input))
         else:
             bottom_up_processed = torch.zeros_like(current_beliefs)
         if top_down_input is not None:
-            top_down_processed = torch.sigmoid(self.top_down_net(top_down_input))
+            top_down_processed = torch.sigmoid(
+                self.top_down_net(top_down_input))
         else:
             top_down_processed = torch.zeros_like(current_beliefs)
         # Weighted combination
@@ -210,7 +214,8 @@ class HierarchicalInference(nn.Module):
         for i, level in enumerate(self.levels):
             # Get top-down input from higher level
             top_down_input = None
-            if i + 1 < len(self.levels) and self.levels[i + 1].state is not None:
+            if i + \
+                    1 < len(self.levels) and self.levels[i + 1].state is not None:
                 top_down_input = self.levels[i + 1].state.beliefs
             # Update beliefs
             level_beliefs = level.update_beliefs(current_input, top_down_input)
@@ -237,8 +242,8 @@ class HierarchicalInference(nn.Module):
         """Get effective beliefs at a target level"""
         if target_level >= self.num_levels:
             raise ValueError(
-                f"Target level {target_level} exceeds number of levels {self.num_levels}"
-            )
+                f"Target level {target_level} exceeds number of levels {
+                    self.num_levels}")
         return self.levels[target_level].state.beliefs
 
 
@@ -252,7 +257,11 @@ class TemporalHierarchicalInference(HierarchicalInference):
         inference_algorithms: list,
         precision_optimizers: Optional[list] = None,
     ) -> None:
-        super().__init__(config, generative_models, inference_algorithms, precision_optimizers)
+        super().__init__(
+            config,
+            generative_models,
+            inference_algorithms,
+            precision_optimizers)
         # Add temporal predictors for each level
         self.temporal_predictors = nn.ModuleList()
         for i in range(self.num_levels):
@@ -275,13 +284,15 @@ class TemporalHierarchicalInference(HierarchicalInference):
             input_state = predicted_state.unsqueeze(1)
         return predictions
 
-    def hierarchical_planning(self, planning_horizon: int) -> List[List[torch.Tensor]]:
+    def hierarchical_planning(
+            self, planning_horizon: int) -> List[List[torch.Tensor]]:
         """Perform hierarchical planning across all levels"""
         trajectories = []
         for i, level in enumerate(self.levels):
             if level.state is not None:
                 horizon = min(planning_horizon, level.prediction_horizon)
-                trajectory = self.predict_future_states(i, level.state.beliefs, horizon)
+                trajectory = self.predict_future_states(
+                    i, level.state.beliefs, horizon)
                 trajectories.append(trajectory)
             else:
                 trajectories.append([])
@@ -307,16 +318,22 @@ def create_hierarchical_inference(
     inference_algorithms = kwargs.get("inference_algorithms")
     precision_optimizers = kwargs.get("precision_optimizers")
     if not generative_models:
-        raise ValueError("create_hierarchical_inference requires generative_models")
+        raise ValueError(
+            "create_hierarchical_inference requires generative_models")
     if not inference_algorithms:
-        raise ValueError("create_hierarchical_inference requires inference_algorithms")
+        raise ValueError(
+            "create_hierarchical_inference requires inference_algorithms")
     if inference_type == "standard":
         return HierarchicalInference(
-            config, generative_models, inference_algorithms, precision_optimizers
-        )
+            config,
+            generative_models,
+            inference_algorithms,
+            precision_optimizers)
     elif inference_type == "temporal":
         return TemporalHierarchicalInference(
-            config, generative_models, inference_algorithms, precision_optimizers
-        )
+            config,
+            generative_models,
+            inference_algorithms,
+            precision_optimizers)
     else:
         raise ValueError(f"Unknown inference type: {inference_type}")

@@ -8,7 +8,7 @@ with integration to Active Inference engine and PyMDP.
 
 import uuid
 from datetime import datetime
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import numpy as np
 import pytest
@@ -17,14 +17,11 @@ from agents.base.markov_blanket import (
     PYMDP_AVAILABLE,
     ActiveInferenceMarkovBlanket,
     AgentState,
-    BoundaryMetrics,
     BoundaryMonitor,
     BoundaryViolationEvent,
     BoundaryViolationType,
     MarkovBlanketConfig,
-    MarkovBlanketDimensions,
     MarkovBlanketInterface,
-    PyMDPMarkovBlanket,
     ViolationType,
 )
 
@@ -41,7 +38,7 @@ class TestAgentState:
             energy=0.85,
             health=0.9,
             intended_action=[0.2, 0.8],
-            belief_state=[0.3, 0.5, 0.2]
+            belief_state=[0.3, 0.5, 0.2],
         )
 
         assert state.agent_id == "agent_001"
@@ -62,7 +59,7 @@ class TestAgentState:
             energy=1.0,
             health=1.0,
             intended_action=None,
-            belief_state=None
+            belief_state=None,
         )
 
         assert state.agent_id == "agent_002"
@@ -77,7 +74,7 @@ class TestAgentState:
         """Test agent state from_agent method."""
         # Test the from_agent class method
         from agents.base.data_model import Agent, AgentStatus, Resources
-        
+
         mock_agent = Mock(spec=Agent)
         mock_agent.agent_id = "agent_003"
         mock_agent.position = (5, 10)
@@ -86,9 +83,9 @@ class TestAgentState:
         mock_agent.resources.energy = 0.7
         mock_agent.resources.health = 0.8
         mock_agent.belief_state = [0.2, 0.3, 0.5]
-        
+
         state = AgentState.from_agent(mock_agent)
-        
+
         assert state.agent_id == "agent_003"
         assert state.position == (5, 10)
         assert state.status == "idle"
@@ -111,7 +108,7 @@ class TestBoundaryViolationEvent:
             threshold_violated=0.5,
             free_energy=1.2,
             expected_free_energy=0.9,
-            kl_divergence=0.15
+            kl_divergence=0.15,
         )
 
         assert event.violation_type == ViolationType.SENSORY_OVERFLOW
@@ -146,7 +143,7 @@ class TestBoundaryViolationEvent:
             threshold_violated=0.5,
             free_energy=1.1,
             expected_free_energy=0.8,
-            kl_divergence=0.12
+            kl_divergence=0.12,
         )
 
         # Test serialization to dict (using actual fields)
@@ -259,7 +256,8 @@ class TestActiveInferenceMarkovBlanket:
 
     def test_markov_blanket_initialization(self):
         """Test Markov blanket initialization."""
-        blanket = ActiveInferenceMarkovBlanket(agent=self.mock_agent, config=self.config)
+        blanket = ActiveInferenceMarkovBlanket(
+            agent=self.mock_agent, config=self.config)
 
         assert blanket.agent == self.mock_agent
         assert blanket.config == self.config
@@ -275,7 +273,8 @@ class TestActiveInferenceMarkovBlanket:
         mock_create_model.return_value = self.mock_generative_model
 
         config = MarkovBlanketConfig(enable_pymdp_integration=True)
-        blanket = ActiveInferenceMarkovBlanket(agent=self.mock_agent, config=config)
+        blanket = ActiveInferenceMarkovBlanket(
+            agent=self.mock_agent, config=config)
 
         # Test PyMDP integration was initialized
         assert blanket.pymdp_enabled is True
@@ -283,7 +282,8 @@ class TestActiveInferenceMarkovBlanket:
 
     def test_update_boundary(self):
         """Test boundary update functionality."""
-        blanket = ActiveInferenceMarkovBlanket(agent=self.mock_agent, config=self.config)
+        blanket = ActiveInferenceMarkovBlanket(
+            agent=self.mock_agent, config=self.config)
 
         new_state = AgentState(
             agent_id="test_agent",
@@ -299,11 +299,14 @@ class TestActiveInferenceMarkovBlanket:
         assert success is True
         current_state = blanket.get_current_state()
         assert current_state.agent_id == "test_agent"
-        assert np.array_equal(current_state.internal_states, new_state.internal_states)
+        assert np.array_equal(
+            current_state.internal_states,
+            new_state.internal_states)
 
     def test_boundary_violation_detection(self):
         """Test boundary violation detection."""
-        blanket = ActiveInferenceMarkovBlanket(agent=self.mock_agent, config=self.config)
+        blanket = ActiveInferenceMarkovBlanket(
+            agent=self.mock_agent, config=self.config)
 
         # Create state that should trigger violation
         problematic_state = AgentState(
@@ -318,15 +321,16 @@ class TestActiveInferenceMarkovBlanket:
         blanket.update_boundary(problematic_state)
         violations = blanket.check_boundary_violations()
 
-        # Should detect violations due to extreme distributions and low confidence
+        # Should detect violations due to extreme distributions and low
+        # confidence
         assert len(violations) > 0
-        assert any(
-            v.violation_type == BoundaryViolationType.INTERNAL_INCONSISTENCY for v in violations
-        )
+        assert any(v.violation_type ==
+                   BoundaryViolationType.INTERNAL_INCONSISTENCY for v in violations)
 
     def test_boundary_integrity_check(self):
         """Test boundary integrity checking."""
-        blanket = ActiveInferenceMarkovBlanket(agent=self.mock_agent, config=self.config)
+        blanket = ActiveInferenceMarkovBlanket(
+            agent=self.mock_agent, config=self.config)
 
         # Initially should be intact
         assert blanket.is_boundary_intact() is True
@@ -361,13 +365,17 @@ class TestActiveInferenceMarkovBlanket:
 
     def test_statistical_independence_check(self):
         """Test statistical independence verification."""
-        blanket = ActiveInferenceMarkovBlanket(agent=self.mock_agent, config=self.config)
+        blanket = ActiveInferenceMarkovBlanket(
+            agent=self.mock_agent, config=self.config)
 
         # Mock internal and external states
-        internal_states = np.random.rand(10, 3)  # 10 samples, 3 internal states
-        external_states = np.random.rand(10, 2)  # 10 samples, 2 external states
+        internal_states = np.random.rand(
+            10, 3)  # 10 samples, 3 internal states
+        external_states = np.random.rand(
+            10, 2)  # 10 samples, 2 external states
         sensory_states = np.random.rand(10, 2)  # 10 samples, 2 sensory states
-        active_states = np.random.randint(0, 2, (10, 2))  # 10 samples, 2 active states
+        active_states = np.random.randint(
+            0, 2, (10, 2))  # 10 samples, 2 active states
 
         # Test independence check
         independence_score = blanket._check_statistical_independence(
@@ -378,7 +386,8 @@ class TestActiveInferenceMarkovBlanket:
 
     def test_violation_history_management(self):
         """Test violation history tracking."""
-        blanket = ActiveInferenceMarkovBlanket(agent=self.mock_agent, config=self.config)
+        blanket = ActiveInferenceMarkovBlanket(
+            agent=self.mock_agent, config=self.config)
 
         # Create multiple violations
         violation1 = BoundaryViolationEvent(
@@ -430,7 +439,8 @@ class TestBoundaryMonitor:
         self.mock_agent = Mock()
         self.mock_agent.id = "monitored_agent"
 
-        self.blanket = ActiveInferenceMarkovBlanket(agent=self.mock_agent, config=self.config)
+        self.blanket = ActiveInferenceMarkovBlanket(
+            agent=self.mock_agent, config=self.config)
 
         self.monitor = BoundaryMonitor(self.blanket)
 
@@ -481,7 +491,6 @@ class TestBoundaryMonitor:
     def test_monitoring_thread_safety(self):
         """Test monitoring thread safety."""
         import threading
-        import time
 
         violations_detected = []
 
@@ -587,7 +596,8 @@ class TestMarkovBlanketIntegration:
 
         # Verify complete workflow
         assert len(blanket.violation_history) > 0
-        assert any(v.agent_id == "integration_test_agent" for v in blanket.violation_history)
+        assert any(
+            v.agent_id == "integration_test_agent" for v in blanket.violation_history)
 
     @pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available")
     def test_pymdp_integration_workflow(self):
@@ -606,7 +616,8 @@ class TestMarkovBlanketIntegration:
             mock_generative_model = Mock()
             mock_create.return_value = mock_generative_model
 
-            blanket = ActiveInferenceMarkovBlanket(agent=mock_agent, config=config)
+            blanket = ActiveInferenceMarkovBlanket(
+                agent=mock_agent, config=config)
 
             # Verify PyMDP integration
             assert blanket.pymdp_enabled is True

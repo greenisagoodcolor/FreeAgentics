@@ -6,7 +6,6 @@ import numpy as np
 import pytest
 
 from inference.gnn.feature_extractor import (
-    ExtractionResult,
     FeatureConfig,
     FeatureType,
     NodeFeatureExtractor,
@@ -198,9 +197,9 @@ class TestNodeFeatureExtractor:
         result = extractor.extract_features(nodes)
         assert result.missing_mask is not None
         assert result.missing_mask.shape == (4, 3)
-        assert result.missing_mask[1, 0] == True
-        assert result.missing_mask[2, 1] == True
-        assert np.all(result.missing_mask[3, :] == True)
+        assert result.missing_mask[1, 0] is True
+        assert result.missing_mask[2, 1] is True
+        assert np.all(result.missing_mask[3, :] is True)
 
     def test_multiple_feature_types(self) -> None:
         """Test extraction with multiple feature types"""
@@ -225,16 +224,20 @@ class TestNodeFeatureExtractor:
     def test_normalization_methods(self) -> None:
         """Test different normalization methods"""
         configs_minmax = [
-            FeatureConfig("value", FeatureType.NUMERICAL, normalization=NormalizationType.MINMAX)
-        ]
+            FeatureConfig(
+                "value",
+                FeatureType.NUMERICAL,
+                normalization=NormalizationType.MINMAX)]
         extractor_minmax = NodeFeatureExtractor(configs_minmax)
         nodes = [{"value": 0}, {"value": 50}, {"value": 100}]
         result_minmax = extractor_minmax.extract_features(nodes)
         assert np.min(result_minmax.features) >= 0
         assert np.max(result_minmax.features) <= 1
         configs_standard = [
-            FeatureConfig("value", FeatureType.NUMERICAL, normalization=NormalizationType.STANDARD)
-        ]
+            FeatureConfig(
+                "value",
+                FeatureType.NUMERICAL,
+                normalization=NormalizationType.STANDARD)]
         extractor_standard = NodeFeatureExtractor(configs_standard)
         result_standard = extractor_standard.extract_features(nodes)
         assert abs(np.mean(result_standard.features)) < 0.1
@@ -246,13 +249,16 @@ class TestNodeFeatureExtractor:
         extractor = NodeFeatureExtractor(configs)
         features = np.array([[1.0], [np.nan], [3.0], [np.nan], [5.0]])
         missing_mask = np.array([[False], [True], [False], [True], [False]])
-        imputed_mean = extractor.handle_missing_data(features, missing_mask, strategy="mean")
+        imputed_mean = extractor.handle_missing_data(
+            features, missing_mask, strategy="mean")
         assert imputed_mean[1, 0] == 3.0
         assert imputed_mean[3, 0] == 3.0
-        imputed_median = extractor.handle_missing_data(features, missing_mask, strategy="median")
+        imputed_median = extractor.handle_missing_data(
+            features, missing_mask, strategy="median")
         assert imputed_median[1, 0] == 3.0
         assert imputed_median[3, 0] == 3.0
-        imputed_zero = extractor.handle_missing_data(features, missing_mask, strategy="zero")
+        imputed_zero = extractor.handle_missing_data(
+            features, missing_mask, strategy="zero")
         assert imputed_zero[1, 0] == 0.0
         assert imputed_zero[3, 0] == 0.0
 

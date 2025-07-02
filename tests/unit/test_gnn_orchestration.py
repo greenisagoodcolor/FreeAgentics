@@ -2,15 +2,12 @@
 Module for FreeAgentics Active Inference implementation.
 """
 
-from unittest.mock import MagicMock, Mock
-
 import pytest
 import torch
 import torch.nn as nn
 
 from inference.engine.active_inference import InferenceConfig, VariationalMessagePassing
 from inference.engine.generative_model import (
-    ContinuousGenerativeModel,
     DiscreteGenerativeModel,
     ModelDimensions,
     ModelParameters,
@@ -56,8 +53,10 @@ class TestGNNIntegrationConfig:
     def test_custom_config(self) -> None:
         """Test custom configuration"""
         config = GNNIntegrationConfig(
-            gnn_type="gat", num_layers=5, aggregation_method="attention", use_gpu=False
-        )
+            gnn_type="gat",
+            num_layers=5,
+            aggregation_method="attention",
+            use_gpu=False)
         assert config.gnn_type == "gat"
         assert config.num_layers == 5
         assert config.aggregation_method == "attention"
@@ -166,7 +165,8 @@ class TestGNNActiveInferenceAdapter:
         gen_model = DiscreteGenerativeModel(dims, params)
         inf_config = InferenceConfig(use_gpu=False)
         inference = VariationalMessagePassing(inf_config)
-        adapter = GNNActiveInferenceAdapter(config, gnn_model, gen_model, inference)
+        adapter = GNNActiveInferenceAdapter(
+            config, gnn_model, gen_model, inference)
         return (adapter, config, gnn_model, gen_model, inference)
 
     def test_initialization(self, setup_adapter) -> None:
@@ -213,9 +213,14 @@ class TestGNNActiveInferenceAdapter:
         node_features = torch.randn(5, 10)
         edge_index = torch.tensor([[0, 1, 2, 3, 4], [1, 2, 3, 4, 0]])
         graph_data = adapter.process_graph(node_features, edge_index)
-        updated_beliefs = adapter.update_beliefs_with_graph(current_beliefs, graph_data)
+        updated_beliefs = adapter.update_beliefs_with_graph(
+            current_beliefs, graph_data)
         assert updated_beliefs.shape == (1, 4)
-        assert torch.allclose(updated_beliefs.sum(dim=-1), torch.ones(1), atol=1e-06)
+        assert torch.allclose(
+            updated_beliefs.sum(
+                dim=-1),
+            torch.ones(1),
+            atol=1e-06)
 
 
 class TestHierarchicalGraphIntegration:
@@ -231,7 +236,8 @@ class TestHierarchicalGraphIntegration:
         assert hier_integration.num_levels == 3
         assert len(hier_integration.level_gnns) == 3
         assert len(hier_integration.level_adapters) == 3
-        assert all(adapter is None for adapter in hier_integration.level_adapters)
+        assert all(
+            adapter is None for adapter in hier_integration.level_adapters)
 
     def test_set_generative_models(self) -> None:
         """Test setting generative models"""
@@ -244,12 +250,19 @@ class TestHierarchicalGraphIntegration:
         gen_models = []
         inf_algorithms = []
         for i in range(2):
-            dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
+            dims = ModelDimensions(
+                num_states=4,
+                num_observations=3,
+                num_actions=2)
             params = ModelParameters(use_gpu=False)
             gen_models.append(DiscreteGenerativeModel(dims, params))
-            inf_algorithms.append(VariationalMessagePassing(InferenceConfig(use_gpu=False)))
+            inf_algorithms.append(
+                VariationalMessagePassing(
+                    InferenceConfig(
+                        use_gpu=False)))
         hier_integration.set_generative_models(gen_models, inf_algorithms)
-        assert all(adapter is not None for adapter in hier_integration.level_adapters)
+        assert all(
+            adapter is not None for adapter in hier_integration.level_adapters)
 
     def test_process_hierarchical_graph(self) -> None:
         """Test processing hierarchical graphs"""
@@ -262,7 +275,8 @@ class TestHierarchicalGraphIntegration:
                 "edge_index": torch.tensor([[0, 1, 2, 3, 4], [1, 2, 3, 4, 0]]),
             }
         ]
-        processed = hier_integration.process_hierarchical_graph(graph_data_per_level)
+        processed = hier_integration.process_hierarchical_graph(
+            graph_data_per_level)
         assert len(processed) == 1
         assert processed[0] == graph_data_per_level[0]
 
@@ -293,7 +307,8 @@ class TestFactoryFunction:
             {"input_dim": 10, "hidden_dim": 32, "output_dim": 16},
             {"input_dim": 16, "hidden_dim": 64, "output_dim": 32},
         ]
-        adapter = create_gnn_adapter("hierarchical", config, level_configs=level_configs)
+        adapter = create_gnn_adapter(
+            "hierarchical", config, level_configs=level_configs)
         assert isinstance(adapter, HierarchicalGraphIntegration)
         assert adapter.num_levels == 2
 

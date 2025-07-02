@@ -165,6 +165,10 @@ export const MarkovBlanketVisualization: React.FC<
     (inferenceData: any) => {
       if (inferenceData.markov_blanket_dimensions) {
         setRealTimeDimensions({
+          internal_states: inferenceData.markov_blanket_dimensions.internal_states || [],
+          sensory_states: inferenceData.markov_blanket_dimensions.sensory_states || [],
+          active_states: inferenceData.markov_blanket_dimensions.active_states || [],
+          external_states: inferenceData.markov_blanket_dimensions.external_states || [],
           internal_dimension:
             inferenceData.markov_blanket_dimensions.internal || 0,
           sensory_dimension:
@@ -495,7 +499,7 @@ export const MarkovBlanketVisualization: React.FC<
           .style("cursor", "pointer")
           .append("title")
           .text(
-            `Violation: ${violation.violation_type}\nSeverity: ${violation.severity.toFixed(2)}`,
+            `Violation: ${violation.violation_type}\nSeverity: ${typeof violation.severity === 'number' ? violation.severity.toFixed(2) : violation.severity}`,
           );
       });
     }

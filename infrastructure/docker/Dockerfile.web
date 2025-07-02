@@ -1,0 +1,94 @@
+# FreeAgentics Web Frontend Dockerfile
+# Multi-stage build for production deployment
+
+FROM node:18-alpine as dependencies
+
+# Install dependencies for native modules and security updates
+RUN apk update && apk add --no-cache \
+    libc6-compat \
+    python3 \
+    make \
+    g++ \
+    curl \
+    && rm -rf /var/cache/apk/*
+
+WORKDIR /app
+
+# Copy package files for optimal caching
+COPY web/package*.json ./
+COPY web/yarn.lock* ./
+
+# Install dependencies with npm ci for reproducible builds
+RUN npm ci --only=production --silent \
+    && npm cache clean --force
+
+# Build stage
+FROM node:18-alpine as builder
+
+# Install build dependencies
+RUN apk update && apk add --no-cache \
+    libc6-compat \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/cache/apk/*
+
+WORKDIR /app
+
+# Copy package files
+COPY web/package*.json ./
+COPY web/yarn.lock* ./
+
+# Install all dependencies including dev dependencies for build
+RUN npm ci --silent \
+    && npm cache clean --force
+
+# Copy source code
+COPY web/ .
+
+# Build application with optimizations
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN npm run build \
+    && rm -rf node_modules \
+    && npm ci --only=production --silent \
+    && npm cache clean --force
+
+# Production stage
+FROM node:18-alpine as production
+
+# Security and signal handling dependencies
+RUN apk update && apk add --no-cache \
+    dumb-init \
+    curl \
+    && rm -rf /var/cache/apk/* \
+    && addgroup -g 1001 -S nodejs \
+    && adduser -S nextjs -u 1001 -G nodejs
+
+WORKDIR /app
+
+# Copy built application with proper ownership
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+
+# Switch to non-root user
+USER nextjs
+
+# Health check with improved configuration
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:3000 || exit 1
+
+# Expose port
+EXPOSE 3000
+
+# Environment variables for production
+ENV NODE_ENV=production \
+    PORT=3000 \
+    HOSTNAME="0.0.0.0" \
+    NEXT_TELEMETRY_DISABLED=1
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["node", "server.js"]

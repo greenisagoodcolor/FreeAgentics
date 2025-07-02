@@ -17,7 +17,7 @@ import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import psutil
 
@@ -178,7 +178,11 @@ class HardwareDetector:
 
         return False, None
 
-    def _determine_profile_name(self, arch: str, ram_gb: float, gpu_available: bool) -> str:
+    def _determine_profile_name(
+            self,
+            arch: str,
+            ram_gb: float,
+            gpu_available: bool) -> str:
         """Determine profile name based on hardware"""
         if arch == "arm64" or arch == "aarch64":
             if ram_gb <= 2:
@@ -298,9 +302,12 @@ class CompatibilityTester:
                             test_name=test.name,
                             status=TestStatus.SKIPPED,
                             duration=0,
-                            message=(f"Skipped: requires {', '.join(test.required_features)}",),
-                        )
-                    )
+                            message=(
+                                f"Skipped: requires {
+                                    ', '.join(
+                                        test.required_features)}",
+                            ),
+                        ))
                     continue
 
             # Run test
@@ -339,7 +346,8 @@ class CompatibilityTester:
         def test_wrapper() -> None:
             try:
                 start_time = time.time()
-                success, message, details = test.test_function(package_dir, hardware_profile)
+                success, message, details = test.test_function(
+                    package_dir, hardware_profile)
                 duration = time.time() - start_time
 
                 status = TestStatus.PASSED if success else TestStatus.FAILED
@@ -404,11 +412,12 @@ class CompatibilityTester:
             b = np.random.rand(size, size)
             c = np.dot(a, b)
 
-            # Some computation
-            result = np.sum(c)
+            # Some computation to prevent optimization
+            _ = np.sum(c)
 
         duration = time.time() - start_time
-        ops_per_second = (iterations * size * size * size * 2) / duration / 1e9  # GFLOPS
+        ops_per_second = (iterations * size * size * size * 2) / \
+            duration / 1e9  # GFLOPS
 
         # Determine if performance is acceptable
         min_gflops = {
@@ -603,14 +612,11 @@ class CompatibilityTester:
             sock.close()
 
             if result == 0:
-                return (
-                    True,
-                    f"Network OK (DNS: {dns_time*1000:.0f}ms, Connect: {connect_time*1000:.0f}ms)",
-                    {
-                        "dns_time_ms": dns_time * 1000,
-                        "connect_time_ms": connect_time * 1000,
-                    },
-                )
+                return (True, f"Network OK (DNS: {dns_time *
+                                                  1000:.0f}ms, Connect: {connect_time *
+                                                                         1000:.0f}ms)", {"dns_time_ms": dns_time *
+                                                                                         1000, "connect_time_ms": connect_time *
+                                                                                         1000, }, )
             else:
                 return (False, "Network connection failed", {"error_code": result})
 
@@ -783,7 +789,8 @@ class CompatibilityTester:
             # Check if limits are reasonable
             issues = []
 
-            if limits["max_memory"][0] != -1 and limits["max_memory"][0] < 1024 * 1024 * 1024:
+            if limits["max_memory"][0] != - \
+                    1 and limits["max_memory"][0] < 1024 * 1024 * 1024:
                 issues.append("Memory limit too low")
 
             if limits["max_open_files"][0] < 1024:

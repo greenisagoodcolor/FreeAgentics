@@ -185,9 +185,9 @@ const Label = ({ children, htmlFor, className = "", ...props }: any) => {
   };
 
   return (
-    <label 
-      htmlFor={htmlFor} 
-      className={`label ${className}`} 
+    <label
+      htmlFor={htmlFor}
+      className={`label ${className}`}
       onClick={handleClick}
       {...props}
     >

@@ -82,7 +82,9 @@ class ReadinessEvaluator:
                 component_scores[component] = 0.0
                 missing_components.append(component)
 
-        overall_score = sum(score * self.criteria[comp] for comp, score in component_scores.items())
+        overall_score = sum(
+            score * self.criteria[comp] for comp,
+            score in component_scores.items())
 
         recommendations = []
         for missing in missing_components:
@@ -164,14 +166,19 @@ class AgentReadinessEvaluator:
         """Evaluate knowledge maturity"""
         try:
             kg = agent.knowledge_graph
-            experience_count = len(kg.experiences) if kg and hasattr(kg, "experiences") else 0
+            experience_count = len(
+                kg.experiences) if kg and hasattr(
+                kg, "experiences") else 0
             patterns = kg.patterns if kg and hasattr(kg, "patterns") else {}
             pattern_count = len(patterns)
 
             # Calculate average pattern confidence
             if patterns:
-                confidences = [p.confidence for p in patterns.values() if hasattr(p, "confidence")]
-                avg_confidence = sum(confidences) / len(confidences) if confidences else 0
+                confidences = [
+                    p.confidence for p in patterns.values() if hasattr(
+                        p, "confidence")]
+                avg_confidence = sum(confidences) / \
+                    len(confidences) if confidences else 0
             else:
                 avg_confidence = 0
 
@@ -186,8 +193,8 @@ class AgentReadinessEvaluator:
             exp_score = min(experience_count / self.thresholds.min_experiences, 1.0)
             pattern_score = min(pattern_count / self.thresholds.min_patterns, 1.0)
             conf_score = (
-                avg_confidence / self.thresholds.pattern_confidence if avg_confidence > 0 else 0
-            )
+                avg_confidence /
+                self.thresholds.pattern_confidence if avg_confidence > 0 else 0)
 
             return (exp_score + pattern_score + conf_score) / 3
 
@@ -257,9 +264,8 @@ class AgentReadinessEvaluator:
             knowledge_shared = stats.get("knowledge_items_shared", 0)
             collaborators = stats.get("collaborators", set())
 
-            interaction_rate = (
-                successful_interactions / total_interactions if total_interactions > 0 else 0
-            )
+            interaction_rate = (successful_interactions /
+                                total_interactions if total_interactions > 0 else 0)
 
             score.metrics["collaboration"] = {
                 "successful_interactions": successful_interactions,
@@ -307,7 +313,8 @@ class AgentReadinessEvaluator:
             recommendations.append("Attempt more complex goals")
 
         if score.model_stability < 0.8:
-            recommendations.append("Allow model to converged through continued training")
+            recommendations.append(
+                "Allow model to converged through continued training")
 
         if score.collaboration < 0.8:
             recommendations.append("Engage in more collaborative activities")

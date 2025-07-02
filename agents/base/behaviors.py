@@ -10,10 +10,11 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from .data_model import Agent, AgentCapability, AgentStatus, Position, SocialRelationship
 from .interfaces import IAgentBehavior, IBehaviorTree
-from agents.base.decision_making import Action, ActionType
 
 if TYPE_CHECKING:
     from .decision_making import Action, ActionType
+else:
+    from agents.base.decision_making import Action, ActionType
 
 """
 Agent Behavior System for FreeAgentics
@@ -65,7 +66,8 @@ class BaseBehavior(IAgentBehavior):
             if datetime.now() - self.last_execution_time < self.cooldown_time:
                 return False
         # Check required capabilities
-        if not all(agent.has_capability(cap) for cap in self.required_capabilities):
+        if not all(agent.has_capability(cap)
+                   for cap in self.required_capabilities):
             return False
         # Check energy requirements
         if agent.resources.energy < self.get_energy_cost(agent, context):
@@ -118,15 +120,18 @@ class BaseBehavior(IAgentBehavior):
         """Get the energy cost for executing this behavior"""
         return 1.0  # Default energy cost
 
-    def _can_execute_custom(self, agent: Agent, context: Dict[str, Any]) -> bool:
+    def _can_execute_custom(
+            self, agent: Agent, context: Dict[str, Any]) -> bool:
         """Custom execution check - override in subclasses"""
         return True
 
-    def _execute_custom(self, agent: Agent, context: Dict[str, Any]) -> Dict[str, Any]:
+    def _execute_custom(self, agent: Agent,
+                        context: Dict[str, Any]) -> Dict[str, Any]:
         """Custom execution logic - override in subclasses"""
         return {"success": True, "behavior": self.name}
 
-    def _get_priority_modifier(self, agent: Agent, context: Dict[str, Any]) -> float:
+    def _get_priority_modifier(
+            self, agent: Agent, context: Dict[str, Any]) -> float:
         """Get dynamic priority modifier - override in subclasses"""
         return 1.0
 
@@ -140,7 +145,8 @@ class IdleBehavior(BaseBehavior):
     def can_execute(self, agent: Agent, context: Dict[str, Any]) -> bool:
         return True  # Idle can always execute
 
-    def _execute_custom(self, agent: Agent, context: Dict[str, Any]) -> Dict[str, Any]:
+    def _execute_custom(self, agent: Agent,
+                        context: Dict[str, Any]) -> Dict[str, Any]:
         # Restore some energy while idle
         agent.resources.restore_energy(0.5)
         return {"success": True, "action": "idle", "energy_restored": 0.5}
@@ -158,10 +164,12 @@ class WanderBehavior(BaseBehavior):
         )
         self.max_wander_distance = 5.0
 
-    def _can_execute_custom(self, agent: Agent, context: Dict[str, Any]) -> bool:
+    def _can_execute_custom(
+            self, agent: Agent, context: Dict[str, Any]) -> bool:
         return agent.status in [AgentStatus.IDLE, AgentStatus.MOVING]
 
-    def _execute_custom(self, agent: Agent, context: Dict[str, Any]) -> Dict[str, Any]:
+    def _execute_custom(self, agent: Agent,
+                        context: Dict[str, Any]) -> Dict[str, Any]:
         # Generate random movement direction
         angle = random.uniform(0, 2 * math.pi)
         distance = random.uniform(1.0, self.max_wander_distance)
@@ -170,14 +178,18 @@ class WanderBehavior(BaseBehavior):
         new_position = Position(new_x, new_y, agent.position.z)
         # Check if movement is valid through world interface
         world_interface = context.get("world_interface")
-        if world_interface and not world_interface.can_move_to(agent, new_position):
+        if world_interface and not world_interface.can_move_to(
+                agent, new_position):
             return {"success": False, "reason": "invalid_position"}
         action = Action(
             action_type=ActionType.MOVE,
             target=new_position,
             parameters={"movement_type": "wander"},
         )
-        return {"success": True, "action": action, "target_position": new_position}
+        return {
+            "success": True,
+            "action": action,
+            "target_position": new_position}
 
     def get_energy_cost(self, agent: Agent, context: Dict[str, Any]) -> float:
         return 2.0
@@ -193,11 +205,13 @@ class GoalSeekingBehavior(BaseBehavior):
             {AgentCapability.MOVEMENT, AgentCapability.PLANNING},
         )
 
-    def _can_execute_custom(self, agent: Agent, context: Dict[str, Any]) -> bool:
+    def _can_execute_custom(
+            self, agent: Agent, context: Dict[str, Any]) -> bool:
         # Can execute if agent has active goals
         return len(agent.goals) > 0 and agent.select_next_goal() is not None
 
-    def _execute_custom(self, agent: Agent, context: Dict[str, Any]) -> Dict[str, Any]:
+    def _execute_custom(self, agent: Agent,
+                        context: Dict[str, Any]) -> Dict[str, Any]:
         goal = agent.select_next_goal()
         if not goal:
             return {"success": False, "reason": "no_active_goals"}
@@ -236,7 +250,8 @@ class GoalSeekingBehavior(BaseBehavior):
                 current_pos.z,
             )
             # Update goal progress
-            goal.progress = min(1.0, 1.0 - (distance - move_distance) / distance)
+            goal.progress = min(
+                1.0, 1.0 - (distance - move_distance) / distance)
             action = Action(
                 action_type=ActionType.MOVE,
                 target=new_position,
@@ -250,9 +265,11 @@ class GoalSeekingBehavior(BaseBehavior):
             }
         return {"success": False, "reason": "goal_has_no_position"}
 
-    def _get_priority_modifier(self, agent: Agent, context: Dict[str, Any]) -> float:
+    def _get_priority_modifier(
+            self, agent: Agent, context: Dict[str, Any]) -> float:
         # Higher priority if agent has urgent goals
-        active_goals = [g for g in agent.goals if not g.completed and not g.is_expired()]
+        active_goals = [
+            g for g in agent.goals if not g.completed and not g.is_expired()]
         if not active_goals:
             return 0.0
         # Increase priority based on goal urgency and importance
@@ -274,22 +291,28 @@ class SocialInteractionBehavior(BaseBehavior):
         )
         self.interaction_radius = 5.0
 
-    def _can_execute_custom(self, agent: Agent, context: Dict[str, Any]) -> bool:
+    def _can_execute_custom(
+            self, agent: Agent, context: Dict[str, Any]) -> bool:
         # Check if there are other agents nearby
         world_interface = context.get("world_interface")
         if not world_interface:
             return False
-        nearby_objects = world_interface.get_nearby_objects(agent.position, self.interaction_radius)
-        nearby_agents = [obj for obj in nearby_objects if obj.get("type") == "agent"]
+        nearby_objects = world_interface.get_nearby_objects(
+            agent.position, self.interaction_radius)
+        nearby_agents = [
+            obj for obj in nearby_objects if obj.get("type") == "agent"]
         return len(nearby_agents) > 0
 
-    def _execute_custom(self, agent: Agent, context: Dict[str, Any]) -> Dict[str, Any]:
+    def _execute_custom(self, agent: Agent,
+                        context: Dict[str, Any]) -> Dict[str, Any]:
         world_interface = context.get("world_interface")
         if not world_interface:
             return {"success": False, "reason": "no_world_interface"}
         # Find nearby agents
-        nearby_objects = world_interface.get_nearby_objects(agent.position, self.interaction_radius)
-        nearby_agents = [obj for obj in nearby_objects if obj.get("type") == "agent"]
+        nearby_objects = world_interface.get_nearby_objects(
+            agent.position, self.interaction_radius)
+        nearby_agents = [
+            obj for obj in nearby_objects if obj.get("type") == "agent"]
         if not nearby_agents:
             return {"success": False, "reason": "no_nearby_agents"}
         # Select an agent to interact with
@@ -336,7 +359,8 @@ class SocialInteractionBehavior(BaseBehavior):
         # Interaction outcome based on personality and existing relationship
         personality = agent.personality
         # Calculate interaction success based on personality traits
-        social_factor = (personality.extraversion + personality.agreeableness) / 2.0
+        social_factor = (personality.extraversion +
+                         personality.agreeableness) / 2.0
         trust_factor = relationship.trust_level
         success_probability = (social_factor + trust_factor) / 2.0
         success = random.random() < success_probability
@@ -369,7 +393,8 @@ class ExplorationBehavior(BaseBehavior):
         )
         self.exploration_radius = 10.0
 
-    def _can_execute_custom(self, agent: Agent, context: Dict[str, Any]) -> bool:
+    def _can_execute_custom(
+            self, agent: Agent, context: Dict[str, Any]) -> bool:
         # Can execute if agent has high openness or is an explorer type
         return (
             agent.personality.openness > 0.6
@@ -377,12 +402,14 @@ class ExplorationBehavior(BaseBehavior):
             or len(agent.goals) == 0  # Explore when no goals
         )
 
-    def _execute_custom(self, agent: Agent, context: Dict[str, Any]) -> Dict[str, Any]:
+    def _execute_custom(self, agent: Agent,
+                        context: Dict[str, Any]) -> Dict[str, Any]:
         # Choose exploration direction based on least explored areas
         # For now, use a simple approach of moving to unexplored directions
         explored_areas = self._get_explored_areas(agent)
         # Find least explored direction
-        best_direction = self._find_best_exploration_direction(agent, explored_areas)
+        best_direction = self._find_best_exploration_direction(
+            agent, explored_areas)
         # Move in that direction
         distance = random.uniform(5.0, self.exploration_radius)
         new_position = Position(
@@ -392,7 +419,8 @@ class ExplorationBehavior(BaseBehavior):
         )
         # Check validity
         world_interface = context.get("world_interface")
-        if world_interface and not world_interface.can_move_to(agent, new_position):
+        if world_interface and not world_interface.can_move_to(
+                agent, new_position):
             # Try a different direction
             best_direction += math.pi / 4
             new_position = Position(
@@ -451,13 +479,15 @@ class ExplorationBehavior(BaseBehavior):
                 agent.position.y + 5.0 * math.sin(direction),
                 agent.position.z,
             )
-            nearby_count = sum(1 for pos in explored_areas if pos.distance_to(test_position) < 3.0)
+            nearby_count = sum(
+                1 for pos in explored_areas if pos.distance_to(test_position) < 3.0)
             direction_scores.append((direction, nearby_count))
         # Choose direction with minimum explored areas
         best_direction = min(direction_scores, key=lambda x: x[1])[0]
         return best_direction
 
-    def _get_priority_modifier(self, agent: Agent, context: Dict[str, Any]) -> float:
+    def _get_priority_modifier(
+            self, agent: Agent, context: Dict[str, Any]) -> float:
         # Higher priority for explorer types and agents with high openness
         if agent.agent_type == "explorer":
             return 1.5
@@ -493,7 +523,10 @@ class BehaviorTreeManager(IBehaviorTree):
         if behavior in self.behaviors:
             self.behaviors.remove(behavior)
 
-    def evaluate(self, agent: Agent, context: Dict[str, Any]) -> Optional[IAgentBehavior]:
+    def evaluate(self,
+                 agent: Agent,
+                 context: Dict[str,
+                               Any]) -> Optional[IAgentBehavior]:
         """Evaluate the tree and return the best behavior to execute"""
         valid_behaviors = []
         # Filter behaviors that can execute
