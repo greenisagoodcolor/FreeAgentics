@@ -196,3 +196,6 @@ htmlcov/
 coverage-massive/
 coverage.json
 .coverage.*
+
+# Release and test artifacts
+release-report-*/
