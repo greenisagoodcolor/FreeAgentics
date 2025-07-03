@@ -8,7 +8,7 @@ import { Loader2, CheckCircle, AlertTriangle } from "lucide-react";
 import { AgentCreationWizard } from "@/components/ui/agent-creation-wizard";
 import { AgentTemplate } from "@/components/ui/agent-template-selector";
 import { AgentConfigurationData } from "@/components/ui/agent-configuration-form";
-import { agentsApi, Agent, CreateAgentRequest } from "@/lib/api/agents-api";
+import { agentsApi, Agent, EnhancedCreateAgentRequest, AgentCapability } from "@/lib/api/agents-api";
 
 interface CharacterCreatorProps {
   onClose: () => void;
@@ -32,7 +32,7 @@ export function CharacterCreator({
 
     try {
       // Convert template and configuration to API request format
-      const createRequest: CreateAgentRequest = {
+      const createRequest: EnhancedCreateAgentRequest = {
         name: configuration.name,
 
         // Convert Active Inference configuration
@@ -73,11 +73,11 @@ export function CharacterCreator({
         // Add legacy personality mapping for backward compatibility
         personality: undefined,
 
-        capabilities: template.capabilities || [
+        capabilities: (template.capabilities || [
           "movement",
           "perception",
           "communication",
-        ],
+        ]) as AgentCapability[],
 
         tags: [
           template.category,

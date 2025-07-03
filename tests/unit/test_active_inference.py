@@ -6,7 +6,15 @@ from typing import Optional
 from unittest.mock import Mock
 
 import pytest
-import torch
+
+# Import torch with fallback for segmentation fault issues
+try:
+    import torch
+    TORCH_AVAILABLE = True
+except (ImportError, RuntimeError) as e:
+    TORCH_AVAILABLE = False
+    torch = None
+    pytest.skip(f"PyTorch not available or causing segfaults: {e}", allow_module_level=True)
 
 from inference.engine.active_inference import (
     ActiveInferenceEngine,
@@ -436,8 +444,10 @@ class TestPerformanceOptimization:
         inference_config.use_gpu = True
         vmp = VariationalMessagePassing(inference_config)
 
-        # Move model to GPU
+        # Move all model components to GPU
         simple_generative_model.A = simple_generative_model.A.cuda()
+        if hasattr(simple_generative_model, 'B') and simple_generative_model.B is not None:
+            simple_generative_model.B = simple_generative_model.B.cuda()
         obs = torch.tensor(0, dtype=torch.long).cuda()
 
         beliefs = vmp.infer_states(obs, simple_generative_model)

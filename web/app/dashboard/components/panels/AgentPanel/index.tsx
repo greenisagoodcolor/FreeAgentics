@@ -14,7 +14,11 @@ import {
 } from "@/components/ui/dialog";
 import AgentTemplateSelector from "@/components/dashboard/AgentTemplateSelector";
 
-export default function AgentPanel() {
+interface AgentPanelProps {
+  view?: "executive" | "technical" | "research" | "minimal";
+}
+
+export default function AgentPanel({ view = "executive" }: AgentPanelProps) {
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
 

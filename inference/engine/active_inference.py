@@ -247,8 +247,22 @@ class VariationalMessagePassing(InferenceAlgorithm):
         belief = prior_beliefs if prior_beliefs is not None else prior
         state_dim = self._get_state_dimension(generative_model)
 
+        # Determine device from generative model
+        device = None
+        if hasattr(generative_model, 'A') and generative_model.A is not None:
+            device = generative_model.A.device
+        elif hasattr(generative_model, 'B') and generative_model.B is not None:
+            device = generative_model.B.device
+
         if belief is None:
-            belief = torch.ones(state_dim) / state_dim
+            if device is not None:
+                belief = torch.ones(state_dim, device=device) / state_dim
+            else:
+                belief = torch.ones(state_dim) / state_dim
+        else:
+            # Ensure belief is on the same device as the model
+            if device is not None and belief.device != device:
+                belief = belief.to(device)
 
         if belief.dim() == 1:
             belief = belief / (belief.sum() + 1e-16)

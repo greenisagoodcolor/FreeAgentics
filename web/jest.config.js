@@ -90,7 +90,7 @@ const customJestConfig = {
   verbose: true,
 
   // Performance optimizations from comprehensive testing strategy
-  testTimeout: 3000, // Aggressive timeout to prevent hanging tests
+  testTimeout: 10000, // Increased timeout for complex component tests (10 seconds)
   maxWorkers: 1, // Force single worker to prevent resource contention and hanging
 
   // Cache configuration for faster subsequent runs

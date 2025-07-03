@@ -327,77 +327,61 @@ jest.mock("@/components/dashboard/AgentTemplateSelector", () => {
   };
 });
 
-// Mock dashboard panel components directly to avoid complex dependency chains
-// Using absolute paths that match the file structure
-jest.mock(
-  "/Users/matthewmoroney/builds/FreeAgentics/web/app/dashboard/components/panels/AgentPanel",
-  () => {
-    return function AgentPanel({ view }) {
-      const mockReact = require("react");
-      return mockReact.createElement(
-        "div",
-        { "data-testid": "agent-panel-mock", view },
-        "Agent Panel Mock",
-      );
-    };
-  },
-);
+// Mock dashboard panel components with relative paths
+jest.mock("@/app/dashboard/components/panels/AgentPanel", () => {
+  return function AgentPanel({ view }) {
+    const mockReact = require("react");
+    return mockReact.createElement(
+      "div",
+      { "data-testid": "agent-panel-mock", view },
+      "Agent Panel Mock",
+    );
+  };
+});
 
-jest.mock(
-  "/Users/matthewmoroney/builds/FreeAgentics/web/app/dashboard/components/panels/ConversationPanel",
-  () => {
-    return function ConversationPanel({ view }) {
-      const mockReact = require("react");
-      return mockReact.createElement(
-        "div",
-        { "data-testid": "conversation-panel-mock", view },
-        "Conversation Panel Mock",
-      );
-    };
-  },
-);
+jest.mock("@/app/dashboard/components/panels/ConversationPanel", () => {
+  return function ConversationPanel({ view }) {
+    const mockReact = require("react");
+    return mockReact.createElement(
+      "div",
+      { "data-testid": "conversation-panel-mock", view },
+      "Conversation Panel Mock",
+    );
+  };
+});
 
-jest.mock(
-  "/Users/matthewmoroney/builds/FreeAgentics/web/app/dashboard/components/panels/GoalPanel",
-  () => {
-    return function GoalPanel({ view }) {
-      const mockReact = require("react");
-      return mockReact.createElement(
-        "div",
-        { "data-testid": "goal-panel-mock", view },
-        "Goal Panel Mock",
-      );
-    };
-  },
-);
+jest.mock("@/app/dashboard/components/panels/GoalPanel", () => {
+  return function GoalPanel({ view }) {
+    const mockReact = require("react");
+    return mockReact.createElement(
+      "div",
+      { "data-testid": "goal-panel-mock", view },
+      "Goal Panel Mock",
+    );
+  };
+});
 
-jest.mock(
-  "/Users/matthewmoroney/builds/FreeAgentics/web/app/dashboard/components/panels/KnowledgePanel",
-  () => {
-    return function KnowledgePanel({ view }) {
-      const mockReact = require("react");
-      return mockReact.createElement(
-        "div",
-        { "data-testid": "knowledge-panel-mock", view },
-        "Knowledge Panel Mock",
-      );
-    };
-  },
-);
+jest.mock("@/app/dashboard/components/panels/KnowledgePanel", () => {
+  return function KnowledgePanel({ view }) {
+    const mockReact = require("react");
+    return mockReact.createElement(
+      "div",
+      { "data-testid": "knowledge-panel-mock", view },
+      "Knowledge Panel Mock",
+    );
+  };
+});
 
-jest.mock(
-  "/Users/matthewmoroney/builds/FreeAgentics/web/app/dashboard/components/panels/MetricsPanel",
-  () => {
-    return function MetricsPanel({ view }) {
-      const mockReact = require("react");
-      return mockReact.createElement(
-        "div",
-        { "data-testid": "metrics-panel-mock", view },
-        "Metrics Panel Mock",
-      );
-    };
-  },
-);
+jest.mock("@/app/dashboard/components/panels/MetricsPanel", () => {
+  return function MetricsPanel({ view }) {
+    const mockReact = require("react");
+    return mockReact.createElement(
+      "div",
+      { "data-testid": "metrics-panel-mock", view },
+      "Metrics Panel Mock",
+    );
+  };
+});
 
 // Mock Redux store with proper structure matching actual store
 jest.mock("@/store/hooks", () => ({

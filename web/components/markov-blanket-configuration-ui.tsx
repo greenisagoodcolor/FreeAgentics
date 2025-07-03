@@ -70,7 +70,7 @@ import {
   AuditLogEntry,
   AuditLogFilter,
   AuditLogStats,
-  ExportOptions,
+  ExportOptions as AuditExportOptions,
   logBoundaryEdit,
   logTemplateSelection,
   logThresholdChange,
@@ -322,7 +322,7 @@ export const MarkovBlanketConfigurationUI: React.FC<
 
   // Handle audit log export
   const handleExportAuditLog = useCallback(
-    async (options: ExportOptions) => {
+    async (options: AuditExportOptions) => {
       try {
         const blob = await auditLogger.exportData({
           ...options,
@@ -827,7 +827,7 @@ const AuditLogPanel: React.FC<{
   selectedEntries: string[];
   onSelectedEntriesChange: (entries: string[]) => void;
   isLoading: boolean;
-  onExport?: (options: ExportOptions) => void;
+  onExport?: (options: AuditExportOptions) => void;
   onRefresh: () => void;
 }> = ({
   entries,
@@ -1170,7 +1170,7 @@ const CompliancePanel: React.FC<{
 const ExportDialog: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-  onExport: (options: ExportOptions) => void;
+  onExport: (options: AuditExportOptions) => void;
   entryCount: number;
 }> = ({ isOpen, onClose, onExport, entryCount }) => {
   const [format, setFormat] = useState<"json" | "csv" | "pdf" | "xlsx">("csv");

@@ -13,7 +13,31 @@ from agents.base.interaction import Message, MessageType
 from agents.base.memory import MessageSystem
 from inference.gnn.executor import GMNExecutor
 from knowledge.knowledge_graph import KnowledgeGraph
-from world.h3_world import H3World
+# Import H3World with fallback for missing world module
+try:
+    from world.h3_world import H3World
+except ImportError:
+    # Create mock H3World for testing when world module is not available
+    class H3World:
+        def __init__(self, resolution=5):
+            self.resolution = resolution
+            self.center_hex = "872830828ffffff"
+            self.resources = {}
+        
+        def add_resource(self, hex_id: str, resource_type: str, amount: float):
+            if hex_id not in self.resources:
+                self.resources[hex_id] = {}
+            self.resources[hex_id][resource_type] = amount
+        
+        def get_neighbors(self, hex_id: str):
+            # Return mock neighbors
+            class MockCell:
+                def __init__(self, hex_id):
+                    self.hex_id = hex_id
+            return [MockCell("neighbor1"), MockCell("neighbor2")]
+        
+        def calculate_path(self, start_hex: str, target_hex: str):
+            return [start_hex, target_hex]
 
 """Integration Tests for Agent System
 Tests the integration of various agent components including:

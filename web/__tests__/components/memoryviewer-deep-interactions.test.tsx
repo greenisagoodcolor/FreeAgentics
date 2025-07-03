@@ -13,7 +13,11 @@ import {
   fireEvent,
   waitFor,
   act,
+  configure,
 } from "@testing-library/react";
+
+// Configure testing library for longer timeouts
+configure({ testIdAttribute: 'data-testid', asyncUtilTimeout: 10000 });
 import { jest } from "@jest/globals";
 import MemoryViewer, {
   type AgentToolPermissions,

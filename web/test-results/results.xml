@@ -1,0 +1,1282 @@
+<testsuites id="" name="" tests="300" failures="0" skipped="300" errors="0" time="0.17323900000000003">
+<testsuite name="active-inference.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="chromium" tests="6" failures="0" skipped="6" time="0" errors="0">
+<testcase name="Active Inference Real-Time Tests › Active Inference dashboard loads and displays real-time data" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › WebSocket connection for real-time belief updates" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › Active Inference visualization renders without errors" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › PyMDP integration status validation" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › real-time performance meets PRD requirements (&lt;100ms)" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › handles Active Inference errors gracefully" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="agents.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="chromium" tests="4" failures="0" skipped="4" time="0" errors="0">
+<testcase name="Agents Page › agents page loads successfully" classname="agents.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Agents Page › can interact with agent creation flow" classname="agents.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Agents Page › agent list renders properly" classname="agents.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Agents Page › handles empty state gracefully" classname="agents.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="dashboard.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="chromium" tests="4" failures="0" skipped="4" time="0" errors="0">
+<testcase name="Dashboard Functionality › dashboard loads with key components" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Functionality › interactive elements are functional" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Functionality › dashboard data loads without errors" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Functionality › dashboard handles loading states" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="knowledge-graph.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="chromium" tests="8" failures="0" skipped="8" time="0" errors="0">
+<testcase name="Knowledge Graph Evolution Tests › knowledge graph visualization renders correctly" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › dual-layer knowledge graph structure is present" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › real-time graph updates functionality" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › epistemic uncertainty visualization" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › knowledge graph interaction capabilities" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › graph performance with multiple nodes" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › consensus tracking features" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › knowledge graph error handling" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="performance.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="chromium" tests="5" failures="0" skipped="5" time="0" errors="0">
+<testcase name="Performance Tests › page load performance is acceptable" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Tests › pages are accessible via keyboard navigation" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Tests › application handles network errors gracefully" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Tests › memory usage is reasonable" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Tests › large data sets render without blocking UI" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="smoke.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="chromium" tests="5" failures="0" skipped="5" time="0" errors="0">
+<testcase name="Application Smoke Tests › homepage loads successfully" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Application Smoke Tests › navigation works" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Application Smoke Tests › responsive design works" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Application Smoke Tests › no console errors on page load" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Application Smoke Tests › basic accessibility checks" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="visual-tests.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="chromium" tests="18" failures="0" skipped="18" time="0" errors="0">
+<testcase name="Dashboard Visual Tests › dashboard renders with all panels visible" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › knowledge graph SVG renders correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › responsive design works on mobile" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › dark theme renders correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › agent visualization displays correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › metrics charts render without issues" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › interactive elements have proper hover states" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › loading states display correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › error states display correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › Dashboard Visual Regression Test" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › Dashboard Visual Regression Test - SVG Renders Correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › Dashboard Interactive Elements Test" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Visual Tests › knowledge graph animations work correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Visual Tests › node interactions visual feedback" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Visual Tests › filters apply visual changes" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Visual Indicators › renders within acceptable time" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Visual Tests › focus indicators are visible" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Visual Tests › high contrast mode works" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="websocket.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="chromium" tests="10" failures="0" skipped="10" time="0" errors="0">
+<testcase name="WebSocket Real-time Features › should establish WebSocket connection" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should display real-time connection status" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should handle real-time agent updates" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should display real-time metrics" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should handle knowledge graph real-time updates" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should maintain connection stability" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should show real-time conversation updates" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should handle WebSocket error gracefully" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should display WebSocket latency metrics" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should support real-time collaboration features" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="active-inference.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="firefox" tests="6" failures="0" skipped="6" time="0" errors="0">
+<testcase name="Active Inference Real-Time Tests › Active Inference dashboard loads and displays real-time data" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › WebSocket connection for real-time belief updates" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › Active Inference visualization renders without errors" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › PyMDP integration status validation" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › real-time performance meets PRD requirements (&lt;100ms)" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › handles Active Inference errors gracefully" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="agents.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="firefox" tests="4" failures="0" skipped="4" time="0" errors="0">
+<testcase name="Agents Page › agents page loads successfully" classname="agents.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Agents Page › can interact with agent creation flow" classname="agents.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Agents Page › agent list renders properly" classname="agents.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Agents Page › handles empty state gracefully" classname="agents.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="dashboard.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="firefox" tests="4" failures="0" skipped="4" time="0" errors="0">
+<testcase name="Dashboard Functionality › dashboard loads with key components" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Functionality › interactive elements are functional" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Functionality › dashboard data loads without errors" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Functionality › dashboard handles loading states" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="knowledge-graph.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="firefox" tests="8" failures="0" skipped="8" time="0" errors="0">
+<testcase name="Knowledge Graph Evolution Tests › knowledge graph visualization renders correctly" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › dual-layer knowledge graph structure is present" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › real-time graph updates functionality" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › epistemic uncertainty visualization" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › knowledge graph interaction capabilities" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › graph performance with multiple nodes" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › consensus tracking features" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › knowledge graph error handling" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="performance.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="firefox" tests="5" failures="0" skipped="5" time="0" errors="0">
+<testcase name="Performance Tests › page load performance is acceptable" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Tests › pages are accessible via keyboard navigation" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Tests › application handles network errors gracefully" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Tests › memory usage is reasonable" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Tests › large data sets render without blocking UI" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="smoke.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="firefox" tests="5" failures="0" skipped="5" time="0" errors="0">
+<testcase name="Application Smoke Tests › homepage loads successfully" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Application Smoke Tests › navigation works" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Application Smoke Tests › responsive design works" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Application Smoke Tests › no console errors on page load" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Application Smoke Tests › basic accessibility checks" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="visual-tests.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="firefox" tests="18" failures="0" skipped="18" time="0" errors="0">
+<testcase name="Dashboard Visual Tests › dashboard renders with all panels visible" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › knowledge graph SVG renders correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › responsive design works on mobile" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › dark theme renders correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › agent visualization displays correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › metrics charts render without issues" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › interactive elements have proper hover states" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › loading states display correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › error states display correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › Dashboard Visual Regression Test" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › Dashboard Visual Regression Test - SVG Renders Correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › Dashboard Interactive Elements Test" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Visual Tests › knowledge graph animations work correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Visual Tests › node interactions visual feedback" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Visual Tests › filters apply visual changes" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Visual Indicators › renders within acceptable time" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Visual Tests › focus indicators are visible" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Visual Tests › high contrast mode works" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="websocket.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="firefox" tests="10" failures="0" skipped="10" time="0" errors="0">
+<testcase name="WebSocket Real-time Features › should establish WebSocket connection" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should display real-time connection status" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should handle real-time agent updates" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should display real-time metrics" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should handle knowledge graph real-time updates" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should maintain connection stability" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should show real-time conversation updates" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should handle WebSocket error gracefully" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should display WebSocket latency metrics" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should support real-time collaboration features" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="active-inference.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="webkit" tests="6" failures="0" skipped="6" time="0" errors="0">
+<testcase name="Active Inference Real-Time Tests › Active Inference dashboard loads and displays real-time data" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › WebSocket connection for real-time belief updates" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › Active Inference visualization renders without errors" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › PyMDP integration status validation" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › real-time performance meets PRD requirements (&lt;100ms)" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › handles Active Inference errors gracefully" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="agents.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="webkit" tests="4" failures="0" skipped="4" time="0" errors="0">
+<testcase name="Agents Page › agents page loads successfully" classname="agents.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Agents Page › can interact with agent creation flow" classname="agents.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Agents Page › agent list renders properly" classname="agents.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Agents Page › handles empty state gracefully" classname="agents.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="dashboard.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="webkit" tests="4" failures="0" skipped="4" time="0" errors="0">
+<testcase name="Dashboard Functionality › dashboard loads with key components" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Functionality › interactive elements are functional" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Functionality › dashboard data loads without errors" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Functionality › dashboard handles loading states" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="knowledge-graph.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="webkit" tests="8" failures="0" skipped="8" time="0" errors="0">
+<testcase name="Knowledge Graph Evolution Tests › knowledge graph visualization renders correctly" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › dual-layer knowledge graph structure is present" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › real-time graph updates functionality" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › epistemic uncertainty visualization" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › knowledge graph interaction capabilities" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › graph performance with multiple nodes" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › consensus tracking features" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › knowledge graph error handling" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="performance.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="webkit" tests="5" failures="0" skipped="5" time="0" errors="0">
+<testcase name="Performance Tests › page load performance is acceptable" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Tests › pages are accessible via keyboard navigation" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Tests › application handles network errors gracefully" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Tests › memory usage is reasonable" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Tests › large data sets render without blocking UI" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="smoke.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="webkit" tests="5" failures="0" skipped="5" time="0" errors="0">
+<testcase name="Application Smoke Tests › homepage loads successfully" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Application Smoke Tests › navigation works" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Application Smoke Tests › responsive design works" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Application Smoke Tests › no console errors on page load" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Application Smoke Tests › basic accessibility checks" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="visual-tests.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="webkit" tests="18" failures="0" skipped="18" time="0" errors="0">
+<testcase name="Dashboard Visual Tests › dashboard renders with all panels visible" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › knowledge graph SVG renders correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › responsive design works on mobile" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › dark theme renders correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › agent visualization displays correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › metrics charts render without issues" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › interactive elements have proper hover states" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › loading states display correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › error states display correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › Dashboard Visual Regression Test" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › Dashboard Visual Regression Test - SVG Renders Correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › Dashboard Interactive Elements Test" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Visual Tests › knowledge graph animations work correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Visual Tests › node interactions visual feedback" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Visual Tests › filters apply visual changes" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Visual Indicators › renders within acceptable time" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Visual Tests › focus indicators are visible" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Visual Tests › high contrast mode works" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="websocket.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="webkit" tests="10" failures="0" skipped="10" time="0" errors="0">
+<testcase name="WebSocket Real-time Features › should establish WebSocket connection" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should display real-time connection status" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should handle real-time agent updates" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should display real-time metrics" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should handle knowledge graph real-time updates" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should maintain connection stability" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should show real-time conversation updates" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should handle WebSocket error gracefully" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should display WebSocket latency metrics" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should support real-time collaboration features" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="active-inference.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="Mobile Chrome" tests="6" failures="0" skipped="6" time="0" errors="0">
+<testcase name="Active Inference Real-Time Tests › Active Inference dashboard loads and displays real-time data" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › WebSocket connection for real-time belief updates" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › Active Inference visualization renders without errors" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › PyMDP integration status validation" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › real-time performance meets PRD requirements (&lt;100ms)" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › handles Active Inference errors gracefully" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="agents.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="Mobile Chrome" tests="4" failures="0" skipped="4" time="0" errors="0">
+<testcase name="Agents Page › agents page loads successfully" classname="agents.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Agents Page › can interact with agent creation flow" classname="agents.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Agents Page › agent list renders properly" classname="agents.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Agents Page › handles empty state gracefully" classname="agents.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="dashboard.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="Mobile Chrome" tests="4" failures="0" skipped="4" time="0" errors="0">
+<testcase name="Dashboard Functionality › dashboard loads with key components" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Functionality › interactive elements are functional" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Functionality › dashboard data loads without errors" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Functionality › dashboard handles loading states" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="knowledge-graph.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="Mobile Chrome" tests="8" failures="0" skipped="8" time="0" errors="0">
+<testcase name="Knowledge Graph Evolution Tests › knowledge graph visualization renders correctly" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › dual-layer knowledge graph structure is present" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › real-time graph updates functionality" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › epistemic uncertainty visualization" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › knowledge graph interaction capabilities" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › graph performance with multiple nodes" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › consensus tracking features" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › knowledge graph error handling" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="performance.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="Mobile Chrome" tests="5" failures="0" skipped="5" time="0" errors="0">
+<testcase name="Performance Tests › page load performance is acceptable" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Tests › pages are accessible via keyboard navigation" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Tests › application handles network errors gracefully" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Tests › memory usage is reasonable" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Tests › large data sets render without blocking UI" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="smoke.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="Mobile Chrome" tests="5" failures="0" skipped="5" time="0" errors="0">
+<testcase name="Application Smoke Tests › homepage loads successfully" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Application Smoke Tests › navigation works" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Application Smoke Tests › responsive design works" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Application Smoke Tests › no console errors on page load" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Application Smoke Tests › basic accessibility checks" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="visual-tests.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="Mobile Chrome" tests="18" failures="0" skipped="18" time="0" errors="0">
+<testcase name="Dashboard Visual Tests › dashboard renders with all panels visible" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › knowledge graph SVG renders correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › responsive design works on mobile" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › dark theme renders correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › agent visualization displays correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › metrics charts render without issues" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › interactive elements have proper hover states" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › loading states display correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › error states display correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › Dashboard Visual Regression Test" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › Dashboard Visual Regression Test - SVG Renders Correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › Dashboard Interactive Elements Test" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Visual Tests › knowledge graph animations work correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Visual Tests › node interactions visual feedback" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Visual Tests › filters apply visual changes" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Visual Indicators › renders within acceptable time" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Visual Tests › focus indicators are visible" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Visual Tests › high contrast mode works" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="websocket.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="Mobile Chrome" tests="10" failures="0" skipped="10" time="0" errors="0">
+<testcase name="WebSocket Real-time Features › should establish WebSocket connection" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should display real-time connection status" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should handle real-time agent updates" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should display real-time metrics" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should handle knowledge graph real-time updates" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should maintain connection stability" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should show real-time conversation updates" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should handle WebSocket error gracefully" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should display WebSocket latency metrics" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should support real-time collaboration features" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="active-inference.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="Mobile Safari" tests="6" failures="0" skipped="6" time="0" errors="0">
+<testcase name="Active Inference Real-Time Tests › Active Inference dashboard loads and displays real-time data" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › WebSocket connection for real-time belief updates" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › Active Inference visualization renders without errors" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › PyMDP integration status validation" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › real-time performance meets PRD requirements (&lt;100ms)" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Active Inference Real-Time Tests › handles Active Inference errors gracefully" classname="active-inference.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="agents.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="Mobile Safari" tests="4" failures="0" skipped="4" time="0" errors="0">
+<testcase name="Agents Page › agents page loads successfully" classname="agents.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Agents Page › can interact with agent creation flow" classname="agents.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Agents Page › agent list renders properly" classname="agents.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Agents Page › handles empty state gracefully" classname="agents.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="dashboard.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="Mobile Safari" tests="4" failures="0" skipped="4" time="0" errors="0">
+<testcase name="Dashboard Functionality › dashboard loads with key components" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Functionality › interactive elements are functional" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Functionality › dashboard data loads without errors" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Functionality › dashboard handles loading states" classname="dashboard.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="knowledge-graph.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="Mobile Safari" tests="8" failures="0" skipped="8" time="0" errors="0">
+<testcase name="Knowledge Graph Evolution Tests › knowledge graph visualization renders correctly" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › dual-layer knowledge graph structure is present" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › real-time graph updates functionality" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › epistemic uncertainty visualization" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › knowledge graph interaction capabilities" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › graph performance with multiple nodes" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › consensus tracking features" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Evolution Tests › knowledge graph error handling" classname="knowledge-graph.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="performance.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="Mobile Safari" tests="5" failures="0" skipped="5" time="0" errors="0">
+<testcase name="Performance Tests › page load performance is acceptable" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Tests › pages are accessible via keyboard navigation" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Tests › application handles network errors gracefully" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Tests › memory usage is reasonable" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Tests › large data sets render without blocking UI" classname="performance.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="smoke.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="Mobile Safari" tests="5" failures="0" skipped="5" time="0" errors="0">
+<testcase name="Application Smoke Tests › homepage loads successfully" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Application Smoke Tests › navigation works" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Application Smoke Tests › responsive design works" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Application Smoke Tests › no console errors on page load" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Application Smoke Tests › basic accessibility checks" classname="smoke.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="visual-tests.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="Mobile Safari" tests="18" failures="0" skipped="18" time="0" errors="0">
+<testcase name="Dashboard Visual Tests › dashboard renders with all panels visible" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › knowledge graph SVG renders correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › responsive design works on mobile" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › dark theme renders correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › agent visualization displays correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › metrics charts render without issues" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › interactive elements have proper hover states" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › loading states display correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › error states display correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › Dashboard Visual Regression Test" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › Dashboard Visual Regression Test - SVG Renders Correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Dashboard Visual Tests › Dashboard Interactive Elements Test" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Visual Tests › knowledge graph animations work correctly" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Visual Tests › node interactions visual feedback" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Knowledge Graph Visual Tests › filters apply visual changes" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Performance Visual Indicators › renders within acceptable time" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Visual Tests › focus indicators are visible" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Accessibility Visual Tests › high contrast mode works" classname="visual-tests.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="websocket.spec.ts" timestamp="2025-07-03T10:41:48.868Z" hostname="Mobile Safari" tests="10" failures="0" skipped="10" time="0" errors="0">
+<testcase name="WebSocket Real-time Features › should establish WebSocket connection" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should display real-time connection status" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should handle real-time agent updates" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should display real-time metrics" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should handle knowledge graph real-time updates" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should maintain connection stability" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should show real-time conversation updates" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should handle WebSocket error gracefully" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should display WebSocket latency metrics" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+<testcase name="WebSocket Real-time Features › should support real-time collaboration features" classname="websocket.spec.ts" time="0">
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+</testsuites>

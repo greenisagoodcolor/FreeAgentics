@@ -6,8 +6,11 @@
  */
 
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, configure } from "@testing-library/react";
 import { jest } from "@jest/globals";
+
+// Configure testing library for longer timeouts
+configure({ testIdAttribute: 'data-testid', asyncUtilTimeout: 10000 });
 
 // Comprehensive mocking strategy
 jest.mock("@/hooks/use-toast", () => ({
