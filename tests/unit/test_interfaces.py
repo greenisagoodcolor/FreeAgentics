@@ -455,8 +455,7 @@ class TestAgentInterfaces:
 
         # Test different behaviors
         standard_result = standard_logger.log_info("agent-001", "test")
-        verbose_result = verbose_logger.log_info(
-            "agent-001", "test", context="testing")
+        verbose_result = verbose_logger.log_info("agent-001", "test", context="testing")
 
         assert standard_result == "[INFO] test"
         assert "[INFO][agent-001] test" in verbose_result

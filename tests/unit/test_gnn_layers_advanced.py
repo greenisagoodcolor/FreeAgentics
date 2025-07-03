@@ -166,10 +166,8 @@ class TestHierarchicalGNNLayer:
     def config(self):
         """Create hierarchical layer config."""
         return LayerConfig(
-            input_dim=64,
-            output_dim=128,
-            hierarchical_levels=3,
-            aggregation="attention")
+            input_dim=64, output_dim=128, hierarchical_levels=3, aggregation="attention"
+        )
 
     @pytest.fixture
     def layer(self, config):
@@ -251,13 +249,11 @@ class TestHierarchicalGNNLayer:
         node_mappings = hierarchical_graph_data["node_mappings"]
 
         # Coarsening phase
-        coarsened_features = layer.coarsen_graph(
-            x, edge_indices[0], node_mappings[1])
+        coarsened_features = layer.coarsen_graph(x, edge_indices[0], node_mappings[1])
         assert coarsened_features.shape[0] < x.shape[0]
 
         # Refinement phase
-        refined_features = layer.refine_graph(
-            coarsened_features, node_mappings[1], x.shape[0])
+        refined_features = layer.refine_graph(coarsened_features, node_mappings[1], x.shape[0])
         assert refined_features.shape[0] == x.shape[0]
 
     def test_cross_level_attention(self, layer, hierarchical_graph_data):
@@ -267,8 +263,7 @@ class TestHierarchicalGNNLayer:
 
         # Extract features at different levels
         level_features = []
-        for i, edge_index in enumerate(
-                hierarchical_graph_data["edge_indices"]):
+        for i, edge_index in enumerate(hierarchical_graph_data["edge_indices"]):
             if i == 0:
                 features = hierarchical_graph_data["x"]
             else:
@@ -283,8 +278,7 @@ class TestHierarchicalGNNLayer:
 
         # Attention scores should sum to 1
         attention_scores = attention_output["attention_scores"]
-        assert torch.allclose(attention_scores.sum(
-            dim=-1), torch.ones(attention_scores.shape[:-1]))
+        assert torch.allclose(attention_scores.sum(dim=-1), torch.ones(attention_scores.shape[:-1]))
 
 
 class TestVariationalGNNLayer:
@@ -355,9 +349,7 @@ class TestVariationalGNNLayer:
         logvar = result["logvar"]
         samples = result["samples"]
 
-        assert mean.shape == (
-            graph_data["x"].shape[0],
-            layer.config.output_dim)
+        assert mean.shape == (graph_data["x"].shape[0], layer.config.output_dim)
         assert logvar.shape == mean.shape
         assert samples.shape == (layer.config.num_samples, *mean.shape)
 
@@ -422,8 +414,7 @@ class TestVariationalGNNLayer:
         mean_uncertainty = torch.mean(torch.stack(uncertainties), dim=0)
 
         # Uncertainty should correlate with prediction variance
-        correlation = layer.compute_calibration_score(
-            prediction_variance, mean_uncertainty)
+        correlation = layer.compute_calibration_score(prediction_variance, mean_uncertainty)
         assert correlation.item() >= -1 and correlation.item() <= 1
 
 
@@ -473,10 +464,7 @@ class TestBayesianGNNLayer:
             return
 
         # Perform Bayesian inference
-        result = layer.bayesian_forward(
-            graph_data["x"],
-            graph_data["edge_index"],
-            num_samples=10)
+        result = layer.bayesian_forward(graph_data["x"], graph_data["edge_index"], num_samples=10)
 
         assert "samples" in result
         assert "posterior_mean" in result
@@ -485,8 +473,7 @@ class TestBayesianGNNLayer:
 
         samples = result["samples"]
         assert samples.shape[0] == 10  # num_samples
-        assert samples.shape[1:] == (
-            graph_data["x"].shape[0], layer.config.output_dim)
+        assert samples.shape[1:] == (graph_data["x"].shape[0], layer.config.output_dim)
 
     def test_model_evidence_computation(self, layer, graph_data):
         """Test model evidence computation."""
@@ -543,8 +530,7 @@ class TestAdaptiveGNNLayer:
         )
 
         # Forward pass with adapted parameters
-        adapted_output = adapted_layer(
-            graph_data["x"], graph_data["edge_index"])
+        adapted_output = adapted_layer(graph_data["x"], graph_data["edge_index"])
 
         # Outputs should be different after adaptation
         assert not torch.allclose(initial_output, adapted_output)
@@ -625,9 +611,7 @@ class TestEfficientGNNLayer:
         # Forward pass with quantized weights
         output = layer(graph_data["x"], graph_data["edge_index"])
 
-        assert output.shape == (
-            graph_data["x"].shape[0],
-            layer.config.output_dim)
+        assert output.shape == (graph_data["x"].shape[0], layer.config.output_dim)
 
         # Check memory usage reduction
         memory_usage = layer.compute_memory_usage()
@@ -639,12 +623,8 @@ class TestEfficientGNNLayer:
             return
 
         # Create teacher model
-        teacher_config = LayerConfig(
-            input_dim=64,
-            output_dim=128,
-            hidden_dim=256)  # Larger model
-        teacher = EfficientGNNLayer(
-            teacher_config) if IMPORT_SUCCESS else Mock()
+        teacher_config = LayerConfig(input_dim=64, output_dim=128, hidden_dim=256)  # Larger model
+        teacher = EfficientGNNLayer(teacher_config) if IMPORT_SUCCESS else Mock()
 
         # Distillation training step
         student_output = layer(graph_data["x"], graph_data["edge_index"])
@@ -673,11 +653,11 @@ class TestGNNLayerIntegration:
         # Create stack of different layer types
         layers = []
         configs = [
-            LayerConfig(
-                input_dim=64, output_dim=128, layer_type=LayerType.CONV), LayerConfig(
-                input_dim=128, output_dim=256, layer_type=LayerType.ATTENTION), LayerConfig(
-                input_dim=256, output_dim=128, layer_type=LayerType.SAGE), LayerConfig(
-                    input_dim=128, output_dim=64, layer_type=LayerType.TRANSFORMER), ]
+            LayerConfig(input_dim=64, output_dim=128, layer_type=LayerType.CONV),
+            LayerConfig(input_dim=128, output_dim=256, layer_type=LayerType.ATTENTION),
+            LayerConfig(input_dim=256, output_dim=128, layer_type=LayerType.SAGE),
+            LayerConfig(input_dim=128, output_dim=64, layer_type=LayerType.TRANSFORMER),
+        ]
 
         for config in configs:
             if config.layer_type == LayerType.CONV:
@@ -750,11 +730,8 @@ class TestGNNLayerIntegration:
 
         for i in range(num_layers):
             config = LayerConfig(
-                input_dim=64,
-                output_dim=64,
-                residual=True,
-                batch_norm=True,
-                dropout=0.1)
+                input_dim=64, output_dim=64, residual=True, batch_norm=True, dropout=0.1
+            )
             layers.append(GraphConvLayer(config))
 
         # Create computation graph

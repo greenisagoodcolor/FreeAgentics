@@ -162,8 +162,7 @@ class AttentionFilter(PerceptionFilter):
 class PerceptionMemory:
     """Manages short-term perception memory"""
 
-    def __init__(self, memory_duration: float = 5.0,
-                 max_memories: int = 100) -> None:
+    def __init__(self, memory_duration: float = 5.0, max_memories: int = 100) -> None:
         self.memory_duration = memory_duration
         self.max_memories = max_memories
         self.memories: deque = deque(maxlen=max_memories)
@@ -174,9 +173,7 @@ class PerceptionMemory:
         self.memories.append(percept)
         self.stimulus_history[percept.stimulus.stimulus_id].append(percept)
 
-    def get_recent_percepts(
-            self,
-            time_window: Optional[float] = None) -> List[Percept]:
+    def get_recent_percepts(self, time_window: Optional[float] = None) -> List[Percept]:
         """Get percepts within time window"""
         if time_window is None:
             time_window = self.memory_duration
@@ -196,7 +193,8 @@ class PerceptionMemory:
             stimulus_id = old_percept.stimulus.stimulus_id
             if stimulus_id in self.stimulus_history:
                 self.stimulus_history[stimulus_id] = [
-                    p for p in self.stimulus_history[stimulus_id] if p.timestamp >= cutoff_time]
+                    p for p in self.stimulus_history[stimulus_id] if p.timestamp >= cutoff_time
+                ]
                 if not self.stimulus_history[stimulus_id]:
                     del self.stimulus_history[stimulus_id]
 
@@ -208,10 +206,8 @@ class SensorSystem:
         self.perception_type = perception_type
 
     def sense(
-            self,
-            agent: Agent,
-            stimuli: List[Stimulus],
-            environment: Optional[Any] = None) -> List[Percept]:
+        self, agent: Agent, stimuli: List[Stimulus], environment: Optional[Any] = None
+    ) -> List[Percept]:
         """Sense stimuli from the environment"""
         raise NotImplementedError
 
@@ -223,16 +219,11 @@ class VisualSensor(SensorSystem):
         super().__init__(PerceptionType.VISUAL)
 
     def sense(
-            self,
-            agent: Agent,
-            stimuli: List[Stimulus],
-            environment: Optional[Any] = None) -> List[Percept]:
+        self, agent: Agent, stimuli: List[Stimulus], environment: Optional[Any] = None
+    ) -> List[Percept]:
         """Detect visible stimuli"""
         percepts = []
-        capabilities = getattr(
-            agent,
-            "perception_capabilities",
-            PerceptionCapabilities())
+        capabilities = getattr(agent, "perception_capabilities", PerceptionCapabilities())
         agent_pos = agent.position.to_array()
         roll, pitch, yaw = agent.orientation.to_euler()
         forward = np.array([np.cos(yaw), np.sin(yaw), 0])
@@ -254,8 +245,7 @@ class VisualSensor(SensorSystem):
             if angle > capabilities.field_of_view / 2:
                 continue
             if environment and hasattr(environment, "check_line_of_sight"):
-                if not environment.check_line_of_sight(
-                        agent.position, stimulus.position):
+                if not environment.check_line_of_sight(agent.position, stimulus.position):
                     continue
             confidence = capabilities.visual_acuity
             if distance > 0:
@@ -282,16 +272,11 @@ class AuditorySensor(SensorSystem):
         super().__init__(PerceptionType.AUDITORY)
 
     def sense(
-            self,
-            agent: Agent,
-            stimuli: List[Stimulus],
-            environment: Optional[Any] = None) -> List[Percept]:
+        self, agent: Agent, stimuli: List[Stimulus], environment: Optional[Any] = None
+    ) -> List[Percept]:
         """Detect audible stimuli"""
         percepts = []
-        capabilities = getattr(
-            agent,
-            "perception_capabilities",
-            PerceptionCapabilities())
+        capabilities = getattr(agent, "perception_capabilities", PerceptionCapabilities())
         agent_pos = agent.position.to_array()
         for stimulus in stimuli:
             if stimulus.stimulus_type != StimulusType.SOUND:
@@ -329,16 +314,11 @@ class ProximitySensor(SensorSystem):
         super().__init__(PerceptionType.PROXIMITY)
 
     def sense(
-            self,
-            agent: Agent,
-            stimuli: List[Stimulus],
-            environment: Optional[Any] = None) -> List[Percept]:
+        self, agent: Agent, stimuli: List[Stimulus], environment: Optional[Any] = None
+    ) -> List[Percept]:
         """Detect nearby stimuli"""
         percepts = []
-        capabilities = getattr(
-            agent,
-            "perception_capabilities",
-            PerceptionCapabilities())
+        capabilities = getattr(agent, "perception_capabilities", PerceptionCapabilities())
         agent_pos = agent.position.to_array()
         for stimulus in stimuli:
             if (
@@ -377,17 +357,15 @@ class PerceptionSystem:
             PerceptionType.AUDITORY: AuditorySensor(),
             PerceptionType.PROXIMITY: ProximitySensor(),
         }
-        self.filters: List[PerceptionFilter] = [
-            ImportanceFilter(), AttentionFilter()]
+        self.filters: List[PerceptionFilter] = [ImportanceFilter(), AttentionFilter()]
         self.perception_memories: Dict[str, PerceptionMemory] = {}
         self.perception_capabilities: Dict[str, PerceptionCapabilities] = {}
         self.stimuli: List[Stimulus] = []
         self.stimulus_sources: Dict[str, Any] = {}
 
     def register_agent(
-            self,
-            agent: Agent,
-            capabilities: Optional[PerceptionCapabilities] = None) -> None:
+        self, agent: Agent, capabilities: Optional[PerceptionCapabilities] = None
+    ) -> None:
         """Register an agent with the perception system"""
         if capabilities is None:
             capabilities = PerceptionCapabilities()
@@ -404,8 +382,7 @@ class PerceptionSystem:
 
     def remove_stimulus(self, stimulus_id: str) -> None:
         """Remove a stimulus from the environment"""
-        self.stimuli = [
-            s for s in self.stimuli if s.stimulus_id != stimulus_id]
+        self.stimuli = [s for s in self.stimuli if s.stimulus_id != stimulus_id]
         self.stimulus_sources.pop(stimulus_id, None)
 
     def update_stimulus(self, stimulus_id: str, **kwargs) -> None:
@@ -417,10 +394,7 @@ class PerceptionSystem:
                         setattr(stimulus, key, value)
                 break
 
-    def perceive(
-            self,
-            agent_id: str,
-            environment: Optional[Any] = None) -> List[Percept]:
+    def perceive(self, agent_id: str, environment: Optional[Any] = None) -> List[Percept]:
         """Process perception for an agent"""
         agent = self.state_manager.get_agent(agent_id)
         if not agent:
@@ -444,9 +418,7 @@ class PerceptionSystem:
             memory.forget_old_memories()
         return filtered_percepts
 
-    def get_perception_memory(
-            self,
-            agent_id: str) -> Optional[PerceptionMemory]:
+    def get_perception_memory(self, agent_id: str) -> Optional[PerceptionMemory]:
         """Get perception memory for an agent"""
         return self.perception_memories.get(agent_id)
 
@@ -459,9 +431,7 @@ class PerceptionSystem:
             position=agent.position,
             intensity=1.0,
             source=agent,
-            metadata={
-                "agent_name": agent.name,
-                "agent_status": agent.status.value},
+            metadata={"agent_name": agent.name, "agent_status": agent.status.value},
         )
 
     def create_sound_stimulus(
@@ -489,8 +459,7 @@ class PerceptionSystem:
             if agent:
                 stimulus_id = f"agent_{agent_id}"
                 self.update_stimulus(stimulus_id, position=agent.position)
-                if not any(
-                        (s.stimulus_id == stimulus_id for s in self.stimuli)):
+                if not any((s.stimulus_id == stimulus_id for s in self.stimuli)):
                     self.add_stimulus(self.create_agent_stimulus(agent))
 
     def get_perceived_agents(self, agent_id: str) -> List[Agent]:

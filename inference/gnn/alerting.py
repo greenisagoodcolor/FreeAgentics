@@ -201,8 +201,7 @@ class EmailChannel(AlertChannel):
 class WebhookChannel(AlertChannel):
     """Webhook-based alert channel"""
 
-    def __init__(self, webhook_url: str,
-                 headers: Optional[Dict[str, str]] = None) -> None:
+    def __init__(self, webhook_url: str, headers: Optional[Dict[str, str]] = None) -> None:
         """
         Initialize webhook channel.
         Args:
@@ -217,10 +216,8 @@ class WebhookChannel(AlertChannel):
         try:
             payload = alert.to_dict()
             response = requests.post(
-                self.webhook_url,
-                json=payload,
-                headers=self.headers,
-                timeout=10)
+                self.webhook_url, json=payload, headers=self.headers, timeout=10
+            )
             response.raise_for_status()
             return True
         except Exception as e:
@@ -239,8 +236,7 @@ class AlertManager:
     - Auto-resolution
     """
 
-    def __init__(self, max_history: int = 1000,
-                 check_interval: int = 30) -> None:
+    def __init__(self, max_history: int = 1000, check_interval: int = 30) -> None:
         """
         Initialize alert manager.
         Args:
@@ -334,8 +330,7 @@ class AlertManager:
         """Add alert rule"""
         with self._lock:
             self.rules.append(rule)
-            self.rule_state[rule.name] = {
-                "breach_count": 0, "last_alert_time": None}
+            self.rule_state[rule.name] = {"breach_count": 0, "last_alert_time": None}
 
     def add_channel(self, channel: AlertChannel) -> None:
         """Add notification channel"""
@@ -393,8 +388,9 @@ class AlertManager:
                     state["breach_count"] += 1
                     if state["breach_count"] >= rule.consecutive_breaches:
                         if state["last_alert_time"]:
-                            cooldown_end = state["last_alert_time"] + \
-                                timedelta(minutes=rule.cooldown_minutes)
+                            cooldown_end = state["last_alert_time"] + timedelta(
+                                minutes=rule.cooldown_minutes
+                            )
                             if datetime.utcnow() < cooldown_end:
                                 continue
                         self.create_alert(
@@ -409,8 +405,7 @@ class AlertManager:
                                 rule.threshold}",
                             metric_value=metric_value,
                             threshold=rule.threshold,
-                            context={
-                                "rule_name": rule.name},
+                            context={"rule_name": rule.name},
                         )
                         state["last_alert_time"] = datetime.utcnow()
                         state["breach_count"] = 0
@@ -436,8 +431,7 @@ class AlertManager:
                             alert.title}",
                         message=f"The alert '{
                             alert.title}' has been resolved.",
-                        context={
-                            "original_alert_id": alert_id},
+                        context={"original_alert_id": alert_id},
                     )
                     self._send_alert(resolution_alert)
                     break

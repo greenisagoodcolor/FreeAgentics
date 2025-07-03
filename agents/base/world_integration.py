@@ -65,9 +65,7 @@ class WorldEvent:
     location: str  # hex_id where event occurred
     agent_id: Optional[str] = None
     data: Dict[str, Any] = field(default_factory=dict)
-    timestamp: datetime = field(
-        default_factory=lambda: datetime.now(
-            timezone.utc))
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     affected_agents: set[str] = field(default_factory=set)
 
 
@@ -82,9 +80,7 @@ class Perception:
     movement_options: List[str]  # valid adjacent hex_ids to move to
     environmental_conditions: Dict[str, Any]
     recent_events: List[WorldEvent]
-    timestamp: datetime = field(
-        default_factory=lambda: datetime.now(
-            timezone.utc))
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 @dataclass
@@ -123,27 +119,21 @@ class IWorldActionInterface(ABC):
     """Interface for agent world actions"""
 
     @abstractmethod
-    def perform_action(self,
-                       agent_id: str,
-                       action_type: ActionType,
-                       parameters: Dict[str,
-                                        Any]) -> ActionResult:
+    def perform_action(
+        self, agent_id: str, action_type: ActionType, parameters: Dict[str, Any]
+    ) -> ActionResult:
         """Perform an action in the world"""
 
     @abstractmethod
-    def validate_action(self,
-                        agent_id: str,
-                        action_type: ActionType,
-                        parameters: Dict[str,
-                                         Any]) -> bool:
+    def validate_action(
+        self, agent_id: str, action_type: ActionType, parameters: Dict[str, Any]
+    ) -> bool:
         """Check if an action is valid"""
 
     @abstractmethod
-    def get_action_cost(self,
-                        agent_id: str,
-                        action_type: ActionType,
-                        parameters: Dict[str,
-                                         Any]) -> float:
+    def get_action_cost(
+        self, agent_id: str, action_type: ActionType, parameters: Dict[str, Any]
+    ) -> float:
         """Get energy cost of performing an action"""
 
 
@@ -151,18 +141,13 @@ class IWorldEventSystem(ABC):
     """Interface for world event handling"""
 
     @abstractmethod
-    def subscribe_to_events(self,
-                            agent_id: str,
-                            event_types: List[EventType],
-                            callback: Callable[[WorldEvent],
-                                               None]) -> None:
+    def subscribe_to_events(
+        self, agent_id: str, event_types: List[EventType], callback: Callable[[WorldEvent], None]
+    ) -> None:
         """Subscribe an agent to specific types of world events"""
 
     @abstractmethod
-    def unsubscribe_from_events(
-            self,
-            agent_id: str,
-            event_types: List[EventType]) -> None:
+    def unsubscribe_from_events(self, agent_id: str, event_types: List[EventType]) -> None:
         """Unsubscribe an agent from event types"""
 
     @abstractmethod
@@ -170,10 +155,7 @@ class IWorldEventSystem(ABC):
         """Publish an event to all subscribed agents"""
 
     @abstractmethod
-    def get_recent_events(
-            self,
-            location: str,
-            time_window_minutes: int = 10) -> List[WorldEvent]:
+    def get_recent_events(self, location: str, time_window_minutes: int = 10) -> List[WorldEvent]:
         """Get recent events near a location"""
 
 
@@ -181,32 +163,24 @@ class WorldEventSystem(IWorldEventSystem):
     """Implementation of world event system"""
 
     def __init__(self) -> None:
-        self.subscribers: Dict[EventType,
-                               Dict[str, Callable]] = defaultdict(dict)
+        self.subscribers: Dict[EventType, Dict[str, Callable]] = defaultdict(dict)
         self.event_history: List[WorldEvent] = []
         self.max_history_size = 10000
 
-    def subscribe_to_events(self,
-                            agent_id: str,
-                            event_types: List[EventType],
-                            callback: Callable[[WorldEvent],
-                                               None]) -> None:
+    def subscribe_to_events(
+        self, agent_id: str, event_types: List[EventType], callback: Callable[[WorldEvent], None]
+    ) -> None:
         """Subscribe an agent to specific types of world events"""
         for event_type in event_types:
             self.subscribers[event_type][agent_id] = callback
-        logger.debug(
-            f"Agent {agent_id} subscribed to events: {[e.value for e in event_types]}")
+        logger.debug(f"Agent {agent_id} subscribed to events: {[e.value for e in event_types]}")
 
-    def unsubscribe_from_events(
-            self,
-            agent_id: str,
-            event_types: List[EventType]) -> None:
+    def unsubscribe_from_events(self, agent_id: str, event_types: List[EventType]) -> None:
         """Unsubscribe an agent from event types"""
         for event_type in event_types:
             if agent_id in self.subscribers[event_type]:
                 del self.subscribers[event_type][agent_id]
-        logger.debug(
-            f"Agent {agent_id} unsubscribed from events: {[e.value for e in event_types]}")
+        logger.debug(f"Agent {agent_id} unsubscribed from events: {[e.value for e in event_types]}")
 
     def publish_event(self, event: WorldEvent) -> None:
         """Publish an event to all subscribed agents"""
@@ -226,20 +200,16 @@ class WorldEventSystem(IWorldEventSystem):
                 try:
                     callback(event)
                 except Exception as e:
-                    logger.error(
-                        f"Error notifying agent {agent_id} of event: {e}")
+                    logger.error(f"Error notifying agent {agent_id} of event: {e}")
         logger.debug(
             f"Published event {
                 event.event_type.value} to {
-                len(subscribers)} subscribers")
+                len(subscribers)} subscribers"
+        )
 
-    def get_recent_events(
-            self,
-            location: str,
-            time_window_minutes: int = 10) -> List[WorldEvent]:
+    def get_recent_events(self, location: str, time_window_minutes: int = 10) -> List[WorldEvent]:
         """Get recent events near a location"""
-        cutoff_time = datetime.now(timezone.utc).timestamp() - \
-            (time_window_minutes * 60)
+        cutoff_time = datetime.now(timezone.utc).timestamp() - (time_window_minutes * 60)
         recent_events = []
         for event in reversed(self.event_history):  # Most recent first
             if event.timestamp.timestamp() < cutoff_time:
@@ -257,14 +227,10 @@ class AgentWorldManager:
     Handles agent positioning, perception, actions, and event coordination.
     """
 
-    def __init__(
-            self,
-            world: H3World,
-            spatial_api: Optional[SpatialAPI] = None) -> None:
+    def __init__(self, world: H3World, spatial_api: Optional[SpatialAPI] = None) -> None:
         self.world = world
         try:
-            self.spatial_api = spatial_api or SpatialAPI(
-                resolution=world.resolution)
+            self.spatial_api = spatial_api or SpatialAPI(resolution=world.resolution)
         except (TypeError, AttributeError):
             # Fallback for testing or when SpatialAPI isn't available
             self.spatial_api = SpatialAPI()
@@ -272,21 +238,18 @@ class AgentWorldManager:
         # Agent state tracking
         self.agent_locations: Dict[str, str] = {}  # agent_id -> hex_id
         self.agent_resources: Dict[str, Dict[str, float]] = defaultdict(dict)
-        self.agent_energy: Dict[str, float] = defaultdict(
-            lambda: 100.0)  # Default energy
+        self.agent_energy: Dict[str, float] = defaultdict(lambda: 100.0)  # Default energy
         # World state modifications
         # Track modifications to world cells
         self.modified_cells: Dict[str, HexCell] = {}
-        self.structures: Dict[str, Dict[str, Any]] = defaultdict(
-            dict)  # hex_id -> structures
+        self.structures: Dict[str, Dict[str, Any]] = defaultdict(dict)  # hex_id -> structures
         logger.info("Initialized AgentWorldManager")
 
     def place_agent(self, agent_id: str, hex_id: str) -> bool:
         """Place an agent at a specific location"""
         cell = self.world.get_cell(hex_id)
         if not cell:
-            logger.warning(
-                f"Cannot place agent {agent_id} at invalid location {hex_id}")
+            logger.warning(f"Cannot place agent {agent_id} at invalid location {hex_id}")
             return False
         old_location = self.agent_locations.get(agent_id)
         self.agent_locations[agent_id] = hex_id
@@ -326,8 +289,7 @@ class AgentWorldManager:
         # Get nearby agents
         nearby_agents = {}
         for other_id, other_location in self.agent_locations.items():
-            if other_id != agent_id and other_location in [
-                    cell.hex_id for cell in visible_cells]:
+            if other_id != agent_id and other_location in [cell.hex_id for cell in visible_cells]:
                 nearby_agents[other_id] = other_location
         # Get available resources at current location
         available_resources = current_cell.resources.copy()
@@ -371,34 +333,28 @@ class AgentWorldManager:
         cell = self.world.get_cell(location)
         if cell and any(amount > 0 for amount in cell.resources.values()):
             actions.append(ActionType.HARVEST_RESOURCE)
-        if any(
-                amount > 0 for amount in self.agent_resources[agent_id].values()):
+        if any(amount > 0 for amount in self.agent_resources[agent_id].values()):
             actions.append(ActionType.DEPOSIT_RESOURCE)
         # Building/trading actions could be conditional on other factors
         actions.extend([ActionType.BUILD_STRUCTURE, ActionType.TRADE])
         return actions
 
-    def perform_action(self,
-                       agent_id: str,
-                       action_type: ActionType,
-                       parameters: Dict[str,
-                                        Any]) -> ActionResult:
+    def perform_action(
+        self, agent_id: str, action_type: ActionType, parameters: Dict[str, Any]
+    ) -> ActionResult:
         """Perform an action in the world"""
         location = self.agent_locations.get(agent_id)
         if not location:
             return ActionResult(
-                success=False,
-                action_type=action_type,
-                message="Agent not found in world")
+                success=False, action_type=action_type, message="Agent not found in world"
+            )
         # Calculate action cost
         cost = self._calculate_action_cost(agent_id, action_type, parameters)
         # Check if agent has enough energy
         if self.agent_energy[agent_id] < cost:
             return ActionResult(
-                success=False,
-                action_type=action_type,
-                cost=cost,
-                message="Insufficient energy")
+                success=False, action_type=action_type, cost=cost, message="Insufficient energy"
+            )
         # Perform the specific action
         if action_type == ActionType.MOVE:
             return self._perform_move_action(agent_id, parameters, cost)
@@ -419,11 +375,9 @@ class AgentWorldManager:
                 message=f"Action type {action_type.value} not implemented",
             )
 
-    def _calculate_action_cost(self,
-                               agent_id: str,
-                               action_type: ActionType,
-                               parameters: Dict[str,
-                                                Any]) -> float:
+    def _calculate_action_cost(
+        self, agent_id: str, action_type: ActionType, parameters: Dict[str, Any]
+    ) -> float:
         """Calculate energy cost of performing an action"""
         base_costs = {
             ActionType.MOVE: 10.0,

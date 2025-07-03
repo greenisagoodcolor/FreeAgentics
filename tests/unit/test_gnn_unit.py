@@ -6,6 +6,19 @@ GNN layers with Active Inference, providing adapters and mappers for translating
 between graph representations and AI states.
 """
 
+import sys
+from typing import Optional
+from unittest.mock import Mock
+
+import torch
+import torch.nn as nn
+
+from inference.engine.generative_model import (
+    DiscreteGenerativeModel,
+    ModelDimensions,
+    ModelParameters,
+)
+
 # Mock the problematic GNN layers to avoid import issues
 from inference.engine.gnn_integration import (
     DirectGraphMapper,
@@ -14,17 +27,6 @@ from inference.engine.gnn_integration import (
     GraphFeatureAggregator,
     LearnedGraphMapper,
 )
-from inference.engine.generative_model import (
-    DiscreteGenerativeModel,
-    ModelDimensions,
-    ModelParameters,
-)
-import sys
-from typing import Optional
-from unittest.mock import Mock
-
-import torch
-import torch.nn as nn
 
 
 # Mock the GNN layers that may cause import issues
@@ -152,10 +154,7 @@ class TestDirectGraphMapper:
 
     def test_direct_mapper_map_to_states(self):
         """Test mapping graph features to states."""
-        config = GNNIntegrationConfig(
-            output_dim=32,
-            use_gpu=False,
-            state_mapping="direct")
+        config = GNNIntegrationConfig(output_dim=32, use_gpu=False, state_mapping="direct")
         mapper = DirectGraphMapper(config, state_dim=32, observation_dim=32)
 
         graph_features = torch.randn(5, 32)
@@ -202,11 +201,7 @@ class TestLearnedGraphMapper:
 
     def test_learned_mapper_creation(self):
         """Test creating LearnedGraphMapper."""
-        config = GNNIntegrationConfig(
-            output_dim=32,
-            hidden_dim=64,
-            dropout=0.1,
-            use_gpu=False)
+        config = GNNIntegrationConfig(output_dim=32, hidden_dim=64, dropout=0.1, use_gpu=False)
         mapper = LearnedGraphMapper(config, state_dim=16, observation_dim=24)
 
         assert mapper.state_dim == 16
@@ -218,8 +213,7 @@ class TestLearnedGraphMapper:
 
     def test_learned_mapper_map_to_states(self):
         """Test mapping graph features to states using learned mapping."""
-        config = GNNIntegrationConfig(
-            output_dim=32, hidden_dim=64, use_gpu=False)
+        config = GNNIntegrationConfig(output_dim=32, hidden_dim=64, use_gpu=False)
         mapper = LearnedGraphMapper(config, state_dim=16, observation_dim=24)
 
         graph_features = torch.randn(5, 32)
@@ -231,8 +225,7 @@ class TestLearnedGraphMapper:
 
     def test_learned_mapper_map_to_observations(self):
         """Test mapping graph features to observations using learned mapping."""
-        config = GNNIntegrationConfig(
-            output_dim=32, hidden_dim=64, use_gpu=False)
+        config = GNNIntegrationConfig(output_dim=32, hidden_dim=64, use_gpu=False)
         mapper = LearnedGraphMapper(config, state_dim=16, observation_dim=24)
 
         graph_features = torch.randn(5, 32)
@@ -242,8 +235,7 @@ class TestLearnedGraphMapper:
 
     def test_learned_mapper_with_node_indices(self):
         """Test learned mapper with node indices."""
-        config = GNNIntegrationConfig(
-            output_dim=32, hidden_dim=64, use_gpu=False)
+        config = GNNIntegrationConfig(output_dim=32, hidden_dim=64, use_gpu=False)
         mapper = LearnedGraphMapper(config, state_dim=16, observation_dim=24)
 
         graph_features = torch.randn(10, 32)
@@ -261,10 +253,7 @@ class TestGraphFeatureAggregator:
 
     def test_aggregator_creation_mean(self):
         """Test creating aggregator with mean aggregation."""
-        config = GNNIntegrationConfig(
-            aggregation_method="mean",
-            output_dim=32,
-            use_gpu=False)
+        config = GNNIntegrationConfig(aggregation_method="mean", output_dim=32, use_gpu=False)
         aggregator = GraphFeatureAggregator(config)
 
         assert aggregator.config.aggregation_method == "mean"
@@ -272,10 +261,8 @@ class TestGraphFeatureAggregator:
     def test_aggregator_creation_attention(self):
         """Test creating aggregator with attention aggregation."""
         config = GNNIntegrationConfig(
-            aggregation_method="attention",
-            output_dim=32,
-            hidden_dim=64,
-            use_gpu=False)
+            aggregation_method="attention", output_dim=32, hidden_dim=64, use_gpu=False
+        )
         aggregator = GraphFeatureAggregator(config)
 
         assert aggregator.config.aggregation_method == "attention"
@@ -329,10 +316,8 @@ class TestGraphFeatureAggregator:
     def test_aggregate_attention(self):
         """Test attention aggregation."""
         config = GNNIntegrationConfig(
-            aggregation_method="attention",
-            output_dim=32,
-            hidden_dim=16,
-            use_gpu=False)
+            aggregation_method="attention", output_dim=32, hidden_dim=16, use_gpu=False
+        )
         aggregator = GraphFeatureAggregator(config)
 
         node_features = torch.randn(4, 32)
@@ -406,8 +391,7 @@ class TestGNNActiveInferenceAdapter:
         self.gnn_model = DummyGNN(10, 32)
 
         # Create mock generative model and inference algorithm
-        self.dims = ModelDimensions(
-            num_states=4, num_observations=3, num_actions=2)
+        self.dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
         self.params = ModelParameters(use_gpu=False)
         self.gen_model = DiscreteGenerativeModel(self.dims, self.params)
 
@@ -455,8 +439,7 @@ class TestGNNActiveInferenceAdapter:
         edge_index = torch.tensor([[0, 1, 2, 3, 4], [1, 2, 3, 4, 0]])
         edge_features = torch.randn(5, 8)
 
-        graph_data = adapter.process_graph(
-            node_features, edge_index, edge_features)
+        graph_data = adapter.process_graph(node_features, edge_index, edge_features)
 
         # Edge features are passed to GNN but not returned in graph_data dict
         assert "node_features" in graph_data
@@ -510,8 +493,7 @@ class TestGNNActiveInferenceAdapter:
             "graph_features": torch.randn(1, 32),
         }
 
-        updated_beliefs = adapter.update_beliefs_with_graph(
-            current_beliefs, graph_data)
+        updated_beliefs = adapter.update_beliefs_with_graph(current_beliefs, graph_data)
 
         assert updated_beliefs.shape == (4,)
 
@@ -531,8 +513,7 @@ class TestGNNActiveInferenceAdapter:
             "graph_features": torch.randn(1, 32),
         }
 
-        efe = adapter.compute_expected_free_energy_with_graph(
-            policy, graph_data)
+        efe = adapter.compute_expected_free_energy_with_graph(policy, graph_data)
 
         assert isinstance(efe, torch.Tensor)
         assert efe.dim() == 0  # scalar
@@ -545,10 +526,8 @@ class TestIntegrationScenarios:
         """Test end-to-end GCN integration scenario."""
         # Setup
         config = GNNIntegrationConfig(
-            gnn_type="gcn",
-            output_dim=16,
-            use_gpu=False,
-            state_mapping="direct")
+            gnn_type="gcn", output_dim=16, use_gpu=False, state_mapping="direct"
+        )
         gnn_model = DummyGNN(8, 16)
         dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
         params = ModelParameters(use_gpu=False)
@@ -559,8 +538,7 @@ class TestIntegrationScenarios:
         inference.infer_states = Mock(return_value=torch.randn(4))
 
         # Create adapter
-        adapter = GNNActiveInferenceAdapter(
-            config, gnn_model, gen_model, inference)
+        adapter = GNNActiveInferenceAdapter(config, gnn_model, gen_model, inference)
 
         # Process graph
         node_features = torch.randn(6, 8)
@@ -593,13 +571,11 @@ class TestIntegrationScenarios:
         inference = Mock()
         inference.infer_states = Mock(return_value=torch.randn(6))
 
-        adapter = GNNActiveInferenceAdapter(
-            config, gnn_model, gen_model, inference)
+        adapter = GNNActiveInferenceAdapter(config, gnn_model, gen_model, inference)
 
         # Test complete workflow
         node_features = torch.randn(8, 12)
-        edge_index = torch.tensor(
-            [[0, 1, 2, 3, 4, 5, 6, 7], [1, 2, 3, 4, 5, 6, 7, 0]])
+        edge_index = torch.tensor([[0, 1, 2, 3, 4, 5, 6, 7], [1, 2, 3, 4, 5, 6, 7, 0]])
 
         graph_data = adapter.process_graph(node_features, edge_index)
         beliefs = adapter.graph_to_beliefs(graph_data)
@@ -619,8 +595,7 @@ class TestIntegrationScenarios:
         inference = Mock()
         inference.infer_states = Mock(return_value=torch.randn(5))
 
-        adapter = GNNActiveInferenceAdapter(
-            config, gnn_model, gen_model, inference)
+        adapter = GNNActiveInferenceAdapter(config, gnn_model, gen_model, inference)
 
         # Initial beliefs
         current_beliefs = torch.softmax(torch.randn(5), dim=0)
@@ -631,8 +606,7 @@ class TestIntegrationScenarios:
         graph_data = adapter.process_graph(node_features, edge_index)
 
         # Update beliefs
-        updated_beliefs = adapter.update_beliefs_with_graph(
-            current_beliefs, graph_data)
+        updated_beliefs = adapter.update_beliefs_with_graph(current_beliefs, graph_data)
 
         assert updated_beliefs.shape == (5,)
         # Verify inference was called with observations

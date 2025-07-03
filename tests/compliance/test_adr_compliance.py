@@ -40,8 +40,7 @@ class TestProjectStructureCompliance:
         ]
 
         for dir_path in required_dirs:
-            assert os.path.exists(
-                dir_path), f"Required directory missing: {dir_path}"
+            assert os.path.exists(dir_path), f"Required directory missing: {dir_path}"
 
     def test_agents_module_structure(self):
         """Verify agents module follows ADR-002 structure."""
@@ -58,8 +57,7 @@ class TestProjectStructureCompliance:
         ]
 
         for dir_path in agent_dirs:
-            assert os.path.exists(
-                dir_path), f"Agent directory missing: {dir_path}"
+            assert os.path.exists(dir_path), f"Agent directory missing: {dir_path}"
 
     def test_inference_module_structure(self):
         """Verify inference module follows ADR-002 structure."""
@@ -71,8 +69,7 @@ class TestProjectStructureCompliance:
         ]
 
         for dir_path in inference_dirs:
-            assert os.path.exists(
-                dir_path), f"Inference directory missing: {dir_path}"
+            assert os.path.exists(dir_path), f"Inference directory missing: {dir_path}"
 
     def test_test_directory_structure(self):
         """Verify comprehensive testing structure per ADR-007."""
@@ -89,8 +86,7 @@ class TestProjectStructureCompliance:
         ]
 
         for dir_path in test_dirs:
-            assert os.path.exists(
-                dir_path), f"Test directory missing: {dir_path}"
+            assert os.path.exists(dir_path), f"Test directory missing: {dir_path}"
 
     def test_documentation_structure(self):
         """Verify documentation follows ADR structure."""
@@ -103,8 +99,7 @@ class TestProjectStructureCompliance:
         ]
 
         for dir_path in doc_dirs:
-            assert os.path.exists(
-                dir_path), f"Documentation directory missing: {dir_path}"
+            assert os.path.exists(dir_path), f"Documentation directory missing: {dir_path}"
 
 
 class TestDependencyCompliance:
@@ -127,11 +122,7 @@ class TestDependencyCompliance:
         for file_path in infrastructure_files:
             imports = self._get_imports(file_path)
             for imp in imports:
-                if any(
-                    layer in imp for layer in [
-                        "agents.",
-                        "coalitions.",
-                        "inference.engine"]):
+                if any(layer in imp for layer in ["agents.", "coalitions.", "inference.engine"]):
                     violations.append(f"{file_path} imports {imp}")
 
         # Core agents should not depend on specific agent types
@@ -143,11 +134,9 @@ class TestDependencyCompliance:
                     agent_type in imp
                     for agent_type in ["explorer.", "scholar.", "guardian.", "merchant."]
                 ):
-                    violations.append(
-                        f"{file_path} imports specific agent: {imp}")
+                    violations.append(f"{file_path} imports specific agent: {imp}")
 
-        assert len(
-            violations) == 0, f"Layer dependency violations: {violations}"
+        assert len(violations) == 0, f"Layer dependency violations: {violations}"
 
     def test_external_dependency_compliance(self):
         """Test that external dependencies are properly managed."""
@@ -166,12 +155,7 @@ class TestDependencyCompliance:
         """Get all Python modules in the project."""
         modules = []
         for root, dirs, files in os.walk("."):
-            if any(
-                exclude in root for exclude in [
-                    ".git",
-                    "__pycache__",
-                    ".venv",
-                    "venv"]):
+            if any(exclude in root for exclude in [".git", "__pycache__", ".venv", "venv"]):
                 continue
             for file in files:
                 if file.endswith(".py"):
@@ -206,26 +190,20 @@ class TestDependencyCompliance:
             pass  # Skip files that can't be parsed
         return imports
 
-    def _build_dependency_graph(
-            self, modules: List[str]) -> Dict[str, Set[str]]:
+    def _build_dependency_graph(self, modules: List[str]) -> Dict[str, Set[str]]:
         """Build a dependency graph between modules."""
         graph = {}
         for module in modules:
             module_name = self._get_module_name(module)
             imports = self._get_imports(module)
-            graph[module_name] = set(self._get_module_name(
-                imp) for imp in imports if self._is_internal_import(imp))
+            graph[module_name] = set(
+                self._get_module_name(imp) for imp in imports if self._is_internal_import(imp)
+            )
         return graph
 
     def _get_module_name(self, file_path: str) -> str:
         """Convert file path to module name."""
-        return file_path.replace(
-            "/",
-            ".").replace(
-            "\\",
-            ".").replace(
-            ".py",
-            "")
+        return file_path.replace("/", ".").replace("\\", ".").replace(".py", "")
 
     def _is_internal_import(self, import_name: str) -> bool:
         """Check if an import is internal to the project."""
@@ -238,8 +216,7 @@ class TestDependencyCompliance:
             "infrastructure",
             "api",
         ]
-        return any(import_name.startswith(module)
-                   for module in internal_modules)
+        return any(import_name.startswith(module) for module in internal_modules)
 
     def _detect_cycles(self, graph: Dict[str, Set[str]]) -> List[List[str]]:
         """Detect circular dependencies in the graph."""
@@ -281,9 +258,9 @@ class TestDependencyCompliance:
                 lines = f.readlines()
                 # Basic validation - should have actual packages
                 package_lines = [
-                    line for line in lines if line.strip() and not line.startswith("#")]
-                assert len(
-                    package_lines) > 0, f"Requirements file {file_path} appears empty"
+                    line for line in lines if line.strip() and not line.startswith("#")
+                ]
+                assert len(package_lines) > 0, f"Requirements file {file_path} appears empty"
 
 
 class TestTestingStrategyCompliance:
@@ -292,8 +269,7 @@ class TestTestingStrategyCompliance:
     def test_property_based_testing_implemented(self):
         """Verify property-based testing is implemented (ADR-007 mandate)."""
         property_test_files = list(Path("tests/property").glob("*.py"))
-        assert len(
-            property_test_files) > 0, "Property-based tests missing (ADR-007 violation)"
+        assert len(property_test_files) > 0, "Property-based tests missing (ADR-007 violation)"
 
         # Verify hypothesis usage
         has_hypothesis = False
@@ -310,10 +286,8 @@ class TestTestingStrategyCompliance:
         behavior_test_files = list(Path("tests/behavior").glob("*.py"))
         feature_files = list(Path("tests/features").glob("*.feature"))
 
-        assert len(
-            behavior_test_files) > 0, "BDD tests missing (ADR-007 violation)"
-        assert len(
-            feature_files) > 0, "Gherkin feature files missing (ADR-007 violation)"
+        assert len(behavior_test_files) > 0, "BDD tests missing (ADR-007 violation)"
+        assert len(feature_files) > 0, "Gherkin feature files missing (ADR-007 violation)"
 
         # Verify pytest-bdd usage
         has_pytest_bdd = False
@@ -328,8 +302,7 @@ class TestTestingStrategyCompliance:
     def test_chaos_engineering_implemented(self):
         """Verify chaos engineering is implemented (ADR-007 mandate)."""
         chaos_test_files = list(Path("tests/chaos").glob("*.py"))
-        assert len(
-            chaos_test_files) > 0, "Chaos engineering tests missing (ADR-007 violation)"
+        assert len(chaos_test_files) > 0, "Chaos engineering tests missing (ADR-007 violation)"
 
         # Verify failure injection patterns
         has_failure_injection = False
@@ -409,22 +382,19 @@ class TestNamingConventionCompliance:
                     file_path = os.path.join(root, file)
 
                     # Check file naming (snake_case)
-                    if not re.match(
-                        r"^[a-z_][a-z0-9_]*\.py$",
-                            file) and file != "__init__.py":
-                        violations.append(
-                            f"File naming violation: {file_path}")
+                    if not re.match(r"^[a-z_][a-z0-9_]*\.py$", file) and file != "__init__.py":
+                        violations.append(f"File naming violation: {file_path}")
 
                     # Check for proper __init__.py files in packages
                     if os.path.isdir(os.path.dirname(file_path)):
-                        init_file = os.path.join(
-                            os.path.dirname(file_path), "__init__.py")
+                        init_file = os.path.join(os.path.dirname(file_path), "__init__.py")
                         if not os.path.exists(init_file) and any(
-                            f.endswith(".py") for f in os.listdir(
-                                os.path.dirname(file_path))):
+                            f.endswith(".py") for f in os.listdir(os.path.dirname(file_path))
+                        ):
                             violations.append(
                                 f"Missing __init__.py in package: {
-                                    os.path.dirname(file_path)}")
+                                    os.path.dirname(file_path)}"
+                            )
 
         assert (
             len(violations) == 0
@@ -443,11 +413,9 @@ class TestNamingConventionCompliance:
 
             for dir_name in dirs:
                 # Check directory naming (snake_case for Python modules)
-                if not re.match(
-                        r"^[a-z_][a-z0-9_]*$",
-                        dir_name) and not re.match(
-                        r"^[A-Z][a-zA-Z0-9]*$",
-                        dir_name):
+                if not re.match(r"^[a-z_][a-z0-9_]*$", dir_name) and not re.match(
+                    r"^[A-Z][a-zA-Z0-9]*$", dir_name
+                ):
                     # Allow some exceptions
                     exceptions = [
                         ".git",
@@ -463,10 +431,10 @@ class TestNamingConventionCompliance:
                         violations.append(
                             f"Directory naming violation: {
                                 os.path.join(
-                                    root, dir_name)}")
+                                    root, dir_name)}"
+                        )
 
-        assert len(
-            violations) == 0, f"Directory naming violations: {violations[:10]}"
+        assert len(violations) == 0, f"Directory naming violations: {violations[:10]}"
 
 
 class TestConfigurationCompliance:
@@ -483,8 +451,7 @@ class TestConfigurationCompliance:
         ]
 
         for config_file in required_configs:
-            assert os.path.exists(
-                config_file), f"Required config file missing: {config_file}"
+            assert os.path.exists(config_file), f"Required config file missing: {config_file}"
 
     def test_gitignore_completeness(self):
         """Test that .gitignore covers common patterns."""

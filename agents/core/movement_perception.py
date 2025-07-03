@@ -140,8 +140,7 @@ class MovementPerceptionSystem:
         dlng = lng2 - lng1
 
         y = math.sin(dlng) * math.cos(lat2)
-        x = math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * \
-            math.cos(lat2) * math.cos(dlng)
+        x = math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(dlng)
 
         bearing = math.degrees(math.atan2(y, x))
         bearing = (bearing + 360) % 360
@@ -152,10 +151,7 @@ class MovementPerceptionSystem:
 
         return Direction(sector)
 
-    def can_move_to(self,
-                    from_hex: str,
-                    to_hex: str) -> tuple[bool,
-                                          Optional[str]]:
+    def can_move_to(self, from_hex: str, to_hex: str) -> tuple[bool, Optional[str]]:
         """
         Check if movement from one hex to another is valid.
 
@@ -242,8 +238,7 @@ class MovementPerceptionSystem:
         visible_cells = self.world.get_visible_cells(agent_position)
 
         # Filter by line of sight
-        visible_cells = self._apply_line_of_sight(
-            agent_position, visible_cells)
+        visible_cells = self._apply_line_of_sight(agent_position, visible_cells)
 
         # Detect nearby agents
         nearby_agents = []
@@ -256,13 +251,10 @@ class MovementPerceptionSystem:
                         {
                             "id": agent.get("id"),
                             "position": agent.get("position"),
-                            "class": agent.get(
-                                "class",
-                                "unknown"),
-                            "visible_action": agent.get(
-                                "current_action",
-                                "idle"),
-                        })
+                            "class": agent.get("class", "unknown"),
+                            "visible_action": agent.get("current_action", "idle"),
+                        }
+                    )
 
         # Calculate total detected resources
         detected_resources = {}
@@ -314,8 +306,7 @@ class MovementPerceptionSystem:
             blocked = False
             observer_elevation = observer_cell.elevation
 
-            for i, hex_id in enumerate(
-                    path[1:-1], 1):  # Skip observer and target
+            for i, hex_id in enumerate(path[1:-1], 1):  # Skip observer and target
                 intermediate_cell = self.world.get_cell(hex_id)
                 if not intermediate_cell:
                     continue
@@ -323,8 +314,9 @@ class MovementPerceptionSystem:
                 # Simple LOS: blocked if intermediate terrain is higher than
                 # the line between observer and target
                 progress = i / len(path)
-                expected_elevation = (observer_elevation *
-                                      (1 - progress) + target_cell.elevation * progress)
+                expected_elevation = (
+                    observer_elevation * (1 - progress) + target_cell.elevation * progress
+                )
 
                 # Add observer height (assume 2m)
                 observer_elevation + 2
@@ -363,42 +355,41 @@ class MovementPerceptionSystem:
 
     def _validate_astar_inputs(self, start_hex: str, goal_hex: str) -> bool:
         """Validate inputs for A* pathfinding"""
-        return (self.world.get_cell(start_hex) is not None and
-                self.world.get_cell(goal_hex) is not None)
+        return (
+            self.world.get_cell(start_hex) is not None and self.world.get_cell(goal_hex) is not None
+        )
 
     def _initialize_astar_state(self, start_hex: str, goal_hex: str) -> dict:
         """Initialize A* algorithm state"""
         from heapq import heappush
 
         state = {
-            'open_set': [],
-            'came_from': {},
-            'g_score': {start_hex: 0},
-            'f_score': {start_hex: h3.grid_distance(start_hex, goal_hex)},
-            'visited': set()
+            "open_set": [],
+            "came_from": {},
+            "g_score": {start_hex: 0},
+            "f_score": {start_hex: h3.grid_distance(start_hex, goal_hex)},
+            "visited": set(),
         }
 
-        heappush(state['open_set'], (state['f_score'][start_hex], start_hex))
+        heappush(state["open_set"], (state["f_score"][start_hex], start_hex))
         return state
 
-    def _execute_astar_search(self,
-                              astar_state: dict,
-                              goal_hex: str,
-                              max_cost: float) -> Optional[list[str]]:
+    def _execute_astar_search(
+        self, astar_state: dict, goal_hex: str, max_cost: float
+    ) -> Optional[list[str]]:
         """Execute main A* search algorithm"""
         from heapq import heappop
 
-        while astar_state['open_set']:
-            current_f, current = heappop(astar_state['open_set'])
+        while astar_state["open_set"]:
+            current_f, current = heappop(astar_state["open_set"])
 
             if current == goal_hex:
-                return self._reconstruct_path(
-                    astar_state['came_from'], current)
+                return self._reconstruct_path(astar_state["came_from"], current)
 
-            if current in astar_state['visited']:
+            if current in astar_state["visited"]:
                 continue
 
-            astar_state['visited'].add(current)
+            astar_state["visited"].add(current)
             self._process_neighbors(current, astar_state, goal_hex, max_cost)
 
         return None  # No path found
@@ -414,63 +405,54 @@ class MovementPerceptionSystem:
         return path
 
     def _process_neighbors(
-            self,
-            current: str,
-            astar_state: dict,
-            goal_hex: str,
-            max_cost: float) -> None:
+        self, current: str, astar_state: dict, goal_hex: str, max_cost: float
+    ) -> None:
         """Process neighbors of current node in A* search"""
         for direction, neighbor in self.get_valid_moves(current):
             if self._should_skip_neighbor(current, neighbor, astar_state):
                 continue
 
-            if self._should_update_neighbor(
-                    current, neighbor, astar_state, max_cost):
-                self._update_neighbor_scores(
-                    current, neighbor, astar_state, goal_hex)
+            if self._should_update_neighbor(current, neighbor, astar_state, max_cost):
+                self._update_neighbor_scores(current, neighbor, astar_state, goal_hex)
 
-    def _should_skip_neighbor(
-            self,
-            current: str,
-            neighbor: str,
-            astar_state: dict) -> bool:
+    def _should_skip_neighbor(self, current: str, neighbor: str, astar_state: dict) -> bool:
         """Check if neighbor should be skipped"""
-        if neighbor in astar_state['visited']:
+        if neighbor in astar_state["visited"]:
             return True
 
         can_move, _ = self.can_move_to(current, neighbor)
         return not can_move
 
-    def _should_update_neighbor(self, current: str, neighbor: str,
-                                astar_state: dict, max_cost: float) -> bool:
+    def _should_update_neighbor(
+        self, current: str, neighbor: str, astar_state: dict, max_cost: float
+    ) -> bool:
         """Check if neighbor should be updated with better path"""
         move_cost = self.calculate_movement_cost(current, neighbor)
-        tentative_g = astar_state['g_score'][current] + move_cost
+        tentative_g = astar_state["g_score"][current] + move_cost
 
         if tentative_g > max_cost:
             return False
 
-        return (neighbor not in astar_state['g_score'] or
-                tentative_g < astar_state['g_score'][neighbor])
+        return (
+            neighbor not in astar_state["g_score"] or tentative_g < astar_state["g_score"][neighbor]
+        )
 
-    def _update_neighbor_scores(self, current: str, neighbor: str,
-                                astar_state: dict, goal_hex: str) -> None:
+    def _update_neighbor_scores(
+        self, current: str, neighbor: str, astar_state: dict, goal_hex: str
+    ) -> None:
         """Update g_score and f_score for neighbor and add to open set"""
         from heapq import heappush
 
         move_cost = self.calculate_movement_cost(current, neighbor)
-        tentative_g = astar_state['g_score'][current] + move_cost
+        tentative_g = astar_state["g_score"][current] + move_cost
 
-        astar_state['came_from'][neighbor] = current
-        astar_state['g_score'][neighbor] = tentative_g
+        astar_state["came_from"][neighbor] = current
+        astar_state["g_score"][neighbor] = tentative_g
 
         h_score = h3.grid_distance(neighbor, goal_hex) * 1.0
-        astar_state['f_score'][neighbor] = tentative_g + h_score
+        astar_state["f_score"][neighbor] = tentative_g + h_score
 
-        heappush(
-            astar_state['open_set'],
-            (astar_state['f_score'][neighbor],
-             neighbor))
+        heappush(astar_state["open_set"], (astar_state["f_score"][neighbor], neighbor))
 
     def get_exploration_targets(
         self, current_hex: str, explored_hexes: set[str], num_targets: int = 3
@@ -538,13 +520,7 @@ if __name__ == "__main__":
     # Create a test world
     from ..world.h3_world import H3World
 
-    world = H3World(
-        center_lat=37.7749,
-        center_lng=-
-        122.4194,
-        resolution=7,
-        num_rings=5,
-        seed=42)
+    world = H3World(center_lat=37.7749, center_lng=-122.4194, resolution=7, num_rings=5, seed=42)
 
     # Create movement system
     movement_system = MovementPerceptionSystem(world)

@@ -142,15 +142,18 @@ class TestEdgeProcessor:
     def sample_edges(self):
         """Create sample edges."""
         return [
+            Edge(source=0, target=1, weight=0.8, features={"distance": 1.5, "category": "friend"}),
             Edge(
-                source=0, target=1, weight=0.8, features={
-                    "distance": 1.5, "category": "friend"}), Edge(
-                source=1, target=2, weight=0.6, features={
-                    "distance": 2.0, "category": "colleague"}), Edge(
-                        source=2, target=0, weight=0.9, features={
-                            "distance": 1.2, "category": "friend"}), Edge(
-                                source=0, target=3, weight=0.4, features={
-                                    "distance": 3.0, "category": "acquaintance"}, ), ]
+                source=1, target=2, weight=0.6, features={"distance": 2.0, "category": "colleague"}
+            ),
+            Edge(source=2, target=0, weight=0.9, features={"distance": 1.2, "category": "friend"}),
+            Edge(
+                source=0,
+                target=3,
+                weight=0.4,
+                features={"distance": 3.0, "category": "acquaintance"},
+            ),
+        ]
 
     def test_processor_initialization(self, processor, edge_config):
         """Test processor initialization."""
@@ -211,10 +214,7 @@ class TestEdgeProcessor:
         config = EdgeConfig(edge_type=EdgeType.BIDIRECTIONAL)
         processor = EdgeProcessor(config)
 
-        edges = [
-            Edge(
-                source=0, target=1, weight=0.5), Edge(
-                source=2, target=3, weight=0.7)]
+        edges = [Edge(source=0, target=1, weight=0.5), Edge(source=2, target=3, weight=0.7)]
 
         edge_batch = processor.process_edges(edges, 4)
 
@@ -244,10 +244,7 @@ class TestEdgeProcessor:
         config = EdgeConfig(feature_types=[EdgeFeatureType.WEIGHT])
         processor = EdgeProcessor(config)
 
-        edges = [
-            Edge(
-                source=0, target=1, weight=0.1), Edge(
-                source=1, target=2, weight=0.9)]
+        edges = [Edge(source=0, target=1, weight=0.1), Edge(source=1, target=2, weight=0.9)]
 
         edge_batch = processor.process_edges(edges, 3)
 
@@ -285,11 +282,7 @@ class TestEdgeProcessor:
 
         edges = [
             Edge(source=0, target=1, features={"similarity": 0.8}),
-            Edge(
-                source=1,
-                target=2,
-                features={
-                    "similarity": 1.5}),
+            Edge(source=1, target=2, features={"similarity": 1.5}),
             # Will be clipped
         ]
 
@@ -376,13 +369,8 @@ class TestEdgeProcessor:
         processor = EdgeProcessor(config)
 
         edges = [
-            Edge(
-                source=0,
-                target=1,
-                weight=0.8,
-                features={
-                    "distance": 1.5,
-                    "similarity": 0.7})]
+            Edge(source=0, target=1, weight=0.8, features={"distance": 1.5, "similarity": 0.7})
+        ]
 
         edge_batch = processor.process_edges(edges, 2)
 
@@ -394,9 +382,7 @@ class TestEdgeProcessor:
         if not IMPORT_SUCCESS or not TORCH_AVAILABLE:
             return
 
-        config = EdgeConfig(
-            max_edges_per_node=2,
-            edge_sampling_strategy="random")
+        config = EdgeConfig(max_edges_per_node=2, edge_sampling_strategy="random")
         processor = EdgeProcessor(config)
 
         # Create many edges from node 0
@@ -413,9 +399,7 @@ class TestEdgeProcessor:
         if not IMPORT_SUCCESS or not TORCH_AVAILABLE:
             return
 
-        config = EdgeConfig(
-            max_edges_per_node=2,
-            edge_sampling_strategy="importance")
+        config = EdgeConfig(max_edges_per_node=2, edge_sampling_strategy="importance")
         processor = EdgeProcessor(config)
 
         # Create edges with different weights
@@ -436,9 +420,7 @@ class TestEdgeProcessor:
         if not IMPORT_SUCCESS or not TORCH_AVAILABLE:
             return
 
-        config = EdgeConfig(
-            max_edges_per_node=2,
-            edge_sampling_strategy="topk")
+        config = EdgeConfig(max_edges_per_node=2, edge_sampling_strategy="topk")
         processor = EdgeProcessor(config)
 
         edges = [
@@ -521,8 +503,7 @@ class TestGraphAnalyzer:
     def simple_graph(self):
         """Create simple graph."""
         if TORCH_AVAILABLE:
-            edge_index = torch.tensor(
-                [[0, 1, 2, 3], [1, 2, 3, 0]], dtype=torch.long)
+            edge_index = torch.tensor([[0, 1, 2, 3], [1, 2, 3, 0]], dtype=torch.long)
             return edge_index, 4
         return None, 4
 
@@ -558,10 +539,8 @@ class TestGraphAnalyzer:
         edge_features = torch.randn(2, 5)
 
         properties = analyzer.analyze_graph(
-            edge_index,
-            2,
-            node_features=node_features,
-            edge_features=edge_features)
+            edge_index, 2, node_features=node_features, edge_features=edge_features
+        )
 
         assert properties.has_node_features
         assert properties.has_edge_features
@@ -588,8 +567,7 @@ class TestGraphAnalyzer:
         edge_index = torch.tensor([[0, 1], [1, 0]], dtype=torch.long)
         edge_weight = torch.tensor([0.5, 0.5], dtype=torch.float)
 
-        properties = analyzer.analyze_graph(
-            edge_index, 2, edge_weight=edge_weight)
+        properties = analyzer.analyze_graph(edge_index, 2, edge_weight=edge_weight)
 
         assert properties.is_weighted
 
@@ -599,8 +577,7 @@ class TestGraphAnalyzer:
             return
 
         # Two disconnected components
-        edge_index = torch.tensor(
-            [[0, 1, 2, 3], [1, 0, 3, 2]], dtype=torch.long)
+        edge_index = torch.tensor([[0, 1, 2, 3], [1, 0, 3, 2]], dtype=torch.long)
 
         properties = analyzer.analyze_graph(edge_index, 4)
 
@@ -612,8 +589,7 @@ class TestGraphAnalyzer:
             return
 
         # Create bipartite graph (no odd cycles)
-        edge_index = torch.tensor(
-            [[0, 1, 2, 3], [2, 3, 0, 1]], dtype=torch.long)
+        edge_index = torch.tensor([[0, 1, 2, 3], [2, 3, 0, 1]], dtype=torch.long)
 
         properties = analyzer.analyze_graph(edge_index, 4)
 
@@ -701,9 +677,7 @@ class TestModelSelector:
         if not IMPORT_SUCCESS:
             return
 
-        config = MappingConfig(
-            task_type=GraphTaskType.NODE_CLASSIFICATION,
-            prefer_attention=True)
+        config = MappingConfig(task_type=GraphTaskType.NODE_CLASSIFICATION, prefer_attention=True)
         selector = ModelSelector(config)
 
         properties = GraphProperties(
@@ -830,7 +804,8 @@ class TestModelSelector:
         properties.num_nodes = 1000
 
         hidden_dims = selector._determine_hidden_dims(
-            input_dim=32, output_dim=10, num_layers=4, graph_properties=properties)
+            input_dim=32, output_dim=10, num_layers=4, graph_properties=properties
+        )
 
         assert len(hidden_dims) == 3  # num_layers - 1
         assert hidden_dims[0] == 64  # 32 * 2
@@ -844,9 +819,7 @@ class TestGraphToModelMapper:
     def mapping_config(self):
         """Create mapping configuration."""
         if IMPORT_SUCCESS:
-            return MappingConfig(
-                task_type=GraphTaskType.NODE_CLASSIFICATION,
-                auto_select=True)
+            return MappingConfig(task_type=GraphTaskType.NODE_CLASSIFICATION, auto_select=True)
         else:
             return Mock()
 
@@ -873,14 +846,12 @@ class TestGraphToModelMapper:
         if not IMPORT_SUCCESS or not TORCH_AVAILABLE:
             return
 
-        edge_index = torch.tensor(
-            [[0, 1, 2, 3], [1, 2, 3, 0]], dtype=torch.long)
+        edge_index = torch.tensor([[0, 1, 2, 3], [1, 2, 3, 0]], dtype=torch.long)
         num_nodes = 4
         input_dim = 16
         output_dim = 10
 
-        model, config = mapper.map_graph_to_model(
-            edge_index, num_nodes, input_dim, output_dim)
+        model, config = mapper.map_graph_to_model(edge_index, num_nodes, input_dim, output_dim)
 
         assert isinstance(model, nn.Module)
         assert isinstance(config, ModelConfig)
@@ -926,11 +897,9 @@ class TestGraphToModelMapper:
         output_dim = 8
         node_features = torch.randn(num_nodes, input_dim)
 
-        model, _ = mapper.map_graph_to_model(
-            edge_index, num_nodes, input_dim, output_dim)
+        model, _ = mapper.map_graph_to_model(edge_index, num_nodes, input_dim, output_dim)
 
-        is_compatible = mapper.validate_model_compatibility(
-            model, edge_index, node_features)
+        is_compatible = mapper.validate_model_compatibility(model, edge_index, node_features)
 
         assert is_compatible
 
@@ -973,8 +942,7 @@ class TestGraphToModelMapper:
         input_dim = 8
         output_dim = 4
 
-        model, config = mapper.map_graph_to_model(
-            edge_index, num_nodes, input_dim, output_dim)
+        model, config = mapper.map_graph_to_model(edge_index, num_nodes, input_dim, output_dim)
 
         # Should handle single node
         x = torch.randn(1, input_dim)
@@ -993,8 +961,7 @@ class TestGraphToModelMapper:
         input_dim = 64
         output_dim = 32
 
-        model, config = mapper.map_graph_to_model(
-            edge_index, num_nodes, input_dim, output_dim)
+        model, config = mapper.map_graph_to_model(edge_index, num_nodes, input_dim, output_dim)
 
         # Should select appropriate architecture
         assert config.architecture == ModelArchitecture.SAGE

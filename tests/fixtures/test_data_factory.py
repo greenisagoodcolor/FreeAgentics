@@ -44,10 +44,10 @@ class DataFactory:
     def __init__(self, seed: Optional[int] = None):
         """Initialize factory with optional random seed for reproducibility."""
         self.seed = seed
-        self._random_state = random.Random(
-            seed) if seed is not None else random.Random()
-        self._np_random_state = (np.random.RandomState(
-            seed) if seed is not None else np.random.RandomState())
+        self._random_state = random.Random(seed) if seed is not None else random.Random()
+        self._np_random_state = (
+            np.random.RandomState(seed) if seed is not None else np.random.RandomState()
+        )
         self._id_counter = 0
         self._agent_names = [
             "Explorer Alpha",
@@ -75,11 +75,7 @@ class DataFactory:
         self._id_counter += 1
         return f"{prefix}_{self._id_counter:04d}"
 
-    def create_position(
-            self,
-            x: float = None,
-            y: float = None,
-            z: float = None) -> Position:
+    def create_position(self, x: float = None, y: float = None, z: float = None) -> Position:
         """Create a position with optional coordinates."""
         if x is None:
             x = self._random_state.uniform(-100, 100)
@@ -129,8 +125,7 @@ class DataFactory:
             name = random.choice(self._agent_names) + f" {agent_id[-4:]}"
 
         if agent_type is None:
-            agent_type = random.choice(
-                ["explorer", "guardian", "merchant", "scholar"])
+            agent_type = random.choice(["explorer", "guardian", "merchant", "scholar"])
 
         if position is None:
             position = self.create_position()
@@ -187,8 +182,7 @@ class DataFactory:
         else:
             return agent_data
 
-    def _generate_capabilities_for_type(
-            self, agent_type: str) -> Dict[str, float]:
+    def _generate_capabilities_for_type(self, agent_type: str) -> Dict[str, float]:
         """Generate type-specific capabilities."""
         base_capabilities = {
             "exploration": 0.5,
@@ -265,8 +259,7 @@ class DataFactory:
             coalition_id = self._next_id("coalition")
 
         if name is None:
-            name = random.choice(self._coalition_names) + \
-                f" {coalition_id[-4:]}"
+            name = random.choice(self._coalition_names) + f" {coalition_id[-4:]}"
 
         if members is None:
             members = []
@@ -311,12 +304,9 @@ class DataFactory:
         coalition_data.update(kwargs)
         return coalition_data
 
-    def create_world_cell(self,
-                          cell_id: str = None,
-                          position: Position = None,
-                          terrain_type: str = None,
-                          **kwargs) -> Dict[str,
-                                            Any]:
+    def create_world_cell(
+        self, cell_id: str = None, position: Position = None, terrain_type: str = None, **kwargs
+    ) -> Dict[str, Any]:
         """Create a world cell with realistic properties."""
         if cell_id is None:
             cell_id = self._next_id("cell")
@@ -345,15 +335,9 @@ class DataFactory:
         cell_data.update(kwargs)
         return cell_data
 
-    def _generate_resources_for_terrain(
-            self, terrain_type: str) -> Dict[str, int]:
+    def _generate_resources_for_terrain(self, terrain_type: str) -> Dict[str, int]:
         """Generate terrain-specific resources."""
-        base_resources = {
-            "energy": 0,
-            "materials": 0,
-            "water": 0,
-            "food": 0,
-            "rare_minerals": 0}
+        base_resources = {"energy": 0, "materials": 0, "water": 0, "food": 0, "rare_minerals": 0}
 
         if terrain_type == "plains":
             base_resources["food"] = random.randint(20, 50)
@@ -451,37 +435,19 @@ class DataFactory:
             num_edges = int(1.5 * num_nodes)
 
         # Generate connected graph
-        edge_index = self._generate_connected_edges(
-            num_nodes, num_edges, directed)
+        edge_index = self._generate_connected_edges(num_nodes, num_edges, directed)
 
         graph_data = {
-            "node_features": np.random.randn(
-                num_nodes,
-                node_feature_dim).astype(
-                np.float32),
-            "edge_features": np.random.randn(
-                num_edges,
-                edge_feature_dim).astype(
-                    np.float32),
+            "node_features": np.random.randn(num_nodes, node_feature_dim).astype(np.float32),
+            "edge_features": np.random.randn(num_edges, edge_feature_dim).astype(np.float32),
             "edge_index": edge_index,
             "num_nodes": num_nodes,
             "num_edges": num_edges,
-            "node_types": np.random.randint(
-                0,
-                4,
-                size=num_nodes),
-            "edge_types": np.random.randint(
-                0,
-                3,
-                size=num_edges),
-            "global_features": np.random.randn(64).astype(
-                np.float32),
-            "node_masks": np.ones(
-                num_nodes,
-                dtype=bool),
-            "edge_masks": np.ones(
-                num_edges,
-                dtype=bool),
+            "node_types": np.random.randint(0, 4, size=num_nodes),
+            "edge_types": np.random.randint(0, 3, size=num_edges),
+            "global_features": np.random.randn(64).astype(np.float32),
+            "node_masks": np.ones(num_nodes, dtype=bool),
+            "edge_masks": np.ones(num_edges, dtype=bool),
         }
 
         graph_data.update(kwargs)
@@ -546,8 +512,7 @@ class DataFactory:
     ) -> Dict[str, Any]:
         """Create WebSocket message."""
         if message_type is None:
-            message_type = random.choice(
-                ["subscribe", "unsubscribe", "update", "command", "query"])
+            message_type = random.choice(["subscribe", "unsubscribe", "update", "command", "query"])
 
         if data is None:
             data = {"value": random.random()}
@@ -592,8 +557,7 @@ class DataFactory:
         world_cells = []
         for i in range(world_size):
             for j in range(world_size):
-                cell = self.create_world_cell(
-                    position={"x": i * 10, "y": j * 10, "z": 0})
+                cell = self.create_world_cell(position={"x": i * 10, "y": j * 10, "z": 0})
                 world_cells.append(cell)
 
         # Create objectives
@@ -647,9 +611,7 @@ class DataFactory:
             "trade": ["merchant", "trader", "broker"],
             "research": ["scholar", "scientist", "analyst"],
         }
-        return type_map.get(
-            scenario_type, [
-                "explorer", "guardian", "merchant", "scholar"])
+        return type_map.get(scenario_type, ["explorer", "guardian", "merchant", "scholar"])
 
     def _get_business_type_for_scenario(self, scenario_type: str) -> str:
         """Get appropriate business type for scenario."""
@@ -661,8 +623,7 @@ class DataFactory:
         }
         return type_map.get(scenario_type, "ResourceOptimization")
 
-    def _create_scenario_objectives(
-            self, scenario_type: str) -> List[Dict[str, Any]]:
+    def _create_scenario_objectives(self, scenario_type: str) -> List[Dict[str, Any]]:
         """Create objectives based on scenario type."""
         objectives = []
 
@@ -701,8 +662,7 @@ class DataFactory:
 
         return objectives
 
-    def _get_success_criteria_for_scenario(
-            self, scenario_type: str) -> Dict[str, Any]:
+    def _get_success_criteria_for_scenario(self, scenario_type: str) -> Dict[str, Any]:
         """Get success criteria for scenario."""
         return {
             "min_objectives_completed": 2,

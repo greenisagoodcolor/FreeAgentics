@@ -19,8 +19,8 @@ from psycopg2.extras import RealDictCursor
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -62,8 +62,7 @@ class DemoSimulator:
             )
             return cursor.fetchall()
 
-    def simulate_agent_action(
-            self, agent: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def simulate_agent_action(self, agent: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Simulate a single agent action"""
         agent_id = agent["id"]
         agent_class = agent["class"]
@@ -97,10 +96,7 @@ class DemoSimulator:
         }
 
         weights = action_weights.get(agent_class, {"rest": 1.0})
-        action = random.choices(
-            list(
-                weights.keys()), weights=list(
-                weights.values()))[0]
+        action = random.choices(list(weights.keys()), weights=list(weights.values()))[0]
 
         # Generate action result
         result = {
@@ -131,8 +127,7 @@ class DemoSimulator:
 
         return result
 
-    def update_agent_stats(self, agent_id: str,
-                           action_result: Dict[str, Any]) -> None:
+    def update_agent_stats(self, agent_id: str, action_result: Dict[str, Any]) -> None:
         """Update agent statistics based on action results"""
         try:
             with self.db_conn.cursor() as cursor:
@@ -141,30 +136,21 @@ class DemoSimulator:
                     updates = []
 
                     if action_result["action"] in ["explore", "research"]:
-                        updates.append(
-                            "experience_count = experience_count + 1")
+                        updates.append("experience_count = experience_count + 1")
 
                     if action_result["action"] in [
                         "share_discovery",
                         "share_knowledge",
                     ]:
-                        updates.append(
-                            "knowledge_items_shared = "
-                            "knowledge_items_shared + 1")
+                        updates.append("knowledge_items_shared = " "knowledge_items_shared + 1")
 
                     if action_result["action"] == "negotiate":
-                        updates.append(
-                            "successful_interactions = "
-                            "successful_interactions + 1")
-                        updates.append(
-                            "total_interactions = total_interactions + 1")
+                        updates.append("successful_interactions = " "successful_interactions + 1")
+                        updates.append("total_interactions = total_interactions + 1")
 
                     if random.random() > 0.7:  # 30% chance to complete goal
-                        updates.append(
-                            "successful_goals = successful_goals + 1")
-                        updates.append(
-                            "total_goals_attempted = "
-                            "total_goals_attempted + 1")
+                        updates.append("successful_goals = successful_goals + 1")
+                        updates.append("total_goals_attempted = " "total_goals_attempted + 1")
 
                     if updates:
                         query = f"""
@@ -246,50 +232,61 @@ class DemoSimulator:
                 agent1, agent2 = random.sample(agents, 2)
 
                 # Create conversation
-                conversation_types = [{"type": "trade_negotiation",
-                                       "messages": [
-                                           (f"Greetings {agent2['name']}, I have resources "
-                                            "to trade."),
-                                           f"Welcome {agent1['name']}, what do you offer?",
-                                           "I can provide 50 units of food for 20 metal.",
-                                           "That's acceptable. Let's proceed with the exchange.",
-                                           "Excellent! Trade completed successfully.",
-                                       ],
-                                       },
-                                      {"type": "knowledge_exchange",
-                                       "messages": [
-                                           (f"Hello {agent2['name']}, I've discovered something "
-                                            "interesting."),
-                                           "Please share your findings!",
-                                           "Resources regenerate 50% faster near water sources.",
-                                           ("Fascinating! I've noticed similar patterns in the "
-                                            "eastern regions."),
-                                           "We should collaborate on further research.",
-                                       ],
-                                       },
-                                      {"type": "coordination",
-                                       "messages": [
-                                           f"{agent2['name']}, we need to coordinate our efforts.",
-                                           "Agreed. What do you propose?",
-                                           ("I'll explore the northern territories while you "
-                                            "secure the south."),
-                                           ("Good plan. I'll establish a base at the southern "
-                                            "checkpoint."),
-                                           "Perfect. Let's reconvene in 2 cycles.",
-                                       ],
-                                       },
-                                      ]
+                conversation_types = [
+                    {
+                        "type": "trade_negotiation",
+                        "messages": [
+                            (f"Greetings {agent2['name']}, I have resources " "to trade."),
+                            f"Welcome {agent1['name']}, what do you offer?",
+                            "I can provide 50 units of food for 20 metal.",
+                            "That's acceptable. Let's proceed with the exchange.",
+                            "Excellent! Trade completed successfully.",
+                        ],
+                    },
+                    {
+                        "type": "knowledge_exchange",
+                        "messages": [
+                            (f"Hello {agent2['name']}, I've discovered something " "interesting."),
+                            "Please share your findings!",
+                            "Resources regenerate 50% faster near water sources.",
+                            (
+                                "Fascinating! I've noticed similar patterns in the "
+                                "eastern regions."
+                            ),
+                            "We should collaborate on further research.",
+                        ],
+                    },
+                    {
+                        "type": "coordination",
+                        "messages": [
+                            f"{agent2['name']}, we need to coordinate our efforts.",
+                            "Agreed. What do you propose?",
+                            (
+                                "I'll explore the northern territories while you "
+                                "secure the south."
+                            ),
+                            ("Good plan. I'll establish a base at the southern " "checkpoint."),
+                            "Perfect. Let's reconvene in 2 cycles.",
+                        ],
+                    },
+                ]
 
                 conversation = random.choice(conversation_types)
 
                 # Log conversation start
                 self.log_demo_event(
-                    "conversation_start", agent1["id"], f"{
+                    "conversation_start",
+                    agent1["id"],
+                    f"{
                         agent1['name']} initiates {
-                        conversation['type']} " f"with {
-                        agent2['name']}", {
-                        "conversation_type": conversation["type"], "participant_ids": [
-                            agent1["id"], agent2["id"]], }, )
+                        conversation['type']} "
+                    f"with {
+                        agent2['name']}",
+                    {
+                        "conversation_type": conversation["type"],
+                        "participant_ids": [agent1["id"], agent2["id"]],
+                    },
+                )
 
                 # Simulate message exchange
                 for i, message in enumerate(conversation["messages"]):
@@ -311,12 +308,8 @@ class DemoSimulator:
                     await asyncio.sleep(2 / self.simulation_speed)
 
                 # Update interaction stats
-                self.update_agent_stats(
-                    agent1["id"], {
-                        "action": "negotiate", "success": True})
-                self.update_agent_stats(
-                    agent2["id"], {
-                        "action": "negotiate", "success": True})
+                self.update_agent_stats(agent1["id"], {"action": "negotiate", "success": True})
+                self.update_agent_stats(agent2["id"], {"action": "negotiate", "success": True})
 
             except Exception as e:
                 logger.error(f"Error in conversation simulation: {e}")
@@ -324,8 +317,10 @@ class DemoSimulator:
     async def run_simulation_loop(self):
         """Run main simulation loop"""
         logger.info(
-            f"Starting demo simulator at " f"{
-                self.simulation_speed}x speed")
+            f"Starting demo simulator at "
+            f"{
+                self.simulation_speed}x speed"
+        )
 
         # Load agents
         agents = self.load_agents()

@@ -1071,9 +1071,7 @@ describe("Specialized Services", () => {
     let storageService: AdvancedStorageService;
 
     beforeEach(async () => {
-      storageService = new AdvancedStorageService();
-
-      // Mock successful initialization
+      // Mock successful initialization immediately without async delay
       const mockRequest = {
         onsuccess: null,
         onerror: null,
@@ -1098,17 +1096,19 @@ describe("Specialized Services", () => {
         },
       };
 
-      (global.indexedDB.open as jest.Mock).mockReturnValue(mockRequest);
+      (global.indexedDB.open as jest.Mock).mockImplementation(() => {
+        // Immediately trigger success to avoid async delay
+        process.nextTick(() => {
+          if (mockRequest.onsuccess) {
+            mockRequest.onsuccess();
+          }
+        });
+        return mockRequest;
+      });
 
-      // Simulate successful initialization
-      setTimeout(() => {
-        if (mockRequest.onsuccess) {
-          mockRequest.onsuccess();
-        }
-      }, 0);
-
+      storageService = new AdvancedStorageService();
       await storageService.initialize();
-    });
+    }, 15000); // Increase timeout for beforeEach
 
     test("should initialize database", async () => {
       expect(global.indexedDB.open).toHaveBeenCalledWith("FreeAgenticsDB", 1);

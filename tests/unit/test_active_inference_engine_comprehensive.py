@@ -132,14 +132,10 @@ class TestInferenceConfig:
                 self.algorithm = kwargs.get("algorithm", "vmp")
                 self.num_iterations = kwargs.get("num_iterations", 10)
                 self.learning_rate = kwargs.get("learning_rate", 0.01)
-                self.precision_parameter = kwargs.get(
-                    "precision_parameter", 1.0)
+                self.precision_parameter = kwargs.get("precision_parameter", 1.0)
                 self.use_gpu = kwargs.get("use_gpu", False)
 
-        config = MockConfig(
-            algorithm="bayesian_filtering",
-            num_iterations=20,
-            learning_rate=0.05)
+        config = MockConfig(algorithm="bayesian_filtering", num_iterations=20, learning_rate=0.05)
 
         assert config.algorithm == "bayesian_filtering"
         assert config.num_iterations == 20
@@ -200,12 +196,10 @@ class TestCategoricalDistribution:
         class MockCategorical:
             def __init__(self, probs):
                 self.probabilities = np.array(probs)
-                self.probabilities = self.probabilities / \
-                    np.sum(self.probabilities)
+                self.probabilities = self.probabilities / np.sum(self.probabilities)
 
             def entropy(self):
-                return -np.sum(self.probabilities *
-                               np.log(self.probabilities + 1e-16))
+                return -np.sum(self.probabilities * np.log(self.probabilities + 1e-16))
 
             def kl_divergence(self, other):
                 return np.sum(
@@ -214,8 +208,7 @@ class TestCategoricalDistribution:
                 )
 
             def sample(self):
-                return np.random.choice(
-                    len(self.probabilities), p=self.probabilities)
+                return np.random.choice(len(self.probabilities), p=self.probabilities)
 
         cat = MockCategorical([0.2, 0.5, 0.3])
         assert np.allclose(np.sum(cat.probabilities), 1.0)
@@ -231,8 +224,7 @@ class TestBeliefState:
     @pytest.mark.skipif(not IMPORT_SUCCESS, reason="Module not available")
     def test_belief_state_creation(self):
         """Test creating belief state"""
-        beliefs = [np.array([0.7, 0.2, 0.1]), np.array(
-            [0.4, 0.6])]  # Factor 1  # Factor 2
+        beliefs = [np.array([0.7, 0.2, 0.1]), np.array([0.4, 0.6])]  # Factor 1  # Factor 2
 
         belief_state = BeliefState(beliefs)
         assert len(belief_state.beliefs) == 2
@@ -281,11 +273,11 @@ class TestBeliefState:
                 # Simple free energy approximation
                 total_fe = 0.0
                 for i, belief in enumerate(self.beliefs):
-                    prior_i = (np.array(prior[i]) if i < len(
-                        prior) else np.ones_like(belief) / len(belief))
+                    prior_i = (
+                        np.array(prior[i]) if i < len(prior) else np.ones_like(belief) / len(belief)
+                    )
                     # KL divergence component
-                    kl = np.sum(
-                        belief * np.log((belief + 1e-16) / (prior_i + 1e-16)))
+                    kl = np.sum(belief * np.log((belief + 1e-16) / (prior_i + 1e-16)))
                     total_fe += kl
                 return total_fe
 
@@ -320,8 +312,7 @@ class TestActiveInferenceEngine:
         engine = ActiveInferenceEngine(mock_generative_model, config)
 
         # Mock observation
-        observation = [np.array([1, 0]), np.array(
-            [0, 1])]  # One-hot observations
+        observation = [np.array([1, 0]), np.array([0, 1])]  # One-hot observations
 
         # Perform inference step
         beliefs, policy = engine.step(observation)
@@ -331,8 +322,7 @@ class TestActiveInferenceEngine:
         assert len(beliefs.beliefs) == 2  # Two state factors
 
     @pytest.mark.skipif(not IMPORT_SUCCESS, reason="Module not available")
-    def test_engine_action_selection(
-            self, mock_generative_model, sample_config):
+    def test_engine_action_selection(self, mock_generative_model, sample_config):
         """Test action selection"""
         config = InferenceConfig(**sample_config)
         engine = ActiveInferenceEngine(mock_generative_model, config)
@@ -379,16 +369,14 @@ class TestActiveInferenceEngine:
 
             def _initialize_beliefs(self):
                 # Initialize uniform beliefs
-                num_states = getattr(self.generative_model,
-                                     "num_states", [2, 2])
+                num_states = getattr(self.generative_model, "num_states", [2, 2])
                 beliefs = []
                 for n_states in num_states:
                     beliefs.append(np.ones(n_states) / n_states)
                 return beliefs
 
             def _initialize_policy(self):
-                num_actions = getattr(
-                    self.generative_model, "num_actions", [3])
+                num_actions = getattr(self.generative_model, "num_actions", [3])
                 return np.ones(num_actions[0]) / num_actions[0]
 
             def step(self, observation):
@@ -397,32 +385,24 @@ class TestActiveInferenceEngine:
                 for i, obs in enumerate(observation):
                     if i < len(self.current_beliefs):
                         # Update belief based on observation
-                        self.current_beliefs[i] = obs + \
-                            0.1 * self.current_beliefs[i]
-                        self.current_beliefs[i] /= np.sum(
-                            self.current_beliefs[i])
+                        self.current_beliefs[i] = obs + 0.1 * self.current_beliefs[i]
+                        self.current_beliefs[i] /= np.sum(self.current_beliefs[i])
 
                 return self.current_beliefs, self.current_policy
 
             def select_action(self):
                 # Select action based on policy
                 if len(self.current_policy) > 0:
-                    return np.random.choice(
-                        len(self.current_policy), p=self.current_policy)
+                    return np.random.choice(len(self.current_policy), p=self.current_policy)
                 return 0
 
             def update_model(self, experience):
                 # Mock model update
                 pass
 
-        mock_model = type(
-            "Model", (), {
-                "num_states": [
-                    3, 2], "num_actions": [4]})()
+        mock_model = type("Model", (), {"num_states": [3, 2], "num_actions": [4]})()
 
-        mock_config = type(
-            "Config", (), {
-                "num_iterations": 10, "learning_rate": 0.01})()
+        mock_config = type("Config", (), {"num_iterations": 10, "learning_rate": 0.01})()
 
         engine = MockActiveInferenceEngine(mock_model, mock_config)
 
@@ -554,10 +534,7 @@ class TestFreeEnergyCalculator:
         assert "accuracy" in components
         assert "complexity" in components
         assert "total" in components
-        assert np.isclose(
-            components["total"],
-            components["accuracy"] +
-            components["complexity"])
+        assert np.isclose(components["total"], components["accuracy"] + components["complexity"])
 
     def test_free_energy_mock(self):
         """Test free energy calculator with mocks"""
@@ -580,8 +557,7 @@ class TestFreeEnergyCalculator:
 
                     # Complexity: KL divergence from prior
                     prior = np.ones_like(belief) / len(belief)
-                    complexity += np.sum(belief *
-                                         np.log((belief + 1e-16) / (prior + 1e-16)))
+                    complexity += np.sum(belief * np.log((belief + 1e-16) / (prior + 1e-16)))
 
                 return accuracy + complexity
 

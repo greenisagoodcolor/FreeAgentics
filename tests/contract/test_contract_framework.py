@@ -34,9 +34,10 @@ class TestContractFramework:
                         },
                     )()
                 return type(
-                    "Response", (), {
-                        "json": lambda self: {
-                            "error": "Not found"}, "status_code": 404}, )()
+                    "Response",
+                    (),
+                    {"json": lambda self: {"error": "Not found"}, "status_code": 404},
+                )()
 
             async def post(self, url, **kwargs):
                 if "/api/agents" in url:
@@ -57,9 +58,10 @@ class TestContractFramework:
                         },
                     )()
                 return type(
-                    "Response", (), {
-                        "json": lambda self: {
-                            "error": "Bad request"}, "status_code": 400}, )()
+                    "Response",
+                    (),
+                    {"json": lambda self: {"error": "Bad request"}, "status_code": 400},
+                )()
 
         # Test with our framework
         runner = ContractTestRunner()
@@ -69,7 +71,9 @@ class TestContractFramework:
         list_contract = ListAgentsContract()
         result = await runner.test_contract(list_contract, client)
 
-        assert result.passed, f"Contract failed with violations: {
+        assert (
+            result.passed
+        ), f"Contract failed with violations: {
             result.violations}"
         assert result.endpoint == "/api/agents"
         assert result.method == "GET"
@@ -78,7 +82,9 @@ class TestContractFramework:
         create_contract = CreateAgentContract()
         result = await runner.test_contract(create_contract, client)
 
-        assert result.passed, f"Contract failed with violations: {
+        assert (
+            result.passed
+        ), f"Contract failed with violations: {
             result.violations}"
         assert result.endpoint == "/api/agents"
         assert result.method == "POST"
@@ -130,6 +136,5 @@ class TestContractFramework:
 
         # If it failed, check why
         if not result.passed:
-            print(
-                f"Violations: {[(v.field, v.message) for v in result.violations]}")
+            print(f"Violations: {[(v.field, v.message) for v in result.violations]}")
             print(f"Warnings: {result.warnings}")

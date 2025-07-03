@@ -25,11 +25,7 @@ from inference.engine.generative_model import (
 class ActiveInferenceAgent:
     """Simple Active Inference agent for testing mathematical invariants."""
 
-    def __init__(
-            self,
-            name: str,
-            config: InferenceConfig,
-            model: DiscreteGenerativeModel):
+    def __init__(self, name: str, config: InferenceConfig, model: DiscreteGenerativeModel):
         """Initialize the agent with a name, config, and generative model."""
         self.name = name
         self.config = config
@@ -40,10 +36,8 @@ class ActiveInferenceAgent:
 
         # Initialize beliefs with uniform distribution
         self.beliefs = (
-            torch.ones(
-                model.dims.num_states,
-                dtype=torch.float64) /
-            model.dims.num_states)
+            torch.ones(model.dims.num_states, dtype=torch.float64) / model.dims.num_states
+        )
         self.beliefs = self.beliefs.to(self.device)
 
         # Store observations for free energy calculation
@@ -132,12 +126,10 @@ class TestActiveInferenceMathematicalInvariants:
 
         # Test the invariant: beliefs sum to 1 (within numerical precision)
         sums = normalized_beliefs.sum(axis=-1)
-        assert np.allclose(
-            sums, 1.0, atol=1e-10), f"Belief sums: {sums}, should all be 1.0"
+        assert np.allclose(sums, 1.0, atol=1e-10), f"Belief sums: {sums}, should all be 1.0"
 
         # Test non-negativity
-        assert np.all(normalized_beliefs >=
-                      0), "All belief values must be non-negative"
+        assert np.all(normalized_beliefs >= 0), "All belief values must be non-negative"
 
     @given(
         num_states=st.integers(min_value=2, max_value=10),
@@ -155,9 +147,8 @@ class TestActiveInferenceMathematicalInvariants:
         """
         # Create minimal Active Inference setup
         dims = ModelDimensions(
-            num_states=num_states,
-            num_observations=num_observations,
-            num_actions=num_actions)
+            num_states=num_states, num_observations=num_observations, num_actions=num_actions
+        )
         params = ModelParameters(use_gpu=False)
         model = DiscreteGenerativeModel(dims, params)
 
@@ -185,10 +176,7 @@ class TestActiveInferenceMathematicalInvariants:
         if len(free_energies) >= 5:
             # Use moving average to smooth out noise
             window = min(3, len(free_energies) // 2)
-            smoothed = np.convolve(
-                free_energies,
-                np.ones(window) / window,
-                mode="valid")
+            smoothed = np.convolve(free_energies, np.ones(window) / window, mode="valid")
 
             if len(smoothed) >= 2:
                 # Allow for some fluctuation but expect overall downward trend
@@ -204,8 +192,7 @@ class TestActiveInferenceMathematicalInvariants:
         coalition_size=st.integers(min_value=2, max_value=4),
     )
     @settings(max_examples=30, deadline=None)
-    def test_coalition_formation_pareto_improvement(
-            self, agent_count, coalition_size):
+    def test_coalition_formation_pareto_improvement(self, agent_count, coalition_size):
         """
         MATHEMATICAL INVARIANT: Coalition formation should only occur with Pareto improvement
         Expert Authority: Robert C. Martin, game theory principles
@@ -268,17 +255,16 @@ class TestActiveInferenceMathematicalInvariants:
         precision_values = np.abs(precision_values) + 1e-6
 
         # Test positive definiteness
-        assert np.all(
-            precision_values > 0), "All precision values must be positive"
+        assert np.all(precision_values > 0), "All precision values must be positive"
 
         # Test reasonable bounds (precision shouldn't be extreme)
-        assert np.all(
-            precision_values < 1000), "Precision values should be bounded"
-        assert np.all(precision_values >
-                      1e-6), "Precision values should not be too small"
+        assert np.all(precision_values < 1000), "Precision values should be bounded"
+        assert np.all(precision_values > 1e-6), "Precision values should not be too small"
 
-    @given(observations=st.lists(st.integers(min_value=0, max_value=9), min_size=2,
-           max_size=20), num_states=st.integers(min_value=2, max_value=8), )
+    @given(
+        observations=st.lists(st.integers(min_value=0, max_value=9), min_size=2, max_size=20),
+        num_states=st.integers(min_value=2, max_value=8),
+    )
     @settings(max_examples=50, deadline=None)
     def test_belief_update_consistency(self, observations, num_states):
         """
@@ -287,8 +273,7 @@ class TestActiveInferenceMathematicalInvariants:
         """
         # Create belief state
         config = BeliefStateConfig(use_gpu=False, dtype=torch.float64)
-        belief_state = DiscreteBeliefState(
-            num_states=num_states, config=config)
+        belief_state = DiscreteBeliefState(num_states=num_states, config=config)
 
         # Initialize with uniform beliefs (already done in constructor)
         # DiscreteBeliefState initializes with uniform beliefs by default
@@ -312,10 +297,7 @@ class TestActiveInferenceMathematicalInvariants:
                 current_beliefs = belief_state.get_beliefs()
 
                 # Beliefs should sum to 1
-                assert torch.allclose(
-                    current_beliefs.sum(),
-                    torch.tensor(1.0),
-                    atol=1e-10)
+                assert torch.allclose(current_beliefs.sum(), torch.tensor(1.0), atol=1e-10)
 
                 # Beliefs should be non-negative
                 assert torch.all(current_beliefs >= 0)
@@ -329,14 +311,15 @@ class TestActiveInferenceMathematicalInvariants:
                 # Skip problematic updates (acceptable for property testing)
                 continue
 
-    @given(resource_amounts=arrays(dtype=np.float64,
-                                   shape=st.integers(min_value=2,
-                                                     max_value=10),
-                                   elements=st.floats(min_value=0.0,
-                                                      max_value=100.0,
-                                                      allow_nan=False,
-                                                      allow_infinity=False),
-                                   ))
+    @given(
+        resource_amounts=arrays(
+            dtype=np.float64,
+            shape=st.integers(min_value=2, max_value=10),
+            elements=st.floats(
+                min_value=0.0, max_value=100.0, allow_nan=False, allow_infinity=False
+            ),
+        )
+    )
     @settings(max_examples=50, deadline=None)
     def test_resource_conservation_laws(self, resource_amounts):
         """
@@ -371,5 +354,4 @@ class TestActiveInferenceMathematicalInvariants:
         ), f"Resources not conserved: {total_initial} -> {total_final}"
 
         # Test non-negativity
-        assert np.all(resource_amounts >= -
-                      1e-10), "Resource amounts cannot be negative"
+        assert np.all(resource_amounts >= -1e-10), "Resource amounts cannot be negative"

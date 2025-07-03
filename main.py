@@ -21,10 +21,7 @@ from fastapi.responses import JSONResponse
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.StreamHandler(
-            sys.stdout),
-        logging.FileHandler("freeagentics.log")],
+    handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler("freeagentics.log")],
 )
 
 logger = logging.getLogger(__name__)
@@ -83,9 +80,7 @@ app = FastAPI(
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:3030"],
+    allow_origins=["http://localhost:3000", "http://localhost:3030"],
     # Next.js dev/demo
     allow_credentials=True,
     allow_methods=["*"],
@@ -190,12 +185,7 @@ try:
         coalition_ws_router, prefix="/ws/coalitions", tags=["websockets", "coalitions"]
     )
 
-    app.include_router(
-        markov_ws_router,
-        prefix="/ws/markov-blanket",
-        tags=[
-            "websockets",
-            "safety"])
+    app.include_router(markov_ws_router, prefix="/ws/markov-blanket", tags=["websockets", "safety"])
 
     logger.info("✅ WebSocket routers registered successfully")
 

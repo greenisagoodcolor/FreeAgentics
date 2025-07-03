@@ -43,13 +43,10 @@ class TestGMNLexer:
         """Test tokenizing arrays"""
         lexer = GMNLexer('features: ["x", "y", "z"]')
         tokens = lexer.tokenize()
-        lbracket_idx = next(
-            (i for i, t in enumerate(tokens) if t.type == "LBRACKET"))
-        rbracket_idx = next(
-            (i for i, t in enumerate(tokens) if t.type == "RBRACKET"))
-        array_tokens = tokens[lbracket_idx + 1: rbracket_idx]
-        string_values = [t.value[1:-1]
-                         for t in array_tokens if t.type == "STRING"]
+        lbracket_idx = next((i for i, t in enumerate(tokens) if t.type == "LBRACKET"))
+        rbracket_idx = next((i for i, t in enumerate(tokens) if t.type == "RBRACKET"))
+        array_tokens = tokens[lbracket_idx + 1 : rbracket_idx]
+        string_values = [t.value[1:-1] for t in array_tokens if t.type == "STRING"]
         assert string_values == ["x", "y", "z"]
 
     def test_tokenize_comments(self) -> None:
@@ -135,8 +132,7 @@ class TestGMNBlockParser:
 
     def test_parse_arrays(self) -> None:
         """Test parsing arrays"""
-        lexer = GMNLexer(
-            '{ tags: ["explorer", "cautious"], values: [1, 2, 3] }')
+        lexer = GMNLexer('{ tags: ["explorer", "cautious"], values: [1, 2, 3] }')
         tokens = lexer.tokenize()
         parser = GMNBlockParser(tokens)
         result = parser.parse()
@@ -238,11 +234,9 @@ class TestGMNParser:
         result = parser.parse(content)
         assert result.ast.node_type == "root"
         assert len(result.ast.children) >= 2
-        metadata_node = next(
-            (n for n in result.ast.children if n.node_type == "metadata"))
+        metadata_node = next((n for n in result.ast.children if n.node_type == "metadata"))
         assert metadata_node.attributes["version"] == "1.0.0"
-        arch_node = next(
-            (n for n in result.ast.children if n.node_type == "architecture"))
+        arch_node = next((n for n in result.ast.children if n.node_type == "architecture"))
         assert arch_node.attributes["type"] == "GCN"
 
 

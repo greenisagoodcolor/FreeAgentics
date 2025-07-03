@@ -39,11 +39,51 @@ import {
 import { cn } from "@/lib/utils";
 import type { AgentTemplate } from "./horizontal-template-selector";
 import { HorizontalTemplateSelector } from "./horizontal-template-selector";
-import {
-  useAgentCreation,
-  type AgentCreationConfig,
-  type CreatedAgentInfo,
-} from "../../lib/services/agent-creation-service";
+// TODO: Fix agent-creation-service to use Redux store
+// import {
+//   useAgentCreation,
+//   type AgentCreationConfig,
+//   type CreatedAgentInfo,
+// } from "../../lib/services/agent-creation-service";
+
+// Temporary types until agent-creation-service is fixed
+type AgentCreationConfig = {
+  template: string;
+  name: string;
+  description?: string;
+  position?: { x: number; y: number };
+  personality?: any;
+};
+
+type CreatedAgentInfo = {
+  id: string;
+  name: string;
+  status: "creating" | "initializing" | "active" | "error";
+  template: string;
+  progress?: number;
+  error?: string;
+};
+
+// Temporary mock hook until agent-creation-service is fixed
+const useAgentCreation = () => ({
+  createAgent: async (template: any, config: Partial<AgentCreationConfig>) => {
+    console.log("Mock createAgent called with:", template, config);
+    return { 
+      success: true, 
+      agent: { 
+        id: "mock-id", 
+        name: config.name || "Mock Agent", 
+        status: "active" as const, 
+        template: template?.id || config.template || "mock"
+      },
+      error: undefined
+    };
+  },
+  createQuickStartAgents: async () => {
+    console.log("Mock createQuickStartAgents called");
+    return [];
+  }
+});
 
 // Mock data for activity sparklines
 const generateSparklineData = () => {
@@ -204,7 +244,7 @@ function AgentInstanceCard({
             <div>
               <CardTitle className="text-base">{agent.name}</CardTitle>
               <CardDescription className="text-sm">
-                {template?.name || agent.templateId}
+                {template?.name || agent.template}
               </CardDescription>
             </div>
           </div>

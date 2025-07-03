@@ -55,32 +55,14 @@ class ValidationResult:
     warnings: List[ValidationError]
     processing_time: float = 0.0
 
-    def add_error(
-            self,
-            field: str,
-            message: str,
-            error_code: Optional[str] = None) -> None:
+    def add_error(self, field: str, message: str, error_code: Optional[str] = None) -> None:
         """Add an error to the result"""
-        self.errors.append(
-            ValidationError(
-                field,
-                message,
-                "error",
-                error_code))
+        self.errors.append(ValidationError(field, message, "error", error_code))
         self.is_valid = False
 
-    def add_warning(
-            self,
-            field: str,
-            message: str,
-            error_code: Optional[str] = None) -> None:
+    def add_warning(self, field: str, message: str, error_code: Optional[str] = None) -> None:
         """Add a warning to the result"""
-        self.warnings.append(
-            ValidationError(
-                field,
-                message,
-                "warning",
-                error_code))
+        self.warnings.append(ValidationError(field, message, "warning", error_code))
 
 
 class CircuitBreaker:
@@ -115,7 +97,8 @@ class CircuitBreaker:
                 self.is_open = True
                 logger.error(
                     f"Circuit breaker opened after {
-                        self.failure_count} failures")
+                        self.failure_count} failures"
+                )
             raise e
 
 
@@ -132,8 +115,7 @@ def validate_input(func: Callable) -> Callable:
 
 
 @contextmanager
-def safe_gnn_processing(
-        file_path: Optional[str] = None) -> Generator[List[Any], None, None]:
+def safe_gnn_processing(file_path: Optional[str] = None) -> Generator[List[Any], None, None]:
     """Context manager for safe GNN processing with resource cleanup"""
     start_time = time.time()
     resources: List[Any] = []
@@ -149,7 +131,8 @@ def safe_gnn_processing(
                     f"File too large: {
                         path.stat().st_size /
                         1024 /
-                        1024:.2f}MB")
+                        1024:.2f}MB"
+                )
         yield resources
     except Exception as e:
         logger.error(f"Error in GNN processing: {e}")
@@ -238,9 +221,8 @@ class GMNValidator:
             with safe_gnn_processing():
                 if not isinstance(model, GMNModel):
                     result.add_error(
-                        "model",
-                        "Invalid model type",
-                        "INVALID_TYPE")  # type: ignore[unreachable]
+                        "model", "Invalid model type", "INVALID_TYPE"
+                    )  # type: ignore[unreachable]
                     return result  # type: ignore[unreachable]
                 self._validate_basic_structure(model, result)
                 self._validate_state_space(model.state_space, result)
@@ -254,27 +236,23 @@ class GMNValidator:
         except Exception as e:
             logger.error(f"Validation error: {e}")
             result.add_error(
-                "validation", f"Validation failed: {
-                    str(e)}", "VALIDATION_FAILED")
+                "validation",
+                f"Validation failed: {
+                    str(e)}",
+                "VALIDATION_FAILED",
+            )
         finally:
             result.processing_time = time.time() - start_time
         return result
 
-    def _validate_basic_structure(
-            self,
-            model: GMNModel,
-            result: ValidationResult) -> None:
+    def _validate_basic_structure(self, model: GMNModel, result: ValidationResult) -> None:
         """Validate basic model structure with edge cases"""
         if not model.name:
-            result.add_error(
-                "model.name",
-                "Model name is required",
-                "MISSING_NAME")
+            result.add_error("model.name", "Model name is required", "MISSING_NAME")
         elif not isinstance(model.name, str):
             result.add_error(
-                "model.name",
-                "Model name must be a string",
-                "INVALID_NAME_TYPE")  # type: ignore[unreachable]
+                "model.name", "Model name must be a string", "INVALID_NAME_TYPE"
+            )  # type: ignore[unreachable]
         elif len(model.name) > ValidationConstraints.MAX_NAME_LENGTH:
             result.add_error(
                 "model.name",
@@ -295,24 +273,14 @@ class GMNValidator:
                 "MISSING_DESCRIPTION",
             )
         elif isinstance(model.description, str) and len(model.description) > 1000:
-            result.add_warning(
-                "model.description",
-                "Description is very long",
-                "LONG_DESCRIPTION")
+            result.add_warning("model.description", "Description is very long", "LONG_DESCRIPTION")
         if not model.state_space:
-            result.add_error(
-                "model.state_space",
-                "State space is required",
-                "MISSING_STATE_SPACE")
+            result.add_error("model.state_space", "State space is required", "MISSING_STATE_SPACE")
 
-    def _validate_state_space(
-            self, state_space: Dict[str, Any], result: ValidationResult) -> None:
+    def _validate_state_space(self, state_space: Dict[str, Any], result: ValidationResult) -> None:
         """Validate state space definitions with comprehensive checks"""
         if not state_space:
-            result.add_error(
-                "state_space",
-                "State space cannot be empty",
-                "EMPTY_STATE_SPACE")
+            result.add_error("state_space", "State space cannot be empty", "EMPTY_STATE_SPACE")
             return
         if not isinstance(state_space, dict):
             result.add_error(  # type: ignore[unreachable]
@@ -336,9 +304,7 @@ class GMNValidator:
                     "INVALID_VAR_NAME_TYPE",
                 )
                 continue
-            if not re.match(
-                    ValidationConstraints.VALID_NAME_PATTERN,
-                    var_name):
+            if not re.match(ValidationConstraints.VALID_NAME_PATTERN, var_name):
                 result.add_error(
                     f"state_space.{var_name}",
                     f"Invalid variable name: {var_name}",
@@ -353,18 +319,14 @@ class GMNValidator:
                 )
                 continue
             self.defined_variables.add(var_name)
-            self._validate_type_definition(
-                f"state_space.{var_name}", type_def, result)
+            self._validate_type_definition(f"state_space.{var_name}", type_def, result)
 
     def _validate_observations(
         self, observations: Dict[str, Any], result: ValidationResult
     ) -> None:
         """Validate observation space definitions"""
         if not observations:
-            result.add_warning(
-                "observations",
-                "No observations defined",
-                "NO_OBSERVATIONS")
+            result.add_warning("observations", "No observations defined", "NO_OBSERVATIONS")
             return
         if not isinstance(observations, dict):
             result.add_error(  # type: ignore[unreachable]
@@ -382,16 +344,13 @@ class GMNValidator:
                     "INVALID_OBS_NAME_TYPE",
                 )
                 continue
-            if not re.match(
-                    ValidationConstraints.VALID_NAME_PATTERN,
-                    obs_name):
+            if not re.match(ValidationConstraints.VALID_NAME_PATTERN, obs_name):
                 result.add_error(
                     f"observations.{obs_name}",
                     f"Invalid observation name: {obs_name}",
                     "INVALID_OBS_NAME",
                 )
-            self._validate_type_definition(
-                f"observations.{obs_name}", type_def, result)
+            self._validate_type_definition(f"observations.{obs_name}", type_def, result)
 
     def _validate_type_definition(
         self, field: str, type_def: Dict[str, Any], result: ValidationResult
@@ -399,23 +358,16 @@ class GMNValidator:
         """Validate a type definition with edge cases"""
         if not isinstance(type_def, dict):
             result.add_error(
-                field,
-                f"Invalid type definition: {type_def}",
-                "INVALID_TYPE_DEF")  # type: ignore[unreachable]
+                field, f"Invalid type definition: {type_def}", "INVALID_TYPE_DEF"
+            )  # type: ignore[unreachable]
             return
         base_type = type_def.get("type")
         constraints = type_def.get("constraints")
         if not base_type:
-            result.add_error(
-                field,
-                "Type definition missing 'type' field",
-                "MISSING_TYPE")
+            result.add_error(field, "Type definition missing 'type' field", "MISSING_TYPE")
             return
         if base_type not in self.VALID_TYPES:
-            result.add_error(
-                field,
-                f"Unknown type: {base_type}",
-                "UNKNOWN_TYPE")
+            result.add_error(field, f"Unknown type: {base_type}", "UNKNOWN_TYPE")
             return
         if base_type == "Real" and constraints:
             self._validate_real_constraints(field, constraints, result)
@@ -434,20 +386,18 @@ class GMNValidator:
         """Validate Real type constraints with edge cases using Template Method pattern"""
         if not self._validate_constraints_type(field, constraints, result):
             return
-        
+
         if self._has_min_max_constraints(constraints):
             self._validate_min_max_constraints(field, constraints, result)
         else:
             self._add_missing_bounds_warning(field, result)
 
-    def _validate_constraints_type(self, field: str, constraints: Any, 
-                                 result: ValidationResult) -> bool:
+    def _validate_constraints_type(
+        self, field: str, constraints: Any, result: ValidationResult
+    ) -> bool:
         """Validate that constraints is a dictionary"""
         if not isinstance(constraints, dict):
-            result.add_error(
-                field,
-                "Constraints must be a dictionary",
-                "INVALID_CONSTRAINTS_TYPE")
+            result.add_error(field, "Constraints must be a dictionary", "INVALID_CONSTRAINTS_TYPE")
             return False
         return True
 
@@ -455,67 +405,50 @@ class GMNValidator:
         """Check if constraints has both min and max values"""
         return "min" in constraints and "max" in constraints
 
-    def _validate_min_max_constraints(self, field: str, constraints: dict, 
-                                    result: ValidationResult) -> None:
+    def _validate_min_max_constraints(
+        self, field: str, constraints: dict, result: ValidationResult
+    ) -> None:
         """Validate min and max constraint values"""
         min_val = constraints["min"]
         max_val = constraints["max"]
-        
+
         self._validate_value_types(field, min_val, max_val, result)
         self._validate_range_logic(field, min_val, max_val, result)
         self._validate_float_ranges(field, min_val, max_val, result)
 
-    def _validate_value_types(self, field: str, min_val: Any, max_val: Any, 
-                            result: ValidationResult) -> None:
+    def _validate_value_types(
+        self, field: str, min_val: Any, max_val: Any, result: ValidationResult
+    ) -> None:
         """Validate min and max value types"""
         if not isinstance(min_val, (int, float)):
-            result.add_error(
-                field,
-                f"Invalid min value: {min_val}",
-                "INVALID_MIN_TYPE")
+            result.add_error(field, f"Invalid min value: {min_val}", "INVALID_MIN_TYPE")
         if not isinstance(max_val, (int, float)):
-            result.add_error(
-                field,
-                f"Invalid max value: {max_val}",
-                "INVALID_MAX_TYPE")
+            result.add_error(field, f"Invalid max value: {max_val}", "INVALID_MAX_TYPE")
 
-    def _validate_range_logic(self, field: str, min_val: Any, max_val: Any, 
-                            result: ValidationResult) -> None:
+    def _validate_range_logic(
+        self, field: str, min_val: Any, max_val: Any, result: ValidationResult
+    ) -> None:
         """Validate logical consistency of min/max range"""
         if not (isinstance(min_val, (int, float)) and isinstance(max_val, (int, float))):
             return
-        
-        if min_val > max_val:
-            result.add_error(
-                field,
-                f"Min ({min_val}) > Max ({max_val})",
-                "INVALID_RANGE")
-        elif min_val == max_val:
-            result.add_warning(
-                field,
-                f"Min equals Max ({min_val})",
-                "SINGLE_VALUE_RANGE")
 
-    def _validate_float_ranges(self, field: str, min_val: Any, max_val: Any, 
-                             result: ValidationResult) -> None:
+        if min_val > max_val:
+            result.add_error(field, f"Min ({min_val}) > Max ({max_val})", "INVALID_RANGE")
+        elif min_val == max_val:
+            result.add_warning(field, f"Min equals Max ({min_val})", "SINGLE_VALUE_RANGE")
+
+    def _validate_float_ranges(
+        self, field: str, min_val: Any, max_val: Any, result: ValidationResult
+    ) -> None:
         """Validate float values are within representable range"""
         if isinstance(min_val, float) and not -1e308 < min_val < 1e308:
-            result.add_error(
-                field,
-                "Min value out of float range",
-                "MIN_OUT_OF_RANGE")
+            result.add_error(field, "Min value out of float range", "MIN_OUT_OF_RANGE")
         if isinstance(max_val, float) and not -1e308 < max_val < 1e308:
-            result.add_error(
-                field,
-                "Max value out of float range",
-                "MAX_OUT_OF_RANGE")
+            result.add_error(field, "Max value out of float range", "MAX_OUT_OF_RANGE")
 
     def _add_missing_bounds_warning(self, field: str, result: ValidationResult) -> None:
         """Add warning for missing min/max bounds"""
-        result.add_warning(
-            field,
-            "Real type should specify min and max",
-            "MISSING_BOUNDS")
+        result.add_warning(field, "Real type should specify min and max", "MISSING_BOUNDS")
 
     def _validate_integer_constraints(
         self, field: str, constraints: Any, result: ValidationResult
@@ -526,15 +459,9 @@ class GMNValidator:
             min_val = constraints.get("min")
             max_val = constraints.get("max")
             if isinstance(min_val, float) and min_val != int(min_val):
-                result.add_error(
-                    field,
-                    "Integer min must be whole number",
-                    "NON_INTEGER_MIN")
+                result.add_error(field, "Integer min must be whole number", "NON_INTEGER_MIN")
             if isinstance(max_val, float) and max_val != int(max_val):
-                result.add_error(
-                    field,
-                    "Integer max must be whole number",
-                    "NON_INTEGER_MAX")
+                result.add_error(field, "Integer max must be whole number", "NON_INTEGER_MAX")
 
     def _validate_h3cell_constraints(
         self, field: str, constraints: Any, result: ValidationResult
@@ -563,10 +490,7 @@ class GMNValidator:
                     "INVALID_RESOLUTION_TYPE",
                 )
         else:
-            result.add_warning(
-                field,
-                "H3Cell should specify resolution",
-                "MISSING_H3_RESOLUTION")
+            result.add_warning(field, "H3Cell should specify resolution", "MISSING_H3_RESOLUTION")
 
     def _validate_collection_constraints(
         self, field: str, constraints: Any, result: ValidationResult
@@ -591,18 +515,11 @@ class GMNValidator:
             try:
                 max_size = int(constraints["max_size"])
                 if max_size < 0:
-                    result.add_error(
-                        field,
-                        "max_size must be non-negative",
-                        "NEGATIVE_MAX_SIZE")
+                    result.add_error(field, "max_size must be non-negative", "NEGATIVE_MAX_SIZE")
                 elif max_size > 10000:
-                    result.add_warning(
-                        field, "Very large max_size specified", "LARGE_MAX_SIZE")
+                    result.add_warning(field, "Very large max_size specified", "LARGE_MAX_SIZE")
             except (ValueError, TypeError):
-                result.add_error(
-                    field,
-                    "max_size must be an integer",
-                    "INVALID_MAX_SIZE_TYPE")
+                result.add_error(field, "max_size must be an integer", "INVALID_MAX_SIZE_TYPE")
 
     def _validate_distribution_constraints(
         self, field: str, constraints: Any, result: ValidationResult
@@ -715,11 +632,9 @@ class GMNValidator:
                     f"Updating undefined variable: {var_name}",
                     "UNDEFINED_UPDATE_VAR",
                 )
-            self._validate_equation(
-                f"update_equations.{var_name}", equation, result)
+            self._validate_equation(f"update_equations.{var_name}", equation, result)
 
-    def _validate_equation(self, field: str, equation: str,
-                           result: ValidationResult) -> None:
+    def _validate_equation(self, field: str, equation: str, result: ValidationResult) -> None:
         """Validate an equation for syntax, references, and security"""
         dangerous_patterns = [
             "__",
@@ -751,19 +666,12 @@ class GMNValidator:
             self.referenced_variables.add(token)
         paren_count = equation.count("(") - equation.count(")")
         if paren_count != 0:
-            result.add_error(
-                field,
-                "Unbalanced parentheses in equation",
-                "UNBALANCED_PARENS")
+            result.add_error(field, "Unbalanced parentheses in equation", "UNBALANCED_PARENS")
         bracket_count = equation.count("[") - equation.count("]")
         if bracket_count != 0:
-            result.add_error(
-                field,
-                "Unbalanced brackets in equation",
-                "UNBALANCED_BRACKETS")
+            result.add_error(field, "Unbalanced brackets in equation", "UNBALANCED_BRACKETS")
 
-    def _validate_preferences(
-            self, preferences: Dict[str, Any], result: ValidationResult) -> None:
+    def _validate_preferences(self, preferences: Dict[str, Any], result: ValidationResult) -> None:
         """Validate preference functions"""
         if not preferences:
             result.add_warning(
@@ -844,10 +752,7 @@ class GMNValidator:
                     "UNDEFINED_REFERENCE",
                 )
 
-    def _validate_consistency(
-            self,
-            model: GMNModel,
-            result: ValidationResult) -> None:
+    def _validate_consistency(self, model: GMNModel, result: ValidationResult) -> None:
         """Validate overall model consistency"""
         if not model.state_space and (not model.observations):
             result.add_error(
@@ -870,21 +775,21 @@ class GMNValidator:
     ) -> None:
         """Check for circular dependencies in connections using Template Method pattern"""
         graph = self._build_dependency_graph(connections)
-        
+
         if self._detect_cycles_in_graph(graph):
             self._add_circular_dependency_warning(result)
 
     def _build_dependency_graph(self, connections: List[Dict[str, Any]]) -> Dict[str, List[str]]:
         """Build dependency graph from connections"""
         graph: Dict[str, List[str]] = {}
-        
+
         for conn in connections:
             source = conn.get("source")
             target = conn.get("target")
-            
+
             if self._is_valid_connection(source, target):
                 self._add_edge_to_graph(graph, source, target)
-        
+
         return graph
 
     def _is_valid_connection(self, source: Any, target: Any) -> bool:
@@ -901,22 +806,23 @@ class GMNValidator:
         """Detect cycles in dependency graph using DFS"""
         visited = set()
         rec_stack = set()
-        
+
         def has_cycle(node: str) -> bool:
             visited.add(node)
             rec_stack.add(node)
-            
+
             for neighbor in graph.get(node, []):
                 if self._should_continue_cycle_check(neighbor, visited, rec_stack, has_cycle):
                     return True
-            
+
             rec_stack.remove(node)
             return False
-        
+
         return self._check_all_nodes_for_cycles(graph, visited, has_cycle)
 
-    def _should_continue_cycle_check(self, neighbor: str, visited: set, 
-                                   rec_stack: set, has_cycle_func) -> bool:
+    def _should_continue_cycle_check(
+        self, neighbor: str, visited: set, rec_stack: set, has_cycle_func
+    ) -> bool:
         """Check if we should continue cycle detection for neighbor"""
         if neighbor not in visited:
             return has_cycle_func(neighbor)
@@ -924,8 +830,9 @@ class GMNValidator:
             return True
         return False
 
-    def _check_all_nodes_for_cycles(self, graph: Dict[str, List[str]], 
-                                  visited: set, has_cycle_func) -> bool:
+    def _check_all_nodes_for_cycles(
+        self, graph: Dict[str, List[str]], visited: set, has_cycle_func
+    ) -> bool:
         """Check all unvisited nodes for cycles"""
         for node in graph:
             if node not in visited:
@@ -941,10 +848,7 @@ class GMNValidator:
             "CIRCULAR_DEPENDENCY",
         )
 
-    def _validate_security(
-            self,
-            model: GMNModel,
-            result: ValidationResult) -> None:
+    def _validate_security(self, model: GMNModel, result: ValidationResult) -> None:
         """Validate model for security issues"""
         all_strings = []
         all_strings.append(model.name)
@@ -992,11 +896,9 @@ if __name__ == "__main__":
                 print(f"Processing time: {result.processing_time:.3f}s")
                 print(f"Errors: {len(result.errors)}")
                 for error in result.errors:
-                    print(
-                        f"  - [{error.error_code}] {error.field}: {error.message}")
+                    print(f"  - [{error.error_code}] {error.field}: {error.message}")
                 print(f"Warnings: {len(result.warnings)}")
                 for warning in result.warnings:
-                    print(
-                        f"  - [{warning.error_code}] {warning.field}: {warning.message}")
+                    print(f"  - [{warning.error_code}] {warning.field}: {warning.message}")
         except Exception as e:
             print(f"Exception caught: {e}")

@@ -11,6 +11,7 @@ from typing import Any, Callable, Dict, List, Optional
 import numpy as np
 import torch
 import torch.nn.functional as F
+
 # type: ignore[import-untyped]
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import (  # type: ignore[import-untyped]
@@ -125,15 +126,13 @@ class EdgeProcessor:
 
         # Add reverse edges if undirected
         if not self.config.directed:
-            reverse_edge_index = torch.tensor(
-                [targets, sources], dtype=torch.long)
+            reverse_edge_index = torch.tensor([targets, sources], dtype=torch.long)
             edge_index = torch.cat([edge_index, reverse_edge_index], dim=1)
             edge_weight = torch.cat([edge_weight, edge_weight], dim=0)
 
         return EdgeBatch(
-            edge_index=edge_index,
-            edge_weight=edge_weight,
-            num_edges=edge_index.shape[1])
+            edge_index=edge_index, edge_weight=edge_weight, num_edges=edge_index.shape[1]
+        )
 
 
 class FeatureType(Enum):
@@ -200,8 +199,7 @@ class NodeFeatureExtractor:
         Args:
             feature_configs: List of feature configurations
         """
-        self.feature_configs = {
-            config.name: config for config in feature_configs}
+        self.feature_configs = {config.name: config for config in feature_configs}
         self.scalers: Dict[str, Any] = {}
         self.encoders: Dict[str, Any] = {}
         self.vectorizers: Dict[str, Any] = {}
@@ -220,8 +218,7 @@ class NodeFeatureExtractor:
             elif config.type == FeatureType.CATEGORICAL:
                 self.encoders[name] = LabelEncoder()
             elif config.type == FeatureType.TEXT:
-                self.vectorizers[name] = TfidfVectorizer(
-                    max_features=config.dimension or 100)
+                self.vectorizers[name] = TfidfVectorizer(max_features=config.dimension or 100)
 
     def extract_features(
         self, nodes: List[Dict[str, Any]], graph: Optional[Any] = None
@@ -236,45 +233,41 @@ class NodeFeatureExtractor:
         """
         if not nodes:
             return self._create_empty_result()
-        
+
         extraction_context = self._initialize_extraction_context(nodes)
         self._extract_all_feature_types(nodes, graph, extraction_context)
-        all_features = self._concatenate_features(extraction_context['feature_arrays'])
-        
+        all_features = self._concatenate_features(extraction_context["feature_arrays"])
+
         return self._create_extraction_result(nodes, all_features, extraction_context)
 
     def _create_empty_result(self) -> ExtractionResult:
         """Create empty extraction result for no nodes"""
-        return ExtractionResult(
-            features=np.array([]),
-            feature_names=[],
-            feature_dims={}
-        )
+        return ExtractionResult(features=np.array([]), feature_names=[], feature_dims={})
 
     def _initialize_extraction_context(self, nodes: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Initialize context for feature extraction"""
         return {
-            'feature_arrays': [],
-            'feature_names': [],
-            'feature_dims': {},
-            'current_idx': 0,
-            'missing_mask': np.zeros((len(nodes), len(self.feature_configs)), dtype=bool)
+            "feature_arrays": [],
+            "feature_names": [],
+            "feature_dims": {},
+            "current_idx": 0,
+            "missing_mask": np.zeros((len(nodes), len(self.feature_configs)), dtype=bool),
         }
 
-    def _extract_all_feature_types(self, nodes: List[Dict[str, Any]], 
-                                 graph: Optional[Any], 
-                                 extraction_context: Dict[str, Any]) -> None:
+    def _extract_all_feature_types(
+        self, nodes: List[Dict[str, Any]], graph: Optional[Any], extraction_context: Dict[str, Any]
+    ) -> None:
         """Extract features for all configured feature types"""
         for feature_idx, (name, config) in enumerate(self.feature_configs.items()):
             logger.debug(f"Extracting feature: {name}")
-            
+
             features, names = self._extract_single_feature_type(nodes, config, graph)
             self._update_missing_mask(nodes, name, feature_idx, extraction_context)
             self._record_feature_info(name, features, names, extraction_context)
 
-    def _extract_single_feature_type(self, nodes: List[Dict[str, Any]], 
-                                   config: FeatureConfig, 
-                                   graph: Optional[Any]) -> tuple[np.ndarray, List[str]]:
+    def _extract_single_feature_type(
+        self, nodes: List[Dict[str, Any]], config: FeatureConfig, graph: Optional[Any]
+    ) -> tuple[np.ndarray, List[str]]:
         """Extract features for a single feature type using Strategy pattern"""
         feature_extractors = {
             FeatureType.SPATIAL: lambda: self._extract_spatial_features(nodes, config),
@@ -283,35 +276,42 @@ class NodeFeatureExtractor:
             FeatureType.NUMERICAL: lambda: self._extract_numerical_features(nodes, config),
             FeatureType.EMBEDDING: lambda: self._extract_embedding_features(nodes, config),
             FeatureType.TEXT: lambda: self._extract_text_features(nodes, config),
-            FeatureType.GRAPH_STRUCTURAL: lambda: self._extract_structural_features(nodes, config, graph)
+            FeatureType.GRAPH_STRUCTURAL: lambda: self._extract_structural_features(
+                nodes, config, graph
+            ),
         }
-        
+
         extractor = feature_extractors.get(config.type)
         if extractor:
             return extractor()
         else:
             logger.warning(f"Unknown feature type: {config.type}")
-            return (np.zeros((len(nodes), 1), dtype=np.float32), 
-                   [f"{config.name}_unknown"])
+            return (np.zeros((len(nodes), 1), dtype=np.float32), [f"{config.name}_unknown"])
 
-    def _update_missing_mask(self, nodes: List[Dict[str, Any]], name: str, 
-                           feature_idx: int, extraction_context: Dict[str, Any]) -> None:
+    def _update_missing_mask(
+        self,
+        nodes: List[Dict[str, Any]],
+        name: str,
+        feature_idx: int,
+        extraction_context: Dict[str, Any],
+    ) -> None:
         """Update missing value mask for current feature"""
         for i, node in enumerate(nodes):
             if name not in node or node[name] is None:
-                extraction_context['missing_mask'][i, feature_idx] = True
+                extraction_context["missing_mask"][i, feature_idx] = True
 
-    def _record_feature_info(self, name: str, features: np.ndarray, 
-                           names: List[str], extraction_context: Dict[str, Any]) -> None:
+    def _record_feature_info(
+        self, name: str, features: np.ndarray, names: List[str], extraction_context: Dict[str, Any]
+    ) -> None:
         """Record feature information in extraction context"""
         # Record feature dimensions
-        current_idx = extraction_context['current_idx']
-        extraction_context['feature_dims'][name] = (current_idx, current_idx + features.shape[1])
-        extraction_context['current_idx'] += features.shape[1]
-        
+        current_idx = extraction_context["current_idx"]
+        extraction_context["feature_dims"][name] = (current_idx, current_idx + features.shape[1])
+        extraction_context["current_idx"] += features.shape[1]
+
         # Add to arrays
-        extraction_context['feature_arrays'].append(features)
-        extraction_context['feature_names'].extend(names)
+        extraction_context["feature_arrays"].append(features)
+        extraction_context["feature_names"].extend(names)
 
     def _concatenate_features(self, feature_arrays: List[np.ndarray]) -> np.ndarray:
         """Concatenate all feature arrays"""
@@ -320,18 +320,21 @@ class NodeFeatureExtractor:
         else:
             return np.zeros((0, 0))
 
-    def _create_extraction_result(self, nodes: List[Dict[str, Any]], 
-                                all_features: np.ndarray, 
-                                extraction_context: Dict[str, Any]) -> ExtractionResult:
+    def _create_extraction_result(
+        self,
+        nodes: List[Dict[str, Any]],
+        all_features: np.ndarray,
+        extraction_context: Dict[str, Any],
+    ) -> ExtractionResult:
         """Create final extraction result"""
         return ExtractionResult(
             features=all_features,
-            feature_names=extraction_context['feature_names'],
-            feature_dims=extraction_context['feature_dims'],
-            missing_mask=extraction_context['missing_mask'],
+            feature_names=extraction_context["feature_names"],
+            feature_dims=extraction_context["feature_dims"],
+            missing_mask=extraction_context["missing_mask"],
             metadata={
                 "num_nodes": len(nodes),
-                "num_features": len(extraction_context['feature_names']),
+                "num_features": len(extraction_context["feature_names"]),
                 "extraction_time": datetime.now().isoformat(),
             },
         )
@@ -346,8 +349,7 @@ class NodeFeatureExtractor:
             if value is None:
                 # Handle missing spatial data
                 if config.name in ["x", "y", "z"]:
-                    feature_values.append(
-                        [0.0] * (3 if config.name == "z" else 2))
+                    feature_values.append([0.0] * (3 if config.name == "z" else 2))
                 elif "h3" in config.name.lower():
                     feature_values.append([0.0] * 7)  # H3 cell features
                 else:
@@ -364,8 +366,7 @@ class NodeFeatureExtractor:
         features = np.array(feature_values, dtype=np.float32)
         # Apply normalization
         if config.normalization != NormalizationType.NONE:
-            features = self._normalize_features(
-                features, config.name, config.normalization)
+            features = self._normalize_features(features, config.name, config.normalization)
         # Generate feature names
         if features.shape[1] == 1:
             names = [config.name]
@@ -413,22 +414,19 @@ class NodeFeatureExtractor:
                     try:
                         dt = datetime.fromisoformat(value)
                         timestamp = dt.timestamp()
-                        temporal_features = self._extract_timestamp_features(
-                            timestamp)
+                        temporal_features = self._extract_timestamp_features(timestamp)
                     except Exception:
                         temporal_features = [0.0] * 7
                 elif isinstance(value, datetime):
                     timestamp = value.timestamp()
-                    temporal_features = self._extract_timestamp_features(
-                        timestamp)
+                    temporal_features = self._extract_timestamp_features(timestamp)
                 else:
                     temporal_features = [0.0] * 7
                 feature_values.append(temporal_features)
         features = np.array(feature_values, dtype=np.float32)
         # Apply normalization
         if config.normalization != NormalizationType.NONE:
-            features = self._normalize_features(
-                features, config.name, config.normalization)
+            features = self._normalize_features(features, config.name, config.normalization)
         # Generate feature names
         names = [
             f"{config.name}_hour",
@@ -480,8 +478,7 @@ class NodeFeatureExtractor:
         one_hot = np.zeros((len(nodes), num_classes), dtype=np.float32)
         one_hot[np.arange(len(nodes)), encoded] = 1.0
         # Generate feature names
-        names = [
-            f"{config.name}_{cls}" for cls in self.encoders[config.name].classes_]
+        names = [f"{config.name}_{cls}" for cls in self.encoders[config.name].classes_]
         return one_hot, names
 
     def _extract_numerical_features(
@@ -506,8 +503,7 @@ class NodeFeatureExtractor:
             features = np.minimum(features, config.constraints["max"])
         # Apply normalization
         if config.normalization != NormalizationType.NONE:
-            features = self._normalize_features(
-                features, config.name, config.normalization)
+            features = self._normalize_features(features, config.name, config.normalization)
         # Generate feature names
         if features.shape[1] == 1:
             names = [config.name]
@@ -540,20 +536,17 @@ class NodeFeatureExtractor:
                         embedding = np.concatenate([embedding, padding])
             else:
                 # Generate embedding from value (e.g., using hash)
-                embedding = self._generate_embedding_from_value(
-                    value, embedding_dim)
+                embedding = self._generate_embedding_from_value(value, embedding_dim)
             embeddings.append(embedding)
         features = np.array(embeddings, dtype=np.float32)
         # Normalize embeddings
         if config.normalization != NormalizationType.NONE:
-            features = F.normalize(
-                torch.from_numpy(features), p=2, dim=1).numpy()
+            features = F.normalize(torch.from_numpy(features), p=2, dim=1).numpy()
         # Generate feature names
         names = [f"{config.name}_{i}" for i in range(embedding_dim)]
         return features, names
 
-    def _generate_embedding_from_value(
-            self, value: Any, dim: int) -> np.ndarray:
+    def _generate_embedding_from_value(self, value: Any, dim: int) -> np.ndarray:
         """Generate embedding from arbitrary value using hashing"""
         # Convert value to string and hash
         str_value = str(value)
@@ -582,8 +575,7 @@ class NodeFeatureExtractor:
             )
         try:
             # Transform texts
-            features = self.vectorizers[config.name].fit_transform(
-                texts).toarray()
+            features = self.vectorizers[config.name].fit_transform(texts).toarray()
         except Exception:
             # Fallback to zero features
             features = np.zeros((len(nodes), config.dimension or 100))
@@ -619,15 +611,9 @@ class NodeFeatureExtractor:
             node_id = node.get("id", i)
             # Example structural features
             structural_feats: List[float] = [
-                float(
-                    graph.degree(node_id) if hasattr(
-                        graph, "degree") else 0),
-                float(
-                    graph.in_degree(node_id) if hasattr(
-                        graph, "in_degree") else 0),
-                float(
-                    graph.out_degree(node_id) if hasattr(
-                        graph, "out_degree") else 0),
+                float(graph.degree(node_id) if hasattr(graph, "degree") else 0),
+                float(graph.in_degree(node_id) if hasattr(graph, "in_degree") else 0),
+                float(graph.out_degree(node_id) if hasattr(graph, "out_degree") else 0),
                 0.0,  # Clustering coefficient placeholder
                 0.0,  # PageRank placeholder
             ]
@@ -635,8 +621,7 @@ class NodeFeatureExtractor:
         features = np.array(structural_features, dtype=np.float32)
         # Normalize
         if config.normalization != NormalizationType.NONE:
-            features = self._normalize_features(
-                features, config.name, config.normalization)
+            features = self._normalize_features(features, config.name, config.normalization)
         names = [
             f"{config.name}_degree",
             f"{config.name}_in_degree",
@@ -652,12 +637,12 @@ class NodeFeatureExtractor:
         """Apply normalization to features using Strategy pattern"""
         if normalization == NormalizationType.NONE:
             return features
-        
+
         original_shape = features.shape
         features, is_single_feature = self._prepare_features_for_normalization(features)
         features = self._apply_normalization_strategy(features, name, normalization)
         features = self._restore_feature_shape(features, is_single_feature, original_shape)
-        
+
         return features
 
     def _prepare_features_for_normalization(self, features: np.ndarray) -> tuple[np.ndarray, bool]:
@@ -667,16 +652,23 @@ class NodeFeatureExtractor:
         else:
             return features, False
 
-    def _apply_normalization_strategy(self, features: np.ndarray, name: str, 
-                                    normalization: NormalizationType) -> np.ndarray:
+    def _apply_normalization_strategy(
+        self, features: np.ndarray, name: str, normalization: NormalizationType
+    ) -> np.ndarray:
         """Apply specific normalization strategy"""
         normalization_strategies = {
             NormalizationType.LOG: self._apply_log_normalization,
-            NormalizationType.STANDARD: lambda f, n: self._apply_scaler_normalization(f, n, StandardScaler),
-            NormalizationType.MINMAX: lambda f, n: self._apply_scaler_normalization(f, n, MinMaxScaler),
-            NormalizationType.ROBUST: lambda f, n: self._apply_scaler_normalization(f, n, RobustScaler)
+            NormalizationType.STANDARD: lambda f, n: self._apply_scaler_normalization(
+                f, n, StandardScaler
+            ),
+            NormalizationType.MINMAX: lambda f, n: self._apply_scaler_normalization(
+                f, n, MinMaxScaler
+            ),
+            NormalizationType.ROBUST: lambda f, n: self._apply_scaler_normalization(
+                f, n, RobustScaler
+            ),
         }
-        
+
         strategy = normalization_strategies.get(normalization)
         if strategy:
             return strategy(features, name)
@@ -687,20 +679,22 @@ class NodeFeatureExtractor:
         """Apply log transformation normalization"""
         return np.log1p(np.abs(features))
 
-    def _apply_scaler_normalization(self, features: np.ndarray, name: str, 
-                                  scaler_class) -> np.ndarray:
+    def _apply_scaler_normalization(
+        self, features: np.ndarray, name: str, scaler_class
+    ) -> np.ndarray:
         """Apply scikit-learn scaler normalization"""
         if name not in self.scalers:
             self.scalers[name] = scaler_class()
-        
+
         try:
             return self.scalers[name].fit_transform(features)
         except Exception:
             logger.warning(f"Failed to normalize {name}, using raw values")
             return features
 
-    def _restore_feature_shape(self, features: np.ndarray, is_single_feature: bool, 
-                             original_shape: tuple) -> np.ndarray:
+    def _restore_feature_shape(
+        self, features: np.ndarray, is_single_feature: bool, original_shape: tuple
+    ) -> np.ndarray:
         """Restore original feature shape after normalization"""
         if is_single_feature:
             return features.ravel()
@@ -708,10 +702,8 @@ class NodeFeatureExtractor:
             return features
 
     def handle_missing_data(
-            self,
-            features: np.ndarray,
-            missing_mask: np.ndarray,
-            strategy: str = "mean") -> np.ndarray:
+        self, features: np.ndarray, missing_mask: np.ndarray, strategy: str = "mean"
+    ) -> np.ndarray:
         """
         Handle missing data in features.
         Args:
@@ -729,11 +721,9 @@ class NodeFeatureExtractor:
             if not np.any(missing_in_feature):
                 continue
             if strategy == "mean":
-                fill_value = np.mean(
-                    features[~missing_in_feature, feature_idx])
+                fill_value = np.mean(features[~missing_in_feature, feature_idx])
             elif strategy == "median":
-                fill_value = np.median(
-                    features[~missing_in_feature, feature_idx])
+                fill_value = np.median(features[~missing_in_feature, feature_idx])
             elif strategy == "zero":
                 fill_value = 0.0
             elif strategy == "forward_fill":
@@ -899,11 +889,7 @@ class GraphBatchProcessor:
         edge_index = torch.cat(all_edge_index, dim=1)
         batch = torch.cat(batch_indices, dim=0)
 
-        return GraphBatch(
-            x=x,
-            edge_index=edge_index,
-            batch=batch,
-            num_graphs=len(graphs))
+        return GraphBatch(x=x, edge_index=edge_index, batch=batch, num_graphs=len(graphs))
 
     def unbatch(self, batch: GraphBatch) -> List[GraphData]:
         """Unbatch a GraphBatch back into individual graphs"""
@@ -920,9 +906,7 @@ class GraphBatchProcessor:
             graph_edge_index = batch.edge_index[:, edge_mask]
 
             # Reindex edges to start from 0
-            node_mapping = {
-                old_idx.item(): new_idx for new_idx,
-                old_idx in enumerate(node_indices)}
+            node_mapping = {old_idx.item(): new_idx for new_idx, old_idx in enumerate(node_indices)}
             reindexed_edges = torch.tensor(
                 [
                     [node_mapping[edge[0].item()], node_mapping[edge[1].item()]]
@@ -974,10 +958,8 @@ class GNNStack(torch.nn.Module):
     """Stack of GNN layers for graph neural network architectures"""
 
     def __init__(
-            self,
-            layer_configs: List[LayerConfig],
-            layer_type: str = "GCN",
-            global_pool: str = "mean") -> None:
+        self, layer_configs: List[LayerConfig], layer_type: str = "GCN", global_pool: str = "mean"
+    ) -> None:
         """
         Initialize GNN stack.
 
@@ -1021,10 +1003,7 @@ class GNNStack(torch.nn.Module):
             return torch.nn.Linear(config.in_channels, config.out_channels)
         elif self.layer_type == "GAT":
             # For GAT, out_channels is usually heads * head_dim
-            return torch.nn.Linear(
-                config.in_channels,
-                config.out_channels *
-                config.heads)
+            return torch.nn.Linear(config.in_channels, config.out_channels * config.heads)
         else:
             # Default to linear layer
             return torch.nn.Linear(config.in_channels, config.out_channels)
@@ -1054,10 +1033,7 @@ class GNNStack(torch.nn.Module):
         # Global pooling
         return self._global_pool(x, batch)
 
-    def _global_pool(
-            self,
-            x: torch.Tensor,
-            batch: torch.Tensor) -> torch.Tensor:
+    def _global_pool(self, x: torch.Tensor, batch: torch.Tensor) -> torch.Tensor:
         """Apply global pooling to get graph-level representations"""
         num_graphs = int(batch.max().item()) + 1
         graph_embeddings = []

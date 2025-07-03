@@ -195,20 +195,15 @@ except ImportError:
             self.events = []
             self.predictions = {}
 
-        def create_coalition(
-                self,
-                coalition_id: str,
-                initial_members: Set[str]) -> CoalitionState:
+        def create_coalition(self, coalition_id: str, initial_members: Set[str]) -> CoalitionState:
             state = CoalitionState(
-                coalition_id=coalition_id,
-                timestamp=datetime.now(),
-                members=initial_members)
+                coalition_id=coalition_id, timestamp=datetime.now(), members=initial_members
+            )
             self.coalitions[coalition_id] = state
             self.history[coalition_id].append(state)
             return state
 
-        def update_coalition(self, coalition_id: str,
-                             updates: Dict[str, Any]) -> CoalitionState:
+        def update_coalition(self, coalition_id: str, updates: Dict[str, Any]) -> CoalitionState:
             if coalition_id not in self.coalitions:
                 raise ValueError(f"Coalition {coalition_id} not found")
 
@@ -221,10 +216,7 @@ except ImportError:
             self.history[coalition_id].append(state)
             return state
 
-        def predict_evolution(
-                self,
-                coalition_id: str,
-                time_steps: int) -> List[CoalitionState]:
+        def predict_evolution(self, coalition_id: str, time_steps: int) -> List[CoalitionState]:
             # Mock prediction logic
             current_state = self.coalitions.get(coalition_id)
             if not current_state:
@@ -234,24 +226,15 @@ except ImportError:
             for i in range(time_steps):
                 predicted_state = CoalitionState(
                     coalition_id=coalition_id,
-                    timestamp=current_state.timestamp +
-                    timedelta(
-                        days=i +
-                        1),
+                    timestamp=current_state.timestamp + timedelta(days=i + 1),
                     phase=current_state.phase,
                     members=current_state.members.copy(),
                     performance_score=min(
-                        1.0,
-                        current_state.performance_score +
-                        np.random.normal(
-                            0,
-                            0.1)),
+                        1.0, current_state.performance_score + np.random.normal(0, 0.1)
+                    ),
                     stability_score=max(
-                        0.0,
-                        current_state.stability_score +
-                        np.random.normal(
-                            0,
-                            0.05)),
+                        0.0, current_state.stability_score + np.random.normal(0, 0.05)
+                    ),
                 )
                 predictions.append(predicted_state)
 
@@ -263,17 +246,12 @@ except ImportError:
                 return {"overall_stability": 0.5}
 
             # Calculate stability metrics
-            performance_variance = np.var(
-                [s.performance_score for s in history[-10:]])
-            membership_changes = sum(1 for i in range(
-                1, len(history)) if history[i].members != history[i - 1].members)
+            performance_variance = np.var([s.performance_score for s in history[-10:]])
+            membership_changes = sum(
+                1 for i in range(1, len(history)) if history[i].members != history[i - 1].members
+            )
 
-            stability_score = max(
-                0.0,
-                1.0 -
-                performance_variance -
-                membership_changes *
-                0.1)
+            stability_score = max(0.0, 1.0 - performance_variance - membership_changes * 0.1)
 
             return {
                 "overall_stability": stability_score,
@@ -371,8 +349,8 @@ class TestTemporalCoalitionManager:
         # Update multiple times to build history
         for i in range(5):
             self.manager.update_coalition(
-                coalition_id, {
-                    "performance_score": 0.7 + i * 0.05, "stability_score": 0.8})
+                coalition_id, {"performance_score": 0.7 + i * 0.05, "stability_score": 0.8}
+            )
 
         stability_metrics = self.manager.analyze_stability(coalition_id)
 
@@ -406,14 +384,12 @@ class TestTemporalCoalitionManager:
 
         # Add new member
         new_members = initial_members.union({"agent_3"})
-        updated_state = self.manager.update_coalition(
-            coalition_id, {"members": new_members})
+        updated_state = self.manager.update_coalition(coalition_id, {"members": new_members})
         assert updated_state.members == new_members
 
         # Remove member
         reduced_members = {"agent_1", "agent_3"}
-        final_state = self.manager.update_coalition(
-            coalition_id, {"members": reduced_members})
+        final_state = self.manager.update_coalition(coalition_id, {"members": reduced_members})
         assert final_state.members == reduced_members
 
     def test_performance_tracking(self):
@@ -426,13 +402,11 @@ class TestTemporalCoalitionManager:
         # Simulate performance changes
         performance_scores = [0.3, 0.5, 0.7, 0.8, 0.75]
         for score in performance_scores:
-            self.manager.update_coalition(
-                coalition_id, {"performance_score": score})
+            self.manager.update_coalition(coalition_id, {"performance_score": score})
 
         # Verify history tracking
         history = self.manager.history[coalition_id]
-        assert len(history) == len(performance_scores) + \
-            1  # +1 for initial creation
+        assert len(history) == len(performance_scores) + 1  # +1 for initial creation
 
         # Check performance progression
         recorded_scores = [state.performance_score for state in history[1:]]
@@ -473,8 +447,8 @@ class TestTemporalCoalitionManager:
 
         for trust, commitment in zip(trust_levels, commitment_levels):
             self.manager.update_coalition(
-                coalition_id, {
-                    "trust_level": trust, "commitment_level": commitment})
+                coalition_id, {"trust_level": trust, "commitment_level": commitment}
+            )
 
         # Verify final state
         final_state = self.manager.coalitions[coalition_id]
@@ -493,15 +467,10 @@ class TestTemporalCoalitionManager:
             "internal_connections": 6,
             "external_connections": 3,
             "network_density": 0.75,
-            "centrality_measures": {
-                "agent_1": 0.8,
-                "agent_2": 0.6,
-                "agent_3": 0.4,
-                "agent_4": 0.5},
+            "centrality_measures": {"agent_1": 0.8, "agent_2": 0.6, "agent_3": 0.4, "agent_4": 0.5},
         }
 
-        updated_state = self.manager.update_coalition(
-            coalition_id, network_updates)
+        updated_state = self.manager.update_coalition(coalition_id, network_updates)
 
         assert updated_state.internal_connections == 6
         assert updated_state.external_connections == 3
@@ -523,8 +492,7 @@ class TestTemporalCoalitionManager:
             "governance_satisfaction": 0.75,
         }
 
-        updated_state = self.manager.update_coalition(
-            coalition_id, governance_updates)
+        updated_state = self.manager.update_coalition(coalition_id, governance_updates)
 
         assert updated_state.decision_speed == 0.7
         assert updated_state.conflict_level == 0.2
@@ -592,8 +560,7 @@ class TestCoalitionEvolutionEngine:
             "efficiency_score": 0.5,
         }
 
-        triggers = self.evolution_engine.detect_adaptation_triggers(
-            coalition_state)
+        triggers = self.evolution_engine.detect_adaptation_triggers(coalition_state)
 
         assert isinstance(triggers, list)
         # Should detect performance and stability issues
@@ -649,8 +616,7 @@ class TestDynamicMembershipManager:
         }
         leaving_member = "agent_3"
 
-        leave_impact = self.membership_manager.evaluate_leaving(
-            coalition_state, leaving_member)
+        leave_impact = self.membership_manager.evaluate_leaving(coalition_state, leaving_member)
 
         assert isinstance(leave_impact, dict)
         assert "impact_score" in leave_impact
@@ -685,8 +651,7 @@ class TestTemporalStabilityAnalyzer:
             for i in range(30)
         ]
 
-        metrics = self.stability_analyzer.calculate_stability_metrics(
-            time_series_data)
+        metrics = self.stability_analyzer.calculate_stability_metrics(time_series_data)
 
         assert isinstance(metrics, dict)
         assert "performance_stability" in metrics
@@ -703,8 +668,7 @@ class TestTemporalStabilityAnalyzer:
             {"performance": 0.2, "trust": 0.3},  # Another drop
         ]
 
-        instabilities = self.stability_analyzer.detect_instabilities(
-            unstable_data)
+        instabilities = self.stability_analyzer.detect_instabilities(unstable_data)
 
         assert isinstance(instabilities, list)
         assert len(instabilities) > 0
@@ -751,13 +715,9 @@ class TestCoalitionEventProcessor:
             "affected_aspects": ["performance", "stability"],
         }
 
-        coalition_state = {
-            "performance_score": 0.7,
-            "stability_score": 0.8,
-            "resilience": 0.6}
+        coalition_state = {"performance_score": 0.7, "stability_score": 0.8, "resilience": 0.6}
 
-        impact = self.event_processor.analyze_event_impact(
-            event, coalition_state)
+        impact = self.event_processor.analyze_event_impact(event, coalition_state)
 
         assert isinstance(impact, dict)
         assert "immediate_impact" in impact
@@ -792,8 +752,7 @@ class TestTemporalCoalitionPredictor:
             for i in range(30)
         ]
 
-        predictions = self.predictor.predict_short_term(
-            historical_data, steps=7)
+        predictions = self.predictor.predict_short_term(historical_data, steps=7)
 
         assert isinstance(predictions, list)
         assert len(predictions) == 7
@@ -805,8 +764,7 @@ class TestTemporalCoalitionPredictor:
     @pytest.mark.skipif(not IMPORT_SUCCESS, reason="Module not available")
     def test_trend_analysis(self):
         """Test trend analysis"""
-        trend_data = [{"performance": 0.3 + i * 0.1}
-                      for i in range(10)]  # Upward trend
+        trend_data = [{"performance": 0.3 + i * 0.1} for i in range(10)]  # Upward trend
 
         trend = self.predictor.analyze_trend(trend_data, metric="performance")
 
@@ -856,8 +814,7 @@ class TestDynamicTrustManager:
             ("agent_1", "agent_3"): 0.8,  # High trust
         }
 
-        repair_strategies = self.trust_manager.suggest_trust_repair(
-            damaged_trust)
+        repair_strategies = self.trust_manager.suggest_trust_repair(damaged_trust)
 
         assert isinstance(repair_strategies, dict)
         assert (
@@ -891,10 +848,7 @@ class TestCoalitionAdaptationEngine:
             {"type": "external_pressure", "severity": 0.8},
         ]
 
-        coalition_capabilities = {
-            "flexibility": 0.6,
-            "learning_ability": 0.7,
-            "resources": 0.5}
+        coalition_capabilities = {"flexibility": 0.6, "learning_ability": 0.7, "resources": 0.5}
 
         strategies = self.adaptation_engine.select_adaptation_strategies(
             challenges, coalition_capabilities
@@ -909,10 +863,7 @@ class TestCoalitionAdaptationEngine:
     @pytest.mark.skipif(not IMPORT_SUCCESS, reason="Module not available")
     def test_adaptation_effectiveness(self):
         """Test adaptation effectiveness evaluation"""
-        before_state = {
-            "performance": 0.5,
-            "stability": 0.4,
-            "efficiency": 0.6}
+        before_state = {"performance": 0.5, "stability": 0.4, "efficiency": 0.6}
 
         after_state = {"performance": 0.7, "stability": 0.6, "efficiency": 0.8}
 
@@ -922,7 +873,8 @@ class TestCoalitionAdaptationEngine:
         ]
 
         effectiveness = self.adaptation_engine.evaluate_adaptation_effectiveness(
-            before_state, after_state, adaptation_actions)
+            before_state, after_state, adaptation_actions
+        )
 
         assert isinstance(effectiveness, dict)
         assert "improvement_score" in effectiveness
@@ -1035,20 +987,23 @@ class TestIntegrationScenarios:
         # Phase 1: Add high-performing member
         phase1_members = initial_members.union({"agent_3"})
         self.manager.update_coalition(
-            coalition_id, {
-                "members": phase1_members, "performance_score": 0.7, "stability_score": 0.8}, )
+            coalition_id,
+            {"members": phase1_members, "performance_score": 0.7, "stability_score": 0.8},
+        )
 
         # Phase 2: Remove underperforming member
         phase2_members = {"agent_1", "agent_3"}
         self.manager.update_coalition(
-            coalition_id, {
-                "members": phase2_members, "performance_score": 0.8, "stability_score": 0.9}, )
+            coalition_id,
+            {"members": phase2_members, "performance_score": 0.8, "stability_score": 0.9},
+        )
 
         # Phase 3: Add specialist member
         final_members = phase2_members.union({"agent_4"})
         _ = self.manager.update_coalition(
-            coalition_id, {
-                "members": final_members, "performance_score": 0.9, "stability_score": 0.85}, )
+            coalition_id,
+            {"members": final_members, "performance_score": 0.9, "stability_score": 0.85},
+        )
 
         # Verify membership evolution improved performance
         history = self.manager.history[coalition_id]
@@ -1064,12 +1019,9 @@ class TestIntegrationScenarios:
         self.manager.create_coalition("coalition_3", {"agent_5", "agent_6"})
 
         # Simulate competitive scenario
-        self.manager.update_coalition(
-            "coalition_1", {"performance_score": 0.8})
-        self.manager.update_coalition(
-            "coalition_2", {"performance_score": 0.6})
-        self.manager.update_coalition(
-            "coalition_3", {"performance_score": 0.7})
+        self.manager.update_coalition("coalition_1", {"performance_score": 0.8})
+        self.manager.update_coalition("coalition_2", {"performance_score": 0.6})
+        self.manager.update_coalition("coalition_3", {"performance_score": 0.7})
 
         # Verify all coalitions exist
         assert len(self.manager.coalitions) == 3

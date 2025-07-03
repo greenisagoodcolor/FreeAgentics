@@ -120,18 +120,11 @@ except ImportError:
                 setattr(self, k, v)
 
     class LayoutConfig:
-        def __init__(
-                self,
-                rows=1,
-                cols=1,
-                spacing=0.1,
-                margins=None,
-                **kwargs):
+        def __init__(self, rows=1, cols=1, spacing=0.1, margins=None, **kwargs):
             self.rows = rows
             self.cols = cols
             self.spacing = spacing
-            self.margins = margins or {
-                "top": 0.1, "bottom": 0.1, "left": 0.1, "right": 0.1}
+            self.margins = margins or {"top": 0.1, "bottom": 0.1, "left": 0.1, "right": 0.1}
             for k, v in kwargs.items():
                 setattr(self, k, v)
 
@@ -195,14 +188,7 @@ class TestExportFormat:
 
     def test_export_formats_exist(self):
         """Test all export formats exist."""
-        expected_formats = [
-            "PNG",
-            "SVG",
-            "PDF",
-            "HTML",
-            "JSON",
-            "VIDEO",
-            "GIF"]
+        expected_formats = ["PNG", "SVG", "PDF", "HTML", "JSON", "VIDEO", "GIF"]
 
         for fmt in expected_formats:
             assert hasattr(ExportFormat, fmt)
@@ -213,12 +199,7 @@ class TestVisualizationTheme:
 
     def test_themes_exist(self):
         """Test all themes exist."""
-        expected_themes = [
-            "LIGHT",
-            "DARK",
-            "SCIENTIFIC",
-            "MINIMAL",
-            "PUBLICATION"]
+        expected_themes = ["LIGHT", "DARK", "SCIENTIFIC", "MINIMAL", "PUBLICATION"]
 
         for theme in expected_themes:
             assert hasattr(VisualizationTheme, theme)
@@ -379,10 +360,7 @@ class TestBeliefTrajectory:
             return
 
         # Create trajectory
-        snapshots = [
-            BeliefSnapshot(
-                torch.randn(3),
-                datetime.now()) for _ in range(5)]
+        snapshots = [BeliefSnapshot(torch.randn(3), datetime.now()) for _ in range(5)]
         trajectory = BeliefTrajectory(snapshots)
 
         # Test slicing
@@ -403,9 +381,7 @@ class TestBeliefVisualizer:
     @pytest.fixture
     def config(self):
         """Create visualization config."""
-        return VisualizationConfig(
-            plot_type=PlotType.BAR,
-            color_scheme=ColorScheme.VIRIDIS)
+        return VisualizationConfig(plot_type=PlotType.BAR, color_scheme=ColorScheme.VIRIDIS)
 
     @pytest.fixture
     def visualizer(self, config):
@@ -530,8 +506,7 @@ class TestBeliefVisualizer:
 
             # Check theme-specific settings
             if theme == VisualizationTheme.DARK:
-                assert visualizer.background_color in [
-                    "black", "#000000", (0, 0, 0)]
+                assert visualizer.background_color in ["black", "#000000", (0, 0, 0)]
             elif theme == VisualizationTheme.PUBLICATION:
                 assert visualizer.config.dpi >= 300
 
@@ -567,10 +542,8 @@ class TestBeliefHeatmap:
         A_matrix = torch.softmax(A_matrix, dim=0)
 
         heatmap.plot_matrix(
-            A_matrix,
-            title="Observation Model",
-            xlabel="States",
-            ylabel="Observations")
+            A_matrix, title="Observation Model", xlabel="States", ylabel="Observations"
+        )
 
         assert heatmap.figure is not None
 
@@ -598,8 +571,7 @@ class TestBeliefHeatmap:
         if not IMPORT_SUCCESS:
             return
 
-        matrix = torch.tensor(
-            [[0.8, 0.1, 0.1], [0.2, 0.6, 0.2], [0.1, 0.2, 0.7]])
+        matrix = torch.tensor([[0.8, 0.1, 0.1], [0.2, 0.6, 0.2], [0.1, 0.2, 0.7]])
 
         heatmap.plot_matrix(matrix, annotate=True, fmt=".2f")
 
@@ -635,8 +607,9 @@ class TestBeliefFlow:
             return
 
         # Define belief flow between states
-        flow_matrix = torch.tensor([[0.0, 0.3, 0.2, 0.0], [0.1, 0.0, 0.4, 0.2], [
-            0.2, 0.1, 0.0, 0.3], [0.0, 0.2, 0.1, 0.0]])
+        flow_matrix = torch.tensor(
+            [[0.0, 0.3, 0.2, 0.0], [0.1, 0.0, 0.4, 0.2], [0.2, 0.1, 0.0, 0.3], [0.0, 0.2, 0.1, 0.0]]
+        )
 
         state_labels = ["Idle", "Explore", "Interact", "Rest"]
 
@@ -697,11 +670,8 @@ class TestInteractiveVisualizer:
             interactive_viz.threshold = value
 
         interactive_viz.add_slider(
-            "threshold",
-            min_val=0.0,
-            max_val=1.0,
-            initial=0.5,
-            callback=update_func)
+            "threshold", min_val=0.0, max_val=1.0, initial=0.5, callback=update_func
+        )
 
         assert "threshold" in interactive_viz.widgets
         assert interactive_viz.widgets["threshold"]["type"] == "slider"
@@ -942,8 +912,7 @@ class TestAnimatedVisualizations:
         for i in range(50):
             t = i / 50.0
             # Simulate belief evolution
-            beliefs = torch.tensor(
-                [0.25 + 0.5 * t, 0.25 - 0.2 * t, 0.25 - 0.2 * t, 0.25 - 0.1 * t])
+            beliefs = torch.tensor([0.25 + 0.5 * t, 0.25 - 0.2 * t, 0.25 - 0.2 * t, 0.25 - 0.1 * t])
             beliefs = beliefs / beliefs.sum()
             trajectory.append(beliefs)
 
@@ -966,8 +935,7 @@ class TestAnimatedVisualizations:
 
         # Export as video
         video_path = tmp_path / "beliefs.mp4"
-        animator.export_animation(
-            frames, video_path, format=ExportFormat.VIDEO)
+        animator.export_animation(frames, video_path, format=ExportFormat.VIDEO)
 
     def test_animation_controls(self, animator):
         """Test animation playback controls."""
@@ -1002,8 +970,7 @@ class TestVisualizationIntegration:
 
         # Mock active inference components
         engine = Mock(spec=ActiveInferenceEngine)
-        engine.belief_state = BeliefState(
-            torch.tensor([0.25, 0.25, 0.25, 0.25]))
+        engine.belief_state = BeliefState(torch.tensor([0.25, 0.25, 0.25, 0.25]))
 
         # Create integrated visualizer
         config = VisualizationConfig()
@@ -1018,8 +985,7 @@ class TestVisualizationIntegration:
             belief_history.append(beliefs.clone())
 
         # Visualize the trajectory
-        trajectory = BeliefTrajectory(
-            [BeliefSnapshot(b, datetime.now()) for b in belief_history])
+        trajectory = BeliefTrajectory([BeliefSnapshot(b, datetime.now()) for b in belief_history])
 
         visualizer.plot_trajectory(trajectory)
 
@@ -1062,9 +1028,7 @@ class TestVisualizationIntegration:
         positions = [(0, 0), (0, 1), (1, 0), (1, 1)]
 
         for agent, pos in zip(agents, positions):
-            config = VisualizationConfig(
-                plot_type=PlotType.RADAR,
-                title=f"{agent} Beliefs")
+            config = VisualizationConfig(plot_type=PlotType.RADAR, title=f"{agent} Beliefs")
             dashboard.add_panel(agent, config, position=pos)
 
         # Update all agents

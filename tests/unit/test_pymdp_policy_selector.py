@@ -5,18 +5,19 @@ This module tests the policy selection algorithms that are compatible
 with pymdp conventions for active inference.
 """
 
+import numpy as np
+import pytest
+
+from inference.engine.generative_model import DiscreteGenerativeModel
+from inference.engine.policy_selection import Policy, PolicyConfig
+from inference.engine.pymdp_generative_model import (
+    PyMDPGenerativeModel,
+)
 from inference.engine.pymdp_policy_selector import (
     PyMDPPolicyAdapter,
     create_pymdp_policy_selector,
     replace_discrete_expected_free_energy,
 )
-from inference.engine.pymdp_generative_model import (
-    PyMDPGenerativeModel,
-)
-from inference.engine.policy_selection import Policy, PolicyConfig
-from inference.engine.generative_model import DiscreteGenerativeModel
-import numpy as np
-import pytest
 
 # Graceful degradation for PyTorch imports
 try:
@@ -108,8 +109,7 @@ class TestPyMDPPolicySelector:
     def test_enumerate_policies_with_num_policies(self):
         """Test policy enumeration with specified number of policies."""
         # Test with num_policies set
-        config_with_num = PolicyConfig(
-            planning_horizon=3, policy_length=2, num_policies=5)
+        config_with_num = PolicyConfig(planning_horizon=3, policy_length=2, num_policies=5)
         selector = PyMDPPolicySelector(config_with_num, self.mock_model)
 
         policies = selector.enumerate_policies(num_actions=3)
@@ -159,8 +159,7 @@ class TestPyMDPPolicySelector:
 
     def test_select_policy_stochastic(self):
         """Test stochastic policy selection."""
-        config_stochastic = PolicyConfig(
-            planning_horizon=3, policy_length=1, use_sampling=True)
+        config_stochastic = PolicyConfig(planning_horizon=3, policy_length=1, use_sampling=True)
         selector = PyMDPPolicySelector(config_stochastic, self.mock_model)
         beliefs = torch.tensor([0.25, 0.25, 0.25, 0.25], dtype=torch.float32)
 
@@ -181,11 +180,9 @@ class TestPyMDPPolicySelector:
     def test_select_policy_with_preferences(self):
         """Test policy selection with preferences."""
         beliefs = torch.tensor([0.25, 0.25, 0.25, 0.25], dtype=torch.float32)
-        preferences = torch.tensor(
-            [0.8, 0.2], dtype=torch.float32)  # Prefer action 0
+        preferences = torch.tensor([0.8, 0.2], dtype=torch.float32)  # Prefer action 0
 
-        policy, probs = self.selector.select_policy(
-            beliefs, preferences=preferences)
+        policy, probs = self.selector.select_policy(beliefs, preferences=preferences)
 
         assert isinstance(policy, Policy)
         assert isinstance(probs, torch.Tensor)
@@ -197,8 +194,7 @@ class TestPyMDPPolicySelector:
         policy = Policy([0])
         beliefs = torch.tensor([0.25, 0.25, 0.25, 0.25], dtype=torch.float32)
 
-        G, epistemic, pragmatic = self.selector.compute_expected_free_energy(
-            policy, beliefs)
+        G, epistemic, pragmatic = self.selector.compute_expected_free_energy(policy, beliefs)
 
         assert isinstance(G, torch.Tensor)
         assert isinstance(epistemic, torch.Tensor)
@@ -230,8 +226,7 @@ class TestPyMDPPolicySelector:
         beliefs = torch.tensor([0.25, 0.25, 0.25, 0.25], dtype=torch.float32)
 
         with pytest.raises(ValueError, match="Unsupported policy type"):
-            self.selector.compute_expected_free_energy(
-                "invalid_policy", beliefs)
+            self.selector.compute_expected_free_energy("invalid_policy", beliefs)
 
     def test_compute_expected_free_energy_pymdp_fallback(self):
         """Test expected free energy computation with PyMDP fallback."""
@@ -242,8 +237,7 @@ class TestPyMDPPolicySelector:
         policy = Policy([0])
         beliefs = torch.tensor([0.25, 0.25, 0.25, 0.25], dtype=torch.float32)
 
-        G, epistemic, pragmatic = self.selector.compute_expected_free_energy(
-            policy, beliefs)
+        G, epistemic, pragmatic = self.selector.compute_expected_free_energy(policy, beliefs)
 
         assert isinstance(G, torch.Tensor)
         assert G.item() > 0  # Should be positive
@@ -257,8 +251,7 @@ class TestPyMDPPolicySelector:
         policy = Policy([1])
         beliefs = torch.tensor([0.25, 0.25, 0.25, 0.25], dtype=torch.float32)
 
-        G, epistemic, pragmatic = self.selector.compute_expected_free_energy(
-            policy, beliefs)
+        G, epistemic, pragmatic = self.selector.compute_expected_free_energy(policy, beliefs)
 
         assert isinstance(G, torch.Tensor)
         assert G.item() >= 1.0  # Should be action-dependent (>= instead of >)
@@ -281,10 +274,8 @@ class TestPyMDPPolicyAdapter:
     def setup_method(self):
         """Set up test adapter."""
         self.config = PolicyConfig(
-            planning_horizon=3,
-            policy_length=1,
-            epistemic_weight=1.0,
-            pragmatic_weight=1.0)
+            planning_horizon=3, policy_length=1, epistemic_weight=1.0, pragmatic_weight=1.0
+        )
 
     def test_initialization_with_none(self):
         """Test adapter initialization with None as second argument."""
@@ -432,8 +423,7 @@ class TestPyMDPPolicyAdapter:
 
         # Create mock cached selector
         mock_cached_selector = Mock()
-        mock_cached_selector.select_policy.return_value = (
-            Policy([1]), torch.tensor([0.4, 0.6]))
+        mock_cached_selector.select_policy.return_value = (Policy([1]), torch.tensor([0.4, 0.6]))
 
         with patch.object(adapter, "_get_cached_selector", return_value=mock_cached_selector):
             mock_model = Mock()
@@ -499,8 +489,7 @@ class TestPyMDPPolicyAdapter:
             )
             mock_get_cached.return_value = mock_cached_selector
 
-            result = adapter.compute_expected_free_energy(
-                policy, beliefs, None)
+            result = adapter.compute_expected_free_energy(policy, beliefs, None)
 
             # Should return just G as tensor for standard interface
             assert isinstance(result, torch.Tensor)
@@ -613,12 +602,10 @@ class TestFactoryFunctions:
                 np.random.rand(4),
             )
 
-            selector = replace_discrete_expected_free_energy(
-                config, mock_discrete_model)
+            selector = replace_discrete_expected_free_energy(config, mock_discrete_model)
 
             assert isinstance(selector, PyMDPPolicySelector)
-            mock_pymdp_model.from_discrete_model.assert_called_once_with(
-                mock_discrete_model)
+            mock_pymdp_model.from_discrete_model.assert_called_once_with(mock_discrete_model)
 
     def test_replace_discrete_expected_free_energy_invalid_model(self):
         """Test replace_discrete_expected_free_energy with invalid model."""
@@ -677,8 +664,7 @@ class TestIntegrationScenarios:
 
         # Test expected free energy computation
         for policy in policies:
-            G, epistemic, pragmatic = selector.compute_expected_free_energy(
-                policy, beliefs)
+            G, epistemic, pragmatic = selector.compute_expected_free_energy(policy, beliefs)
             assert isinstance(G, torch.Tensor)
             assert G.numel() == 1
 

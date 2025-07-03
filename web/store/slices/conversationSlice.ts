@@ -50,7 +50,7 @@ interface ConversationState {
   typingIndicators: Record<string, string[]>; // conversationId -> agentIds
 }
 
-// Demo messages for CEO presentation
+// Demo messages for initial state
 const demoMessages: Message[] = [
   {
     id: "msg-1",

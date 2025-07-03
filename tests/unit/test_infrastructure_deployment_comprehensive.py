@@ -127,11 +127,8 @@ except ImportError:
 
         # Cloud configuration
         cloud_provider: str = CloudProvider.AWS
-        regions: List[str] = field(
-            default_factory=lambda: [
-                "us-east-1", "us-west-2"])
-        availability_zones: List[str] = field(
-            default_factory=lambda: ["a", "b", "c"])
+        regions: List[str] = field(default_factory=lambda: ["us-east-1", "us-west-2"])
+        availability_zones: List[str] = field(default_factory=lambda: ["a", "b", "c"])
 
         # Container configuration
         orchestration_platform: str = ContainerOrchestration.KUBERNETES
@@ -336,8 +333,7 @@ except ImportError:
 
             return {
                 "status": "success",
-                "execution_time": sum(
-                    step["duration"] for step in execution_steps),
+                "execution_time": sum(step["duration"] for step in execution_steps),
                 "services_deployed": 1,
                 "health_score": 0.95,
             }
@@ -383,22 +379,15 @@ except ImportError:
                     "total_instances": target_instances,
                 }
             else:
-                return {
-                    "action": "no_change",
-                    "total_instances": target_instances}
+                return {"action": "no_change", "total_instances": target_instances}
 
         def monitor_infrastructure(self) -> InfrastructureState:
             # Simulate monitoring data
-            self.infrastructure_state.cpu_utilization = 0.6 + \
-                np.random.normal(0, 0.1)
-            self.infrastructure_state.memory_utilization = 0.7 + \
-                np.random.normal(0, 0.1)
-            self.infrastructure_state.response_time_avg = 150 + \
-                np.random.normal(0, 20)
-            self.infrastructure_state.throughput = 800 + \
-                np.random.normal(0, 100)
-            self.infrastructure_state.error_rate = 0.5 + \
-                np.random.normal(0, 0.2)
+            self.infrastructure_state.cpu_utilization = 0.6 + np.random.normal(0, 0.1)
+            self.infrastructure_state.memory_utilization = 0.7 + np.random.normal(0, 0.1)
+            self.infrastructure_state.response_time_avg = 150 + np.random.normal(0, 20)
+            self.infrastructure_state.throughput = 800 + np.random.normal(0, 100)
+            self.infrastructure_state.error_rate = 0.5 + np.random.normal(0, 0.2)
 
             # Ensure values are within realistic bounds
             self.infrastructure_state.cpu_utilization = max(
@@ -407,8 +396,7 @@ except ImportError:
             self.infrastructure_state.memory_utilization = max(
                 0, min(1, self.infrastructure_state.memory_utilization)
             )
-            self.infrastructure_state.error_rate = max(
-                0, self.infrastructure_state.error_rate)
+            self.infrastructure_state.error_rate = max(0, self.infrastructure_state.error_rate)
 
             self.monitoring_data.append(self.infrastructure_state)
             return self.infrastructure_state
@@ -422,29 +410,29 @@ except ImportError:
                 optimizations.append(
                     {
                         "type": "rightsize_instances",
-                        "estimated_savings": current_cost *
-                        0.2,
+                        "estimated_savings": current_cost * 0.2,
                         "description": "Reduce instance sizes due to low CPU utilization",
-                    })
+                    }
+                )
 
             if self.config.cost_optimization.get("spot_instances"):
                 optimizations.append(
                     {
                         "type": "spot_instances",
-                        "estimated_savings": current_cost *
-                        0.6,
+                        "estimated_savings": current_cost * 0.6,
                         "description": "Use spot instances for non-critical workloads",
-                    })
+                    }
+                )
 
-            total_savings = sum(opt["estimated_savings"]
-                                for opt in optimizations)
+            total_savings = sum(opt["estimated_savings"] for opt in optimizations)
 
             return {
                 "current_hourly_cost": current_cost,
                 "potential_savings": total_savings,
                 "optimizations": optimizations,
                 "savings_percentage": (
-                    (total_savings / current_cost * 100) if current_cost > 0 else 0),
+                    (total_savings / current_cost * 100) if current_cost > 0 else 0
+                ),
             }
 
         def validate_compliance(self) -> Dict[str, Any]:
@@ -461,8 +449,7 @@ except ImportError:
                     "findings": [] if score >= 0.8 else ["Minor configuration issues"],
                 }
 
-            overall_score = np.mean([result["score"]
-                                    for result in compliance_results.values()])
+            overall_score = np.mean([result["score"] for result in compliance_results.values()])
 
             return {
                 "overall_compliance_score": overall_score,
@@ -523,8 +510,7 @@ class TestInfrastructureManager:
         if IMPORT_SUCCESS:
             self.infrastructure_manager = InfrastructureManager(self.config)
         else:
-            self.infrastructure_manager = MockInfrastructureManager(
-                self.config)
+            self.infrastructure_manager = MockInfrastructureManager(self.config)
 
     def test_infrastructure_manager_initialization(self):
         """Test infrastructure manager initialization"""
@@ -671,8 +657,7 @@ class TestInfrastructureManager:
             assert "score" in requirement_result
             assert "status" in requirement_result
             assert 0.0 <= requirement_result["score"] <= 1.0
-            assert requirement_result["status"] in [
-                "compliant", "non_compliant"]
+            assert requirement_result["status"] in ["compliant", "non_compliant"]
 
 
 class TestDeploymentEngine:
@@ -717,9 +702,7 @@ class TestDeploymentEngine:
             "service_name": "agent-inference",
             "image": "agent-inference:v1.5.0",
             "canary_percentage": 10,
-            "success_criteria": {
-                "error_rate_threshold": 0.1,
-                "response_time_threshold": 200},
+            "success_criteria": {"error_rate_threshold": 0.1, "response_time_threshold": 200},
         }
 
         result = self.deployment_engine.deploy_canary(canary_config)
@@ -735,8 +718,7 @@ class TestDeploymentEngine:
         deployment_id = "deployment_123"
         rollback_reason = "High error rate detected"
 
-        rollback_result = self.deployment_engine.rollback_deployment(
-            deployment_id, rollback_reason)
+        rollback_result = self.deployment_engine.rollback_deployment(deployment_id, rollback_reason)
 
         assert isinstance(rollback_result, dict)
         assert "rollback_id" in rollback_result
@@ -852,8 +834,7 @@ class TestCloudManager:
             "failover_strategy": "automatic",
         }
 
-        deployment_result = self.cloud_manager.deploy_multi_cloud(
-            multi_cloud_config)
+        deployment_result = self.cloud_manager.deploy_multi_cloud(multi_cloud_config)
 
         assert isinstance(deployment_result, dict)
         assert "primary_deployment" in deployment_result
@@ -928,8 +909,7 @@ class TestMonitoringStack:
             ],
         }
 
-        setup_result = self.monitoring_stack.setup_metrics_collection(
-            metrics_config)
+        setup_result = self.monitoring_stack.setup_metrics_collection(metrics_config)
 
         assert isinstance(setup_result, dict)
         assert "collector_id" in setup_result
@@ -971,16 +951,10 @@ class TestMonitoringStack:
     def test_log_aggregation(self):
         """Test log aggregation setup"""
         log_config = {
-            "sources": [
-                "application",
-                "system",
-                "security"],
+            "sources": ["application", "system", "security"],
             "retention_days": 14,
             "index_pattern": "logs-*",
-            "parsing_rules": {
-                "application": "json",
-                "system": "syslog",
-                "security": "custom"},
+            "parsing_rules": {"application": "json", "system": "syslog", "security": "custom"},
         }
 
         log_setup = self.monitoring_stack.setup_log_aggregation(log_config)
@@ -1016,8 +990,7 @@ class TestSecurityManager:
             {"type": "application", "target": "https://api.example.com"},
         ]
 
-        scan_result = self.security_manager.run_vulnerability_scan(
-            scan_targets)
+        scan_result = self.security_manager.run_vulnerability_scan(scan_targets)
 
         assert isinstance(scan_result, dict)
         assert "scan_id" in scan_result
@@ -1046,8 +1019,7 @@ class TestSecurityManager:
             },
         ]
 
-        enforcement_result = self.security_manager.enforce_security_policies(
-            security_policies)
+        enforcement_result = self.security_manager.enforce_security_policies(security_policies)
 
         assert isinstance(enforcement_result, dict)
         assert "policies_applied" in enforcement_result
@@ -1065,8 +1037,7 @@ class TestSecurityManager:
             "source_ip": "192.168.1.100",
         }
 
-        response_result = self.security_manager.handle_security_incident(
-            incident)
+        response_result = self.security_manager.handle_security_incident(incident)
 
         assert isinstance(response_result, dict)
         assert "incident_id" in response_result
@@ -1084,8 +1055,7 @@ class TestIntegrationScenarios:
         if IMPORT_SUCCESS:
             self.infrastructure_manager = InfrastructureManager(self.config)
         else:
-            self.infrastructure_manager = MockInfrastructureManager(
-                self.config)
+            self.infrastructure_manager = MockInfrastructureManager(self.config)
 
     def test_end_to_end_deployment_workflow(self):
         """Test complete end-to-end deployment workflow"""
@@ -1117,13 +1087,11 @@ class TestIntegrationScenarios:
             },
         )
 
-        plan_id = self.infrastructure_manager.create_deployment_plan(
-            deployment_plan)
+        plan_id = self.infrastructure_manager.create_deployment_plan(deployment_plan)
         assert plan_id is not None
 
         # 2. Execute deployment
-        deployment_result = self.infrastructure_manager.execute_deployment(
-            plan_id)
+        deployment_result = self.infrastructure_manager.execute_deployment(plan_id)
         assert deployment_result["status"] == "success"
 
         # 3. Monitor infrastructure post-deployment
@@ -1155,8 +1123,7 @@ class TestIntegrationScenarios:
             created_by="ops_team",
         )
 
-        plan_id = self.infrastructure_manager.create_deployment_plan(
-            initial_plan)
+        plan_id = self.infrastructure_manager.create_deployment_plan(initial_plan)
         self.infrastructure_manager.execute_deployment(plan_id)
 
         # 2. Simulate disaster (service failure)
@@ -1173,8 +1140,7 @@ class TestIntegrationScenarios:
             estimated_duration=30,  # Fast recovery
         )
 
-        dr_plan_id = self.infrastructure_manager.create_deployment_plan(
-            dr_plan)
+        dr_plan_id = self.infrastructure_manager.create_deployment_plan(dr_plan)
         dr_result = self.infrastructure_manager.execute_deployment(dr_plan_id)
 
         # 4. Validate recovery
@@ -1213,8 +1179,7 @@ class TestIntegrationScenarios:
 
         # 3. Verify scaling history
         scaling_events = self.infrastructure_manager.infrastructure_state.scaling_events
-        assert len(scaling_events) >= len(load_scenarios) - \
-            1  # No scaling for same target
+        assert len(scaling_events) >= len(load_scenarios) - 1  # No scaling for same target
 
     def test_multi_environment_deployment(self):
         """Test deployment across multiple environments"""
@@ -1258,10 +1223,8 @@ class TestIntegrationScenarios:
             created_by="security_team",
         )
 
-        plan_id = self.infrastructure_manager.create_deployment_plan(
-            secure_plan)
-        deployment_result = self.infrastructure_manager.execute_deployment(
-            plan_id)
+        plan_id = self.infrastructure_manager.create_deployment_plan(secure_plan)
+        deployment_result = self.infrastructure_manager.execute_deployment(plan_id)
         assert deployment_result["status"] == "success"
 
         # 2. Run compliance validation

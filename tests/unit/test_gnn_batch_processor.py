@@ -64,21 +64,18 @@ except ImportError:
         cache_size: int = 100
 
     class GraphBatch:
-        def __init__(
-                self,
-                graphs,
-                node_features=None,
-                edge_features=None,
-                batch_index=None):
+        def __init__(self, graphs, node_features=None, edge_features=None, batch_index=None):
             self.graphs = graphs
             self.node_features = node_features
             self.edge_features = edge_features
             self.batch_index = batch_index
             self.num_graphs = len(graphs)
-            self.num_nodes = (sum(g.num_nodes for g in graphs)
-                              if hasattr(graphs[0], "num_nodes") else 0)
-            self.num_edges = (sum(g.num_edges for g in graphs)
-                              if hasattr(graphs[0], "num_edges") else 0)
+            self.num_nodes = (
+                sum(g.num_nodes for g in graphs) if hasattr(graphs[0], "num_nodes") else 0
+            )
+            self.num_edges = (
+                sum(g.num_edges for g in graphs) if hasattr(graphs[0], "num_edges") else 0
+            )
 
     class GraphTensor:
         def __init__(self, data, edge_index=None, batch=None):
@@ -168,12 +165,7 @@ class TestBatchingStrategy:
 
     def test_strategy_types_exist(self):
         """Test all strategy types exist."""
-        expected_strategies = [
-            "STATIC",
-            "DYNAMIC",
-            "ADAPTIVE",
-            "SIZE_BASED",
-            "MEMORY_AWARE"]
+        expected_strategies = ["STATIC", "DYNAMIC", "ADAPTIVE", "SIZE_BASED", "MEMORY_AWARE"]
 
         for strategy in expected_strategies:
             assert hasattr(BatchingStrategy, strategy)
@@ -200,8 +192,7 @@ class TestGraphBatch:
             graph.num_nodes = 10 + i * 5
             graph.num_edges = 20 + i * 10
             graph.x = torch.randn(graph.num_nodes, 16)
-            graph.edge_index = torch.randint(
-                0, graph.num_nodes, (2, graph.num_edges))
+            graph.edge_index = torch.randint(0, graph.num_nodes, (2, graph.num_edges))
             graphs.append(graph)
         return graphs
 
@@ -222,8 +213,9 @@ class TestGraphBatch:
 
         node_features = torch.randn(total_nodes, 16)
         edge_features = torch.randn(total_edges, 8)
-        batch_index = torch.cat([torch.full((g.num_nodes,), i)
-                                 for i, g in enumerate(sample_graphs)])
+        batch_index = torch.cat(
+            [torch.full((g.num_nodes,), i) for i, g in enumerate(sample_graphs)]
+        )
 
         batch = GraphBatch(
             sample_graphs,
@@ -293,10 +285,7 @@ class TestGraphTensor:
         edge_index = torch.randint(0, num_nodes, (2, 100))
         batch_idx = torch.randint(0, 5, (num_nodes,))
 
-        graph_tensor = GraphTensor(
-            data=node_features,
-            edge_index=edge_index,
-            batch=batch_idx)
+        graph_tensor = GraphTensor(data=node_features, edge_index=edge_index, batch=batch_idx)
 
         assert graph_tensor.num_nodes == num_nodes
         assert graph_tensor.num_edges == 100
@@ -333,8 +322,7 @@ class TestGraphTensor:
         edge_index = torch.randint(0, 40, (2, 80))
         batch = torch.cat([torch.full((10,), i) for i in range(4)])
 
-        graph_tensor = GraphTensor(
-            data=data, edge_index=edge_index, batch=batch)
+        graph_tensor = GraphTensor(data=data, edge_index=edge_index, batch=batch)
 
         # Test node selection
         node_mask = torch.randint(0, 2, (40,)).bool()
@@ -367,10 +355,8 @@ class TestBatchProcessor:
     def config(self):
         """Create batch config for testing."""
         return BatchConfig(
-            batch_size=16,
-            max_nodes_per_batch=500,
-            strategy=BatchingStrategy.STATIC,
-            num_workers=2)
+            batch_size=16, max_nodes_per_batch=500, strategy=BatchingStrategy.STATIC, num_workers=2
+        )
 
     @pytest.fixture
     def processor(self, config):
@@ -421,8 +407,7 @@ class TestBatchProcessor:
         # Check batch properties
         assert len(batches) > 0
         assert all(isinstance(batch, GraphBatch) for batch in batches)
-        assert all(batch.num_graphs <=
-                   processor.config.batch_size for batch in batches)
+        assert all(batch.num_graphs <= processor.config.batch_size for batch in batches)
 
     def test_dynamic_batching(self, processor, sample_data):
         """Test dynamic batching strategy."""
@@ -474,9 +459,8 @@ class TestBatchProcessor:
         for batch in batches:
             estimated_memory = processor.estimate_memory_usage(batch)
             assert (
-                estimated_memory <= processor.config.memory_limit_mb *
-                1024 *
-                1024)  # Convert to bytes
+                estimated_memory <= processor.config.memory_limit_mb * 1024 * 1024
+            )  # Convert to bytes
 
     def test_batch_processing_pipeline(self, processor, sample_data):
         """Test complete batch processing pipeline."""
@@ -506,10 +490,8 @@ class TestBatchProcessor:
 
         # With shuffling, batches should be different
         # (Note: This is probabilistic, might occasionally fail)
-        batch_contents1 = [tuple(id(g) for g in batch.graphs)
-                           for batch in batches1]
-        batch_contents2 = [tuple(id(g) for g in batch.graphs)
-                           for batch in batches2]
+        batch_contents1 = [tuple(id(g) for g in batch.graphs) for batch in batches1]
+        batch_contents2 = [tuple(id(g) for g in batch.graphs) for batch in batches2]
 
         # At least some batches should be different
         assert batch_contents1 != batch_contents2
@@ -552,8 +534,7 @@ class TestBatchDataLoader:
             graph.num_nodes = 15 + i % 10
             graph.num_edges = 30 + i % 20
             graph.x = torch.randn(graph.num_nodes, 8)
-            graph.edge_index = torch.randint(
-                0, graph.num_nodes, (2, graph.num_edges))
+            graph.edge_index = torch.randint(0, graph.num_nodes, (2, graph.num_edges))
             graphs.append(graph)
         return graphs
 
@@ -626,8 +607,7 @@ class TestBatchDataLoader:
         # Create slow dataset (mock)
         slow_dataset = Mock()
         slow_dataset.__len__ = Mock(return_value=10)
-        slow_dataset.__getitem__ = Mock(
-            side_effect=lambda x: time.sleep(1))  # Slow operation
+        slow_dataset.__getitem__ = Mock(side_effect=lambda x: time.sleep(1))  # Slow operation
 
         loader = dataloader.create_loader(slow_dataset)
 
@@ -716,8 +696,7 @@ class TestGraphCollator:
         for i in range(5):
             graph = Mock()
             graph.y = torch.randn(8)  # Graph feature vector
-            graph.graph_attr = torch.tensor(
-                [i, i * 2, i * 3])  # Additional attributes
+            graph.graph_attr = torch.tensor([i, i * 2, i * 3])  # Additional attributes
             graphs.append(graph)
 
         # Collate graph features
@@ -759,16 +738,14 @@ class TestGraphCollator:
             # Create sparse tensor
             indices = torch.randint(0, 20, (2, 10))
             values = torch.randn(10)
-            graph.sparse_x = torch.sparse.FloatTensor(
-                indices, values, (20, 20))
+            graph.sparse_x = torch.sparse.FloatTensor(indices, values, (20, 20))
             graphs.append(graph)
 
         # Collate sparse features
         collated_sparse = collator.collate_sparse_features(graphs, "sparse_x")
 
         assert collated_sparse.is_sparse
-        assert collated_sparse.shape[0] == sum(
-            20 for _ in graphs)  # Concatenated along first dim
+        assert collated_sparse.shape[0] == sum(20 for _ in graphs)  # Concatenated along first dim
 
 
 class TestBatchScheduler:
@@ -798,12 +775,9 @@ class TestBatchScheduler:
             return
 
         # Simulate processing history
-        scheduler.add_processing_record(
-            batch_size=16, processing_time=0.1, memory_usage=100)
-        scheduler.add_processing_record(
-            batch_size=32, processing_time=0.25, memory_usage=200)
-        scheduler.add_processing_record(
-            batch_size=64, processing_time=0.6, memory_usage=400)
+        scheduler.add_processing_record(batch_size=16, processing_time=0.1, memory_usage=100)
+        scheduler.add_processing_record(batch_size=32, processing_time=0.25, memory_usage=200)
+        scheduler.add_processing_record(batch_size=64, processing_time=0.6, memory_usage=400)
 
         # Get adaptive batch size
         optimal_size = scheduler.get_optimal_batch_size()
@@ -942,15 +916,13 @@ class TestDynamicBatcher:
             return
 
         # Create test data
-        graphs = [Mock(num_nodes=100 + i * 10, num_edges=200 + i * 20)
-                  for i in range(20)]
+        graphs = [Mock(num_nodes=100 + i * 10, num_edges=200 + i * 20) for i in range(20)]
 
         # Create batches and measure efficiency
         batches = list(dynamic_batcher.create_batches(graphs))
 
         # Calculate utilization metrics
-        total_capacity = len(batches) * \
-            dynamic_batcher.config.max_nodes_per_batch
+        total_capacity = len(batches) * dynamic_batcher.config.max_nodes_per_batch
         total_nodes = sum(batch.num_nodes for batch in batches)
         utilization = total_nodes / total_capacity
 
@@ -966,9 +938,8 @@ class TestMemoryOptimizedBatcher:
         """Create memory-optimized batcher."""
         if IMPORT_SUCCESS:
             config = BatchConfig(
-                strategy=BatchingStrategy.MEMORY_AWARE,
-                memory_limit_mb=512,
-                enable_compression=True)
+                strategy=BatchingStrategy.MEMORY_AWARE, memory_limit_mb=512, enable_compression=True
+            )
             return MemoryOptimizedBatcher(config)
         else:
             return Mock()
@@ -1101,8 +1072,7 @@ class TestParallelBatcher:
         parallel_batcher.start_workers()
 
         assert parallel_batcher.is_active()
-        assert len(
-            parallel_batcher.workers) == parallel_batcher.config.num_workers
+        assert len(parallel_batcher.workers) == parallel_batcher.config.num_workers
 
         # Stop worker pool
         parallel_batcher.stop_workers()
@@ -1115,8 +1085,7 @@ class TestParallelBatcher:
             return
 
         # Create test data
-        graphs = [Mock(num_nodes=50 + i, num_edges=100 + i * 2)
-                  for i in range(100)]
+        graphs = [Mock(num_nodes=50 + i, num_edges=100 + i * 2) for i in range(100)]
 
         # Process batches in parallel
         parallel_batcher.start_workers()
@@ -1124,7 +1093,7 @@ class TestParallelBatcher:
         # Submit processing tasks
         futures = []
         for i in range(0, len(graphs), 16):
-            batch_graphs = graphs[i: i + 16]
+            batch_graphs = graphs[i : i + 16]
             future = parallel_batcher.submit_batch(batch_graphs)
             futures.append(future)
 
@@ -1187,8 +1156,7 @@ class TestParallelBatcher:
 
         # With load balancing, total time should be reasonable
         total_time = end_time - start_time
-        sequential_time = sum(0.01 for _ in fast_graphs) + \
-            sum(0.1 for _ in slow_graphs)
+        sequential_time = sum(0.01 for _ in fast_graphs) + sum(0.1 for _ in slow_graphs)
 
         # Parallel processing should be faster than sequential
         assert total_time < sequential_time
@@ -1243,10 +1211,7 @@ class TestBatchMetrics:
 
         # Record some batches
         for i in range(5):
-            metrics.record_batch(
-                batch_size=32,
-                processing_time=0.1,
-                memory_usage=100)
+            metrics.record_batch(batch_size=32, processing_time=0.1, memory_usage=100)
 
         # Calculate throughput
         throughput = metrics.calculate_throughput()
@@ -1262,14 +1227,8 @@ class TestBatchMetrics:
             return
 
         # Record batches with different efficiencies
-        metrics.record_batch(
-            batch_size=32,
-            processing_time=0.1,
-            memory_usage=100)  # Efficient
-        metrics.record_batch(
-            batch_size=16,
-            processing_time=0.2,
-            memory_usage=200)  # Less efficient
+        metrics.record_batch(batch_size=32, processing_time=0.1, memory_usage=100)  # Efficient
+        metrics.record_batch(batch_size=16, processing_time=0.2, memory_usage=200)  # Less efficient
 
         # Calculate efficiency
         efficiency = metrics.calculate_efficiency()
@@ -1337,9 +1296,8 @@ class TestBatchMetrics:
             # Simulate degrading performance over time
             processing_time = base_time + (i / 50) * 0.05
             metrics.record_batch(
-                batch_size=32,
-                processing_time=processing_time,
-                memory_usage=100 + i * 2)
+                batch_size=32, processing_time=processing_time, memory_usage=100 + i * 2
+            )
 
         # Analyze performance trends
         analysis = metrics.analyze_performance()
@@ -1363,10 +1321,8 @@ class TestBatchIntegration:
 
         # Create complete pipeline
         config = BatchConfig(
-            batch_size=16,
-            strategy=BatchingStrategy.DYNAMIC,
-            max_nodes_per_batch=500,
-            num_workers=2)
+            batch_size=16, strategy=BatchingStrategy.DYNAMIC, max_nodes_per_batch=500, num_workers=2
+        )
 
         processor = BatchProcessor(config)
         dataloader = BatchDataLoader(config)
@@ -1379,8 +1335,7 @@ class TestBatchIntegration:
             graph.num_nodes = 20 + i % 30
             graph.num_edges = 40 + i % 60
             graph.x = torch.randn(graph.num_nodes, 16)
-            graph.edge_index = torch.randint(
-                0, graph.num_nodes, (2, graph.num_edges))
+            graph.edge_index = torch.randint(0, graph.num_nodes, (2, graph.num_edges))
             graph.y = torch.randint(0, 5, (1,))
             dataset.append(graph)
 
@@ -1474,9 +1429,8 @@ class TestBatchIntegration:
 
         for num_workers in worker_counts:
             config = BatchConfig(
-                batch_size=16,
-                num_workers=num_workers,
-                strategy=BatchingStrategy.STATIC)
+                batch_size=16, num_workers=num_workers, strategy=BatchingStrategy.STATIC
+            )
 
             parallel_batcher = ParallelBatcher(config)
 
@@ -1488,7 +1442,7 @@ class TestBatchIntegration:
             # Submit all batches
             futures = []
             for i in range(0, len(dataset), config.batch_size):
-                batch_data = dataset[i: i + config.batch_size]
+                batch_data = dataset[i : i + config.batch_size]
                 future = parallel_batcher.submit_batch(batch_data)
                 futures.append(future)
 
@@ -1537,8 +1491,7 @@ class TestBatchIntegration:
 
         for batch in processor.create_batches(dataset):
             try:
-                result = processor.process_batch_with_retry(
-                    batch, max_retries=2)
+                result = processor.process_batch_with_retry(batch, max_retries=2)
                 if result is not None:
                     successful_batches += 1
                 else:

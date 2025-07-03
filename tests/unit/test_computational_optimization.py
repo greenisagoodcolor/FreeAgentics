@@ -32,10 +32,8 @@ class TestOptimizationConfig:
     def test_custom_config(self) -> None:
         """Test custom optimization configuration"""
         config = OptimizationConfig(
-            use_sparse_operations=False,
-            num_threads=8,
-            batch_size=64,
-            use_gpu=False)
+            use_sparse_operations=False, num_threads=8, batch_size=64, use_gpu=False
+        )
         assert config.use_sparse_operations is False
         assert config.num_threads == 8
         assert config.batch_size == 64
@@ -69,8 +67,7 @@ class TestSparseOperations:
 
     def test_sparse_matmul(self) -> None:
         """Test sparse-dense matrix multiplication"""
-        sparse_a = torch.sparse_coo_tensor(
-            indices=[[0, 1], [0, 2]], values=[1.0, 2.0], size=(3, 3))
+        sparse_a = torch.sparse_coo_tensor(indices=[[0, 1], [0, 2]], values=[1.0, 2.0], size=(3, 3))
         dense_b = torch.tensor([[1.0], [2.0], [3.0]])
         result = self.sparse_ops.sparse_matmul(sparse_a, dense_b)
         expected = torch.tensor([[1.0], [6.0], [0.0]])
@@ -78,13 +75,11 @@ class TestSparseOperations:
 
     def test_optimize_belief_update(self) -> None:
         """Test optimized belief update with sparse operations"""
-        A = torch.tensor(
-            [[0.9, 0.1, 0.0, 0.0], [0.1, 0.8, 0.1, 0.0], [0.0, 0.1, 0.9, 0.0]])
+        A = torch.tensor([[0.9, 0.1, 0.0, 0.0], [0.1, 0.8, 0.1, 0.0], [0.0, 0.1, 0.9, 0.0]])
         sparse_A = self.sparse_ops.sparsify_tensor(A)
         observation = torch.tensor([0.0, 1.0, 0.0])
         prior = torch.tensor([0.25, 0.25, 0.25, 0.25])
-        posterior = self.sparse_ops.optimize_belief_update(
-            sparse_A, observation, prior)
+        posterior = self.sparse_ops.optimize_belief_update(sparse_A, observation, prior)
         assert posterior.shape == prior.shape
         assert torch.allclose(posterior.sum(), torch.tensor(1.0))
 
@@ -92,10 +87,7 @@ class TestSparseOperations:
 class TestParallelInference:
     def setup_method(self) -> None:
         """Setup for tests"""
-        self.config = OptimizationConfig(
-            use_parallel_processing=True,
-            num_threads=2,
-            use_gpu=False)
+        self.config = OptimizationConfig(use_parallel_processing=True, num_threads=2, use_gpu=False)
         self.parallel = ParallelInference(self.config)
 
     def teardown_method(self):
@@ -117,8 +109,7 @@ class TestParallelInference:
         A_matrices = [torch.rand(3, 4) for _ in range(3)]
         for A in A_matrices:
             A /= A.sum(dim=0, keepdim=True)
-        updated_beliefs = self.parallel.parallel_belief_updates(
-            beliefs, observations, A_matrices)
+        updated_beliefs = self.parallel.parallel_belief_updates(beliefs, observations, A_matrices)
         assert len(updated_beliefs) == 3
         for belief in updated_beliefs:
             assert belief.shape == (4,)
@@ -134,8 +125,7 @@ class TestParallelInference:
         C = torch.tensor([0.8, 0.1, 0.1])
         C /= C.sum()
         actions = [0, 1]
-        G_values = self.parallel.parallel_expected_free_energy(
-            qs, A, B, C, actions)
+        G_values = self.parallel.parallel_expected_free_energy(qs, A, B, C, actions)
         assert G_values.shape == (2,)
         assert all(torch.isfinite(G_values))
 
@@ -145,8 +135,7 @@ class TestParallelInference:
         beliefs = [torch.rand(4) for _ in range(2)]
         observations = [torch.rand(3) for _ in range(2)]
         A_matrices = [torch.rand(3, 4) for _ in range(2)]
-        updated_beliefs = self.parallel.parallel_belief_updates(
-            beliefs, observations, A_matrices)
+        updated_beliefs = self.parallel.parallel_belief_updates(beliefs, observations, A_matrices)
         assert len(updated_beliefs) == 2
 
 
@@ -173,8 +162,7 @@ class TestCachedInference:
         """Test belief update caching"""
         belief = torch.tensor([0.25, 0.25, 0.25, 0.25])
         observation = torch.tensor([1.0, 0.0, 0.0])
-        A = torch.tensor(
-            [[0.9, 0.1, 0.0, 0.0], [0.1, 0.8, 0.1, 0.0], [0.0, 0.1, 0.9, 0.0]])
+        A = torch.tensor([[0.9, 0.1, 0.0, 0.0], [0.1, 0.8, 0.1, 0.0], [0.0, 0.1, 0.9, 0.0]])
         result1 = self.cache.cached_belief_update(belief, observation, A)
         assert self.cache.cache_misses == 1
         assert self.cache.cache_hits == 0
@@ -221,8 +209,7 @@ class TestCachedInference:
 class TestGPUOptimizer:
     def setup_method(self) -> None:
         """Setup for tests"""
-        self.config = OptimizationConfig(
-            use_gpu=False, use_mixed_precision=True)
+        self.config = OptimizationConfig(use_gpu=False, use_mixed_precision=True)
         self.gpu_opt = GPUOptimizer(self.config)
 
     def test_optimize_tensor_operations(self) -> None:
@@ -234,8 +221,7 @@ class TestGPUOptimizer:
             assert opt.shape == orig.shape
             assert opt.is_contiguous()
 
-    @pytest.mark.skipif(not torch.cuda.is_available(),
-                        reason="CUDA not available")
+    @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA not available")
     def test_mixed_precision_inference(self) -> None:
         """Test mixed precision inference"""
         model = torch.nn.Linear(10, 5)
@@ -250,8 +236,7 @@ class TestGPUOptimizer:
             return x + y
 
         sample_inputs = (torch.rand(5), torch.rand(5))
-        graphed_func = self.gpu_opt.create_cuda_graph(
-            simple_func, sample_inputs)
+        graphed_func = self.gpu_opt.create_cuda_graph(simple_func, sample_inputs)
         result = graphed_func(torch.rand(5), torch.rand(5))
         assert result.shape == (5,)
 
@@ -269,11 +254,7 @@ class TestBatchProcessor:
             return x * 2
 
         for i in range(2):
-            self.batch_proc.add_request(
-                f"req_{i}",
-                dummy_computation,
-                torch.tensor(
-                    float(i)))
+            self.batch_proc.add_request(f"req_{i}", dummy_computation, torch.tensor(float(i)))
         assert len(self.batch_proc.pending_requests) == 2
         assert len(self.batch_proc.results) == 0
 
@@ -284,11 +265,7 @@ class TestBatchProcessor:
             return x * 2
 
         for i in range(3):
-            self.batch_proc.add_request(
-                f"req_{i}",
-                dummy_computation,
-                torch.tensor(
-                    float(i)))
+            self.batch_proc.add_request(f"req_{i}", dummy_computation, torch.tensor(float(i)))
         assert len(self.batch_proc.pending_requests) == 0
         for i in range(3):
             result = self.batch_proc.get_result(f"req_{i}", timeout=0.1)
@@ -339,8 +316,7 @@ class TestComputationalOptimizer:
         """Test optimized belief update"""
         belief = torch.tensor([0.25, 0.25, 0.25, 0.25])
         observation = torch.tensor([0.0, 1.0, 0.0])
-        A = torch.tensor(
-            [[0.9, 0.1, 0.0, 0.0], [0.1, 0.8, 0.1, 0.0], [0.0, 0.1, 0.9, 0.0]])
+        A = torch.tensor([[0.9, 0.1, 0.0, 0.0], [0.1, 0.8, 0.1, 0.0], [0.0, 0.1, 0.9, 0.0]])
         result = self.optimizer.optimized_belief_update(belief, observation, A)
         assert result.shape == belief.shape
         assert torch.allclose(result.sum(), torch.tensor(1.0))
@@ -358,8 +334,7 @@ class TestComputationalOptimizer:
         for i in range(8):
             if A[i].sum() == 0:
                 A[i, 0] = 1.0
-        result = self.optimizer.optimized_belief_update(
-            belief, observation, A, use_sparse=True)
+        result = self.optimizer.optimized_belief_update(belief, observation, A, use_sparse=True)
         assert result.shape == belief.shape
         assert torch.allclose(result.sum(), torch.tensor(1.0), atol=1e-06)
 
@@ -423,8 +398,7 @@ class TestIntegration:
         )
         optimizer = ComputationalOptimizer(config)
         belief = torch.tensor([0.25, 0.25, 0.25, 0.25])
-        A = torch.tensor(
-            [[0.9, 0.1, 0.0, 0.0], [0.1, 0.8, 0.1, 0.0], [0.0, 0.1, 0.9, 0.0]])
+        A = torch.tensor([[0.9, 0.1, 0.0, 0.0], [0.1, 0.8, 0.1, 0.0], [0.0, 0.1, 0.9, 0.0]])
         B = torch.rand(4, 4, 2)
         B /= B.sum(dim=0, keepdim=True)
         C = torch.tensor([0.7, 0.2, 0.1])
@@ -433,8 +407,7 @@ class TestIntegration:
             observation = torch.zeros(3)
             observation[obs_idx] = 1.0
             belief = optimizer.optimized_belief_update(belief, observation, A)
-            action_probs, _ = optimizer.optimized_action_selection(
-                belief, A, B, C, num_actions=2)
+            action_probs, _ = optimizer.optimized_action_selection(belief, A, B, C, num_actions=2)
             action = torch.multinomial(action_probs, 1).item()
             belief = torch.matmul(B[:, :, action], belief)
         report = optimizer.get_performance_report()

@@ -117,9 +117,8 @@ except ImportError:
             ]
         )
         assessment_methods: List[str] = field(
-            default_factory=lambda: [
-                AssessmentMethod.QUANTITATIVE,
-                AssessmentMethod.QUALITATIVE])
+            default_factory=lambda: [AssessmentMethod.QUANTITATIVE, AssessmentMethod.QUALITATIVE]
+        )
 
         # Thresholds
         minimum_readiness_threshold: float = 0.7
@@ -175,8 +174,7 @@ except ImportError:
         blocking_issues: List[Dict[str, Any]] = field(default_factory=list)
 
         # Recommendations
-        improvement_recommendations: List[Dict[str, Any]] = field(
-            default_factory=list)
+        improvement_recommendations: List[Dict[str, Any]] = field(default_factory=list)
         remediation_plan: Dict[str, Any] = field(default_factory=dict)
         timeline_to_readiness: int = 0  # days
 
@@ -194,8 +192,7 @@ except ImportError:
     @dataclass
     class CoalitionReadinessProfile:
         coalition_id: str
-        member_profiles: Dict[str, Dict[str, Any]
-                              ] = field(default_factory=dict)
+        member_profiles: Dict[str, Dict[str, Any]] = field(default_factory=dict)
         collective_capabilities: Dict[str, float] = field(default_factory=dict)
         synergy_potential: float = 0.0
         integration_complexity: float = 0.0
@@ -255,7 +252,8 @@ except ImportError:
                         "target_score": self.config.target_readiness_level,
                         "gap_size": self.config.target_readiness_level - score,
                         "criticality": (
-                            CriticalityLevel.HIGH if score < 0.4 else CriticalityLevel.MEDIUM),
+                            CriticalityLevel.HIGH if score < 0.4 else CriticalityLevel.MEDIUM
+                        ),
                     }
                     gaps.append(gap)
 
@@ -266,7 +264,8 @@ except ImportError:
                                 "issue_type": "blocking",
                                 "severity": "critical",
                                 "description": f"Critical readiness gap in {dim}",
-                            })
+                            }
+                        )
 
             metrics = ReadinessMetrics(
                 overall_readiness_score=overall_score,
@@ -284,8 +283,7 @@ except ImportError:
 
             return metrics
 
-        def generate_remediation_plan(
-                self, metrics: ReadinessMetrics) -> Dict[str, Any]:
+        def generate_remediation_plan(self, metrics: ReadinessMetrics) -> Dict[str, Any]:
             remediation_actions = []
             for gap in metrics.identified_gaps:
                 action = {
@@ -310,14 +308,12 @@ except ImportError:
                 "total_effort_estimate": sum([a["estimated_effort"] for a in remediation_actions]),
             }
 
-        def track_readiness_progress(
-                self, coalition_id: str) -> Dict[str, Any]:
+        def track_readiness_progress(self, coalition_id: str) -> Dict[str, Any]:
             history = self.history.get(coalition_id, [])
             if len(history) < 2:
                 return {"status": "insufficient_data"}
 
-            recent_scores = [
-                assessment.overall_readiness_score for assessment in history[-5:]]
+            recent_scores = [assessment.overall_readiness_score for assessment in history[-5:]]
             trend = "stable"
             if len(recent_scores) > 1:
                 if recent_scores[-1] > recent_scores[0] + 0.05:
@@ -382,21 +378,10 @@ class TestBusinessReadinessAssessor:
         coalition_profile = CoalitionReadinessProfile(
             coalition_id="test_coalition_1",
             member_profiles={
-                "agent_1": {
-                    "capabilities": [
-                        "skill_1",
-                        "skill_2"],
-                    "experience": 5},
-                "agent_2": {
-                    "capabilities": [
-                        "skill_2",
-                        "skill_3"],
-                    "experience": 3},
+                "agent_1": {"capabilities": ["skill_1", "skill_2"], "experience": 5},
+                "agent_2": {"capabilities": ["skill_2", "skill_3"], "experience": 3},
             },
-            collective_capabilities={
-                "skill_1": 0.8,
-                "skill_2": 0.9,
-                "skill_3": 0.6},
+            collective_capabilities={"skill_1": 0.8, "skill_2": 0.9, "skill_3": 0.6},
             synergy_potential=0.7,
             coordination_readiness=0.8,
         )
@@ -417,8 +402,9 @@ class TestBusinessReadinessAssessor:
     def test_dimension_scoring(self):
         """Test individual dimension scoring"""
         coalition_profile = CoalitionReadinessProfile(
-            coalition_id="dimension_test", collective_capabilities={
-                "technical": 0.8, "financial": 0.6, "operational": 0.7}, )
+            coalition_id="dimension_test",
+            collective_capabilities={"technical": 0.8, "financial": 0.6, "operational": 0.7},
+        )
 
         metrics = self.assessor.assess_coalition_readiness(coalition_profile)
 
@@ -568,14 +554,8 @@ class TestTechnicalReadinessValidator:
     def test_technical_capability_assessment(self):
         """Test technical capability assessment"""
         technical_profile = {
-            "technologies": [
-                "python",
-                "pytorch",
-                "kubernetes"],
-            "infrastructure": {
-                "cloud_readiness": 0.8,
-                "scalability": 0.7,
-                "security": 0.9},
+            "technologies": ["python", "pytorch", "kubernetes"],
+            "infrastructure": {"cloud_readiness": 0.8, "scalability": 0.7, "security": 0.9},
             "development_practices": {
                 "ci_cd": True,
                 "testing_coverage": 0.85,
@@ -583,8 +563,7 @@ class TestTechnicalReadinessValidator:
             },
         }
 
-        assessment = self.validator.assess_technical_readiness(
-            technical_profile)
+        assessment = self.validator.assess_technical_readiness(technical_profile)
 
         assert isinstance(assessment, dict)
         assert "overall_score" in assessment
@@ -601,8 +580,7 @@ class TestTechnicalReadinessValidator:
             "backup_recovery": {"backup_strategy": 0.9, "recovery_time": 0.7},
         }
 
-        assessment = self.validator.assess_infrastructure_readiness(
-            infrastructure_profile)
+        assessment = self.validator.assess_infrastructure_readiness(infrastructure_profile)
 
         assert isinstance(assessment, dict)
         assert "infrastructure_score" in assessment
@@ -706,11 +684,7 @@ class TestOperationalReadinessEvaluator:
     def test_process_readiness_assessment(self):
         """Test process readiness assessment"""
         process_profile = {
-            "defined_processes": [
-                "onboarding",
-                "development",
-                "deployment",
-                "monitoring"],
+            "defined_processes": ["onboarding", "development", "deployment", "monitoring"],
             "process_maturity": {
                 "onboarding": 0.8,
                 "development": 0.9,
@@ -771,24 +745,14 @@ class TestStrategicReadinessAssessor:
     def test_alignment_assessment(self):
         """Test strategic alignment assessment"""
         strategic_profile = {
-            "organizational_goals": [
-                "growth",
-                "innovation",
-                "efficiency"],
-            "coalition_objectives": [
-                "innovation",
-                "efficiency",
-                "market_expansion"],
-            "success_metrics": [
-                "revenue_increase",
-                "cost_reduction",
-                "time_to_market"],
+            "organizational_goals": ["growth", "innovation", "efficiency"],
+            "coalition_objectives": ["innovation", "efficiency", "market_expansion"],
+            "success_metrics": ["revenue_increase", "cost_reduction", "time_to_market"],
             "stakeholder_alignment": 0.8,
             "executive_support": 0.9,
         }
 
-        assessment = self.assessor.assess_strategic_alignment(
-            strategic_profile)
+        assessment = self.assessor.assess_strategic_alignment(strategic_profile)
 
         assert isinstance(assessment, dict)
         assert "alignment_score" in assessment
@@ -867,8 +831,7 @@ class TestRiskReadinessAnalyzer:
             {"id": "risk_2", "type": "technical_failure", "probability": 0.4, "impact": 0.8},
         ]
 
-        mitigation_plan = self.analyzer.develop_mitigation_strategies(
-            high_impact_risks)
+        mitigation_plan = self.analyzer.develop_mitigation_strategies(high_impact_risks)
 
         assert isinstance(mitigation_plan, dict)
         assert "strategies" in mitigation_plan
@@ -908,8 +871,7 @@ class TestComplianceReadinessValidator:
             ],
         }
 
-        assessment = self.validator.assess_compliance_readiness(
-            compliance_profile)
+        assessment = self.validator.assess_compliance_readiness(compliance_profile)
 
         assert isinstance(assessment, dict)
         assert "compliance_score" in assessment
@@ -920,24 +882,12 @@ class TestComplianceReadinessValidator:
     def test_policy_adherence_check(self):
         """Test policy adherence checking"""
         policy_profile = {
-            "required_policies": [
-                "data_governance",
-                "security",
-                "privacy",
-                "ethics"],
+            "required_policies": ["data_governance", "security", "privacy", "ethics"],
             "implemented_policies": {
-                "data_governance": {
-                    "status": "implemented",
-                    "last_review": "2023-06-01"},
-                "security": {
-                    "status": "implemented",
-                    "last_review": "2023-05-15"},
-                "privacy": {
-                    "status": "draft",
-                    "last_review": None},
-                "ethics": {
-                    "status": "not_started",
-                    "last_review": None},
+                "data_governance": {"status": "implemented", "last_review": "2023-06-01"},
+                "security": {"status": "implemented", "last_review": "2023-05-15"},
+                "privacy": {"status": "draft", "last_review": None},
+                "ethics": {"status": "not_started", "last_review": None},
             },
             "training_completion": 0.85,
             "policy_violations": 2,
@@ -1000,8 +950,7 @@ class TestIntegrationScenarios:
             conflict_resolution_capability=0.65,
         )
 
-        metrics = self.assessor.assess_coalition_readiness(
-            comprehensive_profile)
+        metrics = self.assessor.assess_coalition_readiness(comprehensive_profile)
 
         # Verify comprehensive assessment
         assert metrics.overall_readiness_score > 0.0
@@ -1064,21 +1013,19 @@ class TestIntegrationScenarios:
             commitment_level=0.9,  # Excellent
         )
 
-        metrics = self.assessor.assess_coalition_readiness(
-            critical_gap_profile)
+        metrics = self.assessor.assess_coalition_readiness(critical_gap_profile)
 
         # Should identify critical issues
         assert len(metrics.critical_issues) > 0
         assert len(metrics.identified_gaps) > 0
 
         # Overall readiness should be low despite some strong areas
-        assert metrics.readiness_level in [
-            ReadinessLevel.NOT_READY,
-            ReadinessLevel.PARTIALLY_READY]
+        assert metrics.readiness_level in [ReadinessLevel.NOT_READY, ReadinessLevel.PARTIALLY_READY]
 
         # Should have blocking issues
-        blocking_issues = [issue for issue in metrics.critical_issues if issue.get(
-            "issue_type") == "blocking"]
+        blocking_issues = [
+            issue for issue in metrics.critical_issues if issue.get("issue_type") == "blocking"
+        ]
         assert len(blocking_issues) > 0
 
     def test_multi_coalition_readiness_comparison(self):

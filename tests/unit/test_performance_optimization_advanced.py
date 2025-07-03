@@ -318,13 +318,10 @@ except ImportError:
                 )
 
                 # Application metrics
-                self.current_metrics.throughput = max(
-                    0, 800 + np.random.normal(0, 100))
-                self.current_metrics.latency_avg = max(
-                    0, 150 + np.random.normal(0, 30))
+                self.current_metrics.throughput = max(0, 800 + np.random.normal(0, 100))
+                self.current_metrics.latency_avg = max(0, 150 + np.random.normal(0, 30))
                 self.current_metrics.latency_p95 = self.current_metrics.latency_avg * 1.5
-                self.current_metrics.error_rate = max(
-                    0, 0.002 + np.random.normal(0, 0.001))
+                self.current_metrics.error_rate = max(0, 0.002 + np.random.normal(0, 0.001))
 
                 # Cache metrics
                 self.current_metrics.cache_hit_rate = min(
@@ -332,8 +329,7 @@ except ImportError:
                 )
 
                 # Database metrics
-                self.current_metrics.db_query_time_avg = max(
-                    0, 50 + np.random.normal(0, 15))
+                self.current_metrics.db_query_time_avg = max(0, 50 + np.random.normal(0, 15))
 
             except Exception:
                 # Fallback for any calculation errors
@@ -371,8 +367,7 @@ except ImportError:
                 self.bottlenecks[bottleneck.bottleneck_id] = bottleneck
 
             # Check memory bottleneck
-            avg_memory = np.mean(
-                [m.memory_utilization for m in latest_metrics])
+            avg_memory = np.mean([m.memory_utilization for m in latest_metrics])
             if avg_memory > 0.85:
                 bottleneck = Bottleneck(
                     bottleneck_id=f"MEM-{uuid.uuid4().hex[:8]}",
@@ -392,8 +387,7 @@ except ImportError:
 
             # Check latency bottleneck
             avg_latency = np.mean([m.latency_avg for m in latest_metrics])
-            if avg_latency > self.config.target_metrics.get(
-                    PerformanceMetric.LATENCY, 200):
+            if avg_latency > self.config.target_metrics.get(PerformanceMetric.LATENCY, 200):
                 bottleneck = Bottleneck(
                     bottleneck_id=f"LAT-{uuid.uuid4().hex[:8]}",
                     component="application",
@@ -412,8 +406,7 @@ except ImportError:
 
             return bottlenecks
 
-        def optimize_performance(
-                self, optimization_type: str) -> OptimizationResult:
+        def optimize_performance(self, optimization_type: str) -> OptimizationResult:
             optimization_id = f"OPT-{uuid.uuid4().hex[:8]}"
 
             # Get baseline metrics
@@ -432,8 +425,7 @@ except ImportError:
 
             if optimization_type == OptimizationType.CPU:
                 # CPU optimization
-                improvement = np.random.uniform(
-                    0.05, 0.20)  # 5-20% improvement
+                improvement = np.random.uniform(0.05, 0.20)  # 5-20% improvement
                 parameters_changed = {
                     "thread_pool_size": self.config.thread_pool_size * 1.2,
                     "cpu_affinity": "enabled",
@@ -442,8 +434,7 @@ except ImportError:
 
             elif optimization_type == OptimizationType.MEMORY:
                 # Memory optimization
-                improvement = np.random.uniform(
-                    0.10, 0.25)  # 10-25% improvement
+                improvement = np.random.uniform(0.10, 0.25)  # 10-25% improvement
                 parameters_changed = {
                     "memory_pool_size": self.config.max_memory_gb * 0.8,
                     "garbage_collection": "optimized",
@@ -452,8 +443,7 @@ except ImportError:
 
             elif optimization_type == OptimizationType.CACHE:
                 # Cache optimization
-                improvement = np.random.uniform(
-                    0.15, 0.30)  # 15-30% improvement
+                improvement = np.random.uniform(0.15, 0.30)  # 15-30% improvement
                 parameters_changed = {
                     "cache_size": self.config.cache_size_mb * 1.5,
                     "eviction_policy": "adaptive-lru",
@@ -462,8 +452,7 @@ except ImportError:
 
             elif optimization_type == OptimizationType.DATABASE:
                 # Database optimization
-                improvement = np.random.uniform(
-                    0.20, 0.40)  # 20-40% improvement
+                improvement = np.random.uniform(0.20, 0.40)  # 20-40% improvement
                 parameters_changed = {
                     "connection_pool_size": self.config.connection_pool_size * 1.3,
                     "query_optimization": "enabled",
@@ -472,8 +461,7 @@ except ImportError:
 
             else:
                 # Generic optimization
-                improvement = np.random.uniform(
-                    0.05, 0.15)  # 5-15% improvement
+                improvement = np.random.uniform(0.05, 0.15)  # 5-15% improvement
                 parameters_changed = {"optimization_level": "enhanced"}
 
             # Apply optimization effects to metrics
@@ -484,10 +472,8 @@ except ImportError:
             optimized_metrics.memory_utilization = max(
                 0.1, baseline.memory_utilization * (1 - improvement * 0.2)
             )
-            optimized_metrics.throughput = baseline.throughput * \
-                (1 + improvement)
-            optimized_metrics.latency_avg = max(
-                10, baseline.latency_avg * (1 - improvement * 0.5))
+            optimized_metrics.throughput = baseline.throughput * (1 + improvement)
+            optimized_metrics.latency_avg = max(10, baseline.latency_avg * (1 - improvement * 0.5))
             optimized_metrics.cache_hit_rate = min(
                 1.0, baseline.cache_hit_rate * (1 + improvement * 0.1)
             )
@@ -503,21 +489,15 @@ except ImportError:
 
             # Calculate performance gains
             result.performance_gain = {
-                "throughput": (
-                    optimized_metrics.throughput -
-                    baseline.throughput) /
-                baseline.throughput *
-                100,
-                "latency": (
-                    baseline.latency_avg -
-                    optimized_metrics.latency_avg) /
-                baseline.latency_avg *
-                100,
-                "cpu_efficiency": (
-                    baseline.cpu_utilization -
-                    optimized_metrics.cpu_utilization) /
-                baseline.cpu_utilization *
-                100,
+                "throughput": (optimized_metrics.throughput - baseline.throughput)
+                / baseline.throughput
+                * 100,
+                "latency": (baseline.latency_avg - optimized_metrics.latency_avg)
+                / baseline.latency_avg
+                * 100,
+                "cpu_efficiency": (baseline.cpu_utilization - optimized_metrics.cpu_utilization)
+                / baseline.cpu_utilization
+                * 100,
             }
 
             self.optimizations[optimization_id] = result
@@ -540,10 +520,7 @@ except ImportError:
                     "garbage_collection": "low_latency",
                 }
             elif workload_type == WorkloadType.IO_INTENSIVE:
-                tuned_params = {
-                    "io_threads": 32,
-                    "buffer_size": 65536,
-                    "async_io": True}
+                tuned_params = {"io_threads": 32, "buffer_size": 65536, "async_io": True}
             elif workload_type == WorkloadType.NETWORK_INTENSIVE:
                 tuned_params = {
                     "connection_pool_size": self.config.connection_pool_size * 2,
@@ -560,8 +537,7 @@ except ImportError:
 
             return tuned_params
 
-        def predict_performance(
-                self, time_horizon_minutes: int = 60) -> Dict[str, float]:
+        def predict_performance(self, time_horizon_minutes: int = 60) -> Dict[str, float]:
             """Predict performance metrics for future time horizon"""
             if len(self.metrics_history) < 10:
                 return {"error": "Insufficient historical data"}
@@ -570,29 +546,22 @@ except ImportError:
             recent_metrics = list(self.metrics_history)[-10:]
 
             # Calculate trends
-            cpu_trend = np.polyfit(
-                range(10), [
-                    m.cpu_utilization for m in recent_metrics], 1)[0]
-            memory_trend = np.polyfit(
-                range(10), [
-                    m.memory_utilization for m in recent_metrics], 1)[0]
-            throughput_trend = np.polyfit(
-                range(10), [m.throughput for m in recent_metrics], 1)[0]
-            latency_trend = np.polyfit(
-                range(10), [
-                    m.latency_avg for m in recent_metrics], 1)[0]
+            cpu_trend = np.polyfit(range(10), [m.cpu_utilization for m in recent_metrics], 1)[0]
+            memory_trend = np.polyfit(range(10), [m.memory_utilization for m in recent_metrics], 1)[
+                0
+            ]
+            throughput_trend = np.polyfit(range(10), [m.throughput for m in recent_metrics], 1)[0]
+            latency_trend = np.polyfit(range(10), [m.latency_avg for m in recent_metrics], 1)[0]
 
             # Project forward
             current = recent_metrics[-1]
             predictions = {
                 "predicted_cpu_utilization": min(
-                    1.0, max(0.0, current.cpu_utilization +
-                             cpu_trend * time_horizon_minutes / 10)
+                    1.0, max(0.0, current.cpu_utilization + cpu_trend * time_horizon_minutes / 10)
                 ),
                 "predicted_memory_utilization": min(
                     1.0,
-                    max(0.0, current.memory_utilization +
-                        memory_trend * time_horizon_minutes / 10),
+                    max(0.0, current.memory_utilization + memory_trend * time_horizon_minutes / 10),
                 ),
                 "predicted_throughput": max(
                     0, current.throughput + throughput_trend * time_horizon_minutes / 10
@@ -661,11 +630,9 @@ except ImportError:
             if len(self.metrics_history) >= 5:
                 recent_metrics = list(self.metrics_history)[-5:]
                 avg_cpu = np.mean([m.cpu_utilization for m in recent_metrics])
-                avg_memory = np.mean(
-                    [m.memory_utilization for m in recent_metrics])
+                avg_memory = np.mean([m.memory_utilization for m in recent_metrics])
                 avg_latency = np.mean([m.latency_avg for m in recent_metrics])
-                avg_throughput = np.mean(
-                    [m.throughput for m in recent_metrics])
+                avg_throughput = np.mean([m.throughput for m in recent_metrics])
 
                 # CPU optimization recommendations
                 if avg_cpu > 0.8:
@@ -702,8 +669,7 @@ except ImportError:
                     )
 
                 # Latency optimization recommendations
-                target_latency = self.config.target_metrics.get(
-                    PerformanceMetric.LATENCY, 200)
+                target_latency = self.config.target_metrics.get(PerformanceMetric.LATENCY, 200)
                 if avg_latency > target_latency:
                     recommendations.append(
                         {
@@ -869,8 +835,7 @@ class TestPerformanceOptimizer:
         for bottleneck in bottlenecks:
             assert isinstance(bottleneck, Bottleneck)
             assert bottleneck.bottleneck_id is not None
-            assert bottleneck.component in [
-                "cpu", "memory", "application", "network", "database"]
+            assert bottleneck.component in ["cpu", "memory", "application", "network", "database"]
             assert bottleneck.severity in ["low", "medium", "high", "critical"]
             assert len(bottleneck.recommended_actions) > 0
             assert 0.0 <= bottleneck.performance_impact <= 1.0
@@ -916,8 +881,7 @@ class TestPerformanceOptimizer:
             assert "cpu_efficiency" in result.performance_gain
 
         # Verify all optimizations are stored
-        assert len(self.performance_optimizer.optimizations) == len(
-            optimization_types)
+        assert len(self.performance_optimizer.optimizations) == len(optimization_types)
 
         # Check that optimizations show improvements
         for opt_type, result in optimization_results.items():
@@ -940,8 +904,7 @@ class TestPerformanceOptimizer:
         tuning_results = {}
 
         for workload_type in workload_types:
-            tuned_params = self.performance_optimizer.auto_tune_parameters(
-                workload_type)
+            tuned_params = self.performance_optimizer.auto_tune_parameters(workload_type)
             tuning_results[workload_type] = tuned_params
 
             # Verify tuning results
@@ -977,8 +940,7 @@ class TestPerformanceOptimizer:
         time_horizons = [30, 60, 120]  # minutes
 
         for horizon in time_horizons:
-            predictions = self.performance_optimizer.predict_performance(
-                horizon)
+            predictions = self.performance_optimizer.predict_performance(horizon)
 
             # Verify prediction results
             assert isinstance(predictions, dict)
@@ -1051,8 +1013,7 @@ class TestPerformanceOptimizer:
 
         # Add problematic metrics to history
         for _ in range(10):
-            self.performance_optimizer.metrics_history.append(
-                problematic_metrics)
+            self.performance_optimizer.metrics_history.append(problematic_metrics)
 
         # Get recommendations
         recommendations = self.performance_optimizer.get_optimization_recommendations()
@@ -1077,13 +1038,11 @@ class TestPerformanceOptimizer:
                 OptimizationType.CACHE,
                 OptimizationType.CONCURRENCY,
             ]
-            assert recommendation["priority"] in [
-                "low", "medium", "high", "critical"]
+            assert recommendation["priority"] in ["low", "medium", "high", "critical"]
             assert isinstance(recommendation["actions"], list)
             assert len(recommendation["actions"]) > 0
             assert recommendation["expected_improvement"] > 0
-            assert recommendation["implementation_effort"] in [
-                "low", "medium", "high"]
+            assert recommendation["implementation_effort"] in ["low", "medium", "high"]
 
         # Should have recommendations for the performance issues we created
         recommendation_types = [r["type"] for r in recommendations]
@@ -1187,8 +1146,7 @@ class TestCacheOptimizer:
             "access_pattern": "zipfian",
         }
 
-        optimal_size = self.cache_optimizer.calculate_optimal_cache_size(
-            workload_pattern)
+        optimal_size = self.cache_optimizer.calculate_optimal_cache_size(workload_pattern)
 
         assert isinstance(optimal_size, dict)
         assert "recommended_size_mb" in optimal_size
@@ -1198,20 +1156,17 @@ class TestCacheOptimizer:
     @pytest.mark.skipif(not IMPORT_SUCCESS, reason="Module not available")
     def test_eviction_policy_optimization(self):
         """Test cache eviction policy optimization"""
-        access_patterns = [{"key": "user:123",
-                            "access_time": datetime.now(),
-                            "frequency": 10},
-                           {"key": "user:456",
-                            "access_time": datetime.now() - timedelta(hours=1),
-                            "frequency": 5},
-                           {"key": "user:789",
-                            "access_time": datetime.now() - timedelta(minutes=30),
-                            "frequency": 15,
-                            },
-                           ]
+        access_patterns = [
+            {"key": "user:123", "access_time": datetime.now(), "frequency": 10},
+            {"key": "user:456", "access_time": datetime.now() - timedelta(hours=1), "frequency": 5},
+            {
+                "key": "user:789",
+                "access_time": datetime.now() - timedelta(minutes=30),
+                "frequency": 15,
+            },
+        ]
 
-        policy_recommendation = self.cache_optimizer.optimize_eviction_policy(
-            access_patterns)
+        policy_recommendation = self.cache_optimizer.optimize_eviction_policy(access_patterns)
 
         assert isinstance(policy_recommendation, dict)
         assert "recommended_policy" in policy_recommendation
@@ -1237,17 +1192,20 @@ class TestDatabaseOptimizer:
     @pytest.mark.skipif(not IMPORT_SUCCESS, reason="Module not available")
     def test_query_optimization(self):
         """Test SQL query optimization"""
-        slow_queries = [{"query": "SELECT * FROM users WHERE email LIKE '%@example.com%'",
-                         "execution_time_ms": 2500,
-                         "frequency": 100,
-                         "rows_examined": 1000000,
-                         },
-                        {"query": "SELECT u.*, p.* FROM users u JOIN profiles p ON u.id = p.user_id",
-                         "execution_time_ms": 1800,
-                         "frequency": 50,
-                         "rows_examined": 500000,
-                         },
-                        ]
+        slow_queries = [
+            {
+                "query": "SELECT * FROM users WHERE email LIKE '%@example.com%'",
+                "execution_time_ms": 2500,
+                "frequency": 100,
+                "rows_examined": 1000000,
+            },
+            {
+                "query": "SELECT u.*, p.* FROM users u JOIN profiles p ON u.id = p.user_id",
+                "execution_time_ms": 1800,
+                "frequency": 50,
+                "rows_examined": 500000,
+            },
+        ]
 
         optimization_results = self.db_optimizer.optimize_queries(slow_queries)
 
@@ -1278,8 +1236,7 @@ class TestDatabaseOptimizer:
             ],
         }
 
-        index_recommendations = self.db_optimizer.recommend_indexes(
-            table_schema)
+        index_recommendations = self.db_optimizer.recommend_indexes(table_schema)
 
         assert isinstance(index_recommendations, list)
         assert len(index_recommendations) > 0
@@ -1301,8 +1258,7 @@ class TestDatabaseOptimizer:
             "avg_query_duration_ms": 100,
         }
 
-        pool_optimization = self.db_optimizer.optimize_connection_pool(
-            connection_stats)
+        pool_optimization = self.db_optimizer.optimize_connection_pool(connection_stats)
 
         assert isinstance(pool_optimization, dict)
         assert "recommended_pool_size" in pool_optimization
@@ -1351,8 +1307,7 @@ class TestIntegrationScenarios:
             # Apply top 3 recommendations
             for recommendation in recommendations[:3]:
                 opt_type = recommendation["type"]
-                result = self.performance_optimizer.optimize_performance(
-                    opt_type)
+                result = self.performance_optimizer.optimize_performance(opt_type)
                 optimization_results.append(result)
 
         # 5. Validate optimization effectiveness
@@ -1377,8 +1332,7 @@ class TestIntegrationScenarios:
 
         # 7. Calculate overall improvement
         if optimization_results:
-            total_improvement = np.mean(
-                [r.improvement_percentage for r in optimization_results])
+            total_improvement = np.mean([r.improvement_percentage for r in optimization_results])
             assert total_improvement > 0.0
 
             # Verify some metrics improved
@@ -1408,8 +1362,7 @@ class TestIntegrationScenarios:
             workload_type = phase["type"]
 
             # 1. Auto-tune for workload type
-            tuned_params = self.performance_optimizer.auto_tune_parameters(
-                workload_type)
+            tuned_params = self.performance_optimizer.auto_tune_parameters(workload_type)
 
             # 2. Collect metrics during workload
             phase_metrics = []
@@ -1442,8 +1395,7 @@ class TestIntegrationScenarios:
         assert len(phase_results) == len(workload_phases)
 
         # Check that different workloads got different tuning
-        all_tuned_params = [result["tuned_params"]
-                            for result in phase_results.values()]
+        all_tuned_params = [result["tuned_params"] for result in phase_results.values()]
         unique_tuning_configs = set(str(params) for params in all_tuned_params)
         # Should have different configurations
         assert len(unique_tuning_configs) > 1
@@ -1479,8 +1431,7 @@ class TestIntegrationScenarios:
         for _ in range(10):
             metrics = self.performance_optimizer.collect_metrics()
             # Introduce regression
-            metrics.cpu_utilization = min(
-                1.0, metrics.cpu_utilization * 1.5)  # 50% higher CPU
+            metrics.cpu_utilization = min(1.0, metrics.cpu_utilization * 1.5)  # 50% higher CPU
             metrics.latency_avg = metrics.latency_avg * 2.0  # 2x higher latency
             metrics.throughput = metrics.throughput * 0.7  # 30% lower throughput
             regressed_metrics.append(metrics)
@@ -1509,8 +1460,7 @@ class TestIntegrationScenarios:
         assert regressed_performance["throughput_avg"] < baseline_performance["throughput_avg"]
 
         # Should have high-priority recommendations for the regression
-        high_priority_recommendations = [
-            r for r in recommendations if r["priority"] == "high"]
+        high_priority_recommendations = [r for r in recommendations if r["priority"] == "high"]
         assert len(high_priority_recommendations) > 0
 
     def test_multi_dimensional_optimization(self):
@@ -1547,8 +1497,7 @@ class TestIntegrationScenarios:
         assert len(optimization_results) == len(optimization_targets)
 
         # Check that all optimizations succeeded
-        successful_optimizations = [
-            r for r in optimization_results.values() if r.success]
+        successful_optimizations = [r for r in optimization_results.values() if r.success]
         assert len(successful_optimizations) == len(optimization_targets)
 
         # Verify cumulative improvement

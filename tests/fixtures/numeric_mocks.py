@@ -16,13 +16,7 @@ import torch
 class NumericMock(MagicMock):
     """Mock that supports numeric operations."""
 
-    def __init__(self,
-                 value: Union[float,
-                              int,
-                              np.ndarray,
-                              torch.Tensor] = 1.0,
-                 *args,
-                 **kwargs):
+    def __init__(self, value: Union[float, int, np.ndarray, torch.Tensor] = 1.0, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._value = value
         self._setup_numeric_operations()
@@ -30,26 +24,16 @@ class NumericMock(MagicMock):
     def _setup_numeric_operations(self):
         """Setup all numeric operations to use the underlying value."""
         # Arithmetic operations
-        self.__add__ = lambda other: NumericMock(
-            self._value + self._get_value(other))
-        self.__radd__ = lambda other: NumericMock(
-            self._get_value(other) + self._value)
-        self.__sub__ = lambda other: NumericMock(
-            self._value - self._get_value(other))
-        self.__rsub__ = lambda other: NumericMock(
-            self._get_value(other) - self._value)
-        self.__mul__ = lambda other: NumericMock(
-            self._value * self._get_value(other))
-        self.__rmul__ = lambda other: NumericMock(
-            self._get_value(other) * self._value)
-        self.__truediv__ = lambda other: NumericMock(
-            self._value / self._get_value(other))
-        self.__rtruediv__ = lambda other: NumericMock(
-            self._get_value(other) / self._value)
-        self.__pow__ = lambda other: NumericMock(
-            self._value ** self._get_value(other))
-        self.__rpow__ = lambda other: NumericMock(
-            self._get_value(other) ** self._value)
+        self.__add__ = lambda other: NumericMock(self._value + self._get_value(other))
+        self.__radd__ = lambda other: NumericMock(self._get_value(other) + self._value)
+        self.__sub__ = lambda other: NumericMock(self._value - self._get_value(other))
+        self.__rsub__ = lambda other: NumericMock(self._get_value(other) - self._value)
+        self.__mul__ = lambda other: NumericMock(self._value * self._get_value(other))
+        self.__rmul__ = lambda other: NumericMock(self._get_value(other) * self._value)
+        self.__truediv__ = lambda other: NumericMock(self._value / self._get_value(other))
+        self.__rtruediv__ = lambda other: NumericMock(self._get_value(other) / self._value)
+        self.__pow__ = lambda other: NumericMock(self._value ** self._get_value(other))
+        self.__rpow__ = lambda other: NumericMock(self._get_value(other) ** self._value)
         self.__neg__ = lambda: NumericMock(-self._value)
 
         # Comparison operations
@@ -62,12 +46,9 @@ class NumericMock(MagicMock):
 
         # Array/tensor operations
         self.__getitem__ = lambda key: NumericMock(
-            self._value[key] if hasattr(
-                self._value, "__getitem__") else self._value)
-        self.__len__ = lambda: len(
-            self._value) if hasattr(
-            self._value,
-            "__len__") else 1
+            self._value[key] if hasattr(self._value, "__getitem__") else self._value
+        )
+        self.__len__ = lambda: len(self._value) if hasattr(self._value, "__len__") else 1
 
         # Common numpy/torch operations
         self.shape = self._get_shape()
@@ -86,13 +67,11 @@ class NumericMock(MagicMock):
         self.min = lambda axis=None, keepdims=False: NumericMock(
             np.min(self._value, axis=axis, keepdims=keepdims)
         )
-        self.reshape = lambda *shape: NumericMock(
-            np.reshape(self._value, shape))
+        self.reshape = lambda *shape: NumericMock(np.reshape(self._value, shape))
         self.transpose = lambda *axes: NumericMock(
             np.transpose(self._value, axes if axes else None)
         )
-        self.squeeze = lambda axis=None: NumericMock(
-            np.squeeze(self._value, axis=axis))
+        self.squeeze = lambda axis=None: NumericMock(np.squeeze(self._value, axis=axis))
         self.unsqueeze = lambda dim: NumericMock(
             torch.unsqueeze(torch.tensor(self._value), dim)
             if isinstance(self._value, (int, float))
@@ -101,14 +80,11 @@ class NumericMock(MagicMock):
 
         # Type conversion
         self.numpy = lambda: (
-            self._value if isinstance(
-                self._value,
-                np.ndarray) else np.array(
-                self._value))
+            self._value if isinstance(self._value, np.ndarray) else np.array(self._value)
+        )
         self.item = lambda: (
-            float(
-                self._value) if isinstance(
-                self._value, (int, float)) else self._value.item())
+            float(self._value) if isinstance(self._value, (int, float)) else self._value.item()
+        )
         self.float = lambda: float(self._value)
         self.int = lambda: int(self._value)
 
@@ -170,11 +146,9 @@ def create_tensor_mock(
     mock = NumericMock(value)
     mock.requires_grad = requires_grad
     mock.device = device
-    mock.grad = None if not requires_grad else NumericMock(
-        np.zeros_like(value))
+    mock.grad = None if not requires_grad else NumericMock(np.zeros_like(value))
     mock.detach = lambda: NumericMock(value)
-    mock.to = lambda device: create_tensor_mock(
-        shape, value, requires_grad, device)
+    mock.to = lambda device: create_tensor_mock(shape, value, requires_grad, device)
     mock.cpu = lambda: create_tensor_mock(shape, value, requires_grad, "cpu")
     mock.cuda = lambda: create_tensor_mock(shape, value, requires_grad, "cuda")
 
@@ -193,9 +167,7 @@ def create_array_mock(
     return NumericMock(value)
 
 
-def create_belief_state_mock(
-        num_states: int = 4,
-        normalized: bool = True) -> NumericMock:
+def create_belief_state_mock(num_states: int = 4, normalized: bool = True) -> NumericMock:
     """Create a mock belief state for active inference tests."""
     beliefs = np.random.rand(num_states)
     if normalized:
@@ -298,8 +270,7 @@ def numeric_mock_context():
     torch.zeros = lambda *shape, **kwargs: create_tensor_mock(shape, 0.0)
     torch.ones = lambda *shape, **kwargs: create_tensor_mock(shape, 1.0)
     torch.randn = lambda *shape, **kwargs: create_tensor_mock(shape)
-    np.array = lambda data, **kwargs: create_array_mock(
-        np.array(data).shape, data)
+    np.array = lambda data, **kwargs: create_array_mock(np.array(data).shape, data)
     np.zeros = lambda shape, **kwargs: create_array_mock(shape, 0.0)
     np.ones = lambda shape, **kwargs: create_array_mock(shape, 1.0)
 

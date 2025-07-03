@@ -6,9 +6,9 @@ import threading
 import time
 from datetime import datetime, timedelta
 
+import werkzeug.serving
 from flask import Flask, jsonify, render_template_string, request
 from flask_cors import CORS
-import werkzeug.serving
 
 from .metrics_collector import get_metrics_collector
 from .monitoring import get_logger, get_monitor
@@ -35,11 +35,7 @@ class MonitoringDashboard:
     - Error tracking
     """
 
-    def __init__(
-            self,
-            host: str = "127.0.0.1",
-            port: int = 5000,
-            update_interval: int = 5) -> None:
+    def __init__(self, host: str = "127.0.0.1", port: int = 5000, update_interval: int = 5) -> None:
         """
         Initialize monitoring dashboard.
         Args:
@@ -84,8 +80,7 @@ class MonitoringDashboard:
             hours = int(request.args.get("hours", 24))
             group_by = request.args.get("group_by", "hour")
             start_time = datetime.utcnow() - timedelta(hours=hours)
-            stats = self.collector.db.get_aggregated_stats(
-                start_time=start_time, group_by=group_by)
+            stats = self.collector.db.get_aggregated_stats(start_time=start_time, group_by=group_by)
             return jsonify(stats)
 
         @self.app.route("/api/metrics/graphs")
@@ -130,17 +125,13 @@ class MonitoringDashboard:
 
         def run_app():
             werkzeug.serving.run_simple(
-                self.host,
-                self.port,
-                self.app,
-                use_reloader=False,
-                use_debugger=False)
+                self.host, self.port, self.app, use_reloader=False, use_debugger=False
+            )
 
         app_thread = threading.Thread(target=run_app)
         app_thread.daemon = True
         app_thread.start()
-        logger.info(
-            f"Monitoring dashboard started at http://{self.host}:{self.port}")
+        logger.info(f"Monitoring dashboard started at http://{self.host}:{self.port}")
 
     def stop(self):
         """Stop the dashboard"""

@@ -75,12 +75,9 @@ def mock_h3_world():
 def sample_observation(mock_hex_cell):
     """Fixture providing a sample observation"""
     visible_cells = [mock_hex_cell]
-    nearby_agents = [{"id": "agent_1",
-                      "position": "8a283080dc7ffff",
-                      "type": "explorer"}]
+    nearby_agents = [{"id": "agent_1", "position": "8a283080dc7ffff", "type": "explorer"}]
     detected_resources = {"energy": 50.0, "materials": 30.0}
-    movement_options = [(Direction.NORTH, "8a283080dc7ffff"),
-                        (Direction.SOUTH, "8a283080dd7ffff")]
+    movement_options = [(Direction.NORTH, "8a283080dc7ffff"), (Direction.SOUTH, "8a283080dd7ffff")]
 
     return {
         "current_cell": mock_hex_cell,
@@ -150,8 +147,9 @@ class TestObservation:
         assert "visible_area" in obs_dict
         assert "cells" in obs_dict["visible_area"]
         assert len(obs_dict["visible_area"]["cells"]) == 1
-        assert (obs_dict["visible_area"]["total_resources"]
-                == sample_observation["detected_resources"])
+        assert (
+            obs_dict["visible_area"]["total_resources"] == sample_observation["detected_resources"]
+        )
 
         # Check nearby agents
         assert obs_dict["nearby_agents"] == sample_observation["nearby_agents"]
@@ -224,8 +222,8 @@ class TestObservation:
 
         # Create mock cell
         mock_cell = type(
-            "MockCell", (), {
-                "hex_id": "test_hex", "biome": "temperate", "terrain": "land"})()
+            "MockCell", (), {"hex_id": "test_hex", "biome": "temperate", "terrain": "land"}
+        )()
 
         obs = MockObservation(
             current_cell=mock_cell,
@@ -278,8 +276,7 @@ class TestMovementPerceptionSystem:
 
     @pytest.mark.skipif(not IMPORT_SUCCESS, reason="Module not available")
     @patch("h3.grid_ring")
-    def test_get_valid_moves_with_obstacles(
-            self, mock_grid_ring, mock_h3_world):
+    def test_get_valid_moves_with_obstacles(self, mock_grid_ring, mock_h3_world):
         """Test valid moves with water obstacles"""
         neighbor_hexes = ["hex1", "hex2", "hex3", "hex4", "hex5", "hex6"]
         mock_grid_ring.return_value = neighbor_hexes
@@ -325,8 +322,7 @@ class TestMovementPerceptionSystem:
         assert cost > 0  # Should have a cost
 
         # Test to mountain (higher cost)
-        mountain_cost = system.calculate_movement_cost(
-            "start_hex", "mountain_hex")
+        mountain_cost = system.calculate_movement_cost("start_hex", "mountain_hex")
         assert mountain_cost > cost  # Mountain should be more expensive
 
     @pytest.mark.skipif(not IMPORT_SUCCESS, reason="Module not available")
@@ -367,11 +363,7 @@ class TestMovementPerceptionSystem:
         }
 
         # Mock visible cells
-        visible_cells = [
-            Mock(
-                hex_id="hex1"), Mock(
-                hex_id="hex2"), Mock(
-                hex_id="hex3")]
+        visible_cells = [Mock(hex_id="hex1"), Mock(hex_id="hex2"), Mock(hex_id="hex3")]
 
         system = MovementPerceptionSystem(mock_h3_world)
         system.agent_positions = agent_positions  # Inject agent positions
@@ -545,10 +537,7 @@ class TestMovementPerceptionSystem:
         assert len(visible) == 12  # 2 * 6
 
         # Test agent detection
-        system.agent_positions = {
-            "agent_1": {
-                "hex_id": "visible_1",
-                "type": "explorer"}}
+        system.agent_positions = {"agent_1": {"hex_id": "visible_1", "type": "explorer"}}
         nearby = system.detect_nearby_agents("center", visible[:5])
         assert len(nearby) == 1
         assert nearby[0]["id"] == "agent_1"
@@ -563,10 +552,7 @@ class TestMovementPerceptionIntegration:
         system = MovementPerceptionSystem(mock_h3_world)
 
         # Setup world state
-        visible_cells = [
-            mock_hex_cell, Mock(
-                hex_id="hex2", resources={
-                    "energy": 30})]
+        visible_cells = [mock_hex_cell, Mock(hex_id="hex2", resources={"energy": 30})]
         mock_h3_world.get_cell.return_value = mock_hex_cell
 
         # Mock all required methods
@@ -613,8 +599,7 @@ class TestMovementPerceptionIntegration:
             "path2": TerrainType.LAND,
         }
 
-        mock_h3_world.get_terrain_at.side_effect = lambda h: terrain_map.get(
-            h, TerrainType.LAND)
+        mock_h3_world.get_terrain_at.side_effect = lambda h: terrain_map.get(h, TerrainType.LAND)
 
         # Test that pathfinding avoids water
         path = system.find_path("start", "goal", avoid_water=True)

@@ -248,8 +248,7 @@ except ImportError:
 
             # Initialize partitions
             for i in range(self.config.num_partitions):
-                self.partitions[i] = {
-                    "primary": None, "replicas": [], "data": {}}
+                self.partitions[i] = {"primary": None, "replicas": [], "data": {}}
 
         def start_cluster(self) -> bool:
             """Start the distributed cluster"""
@@ -313,9 +312,7 @@ except ImportError:
             if not healthy_nodes:
                 return
 
-            nodes_per_partition = min(
-                self.config.replication_factor,
-                len(healthy_nodes))
+            nodes_per_partition = min(self.config.replication_factor, len(healthy_nodes))
 
             for partition_id in range(self.config.num_partitions):
                 # Use consistent hashing to assign nodes
@@ -332,8 +329,7 @@ except ImportError:
                 replica_nodes = assigned_nodes[1:]
 
                 self.partitions[partition_id]["primary"] = primary_node.node_id
-                self.partitions[partition_id]["replicas"] = [
-                    n.node_id for n in replica_nodes]
+                self.partitions[partition_id]["replicas"] = [n.node_id for n in replica_nodes]
 
                 # Update node partition assignments
                 primary_node.partitions.append(partition_id)
@@ -343,8 +339,7 @@ except ImportError:
                     replica_node.partitions.append(partition_id)
                     replica_node.is_primary[partition_id] = False
 
-        def execute_operation(
-                self, operation: DistributedOperation) -> Dict[str, Any]:
+        def execute_operation(self, operation: DistributedOperation) -> Dict[str, Any]:
             """Execute a distributed operation"""
             if not self.is_running:
                 return {"error": "Cluster not running"}
@@ -359,13 +354,11 @@ except ImportError:
             # Get target nodes based on operation type
             if operation.operation_type in ["read", "get"]:
                 # For reads, we can use any replica
-                target_nodes = [partition_info["primary"]] + \
-                    partition_info["replicas"]
+                target_nodes = [partition_info["primary"]] + partition_info["replicas"]
                 required_responses = operation.read_quorum
             else:
                 # For writes, use quorum of replicas
-                target_nodes = [partition_info["primary"]] + \
-                    partition_info["replicas"]
+                target_nodes = [partition_info["primary"]] + partition_info["replicas"]
                 required_responses = operation.write_quorum
 
             # Filter healthy nodes
@@ -439,7 +432,8 @@ except ImportError:
             self._reassign_partitions(affected_partitions, node_id)
             recovery_actions.append(
                 f"Reassigned {
-                    len(affected_partitions)} partitions")
+                    len(affected_partitions)} partitions"
+            )
 
             return {
                 "node_id": node_id,
@@ -448,10 +442,7 @@ except ImportError:
                 "new_leader": self.leader_id,
             }
 
-        def _reassign_partitions(
-                self,
-                partition_ids: List[int],
-                failed_node_id: str):
+        def _reassign_partitions(self, partition_ids: List[int], failed_node_id: str):
             """Reassign partitions from failed node to healthy nodes"""
             healthy_nodes = [
                 node
@@ -487,15 +478,13 @@ except ImportError:
                     partition_info["replicas"].remove(failed_node_id)
 
                 # Add new replica if needed
-                current_replicas = len(
-                    partition_info["replicas"]) + 1  # +1 for primary
+                current_replicas = len(partition_info["replicas"]) + 1  # +1 for primary
                 if current_replicas < self.config.replication_factor:
                     # Find a healthy node not already serving this partition
-                    serving_nodes = {
-                        partition_info["primary"]} | set(
-                        partition_info["replicas"])
+                    serving_nodes = {partition_info["primary"]} | set(partition_info["replicas"])
                     available_nodes = [
-                        node.node_id for node in healthy_nodes if node.node_id not in serving_nodes]
+                        node.node_id for node in healthy_nodes if node.node_id not in serving_nodes
+                    ]
 
                     if available_nodes:
                         new_replica = available_nodes[0]
@@ -507,8 +496,7 @@ except ImportError:
 
         def get_cluster_status(self) -> Dict[str, Any]:
             """Get current cluster status"""
-            healthy_nodes = len(
-                [n for n in self.nodes.values() if n.is_healthy])
+            healthy_nodes = len([n for n in self.nodes.values() if n.is_healthy])
             total_nodes = len(self.nodes)
 
             partition_status = {
@@ -519,8 +507,7 @@ except ImportError:
             }
 
             for partition_info in self.partitions.values():
-                replicas = [partition_info["primary"]] + \
-                    partition_info["replicas"]
+                replicas = [partition_info["primary"]] + partition_info["replicas"]
                 healthy_replicas = len(
                     [r for r in replicas if r and r in self.nodes and self.nodes[r].is_healthy]
                 )
@@ -542,8 +529,7 @@ except ImportError:
                 "operations_processed": len(self.operations),
             }
 
-        def simulate_partition_healing(
-                self, partition_duration: int = 30) -> Dict[str, Any]:
+        def simulate_partition_healing(self, partition_duration: int = 30) -> Dict[str, Any]:
             """Simulate network partition and healing"""
             if not self.is_running:
                 return {"error": "Cluster not running"}
@@ -690,9 +676,7 @@ class TestDistributedCoordinator:
         for partition_id, partition_info in self.coordinator.partitions.items():
             # primary + replicas
             total_replicas = 1 + len(partition_info["replicas"])
-            expected_replicas = min(
-                self.config.replication_factor, len(
-                    self.coordinator.nodes))
+            expected_replicas = min(self.config.replication_factor, len(self.coordinator.nodes))
             assert total_replicas <= expected_replicas
 
         # Verify node partition assignments
@@ -702,8 +686,7 @@ class TestDistributedCoordinator:
                 assert len(node.partitions) > 0
 
                 # Verify primary assignments
-                primary_count = sum(
-                    1 for is_primary in node.is_primary.values() if is_primary)
+                primary_count = sum(1 for is_primary in node.is_primary.values() if is_primary)
                 assert primary_count <= len(node.partitions)
 
     def test_distributed_operations(self):
@@ -767,8 +750,7 @@ class TestDistributedCoordinator:
             failed_node_id = non_leader_nodes[0]
 
             # Simulate node failure
-            failure_result = self.coordinator.handle_node_failure(
-                failed_node_id)
+            failure_result = self.coordinator.handle_node_failure(failed_node_id)
 
             assert isinstance(failure_result, dict)
             assert failure_result["node_id"] == failed_node_id
@@ -787,8 +769,7 @@ class TestDistributedCoordinator:
 
         # Test leader failure
         if initial_leader:
-            leader_failure_result = self.coordinator.handle_node_failure(
-                initial_leader)
+            leader_failure_result = self.coordinator.handle_node_failure(initial_leader)
 
             assert leader_failure_result["node_id"] == initial_leader
 
@@ -890,13 +871,13 @@ class TestDistributedCoordinator:
             operations.append((operation, result))
 
         # Verify operations executed in order for strong consistency
-        successful_operations = [op for op, result in operations if result.get(
-            "success") and op.status == "committed"]
+        successful_operations = [
+            op for op, result in operations if result.get("success") and op.status == "committed"
+        ]
 
         if len(successful_operations) > 1:
             # Check that operations completed in order
-            completion_times = [
-                op.completed_at for op in successful_operations]
+            completion_times = [op.completed_at for op in successful_operations]
             sorted_times = sorted(completion_times)
             assert completion_times == sorted_times
 
@@ -1002,8 +983,7 @@ class TestConsensusEngine:
             {"term": 2, "index": 3, "data": {"operation": "delete", "key": "a"}},
         ]
 
-        replication_result = self.consensus_engine.replicate_log_entries(
-            log_entries)
+        replication_result = self.consensus_engine.replicate_log_entries(log_entries)
 
         assert isinstance(replication_result, dict)
         assert "replicated_entries" in replication_result
@@ -1046,8 +1026,7 @@ class TestPartitionManager:
         initial_nodes = ["node1", "node2", "node3"]
         keys = [f"key:{i}" for i in range(100)]
 
-        initial_assignment = self.partition_manager.assign_partitions(
-            keys, initial_nodes)
+        initial_assignment = self.partition_manager.assign_partitions(keys, initial_nodes)
 
         # Add a new node
         new_nodes = initial_nodes + ["node4"]
@@ -1059,8 +1038,7 @@ class TestPartitionManager:
         assert len(rebalanced_assignment) == len(keys)
 
         # Verify some keys moved to the new node
-        moved_keys = [key for key in keys if initial_assignment[key]
-                      != rebalanced_assignment[key]]
+        moved_keys = [key for key in keys if initial_assignment[key] != rebalanced_assignment[key]]
 
         assert len(moved_keys) > 0  # Some keys should have moved
 
@@ -1107,8 +1085,7 @@ class TestReplicationManager:
             "sync_mode": "async",
         }
 
-        result = self.replication_manager.configure_replication(
-            replication_config)
+        result = self.replication_manager.configure_replication(replication_config)
 
         assert isinstance(result, dict)
         assert "replication_setup" in result
@@ -1125,7 +1102,8 @@ class TestReplicationManager:
         }
 
         replication_result = self.replication_manager.replicate_write(
-            write_data, write_quorum=2, consistency_level=ConsistencyLevel.STRONG)
+            write_data, write_quorum=2, consistency_level=ConsistencyLevel.STRONG
+        )
 
         assert isinstance(replication_result, dict)
         assert "success" in replication_result
@@ -1209,8 +1187,9 @@ class TestIntegrationScenarios:
             operations.append((operation, result))
 
         # 4. Verify operations completed
-        completed_operations = len([op for op, result in operations if result.get(
-            "success") or op.status == "committed"])
+        completed_operations = len(
+            [op for op, result in operations if result.get("success") or op.status == "committed"]
+        )
 
         assert completed_operations > 0
 
@@ -1248,9 +1227,7 @@ class TestIntegrationScenarios:
         max_byzantine_failures = (total_nodes - 1) // 3
 
         # Simulate Byzantine failures (nodes sending conflicting information)
-        byzantine_nodes = list(
-            self.coordinator.nodes.keys())[
-            :max_byzantine_failures]
+        byzantine_nodes = list(self.coordinator.nodes.keys())[:max_byzantine_failures]
 
         # Mark Byzantine nodes (for simulation)
         for node_id in byzantine_nodes:
@@ -1358,8 +1335,9 @@ class TestIntegrationScenarios:
         total_duration = (end_time - start_time).total_seconds()
 
         # Analyze performance
-        successful_operations = [op for op, result in operations if result.get(
-            "success") or op.status == "committed"]
+        successful_operations = [
+            op for op, result in operations if result.get("success") or op.status == "committed"
+        ]
 
         if len(successful_operations) > 0:
             throughput = len(successful_operations) / total_duration
@@ -1383,8 +1361,7 @@ class TestIntegrationScenarios:
         # Verify cluster stability under load
         final_status = self.coordinator.get_cluster_status()
         assert final_status["cluster_running"] is True
-        assert final_status["operations_processed"] >= len(
-            successful_operations)
+        assert final_status["operations_processed"] >= len(successful_operations)
 
 
 if __name__ == "__main__":

@@ -59,28 +59,18 @@ class TestPolicyConfigPyMDPAlignment:
             "state_space": {
                 "type": "discrete",
                 "size": 4,
-                "semantic_labels": [
-                    "start",
-                    "middle",
-                    "goal",
-                    "obstacle"],
+                "semantic_labels": ["start", "middle", "goal", "obstacle"],
             },
-            "action_space": {
-                "type": "discrete",
-                "size": 2,
-                "semantic_labels": [
-                    "stay",
-                    "move"]},
-            "time_settings": {
-                "horizon": 3,
-                "dt": 1.0},
+            "action_space": {"type": "discrete", "size": 2, "semantic_labels": ["stay", "move"]},
+            "time_settings": {"horizon": 3, "dt": 1.0},
             "active_inference_ontology": "standard",
             "llm_generated": True,
         }
 
         config = PolicyConfig(
             # For testing
-            planning_horizon=gnn_metadata["time_settings"]["horizon"], use_gpu=False
+            planning_horizon=gnn_metadata["time_settings"]["horizon"],
+            use_gpu=False,
         )
 
         # Attach GNN metadata for LLM compatibility
@@ -135,7 +125,8 @@ class TestPolicyPyMDPRepresentation:
         # Verify one-hot encoding
         expected = torch.tensor(
             # action 0  # action 1  # action 0
-            [[1, 0], [0, 1], [1, 0]], dtype=torch.float32
+            [[1, 0], [0, 1], [1, 0]],
+            dtype=torch.float32,
         )
 
         assert torch.allclose(one_hot, expected)
@@ -148,9 +139,7 @@ class TestPolicyPyMDPRepresentation:
 
         # Add GNN metadata for semantic understanding
         policy.gnn_metadata = {
-            "action_semantics": {
-                0: "stay_in_place",
-                1: "move_forward"},
+            "action_semantics": {0: "stay_in_place", 1: "move_forward"},
             "task_context": "grid_navigation",
             "llm_generated": True,
             "text_description": "Policy for cautious exploration: stay, move, stay",
@@ -223,20 +212,17 @@ class TestDiscreteExpectedFreeEnergyPyMDP:
 
         # A matrix columns should sum to 1 (observation model)
         for s in range(model.A.shape[1]):
-            assert torch.allclose(
-                model.A[:, s].sum(), torch.tensor(1.0), atol=1e-6)
+            assert torch.allclose(model.A[:, s].sum(), torch.tensor(1.0), atol=1e-6)
 
         # B matrix transitions should sum to 1
         for a in range(model.B.shape[2]):
             for s in range(model.B.shape[1]):
-                assert torch.allclose(
-                    model.B[:, s, a].sum(), torch.tensor(1.0), atol=1e-6)
+                assert torch.allclose(model.B[:, s, a].sum(), torch.tensor(1.0), atol=1e-6)
 
         # D vector should sum to 1 (probability distribution)
         assert torch.allclose(model.D.sum(), torch.tensor(1.0), atol=1e-6)
 
-    def test_pymdp_expected_free_energy_formula(
-            self, pymdp_efe_calculator, pymdp_compatible_model):
+    def test_pymdp_expected_free_energy_formula(self, pymdp_efe_calculator, pymdp_compatible_model):
         """Test EFE calculation following PyMDP's G(π) = E[ln Q(s,o|π) - ln P(o,s|π)]."""
         # Initial beliefs (posterior over states)
         beliefs = torch.tensor([0.7, 0.2, 0.1])  # Q(s)
@@ -247,29 +233,22 @@ class TestDiscreteExpectedFreeEnergyPyMDP:
 
         # Calculate expected free energy for both policies
         G_stay, epistemic_stay, pragmatic_stay = pymdp_efe_calculator.compute_expected_free_energy(
-            policy_stay, beliefs, pymdp_compatible_model)
+            policy_stay, beliefs, pymdp_compatible_model
+        )
 
         G_move, epistemic_move, pragmatic_move = pymdp_efe_calculator.compute_expected_free_energy(
-            policy_move, beliefs, pymdp_compatible_model)
+            policy_move, beliefs, pymdp_compatible_model
+        )
 
         # Both should be finite and real
         assert torch.isfinite(G_stay) and torch.isfinite(G_move)
         assert not torch.isnan(G_stay) and not torch.isnan(G_move)
 
         # EFE should be sum of epistemic and pragmatic terms
-        assert torch.allclose(
-            G_stay,
-            epistemic_stay +
-            pragmatic_stay,
-            atol=1e-6)
-        assert torch.allclose(
-            G_move,
-            epistemic_move +
-            pragmatic_move,
-            atol=1e-6)
+        assert torch.allclose(G_stay, epistemic_stay + pragmatic_stay, atol=1e-6)
+        assert torch.allclose(G_move, epistemic_move + pragmatic_move, atol=1e-6)
 
-    def test_pymdp_utility_term_calculation(
-            self, pymdp_efe_calculator, pymdp_compatible_model):
+    def test_pymdp_utility_term_calculation(self, pymdp_efe_calculator, pymdp_compatible_model):
         """Test utility (pragmatic) term following PyMDP: E_Q[ln P(o|C)]."""
         # Set only pragmatic weight
         pymdp_efe_calculator.config.epistemic_weight = 0.0
@@ -286,17 +265,18 @@ class TestDiscreteExpectedFreeEnergyPyMDP:
         policy_bad = Policy([0])
 
         G_good, _, pragmatic_good = pymdp_efe_calculator.compute_expected_free_energy(
-            policy_good, beliefs, pymdp_compatible_model)
+            policy_good, beliefs, pymdp_compatible_model
+        )
 
         G_bad, _, pragmatic_bad = pymdp_efe_calculator.compute_expected_free_energy(
-            policy_bad, beliefs, pymdp_compatible_model)
+            policy_bad, beliefs, pymdp_compatible_model
+        )
 
         # Good policy should have lower (more negative) pragmatic value
         assert pragmatic_good < pragmatic_bad
         assert G_good < G_bad  # Lower expected free energy is better
 
-    def test_pymdp_epistemic_term_calculation(
-            self, pymdp_efe_calculator, pymdp_compatible_model):
+    def test_pymdp_epistemic_term_calculation(self, pymdp_efe_calculator, pymdp_compatible_model):
         """Test epistemic term following PyMDP: E[KL[Q(s|o,π)||Q(s|π)]]."""
         # Set only epistemic weight
         pymdp_efe_calculator.config.epistemic_weight = 1.0
@@ -312,17 +292,18 @@ class TestDiscreteExpectedFreeEnergyPyMDP:
 
         # Calculate epistemic value for both belief states
         _, epistemic_uncertain, _ = pymdp_efe_calculator.compute_expected_free_energy(
-            policy, uncertain_beliefs, pymdp_compatible_model)
+            policy, uncertain_beliefs, pymdp_compatible_model
+        )
 
         _, epistemic_certain, _ = pymdp_efe_calculator.compute_expected_free_energy(
-            policy, certain_beliefs, pymdp_compatible_model)
+            policy, certain_beliefs, pymdp_compatible_model
+        )
 
         # Both should be non-negative (information gain ≥ 0)
         assert epistemic_uncertain >= 0
         assert epistemic_certain >= 0
 
-    def test_pymdp_policy_posterior_calculation(
-            self, pymdp_efe_calculator, pymdp_compatible_model):
+    def test_pymdp_policy_posterior_calculation(self, pymdp_efe_calculator, pymdp_compatible_model):
         """Test policy posterior following PyMDP: Q(π) ∝ exp(-βG(π))."""
         beliefs = torch.tensor([0.5, 0.3, 0.2])
 
@@ -356,10 +337,7 @@ class TestDiscreteExpectedFreeEnergyPyMDP:
         # Multi-step policy configuration
         inf_config = InferenceConfig(use_gpu=False)
         inference = VariationalMessagePassing(inf_config)
-        config = PolicyConfig(
-            planning_horizon=3,
-            policy_length=2,
-            use_gpu=False)  # 2-step policies
+        config = PolicyConfig(planning_horizon=3, policy_length=2, use_gpu=False)  # 2-step policies
         efe_calculator = DiscreteExpectedFreeEnergy(config, inference)
 
         beliefs = torch.tensor([1.0, 0.0, 0.0])  # Start in state 0
@@ -386,13 +364,8 @@ class TestDiscreteExpectedFreeEnergyPyMDP:
                 self.gnn_metadata = {
                     "model_type": "discrete_generative_model",
                     "semantic_context": "office_navigation",
-                    "state_semantics": [
-                        "hallway",
-                        "office",
-                        "meeting_room"],
-                    "action_semantics": [
-                        "wait",
-                        "walk"],
+                    "state_semantics": ["hallway", "office", "meeting_room"],
+                    "action_semantics": ["wait", "walk"],
                     "observation_semantics": [
                         "clear_path",
                         "person_present",
@@ -448,8 +421,7 @@ class TestDiscreteExpectedFreeEnergyPyMDP:
                     else:
                         return torch.matmul(self.B[:, :, action], states)
                 else:
-                    raise NotImplementedError(
-                        "Action distributions not supported")
+                    raise NotImplementedError("Action distributions not supported")
 
             def get_preferences(self, timestep=None):
                 return self.C.squeeze()
@@ -458,8 +430,7 @@ class TestDiscreteExpectedFreeEnergyPyMDP:
                 return self.D
 
             def set_preferences(self, preferences):
-                self.C = preferences.unsqueeze(
-                    -1) if preferences.dim() == 1 else preferences
+                self.C = preferences.unsqueeze(-1) if preferences.dim() == 1 else preferences
 
         llm_model = LLMGeneratedPyMDPModel()
 
@@ -515,8 +486,7 @@ class TestPyMDPPolicySelectionIntegration:
         beliefs = torch.tensor([0.6, 0.3, 0.1])
 
         # Select policy using PyMDP algorithm
-        selected_policy, action_probs = selector.select_policy(
-            beliefs, simple_generative_model)
+        selected_policy, action_probs = selector.select_policy(beliefs, simple_generative_model)
 
         # Verify results
         assert isinstance(selected_policy, Policy)
@@ -528,8 +498,7 @@ class TestPyMDPPolicySelectionIntegration:
         selected_action = selected_policy[0]
         assert 0 <= selected_action < simple_generative_model.B.shape[2]
 
-    def test_pymdp_algorithm_comparison(
-            self, model_dimensions, model_parameters):
+    def test_pymdp_algorithm_comparison(self, model_dimensions, model_parameters):
         """Test that our implementation produces similar results to PyMDP algorithm."""
         # Create model with known properties
         model = DiscreteGenerativeModel(model_dimensions, model_parameters)
@@ -676,8 +645,7 @@ class TestPyMDPPolicySelectionIntegration:
 
         # Test policy selection with GNN-generated model
         beliefs = llm_model.get_initial_prior()
-        selected_policy, action_probs = selector.select_policy(
-            beliefs, llm_model)
+        selected_policy, action_probs = selector.select_policy(beliefs, llm_model)
 
         # Should work correctly
         assert isinstance(selected_policy, Policy)
@@ -700,8 +668,7 @@ class TestPolicySelectionFactory:
         inf_config = InferenceConfig(use_gpu=False)
         inference = VariationalMessagePassing(inf_config)
 
-        selector = create_policy_selector(
-            "discrete", inference_algorithm=inference)
+        selector = create_policy_selector("discrete", inference_algorithm=inference)
 
         assert isinstance(selector, DiscreteExpectedFreeEnergy)
         # Should use PyMDP-compatible default configuration
@@ -715,9 +682,7 @@ class TestPolicySelectionFactory:
 
         # Configuration with GNN metadata
         gnn_config = PolicyConfig(planning_horizon=3, use_gpu=False)
-        gnn_config.gnn_metadata = {
-            "model_type": "discrete_generative_model",
-            "llm_generated": True}
+        gnn_config.gnn_metadata = {"model_type": "discrete_generative_model", "llm_generated": True}
 
         selector = create_policy_selector(
             "discrete", config=gnn_config, inference_algorithm=inference
@@ -733,8 +698,7 @@ class TestPolicySelectionFactory:
         inference = VariationalMessagePassing(inf_config)
 
         with pytest.raises(ValueError):
-            create_policy_selector(
-                "invalid_type", inference_algorithm=inference)
+            create_policy_selector("invalid_type", inference_algorithm=inference)
 
     def test_missing_inference_algorithm(self):
         """Test error handling for missing inference algorithm."""

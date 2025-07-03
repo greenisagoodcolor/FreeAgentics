@@ -11,12 +11,7 @@ import sys
 import pytest
 
 # Add the project root to Python path
-sys.path.insert(
-    0,
-    os.path.abspath(
-        os.path.join(
-            os.path.dirname(__file__),
-            "../..")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 
 def test_basic_imports():
@@ -147,8 +142,7 @@ def test_agent_logger_import():
         print("✓ AgentLogger imported successfully")
 
         # Test instantiation
-        logger = importlib.import_module(
-            "agents.base.agent").AgentLogger("test_agent")
+        logger = importlib.import_module("agents.base.agent").AgentLogger("test_agent")
         assert logger.agent_id == "test_agent"
         print("✓ AgentLogger instantiated successfully")
 
@@ -261,12 +255,15 @@ def test_functional_world_classes():
     from world.simulation.engine import SimulationConfig
 
     config = SimulationConfig(
-        max_cycles=100, time_step=0.1, world={
-            "resolution": 5, "size": 50, "resource_density": 1.0}, agents={
-            "count": 10, "distribution": {
-                "explorer": 4, "merchant": 3, "scholar": 2, "guardian": 1}, }, )
-    engine = importlib.import_module(
-        "world.simulation.engine").SimulationEngine(config)
+        max_cycles=100,
+        time_step=0.1,
+        world={"resolution": 5, "size": 50, "resource_density": 1.0},
+        agents={
+            "count": 10,
+            "distribution": {"explorer": 4, "merchant": 3, "scholar": 2, "guardian": 1},
+        },
+    )
+    engine = importlib.import_module("world.simulation.engine").SimulationEngine(config)
     assert engine is not None
     print("✓ SimulationEngine basic functionality works")
 
@@ -278,12 +275,10 @@ def test_functional_world_classes():
     print(f"✓ H3World works: center hex = {h3_world.center_hex}")
 
     # Test SpatialAPI basic setup
-    spatial_api = importlib.import_module(
-        "world.spatial.spatial_api").SpatialAPI(resolution=7)
+    spatial_api = importlib.import_module("world.spatial.spatial_api").SpatialAPI(resolution=7)
 
     # Test basic hex operations
-    hex_id = spatial_api.get_hex_at_position(
-        37.7749, -122.4194)  # San Francisco
+    hex_id = spatial_api.get_hex_at_position(37.7749, -122.4194)  # San Francisco
     assert hex_id is not None
 
     # Test neighbor operations
@@ -327,10 +322,7 @@ def test_functional_inference_classes():
     print(f"✓ ActiveInferenceEngine works: beliefs shape = {beliefs.shape}")
 
     # Test DiscreteGenerativeModel instead of abstract GenerativeModel
-    test_dims = ModelDimensions(
-        num_states=4,
-        num_observations=2,
-        num_actions=2)
+    test_dims = ModelDimensions(num_states=4, num_observations=2, num_actions=2)
     test_params = ModelParameters(use_gpu=False)
     discrete_model = DiscreteGenerativeModel(test_dims, test_params)
 
@@ -340,13 +332,13 @@ def test_functional_inference_classes():
     assert obs_probs.shape[-1] == 2
     print(
         f"✓ DiscreteGenerativeModel works: observation shape = {
-            obs_probs.shape}")
+            obs_probs.shape}"
+    )
 
     # Test GCNLayer
     gcn_layer = GCNLayer(in_channels=4, out_channels=6)
     node_features = torch.randn(5, 4)  # num_nodes=5, features=4
-    edge_index = torch.tensor([[0, 1, 2, 3, 4], [1, 2, 3, 4, 0]],
-                              dtype=torch.long)  # Simple ring
+    edge_index = torch.tensor([[0, 1, 2, 3, 4], [1, 2, 3, 4, 0]], dtype=torch.long)  # Simple ring
 
     gcn_output = gcn_layer(node_features, edge_index)
     assert gcn_output.shape == (5, 6)
@@ -407,9 +399,8 @@ def test_functional_memory_classes():
     # Store some memories
     for i in range(3):
         memory = mem_system.store_memory(
-            content=f"test_item_{i}",
-            memory_type=MemoryType.EPISODIC,
-            importance=0.5)
+            content=f"test_item_{i}", memory_type=MemoryType.EPISODIC, importance=0.5
+        )
         assert memory is not None
 
     # Check that memories were stored

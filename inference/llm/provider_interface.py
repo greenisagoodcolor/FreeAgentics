@@ -129,8 +129,7 @@ class UsageMetrics:
         else:
             self.failed_requests += 1
             if error_type:
-                self.error_counts[error_type] = self.error_counts.get(
-                    error_type, 0) + 1
+                self.error_counts[error_type] = self.error_counts.get(error_type, 0) + 1
 
         # Update average latency
         if self.successful_requests > 0:
@@ -197,10 +196,7 @@ class ILLMProvider(ABC):
         """Get the provider type"""
 
     @abstractmethod
-    def configure(
-            self,
-            credentials: ProviderCredentials,
-            **kwargs: Any) -> bool:
+    def configure(self, credentials: ProviderCredentials, **kwargs: Any) -> bool:
         """Configure the provider with credentials and settings"""
 
     @abstractmethod
@@ -255,10 +251,7 @@ class BaseProvider(ILLMProvider):
     def get_provider_type(self) -> ProviderType:
         return self.provider_type
 
-    def configure(
-            self,
-            credentials: ProviderCredentials,
-            **kwargs: Any) -> bool:
+    def configure(self, credentials: ProviderCredentials, **kwargs: Any) -> bool:
         """Configure the provider with credentials and settings"""
         if not credentials.is_complete():
             logger.error(f"Incomplete credentials for {self.provider_type}")
@@ -269,9 +262,7 @@ class BaseProvider(ILLMProvider):
 
         # Test connection after configuration
         health_check = self.test_connection()
-        return health_check.status in [
-            ProviderStatus.HEALTHY,
-            ProviderStatus.DEGRADED]
+        return health_check.status in [ProviderStatus.HEALTHY, ProviderStatus.DEGRADED]
 
     def get_usage_metrics(self) -> UsageMetrics:
         return self.usage_metrics
@@ -314,8 +305,7 @@ class ProviderRegistry:
         self._provider_priorities: List[ProviderType] = []
         self._health_check_cache: Dict[ProviderType, HealthCheckResult] = {}
 
-    def register_provider(self, provider: ILLMProvider,
-                          priority: int = 100) -> None:
+    def register_provider(self, provider: ILLMProvider, priority: int = 100) -> None:
         """Register a provider with given priority (lower = higher priority)"""
         provider_type = provider.get_provider_type()
         self._providers[provider_type] = provider
@@ -334,28 +324,22 @@ class ProviderRegistry:
                 break
 
         self._provider_priorities.insert(insertion_point, provider_type)
-        logger.info(
-            f"Registered provider {provider_type} with priority {priority}")
+        logger.info(f"Registered provider {provider_type} with priority {priority}")
 
-    def get_provider(
-            self,
-            provider_type: ProviderType) -> Optional[ILLMProvider]:
+    def get_provider(self, provider_type: ProviderType) -> Optional[ILLMProvider]:
         """Get provider by type"""
         return self._providers.get(provider_type)
 
     def get_providers_by_priority(self) -> List[ILLMProvider]:
         """Get providers ordered by priority"""
-        return [self._providers[pt]
-                for pt in self._provider_priorities if pt in self._providers]
+        return [self._providers[pt] for pt in self._provider_priorities if pt in self._providers]
 
     def get_healthy_providers(self) -> List[ILLMProvider]:
         """Get only healthy providers"""
         healthy = []
         for provider in self.get_providers_by_priority():
             health = provider.test_connection()
-            if health.status in [
-                    ProviderStatus.HEALTHY,
-                    ProviderStatus.DEGRADED]:
+            if health.status in [ProviderStatus.HEALTHY, ProviderStatus.DEGRADED]:
                 healthy.append(provider)
         return healthy
 
@@ -401,15 +385,12 @@ class ProviderManager:
                 provider_type = ProviderType(provider_config["type"])
                 # Implementation would create specific provider instances
                 # This is a placeholder for the full implementation
-                logger.info(
-                    f"Loaded provider configuration for {provider_type}")
+                logger.info(f"Loaded provider configuration for {provider_type}")
 
         except Exception as e:
             logger.error(f"Failed to load provider configuration: {e}")
 
-    def generate_with_fallback(
-            self,
-            request: GenerationRequest) -> GenerationResponse:
+    def generate_with_fallback(self, request: GenerationRequest) -> GenerationResponse:
         """Generate with automatic provider fallback"""
         last_error = None
 
@@ -417,16 +398,19 @@ class ProviderManager:
             try:
                 logger.debug(
                     f"Attempting generation with {
-                        provider.get_provider_type()}")
+                        provider.get_provider_type()}"
+                )
                 response = provider.generate(request)
                 logger.info(
                     f"Successfully generated with {
-                        provider.get_provider_type()}")
+                        provider.get_provider_type()}"
+                )
                 return response
             except Exception as e:
                 logger.warning(
                     f"Provider {
-                        provider.get_provider_type()} failed: {e}")
+                        provider.get_provider_type()} failed: {e}"
+                )
                 last_error = e
                 continue
 
@@ -451,10 +435,12 @@ class ProviderManager:
                 results[provider_type] = health_result
                 logger.debug(
                     f"Health check for {provider_type}: {
-                        health_result.status}")
+                        health_result.status}"
+                )
             except Exception as e:
                 results[provider_type] = HealthCheckResult(
-                    status=ProviderStatus.OFFLINE, latency_ms=0, error_message=str(e))
+                    status=ProviderStatus.OFFLINE, latency_ms=0, error_message=str(e)
+                )
         return results
 
     def get_provider_recommendations(
@@ -491,8 +477,7 @@ class ProviderManager:
             estimated_cost = provider.estimate_cost(request)
             if estimated_cost > 0:
                 # Prefer lower cost (this is simplified scoring)
-                cost_score = max(0, 1 - (estimated_cost / 0.1)
-                                 )  # Normalize to $0.10
+                cost_score = max(0, 1 - (estimated_cost / 0.1))  # Normalize to $0.10
                 score += cost_score * 0.1
 
             recommendations.append((provider, score))

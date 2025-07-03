@@ -118,8 +118,9 @@ class TestHealthEndpoint:
     def test_health_endpoint_tags(self):
         """Test that health endpoint has correct tags."""
         # Check if the route exists and has correct tags
-        routes = [route for route in app.routes if hasattr(
-            route, "path") and route.path == "/health"]
+        routes = [
+            route for route in app.routes if hasattr(route, "path") and route.path == "/health"
+        ]
         assert len(routes) == 1
         assert "system" in routes[0].tags
 
@@ -170,9 +171,7 @@ class TestRootEndpoint:
 
     def test_root_endpoint_tags(self):
         """Test that root endpoint has correct tags."""
-        routes = [
-            route for route in app.routes if hasattr(
-                route, "path") and route.path == "/"]
+        routes = [route for route in app.routes if hasattr(route, "path") and route.path == "/"]
         assert len(routes) == 1
         assert "system" in routes[0].tags
 
@@ -247,15 +246,13 @@ class TestMiddleware:
     def test_cors_middleware_configuration(self):
         """Test CORS middleware is configured with correct settings."""
         # Check that CORS middleware is in the middleware stack
-        middleware_classes = [
-            middleware.cls for middleware in app.user_middleware]
+        middleware_classes = [middleware.cls for middleware in app.user_middleware]
         cors_middleware_names = [cls.__name__ for cls in middleware_classes]
         assert "CORSMiddleware" in cors_middleware_names
 
     def test_gzip_middleware_configuration(self):
         """Test GZip middleware is configured."""
-        middleware_classes = [
-            middleware.cls for middleware in app.user_middleware]
+        middleware_classes = [middleware.cls for middleware in app.user_middleware]
         gzip_middleware_names = [cls.__name__ for cls in middleware_classes]
         assert "GZipMiddleware" in gzip_middleware_names
 
@@ -279,8 +276,8 @@ class TestWebSocketRouterRegistration:
         """Test that WebSocket routes are registered if imports succeed."""
         # Check if WebSocket routes exist in the app
         websocket_routes = [
-            route for route in app.routes if hasattr(
-                route, "path") and route.path.startswith("/ws")]
+            route for route in app.routes if hasattr(route, "path") and route.path.startswith("/ws")
+        ]
 
         # Should have WebSocket routes if imports were successful
         # This tests the integration without requiring the actual WebSocket
@@ -376,19 +373,16 @@ class TestDevelopmentServer:
                 if True:  # Simulate __name__ == "__main__"
                     mock_logger.info("🔧 Starting development server...")
                     mock_uvicorn_run(
-                        "main:app",
-                        host="0.0.0.0",
-                        port=8000,
-                        reload=True,
-                        log_level="info")
+                        "main:app", host="0.0.0.0", port=8000, reload=True, log_level="info"
+                    )
 
                 # Verify uvicorn.run was called with correct parameters
                 mock_uvicorn_run.assert_called_with(
-                    "main:app", host="0.0.0.0", port=8000, reload=True, log_level="info")
+                    "main:app", host="0.0.0.0", port=8000, reload=True, log_level="info"
+                )
 
                 # Verify development server logging
-                mock_logger.info.assert_called_with(
-                    "🔧 Starting development server...")
+                mock_logger.info.assert_called_with("🔧 Starting development server...")
 
 
 class TestApplicationMetadata:
@@ -417,8 +411,7 @@ class TestApplicationMetadata:
 
     def test_middleware_order(self):
         """Test that middleware is applied in correct order."""
-        middleware_stack = [
-            middleware.cls for middleware in app.user_middleware]
+        middleware_stack = [middleware.cls for middleware in app.user_middleware]
 
         # Verify middleware classes are present
         middleware_names = [cls.__name__ for cls in middleware_stack]

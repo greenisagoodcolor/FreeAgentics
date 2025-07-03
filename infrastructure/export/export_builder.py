@@ -279,15 +279,13 @@ class ExportPackageBuilder:
         size_mb = model_path.stat().st_size / (1024 * 1024)
         return size_mb
 
-    def _export_knowledge(self, agent, knowledge_dir: Path,
-                          target: HardwareTarget) -> float:
+    def _export_knowledge(self, agent, knowledge_dir: Path, target: HardwareTarget) -> float:
         """Export and compress knowledge graph"""
         logger.info("Exporting knowledge graph...")
 
         # Prune knowledge based on target constraints
         if target.storage_gb < 32:
-            knowledge_data = self._prune_knowledge(
-                agent.knowledge_graph, max_items=10000)
+            knowledge_data = self._prune_knowledge(agent.knowledge_graph, max_items=10000)
         else:
             knowledge_data = {
                 "experiences": [
@@ -332,10 +330,7 @@ class ExportPackageBuilder:
             "agent_id": agent.id,
             "agent_class": agent.agent_class,
             "personality": agent.personality,
-            "created_at": (
-                agent.created_at.isoformat() if hasattr(
-                    agent,
-                    "created_at") else None),
+            "created_at": (agent.created_at.isoformat() if hasattr(agent, "created_at") else None),
             "readiness": readiness_score.to_dict() if readiness_score else None,
         }
 
@@ -442,8 +437,7 @@ class ExportPackageBuilder:
 
         return model_data
 
-    def _prune_knowledge(self, knowledge_graph,
-                         max_items: int = 10000) -> Dict[str, Any]:
+    def _prune_knowledge(self, knowledge_graph, max_items: int = 10000) -> Dict[str, Any]:
         """Prune knowledge graph to fit storage constraints"""
         # Keep most recent and high-confidence items
         experiences = sorted(

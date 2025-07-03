@@ -57,10 +57,7 @@ class TestModelDimensions:
         assert dims.num_actions == 1
 
         # Large dimensions
-        dims = ModelDimensions(
-            num_states=1000,
-            num_observations=500,
-            num_actions=100)
+        dims = ModelDimensions(num_states=1000, num_observations=500, num_actions=100)
         assert dims.num_states == 1000
         assert dims.num_observations == 500
         assert dims.num_actions == 100
@@ -117,11 +114,7 @@ class TestDiscreteGenerativeModel:
 
     def setup_method(self):
         """Set up test fixtures"""
-        self.dims = ModelDimensions(
-            num_states=4,
-            num_observations=3,
-            num_actions=2,
-            time_horizon=5)
+        self.dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2, time_horizon=5)
         self.params = ModelParameters()
 
     def test_initialization(self):
@@ -176,8 +169,7 @@ class TestDiscreteGenerativeModel:
 
         assert next_state.shape == (4,)
         assert torch.all(next_state >= 0)
-        assert torch.allclose(next_state, torch.matmul(
-            model.B[:, :, action], state))
+        assert torch.allclose(next_state, torch.matmul(model.B[:, :, action], state))
 
     def test_transition_model_single_state_tensor_action(self):
         """Test transition model with single state and tensor action"""
@@ -200,8 +192,7 @@ class TestDiscreteGenerativeModel:
 
         assert next_state.shape == (4,)
         assert torch.all(next_state >= 0)
-        assert torch.allclose(
-            next_state, torch.matmul(model.B[:, :, 1], state))
+        assert torch.allclose(next_state, torch.matmul(model.B[:, :, 1], state))
 
     def test_transition_model_batch_states(self):
         """Test transition model with batch of states"""
@@ -218,8 +209,7 @@ class TestDiscreteGenerativeModel:
         """Test transition model with batch of one-hot actions"""
         model = DiscreteGenerativeModel(self.dims, self.params)
         states = torch.tensor([[0.5, 0.3, 0.2, 0.0], [0.25, 0.25, 0.25, 0.25]])
-        actions = torch.tensor([[1.0, 0.0], [0.0, 1.0]]
-                               )  # action 0  # action 1
+        actions = torch.tensor([[1.0, 0.0], [0.0, 1.0]])  # action 0  # action 1
 
         next_states = model.transition_model(states, actions)
 
@@ -290,17 +280,12 @@ class TestContinuousGenerativeModel:
 
     def setup_method(self):
         """Set up test fixtures"""
-        self.dims = ModelDimensions(
-            num_states=3,
-            num_observations=2,
-            num_actions=2,
-            time_horizon=4)
+        self.dims = ModelDimensions(num_states=3, num_observations=2, num_actions=2, time_horizon=4)
         self.params = ModelParameters()
 
     def test_initialization(self):
         """Test model initialization"""
-        model = ContinuousGenerativeModel(
-            self.dims, self.params, hidden_dim=16)
+        model = ContinuousGenerativeModel(self.dims, self.params, hidden_dim=16)
 
         assert model.dims == self.dims
         assert model.params == self.params
@@ -365,8 +350,7 @@ class TestContinuousGenerativeModel:
         """Test transition model with batch states and one-hot actions"""
         model = ContinuousGenerativeModel(self.dims, self.params)
         states = torch.randn(4, 3)
-        actions = torch.tensor(
-            [[1.0, 0.0], [0.0, 1.0], [1.0, 0.0], [0.0, 1.0]])
+        actions = torch.tensor([[1.0, 0.0], [0.0, 1.0], [1.0, 0.0], [0.0, 1.0]])
 
         mean, var = model.transition_model(states, actions)
 
@@ -460,8 +444,7 @@ class TestHierarchicalGenerativeModel:
         assert (1, 2) in model.E_matrices
 
         # Check E matrix shapes
-        assert model.E_matrices[(0, 1)].shape == (
-            2, 3)  # lower_actions x upper_states
+        assert model.E_matrices[(0, 1)].shape == (2, 3)  # lower_actions x upper_states
         assert model.E_matrices[(1, 2)].shape == (3, 4)
 
     def test_hierarchical_observation_model(self):
@@ -506,11 +489,7 @@ class TestHierarchicalGenerativeModel:
 
     def test_single_level_hierarchy(self):
         """Test single level hierarchy"""
-        single_dims = [
-            ModelDimensions(
-                num_states=3,
-                num_observations=2,
-                num_actions=2)]
+        single_dims = [ModelDimensions(num_states=3, num_observations=2, num_actions=2)]
         model = HierarchicalGenerativeModel(single_dims, self.params)
 
         assert model.num_levels == 1
@@ -547,8 +526,7 @@ class TestFactorizedGenerativeModel:
 
         # Check factor-specific B matrices
         assert len(model.factor_B) == 3
-        assert model.factor_B[0].shape == (
-            3, 3, 3)  # factor_dim x factor_dim x actions
+        assert model.factor_B[0].shape == (3, 3, 3)  # factor_dim x factor_dim x actions
         assert model.factor_B[1].shape == (4, 4, 3)
         assert model.factor_B[2].shape == (2, 2, 3)
 
@@ -557,8 +535,7 @@ class TestFactorizedGenerativeModel:
 
         # Check normalizations
         for B_factor in model.factor_B:
-            assert torch.allclose(B_factor.sum(
-                dim=0), torch.ones(B_factor.shape[1:]))
+            assert torch.allclose(B_factor.sum(dim=0), torch.ones(B_factor.shape[1:]))
         assert torch.allclose(model.A.sum(dim=0), torch.ones(24))
 
     def test_factor_to_state_idx(self):
@@ -569,12 +546,9 @@ class TestFactorizedGenerativeModel:
 
         # Test various factor combinations
         assert model.factor_to_state_idx([0, 0, 0]) == 0
-        assert model.factor_to_state_idx(
-            [1, 0, 0]) == 8  # 1 * (4 * 2) + 0 * 2 + 0
-        assert model.factor_to_state_idx(
-            [0, 1, 0]) == 2  # 0 * (4 * 2) + 1 * 2 + 0
-        assert model.factor_to_state_idx(
-            [0, 0, 1]) == 1  # 0 * (4 * 2) + 0 * 2 + 1
+        assert model.factor_to_state_idx([1, 0, 0]) == 8  # 1 * (4 * 2) + 0 * 2 + 0
+        assert model.factor_to_state_idx([0, 1, 0]) == 2  # 0 * (4 * 2) + 1 * 2 + 0
+        assert model.factor_to_state_idx([0, 0, 1]) == 1  # 0 * (4 * 2) + 0 * 2 + 1
         assert model.factor_to_state_idx([2, 3, 1]) == 23  # 2 * 8 + 3 * 2 + 1
 
     def test_state_to_factor_idx(self):
@@ -686,9 +660,7 @@ class TestCreateGenerativeModel:
 
     def test_create_factorized_model(self):
         """Test creating factorized generative model"""
-        model = create_generative_model(
-            "factorized", factor_dims=[
-                3, 4], num_obs=5, num_actions=3)
+        model = create_generative_model("factorized", factor_dims=[3, 4], num_obs=5, num_actions=3)
 
         assert isinstance(model, FactorizedGenerativeModel)
         assert model.factor_dims == [3, 4]
@@ -704,21 +676,16 @@ class TestCreateGenerativeModel:
     def test_create_factorized_model_alternative_kwargs(self):
         """Test creating factorized model with alternative keyword names"""
         model = create_generative_model(
-            "factorized", factor_dimensions=[
-                3, 4], num_observations=5, num_actions=3)
+            "factorized", factor_dimensions=[3, 4], num_observations=5, num_actions=3
+        )
 
         assert isinstance(model, FactorizedGenerativeModel)
         assert model.factor_dims == [3, 4]
 
     def test_create_hierarchical_model_alternative_kwargs(self):
         """Test creating hierarchical model with alternative keyword names"""
-        dims_list = [
-            ModelDimensions(
-                num_states=3,
-                num_observations=2,
-                num_actions=2)]
-        model = create_generative_model(
-            "hierarchical", dimensions_list=dims_list)
+        dims_list = [ModelDimensions(num_states=3, num_observations=2, num_actions=2)]
+        model = create_generative_model("hierarchical", dimensions_list=dims_list)
 
         assert isinstance(model, HierarchicalGenerativeModel)
 
@@ -753,10 +720,7 @@ class TestEdgeCasesAndErrorHandling:
 
     def test_continuous_model_large_dimensions(self):
         """Test continuous model with large dimensions"""
-        dims = ModelDimensions(
-            num_states=100,
-            num_observations=50,
-            num_actions=10)
+        dims = ModelDimensions(num_states=100, num_observations=50, num_actions=10)
         model = ContinuousGenerativeModel(dims, ModelParameters())
 
         # Should not raise errors
@@ -832,14 +796,8 @@ class TestEdgeCasesAndErrorHandling:
     def test_hierarchical_model_different_levels(self):
         """Test hierarchical model with very different level dimensions"""
         dims_list = [
-            ModelDimensions(
-                num_states=2,
-                num_observations=1,
-                num_actions=1),
-            ModelDimensions(
-                num_states=100,
-                num_observations=50,
-                num_actions=10),
+            ModelDimensions(num_states=2, num_observations=1, num_actions=1),
+            ModelDimensions(num_states=100, num_observations=50, num_actions=10),
         ]
         model = HierarchicalGenerativeModel(dims_list, ModelParameters())
 

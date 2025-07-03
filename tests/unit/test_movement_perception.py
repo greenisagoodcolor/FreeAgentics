@@ -71,8 +71,7 @@ class TestObservation:
             }
         ]
 
-        self.detected_resources = {
-            "water": 10.0, "food": 5.0, "minerals": 15.0}
+        self.detected_resources = {"water": 10.0, "food": 5.0, "minerals": 15.0}
         self.movement_options = [(Direction.NORTH, "87283082effffff")]
 
     def test_observation_creation(self):
@@ -234,32 +233,28 @@ class TestMovementPerceptionSystem:
     def test_calculate_direction_north(self):
         """Test calculating direction for northward movement."""
         # Northward movement (higher latitude)
-        direction = self.system._calculate_direction(
-            37.0, -122.0, 38.0, -122.0)
+        direction = self.system._calculate_direction(37.0, -122.0, 38.0, -122.0)
 
         assert isinstance(direction, Direction)
 
     def test_calculate_direction_south(self):
         """Test calculating direction for southward movement."""
         # Southward movement (lower latitude)
-        direction = self.system._calculate_direction(
-            38.0, -122.0, 37.0, -122.0)
+        direction = self.system._calculate_direction(38.0, -122.0, 37.0, -122.0)
 
         assert isinstance(direction, Direction)
 
     def test_calculate_direction_east(self):
         """Test calculating direction for eastward movement."""
         # Eastward movement (higher longitude)
-        direction = self.system._calculate_direction(
-            37.0, -122.0, 37.0, -121.0)
+        direction = self.system._calculate_direction(37.0, -122.0, 37.0, -121.0)
 
         assert isinstance(direction, Direction)
 
     def test_calculate_direction_west(self):
         """Test calculating direction for westward movement."""
         # Westward movement (lower longitude)
-        direction = self.system._calculate_direction(
-            37.0, -121.0, 37.0, -122.0)
+        direction = self.system._calculate_direction(37.0, -121.0, 37.0, -122.0)
 
         assert isinstance(direction, Direction)
 
@@ -267,8 +262,7 @@ class TestMovementPerceptionSystem:
         """Test checking valid move between adjacent hexes."""
         # Mock h3 distance
         with patch("h3.grid_distance", return_value=1):
-            can_move, reason = self.system.can_move_to(
-                self.center_hex, self.neighbor_hex)
+            can_move, reason = self.system.can_move_to(self.center_hex, self.neighbor_hex)
 
         assert can_move is True
         assert reason is None
@@ -277,8 +271,7 @@ class TestMovementPerceptionSystem:
         """Test checking move from non-existent hex."""
         self.mock_world.get_cell.return_value = None
 
-        can_move, reason = self.system.can_move_to(
-            "nonexistent", self.neighbor_hex)
+        can_move, reason = self.system.can_move_to("nonexistent", self.neighbor_hex)
 
         assert can_move is False
         assert "does not exist" in reason
@@ -293,8 +286,7 @@ class TestMovementPerceptionSystem:
 
         self.mock_world.get_cell.side_effect = mock_get_cell_selective
 
-        can_move, reason = self.system.can_move_to(
-            self.center_hex, "nonexistent")
+        can_move, reason = self.system.can_move_to(self.center_hex, "nonexistent")
 
         assert can_move is False
         assert "does not exist" in reason
@@ -304,8 +296,7 @@ class TestMovementPerceptionSystem:
         """Test checking move to non-adjacent hex."""
         mock_grid_distance.return_value = 2  # Not adjacent
 
-        can_move, reason = self.system.can_move_to(
-            self.center_hex, self.neighbor_hex)
+        can_move, reason = self.system.can_move_to(self.center_hex, self.neighbor_hex)
 
         assert can_move is False
         assert "not adjacent" in reason
@@ -328,8 +319,7 @@ class TestMovementPerceptionSystem:
 
         self.mock_world.cells["water_hex"] = water_cell
 
-        can_move, reason = self.system.can_move_to(
-            self.center_hex, "water_hex")
+        can_move, reason = self.system.can_move_to(self.center_hex, "water_hex")
 
         assert can_move is False
         assert "water" in reason.lower()
@@ -362,8 +352,7 @@ class TestMovementPerceptionSystem:
         # Set movement cost on target cell
         self.neighbor_cell.movement_cost = 2.0
 
-        cost = self.system.calculate_movement_cost(
-            self.center_hex, self.neighbor_hex)
+        cost = self.system.calculate_movement_cost(self.center_hex, self.neighbor_hex)
 
         # Base cost (2.0) + elevation cost + temperature penalty
         expected_base = 2.0
@@ -420,8 +409,7 @@ class TestMovementPerceptionSystem:
 
     def test_calculate_movement_cost_nonexistent_cells(self):
         """Test movement cost calculation with non-existent cells."""
-        cost = self.system.calculate_movement_cost(
-            "nonexistent1", "nonexistent2")
+        cost = self.system.calculate_movement_cost("nonexistent1", "nonexistent2")
 
         assert cost == float("inf")
 
@@ -433,15 +421,13 @@ class TestMovementPerceptionSystem:
 
         # Mock valid moves
         with patch.object(self.system, "get_valid_moves") as mock_get_moves:
-            mock_get_moves.return_value = [
-                (Direction.NORTH, self.neighbor_hex)]
+            mock_get_moves.return_value = [(Direction.NORTH, self.neighbor_hex)]
 
             # Mock line of sight filtering
             with patch.object(self.system, "_apply_line_of_sight") as mock_los:
                 mock_los.return_value = visible_cells
 
-                observation = self.system.get_agent_observation(
-                    self.center_hex)
+                observation = self.system.get_agent_observation(self.center_hex)
 
         assert isinstance(observation, Observation)
         assert observation.current_cell == self.center_cell
@@ -472,14 +458,12 @@ class TestMovementPerceptionSystem:
         self.mock_world.get_visible_cells.return_value = visible_cells
 
         with patch.object(self.system, "get_valid_moves") as mock_get_moves:
-            mock_get_moves.return_value = [
-                (Direction.NORTH, self.neighbor_hex)]
+            mock_get_moves.return_value = [(Direction.NORTH, self.neighbor_hex)]
 
             with patch.object(self.system, "_apply_line_of_sight") as mock_los:
                 mock_los.return_value = visible_cells
 
-                observation = self.system.get_agent_observation(
-                    self.center_hex, other_agents)
+                observation = self.system.get_agent_observation(self.center_hex, other_agents)
 
         # Should only see agent_1 (in visible area)
         assert len(observation.nearby_agents) == 1
@@ -505,8 +489,7 @@ class TestMovementPerceptionSystem:
         with patch("h3.grid_path_cells") as mock_path:
             mock_path.return_value = [self.center_hex, self.neighbor_hex]
 
-            visible = self.system._apply_line_of_sight(
-                observer_hex, potential_visible)
+            visible = self.system._apply_line_of_sight(observer_hex, potential_visible)
 
         # Should see both cells (observer + target)
         assert len(visible) == 2
@@ -546,11 +529,9 @@ class TestMovementPerceptionSystem:
 
         # Mock h3 path to include blocking cell
         with patch("h3.grid_path_cells") as mock_path:
-            mock_path.return_value = [
-                self.center_hex, "blocking_hex", "target_hex"]
+            mock_path.return_value = [self.center_hex, "blocking_hex", "target_hex"]
 
-            visible = self.system._apply_line_of_sight(
-                observer_hex, potential_visible)
+            visible = self.system._apply_line_of_sight(observer_hex, potential_visible)
 
         # Should only see observer cell (target blocked)
         assert len(visible) == 1
@@ -561,8 +542,7 @@ class TestMovementPerceptionSystem:
         """Test line of sight from non-existent observer."""
         self.mock_world.get_cell.return_value = None
 
-        visible = self.system._apply_line_of_sight(
-            "nonexistent", [self.neighbor_cell])
+        visible = self.system._apply_line_of_sight("nonexistent", [self.neighbor_cell])
 
         assert len(visible) == 0
 
@@ -613,13 +593,11 @@ class TestMovementPerceptionSystem:
                 with patch.object(self.system, "calculate_movement_cost") as mock_cost:
 
                     # Setup mocks
-                    mock_get_moves.return_value = [
-                        (Direction.NORTH, self.neighbor_hex)]
+                    mock_get_moves.return_value = [(Direction.NORTH, self.neighbor_hex)]
                     mock_can_move.return_value = (True, None)
                     mock_cost.return_value = 1.0
 
-                    path = self.system.find_path_astar(
-                        self.center_hex, self.neighbor_hex)
+                    path = self.system.find_path_astar(self.center_hex, self.neighbor_hex)
 
         assert path is not None
         assert path[0] == self.center_hex
@@ -634,8 +612,7 @@ class TestMovementPerceptionSystem:
             with patch.object(self.system, "can_move_to") as mock_can_move:
                 with patch.object(self.system, "calculate_movement_cost") as mock_cost:
 
-                    mock_get_moves.return_value = [
-                        (Direction.NORTH, self.neighbor_hex)]
+                    mock_get_moves.return_value = [(Direction.NORTH, self.neighbor_hex)]
                     mock_can_move.return_value = (True, None)
                     mock_cost.return_value = 150.0  # Exceeds max_cost of 100
 
@@ -698,8 +675,7 @@ class TestMovementPerceptionSystem:
     def test_get_exploration_targets_all_explored(self, mock_grid_distance):
         """Test getting exploration targets when all areas explored."""
         # Mock world method
-        self.mock_world.get_cells_in_range.return_value = [
-            self.center_cell, self.neighbor_cell]
+        self.mock_world.get_cells_in_range.return_value = [self.center_cell, self.neighbor_cell]
 
         # Mark all cells as explored
         explored_hexes = {self.center_hex, self.neighbor_hex}
@@ -711,8 +687,7 @@ class TestMovementPerceptionSystem:
         assert len(targets) == 0
 
     @patch("h3.grid_distance")
-    def test_get_exploration_targets_with_biome_variety(
-            self, mock_grid_distance):
+    def test_get_exploration_targets_with_biome_variety(self, mock_grid_distance):
         """Test exploration targets considering biome variety."""
         # Create cell with different biome
         desert_cell = HexCell(
@@ -791,11 +766,7 @@ class TestIntegrationScenarios:
     @patch("h3.grid_disk")
     @patch("h3.cell_to_latlng")
     @patch("h3.grid_distance")
-    def test_complete_movement_scenario(
-            self,
-            mock_distance,
-            mock_cell_to_latlng,
-            mock_grid_disk):
+    def test_complete_movement_scenario(self, mock_distance, mock_cell_to_latlng, mock_grid_disk):
         """Test complete movement scenario with planning and execution."""
         # Setup mocks
         mock_grid_disk.return_value = {
@@ -818,20 +789,16 @@ class TestIntegrationScenarios:
         assert len(valid_moves) == 3  # north, south, east (water excluded)
 
         # Step 2: Check movement validity
-        can_move_north, _ = self.system.can_move_to(
-            "872830828ffffff", "87283082effffff")
-        can_move_water, reason = self.system.can_move_to(
-            "872830828ffffff", "872830829ffffff")
+        can_move_north, _ = self.system.can_move_to("872830828ffffff", "87283082effffff")
+        can_move_water, reason = self.system.can_move_to("872830828ffffff", "872830829ffffff")
 
         assert can_move_north is True
         assert can_move_water is False
         assert "water" in reason.lower()
 
         # Step 3: Calculate movement costs
-        cost_north = self.system.calculate_movement_cost(
-            "872830828ffffff", "87283082effffff")
-        cost_east = self.system.calculate_movement_cost(
-            "872830828ffffff", "87283082bffffff")
+        cost_north = self.system.calculate_movement_cost("872830828ffffff", "87283082effffff")
+        cost_east = self.system.calculate_movement_cost("872830828ffffff", "87283082bffffff")
 
         # North has elevation gain (20m) and normal temperature (18°C)
         assert cost_north > 1.0  # Base cost + elevation cost
@@ -871,12 +838,10 @@ class TestIntegrationScenarios:
 
         with patch.object(self.system, "get_valid_moves") as mock_moves:
             with patch.object(self.system, "_apply_line_of_sight") as mock_los:
-                mock_moves.return_value = [
-                    (Direction.NORTH, "87283082effffff")]
+                mock_moves.return_value = [(Direction.NORTH, "87283082effffff")]
                 mock_los.return_value = visible_cells
 
-                observation = self.system.get_agent_observation(
-                    "872830828ffffff", other_agents)
+                observation = self.system.get_agent_observation("872830828ffffff", other_agents)
 
         # Should see explorer_1 and gatherer_1 (both in visible area)
         assert len(observation.nearby_agents) == 2

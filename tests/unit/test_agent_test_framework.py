@@ -32,15 +32,9 @@ class TestAgentTestScenario:
 
     def test_scenario_creation(self):
         """Test creating test scenario with all fields."""
-        agent_configs = [{"id": "agent1", "type": "basic"},
-                         {"id": "agent2", "type": "resource"}]
-        environment_config = {
-            "bounds": (
-                0, 0, 100, 100), "resources": {
-                "energy": 1000.0}}
-        success_criteria = {
-            "min_survival_rate": 0.8,
-            "min_cooperation_score": 0.5}
+        agent_configs = [{"id": "agent1", "type": "basic"}, {"id": "agent2", "type": "resource"}]
+        environment_config = {"bounds": (0, 0, 100, 100), "resources": {"energy": 1000.0}}
+        success_criteria = {"min_survival_rate": 0.8, "min_cooperation_score": 0.5}
         metrics = ["agent_health", "resource_collection", "cooperation_events"]
 
         scenario = AgentTestScenario(
@@ -73,9 +67,7 @@ class TestAgentTestMetrics:
             "agent1": {"health": 80.0, "resources_collected": 150.0},
             "agent2": {"health": 90.0, "resources_collected": 200.0},
         }
-        environment_metrics = {
-            "total_resources": 500.0,
-            "resource_depletion_rate": 0.1}
+        environment_metrics = {"total_resources": 500.0, "resource_depletion_rate": 0.1}
         performance_metrics = {"avg_fps": 60.0, "memory_usage_mb": 128.0}
 
         metrics = AgentTestMetrics(
@@ -100,9 +92,7 @@ class TestAgentTestMetrics:
 
     def test_metrics_defaults(self):
         """Test default values for optional fields."""
-        metrics = AgentTestMetrics(
-            scenario_name="test",
-            start_time=datetime.now())
+        metrics = AgentTestMetrics(scenario_name="test", start_time=datetime.now())
 
         assert metrics.end_time is None
         assert metrics.agent_metrics == {}
@@ -121,8 +111,7 @@ class TestAgentFactory:
         """Test creating basic agent with default values."""
         # Mock random values
         mock_uniform.side_effect = [50.0, -25.0]  # x, y positions
-        mock_random.side_effect = [
-            0.8, 0.7, 0.6, 0.5, 0.4]  # personality traits
+        mock_random.side_effect = [0.8, 0.7, 0.6, 0.5, 0.4]  # personality traits
 
         agent = AgentFactory.create_basic_agent("test_agent")
 
@@ -159,15 +148,11 @@ class TestAgentFactory:
             agreeableness=0.6,
             neuroticism=0.3,
         )
-        capabilities = {
-            AgentCapability.MOVEMENT,
-            AgentCapability.COMMUNICATION}
+        capabilities = {AgentCapability.MOVEMENT, AgentCapability.COMMUNICATION}
 
         agent = AgentFactory.create_basic_agent(
-            "custom_agent",
-            position=position,
-            personality=personality,
-            capabilities=capabilities)
+            "custom_agent", position=position, personality=personality, capabilities=capabilities
+        )
 
         assert agent.agent_id == "custom_agent"
         assert agent.position == position
@@ -190,8 +175,7 @@ class TestAgentFactory:
             resource_agent = AgentFactory.create_resource_agent("resource1")
 
             assert resource_agent.agent_id == "resource1"
-            assert resource_agent.managed_resources == {
-                "energy": 100.0, "materials": 100.0}
+            assert resource_agent.managed_resources == {"energy": 100.0, "materials": 100.0}
             assert AgentCapability.RESOURCE_MANAGEMENT in resource_agent.capabilities
 
     def test_create_resource_agent_custom(self):
@@ -208,13 +192,9 @@ class TestAgentFactory:
             mock_create.return_value = basic_agent
 
             resource_types = ["food", "water", "tools"]
-            resource_agent = AgentFactory.create_resource_agent(
-                "resource2", resource_types)
+            resource_agent = AgentFactory.create_resource_agent("resource2", resource_types)
 
-            expected_resources = {
-                "food": 100.0,
-                "water": 100.0,
-                "tools": 100.0}
+            expected_resources = {"food": 100.0, "water": 100.0, "tools": 100.0}
             assert resource_agent.managed_resources == expected_resources
 
     def test_create_social_agent(self):
@@ -263,8 +243,7 @@ class TestSimulationEnvironment:
                     mock_perception_class.return_value = self.mock_perception
                     mock_interaction_class.return_value = self.mock_interaction
 
-                    self.env = SimulationEnvironment(
-                        self.bounds, time_scale=2.0)
+                    self.env = SimulationEnvironment(self.bounds, time_scale=2.0)
 
     def test_environment_initialization(self):
         """Test environment initialization."""
@@ -382,8 +361,7 @@ class TestBehaviorValidator:
 
     def test_validate_unknown_behavior(self):
         """Test validating unknown behavior type."""
-        success, error = self.validator.validate(
-            "unknown_behavior", self.agent, [])
+        success, error = self.validator.validate("unknown_behavior", self.agent, [])
 
         assert success is False
         assert error == "Unknown behavior type: unknown_behavior"
@@ -392,8 +370,7 @@ class TestBehaviorValidator:
         """Test movement coherence with insufficient history."""
         history = [{"position": Position(0, 0, 0), "timestamp": 0}]
 
-        success, error = self.validator.validate(
-            "movement_coherence", self.agent, history)
+        success, error = self.validator.validate("movement_coherence", self.agent, history)
 
         assert success is True
         assert error is None
@@ -406,8 +383,7 @@ class TestBehaviorValidator:
             {"position": Position(2, 2, 0), "timestamp": 2},
         ]
 
-        success, error = self.validator.validate(
-            "movement_coherence", self.agent, history)
+        success, error = self.validator.validate("movement_coherence", self.agent, history)
 
         assert success is True
         assert error is None
@@ -426,8 +402,7 @@ class TestBehaviorValidator:
             {"position": pos2, "timestamp": 1},
         ]
 
-        success, error = self.validator.validate(
-            "movement_coherence", self.agent, history)
+        success, error = self.validator.validate("movement_coherence", self.agent, history)
 
         assert success is False
         assert "Impossible speed detected" in error
@@ -437,8 +412,7 @@ class TestBehaviorValidator:
         """Test decision consistency validation (placeholder)."""
         history = [{"decision": "move", "goal": "explore"}]
 
-        success, error = self.validator.validate(
-            "decision_consistency", self.agent, history)
+        success, error = self.validator.validate("decision_consistency", self.agent, history)
 
         assert success is True
         assert error is None

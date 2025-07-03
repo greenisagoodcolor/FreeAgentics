@@ -67,10 +67,10 @@ class TestAgentFactory:
             return mock_agent
 
         default_config = {
-            "capabilities": {
-                AgentCapability.MOVEMENT, AgentCapability.RESOURCE_MANAGEMENT}, "personality": {
-                "openness": 0.3, "conscientiousness": 0.7}, "initial_resources": {
-                "energy": 100, "materials": 50}, }
+            "capabilities": {AgentCapability.MOVEMENT, AgentCapability.RESOURCE_MANAGEMENT},
+            "personality": {"openness": 0.3, "conscientiousness": 0.7},
+            "initial_resources": {"energy": 100, "materials": 50},
+        }
 
         self.factory.register_type("specialized", create_specialized_agent)
         self.factory.set_default_config("specialized", default_config)
@@ -84,17 +84,9 @@ class TestAgentFactory:
         agent_data = AgentData(
             agent_id="test_basic_agent",
             name="Test Basic Agent",
-            position=Position(
-                x=0.0,
-                y=0.0,
-                z=0.0),
-            capabilities={
-                AgentCapability.MOVEMENT,
-                AgentCapability.PERCEPTION},
-            personality=AgentPersonality(
-                openness=0.7,
-                conscientiousness=0.8,
-                extraversion=0.5),
+            position=Position(x=0.0, y=0.0, z=0.0),
+            capabilities={AgentCapability.MOVEMENT, AgentCapability.PERCEPTION},
+            personality=AgentPersonality(openness=0.7, conscientiousness=0.8, extraversion=0.5),
         )
 
         with patch("agents.base.agent_factory.create_agent") as mock_create:
@@ -122,10 +114,7 @@ class TestAgentFactory:
             personality=AgentPersonality(openness=0.8, agreeableness=0.3),
         )
 
-        custom_config = {
-            "max_energy": 200,
-            "exploration_radius": 15.0,
-            "learning_rate": 0.05}
+        custom_config = {"max_energy": 200, "exploration_radius": 15.0, "learning_rate": 0.05}
 
         with patch("agents.base.agent_factory.create_agent") as mock_create:
             mock_agent = Mock(spec=BaseAgent)
@@ -145,15 +134,14 @@ class TestAgentFactory:
             call_args = mock_create.call_args
             # Check that the kwargs passed to create_agent contain the custom
             # config
-            passed_kwargs = call_args[1] if call_args and len(
-                call_args) > 1 else {}
+            passed_kwargs = call_args[1] if call_args and len(call_args) > 1 else {}
             # The config_overrides should be merged into the kwargs
             if "config_overrides" in passed_kwargs:
                 assert "max_energy" in passed_kwargs["config_overrides"]
             else:
                 assert "max_energy" in passed_kwargs or any(
-                    "max_energy" in str(arg) for arg in (
-                        call_args[0] if call_args else []))
+                    "max_energy" in str(arg) for arg in (call_args[0] if call_args else [])
+                )
 
     def test_create_agent_unknown_type(self):
         """Test creating agent with unknown type raises error."""
@@ -353,8 +341,7 @@ class TestAgentRegistry:
         # Unregister agent should trigger handler
         self.registry.unregister_agent(self.mock_agent1.agent_id)
 
-        handler.on_agent_destroyed.assert_called_once_with(
-            self.mock_agent1.data)
+        handler.on_agent_destroyed.assert_called_once_with(self.mock_agent1.data)
 
 
 class TestAgentFactoryIntegration:
@@ -369,16 +356,9 @@ class TestAgentFactoryIntegration:
         agent_data = AgentData(
             agent_id="integration_agent",
             name="Integration Test Agent",
-            position=Position(
-                x=0.0,
-                y=0.0,
-                z=0.0),
-            capabilities={
-                AgentCapability.MOVEMENT,
-                AgentCapability.PERCEPTION},
-            personality=AgentPersonality(
-                openness=0.6,
-                agreeableness=0.8),
+            position=Position(x=0.0, y=0.0, z=0.0),
+            capabilities={AgentCapability.MOVEMENT, AgentCapability.PERCEPTION},
+            personality=AgentPersonality(openness=0.6, agreeableness=0.8),
         )
 
         with patch("agents.base.agent_factory.create_agent") as mock_create:

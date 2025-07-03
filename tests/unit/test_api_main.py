@@ -174,8 +174,7 @@ class TestAPIMain:
 
                 # Should have middleware configured
                 if hasattr(mock_app, "middleware"):
-                    [type(m).__name__ for m in getattr(
-                        mock_app, "middleware", [])]
+                    [type(m).__name__ for m in getattr(mock_app, "middleware", [])]
                     # Common CORS middleware indicators
                     # At least one CORS-related middleware should be present
                     # (This is a loose check as implementation may vary)
@@ -194,8 +193,7 @@ class TestAPIMain:
 
             try:
                 # Test malformed request
-                response = test_client.post(
-                    "/api/v1/agents", json={"invalid": "data"})
+                response = test_client.post("/api/v1/agents", json={"invalid": "data"})
                 # Should handle gracefully (not 500)
                 assert response.status_code != 500
             except Exception:
@@ -238,18 +236,13 @@ class TestAPIMain:
     def test_content_type_handling(self, test_client):
         """Test different content type handling."""
         if IMPORT_SUCCESS and hasattr(test_client, "post"):
-            content_types = [
-                "application/json",
-                "text/plain",
-                "application/xml"]
+            content_types = ["application/json", "text/plain", "application/xml"]
 
             for content_type in content_types:
                 try:
                     response = test_client.post(
-                        "/api/v1/test",
-                        data="test data",
-                        headers={
-                            "Content-Type": content_type})
+                        "/api/v1/test", data="test data", headers={"Content-Type": content_type}
+                    )
                     # Should handle gracefully
                     assert response.status_code != 500
                 except Exception:

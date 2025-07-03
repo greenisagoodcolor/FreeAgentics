@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 class SyncPriority(Enum):
     """Priority levels for synchronization tasks"""
+
     CRITICAL = "critical"
     HIGH = "high"
     MEDIUM = "medium"
@@ -32,6 +33,7 @@ class SyncPriority(Enum):
 @dataclass
 class WorkItem:
     """Work item for offline processing queue"""
+
     id: str
     task_type: str
     data: Dict[str, Any]
@@ -43,6 +45,7 @@ class WorkItem:
 
 class StatePersistence:
     """Manages persistent state storage for offline operations"""
+
     def __init__(self, storage_path: str = "./offline_state.db"):
         self.storage_path = Path(storage_path)
         self.connection: Optional[sqlite3.Connection] = None
@@ -53,15 +56,18 @@ class StatePersistence:
         try:
             self.storage_path.parent.mkdir(parents=True, exist_ok=True)
             self.connection = sqlite3.connect(str(self.storage_path), check_same_thread=False)
-            self.connection.execute("""
+            self.connection.execute(
+                """
                 CREATE TABLE IF NOT EXISTS agent_states (
                     agent_id TEXT PRIMARY KEY,
                     state_data BLOB,
                     last_updated TIMESTAMP,
                     version INTEGER
                 )
-            """)
-            self.connection.execute("""
+            """
+            )
+            self.connection.execute(
+                """
                 CREATE TABLE IF NOT EXISTS work_queue (
                     id TEXT PRIMARY KEY,
                     task_type TEXT,
@@ -70,7 +76,8 @@ class StatePersistence:
                     created_at TIMESTAMP,
                     retry_count INTEGER
                 )
-            """)
+            """
+            )
             self.connection.commit()
             logger.info(f"Initialized offline state database at {self.storage_path}")
         except Exception as e:
@@ -85,11 +92,14 @@ class StatePersistence:
 
             state_blob = pickle.dumps(state)
             cursor = self.connection.cursor()
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT OR REPLACE INTO agent_states
                 (agent_id, state_data, last_updated, version)
                 VALUES (?, ?, ?, COALESCE((SELECT version FROM agent_states WHERE agent_id = ?) + 1, 1))
-            """, (agent_id, state_blob, datetime.now(), agent_id))
+            """,
+                (agent_id, state_blob, datetime.now(), agent_id),
+            )
             self.connection.commit()
             return True
         except Exception as e:
@@ -103,10 +113,7 @@ class StatePersistence:
                 return None
 
             cursor = self.connection.cursor()
-            cursor.execute(
-                "SELECT state_data FROM agent_states WHERE agent_id = ?",
-                (agent_id,)
-            )
+            cursor.execute("SELECT state_data FROM agent_states WHERE agent_id = ?", (agent_id,))
             result = cursor.fetchone()
             if result:
                 return pickle.loads(result[0])
@@ -123,10 +130,7 @@ class StatePersistence:
 
             cutoff_date = datetime.now() - timedelta(days=days_old)
             cursor = self.connection.cursor()
-            cursor.execute(
-                "DELETE FROM agent_states WHERE last_updated < ?",
-                (cutoff_date,)
-            )
+            cursor.execute("DELETE FROM agent_states WHERE last_updated < ?", (cutoff_date,))
             self.connection.commit()
             return cursor.rowcount
         except Exception as e:
@@ -151,7 +155,9 @@ class WorkQueue:
                 return
 
             cursor = self.persistence.connection.cursor()
-            cursor.execute("SELECT id, task_type, data, priority, created_at, retry_count FROM work_queue")
+            cursor.execute(
+                "SELECT id, task_type, data, priority, created_at, retry_count FROM work_queue"
+            )
 
             for row in cursor.fetchall():
                 item = WorkItem(
@@ -160,7 +166,7 @@ class WorkQueue:
                     data=pickle.loads(row[2]),
                     priority=SyncPriority(row[3]),
                     created_at=datetime.fromisoformat(row[4]),
-                    retry_count=row[5]
+                    retry_count=row[5],
                 )
                 self.memory_queue.put(item)
 
@@ -182,12 +188,21 @@ class WorkQueue:
                 if self.persistence.connection:
                     data_blob = pickle.dumps(item.data)
                     cursor = self.persistence.connection.cursor()
-                    cursor.execute("""
+                    cursor.execute(
+                        """
                         INSERT OR REPLACE INTO work_queue
                         (id, task_type, data, priority, created_at, retry_count)
                         VALUES (?, ?, ?, ?, ?, ?)
-                    """, (item.id, item.task_type, data_blob, item.priority.value,
-                          item.created_at.isoformat(), item.retry_count))
+                    """,
+                        (
+                            item.id,
+                            item.task_type,
+                            data_blob,
+                            item.priority.value,
+                            item.created_at.isoformat(),
+                            item.retry_count,
+                        ),
+                    )
                     self.persistence.connection.commit()
 
                 return True
@@ -333,21 +348,20 @@ class OfflineManager:
     def cache_data(self, key: str, data: Any, ttl_seconds: int = 3600) -> bool:
         """Cache data for offline access"""
         try:
-            cache_entry = {
-                'data': data,
-                'cached_at': datetime.now(),
-                'ttl_seconds': ttl_seconds
-            }
+            cache_entry = {"data": data, "cached_at": datetime.now(), "ttl_seconds": ttl_seconds}
             self.cached_data[key] = cache_entry
 
             # Persist to disk
             cache_file = self.storage_path / f"cache_{key}.json"
-            with open(cache_file, 'w') as f:
-                json.dump({
-                    'data': data,
-                    'cached_at': cache_entry['cached_at'].isoformat(),
-                    'ttl_seconds': ttl_seconds
-                }, f)
+            with open(cache_file, "w") as f:
+                json.dump(
+                    {
+                        "data": data,
+                        "cached_at": cache_entry["cached_at"].isoformat(),
+                        "ttl_seconds": ttl_seconds,
+                    },
+                    f,
+                )
 
             return True
         except Exception as e:
@@ -360,21 +374,21 @@ class OfflineManager:
             # Check memory cache first
             if key in self.cached_data:
                 entry = self.cached_data[key]
-                age = datetime.now() - entry['cached_at']
-                if age.total_seconds() < entry['ttl_seconds']:
-                    return entry['data']
+                age = datetime.now() - entry["cached_at"]
+                if age.total_seconds() < entry["ttl_seconds"]:
+                    return entry["data"]
                 else:
                     del self.cached_data[key]
 
             # Check disk cache
             cache_file = self.storage_path / f"cache_{key}.json"
             if cache_file.exists():
-                with open(cache_file, 'r') as f:
+                with open(cache_file, "r") as f:
                     cache_entry = json.load(f)
-                    cached_at = datetime.fromisoformat(cache_entry['cached_at'])
+                    cached_at = datetime.fromisoformat(cache_entry["cached_at"])
                     age = datetime.now() - cached_at
-                    if age.total_seconds() < cache_entry['ttl_seconds']:
-                        return cache_entry['data']
+                    if age.total_seconds() < cache_entry["ttl_seconds"]:
+                        return cache_entry["data"]
                     else:
                         cache_file.unlink()  # Remove expired cache
 
@@ -383,14 +397,15 @@ class OfflineManager:
             logger.error(f"Failed to get cached data for key {key}: {e}")
             return None
 
-    def queue_for_sync(self, task_type: str, data: Dict[str, Any],
-                       priority: SyncPriority = SyncPriority.MEDIUM) -> str:
+    def queue_for_sync(
+        self, task_type: str, data: Dict[str, Any], priority: SyncPriority = SyncPriority.MEDIUM
+    ) -> str:
         """Queue task for synchronization when back online"""
         work_item = WorkItem(
             id=f"{task_type}_{int(time.time())}_{id(data)}",
             task_type=task_type,
             data=data,
-            priority=priority
+            priority=priority,
         )
 
         if self.work_queue.add_work_item(work_item):

@@ -265,11 +265,7 @@ class TestActiveInferenceGNN:
         )
 
         # Beliefs should be valid probability distributions
-        assert torch.allclose(
-            posterior_beliefs.sum(
-                dim=-1),
-            torch.ones(
-                posterior_beliefs.shape[0]))
+        assert torch.allclose(posterior_beliefs.sum(dim=-1), torch.ones(posterior_beliefs.shape[0]))
         assert torch.all(posterior_beliefs >= 0)
 
     def test_policy_selection(self, model, graph_observation_data):
@@ -304,11 +300,7 @@ class TestActiveInferenceGNN:
         )
 
         # Action probabilities should be valid
-        assert torch.allclose(
-            action_probs.sum(
-                dim=-1),
-            torch.ones(
-                action_probs.shape[0]))
+        assert torch.allclose(action_probs.sum(dim=-1), torch.ones(action_probs.shape[0]))
         assert torch.all(action_probs >= 0)
 
     def test_generative_modeling(self, model, graph_observation_data):
@@ -334,8 +326,7 @@ class TestActiveInferenceGNN:
         assert "prediction_error" in generated_result
 
         predicted_obs = generated_result["predicted_observations"]
-        assert predicted_obs.shape == (
-            num_nodes, model.config.num_observations)
+        assert predicted_obs.shape == (num_nodes, model.config.num_observations)
 
     def test_free_energy_computation(self, model, graph_observation_data):
         """Test free energy computation."""
@@ -441,8 +432,7 @@ class TestBeliefGNN:
         else:
             return Mock()
 
-    def test_categorical_belief_inference(
-            self, belief_gnn, graph_observation_data):
+    def test_categorical_belief_inference(self, belief_gnn, graph_observation_data):
         """Test categorical belief inference."""
         if not IMPORT_SUCCESS:
             return
@@ -454,16 +444,10 @@ class TestBeliefGNN:
             graph_observation_data["observations"],
         )
 
-        assert beliefs.shape == (
-            graph_observation_data["x"].shape[0],
-            belief_gnn.config.num_states)
+        assert beliefs.shape == (graph_observation_data["x"].shape[0], belief_gnn.config.num_states)
 
         # Should be valid categorical distribution
-        assert torch.allclose(
-            beliefs.sum(
-                dim=-1),
-            torch.ones(
-                beliefs.shape[0]))
+        assert torch.allclose(beliefs.sum(dim=-1), torch.ones(beliefs.shape[0]))
         assert torch.all(beliefs >= 0)
         assert torch.all(beliefs <= 1)
 
@@ -481,8 +465,7 @@ class TestBeliefGNN:
         observations = torch.randn(num_nodes, 8)
 
         # Infer Gaussian beliefs (mean and variance)
-        belief_result = belief_gnn.infer_gaussian_beliefs(
-            x, edge_index, observations)
+        belief_result = belief_gnn.infer_gaussian_beliefs(x, edge_index, observations)
 
         assert "mean" in belief_result
         assert "variance" in belief_result
@@ -505,25 +488,23 @@ class TestBeliefGNN:
 
         for t in range(sequence_length):
             # Add some temporal variation
-            temporal_obs = graph_observation_data["observations"] + 0.1 * \
-                torch.randn_like(graph_observation_data["observations"])
+            temporal_obs = graph_observation_data["observations"] + 0.1 * torch.randn_like(
+                graph_observation_data["observations"]
+            )
 
             beliefs_t = belief_gnn(
-                graph_observation_data["x"],
-                graph_observation_data["edge_index"],
-                temporal_obs)
+                graph_observation_data["x"], graph_observation_data["edge_index"], temporal_obs
+            )
             belief_sequence.append(beliefs_t)
 
         # Beliefs should change over time
         for t in range(1, sequence_length):
-            assert not torch.allclose(
-                belief_sequence[t], belief_sequence[t - 1])
+            assert not torch.allclose(belief_sequence[t], belief_sequence[t - 1])
 
         # Compute belief entropy over time
         entropies = []
         for beliefs in belief_sequence:
-            entropy = -torch.sum(beliefs *
-                                 torch.log(beliefs + 1e-8), dim=-1).mean()
+            entropy = -torch.sum(beliefs * torch.log(beliefs + 1e-8), dim=-1).mean()
             entropies.append(entropy.item())
 
         # Entropy should vary across time
@@ -552,23 +533,17 @@ class TestPolicyGNN:
         else:
             return Mock()
 
-    def test_stochastic_policy_selection(
-            self, policy_gnn, graph_observation_data):
+    def test_stochastic_policy_selection(self, policy_gnn, graph_observation_data):
         """Test stochastic policy selection."""
         if not IMPORT_SUCCESS:
             return
 
         # Create beliefs
         num_nodes = graph_observation_data["x"].shape[0]
-        beliefs = torch.softmax(
-            torch.randn(
-                num_nodes,
-                policy_gnn.config.num_states),
-            dim=-1)
+        beliefs = torch.softmax(torch.randn(num_nodes, policy_gnn.config.num_states), dim=-1)
 
         # Select actions
-        action_probs = policy_gnn(
-            beliefs, graph_observation_data["edge_index"])
+        action_probs = policy_gnn(beliefs, graph_observation_data["edge_index"])
 
         assert action_probs.shape == (num_nodes, policy_gnn.config.num_actions)
 
@@ -585,11 +560,7 @@ class TestPolicyGNN:
         policy_gnn = PolicyGNN(config)
 
         num_nodes = 15
-        beliefs = torch.softmax(
-            torch.randn(
-                num_nodes,
-                config.num_states),
-            dim=-1)
+        beliefs = torch.softmax(torch.randn(num_nodes, config.num_states), dim=-1)
         edge_index = torch.randint(0, num_nodes, (2, 30))
 
         # Select deterministic actions
@@ -608,16 +579,11 @@ class TestPolicyGNN:
         policy_gnn = PolicyGNN(config)
 
         num_nodes = 12
-        beliefs = torch.softmax(
-            torch.randn(
-                num_nodes,
-                config.num_states),
-            dim=-1)
+        beliefs = torch.softmax(torch.randn(num_nodes, config.num_states), dim=-1)
         edge_index = torch.randint(0, num_nodes, (2, 24))
 
         # Hierarchical policy selection
-        policy_result = policy_gnn.hierarchical_policy_selection(
-            beliefs, edge_index, num_levels=3)
+        policy_result = policy_gnn.hierarchical_policy_selection(beliefs, edge_index, num_levels=3)
 
         assert "high_level_policy" in policy_result
         assert "mid_level_policy" in policy_result
@@ -638,21 +604,13 @@ class TestPolicyGNN:
             return
 
         num_nodes = 10
-        beliefs = torch.softmax(
-            torch.randn(
-                num_nodes,
-                policy_gnn.config.num_states),
-            dim=-1)
+        beliefs = torch.softmax(torch.randn(num_nodes, policy_gnn.config.num_states), dim=-1)
         edge_index = torch.randint(0, num_nodes, (2, 20))
 
         # Create multiple policy candidates
         policy_candidates = []
         for _ in range(5):
-            candidate = torch.softmax(
-                torch.randn(
-                    num_nodes,
-                    policy_gnn.config.num_actions),
-                dim=-1)
+            candidate = torch.softmax(torch.randn(num_nodes, policy_gnn.config.num_actions), dim=-1)
             policy_candidates.append(candidate)
 
         # Select policy with minimum expected free energy
@@ -684,10 +642,7 @@ class TestAdvancedAIGNNFeatures:
         if not IMPORT_SUCCESS:
             return
 
-        config = AIGNNConfig(
-            temporal_depth=5,
-            planning_horizon=3,
-            enable_continual_learning=True)
+        config = AIGNNConfig(temporal_depth=5, planning_horizon=3, enable_continual_learning=True)
 
         temporal_model = TemporalAIGNN(config) if IMPORT_SUCCESS else Mock()
 
@@ -701,8 +656,7 @@ class TestAdvancedAIGNNFeatures:
             edge_index_t = torch.randint(0, num_nodes, (2, 30))
             obs_t = torch.randn(num_nodes, 8)
 
-            temporal_data.append(
-                {"x": x_t, "edge_index": edge_index_t, "observations": obs_t})
+            temporal_data.append({"x": x_t, "edge_index": edge_index_t, "observations": obs_t})
 
         # Process temporal sequence
         if IMPORT_SUCCESS:
@@ -723,8 +677,7 @@ class TestAdvancedAIGNNFeatures:
 
         config = AIGNNConfig(multimodal_fusion=True, num_modalities=3)
 
-        multimodal_model = MultiModalAIGNN(
-            config) if IMPORT_SUCCESS else Mock()
+        multimodal_model = MultiModalAIGNN(config) if IMPORT_SUCCESS else Mock()
 
         # Create multimodal data
         num_nodes = 12
@@ -737,8 +690,7 @@ class TestAdvancedAIGNNFeatures:
 
         if IMPORT_SUCCESS:
             # Multimodal inference
-            multimodal_result = multimodal_model.multimodal_inference(
-                modality_data, edge_index)
+            multimodal_result = multimodal_model.multimodal_inference(modality_data, edge_index)
 
             assert "fused_beliefs" in multimodal_result
             assert "modality_weights" in multimodal_result
@@ -754,9 +706,8 @@ class TestAdvancedAIGNNFeatures:
             return
 
         config = AIGNNConfig(
-            enable_continual_learning=True,
-            forgetting_rate=0.01,
-            adaptation_rate=0.05)
+            enable_continual_learning=True, forgetting_rate=0.01, adaptation_rate=0.05
+        )
 
         continual_model = ContinualAIGNN(config) if IMPORT_SUCCESS else Mock()
 
@@ -776,7 +727,8 @@ class TestAdvancedAIGNNFeatures:
             learning_results = []
             for task in tasks:
                 result = continual_model.learn_task(
-                    task["x"], task["edge_index"], task["observations"], task["task_id"])
+                    task["x"], task["edge_index"], task["observations"], task["task_id"]
+                )
                 learning_results.append(result)
 
             # Test knowledge retention
@@ -791,9 +743,8 @@ class TestAdvancedAIGNNFeatures:
             return
 
         config = AIGNNConfig(
-            enable_meta_learning=True,
-            meta_learning_rate=0.001,
-            adaptation_rate=0.01)
+            enable_meta_learning=True, meta_learning_rate=0.001, adaptation_rate=0.01
+        )
 
         meta_model = MetaAIGNN(config) if IMPORT_SUCCESS else Mock()
 
@@ -834,12 +785,9 @@ class TestAdvancedAIGNNFeatures:
         if not IMPORT_SUCCESS:
             return
 
-        config = AIGNNConfig(
-            enable_explainability=True,
-            attention_mechanism=True)
+        config = AIGNNConfig(enable_explainability=True, attention_mechanism=True)
 
-        explainable_model = ExplainableAIGNN(
-            config) if IMPORT_SUCCESS else Mock()
+        explainable_model = ExplainableAIGNN(config) if IMPORT_SUCCESS else Mock()
 
         # Create graph data
         num_nodes = 15
@@ -849,8 +797,7 @@ class TestAdvancedAIGNNFeatures:
 
         if IMPORT_SUCCESS:
             # Get explanations
-            explanation_result = explainable_model.explain_inference(
-                x, edge_index, observations)
+            explanation_result = explainable_model.explain_inference(x, edge_index, observations)
 
             assert "node_importance" in explanation_result
             assert "edge_importance" in explanation_result
@@ -877,11 +824,8 @@ class TestAIGNNIntegration:
             return
 
         config = AIGNNConfig(
-            node_dim=64,
-            num_states=8,
-            num_observations=6,
-            num_actions=4,
-            planning_horizon=3)
+            node_dim=64, num_states=8, num_observations=6, num_actions=4, planning_horizon=3
+        )
 
         model = ActiveInferenceGNN(config) if IMPORT_SUCCESS else Mock()
 
@@ -915,9 +859,7 @@ class TestAIGNNIntegration:
         if not IMPORT_SUCCESS:
             return
 
-        config = AIGNNConfig(
-            enable_continual_learning=True,
-            adaptation_rate=0.02)
+        config = AIGNNConfig(enable_continual_learning=True, adaptation_rate=0.02)
 
         model = OnlineAIGNN(config) if IMPORT_SUCCESS else Mock()
 
@@ -934,8 +876,7 @@ class TestAIGNNIntegration:
 
             if IMPORT_SUCCESS:
                 # Online adaptation step
-                adaptation_result = model.online_adapt(
-                    x, edge_index, observations)
+                adaptation_result = model.online_adapt(x, edge_index, observations)
                 adaptation_history.append(adaptation_result)
 
         if IMPORT_SUCCESS:
@@ -954,8 +895,7 @@ class TestAIGNNIntegration:
 
         config = AIGNNConfig(enable_federation=True, num_agents=4)
 
-        distributed_model = DistributedAIGNN(
-            config) if IMPORT_SUCCESS else Mock()
+        distributed_model = DistributedAIGNN(config) if IMPORT_SUCCESS else Mock()
 
         # Create distributed agent data
         agent_data = []
@@ -970,8 +910,7 @@ class TestAIGNNIntegration:
 
         if IMPORT_SUCCESS:
             # Distributed inference
-            distributed_result = distributed_model.distributed_inference(
-                agent_data)
+            distributed_result = distributed_model.distributed_inference(agent_data)
 
             assert "global_beliefs" in distributed_result
             assert "agent_beliefs" in distributed_result

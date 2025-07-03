@@ -104,15 +104,9 @@ class MockFactory:
             "purpose": "exploration",
             "status": "active",
             "formation_time": datetime.now(),
-            "shared_resources": {
-                "energy": 0.0,
-                "materials": 0,
-                "information": 0},
+            "shared_resources": {"energy": 0.0, "materials": 0, "information": 0},
             "collective_beliefs": np.zeros(4),
-            "success_metrics": {
-                "tasks_completed": 0,
-                "resources_shared": 0,
-                "duration": 0},
+            "success_metrics": {"tasks_completed": 0, "resources_shared": 0, "duration": 0},
         }
 
         defaults.update(kwargs)
@@ -153,26 +147,14 @@ class MockFactory:
         edge_index = np.random.randint(0, num_nodes, size=(2, num_edges))
 
         data = {
-            "node_features": np.random.randn(
-                num_nodes,
-                node_features_dim).astype(
-                np.float32),
-            "edge_features": np.random.randn(
-                num_edges,
-                edge_features_dim).astype(
-                    np.float32),
+            "node_features": np.random.randn(num_nodes, node_features_dim).astype(np.float32),
+            "edge_features": np.random.randn(num_edges, edge_features_dim).astype(np.float32),
             "edge_index": edge_index,
             "num_nodes": num_nodes,
             "num_edges": num_edges,
-            "global_features": np.random.randn(128).astype(
-                np.float32),
-            "node_labels": np.random.randint(
-                0,
-                4,
-                size=num_nodes),
-            "graph_label": np.random.randint(
-                0,
-                2),
+            "global_features": np.random.randn(128).astype(np.float32),
+            "node_labels": np.random.randint(0, 4, size=num_nodes),
+            "graph_label": np.random.randint(0, 2),
         }
 
         data.update(kwargs)
@@ -343,7 +325,6 @@ class MockFactory:
         mock.raise_for_status = Mock()
 
         if status_code >= 400:
-            mock.raise_for_status.side_effect = Exception(
-                f"HTTP {status_code} Error")
+            mock.raise_for_status.side_effect = Exception(f"HTTP {status_code} Error")
 
         return mock

@@ -214,8 +214,7 @@ class TestModelQuantizer:
         assert "size_reduction" in result
 
     @patch("inference.llm.model_quantization.shutil.which")
-    def test_quantize_ggml_manual_fallback(
-            self, mock_which, sample_ggml_file, temp_dir):
+    def test_quantize_ggml_manual_fallback(self, mock_which, sample_ggml_file, temp_dir):
         """Test GGML quantization manual fallback."""
         # Setup mock to return None (tool not available)
         mock_which.return_value = None
@@ -234,8 +233,7 @@ class TestModelQuantizer:
         # Check that output file was created
         assert output_path.exists()
 
-    def test_manual_ggml_quantize_different_types(
-            self, sample_ggml_file, temp_dir):
+    def test_manual_ggml_quantize_different_types(self, sample_ggml_file, temp_dir):
         """Test manual GGML quantization with different types."""
         quantizer = ModelQuantizer(QuantizationConfig(QuantizationType.INT3))
 
@@ -248,8 +246,7 @@ class TestModelQuantizer:
 
         for quant_type, expected_scale in test_cases:
             output_path = temp_dir / f"quantized_{quant_type}.ggml"
-            result = quantizer._manual_ggml_quantize(
-                sample_ggml_file, output_path, quant_type)
+            result = quantizer._manual_ggml_quantize(sample_ggml_file, output_path, quant_type)
 
             assert result["quantization_type"] == quant_type
             assert output_path.exists()
@@ -264,12 +261,8 @@ class TestModelQuantizer:
     @patch("inference.llm.model_quantization.torch.save")
     @patch("inference.llm.model_quantization.quantization.quantize_dynamic")
     def test_quantize_pytorch_int8(
-            self,
-            mock_quant_dynamic,
-            mock_save,
-            mock_load,
-            sample_model_file,
-            temp_dir):
+        self, mock_quant_dynamic, mock_save, mock_load, sample_model_file, temp_dir
+    ):
         """Test PyTorch INT8 quantization."""
         # Setup mock model
         mock_model = Mock(spec=["eval"])
@@ -283,8 +276,7 @@ class TestModelQuantizer:
         result = quantizer._quantize_pytorch(sample_model_file, output_path)
 
         # Verify torch operations
-        mock_load.assert_called_once_with(
-            sample_model_file, map_location="cpu")
+        mock_load.assert_called_once_with(sample_model_file, map_location="cpu")
         mock_model.eval.assert_called_once()
         mock_quant_dynamic.assert_called_once()
         mock_save.assert_called_once_with(mock_quantized, output_path)
@@ -295,12 +287,7 @@ class TestModelQuantizer:
 
     @patch("inference.llm.model_quantization.torch.load")
     @patch("inference.llm.model_quantization.torch.save")
-    def test_quantize_pytorch_int4(
-            self,
-            mock_save,
-            mock_load,
-            sample_model_file,
-            temp_dir):
+    def test_quantize_pytorch_int4(self, mock_save, mock_load, sample_model_file, temp_dir):
         """Test PyTorch INT4 quantization."""
         # Setup mock model
         mock_model = Mock(spec=["eval", "clone"])
@@ -313,8 +300,7 @@ class TestModelQuantizer:
         with patch.object(
             quantizer, "_pytorch_int4_quantize", return_value=mock_model
         ) as mock_int4:
-            result = quantizer._quantize_pytorch(
-                sample_model_file, output_path)
+            result = quantizer._quantize_pytorch(sample_model_file, output_path)
 
             mock_int4.assert_called_once_with(mock_model)
             mock_save.assert_called_once()
@@ -323,8 +309,7 @@ class TestModelQuantizer:
             assert result["quantization_type"] == "int4"
 
     @patch("inference.llm.model_quantization.torch.load")
-    def test_quantize_pytorch_invalid_format(
-            self, mock_load, sample_model_file, temp_dir):
+    def test_quantize_pytorch_invalid_format(self, mock_load, sample_model_file, temp_dir):
         """Test PyTorch quantization with invalid model format."""
         mock_load.return_value = {"not": "a_model"}  # Not a torch.nn.Module
 
@@ -362,11 +347,7 @@ class TestModelQuantizer:
         assert result == mock_model
 
     @patch("inference.llm.model_quantization.quantize_dynamic")
-    def test_quantize_onnx_success(
-            self,
-            mock_quantize,
-            sample_onnx_file,
-            temp_dir):
+    def test_quantize_onnx_success(self, mock_quantize, sample_onnx_file, temp_dir):
         """Test successful ONNX quantization."""
         output_path = temp_dir / "quantized.onnx"
         output_path.write_bytes(b"quantized_onnx_data")  # Simulate output
@@ -379,8 +360,7 @@ class TestModelQuantizer:
         assert result["quantization_type"] == "int8_dynamic"
 
     @patch("inference.llm.model_quantization.quantize_dynamic")
-    def test_quantize_onnx_import_error(
-            self, mock_quantize, sample_onnx_file, temp_dir):
+    def test_quantize_onnx_import_error(self, mock_quantize, sample_onnx_file, temp_dir):
         """Test ONNX quantization with import error."""
         mock_quantize.side_effect = ImportError("ONNX Runtime not available")
 
@@ -408,8 +388,7 @@ class TestModelQuantizer:
         quantized_path.write_bytes(b"quantized_model")
 
         test_inputs = ["input1", "input2"]
-        result = quantizer.benchmark_quantized_model(
-            sample_model_file, quantized_path, test_inputs)
+        result = quantizer.benchmark_quantized_model(sample_model_file, quantized_path, test_inputs)
 
         # Check result structure
         assert "inference_time" in result
@@ -470,8 +449,7 @@ class TestEdgeOptimizer:
         assert nuc["has_gpu"] is False
 
     @patch.object(ModelQuantizer, "quantize_model")
-    def test_optimize_for_device_raspberry_pi(
-            self, mock_quantize, sample_model_file, temp_dir):
+    def test_optimize_for_device_raspberry_pi(self, mock_quantize, sample_model_file, temp_dir):
         """Test optimization for Raspberry Pi (low RAM device)."""
         mock_quantize.return_value = {
             "format": "pytorch",
@@ -480,8 +458,7 @@ class TestEdgeOptimizer:
         }
 
         optimizer = EdgeOptimizer()
-        result = optimizer.optimize_for_device(
-            sample_model_file, "raspberry_pi", temp_dir)
+        result = optimizer.optimize_for_device(sample_model_file, "raspberry_pi", temp_dir)
 
         # Check that INT3 quantization was used for low RAM device
         mock_quantize.assert_called_once()
@@ -493,8 +470,7 @@ class TestEdgeOptimizer:
         assert result["device_optimizations"]["gpu_offload"] is False
 
     @patch.object(ModelQuantizer, "quantize_model")
-    def test_optimize_for_device_jetson_nano(
-            self, mock_quantize, sample_model_file, temp_dir):
+    def test_optimize_for_device_jetson_nano(self, mock_quantize, sample_model_file, temp_dir):
         """Test optimization for Jetson Nano (mid-range device)."""
         mock_quantize.return_value = {
             "format": "pytorch",
@@ -503,16 +479,14 @@ class TestEdgeOptimizer:
         }
 
         optimizer = EdgeOptimizer()
-        result = optimizer.optimize_for_device(
-            sample_model_file, "jetson_nano", temp_dir)
+        result = optimizer.optimize_for_device(sample_model_file, "jetson_nano", temp_dir)
 
         assert result["device_optimizations"]["device_type"] == "jetson_nano"
         assert result["device_optimizations"]["recommended_batch_size"] == 4
         assert result["device_optimizations"]["gpu_offload"] is True
 
     @patch.object(ModelQuantizer, "quantize_model")
-    def test_optimize_for_device_intel_nuc(
-            self, mock_quantize, sample_model_file, temp_dir):
+    def test_optimize_for_device_intel_nuc(self, mock_quantize, sample_model_file, temp_dir):
         """Test optimization for Intel NUC (high RAM device)."""
         mock_quantize.return_value = {
             "format": "pytorch",
@@ -521,8 +495,7 @@ class TestEdgeOptimizer:
         }
 
         optimizer = EdgeOptimizer()
-        result = optimizer.optimize_for_device(
-            sample_model_file, "intel_nuc", temp_dir)
+        result = optimizer.optimize_for_device(sample_model_file, "intel_nuc", temp_dir)
 
         assert result["device_optimizations"]["device_type"] == "intel_nuc"
         assert result["device_optimizations"]["recommended_batch_size"] == 4
@@ -533,23 +506,16 @@ class TestEdgeOptimizer:
         optimizer = EdgeOptimizer()
 
         with pytest.raises(ValueError, match="Unknown device type"):
-            optimizer.optimize_for_device(
-                sample_model_file, "unknown_device", temp_dir)
+            optimizer.optimize_for_device(sample_model_file, "unknown_device", temp_dir)
 
     @patch.object(ModelQuantizer, "quantize_model")
     @patch("inference.llm.model_quantization.shutil.copy2")
-    def test_create_deployment_package(
-            self,
-            mock_copy,
-            mock_quantize,
-            sample_model_file,
-            temp_dir):
+    def test_create_deployment_package(self, mock_copy, mock_quantize, sample_model_file, temp_dir):
         """Test deployment package creation."""
         mock_quantize.return_value = {"format": "pytorch"}
 
         optimizer = EdgeOptimizer()
-        optimizer.optimize_for_device(
-            sample_model_file, "raspberry_pi", temp_dir)
+        optimizer.optimize_for_device(sample_model_file, "raspberry_pi", temp_dir)
 
         # Check that deployment package directory was created
         package_dir = temp_dir / "raspberry_pi_deployment"
@@ -580,8 +546,7 @@ class TestAutoQuantize:
     """Test auto_quantize function."""
 
     @patch.object(ModelQuantizer, "quantize_model")
-    def test_auto_quantize_with_target_size(
-            self, mock_quantize, sample_model_file):
+    def test_auto_quantize_with_target_size(self, mock_quantize, sample_model_file):
         """Test auto quantization with target size constraint."""
         mock_quantize.return_value = {"compression_ratio": 8.0}
 
@@ -597,8 +562,7 @@ class TestAutoQuantize:
         assert result_path.name.endswith("_quantized.pt")
 
     @patch.object(ModelQuantizer, "quantize_model")
-    def test_auto_quantize_with_target_device(
-            self, mock_quantize, sample_model_file):
+    def test_auto_quantize_with_target_device(self, mock_quantize, sample_model_file):
         """Test auto quantization with target device constraint."""
         mock_quantize.return_value = {"compression_ratio": 4.0}
 
@@ -618,8 +582,7 @@ class TestAutoQuantize:
         assert result_path.name.endswith("_quantized.pt")
 
     @patch.object(ModelQuantizer, "quantize_model")
-    def test_auto_quantize_different_compression_ratios(
-            self, mock_quantize, temp_dir):
+    def test_auto_quantize_different_compression_ratios(self, mock_quantize, temp_dir):
         """Test auto quantization with different compression requirements."""
         mock_quantize.return_value = {"compression_ratio": 1.0}
 
@@ -647,12 +610,7 @@ class TestIntegrationScenarios:
 
     @patch("inference.llm.model_quantization.subprocess.run")
     @patch("inference.llm.model_quantization.shutil.which")
-    def test_end_to_end_ggml_quantization(
-            self,
-            mock_which,
-            mock_run,
-            sample_ggml_file,
-            temp_dir):
+    def test_end_to_end_ggml_quantization(self, mock_which, mock_run, sample_ggml_file, temp_dir):
         """Test complete GGML quantization workflow."""
         # Setup successful external tool execution
         mock_which.return_value = "/usr/bin/quantize"
@@ -684,8 +642,7 @@ class TestIntegrationScenarios:
         }
 
         optimizer = EdgeOptimizer()
-        result = optimizer.optimize_for_device(
-            sample_model_file, "mobile_phone", temp_dir)
+        result = optimizer.optimize_for_device(sample_model_file, "mobile_phone", temp_dir)
 
         # Verify quantization was called
         mock_quantize.assert_called_once()
@@ -759,8 +716,7 @@ class TestPerformanceAndMemory:
         quantizer = ModelQuantizer(QuantizationConfig(QuantizationType.INT8))
 
         # Test manual GGML quantization size calculation
-        result = quantizer._manual_ggml_quantize(
-            large_file, temp_dir / "output.ggml", "q4_K_M")
+        result = quantizer._manual_ggml_quantize(large_file, temp_dir / "output.ggml", "q4_K_M")
 
         # Should be 40% of original (scale_factor = 0.4)
         expected_size = 10000 * 0.4

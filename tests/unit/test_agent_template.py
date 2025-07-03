@@ -39,8 +39,8 @@ except ImportError:
             self.num_observations = kwargs.get("num_observations", 4)
             self.num_actions = kwargs.get("num_actions", 4)
             self.state_labels = kwargs.get(
-                "state_labels", [
-                    "idle", "exploring", "interacting", "planning"])
+                "state_labels", ["idle", "exploring", "interacting", "planning"]
+            )
 
     class AgentTemplate:
         def __init__(self, template_type=None, config=None, **kwargs):
@@ -102,13 +102,7 @@ class TestAgentTemplate:
             "num_states": 6,
             "num_observations": 5,
             "num_actions": 4,
-            "state_labels": [
-                "idle",
-                "exploring",
-                "socializing",
-                "learning",
-                "resting",
-                "planning"],
+            "state_labels": ["idle", "exploring", "socializing", "learning", "resting", "planning"],
         }
 
     @pytest.fixture
@@ -168,9 +162,7 @@ class TestAgentTemplate:
     def test_agent_template_initialization(self, sample_ai_config):
         """Test AgentTemplate initialization with various configurations."""
         # Test basic initialization
-        template = AgentTemplate(
-            template_type=TemplateType.EXPLORER,
-            config=sample_ai_config)
+        template = AgentTemplate(template_type=TemplateType.EXPLORER, config=sample_ai_config)
         assert template.template_type == TemplateType.EXPLORER
 
         # Test initialization without config
@@ -185,17 +177,13 @@ class TestAgentTemplate:
             agent = template.create_agent(agent_id="test-agent-001")
             assert agent is not None
 
-    @pytest.mark.parametrize("template_type",
-                             [TemplateType.EXPLORER,
-                              TemplateType.GUARDIAN,
-                              TemplateType.MERCHANT,
-                              TemplateType.SCHOLAR],
-                             )
+    @pytest.mark.parametrize(
+        "template_type",
+        [TemplateType.EXPLORER, TemplateType.GUARDIAN, TemplateType.MERCHANT, TemplateType.SCHOLAR],
+    )
     def test_template_types(self, template_type, sample_ai_config):
         """Test different template types."""
-        template = AgentTemplate(
-            template_type=template_type,
-            config=sample_ai_config)
+        template = AgentTemplate(template_type=template_type, config=sample_ai_config)
         assert template.template_type == template_type
 
     def test_template_builder_pattern(self):
@@ -203,8 +191,9 @@ class TestAgentTemplate:
         if IMPORT_SUCCESS:
             builder = AgentTemplateBuilder()
 
-            template = (builder.set_type(TemplateType.EXPLORER).set_config(
-                {"learning_rate": 0.1}).build())
+            template = (
+                builder.set_type(TemplateType.EXPLORER).set_config({"learning_rate": 0.1}).build()
+            )
 
             assert template is not None
             assert template.template_type == TemplateType.EXPLORER
@@ -246,9 +235,7 @@ class TestAgentTemplate:
             "resources": {"energy": 100, "knowledge": 50},
         }
 
-        template = AgentTemplate(
-            template_type=TemplateType.EXPLORER,
-            config=custom_config)
+        template = AgentTemplate(template_type=TemplateType.EXPLORER, config=custom_config)
 
         if hasattr(template, "config"):
             assert template.config == custom_config
@@ -264,8 +251,7 @@ class TestAgentTemplate:
 
         for config in valid_configs:
             try:
-                template = AgentTemplate(
-                    template_type=TemplateType.EXPLORER, config=config)
+                template = AgentTemplate(template_type=TemplateType.EXPLORER, config=config)
                 assert template is not None
             except Exception:
                 # Some configurations may not be supported
@@ -290,9 +276,7 @@ class TestAgentTemplate:
 
     def test_template_cloning(self):
         """Test template cloning functionality."""
-        original = AgentTemplate(
-            template_type=TemplateType.MERCHANT, config={
-                "trading_skill": 0.7})
+        original = AgentTemplate(template_type=TemplateType.MERCHANT, config={"trading_skill": 0.7})
 
         cloning_methods = ["clone", "copy", "duplicate"]
 
@@ -342,9 +326,7 @@ class TestAgentTemplate:
 
     def test_template_active_inference_integration(self, sample_ai_config):
         """Test Active Inference integration in templates."""
-        template = AgentTemplate(
-            template_type=TemplateType.EXPLORER,
-            config=sample_ai_config)
+        template = AgentTemplate(template_type=TemplateType.EXPLORER, config=sample_ai_config)
 
         ai_methods = [
             "setup_generative_model",
@@ -374,8 +356,8 @@ class TestAgentTemplate:
         }
 
         template = AgentTemplate(
-            template_type=TemplateType.SCHOLAR, config={
-                "personality": personality_config})
+            template_type=TemplateType.SCHOLAR, config={"personality": personality_config}
+        )
 
         if hasattr(template, "apply_personality"):
             try:
@@ -395,13 +377,10 @@ class TestAgentTemplate:
         }
 
         template = AgentTemplate(
-            template_type=TemplateType.GUARDIAN, config={
-                "resources": resource_config})
+            template_type=TemplateType.GUARDIAN, config={"resources": resource_config}
+        )
 
-        resource_methods = [
-            "setup_resources",
-            "configure_limits",
-            "set_initial_state"]
+        resource_methods = ["setup_resources", "configure_limits", "set_initial_state"]
 
         for method_name in resource_methods:
             if hasattr(template, method_name):
@@ -517,8 +496,7 @@ class TestAgentTemplate:
                         # Verify template type matches factory method
                         expected_type = method_name.split("_")[1].upper()
                         if hasattr(TemplateType, expected_type):
-                            expected_template_type = getattr(
-                                TemplateType, expected_type)
+                            expected_template_type = getattr(TemplateType, expected_type)
                             assert template.template_type == expected_template_type
                     except Exception:
                         pass

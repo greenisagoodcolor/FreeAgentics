@@ -5,11 +5,11 @@ This module tests belief update functionality with graceful degradation
 for PyTorch dependencies.
 """
 
-from inference.engine.generative_model import (
-    DiscreteGenerativeModel,
-    ModelDimensions,
-    ModelParameters,
-)
+from typing import Tuple
+
+import pytest
+import torch.nn as nn
+
 from inference.engine.belief_update import (
     AttentionGraphBeliefUpdater,
     BeliefUpdateConfig,
@@ -20,9 +20,11 @@ from inference.engine.belief_update import (
     LearnedGraphObservationModel,
     create_belief_updater,
 )
-import torch.nn as nn
-from typing import Tuple
-import pytest
+from inference.engine.generative_model import (
+    DiscreteGenerativeModel,
+    ModelDimensions,
+    ModelParameters,
+)
 
 # Graceful degradation for PyTorch imports
 try:
@@ -95,10 +97,9 @@ class TestLearnedGraphObservationModel:
 
 class TestGraphNNBeliefUpdater:
     @pytest.fixture
-    def setup_updater(self,
-                      ) -> Tuple[GraphNNBeliefUpdater,
-                                 BeliefUpdateConfig,
-                                 DiscreteGenerativeModel]:
+    def setup_updater(
+        self,
+    ) -> Tuple[GraphNNBeliefUpdater, BeliefUpdateConfig, DiscreteGenerativeModel]:
         """Setup belief updater with components"""
         config = BeliefUpdateConfig(use_gpu=False)
         dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
@@ -107,27 +108,24 @@ class TestGraphNNBeliefUpdater:
         updater = GraphNNBeliefUpdater(config)
         return updater, config, gen_model
 
-    def test_initialization(self,
-                            setup_updater: Tuple[GraphNNBeliefUpdater,
-                                                 BeliefUpdateConfig,
-                                                 DiscreteGenerativeModel],
-                            ) -> None:
+    def test_initialization(
+        self,
+        setup_updater: Tuple[GraphNNBeliefUpdater, BeliefUpdateConfig, DiscreteGenerativeModel],
+    ) -> None:
         """Test updater initialization"""
         updater, config, gen_model = setup_updater
         assert updater.config == config
         assert updater.device is not None
 
-    def test_update_beliefs(self,
-                            setup_updater: Tuple[GraphNNBeliefUpdater,
-                                                 BeliefUpdateConfig,
-                                                 DiscreteGenerativeModel],
-                            ) -> None:
+    def test_update_beliefs(
+        self,
+        setup_updater: Tuple[GraphNNBeliefUpdater, BeliefUpdateConfig, DiscreteGenerativeModel],
+    ) -> None:
         """Test belief update"""
         updater, config, gen_model = setup_updater
         current_beliefs = torch.softmax(torch.randn(2, 4), dim=-1)
         observations = torch.randn(2, 3)
-        updated_beliefs = updater.update_beliefs(
-            current_beliefs, observations, gen_model)
+        updated_beliefs = updater.update_beliefs(current_beliefs, observations, gen_model)
         assert updated_beliefs.shape == (2, 4)
 
 
@@ -139,17 +137,13 @@ class TestAttentionGraphBeliefUpdater:
         updater = AttentionGraphBeliefUpdater(config)
         return updater
 
-    def test_initialization(
-            self,
-            setup_attention_updater: AttentionGraphBeliefUpdater) -> None:
+    def test_initialization(self, setup_attention_updater: AttentionGraphBeliefUpdater) -> None:
         """Test attention updater initialization"""
         updater = setup_attention_updater
         assert updater.config is not None
         assert updater.device is not None
 
-    def test_update_beliefs(
-            self,
-            setup_attention_updater: AttentionGraphBeliefUpdater) -> None:
+    def test_update_beliefs(self, setup_attention_updater: AttentionGraphBeliefUpdater) -> None:
         """Test belief update with attention"""
         updater = setup_attention_updater
         dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
@@ -157,8 +151,7 @@ class TestAttentionGraphBeliefUpdater:
         gen_model = DiscreteGenerativeModel(dims, params)
         current_beliefs = torch.softmax(torch.randn(2, 4), dim=-1)
         observations = torch.randn(2, 3)
-        updated_beliefs = updater.update_beliefs(
-            current_beliefs, observations, gen_model)
+        updated_beliefs = updater.update_beliefs(current_beliefs, observations, gen_model)
         assert updated_beliefs.shape == (2, 4)
 
 
@@ -170,17 +163,13 @@ class TestHierarchicalBeliefUpdater:
         updater = HierarchicalBeliefUpdater(config)
         return updater
 
-    def test_initialization(
-            self,
-            setup_hierarchical_updater: HierarchicalBeliefUpdater) -> None:
+    def test_initialization(self, setup_hierarchical_updater: HierarchicalBeliefUpdater) -> None:
         """Test hierarchical updater initialization"""
         updater = setup_hierarchical_updater
         assert updater.config is not None
         assert updater.device is not None
 
-    def test_update_beliefs(
-            self,
-            setup_hierarchical_updater: HierarchicalBeliefUpdater) -> None:
+    def test_update_beliefs(self, setup_hierarchical_updater: HierarchicalBeliefUpdater) -> None:
         """Test hierarchical belief update"""
         updater = setup_hierarchical_updater
         dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
@@ -188,8 +177,7 @@ class TestHierarchicalBeliefUpdater:
         gen_model = DiscreteGenerativeModel(dims, params)
         current_beliefs = torch.softmax(torch.randn(2, 4), dim=-1)
         observations = torch.randn(2, 3)
-        updated_beliefs = updater.update_beliefs(
-            current_beliefs, observations, gen_model)
+        updated_beliefs = updater.update_beliefs(current_beliefs, observations, gen_model)
         assert updated_beliefs.shape == (2, 4)
 
 

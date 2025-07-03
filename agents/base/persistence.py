@@ -66,8 +66,7 @@ class DatabaseAgentDeserializer:
         if "resources" in state:
             self.agent.resources = AgentResources(**state["resources"])
         if "current_goal" in state and state["current_goal"]:
-            self.agent.current_goal = self.persistence._deserialize_goal(
-                state["current_goal"])
+            self.agent.current_goal = self.persistence._deserialize_goal(state["current_goal"])
         if "short_term_memory" in state:
             self.agent.short_term_memory = state["short_term_memory"]
         if "experience_count" in state:
@@ -76,8 +75,7 @@ class DatabaseAgentDeserializer:
     def set_config_properties(self, config: Dict[str, Any]) -> None:
         """Set configuration properties from database config"""
         if "capabilities" in config:
-            self.agent.capabilities = {
-                AgentCapability(cap) for cap in config["capabilities"]}
+            self.agent.capabilities = {AgentCapability(cap) for cap in config["capabilities"]}
         if "personality" in config:
             self.agent.personality = AgentPersonality(**config["personality"])
         if "metadata" in config:
@@ -93,16 +91,14 @@ class DatabaseAgentDeserializer:
         """Set relationships from beliefs data"""
         if "relationships" in beliefs:
             for agent_id, rel_data in beliefs["relationships"].items():
-                relationship = self.persistence._create_relationship_from_db_data(
-                    rel_data)
+                relationship = self.persistence._create_relationship_from_db_data(rel_data)
                 self.agent.relationships[agent_id] = relationship
 
     def _set_goals(self, beliefs: Dict[str, Any]) -> None:
         """Set goals from beliefs data"""
         if "goals" in beliefs:
             self.agent.goals = [
-                self.persistence._deserialize_goal(goal_data)
-                for goal_data in beliefs["goals"]
+                self.persistence._deserialize_goal(goal_data) for goal_data in beliefs["goals"]
             ]
 
     def _set_memory_and_beliefs(self, beliefs: Dict[str, Any]) -> None:
@@ -143,8 +139,7 @@ class AgentPersistence:
         """
         session = self._get_session()
         try:
-            db_agent = session.query(DBAgent).filter_by(
-                uuid=agent.agent_id).first()
+            db_agent = session.query(DBAgent).filter_by(uuid=agent.agent_id).first()
             if db_agent and (not update_if_exists):
                 logger.error(f"Agent {agent.agent_id} already exists")
                 return False
@@ -242,7 +237,8 @@ class AgentPersistence:
                 except Exception as e:
                     logger.error(
                         f"Error deserializing agent {
-                            db_agent.uuid}: {e}")
+                            db_agent.uuid}: {e}"
+                    )
             logger.info(f"Loaded {len(agents)} agents")
             return agents
         except Exception as e:
@@ -365,13 +361,11 @@ class AgentPersistence:
         else:
             return Agent()
 
-    def _create_relationship_from_db_data(
-            self, rel_data: Dict[str, Any]) -> SocialRelationship:
+    def _create_relationship_from_db_data(self, rel_data: Dict[str, Any]) -> SocialRelationship:
         """Create relationship from database relationship data"""
         last_interaction = None
         if rel_data.get("last_interaction"):
-            last_interaction = datetime.fromisoformat(
-                rel_data["last_interaction"])
+            last_interaction = datetime.fromisoformat(rel_data["last_interaction"])
 
         return SocialRelationship(
             target_agent_id=rel_data["target_agent_id"],
@@ -391,8 +385,7 @@ class AgentPersistence:
         """Deserialize dictionary to AgentGoal"""
         goal_id = goal_data.pop("goal_id", None)
         if "target_position" in goal_data and goal_data["target_position"]:
-            goal_data["target_position"] = Position(
-                **goal_data["target_position"])
+            goal_data["target_position"] = Position(**goal_data["target_position"])
         goal = AgentGoal(**goal_data)
         if goal_id:
             goal.goal_id = goal_id
@@ -434,13 +427,11 @@ class AgentSnapshot:
         self.persistence.save_agent(agent)
         logger.info(
             f"Created snapshot {snapshot_id} for agent {
-                agent.agent_id}")
+                agent.agent_id}"
+        )
         return snapshot_id
 
-    def restore_snapshot(
-            self,
-            agent_id: str,
-            snapshot_id: str) -> Optional[Agent]:
+    def restore_snapshot(self, agent_id: str, snapshot_id: str) -> Optional[Agent]:
         """Restore agent from a snapshot
         Args:
             agent_id: Agent UUID
@@ -453,11 +444,9 @@ class AgentSnapshot:
             logger.error(f"Agent {agent_id} not found")
             return None
         snapshots = current_agent.metadata.get("snapshots", [])
-        snapshot = next(
-            (s for s in snapshots if s["snapshot_id"] == snapshot_id), None)
+        snapshot = next((s for s in snapshots if s["snapshot_id"] == snapshot_id), None)
         if not snapshot:
-            logger.error(
-                f"Snapshot {snapshot_id} not found for agent {agent_id}")
+            logger.error(f"Snapshot {snapshot_id} not found for agent {agent_id}")
             return None
         agent = Agent.from_dict(snapshot["agent_data"])
         logger.info(f"Restored agent {agent_id} from snapshot {snapshot_id}")

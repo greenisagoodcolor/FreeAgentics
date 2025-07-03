@@ -133,10 +133,7 @@ class TestBusinessValueCalculationEngine:
 
         # Agent 1: High capability, moderate resources
         agent1 = Mock(spec=AgentProfile)
-        agent1.capabilities = [
-            "data_analysis",
-            "machine_learning",
-            "visualization"]
+        agent1.capabilities = ["data_analysis", "machine_learning", "visualization"]
         agent1.resources = {"compute": 15, "storage": 100, "bandwidth": 50}
         agent1.reliability_score = 0.9
         agent1.availability = 0.8
@@ -252,11 +249,8 @@ class TestBusinessValueCalculationEngine:
         assert engine.calculation_history[0] == result
 
     def test_calculate_business_value_empty_profiles(
-            self,
-            engine,
-            mock_coalition,
-            mock_formation_result_success,
-            mock_agent_profiles_empty):
+        self, engine, mock_coalition, mock_formation_result_success, mock_agent_profiles_empty
+    ):
         """Test business value calculation with empty agent profiles"""
         result = engine.calculate_business_value(
             coalition=mock_coalition,
@@ -277,8 +271,7 @@ class TestBusinessValueCalculationEngine:
         assert result.confidence_level >= 0.0
 
     @patch("coalitions.formation.business_value_engine.logger")
-    def test_calculate_business_value_exception_handling(
-            self, mock_logger, engine):
+    def test_calculate_business_value_exception_handling(self, mock_logger, engine):
         """Test exception handling in business value calculation"""
         # Create a mock that raises an exception
         mock_coalition = Mock()
@@ -289,9 +282,8 @@ class TestBusinessValueCalculationEngine:
         mock_formation_result.score.side_effect = Exception("Test exception")
 
         result = engine.calculate_business_value(
-            coalition=mock_coalition,
-            formation_result=mock_formation_result,
-            agent_profiles=[])
+            coalition=mock_coalition, formation_result=mock_formation_result, agent_profiles=[]
+        )
 
         # Should return zero metrics on error
         assert isinstance(result, BusinessValueMetrics)
@@ -311,16 +303,12 @@ class TestBusinessValueCalculationEngine:
         self, engine, mock_coalition, mock_formation_result_success
     ):
         """Test synergy calculation with empty profiles"""
-        result = engine._calculate_synergy(
-            mock_coalition, mock_formation_result_success, [])
+        result = engine._calculate_synergy(mock_coalition, mock_formation_result_success, [])
         assert result == 0.0
 
     def test_calculate_synergy_with_profiles(
-            self,
-            engine,
-            mock_coalition,
-            mock_formation_result_success,
-            mock_agent_profiles):
+        self, engine, mock_coalition, mock_formation_result_success, mock_agent_profiles
+    ):
         """Test synergy calculation with agent profiles"""
         result = engine._calculate_synergy(
             mock_coalition, mock_formation_result_success, mock_agent_profiles
@@ -349,8 +337,7 @@ class TestBusinessValueCalculationEngine:
         )
         assert result == 0.0
 
-    def test_calculate_risk_reduction_empty_profiles(
-            self, engine, mock_coalition):
+    def test_calculate_risk_reduction_empty_profiles(self, engine, mock_coalition):
         """Test risk reduction calculation with empty profiles"""
         result = engine._calculate_risk_reduction(mock_coalition, [])
         assert result == 0.0
@@ -359,16 +346,14 @@ class TestBusinessValueCalculationEngine:
         self, engine, mock_coalition, mock_agent_profiles
     ):
         """Test risk reduction calculation with diverse profiles"""
-        result = engine._calculate_risk_reduction(
-            mock_coalition, mock_agent_profiles)
+        result = engine._calculate_risk_reduction(mock_coalition, mock_agent_profiles)
 
         assert isinstance(result, float)
         assert 0.0 <= result <= 1.0
         # Should be positive given diverse capabilities
         assert result > 0.0
 
-    def test_calculate_risk_reduction_identical_profiles(
-            self, engine, mock_coalition):
+    def test_calculate_risk_reduction_identical_profiles(self, engine, mock_coalition):
         """Test risk reduction with identical profiles (low diversification)"""
         # Create identical profiles
         identical_profiles = []
@@ -379,15 +364,13 @@ class TestBusinessValueCalculationEngine:
             agent.reliability_score = 0.8
             identical_profiles.append(agent)
 
-        result = engine._calculate_risk_reduction(
-            mock_coalition, identical_profiles)
+        result = engine._calculate_risk_reduction(mock_coalition, identical_profiles)
 
         assert isinstance(result, float)
         assert 0.0 <= result <= 1.0
         # Should be lower than diverse profiles due to low diversification
 
-    def test_calculate_market_positioning_various_strategies(
-            self, engine, mock_coalition):
+    def test_calculate_market_positioning_various_strategies(self, engine, mock_coalition):
         """Test market positioning calculation with different strategies"""
         strategies = [
             "active_inference",
@@ -407,8 +390,7 @@ class TestBusinessValueCalculationEngine:
             formation_result.strategy_used = Mock()
             formation_result.strategy_used.value = strategy
 
-            result = engine._calculate_market_positioning(
-                mock_coalition, formation_result, None)
+            result = engine._calculate_market_positioning(mock_coalition, formation_result, None)
 
             assert isinstance(result, float)
             assert 0.0 <= result <= 1.0
@@ -426,8 +408,7 @@ class TestBusinessValueCalculationEngine:
         assert isinstance(result, float)
         assert 0.0 <= result <= 1.0
 
-    def test_calculate_market_positioning_speed_bonus(
-            self, engine, mock_coalition):
+    def test_calculate_market_positioning_speed_bonus(self, engine, mock_coalition):
         """Test market positioning speed bonus calculation"""
         # Fast formation (should get speed bonus)
         fast_result = Mock(spec=FormationResult)
@@ -447,10 +428,8 @@ class TestBusinessValueCalculationEngine:
         # Lower base score (0.6)
         slow_result.strategy_used.value = "preference_matching"
 
-        fast_score = engine._calculate_market_positioning(
-            mock_coalition, fast_result, None)
-        slow_score = engine._calculate_market_positioning(
-            mock_coalition, slow_result, None)
+        fast_score = engine._calculate_market_positioning(mock_coalition, fast_result, None)
+        slow_score = engine._calculate_market_positioning(mock_coalition, slow_result, None)
 
         # Fast formation should score higher due to speed bonus
         assert fast_score > slow_score
@@ -459,19 +438,15 @@ class TestBusinessValueCalculationEngine:
         self, engine, mock_coalition, mock_formation_result_success
     ):
         """Test sustainability calculation with empty profiles"""
-        result = engine._calculate_sustainability(
-            mock_coalition, mock_formation_result_success, [])
+        result = engine._calculate_sustainability(mock_coalition, mock_formation_result_success, [])
 
         assert isinstance(result, float)
         assert 0.0 <= result <= 1.0
         # Should still have some value from formation quality
 
     def test_calculate_sustainability_with_profiles(
-            self,
-            engine,
-            mock_coalition,
-            mock_formation_result_success,
-            mock_agent_profiles):
+        self, engine, mock_coalition, mock_formation_result_success, mock_agent_profiles
+    ):
         """Test sustainability calculation with agent profiles"""
         result = engine._calculate_sustainability(
             mock_coalition, mock_formation_result_success, mock_agent_profiles
@@ -482,11 +457,8 @@ class TestBusinessValueCalculationEngine:
         assert result > 0.0
 
     def test_calculate_sustainability_failed_formation(
-            self,
-            engine,
-            mock_coalition,
-            mock_formation_result_failure,
-            mock_agent_profiles):
+        self, engine, mock_coalition, mock_formation_result_failure, mock_agent_profiles
+    ):
         """Test sustainability calculation with failed formation"""
         result = engine._calculate_sustainability(
             mock_coalition, mock_formation_result_failure, mock_agent_profiles
@@ -496,8 +468,7 @@ class TestBusinessValueCalculationEngine:
         assert 0.0 <= result <= 1.0
         # Should be lower than successful formation
 
-    def test_calculate_operational_efficiency_empty_profiles(
-            self, engine, mock_coalition):
+    def test_calculate_operational_efficiency_empty_profiles(self, engine, mock_coalition):
         """Test operational efficiency with empty profiles"""
         result = engine._calculate_operational_efficiency(mock_coalition, [])
         assert result == 0.0
@@ -506,14 +477,12 @@ class TestBusinessValueCalculationEngine:
         self, engine, mock_coalition, mock_agent_profiles
     ):
         """Test operational efficiency with agent profiles"""
-        result = engine._calculate_operational_efficiency(
-            mock_coalition, mock_agent_profiles)
+        result = engine._calculate_operational_efficiency(mock_coalition, mock_agent_profiles)
 
         assert isinstance(result, float)
         assert 0.0 <= result <= 1.0
 
-    def test_calculate_innovation_potential_empty_profiles(
-            self, engine, mock_coalition):
+    def test_calculate_innovation_potential_empty_profiles(self, engine, mock_coalition):
         """Test innovation potential with empty profiles"""
         result = engine._calculate_innovation_potential(mock_coalition, [])
         assert result == 0.0
@@ -522,8 +491,7 @@ class TestBusinessValueCalculationEngine:
         self, engine, mock_coalition, mock_agent_profiles
     ):
         """Test innovation potential with agent profiles"""
-        result = engine._calculate_innovation_potential(
-            mock_coalition, mock_agent_profiles)
+        result = engine._calculate_innovation_potential(mock_coalition, mock_agent_profiles)
 
         assert isinstance(result, float)
         assert 0.0 <= result <= 1.0
@@ -555,11 +523,9 @@ class TestBusinessValueCalculationEngine:
         assert abs(result - expected) < 0.0001
         assert result <= 1.0
 
-    def test_calculate_confidence_empty_profiles(
-            self, engine, mock_formation_result_success):
+    def test_calculate_confidence_empty_profiles(self, engine, mock_formation_result_success):
         """Test confidence calculation with empty profiles"""
-        result = engine._calculate_confidence(
-            mock_formation_result_success, [])
+        result = engine._calculate_confidence(mock_formation_result_success, [])
 
         assert isinstance(result, float)
         assert 0.0 <= result <= 1.0
@@ -568,8 +534,7 @@ class TestBusinessValueCalculationEngine:
         self, engine, mock_formation_result_success, mock_agent_profiles
     ):
         """Test confidence calculation with agent profiles"""
-        result = engine._calculate_confidence(
-            mock_formation_result_success, mock_agent_profiles)
+        result = engine._calculate_confidence(mock_formation_result_success, mock_agent_profiles)
 
         assert isinstance(result, float)
         assert 0.0 <= result <= 1.0
@@ -579,8 +544,7 @@ class TestBusinessValueCalculationEngine:
         self, engine, mock_formation_result_failure, mock_agent_profiles
     ):
         """Test confidence calculation with failed formation"""
-        result = engine._calculate_confidence(
-            mock_formation_result_failure, mock_agent_profiles)
+        result = engine._calculate_confidence(mock_formation_result_failure, mock_agent_profiles)
 
         assert isinstance(result, float)
         assert 0.0 <= result <= 1.0
@@ -593,18 +557,14 @@ class TestBusinessValueCalculationEngine:
         assert len(history) == 0
 
     def test_get_calculation_history_with_data(
-            self,
-            engine,
-            mock_coalition,
-            mock_formation_result_success,
-            mock_agent_profiles):
+        self, engine, mock_coalition, mock_formation_result_success, mock_agent_profiles
+    ):
         """Test getting calculation history with data"""
         # Perform several calculations
         for i in range(5):
             engine.calculate_business_value(
-                mock_coalition,
-                mock_formation_result_success,
-                mock_agent_profiles)
+                mock_coalition, mock_formation_result_success, mock_agent_profiles
+            )
 
         # Get all history
         history = engine.get_calculation_history()
@@ -702,44 +662,29 @@ class TestBusinessValueCalculationEngine:
         assert low_export["investment_readiness"] == "LOW"
 
     def test_mathematical_consistency(
-            self,
-            engine,
-            mock_coalition,
-            mock_formation_result_success,
-            mock_agent_profiles):
+        self, engine, mock_coalition, mock_formation_result_success, mock_agent_profiles
+    ):
         """Test mathematical consistency across multiple calculations"""
         # Run the same calculation multiple times
         results = []
         for i in range(3):
             result = engine.calculate_business_value(
-                mock_coalition, mock_formation_result_success, mock_agent_profiles)
+                mock_coalition, mock_formation_result_success, mock_agent_profiles
+            )
             results.append(result)
 
         # Results should be identical (deterministic calculation)
         for i in range(1, len(results)):
-            assert abs(
-                results[0].synergy_score -
-                results[i].synergy_score) < 0.0001
-            assert abs(
-                results[0].risk_reduction -
-                results[i].risk_reduction) < 0.0001
-            assert abs(
-                results[0].market_positioning -
-                results[i].market_positioning) < 0.0001
-            assert abs(
-                results[0].sustainability_score -
-                results[i].sustainability_score) < 0.0001
-            assert (abs(results[0].operational_efficiency -
-                        results[i].operational_efficiency) < 0.0001)
-            assert abs(
-                results[0].innovation_potential -
-                results[i].innovation_potential) < 0.0001
-            assert abs(
-                results[0].total_value -
-                results[i].total_value) < 0.0001
-            assert abs(
-                results[0].confidence_level -
-                results[i].confidence_level) < 0.0001
+            assert abs(results[0].synergy_score - results[i].synergy_score) < 0.0001
+            assert abs(results[0].risk_reduction - results[i].risk_reduction) < 0.0001
+            assert abs(results[0].market_positioning - results[i].market_positioning) < 0.0001
+            assert abs(results[0].sustainability_score - results[i].sustainability_score) < 0.0001
+            assert (
+                abs(results[0].operational_efficiency - results[i].operational_efficiency) < 0.0001
+            )
+            assert abs(results[0].innovation_potential - results[i].innovation_potential) < 0.0001
+            assert abs(results[0].total_value - results[i].total_value) < 0.0001
+            assert abs(results[0].confidence_level - results[i].confidence_level) < 0.0001
 
 
 class TestGlobalBusinessValueEngine:
@@ -748,9 +693,7 @@ class TestGlobalBusinessValueEngine:
     def test_global_instance_exists(self):
         """Test that global instance exists and is correct type"""
         assert business_value_engine is not None
-        assert isinstance(
-            business_value_engine,
-            BusinessValueCalculationEngine)
+        assert isinstance(business_value_engine, BusinessValueCalculationEngine)
 
     def test_global_instance_initialization(self):
         """Test that global instance is properly initialized"""
@@ -784,8 +727,7 @@ class TestEdgeCases:
         formation_result.strategy_used = Mock()
         formation_result.strategy_used.value = "active_inference"
 
-        result = engine.calculate_business_value(
-            coalition, formation_result, [extreme_agent])
+        result = engine.calculate_business_value(coalition, formation_result, [extreme_agent])
 
         # All values should still be bounded [0, 1]
         assert 0.0 <= result.synergy_score <= 1.0
@@ -820,8 +762,7 @@ class TestEdgeCases:
         formation_result.strategy_used.value = "unknown"
 
         # Should not crash and should handle negatives gracefully
-        result = engine.calculate_business_value(
-            coalition, formation_result, [negative_agent])
+        result = engine.calculate_business_value(coalition, formation_result, [negative_agent])
 
         assert isinstance(result, BusinessValueMetrics)
         # Results should still be in valid range (engine should bound values)
@@ -850,8 +791,7 @@ class TestEdgeCases:
 
         # Should handle None gracefully without crashing
         try:
-            result = engine.calculate_business_value(
-                coalition, formation_result, [none_agent])
+            result = engine.calculate_business_value(coalition, formation_result, [none_agent])
             # If it doesn't crash, results should be valid
             assert isinstance(result, BusinessValueMetrics)
         except (TypeError, AttributeError):

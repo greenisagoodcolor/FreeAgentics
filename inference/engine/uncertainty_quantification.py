@@ -84,11 +84,9 @@ class StatisticalValidation:
         return is_significant, p_value
 
     @staticmethod
-    def anderson_darling_test(
-            data: np.ndarray, distribution: str = "norm") -> Tuple[bool, float]:
+    def anderson_darling_test(data: np.ndarray, distribution: str = "norm") -> Tuple[bool, float]:
         """Perform Anderson-Darling test for normality"""
-        statistic, critical_values, significance_level = stats.anderson(
-            data, dist=distribution)
+        statistic, critical_values, significance_level = stats.anderson(data, dist=distribution)
         is_normal = statistic < critical_values[2]  # 5% significance level
         return is_normal, float(statistic)
 
@@ -150,10 +148,8 @@ class UncertaintyQuantificationEngine:
             lower_idx = np.searchsorted(cumsum, alpha / 2)
             upper_idx = np.searchsorted(cumsum, 1 - alpha / 2)
 
-            lower_bound = sorted_probs[lower_idx] if lower_idx < len(
-                sorted_probs) else 0.0
-            upper_bound = sorted_probs[upper_idx] if upper_idx < len(
-                sorted_probs) else 1.0
+            lower_bound = sorted_probs[lower_idx] if lower_idx < len(sorted_probs) else 0.0
+            upper_bound = sorted_probs[upper_idx] if upper_idx < len(sorted_probs) else 1.0
 
             # Broadcast to match distribution shape
             lower_bounds = np.full_like(belief_distribution, lower_bound)
@@ -161,10 +157,8 @@ class UncertaintyQuantificationEngine:
 
         elif method == "quantile":
             # Quantile-based intervals
-            lower_bounds = np.percentile(
-                belief_distribution, 100 * alpha / 2, axis=0)
-            upper_bounds = np.percentile(
-                belief_distribution, 100 * (1 - alpha / 2), axis=0)
+            lower_bounds = np.percentile(belief_distribution, 100 * alpha / 2, axis=0)
+            upper_bounds = np.percentile(belief_distribution, 100 * (1 - alpha / 2), axis=0)
 
         elif method == "normal_approximation":
             # Normal approximation using posterior variance
@@ -234,16 +228,13 @@ class UncertaintyQuantificationEngine:
         kl_div = self._calculate_kl_divergence(current_belief, previous_belief)
 
         # Calculate Wasserstein distance
-        wasserstein_dist = self._calculate_wasserstein_distance(
-            current_belief, previous_belief)
+        wasserstein_dist = self._calculate_wasserstein_distance(current_belief, previous_belief)
 
         # Calculate Jensen-Shannon divergence
-        js_div = self._calculate_jensen_shannon_divergence(
-            current_belief, previous_belief)
+        js_div = self._calculate_jensen_shannon_divergence(current_belief, previous_belief)
 
         # Calculate Hellinger distance
-        hellinger_dist = self._calculate_hellinger_distance(
-            current_belief, previous_belief)
+        hellinger_dist = self._calculate_hellinger_distance(current_belief, previous_belief)
 
         # Calculate convergence rate
         convergence_rate = self._calculate_convergence_rate(agent_id)
@@ -257,8 +248,7 @@ class UncertaintyQuantificationEngine:
         )
 
         # Determine if converged (multiple criteria)
-        is_converged = self._assess_convergence(
-            kl_div, wasserstein_dist, js_div, stability)
+        is_converged = self._assess_convergence(kl_div, wasserstein_dist, js_div, stability)
 
         metrics = ConvergenceMetrics(
             kl_divergence=kl_div,
@@ -333,8 +323,7 @@ class UncertaintyQuantificationEngine:
         )
 
         # Uncertainty breakdown
-        uncertainty_breakdown = self._decompose_uncertainty(
-            input_uncertainties, mc_samples)
+        uncertainty_breakdown = self._decompose_uncertainty(input_uncertainties, mc_samples)
 
         propagation = UncertaintyPropagation(
             input_uncertainties=input_uncertainties,
@@ -366,8 +355,7 @@ class UncertaintyQuantificationEngine:
 
         if reference_distribution is None:
             # Use uniform distribution as reference
-            reference_distribution = np.ones_like(
-                belief_distribution / len(belief_distribution))
+            reference_distribution = np.ones_like(belief_distribution / len(belief_distribution))
 
         validation_results = {}
 
@@ -381,15 +369,12 @@ class UncertaintyQuantificationEngine:
         is_good_fit, p_val = StatisticalValidation.chi_squared_goodness_of_fit(
             belief_distribution, reference_distribution, alpha
         )
-        validation_results["chi_squared_goodness_of_fit"] = (
-            is_good_fit, p_val)
+        validation_results["chi_squared_goodness_of_fit"] = (is_good_fit, p_val)
 
         # Anderson-Darling test (for normality if applicable)
         try:
-            is_normal, statistic = StatisticalValidation.anderson_darling_test(
-                belief_distribution)
-            validation_results["anderson_darling_normality"] = (
-                is_normal, statistic)
+            is_normal, statistic = StatisticalValidation.anderson_darling_test(belief_distribution)
+            validation_results["anderson_darling_normality"] = (is_normal, statistic)
         except Exception:
             validation_results["anderson_darling_normality"] = (False, np.inf)
 
@@ -463,9 +448,11 @@ class UncertaintyQuantificationEngine:
 
         if include_raw_data and agent_id in self.historical_data:
             report["raw_data"] = {
-                "belief_distributions": [
-                    dist.tolist() for dist in self.historical_data[agent_id]], "timestamps": [
-                    m.confidence_interval.timestamp.isoformat() for m in convergence_data], }
+                "belief_distributions": [dist.tolist() for dist in self.historical_data[agent_id]],
+                "timestamps": [
+                    m.confidence_interval.timestamp.isoformat() for m in convergence_data
+                ],
+            }
 
         return report
 
@@ -477,22 +464,20 @@ class UncertaintyQuantificationEngine:
         safe_q = np.maximum(q, 1e-16)
         return float(np.sum(safe_p * np.log(safe_p / safe_q)))
 
-    def _calculate_wasserstein_distance(
-            self, p: np.ndarray, q: np.ndarray) -> float:
+    def _calculate_wasserstein_distance(self, p: np.ndarray, q: np.ndarray) -> float:
         """Calculate Wasserstein distance between distributions"""
         # 1D Wasserstein distance
         return float(stats.wasserstein_distance(p, q))
 
-    def _calculate_jensen_shannon_divergence(
-            self, p: np.ndarray, q: np.ndarray) -> float:
+    def _calculate_jensen_shannon_divergence(self, p: np.ndarray, q: np.ndarray) -> float:
         """Calculate Jensen-Shannon divergence"""
         m = 0.5 * (p + q)
-        js_div = 0.5 * \
-            self._calculate_kl_divergence(p, m) + 0.5 * self._calculate_kl_divergence(q, m)
+        js_div = 0.5 * self._calculate_kl_divergence(p, m) + 0.5 * self._calculate_kl_divergence(
+            q, m
+        )
         return float(js_div)
 
-    def _calculate_hellinger_distance(
-            self, p: np.ndarray, q: np.ndarray) -> float:
+    def _calculate_hellinger_distance(self, p: np.ndarray, q: np.ndarray) -> float:
         """Calculate Hellinger distance"""
         sqrt_p = np.sqrt(np.maximum(p, 1e-16))
         sqrt_q = np.sqrt(np.maximum(q, 1e-16))
@@ -504,8 +489,7 @@ class UncertaintyQuantificationEngine:
         if len(self.convergence_history[agent_id]) < 3:
             return 0.0
 
-        recent_kl = [
-            m.kl_divergence for m in self.convergence_history[agent_id][-5:]]
+        recent_kl = [m.kl_divergence for m in self.convergence_history[agent_id][-5:]]
         if len(recent_kl) < 2:
             return 0.0
 
@@ -520,8 +504,7 @@ class UncertaintyQuantificationEngine:
         if len(self.convergence_history[agent_id]) < 3:
             return 1.0
 
-        recent_kl = [
-            m.kl_divergence for m in self.convergence_history[agent_id][-10:]]
+        recent_kl = [m.kl_divergence for m in self.convergence_history[agent_id][-10:]]
         variance = np.var(recent_kl)
         stability = 1.0 / (1.0 + variance)  # Higher variance = lower stability
         return float(stability)
@@ -539,16 +522,14 @@ class UncertaintyQuantificationEngine:
                 uncertainty_type=UncertaintyType.EPISTEMIC,
             )
 
-        kl_values = np.array(
-            [m.kl_divergence for m in self.convergence_history[agent_id]])
+        kl_values = np.array([m.kl_divergence for m in self.convergence_history[agent_id]])
 
         # Bootstrap confidence interval
         n_bootstrap = 1000
         bootstrap_means = []
 
         for _ in range(n_bootstrap):
-            bootstrap_sample = np.random.choice(
-                kl_values, size=len(kl_values), replace=True)
+            bootstrap_sample = np.random.choice(kl_values, size=len(kl_values), replace=True)
             bootstrap_means.append(np.mean(bootstrap_sample))
 
         alpha = 1 - confidence_level.value
@@ -567,11 +548,8 @@ class UncertaintyQuantificationEngine:
         )
 
     def _assess_convergence(
-            self,
-            kl_div: float,
-            wasserstein: float,
-            js_div: float,
-            stability: float) -> bool:
+        self, kl_div: float, wasserstein: float, js_div: float, stability: float
+    ) -> bool:
         """Assess convergence using multiple criteria"""
         kl_threshold = 0.01
         wasserstein_threshold = 0.05
@@ -585,16 +563,14 @@ class UncertaintyQuantificationEngine:
             and stability > stability_threshold
         )
 
-    def _add_dirichlet_noise(self, distribution: np.ndarray,
-                             alpha: float = 1.0) -> np.ndarray:
+    def _add_dirichlet_noise(self, distribution: np.ndarray, alpha: float = 1.0) -> np.ndarray:
         """Add Dirichlet noise to distribution"""
         # Use distribution as concentration parameters
         concentration = distribution * alpha + 1e-6
         noisy_dist = np.random.dirichlet(concentration)
         return noisy_dist
 
-    def _estimate_model_uncertainty(
-            self, model_params: Dict[str, np.ndarray]) -> float:
+    def _estimate_model_uncertainty(self, model_params: Dict[str, np.ndarray]) -> float:
         """Estimate model uncertainty from parameter variability"""
         uncertainties = []
         for param_name, param_values in model_params.items():
@@ -604,11 +580,9 @@ class UncertaintyQuantificationEngine:
 
         return float(np.mean(uncertainties)) if uncertainties else 0.0
 
-    def _calculate_free_energy_sample(self,
-                                      belief: np.ndarray,
-                                      model_params: Dict[str,
-                                                         np.ndarray],
-                                      observations: np.ndarray) -> float:
+    def _calculate_free_energy_sample(
+        self, belief: np.ndarray, model_params: Dict[str, np.ndarray], observations: np.ndarray
+    ) -> float:
         """Calculate free energy for a single Monte Carlo sample"""
         # Simplified free energy calculation for Monte Carlo
         entropy = -np.sum(belief * np.log(np.maximum(belief, 1e-16)))
@@ -622,22 +596,17 @@ class UncertaintyQuantificationEngine:
 
         return float(entropy + kl_div)
 
-    def _perform_sensitivity_analysis(self,
-                                      belief: np.ndarray,
-                                      model_params: Dict[str,
-                                                         np.ndarray],
-                                      observations: np.ndarray) -> Dict[str,
-                                                                        float]:
+    def _perform_sensitivity_analysis(
+        self, belief: np.ndarray, model_params: Dict[str, np.ndarray], observations: np.ndarray
+    ) -> Dict[str, float]:
         """Perform sensitivity analysis on model inputs"""
-        baseline_fe = self._calculate_free_energy_sample(
-            belief, model_params, observations)
+        baseline_fe = self._calculate_free_energy_sample(belief, model_params, observations)
 
         sensitivity = {}
 
         # Belief sensitivity
         perturbed_belief = belief + 0.01 * np.random.normal(0, 1, belief.shape)
-        perturbed_belief = perturbed_belief / \
-            np.sum(perturbed_belief)  # Normalize
+        perturbed_belief = perturbed_belief / np.sum(perturbed_belief)  # Normalize
         perturbed_fe = self._calculate_free_energy_sample(
             perturbed_belief, model_params, observations
         )
@@ -645,12 +614,9 @@ class UncertaintyQuantificationEngine:
 
         # Observation sensitivity
         if len(observations) > 0:
-            perturbed_obs = observations + 0.01 * \
-                np.random.normal(0, 1, observations.shape)
-            perturbed_fe = self._calculate_free_energy_sample(
-                belief, model_params, perturbed_obs)
-            sensitivity["observations"] = float(
-                abs(perturbed_fe - baseline_fe))
+            perturbed_obs = observations + 0.01 * np.random.normal(0, 1, observations.shape)
+            perturbed_fe = self._calculate_free_energy_sample(belief, model_params, perturbed_obs)
+            sensitivity["observations"] = float(abs(perturbed_fe - baseline_fe))
         else:
             sensitivity["observations"] = 0.0
 

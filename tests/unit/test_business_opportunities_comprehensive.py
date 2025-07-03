@@ -172,18 +172,16 @@ except ImportError:
             self.opportunities = {}
             self.analyzers = {}
 
-        def identify_opportunity(
-                self, opportunity_data: Dict) -> BusinessOpportunity:
+        def identify_opportunity(self, opportunity_data: Dict) -> BusinessOpportunity:
             opportunity = BusinessOpportunity(
-                opportunity_id=str(
-                    uuid.uuid4()), title=opportunity_data.get(
-                    "title", "New Opportunity"), description=opportunity_data.get(
-                    "description", ""), opportunity_type=opportunity_data.get(
-                    "type", OpportunityType.MARKET_EXPANSION), )
+                opportunity_id=str(uuid.uuid4()),
+                title=opportunity_data.get("title", "New Opportunity"),
+                description=opportunity_data.get("description", ""),
+                opportunity_type=opportunity_data.get("type", OpportunityType.MARKET_EXPANSION),
+            )
             return opportunity
 
-        def analyze_opportunity(
-                self, opportunity: BusinessOpportunity) -> Dict[str, Any]:
+        def analyze_opportunity(self, opportunity: BusinessOpportunity) -> Dict[str, Any]:
             return {
                 "analysis_id": str(uuid.uuid4()),
                 "opportunity_id": opportunity.opportunity_id,
@@ -198,8 +196,7 @@ except ImportError:
         def __init__(self, config: OpportunityAnalysisConfig):
             self.config = config
 
-        def comprehensive_analysis(
-                self, opportunity: BusinessOpportunity) -> Dict[str, Any]:
+        def comprehensive_analysis(self, opportunity: BusinessOpportunity) -> Dict[str, Any]:
             return {"analysis_complete": True, "score": 0.8}
 
 
@@ -355,9 +352,8 @@ class TestBusinessOpportunityEngine:
     def config(self):
         """Create opportunity analysis config."""
         return OpportunityAnalysisConfig(
-            analysis_depth="comprehensive",
-            ml_enhanced_analysis=True,
-            real_time_monitoring=True)
+            analysis_depth="comprehensive", ml_enhanced_analysis=True, real_time_monitoring=True
+        )
 
     @pytest.fixture
     def opportunity_engine(self, config):
@@ -398,17 +394,13 @@ class TestBusinessOpportunityEngine:
             ],
         }
 
-    def test_opportunity_identification(
-            self,
-            opportunity_engine,
-            sample_opportunity_data):
+    def test_opportunity_identification(self, opportunity_engine, sample_opportunity_data):
         """Test opportunity identification process."""
         if not IMPORT_SUCCESS:
             return
 
         # Identify opportunity
-        opportunity = opportunity_engine.identify_opportunity(
-            sample_opportunity_data)
+        opportunity = opportunity_engine.identify_opportunity(sample_opportunity_data)
 
         assert isinstance(opportunity, BusinessOpportunity)
         assert opportunity.title == sample_opportunity_data["title"]
@@ -421,15 +413,13 @@ class TestBusinessOpportunityEngine:
         opportunity_engine.opportunities[opportunity.opportunity_id] = opportunity
         assert opportunity.opportunity_id in opportunity_engine.opportunities
 
-    def test_comprehensive_opportunity_analysis(
-            self, opportunity_engine, sample_opportunity_data):
+    def test_comprehensive_opportunity_analysis(self, opportunity_engine, sample_opportunity_data):
         """Test comprehensive opportunity analysis."""
         if not IMPORT_SUCCESS:
             return
 
         # Create opportunity
-        opportunity = opportunity_engine.identify_opportunity(
-            sample_opportunity_data)
+        opportunity = opportunity_engine.identify_opportunity(sample_opportunity_data)
 
         # Perform comprehensive analysis
         analysis_result = opportunity_engine.analyze_opportunity(opportunity)
@@ -457,14 +447,12 @@ class TestBusinessOpportunityEngine:
         assert 0 <= market_analysis["score"] <= 1
         assert 0 <= risk_analysis["score"] <= 1
 
-    def test_opportunity_scoring_algorithms(
-            self, opportunity_engine, sample_opportunity_data):
+    def test_opportunity_scoring_algorithms(self, opportunity_engine, sample_opportunity_data):
         """Test different opportunity scoring algorithms."""
         if not IMPORT_SUCCESS:
             return
 
-        opportunity = opportunity_engine.identify_opportunity(
-            sample_opportunity_data)
+        opportunity = opportunity_engine.identify_opportunity(sample_opportunity_data)
 
         # Test different scoring models
         scoring_models = [
@@ -499,14 +487,12 @@ class TestBusinessOpportunityEngine:
             assert isinstance(component_scores, dict)
             assert len(component_scores) > 0
 
-    def test_opportunity_validation_process(
-            self, opportunity_engine, sample_opportunity_data):
+    def test_opportunity_validation_process(self, opportunity_engine, sample_opportunity_data):
         """Test opportunity validation process."""
         if not IMPORT_SUCCESS:
             return
 
-        opportunity = opportunity_engine.identify_opportunity(
-            sample_opportunity_data)
+        opportunity = opportunity_engine.identify_opportunity(sample_opportunity_data)
 
         # Configure validation requirements
         opportunity_engine.config.require_validation = True
@@ -514,8 +500,7 @@ class TestBusinessOpportunityEngine:
         opportunity_engine.config.peer_review_required = True
 
         # Perform validation
-        validation_result = opportunity_engine.validate_opportunity(
-            opportunity)
+        validation_result = opportunity_engine.validate_opportunity(opportunity)
 
         assert "validation_status" in validation_result
         assert "validation_score" in validation_result
@@ -588,8 +573,8 @@ class TestBusinessOpportunityEngine:
 
         # Get recommendations
         recommendation_result = opportunity_engine.get_recommendations(
-            opportunities, criteria={
-                "max_investment": 1500000, "max_risk": RiskLevel.MEDIUM})
+            opportunities, criteria={"max_investment": 1500000, "max_risk": RiskLevel.MEDIUM}
+        )
 
         assert "recommended_opportunities" in recommendation_result
         assert "recommendation_rationale" in recommendation_result
@@ -658,8 +643,7 @@ class TestOpportunityAnalyzer:
             return
 
         # Perform market analysis
-        market_analysis = opportunity_analyzer.analyze_market(
-            complex_opportunity)
+        market_analysis = opportunity_analyzer.analyze_market(complex_opportunity)
 
         assert "market_size_analysis" in market_analysis
         assert "growth_projections" in market_analysis
@@ -682,17 +666,13 @@ class TestOpportunityAnalyzer:
             assert "projected_size" in projection
             assert "growth_rate" in projection
 
-    def test_competitive_analysis(
-            self,
-            opportunity_analyzer,
-            complex_opportunity):
+    def test_competitive_analysis(self, opportunity_analyzer, complex_opportunity):
         """Test competitive analysis functionality."""
         if not IMPORT_SUCCESS:
             return
 
         # Perform competitive analysis
-        competitive_analysis = opportunity_analyzer.analyze_competition(
-            complex_opportunity)
+        competitive_analysis = opportunity_analyzer.analyze_competition(complex_opportunity)
 
         assert "competitor_landscape" in competitive_analysis
         assert "competitive_positioning" in competitive_analysis
@@ -751,17 +731,13 @@ class TestOpportunityAnalyzer:
         overall_risk_score = risk_analysis["overall_risk_score"]
         assert 0.6 <= overall_risk_score <= 1.0  # High risk opportunity
 
-    def test_financial_analysis(
-            self,
-            opportunity_analyzer,
-            complex_opportunity):
+    def test_financial_analysis(self, opportunity_analyzer, complex_opportunity):
         """Test financial analysis functionality."""
         if not IMPORT_SUCCESS:
             return
 
         # Perform financial analysis
-        financial_analysis = opportunity_analyzer.analyze_financials(
-            complex_opportunity)
+        financial_analysis = opportunity_analyzer.analyze_financials(complex_opportunity)
 
         assert "revenue_projections" in financial_analysis
         assert "cost_analysis" in financial_analysis
@@ -786,17 +762,13 @@ class TestOpportunityAnalyzer:
         assert "net_margin" in profitability_analysis
         assert "break_even_analysis" in profitability_analysis
 
-    def test_technical_analysis(
-            self,
-            opportunity_analyzer,
-            complex_opportunity):
+    def test_technical_analysis(self, opportunity_analyzer, complex_opportunity):
         """Test technical analysis functionality."""
         if not IMPORT_SUCCESS:
             return
 
         # Perform technical analysis
-        technical_analysis = opportunity_analyzer.analyze_technical_aspects(
-            complex_opportunity)
+        technical_analysis = opportunity_analyzer.analyze_technical_aspects(complex_opportunity)
 
         assert "technical_feasibility" in technical_analysis
         assert "technology_requirements" in technical_analysis
@@ -818,17 +790,13 @@ class TestOpportunityAnalyzer:
         assert "development_timeline" in technology_requirements
         assert "skill_requirements" in technology_requirements
 
-    def test_strategic_analysis(
-            self,
-            opportunity_analyzer,
-            complex_opportunity):
+    def test_strategic_analysis(self, opportunity_analyzer, complex_opportunity):
         """Test strategic analysis functionality."""
         if not IMPORT_SUCCESS:
             return
 
         # Perform strategic analysis
-        strategic_analysis = opportunity_analyzer.analyze_strategic_fit(
-            complex_opportunity)
+        strategic_analysis = opportunity_analyzer.analyze_strategic_fit(complex_opportunity)
 
         assert "strategic_alignment" in strategic_analysis
         assert "strategic_value" in strategic_analysis
@@ -848,15 +816,13 @@ class TestOpportunityAnalyzer:
         assert "long_term_value" in strategic_value
         assert "strategic_optionality" in strategic_value
 
-    def test_comprehensive_analysis_integration(
-            self, opportunity_analyzer, complex_opportunity):
+    def test_comprehensive_analysis_integration(self, opportunity_analyzer, complex_opportunity):
         """Test comprehensive analysis integration."""
         if not IMPORT_SUCCESS:
             return
 
         # Perform comprehensive analysis
-        comprehensive_result = opportunity_analyzer.comprehensive_analysis(
-            complex_opportunity)
+        comprehensive_result = opportunity_analyzer.comprehensive_analysis(complex_opportunity)
 
         assert "analysis_summary" in comprehensive_result
         assert "integrated_score" in comprehensive_result
@@ -982,8 +948,7 @@ class TestOpportunityPortfolioManagement:
             },
         ]
 
-        all_opportunities = tech_opportunities + \
-            market_opportunities + partnership_opportunities
+        all_opportunities = tech_opportunities + market_opportunities + partnership_opportunities
 
         for i, opp_data in enumerate(all_opportunities):
             opportunity = BusinessOpportunity(
@@ -1000,10 +965,7 @@ class TestOpportunityPortfolioManagement:
 
         return opportunities
 
-    def test_portfolio_construction(
-            self,
-            opportunity_portfolio,
-            diverse_opportunities):
+    def test_portfolio_construction(self, opportunity_portfolio, diverse_opportunities):
         """Test portfolio construction and optimization."""
         if not IMPORT_SUCCESS:
             return
@@ -1034,16 +996,16 @@ class TestOpportunityPortfolioManagement:
         portfolio_metrics = portfolio_result["portfolio_metrics"]
 
         # Verify portfolio constraints
-        total_investment = sum(
-            opp.investment_required for opp in selected_opportunities)
+        total_investment = sum(opp.investment_required for opp in selected_opportunities)
         assert total_investment <= portfolio_constraints["max_total_investment"]
 
         # Check risk distribution
         high_risk_count = sum(
-            1 for opp in selected_opportunities if opp.risk_level == RiskLevel.HIGH)
+            1 for opp in selected_opportunities if opp.risk_level == RiskLevel.HIGH
+        )
         high_risk_percentage = (
-            high_risk_count /
-            len(selected_opportunities) if selected_opportunities else 0)
+            high_risk_count / len(selected_opportunities) if selected_opportunities else 0
+        )
         assert high_risk_percentage <= portfolio_constraints["max_high_risk_percentage"]
 
         # Verify portfolio metrics
@@ -1053,10 +1015,7 @@ class TestOpportunityPortfolioManagement:
         assert "risk_score" in portfolio_metrics
         assert "diversification_score" in portfolio_metrics
 
-    def test_portfolio_risk_analysis(
-            self,
-            opportunity_portfolio,
-            diverse_opportunities):
+    def test_portfolio_risk_analysis(self, opportunity_portfolio, diverse_opportunities):
         """Test portfolio risk analysis."""
         if not IMPORT_SUCCESS:
             return
@@ -1065,8 +1024,7 @@ class TestOpportunityPortfolioManagement:
         selected_opportunities = diverse_opportunities[:5]
 
         # Analyze portfolio risk
-        risk_analysis = opportunity_portfolio.analyze_portfolio_risk(
-            selected_opportunities)
+        risk_analysis = opportunity_portfolio.analyze_portfolio_risk(selected_opportunities)
 
         assert "overall_risk_score" in risk_analysis
         assert "risk_breakdown" in risk_analysis
@@ -1099,8 +1057,7 @@ class TestOpportunityPortfolioManagement:
             assert "success_probability" in analysis
             assert "risk_adjusted_return" in analysis
 
-    def test_portfolio_optimization_algorithms(
-            self, opportunity_portfolio, diverse_opportunities):
+    def test_portfolio_optimization_algorithms(self, opportunity_portfolio, diverse_opportunities):
         """Test different portfolio optimization algorithms."""
         if not IMPORT_SUCCESS:
             return
@@ -1113,16 +1070,15 @@ class TestOpportunityPortfolioManagement:
             "multi_objective",
         ]
 
-        portfolio_constraints = {
-            "max_total_investment": 10000000,
-            "target_return": 0.2}
+        portfolio_constraints = {"max_total_investment": 10000000, "target_return": 0.2}
 
         optimization_results = {}
 
         for algorithm in optimization_algorithms:
             # Run optimization with different algorithm
             result = opportunity_portfolio.optimize_portfolio(
-                diverse_opportunities, portfolio_constraints, algorithm=algorithm)
+                diverse_opportunities, portfolio_constraints, algorithm=algorithm
+            )
             optimization_results[algorithm] = result
 
         # Compare optimization results
@@ -1135,8 +1091,7 @@ class TestOpportunityPortfolioManagement:
             optimization_metrics = result["optimization_metrics"]
 
             # All portfolios should meet constraints
-            total_investment = sum(
-                opp.investment_required for opp in optimized_portfolio)
+            total_investment = sum(opp.investment_required for opp in optimized_portfolio)
             assert total_investment <= portfolio_constraints["max_total_investment"]
 
             # Should have optimization metrics
@@ -1144,10 +1099,7 @@ class TestOpportunityPortfolioManagement:
             assert "portfolio_risk" in optimization_metrics
             assert "sharpe_ratio" in optimization_metrics
 
-    def test_portfolio_rebalancing(
-            self,
-            opportunity_portfolio,
-            diverse_opportunities):
+    def test_portfolio_rebalancing(self, opportunity_portfolio, diverse_opportunities):
         """Test portfolio rebalancing over time."""
         if not IMPORT_SUCCESS:
             return
@@ -1185,8 +1137,7 @@ class TestOpportunityPortfolioManagement:
                 assert "rationale" in action
                 assert "expected_benefit" in action
 
-    def test_portfolio_performance_tracking(
-            self, opportunity_portfolio, diverse_opportunities):
+    def test_portfolio_performance_tracking(self, opportunity_portfolio, diverse_opportunities):
         """Test portfolio performance tracking."""
         if not IMPORT_SUCCESS:
             return
@@ -1213,8 +1164,7 @@ class TestOpportunityPortfolioManagement:
             performance_periods.append(period_performance)
 
         # Track portfolio performance
-        tracking_result = opportunity_portfolio.track_performance(
-            portfolio, performance_periods)
+        tracking_result = opportunity_portfolio.track_performance(portfolio, performance_periods)
 
         assert "performance_summary" in tracking_result
         assert "trend_analysis" in tracking_result
@@ -1286,20 +1236,17 @@ class TestOpportunityIntegrationScenarios:
 
         identified_opportunities = []
         for source in discovery_sources:
-            opportunities = opportunity_engine.discover_opportunities_from_source(
-                source)
+            opportunities = opportunity_engine.discover_opportunities_from_source(source)
             identified_opportunities.extend(opportunities)
 
         # Phase 2: Comprehensive Analysis and Validation
         analyzed_opportunities = []
         for opportunity in identified_opportunities:
             # Comprehensive analysis
-            analysis_result = opportunity_engine.analyze_opportunity(
-                opportunity)
+            analysis_result = opportunity_engine.analyze_opportunity(opportunity)
 
             # Validation process
-            validation_result = opportunity_engine.validate_opportunity(
-                opportunity)
+            validation_result = opportunity_engine.validate_opportunity(opportunity)
 
             # Update opportunity with analysis results
             opportunity.confidence_score = analysis_result["overall_score"]
@@ -1319,8 +1266,7 @@ class TestOpportunityIntegrationScenarios:
             "strategic_alignment_threshold": 0.7,
         }
 
-        portfolio_manager = OpportunityPortfolio(
-            config) if IMPORT_SUCCESS else Mock()
+        portfolio_manager = OpportunityPortfolio(config) if IMPORT_SUCCESS else Mock()
         optimal_portfolio = (
             portfolio_manager.construct_optimal_portfolio(
                 analyzed_opportunities, portfolio_constraints
@@ -1332,34 +1278,29 @@ class TestOpportunityIntegrationScenarios:
         selected_opportunities = optimal_portfolio["selected_opportunities"]
 
         # Phase 4: Implementation and Monitoring
-        lifecycle_manager = OpportunityLifecycleManager(
-            config) if IMPORT_SUCCESS else Mock()
+        lifecycle_manager = OpportunityLifecycleManager(config) if IMPORT_SUCCESS else Mock()
 
         implementation_results = []
         for opportunity in selected_opportunities:
             # Create implementation plan
             implementation_plan = (
-                lifecycle_manager.create_implementation_plan(opportunity) if IMPORT_SUCCESS else {
+                lifecycle_manager.create_implementation_plan(opportunity)
+                if IMPORT_SUCCESS
+                else {
                     "plan_id": f"plan_{
                         opportunity.opportunity_id}",
-                    "milestones": [
-                        "initiation",
-                        "development",
-                        "testing",
-                        "launch"],
+                    "milestones": ["initiation", "development", "testing", "launch"],
                     "timeline": 18,
-                    "resource_allocation": {
-                        "budget": opportunity.investment_required},
-                })
+                    "resource_allocation": {"budget": opportunity.investment_required},
+                }
+            )
 
             # Execute implementation
             execution_result = (
-                lifecycle_manager.execute_implementation(
-                    opportunity,
-                    implementation_plan) if IMPORT_SUCCESS else {
-                    "execution_status": "in_progress",
-                    "progress": 0.3,
-                    "milestones_completed": 1})
+                lifecycle_manager.execute_implementation(opportunity, implementation_plan)
+                if IMPORT_SUCCESS
+                else {"execution_status": "in_progress", "progress": 0.3, "milestones_completed": 1}
+            )
 
             implementation_results.append(execution_result)
 
@@ -1368,32 +1309,21 @@ class TestOpportunityIntegrationScenarios:
         for i, opportunity in enumerate(selected_opportunities):
             # Monitor performance
             performance_data = {
-                "actual_value": opportunity.estimated_value *
-                np.random.uniform(
-                    0.8,
-                    1.2),
-                "cost_to_date": opportunity.investment_required *
-                np.random.uniform(
-                    0.6,
-                    1.1),
-                "timeline_progress": np.random.uniform(
-                    0.2,
-                    0.8),
-                "risk_indicators": np.random.uniform(
-                    0.2,
-                    0.7),
+                "actual_value": opportunity.estimated_value * np.random.uniform(0.8, 1.2),
+                "cost_to_date": opportunity.investment_required * np.random.uniform(0.6, 1.1),
+                "timeline_progress": np.random.uniform(0.2, 0.8),
+                "risk_indicators": np.random.uniform(0.2, 0.7),
             }
 
             monitoring_result = (
-                lifecycle_manager.monitor_opportunity_performance(
-                    opportunity,
-                    performance_data) if IMPORT_SUCCESS else {
+                lifecycle_manager.monitor_opportunity_performance(opportunity, performance_data)
+                if IMPORT_SUCCESS
+                else {
                     "performance_score": 0.8,
                     "status": "on_track",
-                    "recommendations": [
-                        "continue",
-                        "optimize_resources"],
-                })
+                    "recommendations": ["continue", "optimize_resources"],
+                }
+            )
 
             monitoring_results.append(monitoring_result)
 
@@ -1406,15 +1336,12 @@ class TestOpportunityIntegrationScenarios:
 
         # Check process integrity
         for opportunity in analyzed_opportunities:
-            assert opportunity.status in [
-                OpportunityStatus.VALIDATED,
-                OpportunityStatus.ANALYZING]
+            assert opportunity.status in [OpportunityStatus.VALIDATED, OpportunityStatus.ANALYZING]
             assert 0 <= opportunity.confidence_score <= 1
 
         for result in implementation_results:
             assert "execution_status" in result
-            assert result["execution_status"] in [
-                "planned", "in_progress", "completed"]
+            assert result["execution_status"] in ["planned", "in_progress", "completed"]
 
         for result in monitoring_results:
             assert "performance_score" in result
@@ -1426,8 +1353,7 @@ class TestOpportunityIntegrationScenarios:
             return
 
         config = OpportunityAnalysisConfig(real_time_monitoring=True)
-        monitor = RealTimeOpportunityMonitor(
-            config) if IMPORT_SUCCESS else Mock()
+        monitor = RealTimeOpportunityMonitor(config) if IMPORT_SUCCESS else Mock()
 
         # Create opportunity to monitor
         opportunity = BusinessOpportunity(
@@ -1473,8 +1399,7 @@ class TestOpportunityIntegrationScenarios:
                 assert "recommended_actions" in result
 
                 if result["alert_triggered"]:
-                    assert result["severity_level"] in [
-                        "low", "medium", "high", "critical"]
+                    assert result["severity_level"] in ["low", "medium", "high", "critical"]
                     assert len(result["recommended_actions"]) > 0
 
     def test_machine_learning_enhanced_analysis(self):
@@ -1483,11 +1408,10 @@ class TestOpportunityIntegrationScenarios:
             return
 
         config = OpportunityAnalysisConfig(
-            ml_enhanced_analysis=True,
-            scoring_model="machine_learning_enhanced")
+            ml_enhanced_analysis=True, scoring_model="machine_learning_enhanced"
+        )
 
-        ml_detector = MachineLearningOpportunityDetector(
-            config) if IMPORT_SUCCESS else Mock()
+        ml_detector = MachineLearningOpportunityDetector(config) if IMPORT_SUCCESS else Mock()
 
         # Historical opportunity data for training
         historical_data = []
@@ -1527,8 +1451,7 @@ class TestOpportunityIntegrationScenarios:
                 "resource_availability": 0.9,
             }
 
-            prediction_result = ml_detector.predict_opportunity_success(
-                new_opportunity_features)
+            prediction_result = ml_detector.predict_opportunity_success(new_opportunity_features)
 
             assert "success_probability" in prediction_result
             assert "predicted_roi" in prediction_result

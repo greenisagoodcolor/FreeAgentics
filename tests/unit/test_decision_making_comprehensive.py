@@ -86,9 +86,7 @@ def sample_agent():
     agent.id = "agent_1"
     agent.position = Position(0.0, 0.0, 0.0)
     agent.resources = Mock(energy=100.0, health=100.0)
-    agent.capabilities = [
-        AgentCapability.COMMUNICATION,
-        AgentCapability.NAVIGATION]
+    agent.capabilities = [AgentCapability.COMMUNICATION, AgentCapability.NAVIGATION]
     agent.goals = []
     agent.status = AgentStatus.IDLE
     return agent
@@ -247,17 +245,10 @@ class TestDecisionContext:
             def get_priority_percept(self):
                 if not self.percepts:
                     return None
-                return max(
-                    self.percepts, key=lambda p: getattr(
-                        p, "intensity", 0))
+                return max(self.percepts, key=lambda p: getattr(p, "intensity", 0))
 
-        mock_percept = type(
-            "Percept", (), {
-                "intensity": 0.9, "type": "resource"})()
-        context = MockContext(
-            agent="agent_1",
-            percepts=[mock_percept],
-            goals=["explore"])
+        mock_percept = type("Percept", (), {"intensity": 0.9, "type": "resource"})()
+        context = MockContext(agent="agent_1", percepts=[mock_percept], goals=["explore"])
 
         assert context.agent == "agent_1"
         priority = context.get_priority_percept()
@@ -285,8 +276,7 @@ class TestUtilityCalculator:
                 return -action.cost  # Negative utility for movement cost
             return 0.0
 
-        calc.register_utility_function(
-            "distance", distance_utility, weight=0.5)
+        calc.register_utility_function("distance", distance_utility, weight=0.5)
 
         assert "distance" in calc.utility_functions
         assert calc.weights["distance"] == 0.5
@@ -297,10 +287,8 @@ class TestUtilityCalculator:
         calc = UtilityCalculator()
 
         # Register multiple utility functions
-        calc.register_utility_function(
-            "cost", lambda a, c: -a.cost, weight=0.3)
-        calc.register_utility_function(
-            "benefit", lambda a, c: a.expected_utility, weight=0.7)
+        calc.register_utility_function("cost", lambda a, c: -a.cost, weight=0.3)
+        calc.register_utility_function("benefit", lambda a, c: a.expected_utility, weight=0.7)
 
         action = Action(**sample_action)
         context = Mock()
@@ -369,12 +357,7 @@ class TestGoalPlanner:
         """Test generating action sequence for goal"""
         planner = GoalPlanner()
 
-        goal = Mock(
-            description="reach_location",
-            target_position=Position(
-                10,
-                10,
-                0))
+        goal = Mock(description="reach_location", target_position=Position(10, 10, 0))
 
         context = Mock(agent=Mock(position=Position(0, 0, 0)))
 
@@ -394,27 +377,18 @@ class TestGoalPlanner:
 
             def prioritize_goals(self, goals):
                 # Sort by priority attribute
-                return sorted(
-                    goals, key=lambda g: getattr(
-                        g, "priority", 0), reverse=True)
+                return sorted(goals, key=lambda g: getattr(g, "priority", 0), reverse=True)
 
             def generate_action_sequence(self, goal, context):
                 # Generate simple sequence
                 return [
-                    type(
-                        "Action", (), {
-                            "action_type": "move", "cost": 1.0})(), type(
-                        "Action", (), {
-                            "action_type": "interact", "cost": 2.0})(), ]
+                    type("Action", (), {"action_type": "move", "cost": 1.0})(),
+                    type("Action", (), {"action_type": "interact", "cost": 2.0})(),
+                ]
 
         planner = MockGoalPlanner()
 
-        goals = [
-            type(
-                "Goal", (), {
-                    "priority": 0.5})(), type(
-                "Goal", (), {
-                    "priority": 0.9})()]
+        goals = [type("Goal", (), {"priority": 0.5})(), type("Goal", (), {"priority": 0.9})()]
 
         prioritized = planner.prioritize_goals(goals)
         assert prioritized[0].priority == 0.9
@@ -531,10 +505,8 @@ class TestDecisionMaker:
         maker = DecisionMaker(DecisionStrategy.REACTIVE)
 
         context = Mock(
-            agent=sample_agent, percepts=[
-                Mock(
-                    stimulus=Mock(
-                        stimulus_type=StimulusType.DANGER))])
+            agent=sample_agent, percepts=[Mock(stimulus=Mock(stimulus_type=StimulusType.DANGER))]
+        )
 
         actions = maker.generate_available_actions(context)
 
@@ -550,7 +522,8 @@ class TestDecisionMaker:
 
         # Setup utility function
         maker.utility_calculator.register_utility_function(
-            "simple", lambda a, c: 10.0 if a.action_type == ActionType.WAIT else 5.0)
+            "simple", lambda a, c: 10.0 if a.action_type == ActionType.WAIT else 5.0
+        )
 
         context = Mock(agent=sample_agent, percepts=[])
         action = maker.decide(context)
@@ -602,8 +575,7 @@ class TestDecisionOrchestrator:
         perception_system = Mock()
         movement_controller = Mock()
 
-        orchestrator = DecisionOrchestrator(
-            state_manager, perception_system, movement_controller)
+        orchestrator = DecisionOrchestrator(state_manager, perception_system, movement_controller)
 
         assert orchestrator.state_manager == state_manager
         assert orchestrator.perception_system == perception_system
@@ -636,8 +608,7 @@ class TestDecisionOrchestrator:
 
         movement_controller = Mock()
 
-        orchestrator = DecisionOrchestrator(
-            state_manager, perception_system, movement_controller)
+        orchestrator = DecisionOrchestrator(state_manager, perception_system, movement_controller)
 
         # Register decision maker
         maker = Mock()
@@ -660,13 +631,10 @@ class TestDecisionOrchestrator:
         movement_controller = Mock()
         movement_controller.set_destination.return_value = True
 
-        orchestrator = DecisionOrchestrator(
-            state_manager, Mock(), movement_controller)
+        orchestrator = DecisionOrchestrator(state_manager, Mock(), movement_controller)
 
         # Test move action
-        move_action = Action(
-            ActionType.MOVE, target=Position(
-                10, 10, 0), cost=5.0)
+        move_action = Action(ActionType.MOVE, target=Position(10, 10, 0), cost=5.0)
 
         success = orchestrator.execute_action("agent_1", move_action)
         assert success is True
@@ -694,9 +662,7 @@ class TestDecisionOrchestrator:
                 if agent_id not in self.decision_makers:
                     return None
 
-                action = type(
-                    "Action", (), {
-                        "action_type": "wait", "cost": 0})()
+                action = type("Action", (), {"action_type": "wait", "cost": 0})()
                 self.decision_history[agent_id].append(action)
                 return action
 
@@ -724,8 +690,7 @@ class TestDecisionIntegration:
         # Setup components
         state_manager = Mock()
         state_manager.get_agent.return_value = sample_agent
-        state_manager.get_agent_goals.return_value = [
-            Mock(description="explore", priority=0.8)]
+        state_manager.get_agent_goals.return_value = [Mock(description="explore", priority=0.8)]
 
         perception_system = Mock()
         perception_system.perceive.return_value = sample_percepts
@@ -734,8 +699,7 @@ class TestDecisionIntegration:
         movement_controller.set_destination.return_value = True
 
         # Create orchestrator
-        orchestrator = DecisionOrchestrator(
-            state_manager, perception_system, movement_controller)
+        orchestrator = DecisionOrchestrator(state_manager, perception_system, movement_controller)
 
         # Create and register decision maker
         maker = DecisionMaker(DecisionStrategy.GOAL_ORIENTED)

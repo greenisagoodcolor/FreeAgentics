@@ -145,10 +145,7 @@ class TestConversationMessage:
                     "timestamp": self.timestamp.isoformat(),
                 }
 
-        msg = MockMessage(
-            sender_id="agent_1",
-            content="Hello",
-            intent="casual_greeting")
+        msg = MockMessage(sender_id="agent_1", content="Hello", intent="casual_greeting")
 
         assert msg.sender_id == "agent_1"
         assert msg.content == "Hello"
@@ -166,11 +163,8 @@ class TestConversationTurn:
         """Test creating a conversation turn"""
         msg = ConversationMessage(**sample_message)
         turn = ConversationTurn(
-            agent_id="agent_1",
-            action="speak",
-            message=msg,
-            internal_state={
-                "belief_updated": True})
+            agent_id="agent_1", action="speak", message=msg, internal_state={"belief_updated": True}
+        )
 
         assert turn.agent_id == "agent_1"
         assert turn.action == "speak"
@@ -181,11 +175,8 @@ class TestConversationTurn:
     def test_listen_turn(self):
         """Test creating a listen turn"""
         turn = ConversationTurn(
-            agent_id="agent_2",
-            action="listen",
-            message=None,
-            internal_state={
-                "processing": True})
+            agent_id="agent_2", action="listen", message=None, internal_state={"processing": True}
+        )
 
         assert turn.action == "listen"
         assert turn.message is None
@@ -194,12 +185,7 @@ class TestConversationTurn:
         """Test turn functionality with mocks"""
 
         class MockTurn:
-            def __init__(
-                    self,
-                    agent_id,
-                    action,
-                    message=None,
-                    internal_state=None):
+            def __init__(self, agent_id, action, message=None, internal_state=None):
                 self.agent_id = agent_id
                 self.action = action
                 self.message = message
@@ -383,12 +369,9 @@ class TestAgentConversation:
                 self.messages.append(message)
                 # Handle dict messages
                 sender_id = (
-                    message.get("sender_id") if isinstance(
-                        message, dict) else message.sender_id)
-                turn = {
-                    "agent_id": sender_id,
-                    "action": "speak",
-                    "message": message}
+                    message.get("sender_id") if isinstance(message, dict) else message.sender_id
+                )
+                turn = {"agent_id": sender_id, "action": "speak", "message": message}
                 self.turns.append(turn)
 
                 if len(self.turns) >= self.max_turns:
@@ -484,8 +467,7 @@ class TestConversationOrchestrator:
             "metadata": {"location": (10, 20), "resource": "energy"},
         }
 
-        message = orchestrator.process_agent_intent(
-            "agent_1", conv_id, intent_data)
+        message = orchestrator.process_agent_intent("agent_1", conv_id, intent_data)
 
         assert message is not None
         assert message.sender_id == "agent_1"
@@ -626,8 +608,7 @@ class TestConversationTemplates:
             "details": "Large energy deposit",
         }
 
-        template = ConversationTemplates.share_discovery(
-            "Scout", discovery_info)
+        template = ConversationTemplates.share_discovery("Scout", discovery_info)
 
         assert "Scout" in template
         assert "discovered" in template.lower() or "found" in template.lower()
@@ -641,8 +622,7 @@ class TestConversationTemplates:
             "requesting": {"resource": "materials", "amount": 30},
         }
 
-        template = ConversationTemplates.propose_trade(
-            "Merchant", trade_details)
+        template = ConversationTemplates.propose_trade("Merchant", trade_details)
 
         assert "Merchant" in template
         assert "trade" in template.lower() or "exchange" in template.lower()
@@ -651,9 +631,7 @@ class TestConversationTemplates:
     @pytest.mark.skipif(not IMPORT_SUCCESS, reason="Module not available")
     def test_warn_danger_template(self):
         """Test danger warning template"""
-        danger_info = {
-            "threat": "hostile_entity", "location": (
-                5, 5), "severity": "high"}
+        danger_info = {"threat": "hostile_entity", "location": (5, 5), "severity": "high"}
 
         template = ConversationTemplates.warn_danger("Guardian", danger_info)
 
@@ -726,8 +704,7 @@ class TestConversationTemplates:
         assert "Agent1" in greeting
         assert "Agent2" in greeting
 
-        discovery = MockTemplates.share_discovery(
-            "Scout", {"type": "resource"})
+        discovery = MockTemplates.share_discovery("Scout", {"type": "resource"})
         assert "Scout" in discovery
         assert "discovered" in discovery
 
@@ -740,12 +717,8 @@ class TestCommunicationIntegration:
         """Test complete conversation flow"""
         # Setup orchestrator
         orchestrator = ConversationOrchestrator(mock_knowledge_graph)
-        orchestrator.register_agent(
-            "explorer", {
-                "name": "Explorer", "role": "scout"})
-        orchestrator.register_agent(
-            "guardian", {
-                "name": "Guardian", "role": "protector"})
+        orchestrator.register_agent("explorer", {"name": "Explorer", "role": "scout"})
+        orchestrator.register_agent("guardian", {"name": "Guardian", "role": "protector"})
 
         # Start conversation
         conv_id = orchestrator.start_conversation(
@@ -761,8 +734,7 @@ class TestCommunicationIntegration:
             "metadata": {"discovery_type": "resource", "coordinates": (20, 30)},
         }
 
-        msg1 = orchestrator.process_agent_intent(
-            "explorer", conv_id, discovery_intent)
+        msg1 = orchestrator.process_agent_intent("explorer", conv_id, discovery_intent)
         assert msg1 is not None
 
         # Guardian warns of danger
@@ -774,8 +746,7 @@ class TestCommunicationIntegration:
             "metadata": {"threat_level": "high", "coordinates": (22, 28)},
         }
 
-        msg2 = orchestrator.process_agent_intent(
-            "guardian", conv_id, warning_intent)
+        msg2 = orchestrator.process_agent_intent("guardian", conv_id, warning_intent)
         assert msg2 is not None
 
         # Verify conversation state
@@ -785,8 +756,7 @@ class TestCommunicationIntegration:
         assert conv.messages[1].intent == ConversationIntent.WARN_DANGER
 
         # End conversation
-        success = orchestrator.end_conversation(
-            conv_id, "Information exchanged")
+        success = orchestrator.end_conversation(conv_id, "Information exchanged")
         assert success is True
         assert conv_id in orchestrator.conversation_history
 
@@ -811,8 +781,7 @@ class TestCommunicationIntegration:
             "recipient_id": None,  # Broadcast to all
         }
 
-        msg = orchestrator.process_agent_intent(
-            "agent_0", conv_id, broadcast_intent)
+        msg = orchestrator.process_agent_intent("agent_0", conv_id, broadcast_intent)
         assert msg.recipient_id is None  # Confirms broadcast
 
         # Verify all agents can see the message

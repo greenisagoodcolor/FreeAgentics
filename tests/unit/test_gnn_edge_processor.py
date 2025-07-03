@@ -186,12 +186,7 @@ class TestEdgeType:
 
     def test_edge_types_exist(self):
         """Test all edge types exist."""
-        expected_types = [
-            "DIRECTED",
-            "UNDIRECTED",
-            "BIDIRECTIONAL",
-            "SELF_LOOP",
-            "MULTI_EDGE"]
+        expected_types = ["DIRECTED", "UNDIRECTED", "BIDIRECTIONAL", "SELF_LOOP", "MULTI_EDGE"]
 
         for edge_type in expected_types:
             assert hasattr(EdgeType, edge_type)
@@ -210,15 +205,7 @@ class TestAggregationType:
 
     def test_aggregation_types_exist(self):
         """Test all aggregation types exist."""
-        expected_types = [
-            "SUM",
-            "MEAN",
-            "MAX",
-            "MIN",
-            "ATTENTION",
-            "CONCAT",
-            "WEIGHTED",
-            "GATE"]
+        expected_types = ["SUM", "MEAN", "MAX", "MIN", "ATTENTION", "CONCAT", "WEIGHTED", "GATE"]
 
         for agg_type in expected_types:
             assert hasattr(AggregationType, agg_type)
@@ -242,11 +229,8 @@ class TestEdgeFeatureProcessor:
     def config(self):
         """Create edge config for testing."""
         return EdgeConfig(
-            input_dim=64,
-            hidden_dim=128,
-            output_dim=64,
-            edge_attr_dim=32,
-            use_edge_attr=True)
+            input_dim=64, hidden_dim=128, output_dim=64, edge_attr_dim=32, use_edge_attr=True
+        )
 
     @pytest.fixture
     def processor(self, config):
@@ -291,8 +275,7 @@ class TestEdgeFeatureProcessor:
         edge_attr = torch.randn(num_edges, processor.config.edge_attr_dim)
 
         # Transform edge features
-        transformed_features = processor.transform_edge_features(
-            edge_index, edge_attr)
+        transformed_features = processor.transform_edge_features(edge_index, edge_attr)
 
         assert transformed_features.shape[0] == num_edges
         assert transformed_features.shape[1] == processor.config.output_dim
@@ -376,8 +359,7 @@ class TestEdgeAggregator:
 
         # Create edge messages for nodes
         num_nodes = 10
-        edge_index = torch.tensor(
-            [[0, 1, 2, 0, 1], [1, 2, 0, 2, 0]])  # 5 edges
+        edge_index = torch.tensor([[0, 1, 2, 0, 1], [1, 2, 0, 2, 0]])  # 5 edges
         edge_messages = torch.randn(5, 64)
 
         # Aggregate messages
@@ -428,8 +410,7 @@ class TestEdgeAggregator:
         assert aggregated.shape == (num_nodes, 16)
 
         # Verify max aggregation for node 2 (receives from edges 1, 2)
-        expected_node_2, _ = torch.max(torch.stack(
-            [edge_messages[1], edge_messages[2]]), dim=0)
+        expected_node_2, _ = torch.max(torch.stack([edge_messages[1], edge_messages[2]]), dim=0)
         assert torch.allclose(aggregated[2], expected_node_2, atol=1e-6)
 
     def test_attention_aggregation(self, aggregator):
@@ -469,8 +450,7 @@ class TestEdgeAggregator:
         edge_weights = torch.tensor([0.5, 0.3, 0.8])
 
         # Aggregate with weights
-        aggregated = aggregator.aggregate(
-            edge_messages, edge_index, num_nodes, edge_weights)
+        aggregated = aggregator.aggregate(edge_messages, edge_index, num_nodes, edge_weights)
 
         assert aggregated.shape == (num_nodes, 32)
 
@@ -570,8 +550,7 @@ class TestEdgeAttention:
             node_features, edge_index, edge_attr
         )
 
-        assert attended_features.shape == (
-            num_nodes, attention.config.hidden_dim)
+        assert attended_features.shape == (num_nodes, attention.config.hidden_dim)
         assert attention_weights.shape[0] == num_edges
 
         # Attention weights should sum to 1 for each target node
@@ -601,10 +580,8 @@ class TestEdgeAttention:
             node_features, edge_index, edge_attr
         )
 
-        assert attended_features.shape == (
-            num_nodes, attention.config.hidden_dim)
-        assert attention_weights.shape == (
-            attention.config.attention_heads, num_edges)
+        assert attended_features.shape == (num_nodes, attention.config.hidden_dim)
+        assert attention_weights.shape == (attention.config.attention_heads, num_edges)
 
         # Each head should produce valid attention weights
         for head in range(attention.config.attention_heads):
@@ -631,12 +608,10 @@ class TestEdgeAttention:
             node_features, edge_index, edge_attr
         )
 
-        assert attended_features.shape == (
-            num_nodes, attention.config.hidden_dim)
+        assert attended_features.shape == (num_nodes, attention.config.hidden_dim)
 
         # Compare with attention without edge features
-        attended_no_edge, _ = attention.forward(
-            node_features, edge_index, None)
+        attended_no_edge, _ = attention.forward(node_features, edge_index, None)
 
         # Results should be different when edge features are used
         assert not torch.allclose(attended_features, attended_no_edge)
@@ -659,8 +634,7 @@ class TestEdgeAttention:
             node_features, edge_index, edge_attr=None
         )
 
-        assert attended_features.shape == (
-            num_nodes, attention.config.hidden_dim)
+        assert attended_features.shape == (num_nodes, attention.config.hidden_dim)
         assert attention_weights.shape[0] == num_edges
 
     def test_attention_masking(self, attention):
@@ -680,8 +654,7 @@ class TestEdgeAttention:
             node_features, edge_index, edge_mask=edge_mask
         )
 
-        assert attended_features.shape == (
-            num_nodes, attention.config.hidden_dim)
+        assert attended_features.shape == (num_nodes, attention.config.hidden_dim)
 
         # Masked edges should have zero attention weights
         masked_weights = attention_weights[~edge_mask]
@@ -697,19 +670,12 @@ class TestEdgeAttention:
         # Create data that requires gradients
         num_nodes = 4
         num_edges = 8
-        node_features = torch.randn(
-            num_nodes,
-            attention.config.input_dim,
-            requires_grad=True)
+        node_features = torch.randn(num_nodes, attention.config.input_dim, requires_grad=True)
         edge_index = torch.randint(0, num_nodes, (2, num_edges))
-        edge_attr = torch.randn(
-            num_edges,
-            attention.config.edge_attr_dim,
-            requires_grad=True)
+        edge_attr = torch.randn(num_edges, attention.config.edge_attr_dim, requires_grad=True)
 
         # Forward pass
-        attended_features, _ = attention.forward(
-            node_features, edge_index, edge_attr)
+        attended_features, _ = attention.forward(node_features, edge_index, edge_attr)
 
         # Compute loss and backward pass
         loss = attended_features.sum()
@@ -730,11 +696,8 @@ class TestEdgeConvolution:
         """Create edge convolution layer."""
         if IMPORT_SUCCESS:
             config = EdgeConfig(
-                input_dim=64,
-                hidden_dim=128,
-                output_dim=64,
-                edge_attr_dim=32,
-                use_edge_attr=True)
+                input_dim=64, hidden_dim=128, output_dim=64, edge_attr_dim=32, use_edge_attr=True
+            )
             return EdgeConvolution(config)
         else:
             return Mock()
@@ -762,11 +725,9 @@ class TestEdgeConvolution:
         edge_attr = torch.randn(num_edges, conv_layer.config.edge_attr_dim)
 
         # Forward pass
-        output_features = conv_layer.forward(
-            node_features, edge_index, edge_attr)
+        output_features = conv_layer.forward(node_features, edge_index, edge_attr)
 
-        assert output_features.shape == (
-            num_nodes, conv_layer.config.output_dim)
+        assert output_features.shape == (num_nodes, conv_layer.config.output_dim)
 
     def test_message_passing(self, conv_layer):
         """Test message passing in convolution."""
@@ -780,8 +741,7 @@ class TestEdgeConvolution:
         edge_attr = torch.randn(num_edges, conv_layer.config.edge_attr_dim)
 
         # Compute messages
-        messages = conv_layer.message(
-            source_features, target_features, edge_attr)
+        messages = conv_layer.message(source_features, target_features, edge_attr)
 
         assert messages.shape[0] == num_edges
         assert messages.shape[1] == conv_layer.config.hidden_dim
@@ -794,15 +754,12 @@ class TestEdgeConvolution:
         # Create node features and aggregated messages
         num_nodes = 8
         node_features = torch.randn(num_nodes, conv_layer.config.input_dim)
-        aggregated_messages = torch.randn(
-            num_nodes, conv_layer.config.hidden_dim)
+        aggregated_messages = torch.randn(num_nodes, conv_layer.config.hidden_dim)
 
         # Update nodes
-        updated_features = conv_layer.update(
-            node_features, aggregated_messages)
+        updated_features = conv_layer.update(node_features, aggregated_messages)
 
-        assert updated_features.shape == (
-            num_nodes, conv_layer.config.output_dim)
+        assert updated_features.shape == (num_nodes, conv_layer.config.output_dim)
 
     def test_residual_connections(self, conv_layer):
         """Test residual connections in convolution."""
@@ -820,8 +777,7 @@ class TestEdgeConvolution:
         edge_attr = torch.randn(num_edges, conv_layer.config.edge_attr_dim)
 
         # Forward pass with residual
-        output_features = conv_layer.forward(
-            node_features, edge_index, edge_attr)
+        output_features = conv_layer.forward(node_features, edge_index, edge_attr)
 
         assert output_features.shape == node_features.shape
 
@@ -862,10 +818,7 @@ class TestMessagePassing:
     def message_passing(self):
         """Create message passing layer."""
         if IMPORT_SUCCESS:
-            config = EdgeConfig(
-                input_dim=64,
-                hidden_dim=128,
-                aggregation=AggregationType.SUM)
+            config = EdgeConfig(input_dim=64, hidden_dim=128, aggregation=AggregationType.SUM)
             return MessagePassing(config)
         else:
             return Mock()
@@ -892,8 +845,7 @@ class TestMessagePassing:
         edge_features = torch.randn(num_edges, 32)
 
         # Compute messages
-        messages = message_passing.message(
-            source_nodes, target_nodes, edge_features)
+        messages = message_passing.message(source_nodes, target_nodes, edge_features)
 
         assert messages.shape[0] == num_edges
         assert messages.shape[1] == message_passing.config.hidden_dim
@@ -912,8 +864,7 @@ class TestMessagePassing:
         # Aggregate messages
         aggregated = message_passing.aggregate(messages, edge_index, num_nodes)
 
-        assert aggregated.shape == (
-            num_nodes, message_passing.config.hidden_dim)
+        assert aggregated.shape == (num_nodes, message_passing.config.hidden_dim)
 
     def test_node_update_step(self, message_passing):
         """Test node update step."""
@@ -922,14 +873,11 @@ class TestMessagePassing:
 
         # Create node features and messages
         num_nodes = 10
-        node_features = torch.randn(
-            num_nodes, message_passing.config.input_dim)
-        aggregated_messages = torch.randn(
-            num_nodes, message_passing.config.hidden_dim)
+        node_features = torch.randn(num_nodes, message_passing.config.input_dim)
+        aggregated_messages = torch.randn(num_nodes, message_passing.config.hidden_dim)
 
         # Update nodes
-        updated_nodes = message_passing.update(
-            node_features, aggregated_messages)
+        updated_nodes = message_passing.update(node_features, aggregated_messages)
 
         assert updated_nodes.shape[0] == num_nodes
         assert updated_nodes.shape[1] == message_passing.config.hidden_dim
@@ -942,17 +890,14 @@ class TestMessagePassing:
         # Create graph data
         num_nodes = 12
         num_edges = 24
-        node_features = torch.randn(
-            num_nodes, message_passing.config.input_dim)
+        node_features = torch.randn(num_nodes, message_passing.config.input_dim)
         edge_index = torch.randint(0, num_nodes, (2, num_edges))
         edge_attr = torch.randn(num_edges, 32)
 
         # Perform message passing step
-        updated_features = message_passing.forward(
-            node_features, edge_index, edge_attr)
+        updated_features = message_passing.forward(node_features, edge_index, edge_attr)
 
-        assert updated_features.shape == (
-            num_nodes, message_passing.config.hidden_dim)
+        assert updated_features.shape == (num_nodes, message_passing.config.hidden_dim)
 
     def test_multiple_message_passing_steps(self, message_passing):
         """Test multiple message passing steps."""
@@ -962,18 +907,15 @@ class TestMessagePassing:
         # Create graph data
         num_nodes = 6
         num_edges = 12
-        node_features = torch.randn(
-            num_nodes, message_passing.config.input_dim)
+        node_features = torch.randn(num_nodes, message_passing.config.input_dim)
         edge_index = torch.randint(0, num_nodes, (2, num_edges))
 
         # Perform multiple steps
         current_features = node_features
         for step in range(3):
-            current_features = message_passing.forward(
-                current_features, edge_index)
+            current_features = message_passing.forward(current_features, edge_index)
 
-        assert current_features.shape == (
-            num_nodes, message_passing.config.hidden_dim)
+        assert current_features.shape == (num_nodes, message_passing.config.hidden_dim)
 
         # Features should change over multiple steps
         assert not torch.allclose(current_features, node_features)
@@ -986,10 +928,7 @@ class TestEdgePooling:
     def pooling_layer(self):
         """Create edge pooling layer."""
         if IMPORT_SUCCESS:
-            config = EdgeConfig(
-                input_dim=64,
-                hidden_dim=128,
-                aggregation=AggregationType.MAX)
+            config = EdgeConfig(input_dim=64, hidden_dim=128, aggregation=AggregationType.MAX)
             return EdgePooling(config)
         else:
             return Mock()
@@ -1033,15 +972,13 @@ class TestEdgePooling:
         ]
 
         # Perform hierarchical pooling
-        pooled_hierarchy = pooling_layer.hierarchical_pool(
-            edge_features, edge_hierarchy)
+        pooled_hierarchy = pooling_layer.hierarchical_pool(edge_features, edge_hierarchy)
 
         assert len(pooled_hierarchy) == len(edge_hierarchy)
 
         # Each level should have fewer features
         for i in range(len(pooled_hierarchy) - 1):
-            assert pooled_hierarchy[i +
-                                    1].shape[0] <= pooled_hierarchy[i].shape[0]
+            assert pooled_hierarchy[i + 1].shape[0] <= pooled_hierarchy[i].shape[0]
 
     def test_attention_pooling(self, pooling_layer):
         """Test attention-based pooling."""
@@ -1056,8 +993,7 @@ class TestEdgePooling:
         attention_scores = torch.randn(num_edges)
 
         # Pool with attention
-        pooled_features = pooling_layer.attention_pool(
-            edge_features, attention_scores)
+        pooled_features = pooling_layer.attention_pool(edge_features, attention_scores)
 
         assert pooled_features.shape[1] == pooling_layer.config.input_dim
 
@@ -1094,11 +1030,7 @@ class TestEdgeEncoder:
     def encoder(self):
         """Create edge encoder."""
         if IMPORT_SUCCESS:
-            config = EdgeConfig(
-                input_dim=32,
-                hidden_dim=64,
-                output_dim=128,
-                edge_attr_dim=16)
+            config = EdgeConfig(input_dim=32, hidden_dim=64, output_dim=128, edge_attr_dim=16)
             return EdgeEncoder(config)
         else:
             return Mock()
@@ -1150,8 +1082,7 @@ class TestEdgeEncoder:
 
         # Create edge types
         num_edges = 40
-        edge_types = torch.randint(
-            0, encoder.config.num_edge_types, (num_edges,))
+        edge_types = torch.randint(0, encoder.config.num_edge_types, (num_edges,))
 
         # Encode edge types
         type_encoded = encoder.encode_edge_types(edge_types)
@@ -1182,11 +1113,7 @@ class TestEdgeDecoder:
     def decoder(self):
         """Create edge decoder."""
         if IMPORT_SUCCESS:
-            config = EdgeConfig(
-                input_dim=128,
-                hidden_dim=64,
-                output_dim=32,
-                edge_attr_dim=16)
+            config = EdgeConfig(input_dim=128, hidden_dim=64, output_dim=32, edge_attr_dim=16)
             return EdgeDecoder(config)
         else:
             return Mock()
@@ -1225,8 +1152,7 @@ class TestEdgeDecoder:
         edge_index = torch.randint(0, num_nodes, (2, 20))
 
         # Reconstruct edges
-        reconstructed_edges = decoder.reconstruct_edges(
-            node_embeddings, edge_index)
+        reconstructed_edges = decoder.reconstruct_edges(node_embeddings, edge_index)
 
         assert reconstructed_edges.shape[0] == edge_index.shape[1]
         assert reconstructed_edges.shape[1] == decoder.config.output_dim
@@ -1257,11 +1183,7 @@ class TestHeteroEdgeProcessor:
     def hetero_processor(self):
         """Create heterogeneous edge processor."""
         if IMPORT_SUCCESS:
-            config = EdgeConfig(
-                input_dim=64,
-                hidden_dim=128,
-                num_edge_types=5,
-                use_edge_attr=True)
+            config = EdgeConfig(input_dim=64, hidden_dim=128, num_edge_types=5, use_edge_attr=True)
             return HeteroEdgeProcessor(config)
         else:
             return Mock()
@@ -1273,8 +1195,7 @@ class TestHeteroEdgeProcessor:
 
         assert hasattr(hetero_processor, "edge_type_processors")
         assert hasattr(hetero_processor, "type_specific_layers")
-        assert len(
-            hetero_processor.edge_type_processors) == hetero_processor.config.num_edge_types
+        assert len(hetero_processor.edge_type_processors) == hetero_processor.config.num_edge_types
 
     def test_multi_type_edge_processing(self, hetero_processor):
         """Test processing multiple edge types."""
@@ -1283,18 +1204,14 @@ class TestHeteroEdgeProcessor:
 
         # Create heterogeneous edge data
         num_edges = 60
-        edge_types = torch.randint(
-            0, hetero_processor.config.num_edge_types, (num_edges,))
-        edge_features = torch.randn(
-            num_edges, hetero_processor.config.input_dim)
+        edge_types = torch.randint(0, hetero_processor.config.num_edge_types, (num_edges,))
+        edge_features = torch.randn(num_edges, hetero_processor.config.input_dim)
         edge_index = torch.randint(0, 20, (2, num_edges))
 
         # Process different edge types
-        processed_features = hetero_processor.process_by_type(
-            edge_features, edge_types, edge_index)
+        processed_features = hetero_processor.process_by_type(edge_features, edge_types, edge_index)
 
-        assert processed_features.shape == (
-            num_edges, hetero_processor.config.hidden_dim)
+        assert processed_features.shape == (num_edges, hetero_processor.config.hidden_dim)
 
     def test_type_specific_aggregation(self, hetero_processor):
         """Test type-specific edge aggregation."""
@@ -1317,8 +1234,7 @@ class TestHeteroEdgeProcessor:
             type_features, type_indices, num_nodes=15
         )
 
-        assert aggregated_features.shape == (
-            15, hetero_processor.config.hidden_dim)
+        assert aggregated_features.shape == (15, hetero_processor.config.hidden_dim)
 
     def test_cross_type_attention(self, hetero_processor):
         """Test cross-type attention mechanism."""
@@ -1333,12 +1249,10 @@ class TestHeteroEdgeProcessor:
         ]
 
         # Compute cross-type attention
-        attended_features = hetero_processor.cross_type_attention(
-            type_features)
+        attended_features = hetero_processor.cross_type_attention(type_features)
 
         total_edges = sum(tf.shape[0] for tf in type_features)
-        assert attended_features.shape == (
-            total_edges, hetero_processor.config.hidden_dim)
+        assert attended_features.shape == (total_edges, hetero_processor.config.hidden_dim)
 
 
 class TestTemporalEdgeProcessor:
@@ -1348,11 +1262,7 @@ class TestTemporalEdgeProcessor:
     def temporal_processor(self):
         """Create temporal edge processor."""
         if IMPORT_SUCCESS:
-            config = EdgeConfig(
-                input_dim=64,
-                hidden_dim=128,
-                temporal=True,
-                max_temporal_steps=10)
+            config = EdgeConfig(input_dim=64, hidden_dim=128, temporal=True, max_temporal_steps=10)
             return TemporalEdgeProcessor(config)
         else:
             return Mock()
@@ -1380,8 +1290,7 @@ class TestTemporalEdgeProcessor:
         timestamps = torch.arange(sequence_length).repeat(num_edges, 1)
 
         # Encode temporal sequences
-        encoded_sequences = temporal_processor.encode_temporal_sequence(
-            edge_sequences, timestamps)
+        encoded_sequences = temporal_processor.encode_temporal_sequence(edge_sequences, timestamps)
 
         assert encoded_sequences.shape == (
             num_edges,
@@ -1404,8 +1313,7 @@ class TestTemporalEdgeProcessor:
         # Aggregate over time
         aggregated = temporal_processor.temporal_aggregate(temporal_features)
 
-        assert aggregated.shape == (
-            num_edges, temporal_processor.config.hidden_dim)
+        assert aggregated.shape == (num_edges, temporal_processor.config.hidden_dim)
 
     def test_temporal_attention(self, temporal_processor):
         """Test temporal attention mechanism."""
@@ -1421,10 +1329,10 @@ class TestTemporalEdgeProcessor:
 
         # Apply temporal attention
         attended_features, attention_weights = temporal_processor.temporal_attention(
-            temporal_features)
+            temporal_features
+        )
 
-        assert attended_features.shape == (
-            num_edges, temporal_processor.config.hidden_dim)
+        assert attended_features.shape == (num_edges, temporal_processor.config.hidden_dim)
         assert attention_weights.shape == (num_edges, sequence_length)
 
         # Attention weights should sum to 1 for each edge
@@ -1439,10 +1347,7 @@ class TestMetaPath:
     def meta_path(self):
         """Create meta-path processor."""
         if IMPORT_SUCCESS:
-            config = EdgeConfig(
-                enable_meta_paths=True,
-                meta_path_length=3,
-                num_edge_types=4)
+            config = EdgeConfig(enable_meta_paths=True, meta_path_length=3, num_edge_types=4)
             return MetaPath(config)
         else:
             return Mock()
@@ -1465,8 +1370,7 @@ class TestMetaPath:
         num_nodes = 20
         num_edges = 50
         edge_index = torch.randint(0, num_nodes, (2, num_edges))
-        edge_types = torch.randint(
-            0, meta_path.config.num_edge_types, (num_edges,))
+        edge_types = torch.randint(0, meta_path.config.num_edge_types, (num_edges,))
 
         # Extract meta-paths
         meta_paths = meta_path.extract_meta_paths(edge_index, edge_types)
@@ -1484,8 +1388,7 @@ class TestMetaPath:
             return
 
         # Create meta-path sequences
-        meta_paths = [[0, 1, 2], [1, 0, 3], [
-            2, 3, 1], [0, 2, 1]]  # Type sequence
+        meta_paths = [[0, 1, 2], [1, 0, 3], [2, 3, 1], [0, 2, 1]]  # Type sequence
 
         # Encode meta-paths
         encoded_paths = meta_path.encode_meta_paths(meta_paths)
@@ -1551,10 +1454,8 @@ class TestEdgeProcessorIntegration:
 
         # Create large-scale configuration
         config = EdgeConfig(
-            input_dim=128,
-            hidden_dim=256,
-            output_dim=128,
-            aggregation=AggregationType.MEAN)
+            input_dim=128, hidden_dim=256, output_dim=128, aggregation=AggregationType.MEAN
+        )
 
         processor = EdgeProcessor(config)
 
@@ -1567,8 +1468,7 @@ class TestEdgeProcessorIntegration:
 
         # Process large graph
         start_time = time.time()
-        processed_features = processor.process_edges(
-            node_features, edge_index, edge_attr)
+        processed_features = processor.process_edges(node_features, edge_index, edge_attr)
         end_time = time.time()
 
         processing_time = end_time - start_time
@@ -1632,17 +1532,12 @@ class TestEdgeProcessorIntegration:
         # Create data with gradients
         num_nodes = 20
         num_edges = 40
-        node_features = torch.randn(
-            num_nodes, config.input_dim, requires_grad=True)
+        node_features = torch.randn(num_nodes, config.input_dim, requires_grad=True)
         edge_index = torch.randint(0, num_nodes, (2, num_edges))
-        edge_attr = torch.randn(
-            num_edges,
-            config.edge_attr_dim,
-            requires_grad=True)
+        edge_attr = torch.randn(num_edges, config.edge_attr_dim, requires_grad=True)
 
         # Forward pass
-        processed_features = processor.process_edges(
-            node_features, edge_index, edge_attr)
+        processed_features = processor.process_edges(node_features, edge_index, edge_attr)
 
         # Compute loss and backward pass
         loss = processed_features.sum()

@@ -18,6 +18,9 @@ import pytest_asyncio
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
+# Import test fixtures
+from tests.fixtures.active_inference_fixtures import *
+
 # Dependency availability checks
 TORCH_AVAILABLE = False
 PYMDP_AVAILABLE = False
@@ -41,9 +44,7 @@ try:
     TORCH_GEOMETRIC_AVAILABLE = TORCH_AVAILABLE  # Requires PyTorch
 except (ImportError, RuntimeError) as e:
     if TORCH_AVAILABLE:
-        warnings.warn(
-            f"PyTorch Geometric not available for testing: {e}",
-            stacklevel=2)
+        warnings.warn(f"PyTorch Geometric not available for testing: {e}", stacklevel=2)
     torch_geometric = None
 
 try:
@@ -73,16 +74,10 @@ os.environ.setdefault("LOG_LEVEL", "WARNING")
 
 def pytest_configure(config):
     """Configure pytest with custom markers and settings."""
-    config.addinivalue_line(
-        "markers",
-        "pytorch: mark test as requiring PyTorch")
+    config.addinivalue_line("markers", "pytorch: mark test as requiring PyTorch")
     config.addinivalue_line("markers", "pymdp: mark test as requiring PyMDP")
-    config.addinivalue_line(
-        "markers",
-        "gnn: mark test as requiring Graph Neural Networks")
-    config.addinivalue_line(
-        "markers",
-        "core: mark test as core functionality (no ML dependencies)")
+    config.addinivalue_line("markers", "gnn: mark test as requiring Graph Neural Networks")
+    config.addinivalue_line("markers", "core: mark test as core functionality (no ML dependencies)")
     config.addinivalue_line("markers", "slow: mark test as slow running")
 
 
@@ -107,9 +102,7 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(pytest.mark.skip(reason="PyMDP not available"))
 
         if item.get_closest_marker("gnn") and not TORCH_GEOMETRIC_AVAILABLE:
-            item.add_marker(
-                pytest.mark.skip(
-                    reason="PyTorch Geometric not available"))
+            item.add_marker(pytest.mark.skip(reason="PyTorch Geometric not available"))
 
 
 @pytest.fixture(scope="session")
@@ -205,10 +198,7 @@ def suppress_warnings():
     """Automatically suppress known warnings during testing."""
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     warnings.filterwarnings("ignore", category=PendingDeprecationWarning)
-    warnings.filterwarnings(
-        "ignore",
-        message=".*torch.*",
-        category=UserWarning)
+    warnings.filterwarnings("ignore", message=".*torch.*", category=UserWarning)
 
 
 @pytest.fixture
@@ -230,16 +220,12 @@ def coverage_test_env():
 # Helper functions for test utilities
 def requires_torch(test_func):
     """Decorator to skip tests that require PyTorch."""
-    return pytest.mark.skipif(
-        not TORCH_AVAILABLE,
-        reason="PyTorch not available")(test_func)
+    return pytest.mark.skipif(not TORCH_AVAILABLE, reason="PyTorch not available")(test_func)
 
 
 def requires_pymdp(test_func):
     """Decorator to skip tests that require PyMDP."""
-    return pytest.mark.skipif(
-        not PYMDP_AVAILABLE,
-        reason="PyMDP not available")(test_func)
+    return pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available")(test_func)
 
 
 def requires_gnn(test_func):
@@ -278,23 +264,22 @@ def inference_config():
 try:
     ACTIVE_INFERENCE_FIXTURES_AVAILABLE = True
 except ImportError as e:
-    warnings.warn(
-        f"Active Inference fixtures not available: {e}",
-        stacklevel=2)
+    warnings.warn(f"Active Inference fixtures not available: {e}", stacklevel=2)
     ACTIVE_INFERENCE_FIXTURES_AVAILABLE = False
 
 
 # HTTP Client fixtures for API contract testing
-@pytest_asyncio.fixture
-async def client():
+@pytest.fixture
+def client():
     """HTTP client fixture for API contract testing."""
     try:
-        from httpx import AsyncClient
+        from fastapi.testclient import TestClient
 
         from api.main import app  # Import the FastAPI app
 
-        async with AsyncClient(app=app, base_url="http://test") as ac:
-            yield ac
+        # Use TestClient for FastAPI testing - it's synchronous
+        with TestClient(app) as client:
+            yield client
     except ImportError:
         # Fallback mock client if httpx or FastAPI not available
         pass
@@ -337,8 +322,7 @@ async def client():
                     )
                 elif "agents" in url:
                     # List agents
-                    return MockResponse(
-                        {"items": [], "total": 0, "page": 1, "per_page": 20})
+                    return MockResponse({"items": [], "total": 0, "page": 1, "per_page": 20})
                 return MockResponse({}, 404)
 
             async def post(self, url, **kwargs):
@@ -409,12 +393,7 @@ def agent_factory():
 
     class AgentFactory:
         @staticmethod
-        def create_agent(
-                agent_id="test-agent",
-                initial_position=(
-                    0,
-                    0),
-                **kwargs):
+        def create_agent(agent_id="test-agent", initial_position=(0, 0), **kwargs):
             """Create a mock agent with realistic positioning behavior."""
             from unittest.mock import Mock
 
@@ -430,12 +409,8 @@ def agent_factory():
                     self.status = kwargs.get("status", "active")
 
                     # Ensure position is a proper tuple for arithmetic
-                    if isinstance(initial_position, (list, tuple)
-                                  ) and len(initial_position) >= 2:
-                        self.position = (
-                            float(
-                                initial_position[0]), float(
-                                initial_position[1]))
+                    if isinstance(initial_position, (list, tuple)) and len(initial_position) >= 2:
+                        self.position = (float(initial_position[0]), float(initial_position[1]))
                     else:
                         self.position = (0.0, 0.0)
 
@@ -447,10 +422,7 @@ def agent_factory():
                             agent_id=agent_id,
                             name=self.name,
                             agent_type=self.agent_type,
-                            position=Position(
-                                self.position[0],
-                                self.position[1],
-                                0.0),
+                            position=Position(self.position[0], self.position[1], 0.0),
                         )
                         self.data.constraints = {}
                         self.data.personality = {}
@@ -463,19 +435,14 @@ def agent_factory():
                         self.data.position.y = self.position[1]
 
                     # Additional agent properties
-                    self.personality = kwargs.get(
-                        "personality", {"curiosity": 0.5, "caution": 0.5})
+                    self.personality = kwargs.get("personality", {"curiosity": 0.5, "caution": 0.5})
                     self.constraints = kwargs.get("constraints", {})
                     self.resources = kwargs.get("resources", {"energy": 100})
 
                 def move_to(self, new_position):
                     """Move agent to new position."""
-                    if isinstance(new_position, (list, tuple)
-                                  ) and len(new_position) >= 2:
-                        self.position = (
-                            float(
-                                new_position[0]), float(
-                                new_position[1]))
+                    if isinstance(new_position, (list, tuple)) and len(new_position) >= 2:
+                        self.position = (float(new_position[0]), float(new_position[1]))
                         if hasattr(self.data, "position"):
                             self.data.position.x = self.position[0]
                             self.data.position.y = self.position[1]
@@ -490,8 +457,7 @@ def agent_factory():
             coalition = Mock()
             coalition.members = members or []
             coalition.name = kwargs.get("name", "Test Coalition")
-            coalition.business_type = kwargs.get(
-                "business_type", "ResourceOptimization")
+            coalition.business_type = kwargs.get("business_type", "ResourceOptimization")
             coalition.synergy_score = kwargs.get("synergy_score", 0.8)
             coalition.status = kwargs.get("status", "active")
 

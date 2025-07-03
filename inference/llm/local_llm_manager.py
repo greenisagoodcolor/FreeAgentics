@@ -130,13 +130,13 @@ class OllamaProvider(LocalLLMProvider):
                 if config.model_name in model_names:
                     logger.info(
                         f"Model {
-                            config.model_name} already loaded in Ollama")
+                            config.model_name} already loaded in Ollama"
+                    )
                     return True
             # Pull model if not exists
             logger.info(f"Pulling model {config.model_name} in Ollama...")
             pull_data = {"name": config.model_name}
-            response = self.session.post(
-                f"{self.base_url}/api/pull", json=pull_data, stream=True)
+            response = self.session.post(f"{self.base_url}/api/pull", json=pull_data, stream=True)
             # Monitor pull progress
             for line in response.iter_lines():
                 if line:
@@ -156,12 +156,8 @@ class OllamaProvider(LocalLLMProvider):
                 "model": self.config.model_name,
                 "prompt": prompt,
                 "options": {
-                    "temperature": kwargs.get(
-                        "temperature",
-                        self.config.temperature),
-                    "num_predict": kwargs.get(
-                        "max_tokens",
-                        self.config.max_tokens),
+                    "temperature": kwargs.get("temperature", self.config.temperature),
+                    "num_predict": kwargs.get("max_tokens", self.config.max_tokens),
                     "num_ctx": self.config.context_size,
                     "num_thread": self.config.threads,
                     "seed": self.config.seed,
@@ -324,9 +320,7 @@ class ResponseCache:
         with self.lock:
             # Simple size management - remove oldest entries if too large
             if len(self.cache) > 1000:  # Arbitrary limit
-                oldest_key = min(
-                    self.cache.keys(),
-                    key=lambda k: self.cache[k][1])
+                oldest_key = min(self.cache.keys(), key=lambda k: self.cache[k][1])
                 del self.cache[oldest_key]
             self.cache[key] = (response, time.time())
 
@@ -456,8 +450,7 @@ class LocalLLMManager:
             return False
         try:
             if model_path:
-                return self.current_provider.load_model(
-                    model_path, self.config)
+                return self.current_provider.load_model(model_path, self.config)
             else:
                 # For Ollama, model_path is optional
                 return self.current_provider.load_model(Path(""), self.config)
@@ -482,8 +475,7 @@ class LocalLLMManager:
         # Try primary provider
         if self.current_provider:
             try:
-                response = self._try_generate(
-                    self.current_provider, prompt, **kwargs)
+                response = self._try_generate(self.current_provider, prompt, **kwargs)
                 self.cache.put(prompt, response, **kwargs)
                 return response
             except Exception as e:
@@ -497,13 +489,11 @@ class LocalLLMManager:
                     self.cache.put(prompt, response, **kwargs)
                     return response
                 except Exception as e:
-                    logger.warning(
-                        f"Fallback provider {provider_type} failed: {e}")
+                    logger.warning(f"Fallback provider {provider_type} failed: {e}")
         # Use fallback responder as last resort
         if self.config.enable_fallback:
             logger.warning("Using fallback responder")
-            fallback_text = self.fallback_responder.get_fallback_response(
-                prompt)
+            fallback_text = self.fallback_responder.get_fallback_response(prompt)
             return LLMResponse(
                 text=fallback_text,
                 tokens_used=len(fallback_text.split()),
@@ -513,11 +503,7 @@ class LocalLLMManager:
             )
         raise Exception("All LLM providers failed and fallback disabled")
 
-    def _try_generate(
-            self,
-            provider: LocalLLMProvider,
-            prompt: str,
-            **kwargs) -> LLMResponse:
+    def _try_generate(self, provider: LocalLLMProvider, prompt: str, **kwargs) -> LLMResponse:
         """Try to generate with retries"""
         last_error = None
         for attempt in range(self.config.retry_attempts):
@@ -533,12 +519,10 @@ class LocalLLMManager:
         """Get status of LLM manager"""
         return {
             "current_provider": (
-                type(
-                    self.current_provider).__name__ if self.current_provider else None),
-            "available_providers": list(
-                self.providers.keys()),
-            "model_loaded": bool(
-                self.current_provider),
+                type(self.current_provider).__name__ if self.current_provider else None
+            ),
+            "available_providers": list(self.providers.keys()),
+            "model_loaded": bool(self.current_provider),
             "cache_stats": self.cache.get_stats(),
             "config": {
                 "model": self.config.model_name,
@@ -560,9 +544,7 @@ class LocalLLMManager:
         Returns:
             Optimized configuration
         """
-        config = LocalLLMConfig(
-            provider=self.config.provider,
-            model_name=self.config.model_name)
+        config = LocalLLMConfig(provider=self.config.provider, model_name=self.config.model_name)
         # Adjust quantization based on RAM
         if ram_gb < 4:
             config.quantization = QuantizationLevel.INT3

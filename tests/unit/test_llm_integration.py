@@ -134,12 +134,7 @@ except ImportError:
             self.metadata = metadata or {}
 
     class BeliefResponse:
-        def __init__(
-                self,
-                updated_beliefs,
-                confidence,
-                reasoning,
-                metadata=None):
+        def __init__(self, updated_beliefs, confidence, reasoning, metadata=None):
             self.updated_beliefs = updated_beliefs
             self.confidence = confidence
             self.reasoning = reasoning
@@ -205,11 +200,7 @@ class TestAggregationMethod:
 
     def test_aggregation_methods_exist(self):
         """Test all aggregation methods exist."""
-        expected_methods = [
-            "WEIGHTED_AVERAGE",
-            "MAJORITY_VOTE",
-            "CONFIDENCE_BASED",
-            "ENSEMBLE"]
+        expected_methods = ["WEIGHTED_AVERAGE", "MAJORITY_VOTE", "CONFIDENCE_BASED", "ENSEMBLE"]
 
         for method in expected_methods:
             assert hasattr(AggregationMethod, method)
@@ -288,11 +279,7 @@ class TestBeliefResponse:
         reasoning = "Based on observations, state 2 is most likely"
         metadata = {"processing_time": 0.15, "model_used": "gpt-4"}
 
-        response = BeliefResponse(
-            updated_beliefs,
-            confidence,
-            reasoning,
-            metadata)
+        response = BeliefResponse(updated_beliefs, confidence, reasoning, metadata)
 
         assert torch.equal(response.updated_beliefs, updated_beliefs)
         assert response.confidence == 0.85
@@ -433,8 +420,7 @@ class TestBeliefCache:
     def cache(self):
         """Create belief cache."""
         if IMPORT_SUCCESS:
-            config = IntegrationConfig(
-                cache_size=100, cache_strategy=CacheStrategy.LRU)
+            config = IntegrationConfig(cache_size=100, cache_strategy=CacheStrategy.LRU)
             return BeliefCache(config)
         else:
             return Mock()
@@ -505,8 +491,7 @@ class TestBeliefAggregator:
     def aggregator(self):
         """Create belief aggregator."""
         if IMPORT_SUCCESS:
-            config = IntegrationConfig(
-                aggregation_method=AggregationMethod.WEIGHTED_AVERAGE)
+            config = IntegrationConfig(aggregation_method=AggregationMethod.WEIGHTED_AVERAGE)
             return BeliefAggregator(config)
         else:
             return Mock()
@@ -558,19 +543,14 @@ class TestBeliefAggregator:
 
         aggregator.config.aggregation_method = AggregationMethod.CONFIDENCE_BASED
 
-        beliefs_list = [torch.tensor(
-            [0.1, 0.7, 0.2]), torch.tensor([0.6, 0.3, 0.1])]
+        beliefs_list = [torch.tensor([0.1, 0.7, 0.2]), torch.tensor([0.6, 0.3, 0.1])]
         # First belief has higher confidence
         confidences = torch.tensor([0.9, 0.3])
 
         aggregated = aggregator.aggregate(beliefs_list, confidences)
 
         # Result should be closer to first belief due to higher confidence
-        assert abs(
-            aggregated[1] -
-            beliefs_list[0][1]) < abs(
-            aggregated[1] -
-            beliefs_list[1][1])
+        assert abs(aggregated[1] - beliefs_list[0][1]) < abs(aggregated[1] - beliefs_list[1][1])
 
 
 class TestBeliefIntegrator:
@@ -579,18 +559,15 @@ class TestBeliefIntegrator:
     @pytest.fixture
     def config(self):
         """Create integration config."""
-        return IntegrationConfig(
-            mode=IntegrationMode.HYBRID,
-            confidence_threshold=0.7)
+        return IntegrationConfig(mode=IntegrationMode.HYBRID, confidence_threshold=0.7)
 
     @pytest.fixture
     def llm_provider(self):
         """Create mock LLM provider."""
         provider = Mock()
         provider.generate = Mock(
-            return_value=Mock(
-                text="State 1 is most likely (70% confidence)",
-                cost=0.01))
+            return_value=Mock(text="State 1 is most likely (70% confidence)", cost=0.01)
+        )
         return provider
 
     @pytest.fixture
@@ -652,21 +629,15 @@ class TestBeliefIntegrator:
 
         # Mock traditional belief update
         traditional_beliefs = torch.tensor([0.15, 0.55, 0.2, 0.1])
-        integrator.belief_update.update = Mock(
-            return_value=traditional_beliefs)
+        integrator.belief_update.update = Mock(return_value=traditional_beliefs)
 
-        prompt = BeliefPrompt(
-            context="Agent exploring",
-            query="Refine beliefs",
-            beliefs=beliefs)
+        prompt = BeliefPrompt(context="Agent exploring", query="Refine beliefs", beliefs=beliefs)
 
         response = integrator.integrate(prompt, observations)
 
         # Should combine traditional and LLM-based updates
         assert response.updated_beliefs.shape == beliefs.shape
-        assert not torch.equal(
-            response.updated_beliefs,
-            traditional_beliefs)  # Should be different
+        assert not torch.equal(response.updated_beliefs, traditional_beliefs)  # Should be different
 
     def test_caching_behavior(self, integrator):
         """Test caching of responses."""
@@ -676,10 +647,7 @@ class TestBeliefIntegrator:
         beliefs = torch.tensor([0.25, 0.25, 0.25, 0.25])
         observations = torch.randn(10)
 
-        prompt = BeliefPrompt(
-            context="Test context",
-            query="Test query",
-            beliefs=beliefs)
+        prompt = BeliefPrompt(context="Test context", query="Test query", beliefs=beliefs)
 
         # First call should hit LLM
         response1 = integrator.integrate(prompt, observations)
@@ -693,9 +661,7 @@ class TestBeliefIntegrator:
         integrator.llm_provider.generate.assert_not_called()
 
         # Responses should be identical
-        assert torch.equal(
-            response1.updated_beliefs,
-            response2.updated_beliefs)
+        assert torch.equal(response1.updated_beliefs, response2.updated_beliefs)
         assert response1.confidence == response2.confidence
 
     def test_confidence_threshold(self, integrator):
@@ -761,13 +727,7 @@ class TestModelStatus:
 
     def test_model_statuses_exist(self):
         """Test all model statuses exist."""
-        expected_statuses = [
-            "UNLOADED",
-            "LOADING",
-            "LOADED",
-            "OPTIMIZING",
-            "READY",
-            "ERROR"]
+        expected_statuses = ["UNLOADED", "LOADING", "LOADED", "OPTIMIZING", "READY", "ERROR"]
 
         for status in expected_statuses:
             assert hasattr(ModelStatus, status)
@@ -859,9 +819,7 @@ class TestModelRegistry:
         model_list = registry.list_models()
 
         assert len(model_list) == 3
-        assert all(
-            model_id in model_list for model_id in [
-                "model1", "model2", "model3"])
+        assert all(model_id in model_list for model_id in ["model1", "model2", "model3"])
 
 
 class TestModelLoader:
@@ -1036,12 +994,7 @@ class TestBatchProcessor:
             processor.add_to_batch(inp)
 
         # Mock process function
-        processor.process_fn = Mock(
-            return_value=[
-                "output1",
-                "output2",
-                "output3",
-                "output4"])
+        processor.process_fn = Mock(return_value=["output1", "output2", "output3", "output4"])
 
         # Should process first 4 items (max_batch_size)
         results = processor.process_batch()
@@ -1235,10 +1188,8 @@ class TestLocalLLMManager:
             return
 
         config = ModelConfig(
-            model_id="llama-7b",
-            model_path="/models/llama-7b",
-            device="cuda",
-            quantization_bits=8)
+            model_id="llama-7b", model_path="/models/llama-7b", device="cuda", quantization_bits=8
+        )
 
         # Register model
         manager.register_model(config)
@@ -1254,10 +1205,7 @@ class TestLocalLLMManager:
         if not IMPORT_SUCCESS:
             return
 
-        config = ModelConfig(
-            model_id="test-model",
-            model_path="/test/path",
-            quantization_bits=8)
+        config = ModelConfig(model_id="test-model", model_path="/test/path", quantization_bits=8)
 
         manager.register_model(config)
 
@@ -1336,13 +1284,7 @@ class TestLocalLLMManager:
             return
 
         # Register multiple models
-        configs = [
-            ModelConfig(
-                "model1",
-                "/path1"),
-            ModelConfig(
-                "model2",
-                "/path2")]
+        configs = [ModelConfig("model1", "/path1"), ModelConfig("model2", "/path2")]
 
         for config in configs:
             manager.register_model(config)
@@ -1407,8 +1349,7 @@ class TestIntegrationScenarios:
         integration_config = IntegrationConfig(mode=IntegrationMode.HYBRID)
         belief_update = Mock()
 
-        integrator = BeliefIntegrator(
-            integration_config, mock_provider, belief_update)
+        integrator = BeliefIntegrator(integration_config, mock_provider, belief_update)
 
         # Test integration
         beliefs = torch.tensor([0.25, 0.25, 0.25, 0.25])
@@ -1430,9 +1371,8 @@ class TestIntegrationScenarios:
 
         local_provider = Mock()
         local_provider.generate = Mock(
-            return_value=Mock(
-                text="Local model: State 1 is most likely",
-                cost=0.0))
+            return_value=Mock(text="Local model: State 1 is most likely", cost=0.0)
+        )
 
         # Manager with fallback capability
         manager = ProviderManager()

@@ -235,13 +235,16 @@ class TestWebSocketPerformance:
             assert (
                 messages_per_second > 100
             ), f"Throughput {messages_per_second:.2f} msg/s below threshold"
-            assert latency_ms < 50, f"Latency {
+            assert (
+                latency_ms < 50
+            ), f"Latency {
                 latency_ms:.2f}ms exceeds threshold"
 
             print(
                 f"WebSocket Performance: {
                     messages_per_second:.2f} msg/s, {
-                    latency_ms:.2f}ms latency")
+                    latency_ms:.2f}ms latency"
+            )
 
     @pytest.mark.asyncio
     async def test_large_message_handling(self, mock_ws_server):
@@ -250,8 +253,7 @@ class TestWebSocketPerformance:
 
         async with websockets.connect(uri) as websocket:
             # Create large payload (1MB)
-            large_data = {"type": "large_message",
-                          "data": "x" * (1024 * 1024)}  # 1MB of data
+            large_data = {"type": "large_message", "data": "x" * (1024 * 1024)}  # 1MB of data
 
             start_time = time.time()
             await websocket.send(json.dumps(large_data))
@@ -263,7 +265,9 @@ class TestWebSocketPerformance:
 
             # Verify transmission time is reasonable
             transmission_time = end_time - start_time
-            assert transmission_time < 1.0, f"Large message took {
+            assert (
+                transmission_time < 1.0
+            ), f"Large message took {
                 transmission_time:.2f}s"
 
 

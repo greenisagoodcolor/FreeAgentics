@@ -35,8 +35,7 @@ class TestBeliefStateConfig:
 
     def test_custom_config(self) -> None:
         """Test custom configuration"""
-        config = BeliefStateConfig(
-            use_gpu=False, eps=1e-6, max_history_length=50)
+        config = BeliefStateConfig(use_gpu=False, eps=1e-6, max_history_length=50)
         assert config.use_gpu is False
         assert config.eps == 1e-6
         assert config.max_history_length == 50
@@ -60,10 +59,7 @@ class TestDiscreteBeliefState:
         belief_state = DiscreteBeliefState(num_states=4, config=config)
         assert belief_state.num_states == 4
         assert belief_state.beliefs.shape == (4,)
-        assert torch.allclose(
-            belief_state.beliefs,
-            torch.ones(4) /
-            4)  # Uniform prior
+        assert torch.allclose(belief_state.beliefs, torch.ones(4) / 4)  # Uniform prior
         assert belief_state.update_count == 0
 
     def test_initialization_with_priors(self, config) -> None:
@@ -232,8 +228,7 @@ class TestDiscreteBeliefState:
         assert "metadata" in data
         assert data["metadata"]["test_key"] == "test_value"
         # Deserialize
-        new_belief = DiscreteBeliefState(
-            num_states=1, config=BeliefStateConfig()).from_dict(data)
+        new_belief = DiscreteBeliefState(num_states=1, config=BeliefStateConfig()).from_dict(data)
         assert new_belief.num_states == 4
         assert torch.allclose(new_belief.beliefs, belief_state.beliefs)
         assert new_belief.metadata["test_key"] == "test_value"
@@ -251,9 +246,7 @@ class TestDiscreteBeliefState:
             pkl_path = Path(tmpdir) / "belief_state.pkl"
             belief_state.save(pkl_path)
             loaded_belief_pkl = DiscreteBeliefState.load(pkl_path)
-            assert torch.allclose(
-                loaded_belief_pkl.beliefs,
-                belief_state.beliefs)
+            assert torch.allclose(loaded_belief_pkl.beliefs, belief_state.beliefs)
 
 
 class TestContinuousBeliefState:
@@ -335,8 +328,7 @@ class TestContinuousBeliefState:
 
     def test_most_likely_state(self, belief_state) -> None:
         """Test most likely state (mean) retrieval"""
-        belief_state.set_beliefs(
-            (torch.tensor([1.0, 2.0, 3.0]), belief_state.cov))
+        belief_state.set_beliefs((torch.tensor([1.0, 2.0, 3.0]), belief_state.cov))
         most_likely = belief_state.most_likely_state()
         assert torch.allclose(most_likely, torch.tensor([1.0, 2.0, 3.0]))
 
@@ -397,8 +389,7 @@ class TestBeliefStateIntegration:
 
         # Create components
         config = BeliefStateConfig(use_gpu=False)
-        belief_state = create_discrete_belief_state(
-            num_states=4, config=config)
+        belief_state = create_discrete_belief_state(num_states=4, config=config)
         # Create simple generative model
         dims = ModelDimensions(num_states=4, num_observations=2, num_actions=2)
         params = ModelParameters(use_gpu=False)
@@ -408,15 +399,11 @@ class TestBeliefStateIntegration:
         inference = VariationalMessagePassing(inference_config)
         # Test inference with belief state
         observation = torch.tensor(0)
-        updated_beliefs = inference.infer_states(
-            observation, model, belief_state.get_beliefs())
+        updated_beliefs = inference.infer_states(observation, model, belief_state.get_beliefs())
         # Update belief state with results
         belief_state.set_beliefs(updated_beliefs)
         assert belief_state.beliefs.shape == (4,)
-        assert torch.allclose(
-            belief_state.beliefs.sum(),
-            torch.tensor(1.0),
-            atol=1e-6)
+        assert torch.allclose(belief_state.beliefs.sum(), torch.tensor(1.0), atol=1e-6)
 
 
 if __name__ == "__main__":

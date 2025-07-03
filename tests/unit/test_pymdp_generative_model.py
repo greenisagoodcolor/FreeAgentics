@@ -34,19 +34,12 @@ class TestPyMDPGenerativeModel:
     @pytest.fixture
     def model_dimensions(self):
         """Create model dimensions for testing"""
-        return ModelDimensions(
-            num_states=4,
-            num_observations=3,
-            num_actions=2,
-            time_horizon=5)
+        return ModelDimensions(num_states=4, num_observations=3, num_actions=2, time_horizon=5)
 
     @pytest.fixture
     def model_parameters(self):
         """Create model parameters for testing"""
-        return ModelParameters(
-            learning_rate=0.01,
-            temperature=1.0,
-            prior_strength=1.0)
+        return ModelParameters(learning_rate=0.01, temperature=1.0, prior_strength=1.0)
 
     @pytest.fixture
     def pymdp_model(self, model_dimensions, model_parameters):
@@ -61,15 +54,12 @@ class TestPyMDPGenerativeModel:
         assert isinstance(pymdp_model.C, np.ndarray)
         assert isinstance(pymdp_model.D, np.ndarray)
 
-    def test_A_matrix_shape_and_properties(
-            self, pymdp_model, model_dimensions):
+    def test_A_matrix_shape_and_properties(self, pymdp_model, model_dimensions):
         """Test A matrix (observation model) shape and properties"""
         A = pymdp_model.A
 
         # Check shape
-        expected_shape = (
-            model_dimensions.num_observations,
-            model_dimensions.num_states)
+        expected_shape = (model_dimensions.num_observations, model_dimensions.num_states)
         assert A.shape == expected_shape
 
         # Check that each column sums to 1 (proper probability distribution)
@@ -79,8 +69,7 @@ class TestPyMDPGenerativeModel:
         # Check that all values are non-negative
         assert np.all(A >= 0)
 
-    def test_B_matrix_shape_and_properties(
-            self, pymdp_model, model_dimensions):
+    def test_B_matrix_shape_and_properties(self, pymdp_model, model_dimensions):
         """Test B matrix (transition model) shape and properties"""
         B = pymdp_model.B
 
@@ -100,22 +89,18 @@ class TestPyMDPGenerativeModel:
         # Check that all values are non-negative
         assert np.all(B >= 0)
 
-    def test_C_matrix_shape_and_properties(
-            self, pymdp_model, model_dimensions):
+    def test_C_matrix_shape_and_properties(self, pymdp_model, model_dimensions):
         """Test C matrix (preferences) shape and properties"""
         C = pymdp_model.C
 
         # Check shape
-        expected_shape = (
-            model_dimensions.num_observations,
-            model_dimensions.time_horizon)
+        expected_shape = (model_dimensions.num_observations, model_dimensions.time_horizon)
         assert C.shape == expected_shape
 
         # Default initialization should be zeros
         np.testing.assert_array_equal(C, np.zeros(expected_shape))
 
-    def test_D_matrix_shape_and_properties(
-            self, pymdp_model, model_dimensions):
+    def test_D_matrix_shape_and_properties(self, pymdp_model, model_dimensions):
         """Test D matrix (initial prior) shape and properties"""
         D = pymdp_model.D
 
@@ -130,16 +115,13 @@ class TestPyMDPGenerativeModel:
         assert np.all(D >= 0)
 
         # Default should be uniform
-        expected_uniform = np.ones(
-            model_dimensions.num_states) / model_dimensions.num_states
+        expected_uniform = np.ones(model_dimensions.num_states) / model_dimensions.num_states
         np.testing.assert_allclose(D, expected_uniform)
 
     def test_set_A_matrix_numpy(self, pymdp_model, model_dimensions):
         """Test setting A matrix with numpy array"""
         # Create test A matrix
-        new_A = np.random.rand(
-            model_dimensions.num_observations,
-            model_dimensions.num_states)
+        new_A = np.random.rand(model_dimensions.num_observations, model_dimensions.num_states)
 
         pymdp_model.set_A_matrix(new_A)
 
@@ -154,7 +136,8 @@ class TestPyMDPGenerativeModel:
             # Create mock tensor
             mock_tensor = Mock()
             mock_tensor.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(
-                model_dimensions.num_observations, model_dimensions.num_states)
+                model_dimensions.num_observations, model_dimensions.num_states
+            )
             pymdp_model.set_A_matrix(mock_tensor)
             # Check that it was converted and normalized
             assert isinstance(pymdp_model.A, np.ndarray)
@@ -172,9 +155,8 @@ class TestPyMDPGenerativeModel:
         """Test setting B matrix with numpy array"""
         # Create test B matrix
         new_B = np.random.rand(
-            model_dimensions.num_states,
-            model_dimensions.num_states,
-            model_dimensions.num_actions)
+            model_dimensions.num_states, model_dimensions.num_states, model_dimensions.num_actions
+        )
 
         pymdp_model.set_B_matrix(new_B)
 
@@ -189,7 +171,10 @@ class TestPyMDPGenerativeModel:
             # Create mock tensor
             mock_tensor = Mock()
             mock_tensor.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(
-                model_dimensions.num_states, model_dimensions.num_states, model_dimensions.num_actions, )
+                model_dimensions.num_states,
+                model_dimensions.num_states,
+                model_dimensions.num_actions,
+            )
             pymdp_model.set_B_matrix(mock_tensor)
             # Check that it was converted and normalized
             for a in range(model_dimensions.num_actions):
@@ -206,9 +191,7 @@ class TestPyMDPGenerativeModel:
     def test_set_C_matrix_numpy_2d(self, pymdp_model, model_dimensions):
         """Test setting C matrix with 2D numpy array"""
         # Create test C matrix
-        new_C = np.random.randn(
-            model_dimensions.num_observations,
-            model_dimensions.time_horizon)
+        new_C = np.random.randn(model_dimensions.num_observations, model_dimensions.time_horizon)
 
         pymdp_model.set_C_matrix(new_C)
 
@@ -222,8 +205,7 @@ class TestPyMDPGenerativeModel:
         pymdp_model.set_C_matrix(new_C_1d)
 
         # Should be broadcast to all timesteps
-        expected_C = np.tile(new_C_1d.reshape(-1, 1),
-                             (1, model_dimensions.time_horizon))
+        expected_C = np.tile(new_C_1d.reshape(-1, 1), (1, model_dimensions.time_horizon))
         np.testing.assert_array_equal(pymdp_model.C, expected_C)
 
     def test_set_C_matrix_torch(self, pymdp_model, model_dimensions):
@@ -232,7 +214,8 @@ class TestPyMDPGenerativeModel:
             # Create mock tensor
             mock_tensor = Mock()
             mock_tensor.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(
-                model_dimensions.num_observations, model_dimensions.time_horizon)
+                model_dimensions.num_observations, model_dimensions.time_horizon
+            )
             pymdp_model.set_C_matrix(mock_tensor)
             # Check that it was converted
             assert isinstance(pymdp_model.C, np.ndarray)
@@ -264,7 +247,8 @@ class TestPyMDPGenerativeModel:
             # Create mock tensor
             mock_tensor = Mock()
             mock_tensor.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(
-                model_dimensions.num_states)
+                model_dimensions.num_states
+            )
             pymdp_model.set_D_matrix(mock_tensor)
             # Check that it was converted and normalized
             assert isinstance(pymdp_model.D, np.ndarray)
@@ -289,25 +273,17 @@ class TestPyMDPGenerativeModel:
         assert isinstance(D, np.ndarray)
 
         # Check shapes
-        assert A.shape == (
-            model_dimensions.num_observations,
-            model_dimensions.num_states)
+        assert A.shape == (model_dimensions.num_observations, model_dimensions.num_states)
         assert B.shape == (
             model_dimensions.num_states,
             model_dimensions.num_states,
             model_dimensions.num_actions,
         )
-        assert C.shape == (
-            model_dimensions.num_observations,
-            model_dimensions.time_horizon)
+        assert C.shape == (model_dimensions.num_observations, model_dimensions.time_horizon)
         assert D.shape == (model_dimensions.num_states,)
 
     @patch("inference.engine.pymdp_generative_model.logger")
-    def test_initialization_logging(
-            self,
-            mock_logger,
-            model_dimensions,
-            model_parameters):
+    def test_initialization_logging(self, mock_logger, model_dimensions, model_parameters):
         """Test that initialization logs the model parameters"""
         PyMDPGenerativeModel(model_dimensions, model_parameters)
 
@@ -320,8 +296,7 @@ class TestPyMDPGenerativeModel:
     def test_from_discrete_model(self, model_dimensions, model_parameters):
         """Test creating PyMDPGenerativeModel from DiscreteGenerativeModel"""
         # Create a discrete model
-        discrete_model = DiscreteGenerativeModel(
-            model_dimensions, model_parameters)
+        discrete_model = DiscreteGenerativeModel(model_dimensions, model_parameters)
 
         # Convert to PyMDP model
         pymdp_model = PyMDPGenerativeModel.from_discrete_model(discrete_model)
@@ -332,32 +307,27 @@ class TestPyMDPGenerativeModel:
 
         # Check that matrices have correct shapes
         A, B, C, D = pymdp_model.get_pymdp_matrices()
-        assert A.shape == (
-            model_dimensions.num_observations,
-            model_dimensions.num_states)
+        assert A.shape == (model_dimensions.num_observations, model_dimensions.num_states)
         assert B.shape == (
             model_dimensions.num_states,
             model_dimensions.num_states,
             model_dimensions.num_actions,
         )
-        assert C.shape == (
-            model_dimensions.num_observations,
-            model_dimensions.time_horizon)
+        assert C.shape == (model_dimensions.num_observations, model_dimensions.time_horizon)
         assert D.shape == (model_dimensions.num_states,)
 
-    def test_from_discrete_model_1d_C_matrix(
-            self, model_dimensions, model_parameters):
+    def test_from_discrete_model_1d_C_matrix(self, model_dimensions, model_parameters):
         """Test conversion with 1D C matrix from discrete model"""
         # Create a discrete model with 1D C matrix
-        discrete_model = DiscreteGenerativeModel(
-            model_dimensions, model_parameters)
+        discrete_model = DiscreteGenerativeModel(model_dimensions, model_parameters)
 
         # Make C matrix 1D by mocking
         mock_tensor = Mock()
         mock_tensor.dim.return_value = 1
         mock_tensor.unsqueeze.return_value.repeat.return_value = mock_tensor
         mock_tensor.detach.return_value.cpu.return_value.numpy.return_value = np.random.randn(
-            model_dimensions.num_observations, model_dimensions.time_horizon)
+            model_dimensions.num_observations, model_dimensions.time_horizon
+        )
         discrete_model.C = mock_tensor
 
         # Convert to PyMDP model
@@ -376,19 +346,12 @@ class TestPyMDPGenerativeModelAdapter:
     @pytest.fixture
     def model_dimensions(self):
         """Create model dimensions for testing"""
-        return ModelDimensions(
-            num_states=4,
-            num_observations=3,
-            num_actions=2,
-            time_horizon=5)
+        return ModelDimensions(num_states=4, num_observations=3, num_actions=2, time_horizon=5)
 
     @pytest.fixture
     def model_parameters(self):
         """Create model parameters for testing"""
-        return ModelParameters(
-            learning_rate=0.01,
-            temperature=1.0,
-            prior_strength=1.0)
+        return ModelParameters(learning_rate=0.01, temperature=1.0, prior_strength=1.0)
 
     @pytest.fixture
     def discrete_model(self, model_dimensions, model_parameters):
@@ -442,7 +405,8 @@ class TestPyMDPGenerativeModelAdapter:
         # Create mock tensor
         mock_tensor = Mock()
         mock_tensor.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(
-            model_dimensions.num_states)
+            model_dimensions.num_states
+        )
 
         # Compute observations
         observations = adapter.observation_model(mock_tensor)
@@ -473,7 +437,8 @@ class TestPyMDPGenerativeModelAdapter:
         # Create mock tensor
         mock_tensor = Mock()
         mock_tensor.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(
-            model_dimensions.num_states)
+            model_dimensions.num_states
+        )
         action = 1
 
         # Compute next states
@@ -497,8 +462,7 @@ class TestPyMDPGenerativeModelAdapter:
         assert isinstance(prefs_2, np.ndarray)
         assert prefs_2.shape == (model_dimensions.num_observations,)
 
-    def test_get_preferences_out_of_bounds(
-            self, discrete_model, model_dimensions):
+    def test_get_preferences_out_of_bounds(self, discrete_model, model_dimensions):
         """Test getting preferences for timestep beyond time horizon"""
         adapter = PyMDPGenerativeModelAdapter(discrete_model)
 
@@ -524,17 +488,13 @@ class TestPyMDPGenerativeModelAdapter:
         A, B, C, D = adapter.get_pymdp_matrices()
 
         # Check that all matrices have correct shapes
-        assert A.shape == (
-            model_dimensions.num_observations,
-            model_dimensions.num_states)
+        assert A.shape == (model_dimensions.num_observations, model_dimensions.num_states)
         assert B.shape == (
             model_dimensions.num_states,
             model_dimensions.num_states,
             model_dimensions.num_actions,
         )
-        assert C.shape == (
-            model_dimensions.num_observations,
-            model_dimensions.time_horizon)
+        assert C.shape == (model_dimensions.num_observations, model_dimensions.time_horizon)
         assert D.shape == (model_dimensions.num_states,)
 
 
@@ -555,8 +515,7 @@ class TestFactoryFunction:
 
     def test_create_pymdp_generative_model_default_time_horizon(self):
         """Test factory function with default time horizon"""
-        model = create_pymdp_generative_model(
-            num_states=4, num_observations=3, num_actions=2)
+        model = create_pymdp_generative_model(num_states=4, num_observations=3, num_actions=2)
 
         assert isinstance(model, PyMDPGenerativeModel)
         assert model.dims.time_horizon == 1
@@ -564,11 +523,8 @@ class TestFactoryFunction:
     def test_create_pymdp_generative_model_with_kwargs(self):
         """Test factory function with additional kwargs"""
         model = create_pymdp_generative_model(
-            num_states=3,
-            num_observations=2,
-            num_actions=2,
-            learning_rate=0.05,
-            temperature=2.0)
+            num_states=3, num_observations=2, num_actions=2, learning_rate=0.05, temperature=2.0
+        )
 
         assert isinstance(model, PyMDPGenerativeModel)
         assert model.params.learning_rate == 0.05
@@ -582,26 +538,20 @@ class TestMatrixConversionFunction:
         """Test basic matrix conversion"""
         # Create mock tensors
         A_torch = Mock()
-        A_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(
-            3, 4)
+        A_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(3, 4)
 
         B_torch = Mock()
-        B_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(
-            4, 4, 2)
-        B_torch.transpose.return_value.numpy.return_value = np.random.rand(
-            4, 4, 2)
+        B_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(4, 4, 2)
+        B_torch.transpose.return_value.numpy.return_value = np.random.rand(4, 4, 2)
 
         C_torch = Mock()
-        C_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.randn(
-            3)
+        C_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.randn(3)
         C_torch.ndim = 1
 
         D_torch = Mock()
-        D_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(
-            4)
+        D_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(4)
 
-        A, B, C, D = convert_torch_to_pymdp_matrices(
-            A_torch, B_torch, C_torch, D_torch)
+        A, B, C, D = convert_torch_to_pymdp_matrices(A_torch, B_torch, C_torch, D_torch)
 
         # Check types
         assert isinstance(A, np.ndarray)
@@ -619,22 +569,17 @@ class TestMatrixConversionFunction:
         A_torch.shape = [4, 4]
 
         B_torch = Mock()
-        B_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(
-            4, 4, 2)
-        B_torch.transpose.return_value.numpy.return_value = np.random.rand(
-            4, 4, 2)
+        B_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(4, 4, 2)
+        B_torch.transpose.return_value.numpy.return_value = np.random.rand(4, 4, 2)
 
         C_torch = Mock()
-        C_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.randn(
-            4)
+        C_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.randn(4)
         C_torch.ndim = 1
 
         D_torch = Mock()
-        D_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(
-            4)
+        D_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(4)
 
-        A, B, C, D = convert_torch_to_pymdp_matrices(
-            A_torch, B_torch, C_torch, D_torch)
+        A, B, C, D = convert_torch_to_pymdp_matrices(A_torch, B_torch, C_torch, D_torch)
 
         # Should be transposed for square matrices
         assert A.shape == (4, 4)
@@ -642,27 +587,21 @@ class TestMatrixConversionFunction:
     def test_convert_torch_to_pymdp_matrices_2d_C(self):
         """Test matrix conversion with 2D C matrix"""
         A_torch = Mock()
-        A_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(
-            3, 4)
+        A_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(3, 4)
         A_torch.shape = [3, 4]
 
         B_torch = Mock()
-        B_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(
-            4, 4, 2)
-        B_torch.transpose.return_value.numpy.return_value = np.random.rand(
-            4, 4, 2)
+        B_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(4, 4, 2)
+        B_torch.transpose.return_value.numpy.return_value = np.random.rand(4, 4, 2)
 
         C_torch = Mock()
-        C_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.randn(
-            3, 5)
+        C_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.randn(3, 5)
         C_torch.ndim = 2
 
         D_torch = Mock()
-        D_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(
-            4)
+        D_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(4)
 
-        A, B, C, D = convert_torch_to_pymdp_matrices(
-            A_torch, B_torch, C_torch, D_torch)
+        A, B, C, D = convert_torch_to_pymdp_matrices(A_torch, B_torch, C_torch, D_torch)
 
         # C should remain 2D
         assert C.shape == (3, 5)
@@ -670,27 +609,21 @@ class TestMatrixConversionFunction:
     def test_convert_torch_to_pymdp_matrices_normalization(self):
         """Test that matrices are properly normalized"""
         A_torch = Mock()
-        A_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(
-            3, 4)
+        A_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(3, 4)
         A_torch.shape = [3, 4]
 
         B_torch = Mock()
-        B_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(
-            4, 4, 2)
-        B_torch.transpose.return_value.numpy.return_value = np.random.rand(
-            4, 4, 2)
+        B_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(4, 4, 2)
+        B_torch.transpose.return_value.numpy.return_value = np.random.rand(4, 4, 2)
 
         C_torch = Mock()
-        C_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.randn(
-            3)
+        C_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.randn(3)
         C_torch.ndim = 1
 
         D_torch = Mock()
-        D_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(
-            4)
+        D_torch.detach.return_value.cpu.return_value.numpy.return_value = np.random.rand(4)
 
-        A, B, C, D = convert_torch_to_pymdp_matrices(
-            A_torch, B_torch, C_torch, D_torch)
+        A, B, C, D = convert_torch_to_pymdp_matrices(A_torch, B_torch, C_torch, D_torch)
 
         # Check normalization
         # A columns should sum to 1

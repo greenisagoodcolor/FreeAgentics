@@ -125,8 +125,7 @@ class ResponseCache:
         conn.commit()
         conn.close()
 
-    def _generate_key(self, prompt: str,
-                      context: Optional[Dict[str, Any]] = None) -> str:
+    def _generate_key(self, prompt: str, context: Optional[Dict[str, Any]] = None) -> str:
         """Generate cache key from prompt and context"""
         key_data = {"prompt": prompt, "context": context or {}}
         key_str = json.dumps(key_data, sort_keys=True)
@@ -227,8 +226,7 @@ class ResponseCache:
             cursor.execute("SELECT SUM(size_bytes) FROM cache_entries")
             total_size = cursor.fetchone()[0] or 0
             if total_size > self.max_size_bytes:
-                self._evict_entries(
-                    cursor, total_size - self.max_size_bytes * 0.8)
+                self._evict_entries(cursor, total_size - self.max_size_bytes * 0.8)
             # Compress and store
             compressed = self._compress_response(response)
             cursor.execute(
@@ -382,14 +380,10 @@ class TemplateEngine:
                         custom_templates = json.load(f)
                         templates.update(custom_templates)
                 except Exception as e:
-                    logger.error(
-                        f"Failed to load template {template_file}: {e}")
+                    logger.error(f"Failed to load template {template_file}: {e}")
         return templates
 
-    def generate(self,
-                 intent: str,
-                 variables: Dict[str,
-                                 Any]) -> Optional[str]:
+    def generate(self, intent: str, variables: Dict[str, Any]) -> Optional[str]:
         """
         Generate response from template.
         Args:
@@ -449,8 +443,7 @@ class RuleBasedResponder:
         def resource_response(prompt: str, context: dict) -> str:
             resources = context.get("resources", {})
             if resources:
-                resource_list = ", ".join(
-                    f"{k}: {v}" for k, v in resources.items())
+                resource_list = ", ".join(f"{k}: {v}" for k, v in resources.items())
                 return f"Current resources: {resource_list}"
             return "No resources currently available."
 
@@ -497,37 +490,46 @@ class PrecomputedResponses:
             except Exception as e:
                 logger.error(f"Failed to load precomputed responses: {e}")
         # Default responses
-        return {"exploration": [{"context": "new_area",
-                                 "response": "Initiating systematic exploration of uncharted territory.",
-                                 "confidence": 0.8,
-                                 },
-                                {"context": "resource_search",
-                                 "response": "Scanning area for valuable resources and materials.",
-                                 "confidence": 0.9,
-                                 },
-                                ],
-                "combat": [{"context": "threat_detected",
-                            "response": "Threat detected. Initiating defensive protocols.",
-                            "confidence": 0.95,
-                            },
-                           {"context": "retreat",
-                            "response": "Strategic withdrawal to safer position.",
-                            "confidence": 0.85,
-                            },
-                           ],
-                "trading": [{"context": "offer_received",
-                             "response": "Evaluating trade offer for mutual benefit.",
-                             "confidence": 0.7,
-                             },
-                            {"context": "negotiation",
-                             "response": "Proposing alternative terms for fair exchange.",
-                             "confidence": 0.75,
-                             },
-                            ],
-                }
+        return {
+            "exploration": [
+                {
+                    "context": "new_area",
+                    "response": "Initiating systematic exploration of uncharted territory.",
+                    "confidence": 0.8,
+                },
+                {
+                    "context": "resource_search",
+                    "response": "Scanning area for valuable resources and materials.",
+                    "confidence": 0.9,
+                },
+            ],
+            "combat": [
+                {
+                    "context": "threat_detected",
+                    "response": "Threat detected. Initiating defensive protocols.",
+                    "confidence": 0.95,
+                },
+                {
+                    "context": "retreat",
+                    "response": "Strategic withdrawal to safer position.",
+                    "confidence": 0.85,
+                },
+            ],
+            "trading": [
+                {
+                    "context": "offer_received",
+                    "response": "Evaluating trade offer for mutual benefit.",
+                    "confidence": 0.7,
+                },
+                {
+                    "context": "negotiation",
+                    "response": "Proposing alternative terms for fair exchange.",
+                    "confidence": 0.75,
+                },
+            ],
+        }
 
-    def find_best_match(self, category: str,
-                        context: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def find_best_match(self, category: str, context: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Find best matching precomputed response"""
         if category not in self.responses:
             return None
@@ -536,8 +538,7 @@ class PrecomputedResponses:
         best_match = None
         best_score = 0
         for candidate in candidates:
-            score = self._calculate_context_similarity(
-                candidate.get("context", ""), context)
+            score = self._calculate_context_similarity(candidate.get("context", ""), context)
             if score > best_score:
                 best_score = score
                 best_match = candidate
@@ -562,8 +563,7 @@ class FallbackManager:
     Manages all fallback mechanisms with graceful degradation.
     """
 
-    def __init__(self, cache_dir: Path,
-                 config: Optional[Dict[str, Any]] = None) -> None:
+    def __init__(self, cache_dir: Path, config: Optional[Dict[str, Any]] = None) -> None:
         """Initialize fallback manager"""
         self.cache_dir = cache_dir
         self.config = config or {}
@@ -622,8 +622,7 @@ class FallbackManager:
             computation_time_ms=(time.time() - start_time) * 1000,
         )
 
-    def _determine_fallback_level(
-            self, constraints: ResourceConstraints) -> FallbackLevel:
+    def _determine_fallback_level(self, constraints: ResourceConstraints) -> FallbackLevel:
         """Determine appropriate fallback level based on constraints"""
         # Memory-based decision
         if constraints.available_memory_mb < 50:
@@ -694,8 +693,7 @@ class FallbackManager:
             )
         return None
 
-    def _generate_random_response(
-            self, context: Dict[str, Any]) -> FallbackResponse:
+    def _generate_random_response(self, context: Dict[str, Any]) -> FallbackResponse:
         """Generate random valid response"""
         responses = [
             "Processing your request...",
@@ -740,8 +738,7 @@ class FallbackManager:
                 return category
         return None
 
-    def _record_performance(self, response: FallbackResponse,
-                            constraints: ResourceConstraints):
+    def _record_performance(self, response: FallbackResponse, constraints: ResourceConstraints):
         """Record performance metrics"""
         metric = {
             "timestamp": time.time(),
@@ -761,8 +758,7 @@ class FallbackManager:
         if not self.performance_history:
             return {}
         # Calculate statistics
-        computation_times = [m["computation_time_ms"]
-                             for m in self.performance_history]
+        computation_times = [m["computation_time_ms"] for m in self.performance_history]
         confidence_scores = [m["confidence"] for m in self.performance_history]
         fallback_counts = defaultdict(int)
         for metric in self.performance_history:

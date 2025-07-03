@@ -148,10 +148,7 @@ class BenchmarkDatasets:
         labels = torch.tensor(
             [G.nodes[i]["club"] == "Officer" for i in range(num_nodes)], dtype=torch.long
         )
-        graph = GraphData(
-            node_features=node_features,
-            edge_index=edge_index,
-            target=labels)
+        graph = GraphData(node_features=node_features, edge_index=edge_index, target=labels)
         return [graph]
 
     def generate_synthetic_small(self) -> List[GraphData]:
@@ -168,8 +165,7 @@ class BenchmarkDatasets:
             else:
                 G = nx.watts_strogatz_graph(num_nodes, 4, 0.3)
                 label = 2
-            graph = self._networkx_to_graphdata(
-                G, feature_dim=32, graph_label=label)
+            graph = self._networkx_to_graphdata(G, feature_dim=32, graph_label=label)
             graphs.append(graph)
         return graphs
 
@@ -242,8 +238,7 @@ class BenchmarkDatasets:
                 label = 3
             mapping = {node: idx for idx, node in enumerate(G.nodes())}
             G = nx.relabel_nodes(G, mapping)
-            graph = self._networkx_to_graphdata(
-                G, feature_dim=16, graph_label=label)
+            graph = self._networkx_to_graphdata(G, feature_dim=16, graph_label=label)
             graphs.append(graph)
         return graphs
 
@@ -262,8 +257,7 @@ class BenchmarkDatasets:
             else:
                 num_nodes = np.random.randint(20, 40)
                 G = nx.path_graph(num_nodes)
-            graph = self._networkx_to_graphdata(
-                G, feature_dim=32, graph_label=tree_type)
+            graph = self._networkx_to_graphdata(G, feature_dim=32, graph_label=tree_type)
             graphs.append(graph)
         return graphs
 
@@ -272,8 +266,7 @@ class BenchmarkDatasets:
         graphs = []
         for i in range(50):
             num_communities = np.random.randint(2, 5)
-            community_sizes = [np.random.randint(15, 35)
-                               for _ in range(num_communities)]
+            community_sizes = [np.random.randint(15, 35) for _ in range(num_communities)]
             p_within = 0.3
             p_between = 0.02
             probs = []
@@ -299,9 +292,8 @@ class BenchmarkDatasets:
             else:
                 edge_index = torch.empty((2, 0), dtype=torch.long)
             graph = GraphData(
-                node_features=node_features,
-                edge_index=edge_index,
-                target=node_labels)
+                node_features=node_features, edge_index=edge_index, target=node_labels
+            )
             graphs.append(graph)
         return graphs
 
@@ -332,10 +324,8 @@ class BenchmarkDatasets:
         else:
             target = None
         return GraphData(
-            node_features=node_features,
-            edge_index=edge_index,
-            edge_attr=edge_attr,
-            target=target)
+            node_features=node_features, edge_index=edge_index, edge_attr=edge_attr, target=target
+        )
 
     def get_dataset(self, name: str) -> List[GraphData]:
         """
@@ -405,10 +395,7 @@ class BenchmarkDatasets:
                 save_path / f"{name}_graph_{i}.pt",
             )
 
-    def load_dataset_from_disk(
-            self,
-            name: str,
-            load_dir: str) -> List[GraphData]:
+    def load_dataset_from_disk(self, name: str, load_dir: str) -> List[GraphData]:
         """
         Load a dataset from disk.
         Args:

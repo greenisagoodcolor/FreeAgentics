@@ -97,16 +97,13 @@ class TestWorldEvent:
         """Test world event with affected agents"""
         affected = {"agent_2", "agent_3"}
         event = WorldEvent(
-            event_type=EventType.RESOURCE_DISCOVERED,
-            location="hex_456",
-            affected_agents=affected)
+            event_type=EventType.RESOURCE_DISCOVERED, location="hex_456", affected_agents=affected
+        )
         assert event.affected_agents == affected
 
     def test_world_event_defaults(self):
         """Test world event with default values"""
-        event = WorldEvent(
-            event_type=EventType.WEATHER_CHANGED,
-            location="hex_789")
+        event = WorldEvent(event_type=EventType.WEATHER_CHANGED, location="hex_789")
         assert event.agent_id is None
         assert event.data == {}
         assert event.affected_agents == set()
@@ -114,9 +111,7 @@ class TestWorldEvent:
 
     def test_world_event_timestamp_timezone(self):
         """Test that timestamp is in UTC"""
-        event = WorldEvent(
-            event_type=EventType.STRUCTURE_BUILT,
-            location="hex_000")
+        event = WorldEvent(event_type=EventType.STRUCTURE_BUILT, location="hex_000")
         assert event.timestamp.tzinfo == timezone.utc
 
 
@@ -198,9 +193,8 @@ class TestActionResult:
     def test_action_result_failure(self):
         """Test failed action result"""
         result = ActionResult(
-            success=False,
-            action_type=ActionType.HARVEST_RESOURCE,
-            message="No resources available")
+            success=False, action_type=ActionType.HARVEST_RESOURCE, message="No resources available"
+        )
 
         assert result.success is False
         assert result.action_type == ActionType.HARVEST_RESOURCE
@@ -252,8 +246,7 @@ class TestWorldEventSystem:
         self.event_system.subscribe_to_events("agent_1", event_types, callback)
 
         # Then unsubscribe
-        self.event_system.unsubscribe_from_events(
-            "agent_1", [EventType.AGENT_MOVED])
+        self.event_system.unsubscribe_from_events("agent_1", [EventType.AGENT_MOVED])
 
         assert "agent_1" not in self.event_system.subscribers[EventType.AGENT_MOVED]
         assert "agent_1" in self.event_system.subscribers[EventType.RESOURCE_DEPLETED]
@@ -261,14 +254,11 @@ class TestWorldEventSystem:
     def test_unsubscribe_nonexistent_agent(self):
         """Test unsubscribing agent that wasn't subscribed"""
         # Should not raise exception
-        self.event_system.unsubscribe_from_events(
-            "nonexistent", [EventType.AGENT_MOVED])
+        self.event_system.unsubscribe_from_events("nonexistent", [EventType.AGENT_MOVED])
 
     def test_publish_event_no_subscribers(self):
         """Test publishing event with no subscribers"""
-        event = WorldEvent(
-            event_type=EventType.WEATHER_CHANGED,
-            location="hex_1")
+        event = WorldEvent(event_type=EventType.WEATHER_CHANGED, location="hex_1")
 
         # Should not raise exception
         self.event_system.publish_event(event)
@@ -281,15 +271,10 @@ class TestWorldEventSystem:
         callback1 = Mock()
         callback2 = Mock()
 
-        self.event_system.subscribe_to_events(
-            "agent_1", [EventType.AGENT_MOVED], callback1)
-        self.event_system.subscribe_to_events(
-            "agent_2", [EventType.AGENT_MOVED], callback2)
+        self.event_system.subscribe_to_events("agent_1", [EventType.AGENT_MOVED], callback1)
+        self.event_system.subscribe_to_events("agent_2", [EventType.AGENT_MOVED], callback2)
 
-        event = WorldEvent(
-            event_type=EventType.AGENT_MOVED,
-            location="hex_1",
-            agent_id="agent_3")
+        event = WorldEvent(event_type=EventType.AGENT_MOVED, location="hex_1", agent_id="agent_3")
 
         self.event_system.publish_event(event)
 
@@ -302,12 +287,9 @@ class TestWorldEventSystem:
         callback2 = Mock()
         callback3 = Mock()
 
-        self.event_system.subscribe_to_events(
-            "agent_1", [EventType.RESOURCE_DISCOVERED], callback1)
-        self.event_system.subscribe_to_events(
-            "agent_2", [EventType.RESOURCE_DISCOVERED], callback2)
-        self.event_system.subscribe_to_events(
-            "agent_3", [EventType.RESOURCE_DISCOVERED], callback3)
+        self.event_system.subscribe_to_events("agent_1", [EventType.RESOURCE_DISCOVERED], callback1)
+        self.event_system.subscribe_to_events("agent_2", [EventType.RESOURCE_DISCOVERED], callback2)
+        self.event_system.subscribe_to_events("agent_3", [EventType.RESOURCE_DISCOVERED], callback3)
 
         event = WorldEvent(
             event_type=EventType.RESOURCE_DISCOVERED,
@@ -329,10 +311,8 @@ class TestWorldEventSystem:
         callback_good = Mock()
         callback_bad = Mock(side_effect=Exception("Callback error"))
 
-        self.event_system.subscribe_to_events(
-            "agent_1", [EventType.AGENT_MOVED], callback_good)
-        self.event_system.subscribe_to_events(
-            "agent_2", [EventType.AGENT_MOVED], callback_bad)
+        self.event_system.subscribe_to_events("agent_1", [EventType.AGENT_MOVED], callback_good)
+        self.event_system.subscribe_to_events("agent_2", [EventType.AGENT_MOVED], callback_bad)
 
         event = WorldEvent(event_type=EventType.AGENT_MOVED, location="hex_1")
 
@@ -349,9 +329,7 @@ class TestWorldEventSystem:
 
         # Add events beyond the limit
         for i in range(5):
-            event = WorldEvent(
-                event_type=EventType.AGENT_MOVED,
-                location=f"hex_{i}")
+            event = WorldEvent(event_type=EventType.AGENT_MOVED, location=f"hex_{i}")
             self.event_system.publish_event(event)
 
         # Should only keep the last 3 events
@@ -362,23 +340,16 @@ class TestWorldEventSystem:
     def test_get_recent_events(self):
         """Test getting recent events near a location"""
         # Create events at different times
-        old_event = WorldEvent(
-            event_type=EventType.AGENT_MOVED,
-            location="hex_1")
+        old_event = WorldEvent(event_type=EventType.AGENT_MOVED, location="hex_1")
         # Manually set old timestamp
-        old_event.timestamp = datetime.now(
-            timezone.utc).replace(
-            hour=0, minute=0)
+        old_event.timestamp = datetime.now(timezone.utc).replace(hour=0, minute=0)
 
-        recent_event = WorldEvent(
-            event_type=EventType.RESOURCE_DISCOVERED,
-            location="hex_1")
+        recent_event = WorldEvent(event_type=EventType.RESOURCE_DISCOVERED, location="hex_1")
 
         self.event_system.event_history = [old_event, recent_event]
 
         # Get events from the last 10 minutes
-        recent_events = self.event_system.get_recent_events(
-            "hex_1", time_window_minutes=10)
+        recent_events = self.event_system.get_recent_events("hex_1", time_window_minutes=10)
 
         # Should only get the recent event
         assert len(recent_events) == 1
@@ -414,8 +385,7 @@ class TestAgentWorldManager:
         # Create manager with mocks
         with patch("agents.base.world_integration.SpatialAPI") as mock_spatial_class:
             mock_spatial_class.return_value = self.mock_spatial_api
-            self.manager = AgentWorldManager(
-                self.mock_world, self.mock_spatial_api)
+            self.manager = AgentWorldManager(self.mock_world, self.mock_spatial_api)
 
     def test_initialization(self):
         """Test manager initialization"""
@@ -573,8 +543,7 @@ class TestAgentWorldManager:
 
     def test_perform_action_agent_not_found(self):
         """Test performing action for nonexistent agent"""
-        result = self.manager.perform_action(
-            "nonexistent", ActionType.MOVE, {})
+        result = self.manager.perform_action("nonexistent", ActionType.MOVE, {})
 
         assert result.success is False
         assert "Agent not found" in result.message
@@ -589,9 +558,7 @@ class TestAgentWorldManager:
         mock_target_cell.movement_cost = 1.0  # Fix: set as float, not Mock
         self.mock_world.get_cell.return_value = mock_target_cell
 
-        result = self.manager.perform_action(
-            "agent_1", ActionType.MOVE, {
-                "target_hex": "hex_2"})
+        result = self.manager.perform_action("agent_1", ActionType.MOVE, {"target_hex": "hex_2"})
 
         assert result.success is False
         assert "Insufficient energy" in result.message
@@ -611,9 +578,7 @@ class TestAgentWorldManager:
         mock_cell.movement_cost = 1.0
         self.mock_world.get_cell.return_value = mock_cell
 
-        result = self.manager.perform_action(
-            "agent_1", ActionType.MOVE, {
-                "target_hex": "hex_2"})
+        result = self.manager.perform_action("agent_1", ActionType.MOVE, {"target_hex": "hex_2"})
 
         assert result.success is True
         assert self.manager.agent_locations["agent_1"] == "hex_2"
@@ -644,9 +609,7 @@ class TestAgentWorldManager:
         # No neighbors available
         self.mock_world.get_neighbors.return_value = []
 
-        result = self.manager.perform_action(
-            "agent_1", ActionType.MOVE, {
-                "target_hex": "hex_2"})
+        result = self.manager.perform_action("agent_1", ActionType.MOVE, {"target_hex": "hex_2"})
 
         assert result.success is False
         assert "not adjacent or invalid" in result.message
@@ -661,8 +624,8 @@ class TestAgentWorldManager:
         self.mock_world.get_cell.return_value = mock_cell
 
         result = self.manager.perform_action(
-            "agent_1", ActionType.HARVEST_RESOURCE, {
-                "resource_type": "wood", "amount": 10.0})
+            "agent_1", ActionType.HARVEST_RESOURCE, {"resource_type": "wood", "amount": 10.0}
+        )
 
         assert result.success is True
         assert self.manager.agent_resources["agent_1"]["wood"] == 10.0
@@ -674,8 +637,7 @@ class TestAgentWorldManager:
         self.manager.agent_locations["agent_1"] = "hex_1"
         self.manager.agent_energy["agent_1"] = 100.0
 
-        result = self.manager.perform_action(
-            "agent_1", ActionType.HARVEST_RESOURCE, {})
+        result = self.manager.perform_action("agent_1", ActionType.HARVEST_RESOURCE, {})
 
         assert result.success is False
         assert "No resource_type specified" in result.message
@@ -706,8 +668,8 @@ class TestAgentWorldManager:
         self.mock_world.get_cell.return_value = mock_cell
 
         result = self.manager.perform_action(
-            "agent_1", ActionType.HARVEST_RESOURCE, {
-                "resource_type": "wood", "amount": 10.0})
+            "agent_1", ActionType.HARVEST_RESOURCE, {"resource_type": "wood", "amount": 10.0}
+        )
 
         assert result.success is True
         assert len(result.generated_events) == 1
@@ -743,8 +705,8 @@ class TestAgentWorldManager:
         self.manager.agent_energy["agent_1"] = 100.0
 
         result = self.manager.perform_action(
-            "agent_1", ActionType.COMMUNICATE, {
-                "target_agent": "agent_2", "message": "Hello"})
+            "agent_1", ActionType.COMMUNICATE, {"target_agent": "agent_2", "message": "Hello"}
+        )
 
         assert result.success is True
         assert len(result.generated_events) == 1
@@ -757,8 +719,8 @@ class TestAgentWorldManager:
         self.manager.agent_energy["agent_1"] = 100.0
 
         result = self.manager.perform_action(
-            "agent_1", ActionType.BUILD_STRUCTURE, {
-                "structure_type": "shelter"})
+            "agent_1", ActionType.BUILD_STRUCTURE, {"structure_type": "shelter"}
+        )
 
         assert result.success is True
         assert "shelter" in self.manager.structures["hex_1"]
@@ -772,8 +734,8 @@ class TestAgentWorldManager:
         self.manager.structures["hex_1"]["shelter"] = {"built_by": "agent_1"}
 
         result = self.manager.perform_action(
-            "agent_1", ActionType.BUILD_STRUCTURE, {
-                "structure_type": "shelter"})
+            "agent_1", ActionType.BUILD_STRUCTURE, {"structure_type": "shelter"}
+        )
 
         assert result.success is False
         assert "already exists" in result.message
@@ -792,8 +754,7 @@ class TestAgentWorldManager:
         """Test basic action cost calculation"""
         self.manager.agent_locations["agent_1"] = "hex_1"
 
-        cost = self.manager._calculate_action_cost(
-            "agent_1", ActionType.MOVE, {})
+        cost = self.manager._calculate_action_cost("agent_1", ActionType.MOVE, {})
         assert cost == 10.0
 
     def test_calculate_action_cost_with_terrain(self):
@@ -804,8 +765,7 @@ class TestAgentWorldManager:
         mock_target_cell = Mock()
         mock_target_cell.movement_cost = 2.0
 
-        self.mock_world.get_cell.side_effect = [
-            mock_current_cell, mock_target_cell]
+        self.mock_world.get_cell.side_effect = [mock_current_cell, mock_target_cell]
 
         cost = self.manager._calculate_action_cost(
             "agent_1", ActionType.MOVE, {"target_hex": "hex_2"}
@@ -879,8 +839,8 @@ class TestAgentWorldManager:
         self.mock_world.get_cell.return_value = mock_cell
 
         result = self.manager.perform_action(
-            "agent_1", ActionType.DEPOSIT_RESOURCE, {
-                "resource_type": "wood", "amount": 10.0})
+            "agent_1", ActionType.DEPOSIT_RESOURCE, {"resource_type": "wood", "amount": 10.0}
+        )
 
         assert result.success is True
         assert self.manager.agent_resources["agent_1"]["wood"] == 10.0
@@ -894,8 +854,8 @@ class TestAgentWorldManager:
         self.manager.agent_resources["agent_1"] = {"wood": 5.0}
 
         result = self.manager.perform_action(
-            "agent_1", ActionType.DEPOSIT_RESOURCE, {
-                "resource_type": "wood", "amount": 10.0})
+            "agent_1", ActionType.DEPOSIT_RESOURCE, {"resource_type": "wood", "amount": 10.0}
+        )
 
         assert result.success is False
         assert "Insufficient" in result.message

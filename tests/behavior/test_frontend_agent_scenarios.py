@@ -34,9 +34,7 @@ class TestFrontendAgentBehavior:
         result = self._run_frontend_test("coalition-formation", test_scenario)
 
         assert result["coalitions_formed"] == test_scenario["expected_coalitions"]
-        assert set(
-            result["coalition_members"]) == set(
-            test_scenario["expected_members"])
+        assert set(result["coalition_members"]) == set(test_scenario["expected_members"])
 
     def test_agent_conversation_dynamics(self):
         """
@@ -55,8 +53,7 @@ class TestFrontendAgentBehavior:
             "topic": "active_inference",
         }
 
-        result = self._run_frontend_test(
-            "conversation-dynamics", conversation_scenario)
+        result = self._run_frontend_test("conversation-dynamics", conversation_scenario)
 
         # Verify knowledge transfer
         assert result["learner_knowledge_after"] > 0.3
@@ -98,14 +95,10 @@ class TestFrontendAgentBehavior:
         emergence_scenario = {
             "agent_count": 20,
             "interaction_rounds": 50,
-            "expected_patterns": [
-                "clustering",
-                "information_hubs",
-                "cyclic_behavior"],
+            "expected_patterns": ["clustering", "information_hubs", "cyclic_behavior"],
         }
 
-        result = self._run_frontend_test(
-            "emergent-behavior", emergence_scenario)
+        result = self._run_frontend_test("emergent-behavior", emergence_scenario)
 
         detected_patterns = result["detected_patterns"]
         for pattern in emergence_scenario["expected_patterns"]:
@@ -130,13 +123,11 @@ class TestFrontendAgentBehavior:
             "negotiation_rounds": 5,
         }
 
-        result = self._run_frontend_test(
-            "conflict-resolution", conflict_scenario)
+        result = self._run_frontend_test("conflict-resolution", conflict_scenario)
 
         assert result["conflict_detected"] is True
         assert result["negotiation_completed"] is True
-        assert result["resolution_type"] in [
-            "compromise", "turn_taking", "coalition"]
+        assert result["resolution_type"] in ["compromise", "turn_taking", "coalition"]
         assert result["satisfaction_a1"] > 0.5
         assert result["satisfaction_a2"] > 0.5
 
@@ -155,8 +146,7 @@ class TestFrontendAgentBehavior:
             "options": ["option_a", "option_b", "option_c"],
         }
 
-        result = self._run_frontend_test(
-            "collective-decision", decision_scenario)
+        result = self._run_frontend_test("collective-decision", decision_scenario)
 
         assert result["all_agents_participated"] is True
         assert result["decision_transparency"] > 0.8
@@ -182,8 +172,7 @@ class TestFrontendAgentBehavior:
 
         for agent in learning_scenario["agents"]:
             agent_result = result[agent]
-            improvement = agent_result["final_performance"] - \
-                agent_result["initial_performance"]
+            improvement = agent_result["final_performance"] - agent_result["initial_performance"]
             assert improvement >= learning_scenario["expected_improvement"]
             assert agent_result["curve_displayed"] is True
 
@@ -204,8 +193,7 @@ class TestFrontendAgentBehavior:
             "interaction_type": "information_sharing",
         }
 
-        result = self._run_frontend_test(
-            "reputation-system", reputation_scenario)
+        result = self._run_frontend_test("reputation-system", reputation_scenario)
 
         # Verify reputation affects interactions
         assert result["trusted_interactions"] > result["untrusted_interactions"]
@@ -252,8 +240,7 @@ class TestFrontendAgentBehavior:
             "contribution_rounds": 5,
         }
 
-        result = self._run_frontend_test(
-            "collaborative-knowledge", collab_scenario)
+        result = self._run_frontend_test("collaborative-knowledge", collab_scenario)
 
         assert result["final_nodes"] > collab_scenario["initial_nodes"]
         assert result["merge_conflicts_resolved"] >= 0
@@ -302,64 +289,73 @@ class TestFrontendAgentBehavior:
         """
         Mock results for different test scenarios
         """
-        mock_results = {"coalition-formation": {"coalitions_formed": 1,
-                                                "coalition_members": ["agent-1",
-                                                                      "agent-2",
-                                                                      "agent-3"],
-                                                },
-                        "conversation-dynamics": {"learner_knowledge_after": 0.6,
-                                                  "conversation_coherence": 0.8,
-                                                  "information_exchange_rate": 0.7,
-                                                  },
-                        "belief-propagation": {"a2": {"trust": 0.7},
-                                               "a3": {"trust": 0.65},
-                                               "propagation_visualized": True,
-                                               },
-                        "emergent-behavior": {"detected_patterns": ["clustering",
-                                                                    "information_hubs",
-                                                                    "cyclic_behavior"],
-                                              "ui_highlights_count": 5,
-                                              },
-                        "conflict-resolution": {"conflict_detected": True,
-                                                "negotiation_completed": True,
-                                                "resolution_type": "compromise",
-                                                "satisfaction_a1": 0.7,
-                                                "satisfaction_a2": 0.75,
-                                                },
-                        "collective-decision": {"all_agents_participated": True,
-                                                "decision_transparency": 0.9,
-                                                "ui_showed_voting_process": True,
-                                                "consensus_level": 0.75,
-                                                },
-                        "learning-curves": {"learner_1": {"initial_performance": 0.2,
-                                                          "final_performance": 0.8,
-                                                          "curve_displayed": True,
-                                                          },
-                                            "learner_2": {"initial_performance": 0.3,
-                                                          "final_performance": 0.85,
-                                                          "curve_displayed": True,
-                                                          },
-                                            "learner_3": {"initial_performance": 0.25,
-                                                          "final_performance": 0.78,
-                                                          "curve_displayed": True,
-                                                          },
-                                            },
-                        "reputation-system": {"trusted_interactions": 15,
-                                              "untrusted_interactions": 3,
-                                              "reputation_badges_shown": True,
-                                              "trust_indicators_visible": True,
-                                              },
-                        "swarm-behavior": {"swarm_formed": True,
-                                           "average_neighbor_distance": 75,
-                                           "visualization_fps": 45,
-                                           "observed_patterns": ["flocking",
-                                                                 "emergence"],
-                                           },
-                        "collaborative-knowledge": {"final_nodes": 35,
-                                                    "merge_conflicts_resolved": 2,
-                                                    "knowledge_quality_score": 0.87,
-                                                    "contribution_attribution": True,
-                                                    },
-                        }
+        mock_results = {
+            "coalition-formation": {
+                "coalitions_formed": 1,
+                "coalition_members": ["agent-1", "agent-2", "agent-3"],
+            },
+            "conversation-dynamics": {
+                "learner_knowledge_after": 0.6,
+                "conversation_coherence": 0.8,
+                "information_exchange_rate": 0.7,
+            },
+            "belief-propagation": {
+                "a2": {"trust": 0.7},
+                "a3": {"trust": 0.65},
+                "propagation_visualized": True,
+            },
+            "emergent-behavior": {
+                "detected_patterns": ["clustering", "information_hubs", "cyclic_behavior"],
+                "ui_highlights_count": 5,
+            },
+            "conflict-resolution": {
+                "conflict_detected": True,
+                "negotiation_completed": True,
+                "resolution_type": "compromise",
+                "satisfaction_a1": 0.7,
+                "satisfaction_a2": 0.75,
+            },
+            "collective-decision": {
+                "all_agents_participated": True,
+                "decision_transparency": 0.9,
+                "ui_showed_voting_process": True,
+                "consensus_level": 0.75,
+            },
+            "learning-curves": {
+                "learner_1": {
+                    "initial_performance": 0.2,
+                    "final_performance": 0.8,
+                    "curve_displayed": True,
+                },
+                "learner_2": {
+                    "initial_performance": 0.3,
+                    "final_performance": 0.85,
+                    "curve_displayed": True,
+                },
+                "learner_3": {
+                    "initial_performance": 0.25,
+                    "final_performance": 0.78,
+                    "curve_displayed": True,
+                },
+            },
+            "reputation-system": {
+                "trusted_interactions": 15,
+                "untrusted_interactions": 3,
+                "reputation_badges_shown": True,
+                "trust_indicators_visible": True,
+            },
+            "swarm-behavior": {
+                "swarm_formed": True,
+                "average_neighbor_distance": 75,
+                "visualization_fps": 45,
+                "observed_patterns": ["flocking", "emergence"],
+            },
+            "collaborative-knowledge": {
+                "final_nodes": 35,
+                "merge_conflicts_resolved": 2,
+                "knowledge_quality_score": 0.87,
+                "contribution_attribution": True,
+            },
+        }
 
         return mock_results.get(test_name, {})

@@ -11,8 +11,9 @@ from typing import Any, Dict, List, Optional, Union
 import numpy as np
 import scipy.sparse as sp  # type: ignore[import-untyped]
 import torch
-from sklearn.preprocessing import MinMaxScaler  # type: ignore[import-untyped]
+
 # type: ignore[import-untyped]
+from sklearn.preprocessing import MinMaxScaler  # type: ignore[import-untyped]
 from sklearn.preprocessing import StandardScaler
 
 # Configure logging
@@ -141,8 +142,7 @@ class EdgeProcessor:
                 edge_index, edge_attr, edge_weight, num_nodes
             )
         # Create edge type tensor if needed
-        edge_type = self._extract_edge_types(
-            processed_edges) if edges else None
+        edge_type = self._extract_edge_types(processed_edges) if edges else None
         return EdgeBatch(
             edge_index=edge_index,
             edge_attr=edge_attr,
@@ -168,8 +168,7 @@ class EdgeProcessor:
         undirected_edges = []
         seen_pairs = set()
         for edge in edges:
-            pair = (min(edge.source, edge.target),
-                    max(edge.source, edge.target))
+            pair = (min(edge.source, edge.target), max(edge.source, edge.target))
             if pair not in seen_pairs:
                 seen_pairs.add(pair)
                 # Create undirected edge
@@ -216,35 +215,35 @@ class EdgeProcessor:
             edge_index = torch.cat([edge_index, self_loops], dim=1)
         return edge_index
 
-    def _extract_edge_features(self,
-                               edges: List[Edge]) -> Optional[torch.Tensor]:
+    def _extract_edge_features(self, edges: List[Edge]) -> Optional[torch.Tensor]:
         """Extract and normalize edge features using Strategy pattern"""
         if not self.config.feature_types:
             return None
-        
+
         feature_arrays = self._extract_all_feature_types(edges)
-        
+
         if not feature_arrays:
             return None
-        
+
         edge_attr = self._concatenate_features(feature_arrays)
         edge_attr = self._add_self_loop_features(edge_attr, len(edges))
-        
+
         return edge_attr
 
     def _extract_all_feature_types(self, edges: List[Edge]) -> List[torch.Tensor]:
         """Extract features for all configured feature types"""
         feature_arrays = []
-        
+
         for feature_type in self.config.feature_types:
             features = self._extract_single_feature_type(edges, feature_type)
             if features is not None:
                 feature_arrays.append(features)
-        
+
         return feature_arrays
 
-    def _extract_single_feature_type(self, edges: List[Edge], 
-                                   feature_type: EdgeFeatureType) -> Optional[torch.Tensor]:
+    def _extract_single_feature_type(
+        self, edges: List[Edge], feature_type: EdgeFeatureType
+    ) -> Optional[torch.Tensor]:
         """Extract features for a single feature type using Strategy pattern"""
         feature_extractors = {
             EdgeFeatureType.WEIGHT: self._extract_weight_features,
@@ -252,9 +251,9 @@ class EdgeProcessor:
             EdgeFeatureType.SIMILARITY: self._extract_similarity_features,
             EdgeFeatureType.CATEGORICAL: self._extract_categorical_features,
             EdgeFeatureType.TEMPORAL: self._extract_temporal_features,
-            EdgeFeatureType.EMBEDDING: self._extract_embedding_features
+            EdgeFeatureType.EMBEDDING: self._extract_embedding_features,
         }
-        
+
         extractor = feature_extractors.get(feature_type)
         if extractor:
             return extractor(edges)
@@ -265,16 +264,18 @@ class EdgeProcessor:
         """Concatenate all feature arrays"""
         return torch.cat(feature_arrays, dim=1)
 
-    def _add_self_loop_features(self, edge_attr: torch.Tensor, num_original_edges: int) -> torch.Tensor:
+    def _add_self_loop_features(
+        self, edge_attr: torch.Tensor, num_original_edges: int
+    ) -> torch.Tensor:
         """Add features for self-loops if needed"""
         if not self.config.self_loops:
             return edge_attr
-        
+
         num_self_loops = edge_attr.shape[0] - num_original_edges
         if num_self_loops > 0:
             self_loop_features = torch.zeros(num_self_loops, edge_attr.shape[1])
             edge_attr = torch.cat([edge_attr, self_loop_features], dim=0)
-        
+
         return edge_attr
 
     def _extract_weight_features(self, edges: List[Edge]) -> torch.Tensor:
@@ -286,8 +287,7 @@ class EdgeProcessor:
             weights = self.scalers["weight"].fit_transform(weights)
         return torch.tensor(weights, dtype=torch.float32)
 
-    def _extract_distance_features(
-            self, edges: List[Edge]) -> Optional[torch.Tensor]:
+    def _extract_distance_features(self, edges: List[Edge]) -> Optional[torch.Tensor]:
         """Extract distance-based features"""
         distances: List[float] = []
         for edge in edges:
@@ -297,8 +297,7 @@ class EdgeProcessor:
                 # Calculate distance from positions
                 pos_source = edge.metadata["positions"][edge.source]
                 pos_target = edge.metadata["positions"][edge.target]
-                distance = np.linalg.norm(
-                    np.array(pos_source) - np.array(pos_target))
+                distance = np.linalg.norm(np.array(pos_source) - np.array(pos_target))
                 distances.append(distance)
             else:
                 distances.append(0.0)
@@ -306,12 +305,10 @@ class EdgeProcessor:
         # Normalize distances to [0, 1] to ensure non-negative values
         if "distance" not in self.scalers:
             self.scalers["distance"] = MinMaxScaler()
-        distances_normalized = self.scalers["distance"].fit_transform(
-            distances_array)
+        distances_normalized = self.scalers["distance"].fit_transform(distances_array)
         return torch.tensor(distances_normalized, dtype=torch.float32)
 
-    def _extract_similarity_features(
-            self, edges: List[Edge]) -> Optional[torch.Tensor]:
+    def _extract_similarity_features(self, edges: List[Edge]) -> Optional[torch.Tensor]:
         """Extract similarity-based features"""
         similarities: List[float] = []
         for edge in edges:
@@ -325,8 +322,7 @@ class EdgeProcessor:
         similarities_clipped = np.clip(similarities_array, 0, 1)
         return torch.tensor(similarities_clipped, dtype=torch.float32)
 
-    def _extract_categorical_features(
-            self, edges: List[Edge]) -> Optional[torch.Tensor]:
+    def _extract_categorical_features(self, edges: List[Edge]) -> Optional[torch.Tensor]:
         """Extract categorical edge features"""
         if not any("category" in edge.features for edge in edges):
             return None
@@ -337,9 +333,7 @@ class EdgeProcessor:
             categories.append(str(category))
         # Create category mapping
         unique_categories = sorted(set(categories))
-        category_to_idx = {
-            cat: idx for idx,
-            cat in enumerate(unique_categories)}
+        category_to_idx = {cat: idx for idx, cat in enumerate(unique_categories)}
         # One-hot encode
         num_categories = len(unique_categories)
         one_hot = np.zeros((len(edges), num_categories))
@@ -347,8 +341,7 @@ class EdgeProcessor:
             one_hot[i, category_to_idx[category]] = 1.0
         return torch.tensor(one_hot, dtype=torch.float32)
 
-    def _extract_temporal_features(
-            self, edges: List[Edge]) -> Optional[torch.Tensor]:
+    def _extract_temporal_features(self, edges: List[Edge]) -> Optional[torch.Tensor]:
         """Extract temporal edge features"""
         temporal_features = []
         for edge in edges:
@@ -358,12 +351,10 @@ class EdgeProcessor:
                 features = self._decompose_timestamp(timestamp)
                 temporal_features.append(features)
             else:
-                temporal_features.append(
-                    [0.0] * 7)  # Default temporal features
+                temporal_features.append([0.0] * 7)  # Default temporal features
         return torch.tensor(temporal_features, dtype=torch.float32)
 
-    def _decompose_timestamp(
-            self, timestamp: Union[int, float, str]) -> List[float]:
+    def _decompose_timestamp(self, timestamp: Union[int, float, str]) -> List[float]:
         """Decompose timestamp into multiple features"""
         if isinstance(timestamp, str):
             dt = datetime.fromisoformat(timestamp)
@@ -380,8 +371,7 @@ class EdgeProcessor:
             timestamp / 1e10,
         ]
 
-    def _extract_embedding_features(
-            self, edges: List[Edge]) -> Optional[torch.Tensor]:
+    def _extract_embedding_features(self, edges: List[Edge]) -> Optional[torch.Tensor]:
         """Extract embedding features from edges"""
         embeddings: List[np.ndarray] = []
         embedding_dim = None
@@ -392,8 +382,8 @@ class EdgeProcessor:
                     if embedding_dim is None:
                         embedding_dim = len(embedding)
                     embeddings.append(
-                        np.array(embedding) if isinstance(
-                            embedding, list) else embedding)
+                        np.array(embedding) if isinstance(embedding, list) else embedding
+                    )
                 else:
                     # Generate embedding from edge properties
                     if embedding_dim is None:
@@ -414,11 +404,9 @@ class EdgeProcessor:
         norms = torch.norm(embeddings_tensor, p=2, dim=1, keepdim=True)
         zero_mask = norms.squeeze() < 1e-8
         if zero_mask.any():
-            embeddings_tensor[zero_mask] = torch.randn_like(
-                embeddings_tensor[zero_mask]) * 0.1
+            embeddings_tensor[zero_mask] = torch.randn_like(embeddings_tensor[zero_mask]) * 0.1
         # Now normalize to unit vectors
-        embeddings_normalized = torch.nn.functional.normalize(
-            embeddings_tensor, p=2, dim=1)
+        embeddings_normalized = torch.nn.functional.normalize(embeddings_tensor, p=2, dim=1)
         return embeddings_normalized
 
     def _extract_custom_features(
@@ -442,8 +430,7 @@ class EdgeProcessor:
         weights = [edge.weight for edge in edges]
         # Add weights for self-loops if needed
         if self.config.self_loops:
-            num_self_loops = max(max(e.source for e in edges),
-                                 max(e.target for e in edges)) + 1
+            num_self_loops = max(max(e.source for e in edges), max(e.target for e in edges)) + 1
             weights.extend([1.0] * num_self_loops)
         return torch.tensor(weights, dtype=torch.float32)
 
@@ -460,8 +447,7 @@ class EdgeProcessor:
             edge_types.append(self.edge_type_mapping[edge_type])
         # Add types for self-loops if needed
         if self.config.self_loops:
-            default_type = self.edge_type_mapping.get(
-                "self_loop", len(self.edge_type_mapping))
+            default_type = self.edge_type_mapping.get("self_loop", len(self.edge_type_mapping))
             if "self_loop" not in self.edge_type_mapping:
                 self.edge_type_mapping["self_loop"] = default_type
             num_self_loops = len(edges) - len(edge_types)
@@ -477,14 +463,11 @@ class EdgeProcessor:
     ) -> tuple[torch.Tensor, Optional[torch.Tensor], torch.Tensor]:
         """Sample edges based on configured strategy"""
         if self.config.edge_sampling_strategy == "random":
-            return self._random_sample_edges(
-                edge_index, edge_attr, edge_weight, num_nodes)
+            return self._random_sample_edges(edge_index, edge_attr, edge_weight, num_nodes)
         elif self.config.edge_sampling_strategy == "importance":
-            return self._importance_sample_edges(
-                edge_index, edge_attr, edge_weight, num_nodes)
+            return self._importance_sample_edges(edge_index, edge_attr, edge_weight, num_nodes)
         elif self.config.edge_sampling_strategy == "topk":
-            return self._topk_sample_edges(
-                edge_index, edge_attr, edge_weight, num_nodes)
+            return self._topk_sample_edges(edge_index, edge_attr, edge_weight, num_nodes)
         else:
             return edge_index, edge_attr, edge_weight
 
@@ -505,15 +488,13 @@ class EdgeProcessor:
                 and len(outgoing_edges) > self.config.max_edges_per_node
             ):
                 # Randomly sample outgoing edges
-                perm = torch.randperm(len(outgoing_edges))[
-                    : self.config.max_edges_per_node]
+                perm = torch.randperm(len(outgoing_edges))[: self.config.max_edges_per_node]
                 sampled_indices.update(outgoing_edges[perm].tolist())
             else:
                 sampled_indices.update(outgoing_edges.tolist())
         # Convert to sorted list for consistent ordering
         sampled_indices_list = sorted(list(sampled_indices))
-        sampled_indices_tensor = torch.tensor(
-            sampled_indices_list, dtype=torch.long)
+        sampled_indices_tensor = torch.tensor(sampled_indices_list, dtype=torch.long)
         # Extract sampled edges
         edge_index = edge_index[:, sampled_indices_tensor]
         edge_weight = edge_weight[sampled_indices_tensor]
@@ -552,8 +533,7 @@ class EdgeProcessor:
                 sampled_indices.update(outgoing_edges.tolist())
         # Convert to sorted list for consistent ordering
         sampled_indices_list = sorted(list(sampled_indices))
-        sampled_indices_tensor = torch.tensor(
-            sampled_indices_list, dtype=torch.long)
+        sampled_indices_tensor = torch.tensor(sampled_indices_list, dtype=torch.long)
         # Extract sampled edges
         edge_index = edge_index[:, sampled_indices_tensor]
         edge_weight = edge_weight[sampled_indices_tensor]
@@ -579,15 +559,13 @@ class EdgeProcessor:
             ):
                 # Get top-k by weight
                 node_weights = edge_weight[outgoing_edges]
-                topk_values, topk_indices = torch.topk(
-                    node_weights, self.config.max_edges_per_node)
+                topk_values, topk_indices = torch.topk(node_weights, self.config.max_edges_per_node)
                 sampled_indices.update(outgoing_edges[topk_indices].tolist())
             else:
                 sampled_indices.update(outgoing_edges.tolist())
         # Convert to sorted list for consistent ordering
         sampled_indices_list = sorted(list(sampled_indices))
-        sampled_indices_tensor = torch.tensor(
-            sampled_indices_list, dtype=torch.long)
+        sampled_indices_tensor = torch.tensor(sampled_indices_list, dtype=torch.long)
         # Extract sampled edges
         edge_index = edge_index[:, sampled_indices_tensor]
         edge_weight = edge_weight[sampled_indices_tensor]
@@ -614,15 +592,10 @@ class EdgeProcessor:
             edge_attr=None,
             edge_weight=edge_weight,
             edge_type=None,
-            metadata={
-                "num_edges": edge_index.shape[1],
-                "num_nodes": num_nodes},
+            metadata={"num_edges": edge_index.shape[1], "num_nodes": num_nodes},
         )
 
-    def to_adjacency_matrix(
-            self,
-            edge_batch: EdgeBatch,
-            num_nodes: int) -> sp.csr_matrix:
+    def to_adjacency_matrix(self, edge_batch: EdgeBatch, num_nodes: int) -> sp.csr_matrix:
         """Convert edge batch to sparse adjacency matrix"""
         edge_index = edge_batch.edge_index.numpy()
         weights = (
@@ -632,12 +605,11 @@ class EdgeProcessor:
         )
         # Create sparse matrix
         adj_matrix = sp.csr_matrix(
-            (weights, (edge_index[0], edge_index[1])), shape=(
-                num_nodes, num_nodes))
+            (weights, (edge_index[0], edge_index[1])), shape=(num_nodes, num_nodes)
+        )
         return adj_matrix
 
-    def compute_edge_statistics(self, edge_batch: EdgeBatch,
-                                num_nodes: int) -> Dict[str, Any]:
+    def compute_edge_statistics(self, edge_batch: EdgeBatch, num_nodes: int) -> Dict[str, Any]:
         """Compute statistics about the edge batch"""
         # Compute statistics about the edge batch
         edge_index = edge_batch.edge_index
@@ -657,9 +629,7 @@ class EdgeProcessor:
         # Edge type distribution
         if edge_batch.edge_type is not None:
             edge_type_counts = torch.bincount(edge_batch.edge_type)
-            edge_type_dist = {
-                f"type_{i}": count.item() for i,
-                count in enumerate(edge_type_counts)}
+            edge_type_dist = {f"type_{i}": count.item() for i, count in enumerate(edge_type_counts)}
         else:
             edge_type_dist = {}
         return {
@@ -725,10 +695,12 @@ if __name__ == "__main__":
     print(f"Edge index shape: {edge_batch.edge_index.shape}")
     print(
         f"Edge attributes shape: {
-            edge_batch.edge_attr.shape if edge_batch.edge_attr is not None else None}")
+            edge_batch.edge_attr.shape if edge_batch.edge_attr is not None else None}"
+    )
     print(
         f"Edge weights shape: {
-            edge_batch.edge_weight.shape if edge_batch.edge_weight is not None else 'None'}")
+            edge_batch.edge_weight.shape if edge_batch.edge_weight is not None else 'None'}"
+    )
     # Compute statistics
     stats = processor.compute_edge_statistics(edge_batch, num_nodes=4)
     print(f"Edge statistics: {stats}")

@@ -106,19 +106,16 @@ class TestExportValidator:
         assert isinstance(results[0], ValidationResult)
 
         # Check that structure validation passed
-        structure_results = [
-            r for r in results if r.check_name == "package_structure"]
+        structure_results = [r for r in results if r.check_name == "package_structure"]
         assert len(structure_results) > 0
         assert structure_results[0].status == ValidationStatus.PASSED
 
-    def test_check_structure_all_files_present(
-            self, validator, temp_package_dir):
+    def test_check_structure_all_files_present(self, validator, temp_package_dir):
         """Test structure check when all required files are present"""
         results = validator._check_structure(temp_package_dir)
 
         # Should pass structure check
-        structure_result = next(
-            r for r in results if r.check_name == "package_structure")
+        structure_result = next(r for r in results if r.check_name == "package_structure")
         assert structure_result.status == ValidationStatus.PASSED
         assert "All required files present" in structure_result.message
 
@@ -130,8 +127,7 @@ class TestExportValidator:
         results = validator._check_structure(temp_package_dir)
 
         # Should fail structure check
-        structure_result = next(
-            r for r in results if r.check_name == "package_structure")
+        structure_result = next(r for r in results if r.check_name == "package_structure")
         assert structure_result.status == ValidationStatus.FAILED
         assert "manifest.json" in structure_result.message
         assert "manifest.json" in structure_result.details["missing_files"]
@@ -141,8 +137,7 @@ class TestExportValidator:
         results = validator._check_manifest(temp_package_dir)
 
         # Should pass manifest checks
-        structure_results = [
-            r for r in results if r.check_name == "manifest_structure"]
+        structure_results = [r for r in results if r.check_name == "manifest_structure"]
         assert len(structure_results) > 0
         assert structure_results[0].status == ValidationStatus.PASSED
 
@@ -207,19 +202,14 @@ class TestDeploymentVerifier:
 
     def test_verify_deployment(self, verifier, temp_package_dir):
         """Test deployment verification"""
-        results = verifier.verify_deployment(
-            temp_package_dir, HardwarePlatform.RASPBERRY_PI)
+        results = verifier.verify_deployment(temp_package_dir, HardwarePlatform.RASPBERRY_PI)
 
         # Should return list of validation results
         assert isinstance(results, list)
         assert len(results) > 0
 
     @patch("os.kill")
-    def test_check_process_running(
-            self,
-            mock_kill,
-            verifier,
-            temp_package_dir):
+    def test_check_process_running(self, mock_kill, verifier, temp_package_dir):
         """Test checking if process is running"""
         # Create a PID file
         pid_file = temp_package_dir / "agent.pid"

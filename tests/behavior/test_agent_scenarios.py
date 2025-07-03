@@ -11,6 +11,25 @@ from pytest_bdd import given, parsers, scenarios, then, when
 scenarios("../features/agent_exploration.feature")
 scenarios("../features/coalition_formation.feature")
 
+# Global test isolation - critical for Meta-quality standards
+@pytest.fixture(autouse=True)
+def isolate_test_state():
+    """Ensure test isolation by cleaning global state before and after each test."""
+    # Clean global state before test
+    global _multi_agent_context, _coalition_context, _optimization_context, _exploration_context
+    _multi_agent_context = {}
+    _coalition_context = {}
+    _optimization_context = {}
+    _exploration_context = {}
+    
+    yield  # Run the test
+    
+    # Clean global state after test
+    _multi_agent_context = {}
+    _coalition_context = {}
+    _optimization_context = {}
+    _exploration_context = {}
+
 
 # Agent Exploration BDD Steps
 
@@ -101,11 +120,7 @@ def exploration_context():
 
 
 @when(parsers.parse("the agent explores for {timesteps:d} timesteps"))
-def agent_explores(
-        explorer_agent,
-        world_with_unknown_territories,
-        exploration_context,
-        timesteps):
+def agent_explores(explorer_agent, world_with_unknown_territories, exploration_context, timesteps):
     """Simulate agent exploration for specified timesteps."""
     import random
 
@@ -146,29 +161,22 @@ def check_exploration_efficiency(exploration_context):
 
     # Compare exploration in first half vs second half
     mid_point = len(exploration_data) // 2
-    first_half_positions = {entry["position"]
-                            for entry in exploration_data[:mid_point]}
-    second_half_positions = {entry["position"]
-                             for entry in exploration_data[mid_point:]}
+    first_half_positions = {entry["position"] for entry in exploration_data[:mid_point]}
+    second_half_positions = {entry["position"] for entry in exploration_data[mid_point:]}
 
     # Second half should have discovered at least some new positions
     new_discoveries = second_half_positions - first_half_positions
-    assert len(
-        new_discoveries) > 0, "No new areas discovered in second half of " "exploration"
+    assert len(new_discoveries) > 0, "No new areas discovered in second half of " "exploration"
 
 
 @then("the agent should avoid dangerous territories")
-def check_agent_avoids_danger(
-        exploration_context,
-        world_with_unknown_territories):
+def check_agent_avoids_danger(exploration_context, world_with_unknown_territories):
     """Verify the agent avoided dangerous areas."""
     exploration_data = exploration_context["exploration_data"]
     world = world_with_unknown_territories
 
     # Get dangerous areas
-    dangerous_areas = getattr(
-        world, "dangerous_areas", [
-            (5, 5), (10, 10), (15, 15)])
+    dangerous_areas = getattr(world, "dangerous_areas", [(5, 5), (10, 10), (15, 15)])
 
     # Check if agent visited any dangerous areas
     visited_positions = [entry["position"] for entry in exploration_data]
@@ -186,10 +194,12 @@ def check_agent_avoids_danger(
                 danger_encounters += 1
 
     # A cautious agent should have minimal danger encounters
-    danger_rate = danger_encounters / \
-        len(visited_positions) if visited_positions else 0
-    assert danger_rate <= 0.1, f"Agent encountered danger too often: " f"{
+    danger_rate = danger_encounters / len(visited_positions) if visited_positions else 0
+    assert danger_rate <= 0.1, (
+        f"Agent encountered danger too often: "
+        f"{
         danger_rate:.2%} of moves"
+    )
 
 
 @then("the agent should find safe paths to resources")
@@ -205,7 +215,8 @@ def check_safe_resource_paths(exploration_context):
 
     # Check reasonable exploration
     assert (
-        len(unique_positions) >= 5), f"Agent didn't explore enough: only {
+        len(unique_positions) >= 5
+    ), f"Agent didn't explore enough: only {
         len(unique_positions)} unique positions"
 
     # Check the agent didn't get stuck (max consecutive same positions)
@@ -250,10 +261,7 @@ def given_multiple_explorer_agents(num):
                 agent_id=agent_id,
                 name=name,
                 agent_type="explorer",
-                position=Position(
-                    initial_position[0],
-                    initial_position[1],
-                    0.0),
+                position=Position(initial_position[0], initial_position[1], 0.0),
             )
             self.data.constraints = {}
             self.data.personality = {}
@@ -282,12 +290,8 @@ def given_multiple_explorer_agents(num):
     return agents
 
 
-@when(parsers.parse(
-    "agents explore independently for {timesteps:d} timesteps"))
-def agents_explore_independently(
-        world_with_unknown_territories,
-        exploration_context,
-        timesteps):
+@when(parsers.parse("agents explore independently for {timesteps:d} timesteps"))
+def agents_explore_independently(world_with_unknown_territories, exploration_context, timesteps):
     """Simulate multiple agents exploring independently for specified timesteps."""
     import random
     from unittest.mock import _patch
@@ -323,10 +327,7 @@ def agents_explore_independently(
                     agent_id=agent_id,
                     name=name,
                     agent_type="explorer",
-                    position=Position(
-                        initial_position[0],
-                        initial_position[1],
-                        0.0),
+                    position=Position(initial_position[0], initial_position[1], 0.0),
                 )
                 self.data.constraints = {}
                 self.data.personality = {}
@@ -344,9 +345,7 @@ def agents_explore_independently(
             )
 
             # Set personality traits for exploration behavior
-            personality = {
-                "curiosity": 0.7 + i * 0.1,
-                "caution": 0.3 - i * 0.05}
+            personality = {"curiosity": 0.7 + i * 0.1, "caution": 0.3 - i * 0.05}
             agent.personality = personality
             agent.data.personality = personality
 
@@ -372,47 +371,57 @@ def agents_explore_independently(
             caution = agent.personality.get("caution", 0.5)
 
             # More curious agents move more, cautious ones move more carefully
-            movement_probability = curiosity * 0.8 + \
-                0.2  # At least 20% movement probability
+            movement_probability = curiosity * 0.8 + 0.2  # At least 20% movement probability
             # More curious = bigger steps
             step_size = max(1, int(curiosity * 2))
 
             if random.random() < movement_probability:
                 # Random walk with personality influence
-                dx = random.choice([-step_size, 0, step_size]
-                                   ) if random.random() < curiosity else 0
-                dy = random.choice([-step_size, 0, step_size]
-                                   ) if random.random() < curiosity else 0
+                dx = random.choice([-step_size, 0, step_size]) if random.random() < curiosity else 0
+                dy = random.choice([-step_size, 0, step_size]) if random.random() < curiosity else 0
 
                 # Cautious agents avoid large movements
                 if caution > 0.7:
                     dx = max(-1, min(1, dx))
                     dy = max(-1, min(1, dy))
 
-                current_position = (
-                    current_position[0] + dx,
-                    current_position[1] + dy)
+                # Ensure position tuple has numeric values
+                try:
+                    new_x = float(current_position[0]) + dx
+                    new_y = float(current_position[1]) + dy
+                    current_position = (new_x, new_y)
+                except (TypeError, AttributeError):
+                    # If position is mocked or invalid, use default movement
+                    current_position = (dx, dy)
 
             exploration_data.append(
                 {
                     "timestep": timestep,
                     "position": current_position,
                     "agent_id": (
-                        agent.data.agent_id if hasattr(
-                            agent,
-                            "data") else getattr(
+                        agent.data.agent_id
+                        if hasattr(agent, "data")
+                        else getattr(
                             agent,
                             "agent_id",
                             f"agent_{
-                                len(all_exploration_data)}")),
+                                len(all_exploration_data)}",
+                        )
+                    ),
                     "explored": True,
-                })
+                }
+            )
 
         agent_id = (
-            agent.data.agent_id if hasattr(
-                agent, "data") else getattr(
-                agent, "agent_id", f"agent_{
-                    len(all_exploration_data)}"))
+            agent.data.agent_id
+            if hasattr(agent, "data")
+            else getattr(
+                agent,
+                "agent_id",
+                f"agent_{
+                    len(all_exploration_data)}",
+            )
+        )
         all_exploration_data[agent_id] = exploration_data
 
     # Store in context for then steps
@@ -457,7 +466,9 @@ def check_agents_cover_different_territories(exploration_context):
     # Average overlap should be reasonable (not too high)
     if total_comparisons > 0:
         avg_overlap = total_overlaps / total_comparisons
-        assert avg_overlap < 0.7, f"Agents have too much territorial overlap: {
+        assert (
+            avg_overlap < 0.7
+        ), f"Agents have too much territorial overlap: {
             avg_overlap:.2%}"
 
 
@@ -480,7 +491,7 @@ def check_total_area_coverage_maximized(exploration_context):
     # Account for some overlap between agents, so use a more realistic threshold
     # Each agent should contribute at least 7 unique areas on average,
     # allowing for overlap
-    expected_min_coverage = (len(all_data) * 7)
+    expected_min_coverage = len(all_data) * 7
 
     actual_coverage = len(all_positions)
 
@@ -521,10 +532,7 @@ def multiple_agents(num):
                 agent_id=agent_id,
                 name=name,
                 agent_type=agent_type,
-                position=Position(
-                    initial_position[0],
-                    initial_position[1],
-                    0.0),
+                position=Position(initial_position[0], initial_position[1], 0.0),
             )
             self.data.constraints = {}
             self.data.personality = {}
@@ -608,8 +616,7 @@ def agent_accepts_proposal(agent_id):
     return proposal
 
 
-@then(parsers.parse(
-    "a coalition should be formed between agent {agent1:d} and agent {agent2:d}"))
+@then(parsers.parse("a coalition should be formed between agent {agent1:d} and agent {agent2:d}"))
 def verify_coalition_formed(agent1, agent2):
     """Verify coalition was successfully formed."""
     proposal = _coalition_context.get("proposal", {})
@@ -666,9 +673,7 @@ def competing_agents(resource_constrained_environment):
 
 
 @when("agents optimize their resource gathering strategies")
-def optimize_resource_gathering(
-        resource_constrained_environment,
-        competing_agents):
+def optimize_resource_gathering(resource_constrained_environment, competing_agents):
     """Simulate resource optimization strategies."""
     env = resource_constrained_environment
     agents = competing_agents
@@ -724,7 +729,9 @@ def verify_resource_improvement(optimize_resource_gathering, competing_agents):
 
     improvement = (final_total - initial_total) / initial_total
 
-    assert improvement >= 0.3, f"Resource improvement only {
+    assert (
+        improvement >= 0.3
+    ), f"Resource improvement only {
         improvement:.1%}, expected at least 30%"
 
 

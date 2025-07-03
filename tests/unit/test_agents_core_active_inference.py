@@ -142,11 +142,7 @@ class TestAction:
 class TestActiveInferenceAgentInitialization:
     """Test ActiveInferenceAgent initialization."""
 
-    def test_agent_initialization(
-            self,
-            active_agent,
-            mock_gnn_executor,
-            sample_position):
+    def test_agent_initialization(self, active_agent, mock_gnn_executor, sample_position):
         """Test successful agent initialization."""
         assert active_agent.id == "test_agent_001"
         assert active_agent.model_name == "test_gnn_model"
@@ -175,13 +171,7 @@ class TestActiveInferenceAgentInitialization:
 
     def test_available_actions_initialization(self, active_agent):
         """Test that available actions are properly initialized."""
-        expected_actions = [
-            "move",
-            "gather",
-            "communicate",
-            "observe",
-            "rest",
-            "share_knowledge"]
+        expected_actions = ["move", "gather", "communicate", "observe", "rest", "share_knowledge"]
         assert active_agent.available_actions == expected_actions
 
     def test_generative_model_initialization(self, active_agent):
@@ -306,8 +296,7 @@ class TestActionSelection:
 
         # With agents
         world_state = {"nearby_agents": ["agent_002", "agent_003"]}
-        assert active_agent._can_perform_action(
-            "communicate", world_state) is True
+        assert active_agent._can_perform_action("communicate", world_state) is True
 
     def test_can_perform_action_rest(self, active_agent):
         """Test rest action availability."""
@@ -322,8 +311,7 @@ class TestActionSelection:
         """Test expected free energy calculation."""
         world_state = {"test": "state"}
 
-        free_energy = active_agent._calculate_expected_free_energy(
-            "move", world_state)
+        free_energy = active_agent._calculate_expected_free_energy("move", world_state)
 
         # Should return a numeric value
         assert isinstance(free_energy, float)
@@ -388,11 +376,7 @@ class TestActionSelection:
 
     def test_execute_action_gather(self, active_agent):
         """Test executing a gather action."""
-        action = Action(
-            type="gather",
-            parameters={
-                "resource": "wood"},
-            energy_cost=1.5)
+        action = Action(type="gather", parameters={"resource": "wood"}, energy_cost=1.5)
         initial_energy = active_agent.energy
 
         active_agent._execute_action(action)
@@ -402,11 +386,7 @@ class TestActionSelection:
 
     def test_execute_action_communicate(self, active_agent):
         """Test executing a communicate action."""
-        action = Action(
-            type="communicate",
-            parameters={
-                "target": "agent_002"},
-            energy_cost=0.5)
+        action = Action(type="communicate", parameters={"target": "agent_002"}, energy_cost=0.5)
         initial_energy = active_agent.energy
 
         active_agent._execute_action(action)
@@ -627,10 +607,7 @@ class TestIntegrationScenarios:
         observations = [
             Observation(type="scan_1", data={"feature_A": True}),
             Observation(type="scan_2", data={"feature_B": False}),
-            Observation(
-                type="scan_3",
-                data={
-                    "feature_A": True}),
+            Observation(type="scan_3", data={"feature_A": True}),
             # Reinforcement
         ]
 
@@ -657,12 +634,8 @@ class TestIntegrationScenarios:
 
         # Add some beliefs to influence decision
         active_agent.beliefs = {
-            "resource_need": Belief(
-                state="resource_need",
-                confidence=0.8),
-            "social_opportunity": Belief(
-                state="social_opportunity",
-                confidence=0.6),
+            "resource_need": Belief(state="resource_need", confidence=0.8),
+            "social_opportunity": Belief(state="social_opportunity", confidence=0.6),
         }
 
         action = active_agent.act(world_state)
@@ -673,11 +646,8 @@ class TestIntegrationScenarios:
 
         # Action should have appropriate parameters based on world state
         if action.type == "gather":
-            assert action.parameters.get(
-                "resource") in world_state["nearby_resources"]
+            assert action.parameters.get("resource") in world_state["nearby_resources"]
         elif action.type == "communicate":
-            assert action.parameters.get(
-                "target_agent") in world_state["nearby_agents"]
+            assert action.parameters.get("target_agent") in world_state["nearby_agents"]
         elif action.type == "move":
-            assert action.parameters.get(
-                "direction") in world_state["possible_moves"]
+            assert action.parameters.get("direction") in world_state["possible_moves"]

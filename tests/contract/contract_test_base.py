@@ -47,8 +47,7 @@ class ContractSchema(BaseModel):
         validate_assignment = True
 
     @classmethod
-    def validate_contract(
-            cls, data: Dict[str, Any]) -> List[ContractViolation]:
+    def validate_contract(cls, data: Dict[str, Any]) -> List[ContractViolation]:
         """Validate data against contract schema."""
         violations = []
         try:
@@ -93,9 +92,7 @@ class APIContract(ABC):
         """Expected status codes for success."""
         return [200, 201]
 
-    def validate_request(self,
-                         request_data: Dict[str,
-                                            Any]) -> List[ContractViolation]:
+    def validate_request(self, request_data: Dict[str, Any]) -> List[ContractViolation]:
         """Validate request data against contract."""
         if self.request_schema is None:
             return []
@@ -112,11 +109,11 @@ class APIContract(ABC):
         if status_code not in self.expected_status_codes:
             warnings.append(
                 f"Unexpected status code: {status_code}. Expected: {
-                    self.expected_status_codes}")
+                    self.expected_status_codes}"
+            )
 
         # Validate response schema
-        violations.extend(
-            self.response_schema.validate_contract(response_data))
+        violations.extend(self.response_schema.validate_contract(response_data))
 
         return ContractTestResult(
             passed=len(violations) == 0,
@@ -138,16 +135,12 @@ class ContractTestBase:
         """Register a contract for testing."""
         self.contracts.append(contract)
 
-    async def test_contract(
-            self,
-            contract: APIContract,
-            client: Any) -> ContractTestResult:
+    async def test_contract(self, contract: APIContract, client: Any) -> ContractTestResult:
         """Test a single contract."""
         # This is a base implementation - override in subclasses
         raise NotImplementedError("Subclasses must implement test_contract")
 
-    async def test_all_contracts(
-            self, client: Any) -> List[ContractTestResult]:
+    async def test_all_contracts(self, client: Any) -> List[ContractTestResult]:
         """Test all registered contracts."""
         results = []
         for contract in self.contracts:
@@ -177,8 +170,7 @@ class ContractTestBase:
             if result.violations:
                 report.append("### Violations:")
                 for violation in result.violations:
-                    report.append(
-                        f"- **{violation.field}**: {violation.message}")
+                    report.append(f"- **{violation.field}**: {violation.message}")
                     report.append(f"  - Expected: {violation.expected}")
                     report.append(f"  - Actual: {violation.actual}")
 
@@ -223,9 +215,7 @@ class ContractRegistry:
         key = f"{method}:{endpoint}"
         return self._versions.get(key, [])
 
-    def get_all_contracts(
-            self,
-            version: Optional[str] = None) -> List[APIContract]:
+    def get_all_contracts(self, version: Optional[str] = None) -> List[APIContract]:
         """Get all contracts, optionally filtered by version."""
         contracts = []
         for endpoint_contracts in self._contracts.values():
@@ -263,7 +253,8 @@ def validate_response_contract(schema: Type[ContractSchema]):
             else:
                 raise ValueError(
                     f"Cannot extract data from response: {
-                        type(response)}")
+                        type(response)}"
+                )
 
             # Validate
             violations = schema.validate_contract(data)
@@ -409,10 +400,7 @@ class ListAgentsContract(APIContract):
 class ContractTestRunner(ContractTestBase):
     """Runner for contract tests with mock client support."""
 
-    async def test_contract(
-            self,
-            contract: APIContract,
-            client: Any) -> ContractTestResult:
+    async def test_contract(self, contract: APIContract, client: Any) -> ContractTestResult:
         """Test a contract against a client."""
         # Prepare request
         url = contract.endpoint
@@ -457,8 +445,7 @@ class ContractTestRunner(ContractTestBase):
         try:
             if contract.request_schema and method in ["post", "put", "patch"]:
                 # Generate sample request data
-                sample_data = self._generate_sample_data(
-                    contract.request_schema)
+                sample_data = self._generate_sample_data(contract.request_schema)
                 response = await client_method(url, json=sample_data)
             else:
                 response = await client_method(url)
@@ -502,8 +489,7 @@ class ContractTestRunner(ContractTestBase):
                 ],
             )
 
-    def _generate_sample_data(
-            self, schema: Type[ContractSchema]) -> Dict[str, Any]:
+    def _generate_sample_data(self, schema: Type[ContractSchema]) -> Dict[str, Any]:
         """Generate sample data for a schema."""
         # This is a simple implementation - could be enhanced
         sample_data = {}
@@ -524,8 +510,7 @@ class ContractTestRunner(ContractTestBase):
                         if field_type.__origin__ is Union:
                             # Get the non-None type from Optional[T]
                             args = field_type.__args__
-                            field_type = next(
-                                (arg for arg in args if arg is not type(None)), str)
+                            field_type = next((arg for arg in args if arg is not type(None)), str)
 
                     if field_type == str:
                         sample_data[field_name] = f"test_{field_name}"

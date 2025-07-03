@@ -144,8 +144,7 @@ except ImportError:
         # Alerting configuration
         alerting_enabled: bool = True
         alert_evaluation_interval: int = 60  # seconds
-        notification_channels: List[str] = field(
-            default_factory=lambda: ["email", "slack"])
+        notification_channels: List[str] = field(default_factory=lambda: ["email", "slack"])
         escalation_enabled: bool = True
 
         # Performance thresholds
@@ -299,8 +298,7 @@ except ImportError:
         created_at: datetime = field(default_factory=datetime.now)
 
         # Configuration
-        time_range: Dict[str, Any] = field(
-            default_factory=lambda: {"from": "now-1h", "to": "now"})
+        time_range: Dict[str, Any] = field(default_factory=lambda: {"from": "now-1h", "to": "now"})
         refresh_interval: int = 30  # seconds
         auto_refresh: bool = True
 
@@ -363,15 +361,12 @@ except ImportError:
                 LogLevel.ERROR,
                 LogLevel.FATAL,
             ]
-            if log_levels.index(
-                    entry.level) >= log_levels.index(
-                    self.config.log_level):
+            if log_levels.index(entry.level) >= log_levels.index(self.config.log_level):
                 self.logs.append(entry)
 
                 # Keep only recent logs
                 cutoff = datetime.now() - timedelta(days=self.config.data_retention_days)
-                self.logs = [
-                    log for log in self.logs if log.timestamp > cutoff]
+                self.logs = [log for log in self.logs if log.timestamp > cutoff]
 
                 return True
             return False
@@ -409,8 +404,7 @@ except ImportError:
             self.dashboards[dashboard.dashboard_id] = dashboard
             return dashboard.dashboard_id
 
-        def query_metrics(self, query: str,
-                          time_range: Dict[str, Any]) -> List[Dict[str, Any]]:
+        def query_metrics(self, query: str, time_range: Dict[str, Any]) -> List[Dict[str, Any]]:
             # Mock query implementation
             results = []
 
@@ -434,10 +428,7 @@ except ImportError:
 
             return results
 
-        def search_logs(self,
-                        query: str,
-                        time_range: Dict[str,
-                                         Any]) -> List[LogEntry]:
+        def search_logs(self, query: str, time_range: Dict[str, Any]) -> List[LogEntry]:
             # Mock log search
             relevant_logs = []
             start_time = datetime.now() - timedelta(hours=1)
@@ -490,8 +481,13 @@ except ImportError:
         def get_system_health(self) -> Dict[str, Any]:
             # Calculate overall system health
             total_alerts = len(self.alerts)
-            critical_alerts = len([a for a in self.alerts.values(
-            ) if a.severity == AlertSeverity.CRITICAL and a.state == AlertState.FIRING])
+            critical_alerts = len(
+                [
+                    a
+                    for a in self.alerts.values()
+                    if a.severity == AlertSeverity.CRITICAL and a.state == AlertState.FIRING
+                ]
+            )
 
             health_score = 1.0 - (critical_alerts / max(total_alerts, 1)) * 0.5
 
@@ -668,10 +664,8 @@ class TestObservabilityPlatform:
         assert len(self.platform.logs) == 2
 
         # Check log content
-        info_logs = [
-            log for log in self.platform.logs if log.level == LogLevel.INFO]
-        error_logs = [
-            log for log in self.platform.logs if log.level == LogLevel.ERROR]
+        info_logs = [log for log in self.platform.logs if log.level == LogLevel.INFO]
+        error_logs = [log for log in self.platform.logs if log.level == LogLevel.ERROR]
 
         assert len(info_logs) == 1
         assert len(error_logs) == 1
@@ -691,9 +685,7 @@ class TestObservabilityPlatform:
                 operation_name="http_request",
                 service_name="api-gateway",
                 duration_ms=250.0,
-                tags={
-                    "http.method": "GET",
-                    "http.url": "/api/users"},
+                tags={"http.method": "GET", "http.url": "/api/users"},
             ),
             Span(
                 trace_id=trace_id,
@@ -702,9 +694,7 @@ class TestObservabilityPlatform:
                 operation_name="db_query",
                 service_name="user-service",
                 duration_ms=45.0,
-                tags={
-                    "db.statement": "SELECT * FROM users",
-                    "db.type": "postgresql"},
+                tags={"db.statement": "SELECT * FROM users", "db.type": "postgresql"},
             ),
             Span(
                 trace_id=trace_id,
@@ -713,9 +703,7 @@ class TestObservabilityPlatform:
                 operation_name="cache_lookup",
                 service_name="cache-service",
                 duration_ms=5.0,
-                tags={
-                    "cache.key": "user:12345",
-                    "cache.hit": True},
+                tags={"cache.key": "user:12345", "cache.hit": True},
             ),
         ]
 
@@ -735,8 +723,7 @@ class TestObservabilityPlatform:
             for span in recorded_spans:
                 assert span.trace_id == trace_id
                 if span.parent_span_id:
-                    assert span.parent_span_id in [
-                        s.span_id for s in recorded_spans]
+                    assert span.parent_span_id in [s.span_id for s in recorded_spans]
 
     def test_alerting_system(self):
         """Test alerting system functionality"""
@@ -821,10 +808,7 @@ class TestObservabilityPlatform:
         cpu_metric = Metric(name="cpu_utilization", value=0.7)
         self.platform.collect_metric(cpu_metric)
 
-        test_log = LogEntry(
-            level=LogLevel.INFO,
-            message="Test log message",
-            service="test-service")
+        test_log = LogEntry(level=LogLevel.INFO, message="Test log message", service="test-service")
         self.platform.log_entry(test_log)
 
         # Test metrics query
@@ -835,8 +819,7 @@ class TestObservabilityPlatform:
         assert len(metrics_result) > 0
 
         # Test logs search
-        logs_result = self.platform.search_logs(
-            "test", {"from": "now-1h", "to": "now"})
+        logs_result = self.platform.search_logs("test", {"from": "now-1h", "to": "now"})
         assert isinstance(logs_result, list)
 
     def test_anomaly_detection(self):
@@ -859,8 +842,7 @@ class TestObservabilityPlatform:
         self.platform.collect_metric(anomaly_metric)
 
         # Detect anomalies
-        anomalies = self.platform.detect_anomalies(
-            "response_time", time_window=3600)
+        anomalies = self.platform.detect_anomalies("response_time", time_window=3600)
 
         assert isinstance(anomalies, list)
         # Should detect the 800ms response time as anomalous
@@ -873,10 +855,7 @@ class TestObservabilityPlatform:
 
         # Add some test data
         self.platform.collect_metric(Metric(name="cpu_utilization", value=0.6))
-        self.platform.log_entry(
-            LogEntry(
-                level=LogLevel.INFO,
-                message="System running"))
+        self.platform.log_entry(LogEntry(level=LogLevel.INFO, message="System running"))
 
         # Create some alerts
         warning_alert = Alert(
@@ -972,12 +951,13 @@ class TestMetricsEngine:
         # Create metrics with many unique label combinations
         high_cardinality_metrics = []
         for i in range(15000):  # Exceeds limit
-            metric = {"name": "requests_total", "labels": {
-                "user_id": f"user_{i}", "endpoint": f"/api/endpoint_{i % 100}"}, }
+            metric = {
+                "name": "requests_total",
+                "labels": {"user_id": f"user_{i}", "endpoint": f"/api/endpoint_{i % 100}"},
+            }
             high_cardinality_metrics.append(metric)
 
-        cardinality_report = self.metrics_engine.analyze_cardinality(
-            high_cardinality_metrics)
+        cardinality_report = self.metrics_engine.analyze_cardinality(high_cardinality_metrics)
 
         assert isinstance(cardinality_report, dict)
         assert "total_series" in cardinality_report
@@ -1028,22 +1008,12 @@ class TestLoggingEngine:
             {
                 "name": "nginx_access_log",
                 "pattern": r'(?P<ip>\S+) - - \[(?P<timestamp>[^\]]+)\] "(?P<method>\S+) (?P<path>\S+) (?P<protocol>\S+)" (?P<status>\d+) (?P<size>\d+)',
-                "fields": [
-                    "ip",
-                    "timestamp",
-                    "method",
-                    "path",
-                    "protocol",
-                    "status",
-                    "size"],
+                "fields": ["ip", "timestamp", "method", "path", "protocol", "status", "size"],
             },
             {
                 "name": "application_log",
                 "pattern": r"(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[(?P<level>\w+)\] (?P<message>.*)",
-                "fields": [
-                    "timestamp",
-                    "level",
-                    "message"],
+                "fields": ["timestamp", "level", "message"],
             },
         ]
 
@@ -1066,8 +1036,7 @@ class TestLoggingEngine:
             },
         }
 
-        result = self.logging_engine.configure_retention_policy(
-            retention_config)
+        result = self.logging_engine.configure_retention_policy(retention_config)
 
         assert isinstance(result, dict)
         assert "policy_applied" in result
@@ -1107,31 +1076,24 @@ class TestTracingEngine:
     def test_service_dependency_mapping(self):
         """Test service dependency mapping from traces"""
         # Create traces showing service dependencies
-        traces = [{"trace_id": "trace-1",
-                   "spans": [{"service": "api-gateway",
-                               "operation": "request",
-                               "parent": None},
-                             {"service": "user-service",
-                              "operation": "get_user",
-                              "parent": "api-gateway"},
-                             {"service": "database",
-                              "operation": "select",
-                              "parent": "user-service"},
-                             ],
-                   },
-                  {"trace_id": "trace-2",
-                   "spans": [{"service": "api-gateway",
-                              "operation": "request",
-                              "parent": None},
-                             {"service": "auth-service",
-                              "operation": "validate",
-                              "parent": "api-gateway"},
-                             {"service": "cache",
-                              "operation": "get",
-                              "parent": "auth-service"},
-                             ],
-                   },
-                  ]
+        traces = [
+            {
+                "trace_id": "trace-1",
+                "spans": [
+                    {"service": "api-gateway", "operation": "request", "parent": None},
+                    {"service": "user-service", "operation": "get_user", "parent": "api-gateway"},
+                    {"service": "database", "operation": "select", "parent": "user-service"},
+                ],
+            },
+            {
+                "trace_id": "trace-2",
+                "spans": [
+                    {"service": "api-gateway", "operation": "request", "parent": None},
+                    {"service": "auth-service", "operation": "validate", "parent": "api-gateway"},
+                    {"service": "cache", "operation": "get", "parent": "auth-service"},
+                ],
+            },
+        ]
 
         dependency_map = self.tracing_engine.build_service_map(traces)
 
@@ -1211,26 +1173,30 @@ class TestAlertingEngine:
     @pytest.mark.skipif(not IMPORT_SUCCESS, reason="Module not available")
     def test_notification_routing(self):
         """Test alert notification routing"""
-        notification_config = {"channels": [{"name": "critical-alerts-slack",
-                                             "type": "slack",
-                                             "webhook_url": "https://hooks.slack.com/...",
-                                             "conditions": ["severity == 'critical'"],
-                                             },
-                                            {"name": "ops-team-email",
-                                             "type": "email",
-                                             "recipients": ["ops@company.com"],
-                                             "conditions": ["severity in ['warning', 'critical']"],
-                                             },
-                                            {"name": "pagerduty-escalation",
-                                             "type": "pagerduty",
-                                             "service_key": "abc123",
-                                             "conditions": ["severity == 'critical'",
-                                                            "for_duration > 600"],
-                                             },
-                                            ]}
+        notification_config = {
+            "channels": [
+                {
+                    "name": "critical-alerts-slack",
+                    "type": "slack",
+                    "webhook_url": "https://hooks.slack.com/...",
+                    "conditions": ["severity == 'critical'"],
+                },
+                {
+                    "name": "ops-team-email",
+                    "type": "email",
+                    "recipients": ["ops@company.com"],
+                    "conditions": ["severity in ['warning', 'critical']"],
+                },
+                {
+                    "name": "pagerduty-escalation",
+                    "type": "pagerduty",
+                    "service_key": "abc123",
+                    "conditions": ["severity == 'critical'", "for_duration > 600"],
+                },
+            ]
+        }
 
-        result = self.alerting_engine.configure_notifications(
-            notification_config)
+        result = self.alerting_engine.configure_notifications(notification_config)
 
         assert isinstance(result, dict)
         assert "channels_configured" in result
@@ -1279,26 +1245,10 @@ class TestIntegrationScenarios:
         # 2. Set up comprehensive monitoring
         # Metrics
         system_metrics = [
-            Metric(
-                name="cpu_utilization",
-                value=0.65,
-                labels={
-                    "host": "web-1"}),
-            Metric(
-                name="memory_utilization",
-                value=0.78,
-                labels={
-                    "host": "web-1"}),
-            Metric(
-                name="request_rate",
-                value=150.0,
-                labels={
-                    "service": "api"}),
-            Metric(
-                name="response_time_p95",
-                value=180.0,
-                labels={
-                    "service": "api"}),
+            Metric(name="cpu_utilization", value=0.65, labels={"host": "web-1"}),
+            Metric(name="memory_utilization", value=0.78, labels={"host": "web-1"}),
+            Metric(name="request_rate", value=150.0, labels={"service": "api"}),
+            Metric(name="response_time_p95", value=180.0, labels={"service": "api"}),
         ]
 
         for metric in system_metrics:
@@ -1401,8 +1351,7 @@ class TestIntegrationScenarios:
         metrics_data = self.platform.query_metrics(
             "cpu_utilization", {"from": "now-1h", "to": "now"}
         )
-        logs_data = self.platform.search_logs(
-            "auth", {"from": "now-1h", "to": "now"})
+        logs_data = self.platform.search_logs("auth", {"from": "now-1h", "to": "now"})
 
         assert isinstance(metrics_data, list)
         assert isinstance(logs_data, list)
@@ -1413,20 +1362,12 @@ class TestIntegrationScenarios:
 
         # 1. Simulate system degradation
         degradation_metrics = [
-            Metric(
-                name="error_rate",
-                value=0.15,
-                labels={
-                    "service": "payment"}),
+            Metric(name="error_rate", value=0.15, labels={"service": "payment"}),
             # High error rate
             Metric(
                 name="response_time_p95", value=2500.0, labels={"service": "payment"}
             ),  # Slow responses
-            Metric(
-                name="cpu_utilization",
-                value=0.95,
-                labels={
-                    "host": "payment-1"}),
+            Metric(name="cpu_utilization", value=0.95, labels={"host": "payment-1"}),
             # High CPU
         ]
 
@@ -1505,39 +1446,23 @@ class TestIntegrationScenarios:
         for hour in range(baseline_period):
             # Simulate daily usage patterns
             hour_of_day = hour % 24
-            load_factor = 0.5 + 0.4 * \
-                np.sin(2 * np.pi * hour_of_day / 24)  # Sinusoidal pattern
+            load_factor = 0.5 + 0.4 * np.sin(2 * np.pi * hour_of_day / 24)  # Sinusoidal pattern
 
             metrics = [
                 Metric(
                     name="cpu_utilization",
-                    value=0.3 +
-                    0.4 *
-                    load_factor,
-                    timestamp=datetime.now() -
-                    timedelta(
-                        hours=baseline_period -
-                        hour),
+                    value=0.3 + 0.4 * load_factor,
+                    timestamp=datetime.now() - timedelta(hours=baseline_period - hour),
                 ),
                 Metric(
                     name="memory_utilization",
-                    value=0.4 +
-                    0.3 *
-                    load_factor,
-                    timestamp=datetime.now() -
-                    timedelta(
-                        hours=baseline_period -
-                        hour),
+                    value=0.4 + 0.3 * load_factor,
+                    timestamp=datetime.now() - timedelta(hours=baseline_period - hour),
                 ),
                 Metric(
                     name="request_rate",
-                    value=100 +
-                    200 *
-                    load_factor,
-                    timestamp=datetime.now() -
-                    timedelta(
-                        hours=baseline_period -
-                        hour),
+                    value=100 + 200 * load_factor,
+                    timestamp=datetime.now() - timedelta(hours=baseline_period - hour),
                 ),
             ]
 
@@ -1577,16 +1502,14 @@ class TestIntegrationScenarios:
 
         # 4. Verify capacity monitoring
         assert len(self.platform.metrics["cpu_utilization"]) > baseline_period
-        assert len(
-            self.platform.metrics["memory_utilization"]) > baseline_period
+        assert len(self.platform.metrics["memory_utilization"]) > baseline_period
         assert len(self.platform.alerts) >= 2
 
         # 5. Check for high-utilization anomalies
         cpu_anomalies = self.platform.detect_anomalies(
             "cpu_utilization", time_window=86400
         )  # 24 hours
-        memory_anomalies = self.platform.detect_anomalies(
-            "memory_utilization", time_window=86400)
+        memory_anomalies = self.platform.detect_anomalies("memory_utilization", time_window=86400)
 
         # Should detect the spike as anomalous
         assert isinstance(cpu_anomalies, list)

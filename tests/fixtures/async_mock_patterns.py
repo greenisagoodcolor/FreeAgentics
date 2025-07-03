@@ -106,8 +106,7 @@ class AsyncTestPatterns:
     """Common async test patterns."""
 
     @staticmethod
-    async def with_timeout(
-            coro: Coroutine[Any, Any, T], timeout: float = 1.0) -> T:
+    async def with_timeout(coro: Coroutine[Any, Any, T], timeout: float = 1.0) -> T:
         """Execute coroutine with timeout.
 
         Args:
@@ -144,8 +143,7 @@ class AsyncTestPatterns:
             assert elapsed < timeout, f"Operation took {elapsed}s, expected < {timeout}s"
 
     @staticmethod
-    async def gather_with_errors(
-            *coros: Coroutine[Any, Any, Any]) -> List[Any]:
+    async def gather_with_errors(*coros: Coroutine[Any, Any, Any]) -> List[Any]:
         """Gather multiple coroutines, capturing errors.
 
         Args:
@@ -164,10 +162,7 @@ class AsyncTestPatterns:
         return results
 
     @staticmethod
-    def async_retry(
-            max_attempts: int = 3,
-            delay: float = 0.1,
-            backoff: float = 2.0) -> Callable:
+    def async_retry(max_attempts: int = 3, delay: float = 0.1, backoff: float = 2.0) -> Callable:
         """Decorator for retrying async functions.
 
         Args:

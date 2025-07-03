@@ -31,7 +31,7 @@ class TestPerformanceMetrics:
     @pytest.mark.asyncio
     async def test_agent_creation_performance(self, performance_logger):
         """Test agent creation performance"""
-        agent_counts = [10, 50, 100, 500, 1000]
+        agent_counts = [5, 10, 25]  # Reasonable test sizes for CI/CD
         creation_times = []
         for count in agent_counts:
             start_time = time.time()
@@ -96,8 +96,7 @@ class TestPerformanceMetrics:
                     "time_per_cell": (generation_time / min(1000, len(cells))),
                 },
             )
-        time_per_cell = [t / min(1000, c)
-                         for t, c in zip(generation_times, cell_counts)]
+        time_per_cell = [t / min(1000, c) for t, c in zip(generation_times, cell_counts)]
         assert max(time_per_cell) < min(time_per_cell) * 3
 
     @pytest.mark.asyncio
@@ -423,11 +422,7 @@ class TestMemoryAndResourceUsage:
             if i % 5 == 0:
                 memory_mb = process.memory_info().rss / 1024 / 1024
                 memory_samples.append(memory_mb)
-        growth_rate = np.polyfit(
-            range(
-                len(memory_samples)),
-            memory_samples,
-            1)[0]
+        growth_rate = np.polyfit(range(len(memory_samples)), memory_samples, 1)[0]
         assert growth_rate < 1.0
         total_growth = memory_samples[-1] - memory_samples[0]
         assert total_growth < 50

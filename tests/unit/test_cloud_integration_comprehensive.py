@@ -81,16 +81,14 @@ except ImportError:
         # Provider configuration
         primary_provider: str = CloudProvider.AWS.value
         secondary_providers: List[str] = field(
-            default_factory=lambda: [
-                CloudProvider.AZURE.value,
-                CloudProvider.GCP.value])
+            default_factory=lambda: [CloudProvider.AZURE.value, CloudProvider.GCP.value]
+        )
         deployment_strategy: str = DeploymentStrategy.MULTI_CLOUD.value
 
         # Resource configuration
         default_regions: List[str] = field(
-            default_factory=lambda: [
-                CloudRegion.US_EAST_1.value,
-                CloudRegion.EU_WEST_1.value])
+            default_factory=lambda: [CloudRegion.US_EAST_1.value, CloudRegion.EU_WEST_1.value]
+        )
         auto_scaling_enabled: bool = True
         disaster_recovery_enabled: bool = True
 
@@ -195,8 +193,7 @@ class TestCloudIntegrationManager:
         assert "aws" in manager.providers
 
         # Test resource creation
-        resource_id = manager.create_resource(
-            "compute", {"instance_type": "t3.micro"})
+        resource_id = manager.create_resource("compute", {"instance_type": "t3.micro"})
         assert resource_id in manager.resources
         assert manager.resources[resource_id]["status"] == "active"
 
@@ -228,8 +225,7 @@ class TestMultiCloudOrchestrator:
 
             def deploy_workload(self, workload_config, target_providers=None):
                 deployment_id = f"deploy-{uuid.uuid4().hex[:8]}"
-                providers = target_providers or list(
-                    self.cloud_providers.keys())
+                providers = target_providers or list(self.cloud_providers.keys())
 
                 self.active_deployments[deployment_id] = {
                     "workload": workload_config,
@@ -240,9 +236,7 @@ class TestMultiCloudOrchestrator:
                 return deployment_id
 
             def get_deployment_status(self, deployment_id):
-                return self.active_deployments.get(
-                    deployment_id, {}).get(
-                    "status", "unknown")
+                return self.active_deployments.get(deployment_id, {}).get("status", "unknown")
 
         orchestrator = MockMultiCloudOrchestrator(cloud_config)
 
@@ -273,11 +267,7 @@ class TestCloudProviderAdapters:
             def __init__(self, config):
                 self.config = config
                 self.region = config.get("region", "us-east-1")
-                self.services = {
-                    "ec2": Mock(),
-                    "s3": Mock(),
-                    "rds": Mock(),
-                    "lambda": Mock()}
+                self.services = {"ec2": Mock(), "s3": Mock(), "rds": Mock(), "lambda": Mock()}
 
             def create_instance(self, instance_config):
                 instance_id = f"i-{uuid.uuid4().hex[:8]}"
@@ -289,15 +279,9 @@ class TestCloudProviderAdapters:
                 }
 
             def create_bucket(self, bucket_name):
-                return {
-                    "bucket_name": bucket_name,
-                    "region": self.region,
-                    "status": "created"}
+                return {"bucket_name": bucket_name, "region": self.region, "status": "created"}
 
-        aws_config = {
-            "region": "us-west-2",
-            "access_key": "test",
-            "secret_key": "test"}
+        aws_config = {"region": "us-west-2", "access_key": "test", "secret_key": "test"}
         adapter = MockAWSAdapter(aws_config)
 
         # Test instance creation
@@ -321,8 +305,7 @@ class TestCloudProviderAdapters:
             def __init__(self, config):
                 self.config = config
                 self.subscription_id = config.get("subscription_id")
-                self.resource_group = config.get(
-                    "resource_group", "default-rg")
+                self.resource_group = config.get("resource_group", "default-rg")
                 self.services = {
                     "compute": Mock(),
                     "storage": Mock(),
@@ -344,8 +327,7 @@ class TestCloudProviderAdapters:
                     "account_name": account_name,
                     "resource_group": self.resource_group,
                     "status": "created",
-                    "endpoints": {
-                        "blob": f"https://{account_name}.blob.core.windows.net"},
+                    "endpoints": {"blob": f"https://{account_name}.blob.core.windows.net"},
                 }
 
         azure_config = {
@@ -383,11 +365,7 @@ class TestCloudResourceManager:
                 self.resource_templates = {}
                 self.resource_policies = {}
 
-            def create_resource(
-                    self,
-                    resource_type,
-                    resource_config,
-                    provider=None):
+            def create_resource(self, resource_type, resource_config, provider=None):
                 resource_id = f"{resource_type}-{uuid.uuid4().hex[:8]}"
                 provider = provider or self.config.primary_provider
 
@@ -429,8 +407,7 @@ class TestCloudResourceManager:
                 if filters:
                     # Simple filtering
                     for key, value in filters.items():
-                        resources = [
-                            r for r in resources if r.get(key) == value]
+                        resources = [r for r in resources if r.get(key) == value]
                 return resources
 
         manager = MockCloudResourceManager(cloud_config)
@@ -502,12 +479,7 @@ class TestCloudStorageManager:
                 self.buckets[bucket_id] = bucket
                 return bucket_id
 
-            def upload_object(
-                    self,
-                    bucket_id,
-                    object_key,
-                    content,
-                    metadata=None):
+            def upload_object(self, bucket_id, object_key, content, metadata=None):
                 if bucket_id not in self.buckets:
                     return None
 
@@ -538,8 +510,7 @@ class TestCloudStorageManager:
 
                 objects = list(self.objects[bucket_id].values())
                 if prefix:
-                    objects = [
-                        obj for obj in objects if obj["key"].startswith(prefix)]
+                    objects = [obj for obj in objects if obj["key"].startswith(prefix)]
                 return objects
 
         manager = MockCloudStorageManager(cloud_config)
@@ -639,25 +610,13 @@ class TestCloudComputeManager:
 
                 asg = {
                     "id": asg_id,
-                    "name": asg_config.get(
-                        "name",
-                        f"asg-{asg_id}"),
-                    "min_size": asg_config.get(
-                        "min_size",
-                        1),
-                    "max_size": asg_config.get(
-                        "max_size",
-                        10),
-                    "desired_capacity": asg_config.get(
-                        "desired_capacity",
-                        2),
+                    "name": asg_config.get("name", f"asg-{asg_id}"),
+                    "min_size": asg_config.get("min_size", 1),
+                    "max_size": asg_config.get("max_size", 10),
+                    "desired_capacity": asg_config.get("desired_capacity", 2),
                     "launch_template": asg_config.get("launch_template"),
-                    "target_groups": asg_config.get(
-                        "target_groups",
-                        []),
-                    "health_check_type": asg_config.get(
-                        "health_check_type",
-                        "EC2"),
+                    "target_groups": asg_config.get("target_groups", []),
+                    "health_check_type": asg_config.get("health_check_type", "EC2"),
                     "created_at": datetime.now(),
                 }
 
@@ -695,9 +654,7 @@ class TestCloudComputeManager:
             "min_size": 2,
             "max_size": 10,
             "desired_capacity": 3,
-            "launch_template": {
-                "image_id": "ami-12345",
-                "instance_type": "t3.small"},
+            "launch_template": {"image_id": "ami-12345", "instance_type": "t3.small"},
         }
 
         asg_id = manager.create_auto_scaling_group(asg_config)
@@ -728,27 +685,13 @@ class TestServerlessService:
 
                 function = {
                     "id": function_id,
-                    "name": function_config.get(
-                        "name",
-                        function_id),
-                    "runtime": function_config.get(
-                        "runtime",
-                        "python3.9"),
-                    "handler": function_config.get(
-                        "handler",
-                        "lambda_function.lambda_handler"),
-                    "code": function_config.get(
-                        "code",
-                        ""),
-                    "environment": function_config.get(
-                        "environment",
-                        {}),
-                    "timeout": function_config.get(
-                        "timeout",
-                        30),
-                    "memory": function_config.get(
-                        "memory",
-                        128),
+                    "name": function_config.get("name", function_id),
+                    "runtime": function_config.get("runtime", "python3.9"),
+                    "handler": function_config.get("handler", "lambda_function.lambda_handler"),
+                    "code": function_config.get("code", ""),
+                    "environment": function_config.get("environment", {}),
+                    "timeout": function_config.get("timeout", 30),
+                    "memory": function_config.get("memory", 128),
                     "provider": provider,
                     "created_at": datetime.now(),
                     "last_modified": datetime.now(),
@@ -758,11 +701,7 @@ class TestServerlessService:
                 self.functions[function_id] = function
                 return function_id
 
-            def invoke_function(
-                    self,
-                    function_id,
-                    payload=None,
-                    invocation_type="sync"):
+            def invoke_function(self, function_id, payload=None, invocation_type="sync"):
                 if function_id not in self.functions:
                     return None
 
@@ -812,8 +751,7 @@ class TestServerlessService:
             "code": "def handler(event, context): return {'status': 'success'}",
             "timeout": 60,
             "memory": 256,
-            "environment": {
-                "LOG_LEVEL": "INFO"},
+            "environment": {"LOG_LEVEL": "INFO"},
         }
 
         function_id = service.create_function(function_config, "aws")
@@ -892,8 +830,9 @@ class TestCloudCostOptimizer:
                 self.recommendations = []
 
                 # Mock recommendations based on cost patterns
-                total_costs = sum(sum(entry["amount"] for entry in entries)
-                                  for entries in self.cost_data.values())
+                total_costs = sum(
+                    sum(entry["amount"] for entry in entries) for entries in self.cost_data.values()
+                )
 
                 if total_costs > 500:  # Arbitrary threshold
                     self.recommendations.append(
@@ -902,7 +841,8 @@ class TestCloudCostOptimizer:
                             "description": "Consider downsizing underutilized instances",
                             "potential_savings": total_costs * 0.2,
                             "priority": "high",
-                        })
+                        }
+                    )
 
                 self.recommendations.append(
                     {
@@ -910,7 +850,8 @@ class TestCloudCostOptimizer:
                         "description": "Purchase reserved instances for stable workloads",
                         "potential_savings": total_costs * 0.3,
                         "priority": "medium",
-                    })
+                    }
+                )
 
                 return self.recommendations
 
@@ -943,16 +884,10 @@ class TestCloudCostOptimizer:
         optimizer = MockCloudCostOptimizer(cloud_config)
 
         # Test cost tracking
-        cost_data = {
-            "amount": 150.50,
-            "service": "compute",
-            "region": "us-east-1"}
+        cost_data = {"amount": 150.50, "service": "compute", "region": "us-east-1"}
         assert optimizer.track_costs("i-12345", cost_data)
 
-        cost_data2 = {
-            "amount": 75.25,
-            "service": "storage",
-            "region": "us-west-2"}
+        cost_data2 = {"amount": 75.25, "service": "storage", "region": "us-west-2"}
         assert optimizer.track_costs("s3-bucket-123", cost_data2)
 
         # Test budget creation
@@ -1038,18 +973,10 @@ class TestCloudSecurityManager:
 
                 key = {
                     "id": key_id,
-                    "alias": key_config.get(
-                        "alias",
-                        f"alias/{key_id}"),
-                    "description": key_config.get(
-                        "description",
-                        ""),
-                    "key_usage": key_config.get(
-                        "key_usage",
-                        "ENCRYPT_DECRYPT"),
-                    "key_spec": key_config.get(
-                        "key_spec",
-                        "SYMMETRIC_DEFAULT"),
+                    "alias": key_config.get("alias", f"alias/{key_id}"),
+                    "description": key_config.get("description", ""),
+                    "key_usage": key_config.get("key_usage", "ENCRYPT_DECRYPT"),
+                    "key_spec": key_config.get("key_spec", "SYMMETRIC_DEFAULT"),
                     "created_at": datetime.now(),
                     "enabled": True,
                 }
@@ -1096,8 +1023,7 @@ class TestCloudSecurityManager:
                     "framework": framework,
                     "total_checks": len(checks),
                     "passed_checks": passed_checks,
-                    "compliance_percentage": (
-                        passed_checks / len(checks)) * 100,
+                    "compliance_percentage": (passed_checks / len(checks)) * 100,
                     "last_check": datetime.now(),
                     "status": "compliant" if passed_checks == len(checks) else "non_compliant",
                 }

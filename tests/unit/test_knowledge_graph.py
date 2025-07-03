@@ -44,10 +44,7 @@ class TestBeliefNode:
 
     def test_belief_node_defaults(self):
         """Test default values for optional fields."""
-        node = BeliefNode(
-            id="test_id",
-            statement="Test statement",
-            confidence=0.5)
+        node = BeliefNode(id="test_id", statement="Test statement", confidence=0.5)
 
         assert node.supporting_patterns == []
         assert node.contradicting_patterns == []
@@ -112,8 +109,7 @@ class TestKnowledgeGraph:
 
     def test_add_belief_basic(self):
         """Test adding basic belief to graph."""
-        node = self.graph.add_belief(
-            statement="The weather is sunny", confidence=0.8)
+        node = self.graph.add_belief(statement="The weather is sunny", confidence=0.8)
 
         assert isinstance(node, BeliefNode)
         assert node.statement == "The weather is sunny"
@@ -192,23 +188,21 @@ class TestKnowledgeGraph:
 
         # Update only confidence and metadata
         success = self.graph.update_belief(
-            node_id=original_id, confidence=0.9, metadata={
-                "new_field": "new_value"})
+            node_id=original_id, confidence=0.9, metadata={"new_field": "new_value"}
+        )
 
         assert success is True
 
         updated_node = self.graph.nodes[original_id]
         assert updated_node.confidence == 0.9
-        assert updated_node.supporting_patterns == [
-            "old_evidence"]  # Unchanged
+        assert updated_node.supporting_patterns == ["old_evidence"]  # Unchanged
         # Metadata should be merged
         assert updated_node.metadata["original"] == "value"
         assert updated_node.metadata["new_field"] == "new_value"
 
     def test_update_belief_nonexistent(self):
         """Test updating non-existent belief."""
-        success = self.graph.update_belief(
-            node_id="nonexistent_id", confidence=0.5)
+        success = self.graph.update_belief(node_id="nonexistent_id", confidence=0.5)
 
         assert success is False
 
@@ -249,9 +243,8 @@ class TestKnowledgeGraph:
         node = self.graph.add_belief("Statement", 0.5)
 
         edge = self.graph.add_relationship(
-            source_id="nonexistent",
-            target_id=node.id,
-            relationship_type="supports")
+            source_id="nonexistent", target_id=node.id, relationship_type="supports"
+        )
 
         assert edge is None
         assert len(self.graph.edges) == 0
@@ -261,9 +254,8 @@ class TestKnowledgeGraph:
         node = self.graph.add_belief("Statement", 0.5)
 
         edge = self.graph.add_relationship(
-            source_id=node.id,
-            target_id="nonexistent",
-            relationship_type="contradicts")
+            source_id=node.id, target_id="nonexistent", relationship_type="contradicts"
+        )
 
         assert edge is None
         assert len(self.graph.edges) == 0
@@ -274,9 +266,8 @@ class TestKnowledgeGraph:
         node2 = self.graph.add_belief("Statement 2", 0.7)
 
         edge = self.graph.add_relationship(
-            source_id=node1.id,
-            target_id=node2.id,
-            relationship_type="relates_to")
+            source_id=node1.id, target_id=node2.id, relationship_type="relates_to"
+        )
 
         assert edge is not None
         assert edge.strength == 1.0  # Default strength
@@ -344,8 +335,7 @@ class TestKnowledgeGraph:
         self.graph.add_belief("Weather forecast reliable", 0.8)
         self.graph.add_belief("Temperature reading", 0.4)
 
-        results = self.graph.query_beliefs(
-            pattern="weather", min_confidence=0.7, max_results=2)
+        results = self.graph.query_beliefs(pattern="weather", min_confidence=0.7, max_results=2)
 
         assert len(results) == 2
         statements = [node.statement for node in results]
@@ -490,8 +480,9 @@ class TestKnowledgeGraph:
     def test_to_dict_populated_graph(self):
         """Test exporting populated graph to dictionary."""
         # Add nodes
-        node1 = self.graph.add_belief("Belief 1", 0.8, supporting_patterns=[
-            "evidence1"], metadata={"source": "test"})
+        node1 = self.graph.add_belief(
+            "Belief 1", 0.8, supporting_patterns=["evidence1"], metadata={"source": "test"}
+        )
         node2 = self.graph.add_belief("Belief 2", 0.6)
 
         # Add edge
@@ -633,7 +624,8 @@ class TestPatternExtractor:
 
         # sunny-outdoor appears twice (confidence = 2/3 = 0.67 >= 0.5)
         sunny_outdoor = next(
-            r for r in relationships if r["value1"] == "sunny" and r["value2"] == "outdoor")
+            r for r in relationships if r["value1"] == "sunny" and r["value2"] == "outdoor"
+        )
         assert sunny_outdoor["confidence"] == 2 / 3
         assert sunny_outdoor["support"] == 2 / 3
         assert sunny_outdoor["count"] == 2
@@ -644,7 +636,8 @@ class TestPatternExtractor:
         # rainy-indoor appears once (confidence = 1/3 = 0.33 < 0.5, not
         # included)
         rainy_indoor_relationships = [
-            r for r in relationships if r["value1"] == "rainy" and r["value2"] == "indoor"]
+            r for r in relationships if r["value1"] == "rainy" and r["value2"] == "indoor"
+        ]
         assert len(rainy_indoor_relationships) == 0
 
     def test_extract_relationships_multiple_attributes(self):
@@ -734,15 +727,13 @@ class TestPatternExtractor:
         self.extractor.extract_patterns(data)
 
         # Filter by type
-        filtered = self.extractor.filter_patterns(
-            pattern_type="frequent_value")
+        filtered = self.extractor.filter_patterns(pattern_type="frequent_value")
 
         assert len(filtered) == len(self.extractor.patterns)
         assert all(p["type"] == "frequent_value" for p in filtered)
 
         # Filter by non-existent type
-        filtered_empty = self.extractor.filter_patterns(
-            pattern_type="nonexistent")
+        filtered_empty = self.extractor.filter_patterns(pattern_type="nonexistent")
         assert len(filtered_empty) == 0
 
     def test_filter_patterns_by_support(self):
@@ -772,8 +763,7 @@ class TestPatternExtractor:
         self.extractor.extract_patterns(data)
 
         # Filter by type and support
-        filtered = self.extractor.filter_patterns(
-            pattern_type="frequent_value", min_support=0.6)
+        filtered = self.extractor.filter_patterns(pattern_type="frequent_value", min_support=0.6)
 
         # Only "attr": "common" should meet both criteria
         assert len(filtered) == 1
@@ -793,23 +783,15 @@ class TestIntegrationScenarios:
         """Test building a network of interconnected beliefs."""
         # Add core beliefs
         weather_node = self.graph.add_belief("Weather is sunny", 0.9)
-        activity_node = self.graph.add_belief(
-            "Outdoor activities are preferable", 0.8)
+        activity_node = self.graph.add_belief("Outdoor activities are preferable", 0.8)
         mood_node = self.graph.add_belief("People are in good mood", 0.7)
         traffic_node = self.graph.add_belief("Traffic is lighter", 0.6)
 
         # Create relationships
-        self.graph.add_relationship(
-            weather_node.id, activity_node.id, "enables", 0.8)
-        self.graph.add_relationship(
-            weather_node.id, mood_node.id, "influences", 0.7)
-        self.graph.add_relationship(
-            weather_node.id,
-            traffic_node.id,
-            "correlates_with",
-            0.5)
-        self.graph.add_relationship(
-            activity_node.id, mood_node.id, "supports", 0.6)
+        self.graph.add_relationship(weather_node.id, activity_node.id, "enables", 0.8)
+        self.graph.add_relationship(weather_node.id, mood_node.id, "influences", 0.7)
+        self.graph.add_relationship(weather_node.id, traffic_node.id, "correlates_with", 0.5)
+        self.graph.add_relationship(activity_node.id, mood_node.id, "supports", 0.6)
 
         # Test network properties
         assert len(self.graph.nodes) == 4
@@ -827,8 +809,7 @@ class TestIntegrationScenarios:
         stats = self.graph.get_statistics()
         assert stats["num_nodes"] == 4
         assert stats["num_edges"] == 4
-        assert abs(stats["avg_confidence"] -
-                   (0.9 + 0.8 + 0.7 + 0.6) / 4) < 1e-10
+        assert abs(stats["avg_confidence"] - (0.9 + 0.8 + 0.7 + 0.6) / 4) < 1e-10
 
     def test_pattern_extraction_from_beliefs(self):
         """Test extracting patterns from belief data."""
@@ -854,8 +835,8 @@ class TestIntegrationScenarios:
 
         # Check for expected patterns (sensor source appears 3/5 times = 0.6)
         sensor_pattern = next(
-            (p for p in patterns if p["attribute"] == "source" and p["value"] == "sensor"),
-            None)
+            (p for p in patterns if p["attribute"] == "source" and p["value"] == "sensor"), None
+        )
         assert sensor_pattern is not None
         assert sensor_pattern["support"] == 0.6
 
@@ -887,20 +868,19 @@ class TestIntegrationScenarios:
             self.graph.update_from_message(message, sender)
 
         # Check that communication beliefs were created
-        communication_beliefs = self.graph.query_beliefs(
-            pattern="communicated")
+        communication_beliefs = self.graph.query_beliefs(pattern="communicated")
         # weather_service messages get merged
         assert len(communication_beliefs) == 2
 
         # Weather service should have higher confidence due to multiple
         # messages
         weather_service_belief = next(
-            b for b in communication_beliefs if "weather_service" in b.statement)
+            b for b in communication_beliefs if "weather_service" in b.statement
+        )
         assert weather_service_belief.confidence > 0.8  # Increased from base 0.8
 
         # Test querying by sender context
-        weather_service_beliefs = self.graph.query_beliefs(
-            pattern="weather_service")
+        weather_service_beliefs = self.graph.query_beliefs(pattern="weather_service")
         assert len(weather_service_beliefs) == 1
 
     def test_belief_contradiction_detection(self):
@@ -928,8 +908,9 @@ class TestIntegrationScenarios:
 
         # Could implement contradiction resolution logic here
         # For now, just verify the contradictory relationship exists
-        contradiction_edges = [edge for edge in self.graph.edges.values(
-        ) if edge.relationship_type == "contradicts"]
+        contradiction_edges = [
+            edge for edge in self.graph.edges.values() if edge.relationship_type == "contradicts"
+        ]
         assert len(contradiction_edges) == 1
 
     def test_knowledge_graph_export_import_cycle(self):
@@ -947,8 +928,7 @@ class TestIntegrationScenarios:
 
         # Add relationships
         for i in range(len(beliefs) - 1):
-            self.graph.add_relationship(
-                beliefs[i].id, beliefs[i + 1].id, "leads_to", 0.8)
+            self.graph.add_relationship(beliefs[i].id, beliefs[i + 1].id, "leads_to", 0.8)
 
         # Export to dictionary
         exported_dict = self.graph.to_dict()

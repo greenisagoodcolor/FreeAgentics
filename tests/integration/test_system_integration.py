@@ -85,16 +85,11 @@ class TestFullSystemIntegration:
         for cycle in range(30):
             await engine.step()
             metrics = await engine.get_ecosystem_metrics()
-            ecosystem_metrics["resource_distribution"].append(
-                metrics["resource_gini_coefficient"])
-            ecosystem_metrics["agent_wealth"].append(
-                metrics["average_agent_wealth"])
-            ecosystem_metrics["knowledge_density"].append(
-                metrics["knowledge_nodes_per_agent"])
-            ecosystem_metrics["trade_volume"].append(
-                metrics["trades_this_cycle"])
-            ecosystem_metrics["exploration_coverage"].append(
-                metrics["explored_cells_percentage"])
+            ecosystem_metrics["resource_distribution"].append(metrics["resource_gini_coefficient"])
+            ecosystem_metrics["agent_wealth"].append(metrics["average_agent_wealth"])
+            ecosystem_metrics["knowledge_density"].append(metrics["knowledge_nodes_per_agent"])
+            ecosystem_metrics["trade_volume"].append(metrics["trades_this_cycle"])
+            ecosystem_metrics["exploration_coverage"].append(metrics["explored_cells_percentage"])
         resource_trend = np.polyfit(
             range(len(ecosystem_metrics["resource_distribution"])),
             ecosystem_metrics["resource_distribution"],
@@ -126,8 +121,7 @@ class TestFullSystemIntegration:
             if agent.agent_class == "merchant":
                 merchant_centrality.append(centrality)
         avg_merchant_centrality = np.mean(merchant_centrality)
-        avg_overall_centrality = np.mean(
-            list(social_network.get_centrality_scores().values()))
+        avg_overall_centrality = np.mean(list(social_network.get_centrality_scores().values()))
         assert avg_merchant_centrality > avg_overall_centrality
         knowledge_network = social_network.get_knowledge_sharing_network()
         scholar_connections = []
@@ -181,8 +175,7 @@ class TestFullSystemIntegration:
             memory_mb = process.memory_info().rss / 1024 / 1024
             performance_metrics["memory_usage"].append(memory_mb)
             cpu_after = process.cpu_percent()
-            performance_metrics["cpu_usage"].append(
-                (cpu_before + cpu_after) / 2)
+            performance_metrics["cpu_usage"].append((cpu_before + cpu_after) / 2)
             latency = await engine.get_average_message_latency()
             performance_metrics["message_latency"].append(latency)
         avg_cycle_time = np.mean(performance_metrics["cycle_times"])
@@ -240,15 +233,11 @@ class TestFullSystemIntegration:
         for cycle in range(40):
             await engine.step()
             if cycle % 5 == 0:
-                patterns = pattern_extractor.extract_patterns(
-                    engine.get_event_history())
+                patterns = pattern_extractor.extract_patterns(engine.get_event_history())
                 metrics = await engine.get_adaptation_metrics()
-                adaptation_metrics["collective_knowledge"].append(
-                    metrics["total_knowledge_nodes"])
-                adaptation_metrics["behavior_diversity"].append(
-                    metrics["behavior_entropy"])
-                adaptation_metrics["success_rates"].append(
-                    metrics["average_goal_achievement"])
+                adaptation_metrics["collective_knowledge"].append(metrics["total_knowledge_nodes"])
+                adaptation_metrics["behavior_diversity"].append(metrics["behavior_entropy"])
+                adaptation_metrics["success_rates"].append(metrics["average_goal_achievement"])
                 adaptation_metrics["pattern_count"].append(len(patterns))
         knowledge_growth = (
             adaptation_metrics["collective_knowledge"][-1]
@@ -324,8 +313,8 @@ class TestEdgeCasesAndStress:
             survival_timeline.append(alive_count)
             events = engine.get_events_this_cycle()
             cooperation_count = sum(
-                1 for e in events if e["type"] in [
-                    "trade", "resource_share", "alliance_formed"])
+                1 for e in events if e["type"] in ["trade", "resource_share", "alliance_formed"]
+            )
             cooperation_events.append(cooperation_count)
         early_cooperation = np.mean(cooperation_events[:10])
         late_cooperation = np.mean(cooperation_events[-10:])
@@ -417,8 +406,7 @@ class TestExportAndDeployment:
         assert success
         validator = ExportValidator()
         results = validator.validate_package(export_path)
-        summary = next(r for r in results if r.check_name ==
-                       "validation_summary")
+        summary = next(r for r in results if r.check_name == "validation_summary")
         assert summary.status.value == "passed"
         assert (export_path / "manifest.json").exists()
         assert (export_path / "agent_config.json").exists()

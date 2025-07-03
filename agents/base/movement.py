@@ -105,10 +105,8 @@ class CollisionSystem:
         self.dynamic_obstacles[id] = position
 
     def check_collision(
-            self,
-            position: Position,
-            radius: float,
-            exclude_id: Optional[str] = None) -> bool:
+        self, position: Position, radius: float, exclude_id: Optional[str] = None
+    ) -> bool:
         """Check if a position would result in collision"""
         for obstacle in self.static_obstacles:
             distance = position.distance_to(obstacle["position"])
@@ -121,8 +119,7 @@ class CollisionSystem:
                     return True
         return False
 
-    def get_collision_normal(self, position: Position,
-                             radius: float) -> Optional[np.ndarray]:
+    def get_collision_normal(self, position: Position, radius: float) -> Optional[np.ndarray]:
         """Get the normal vector of the nearest collision"""
         min_distance = float("inf")
         collision_normal = None
@@ -139,8 +136,7 @@ class CollisionSystem:
 class PathfindingGrid:
     """Grid-based pathfinding for navigation"""
 
-    def __init__(self, width: int, height: int,
-                 cell_size: float = 1.0) -> None:
+    def __init__(self, width: int, height: int, cell_size: float = 1.0) -> None:
         self.width = width
         self.height = height
         self.cell_size = cell_size
@@ -186,8 +182,7 @@ class PathfindingGrid:
         """Heuristic function for A* (Euclidean distance)"""
         return math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
 
-    def get_movement_cost(
-            self, from_pos: Tuple[int, int], to_pos: Tuple[int, int]) -> float:
+    def get_movement_cost(self, from_pos: Tuple[int, int], to_pos: Tuple[int, int]) -> float:
         """Get cost of moving between two cells"""
         dx = to_pos[0] - from_pos[0]
         dy = to_pos[1] - from_pos[1]
@@ -195,8 +190,7 @@ class PathfindingGrid:
         terrain_mult = self.terrain_costs.get(to_pos, 1.0)
         return base_cost * terrain_mult
 
-    def find_path(self, start: Position,
-                  goal: Position) -> Optional[List[Position]]:
+    def find_path(self, start: Position, goal: Position) -> Optional[List[Position]]:
         """Find path using A* algorithm"""
         start_grid = self.world_to_grid(start)
         goal_grid = self.world_to_grid(goal)
@@ -217,13 +211,11 @@ class PathfindingGrid:
                 path.reverse()
                 return path
             for neighbor in self.get_neighbors(current):
-                tentative_g = g_score[current] + \
-                    self.get_movement_cost(current, neighbor)
+                tentative_g = g_score[current] + self.get_movement_cost(current, neighbor)
                 if neighbor not in g_score or tentative_g < g_score[neighbor]:
                     came_from[neighbor] = current
                     g_score[neighbor] = tentative_g
-                    f_score[neighbor] = tentative_g + \
-                        self.heuristic(neighbor, goal_grid)
+                    f_score[neighbor] = tentative_g + self.heuristic(neighbor, goal_grid)
                     heapq.heappush(open_set, (f_score[neighbor], neighbor))
         return None
 
@@ -248,10 +240,8 @@ class MovementController:
     ) -> None:
         """Register an agent with the movement controller"""
         self.movement_states[agent.agent_id] = MovementState()
-        self.movement_constraints[agent.agent_id] = constraints or MovementConstraints(
-        )
-        self.collision_system.update_dynamic_obstacle(
-            agent.agent_id, agent.position)
+        self.movement_constraints[agent.agent_id] = constraints or MovementConstraints()
+        self.collision_system.update_dynamic_obstacle(agent.agent_id, agent.position)
 
     def set_destination(self, agent_id: str, destination: Position) -> bool:
         """Set movement destination for an agent"""
@@ -284,11 +274,7 @@ class MovementController:
             else:
                 self._update_physics(agent, state, delta_time)
 
-    def _update_path_following(
-            self,
-            agent: Agent,
-            state: MovementState,
-            delta_time: float) -> None:
+    def _update_path_following(self, agent: Agent, state: MovementState, delta_time: float) -> None:
         """Update agent following a path"""
         if state.path is None:
             return
@@ -301,31 +287,23 @@ class MovementController:
             if state.path_index >= len(state.path):
                 state.path = None
                 state.velocity = np.zeros(3)
-                self.state_manager.update_agent_status(
-                    agent.agent_id, AgentStatus.IDLE)
+                self.state_manager.update_agent_status(agent.agent_id, AgentStatus.IDLE)
                 return
         if distance > 0:
             direction = direction / distance
             base_speed = constraints.max_speed
             mode_mult = constraints.mode_speeds.get(state.mode, 1.0)
-            terrain_mult = constraints.terrain_speeds.get(
-                state.current_terrain, 1.0)
+            terrain_mult = constraints.terrain_speeds.get(state.current_terrain, 1.0)
             desired_speed = base_speed * mode_mult * terrain_mult
-            desired_velocity = direction * \
-                min(desired_speed, float(distance / delta_time))
+            desired_velocity = direction * min(desired_speed, float(distance / delta_time))
             velocity_diff = desired_velocity - state.velocity
             max_accel = constraints.max_acceleration * delta_time
             if np.linalg.norm(velocity_diff) > max_accel:
-                velocity_diff = velocity_diff / \
-                    np.linalg.norm(velocity_diff) * max_accel
+                velocity_diff = velocity_diff / np.linalg.norm(velocity_diff) * max_accel
             state.velocity += velocity_diff
         self._apply_movement(agent, state, delta_time)
 
-    def _update_physics(
-            self,
-            agent: Agent,
-            state: MovementState,
-            delta_time: float) -> None:
+    def _update_physics(self, agent: Agent, state: MovementState, delta_time: float) -> None:
         """Update physics-based movement"""
         friction = 0.9
         state.velocity *= friction
@@ -334,49 +312,35 @@ class MovementController:
         self._apply_movement(agent, state, delta_time)
         if np.linalg.norm(state.velocity) < 0.1:
             state.velocity = np.zeros(3)
-            self.state_manager.update_agent_status(
-                agent.agent_id, AgentStatus.IDLE)
+            self.state_manager.update_agent_status(agent.agent_id, AgentStatus.IDLE)
 
-    def _apply_movement(
-            self,
-            agent: Agent,
-            state: MovementState,
-            delta_time: float) -> None:
+    def _apply_movement(self, agent: Agent, state: MovementState, delta_time: float) -> None:
         """Apply movement with collision detection"""
         constraints = self.movement_constraints[agent.agent_id]
         movement = state.velocity * delta_time
         new_pos_array = agent.position.to_array() + movement
-        new_position = Position(
-            new_pos_array[0],
-            new_pos_array[1],
-            new_pos_array[2])
+        new_position = Position(new_pos_array[0], new_pos_array[1], new_pos_array[2])
         if not self.collision_system.check_collision(
             new_position, constraints.collision_radius, agent.agent_id
         ):
             agent.velocity = state.velocity
-            self.state_manager.update_agent_position(
-                agent.agent_id, new_position)
-            self.collision_system.update_dynamic_obstacle(
-                agent.agent_id, new_position)
+            self.state_manager.update_agent_position(agent.agent_id, new_position)
+            self.collision_system.update_dynamic_obstacle(agent.agent_id, new_position)
         else:
             normal = self.collision_system.get_collision_normal(
                 new_position, constraints.collision_radius
             )
             if normal is not None:
-                state.velocity = state.velocity - \
-                    np.dot(state.velocity, normal) * normal
+                state.velocity = state.velocity - np.dot(state.velocity, normal) * normal
                 movement = state.velocity * delta_time
                 new_pos_array = agent.position.to_array() + movement
-                new_position = Position(
-                    new_pos_array[0], new_pos_array[1], new_pos_array[2])
+                new_position = Position(new_pos_array[0], new_pos_array[1], new_pos_array[2])
                 if not self.collision_system.check_collision(
                     new_position, constraints.collision_radius, agent.agent_id
                 ):
                     agent.velocity = state.velocity
-                    self.state_manager.update_agent_position(
-                        agent.agent_id, new_position)
-                    self.collision_system.update_dynamic_obstacle(
-                        agent.agent_id, new_position)
+                    self.state_manager.update_agent_position(agent.agent_id, new_position)
+                    self.collision_system.update_dynamic_obstacle(agent.agent_id, new_position)
             else:
                 state.velocity = np.zeros(3)
 
@@ -389,15 +353,13 @@ class MovementController:
         acceleration = force
         if np.linalg.norm(acceleration) > constraints.max_acceleration:
             acceleration = (
-                acceleration /
-                np.linalg.norm(acceleration) *
-                constraints.max_acceleration)
+                acceleration / np.linalg.norm(acceleration) * constraints.max_acceleration
+            )
         state.acceleration = acceleration
         state.velocity += acceleration
         agent = self.state_manager.get_agent(agent_id)
         if agent and agent.status == AgentStatus.IDLE:
-            self.state_manager.update_agent_status(
-                agent_id, AgentStatus.MOVING)
+            self.state_manager.update_agent_status(agent_id, AgentStatus.MOVING)
 
     def jump(self, agent_id: str, jump_force: float = 5.0) -> bool:
         """Make an agent jump"""
@@ -427,14 +389,9 @@ class MovementController:
                 "z": state.destination.z,
             }
         return {
-            "position": {
-                "x": agent.position.x,
-                "y": agent.position.y,
-                "z": agent.position.z},
+            "position": {"x": agent.position.x, "y": agent.position.y, "z": agent.position.z},
             "velocity": state.velocity.tolist(),
-            "speed": float(
-                np.linalg.norm(
-                    state.velocity)),
+            "speed": float(np.linalg.norm(state.velocity)),
             "mode": state.mode.value,
             "is_grounded": state.is_grounded,
             "has_path": state.path is not None,
@@ -446,10 +403,7 @@ class SteeringBehaviors:
     """Advanced steering behaviors for more natural movement"""
 
     @staticmethod
-    def seek(
-            position: np.ndarray,
-            target: np.ndarray,
-            max_speed: float) -> np.ndarray:
+    def seek(position: np.ndarray, target: np.ndarray, max_speed: float) -> np.ndarray:
         """Seek steering behavior - move towards target"""
         desired = target - position
         distance = np.linalg.norm(desired)
@@ -458,10 +412,7 @@ class SteeringBehaviors:
         return np.array(desired)
 
     @staticmethod
-    def flee(
-            position: np.ndarray,
-            threat: np.ndarray,
-            max_speed: float) -> np.ndarray:
+    def flee(position: np.ndarray, threat: np.ndarray, max_speed: float) -> np.ndarray:
         """Flee steering behavior - move away from threat"""
         desired = position - threat
         distance = np.linalg.norm(desired)
@@ -471,10 +422,8 @@ class SteeringBehaviors:
 
     @staticmethod
     def arrive(
-            position: np.ndarray,
-            target: np.ndarray,
-            max_speed: float,
-            slowing_radius: float = 5.0) -> np.ndarray:
+        position: np.ndarray, target: np.ndarray, max_speed: float, slowing_radius: float = 5.0
+    ) -> np.ndarray:
         """Arrive steering behavior - slow down when approaching target"""
         desired = target - position
         distance = np.linalg.norm(desired)
@@ -487,11 +436,9 @@ class SteeringBehaviors:
         return np.array(desired)
 
     @staticmethod
-    def wander(velocity: np.ndarray,
-               wander_angle: float,
-               wander_rate: float,
-               max_speed: float) -> tuple[np.ndarray,
-                                          float]:
+    def wander(
+        velocity: np.ndarray, wander_angle: float, wander_rate: float, max_speed: float
+    ) -> tuple[np.ndarray, float]:
         """Wander steering behavior - random movement"""
         wander_angle += (np.random.random() - 0.5) * wander_rate
         if np.linalg.norm(velocity) > 0:
@@ -499,8 +446,7 @@ class SteeringBehaviors:
         else:
             current_angle = 0
         new_angle = current_angle + wander_angle
-        wander_force = np.array([np.cos(new_angle) * max_speed,
-                                np.sin(new_angle) * max_speed, 0])
+        wander_force = np.array([np.cos(new_angle) * max_speed, np.sin(new_angle) * max_speed, 0])
         return (wander_force, wander_angle)
 
     @staticmethod

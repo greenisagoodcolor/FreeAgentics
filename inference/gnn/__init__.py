@@ -5,6 +5,7 @@ This module provides graph neural network implementations for agent
 belief updating, coalition analysis, and spatial reasoning.
 """
 
+from .executor import GMNExecutor
 from .feature_extractor import (
     ExtractionResult,
     FeatureConfig,
@@ -13,6 +14,9 @@ from .feature_extractor import (
     NormalizationType,
 )
 from .layers import AggregationType, GATLayer, GCNLayer, LayerConfig
+from .model import GMNModel, GNNModel
+from .parser import GMNParser
+from .validator import GMNValidator
 
 __all__ = [
     "AggregationType",
@@ -24,4 +28,9 @@ __all__ = [
     "FeatureConfig",
     "ExtractionResult",
     "NodeFeatureExtractor",
+    "GMNExecutor",
+    "GMNModel",
+    "GNNModel",
+    "GMNParser",
+    "GMNValidator",
 ]

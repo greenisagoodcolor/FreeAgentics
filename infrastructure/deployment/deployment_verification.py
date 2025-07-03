@@ -137,8 +137,10 @@ class HealthMonitor:
                     else:
                         logger.warning(
                             f"Health check {
-                                check.name} failed: " f"status {
-                                response.status}")
+                                check.name} failed: "
+                            f"status {
+                                response.status}"
+                        )
 
             except asyncio.TimeoutError:
                 logger.warning(f"Health check {check.name} timed out")
@@ -165,8 +167,7 @@ class HealthMonitor:
                 status = await self.check_health()
 
                 # Record history
-                self.health_history.append(
-                    {"timestamp": time.time(), "status": status.value})
+                self.health_history.append({"timestamp": time.time(), "status": status.value})
 
                 # Keep history bounded
                 if len(self.health_history) > self.max_history:
@@ -226,8 +227,7 @@ class ServiceManager:
         self.config = config
         self.service_info = ServiceInfo(name=config.agent_name)
 
-    def start_service(self, command: List[str],
-                      env: Optional[Dict[str, str]] = None) -> bool:
+    def start_service(self, command: List[str], env: Optional[Dict[str, str]] = None) -> bool:
         """
         Start the agent service.
 
@@ -276,7 +276,8 @@ class ServiceManager:
 
                     logger.info(
                         f"Service {
-                            self.config.agent_name} started (PID: {pid})")
+                            self.config.agent_name} started (PID: {pid})"
+                    )
                     return True
 
                 time.sleep(1)
@@ -337,8 +338,7 @@ class ServiceManager:
             self.service_info.errors.append(str(e))
             return False
 
-    def restart_service(self, command: List[str],
-                        env: Optional[Dict[str, str]] = None) -> bool:
+    def restart_service(self, command: List[str], env: Optional[Dict[str, str]] = None) -> bool:
         """Restart the agent service"""
         logger.info(f"Restarting service {self.config.agent_name}")
 
@@ -574,8 +574,7 @@ class FunctionalTester:
                 "message": f"Test failed: {str(e)}",
             }
 
-    async def _test_communication(
-            self, session: aiohttp.ClientSession) -> Dict[str, Any]:
+    async def _test_communication(self, session: aiohttp.ClientSession) -> Dict[str, Any]:
         """Test agent communication"""
         test_name = "communication"
 
@@ -620,8 +619,7 @@ class FunctionalTester:
                 "message": f"Test failed: {str(e)}",
             }
 
-    async def _test_decision_making(
-            self, session: aiohttp.ClientSession) -> Dict[str, Any]:
+    async def _test_decision_making(self, session: aiohttp.ClientSession) -> Dict[str, Any]:
         """Test agent decision making"""
         test_name = "decision_making"
 
@@ -704,8 +702,7 @@ class DeploymentVerifier:
             }
 
         # Create health check objects
-        health_checks = [HealthCheck(**hc)
-                         for hc in config_data.get("health_checks", [])]
+        health_checks = [HealthCheck(**hc) for hc in config_data.get("health_checks", [])]
 
         return DeploymentConfig(
             agent_name=config_data.get("agent_name", "agent"),
@@ -861,11 +858,7 @@ class DeploymentVerifier:
 
         # Check resource usage
         resources = checks.get("resources", {})
-        if resources.get(
-                "cpu_percent",
-                0) > 90 or resources.get(
-                "memory_percent",
-                0) > 90:
+        if resources.get("cpu_percent", 0) > 90 or resources.get("memory_percent", 0) > 90:
             return "degraded"
 
         return "healthy"
@@ -893,8 +886,7 @@ async def verify_deployment(deployment_path: str) -> bool:
     if "health" in results["checks"]:
         print(f"Health Status: {results['checks']['health']['status']}")
 
-    if "functional" in results["checks"] and not results["checks"]["functional"].get(
-            "skipped"):
+    if "functional" in results["checks"] and not results["checks"]["functional"].get("skipped"):
         summary = results["checks"]["functional"]["summary"]
         print(f"Functional Tests: {summary['passed']}/{summary['total']} passed")
 
@@ -903,7 +895,8 @@ async def verify_deployment(deployment_path: str) -> bool:
         print(
             f"Log Errors: {
                 logs['error_count']} errors, {
-                logs['warning_count']} warnings")
+                logs['warning_count']} warnings"
+        )
 
     if "resources" in results["checks"]:
         resources = results["checks"]["resources"]

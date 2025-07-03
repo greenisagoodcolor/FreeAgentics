@@ -57,11 +57,7 @@ def model_dimensions():
     """Standard model dimensions for testing."""
     if not INFERENCE_AVAILABLE:
         pytest.skip("Inference engine not available")
-    return ModelDimensions(
-        num_states=4,
-        num_observations=3,
-        num_actions=2,
-        time_horizon=5)
+    return ModelDimensions(num_states=4, num_observations=3, num_actions=2, time_horizon=5)
 
 
 @pytest.fixture
@@ -102,18 +98,11 @@ def simple_generative_model(model_dimensions, model_parameters):
             )
 
             # Transition model: p(s'|s,a)
-            self.B = torch.zeros(
-                dims.num_actions,
-                dims.num_states,
-                dims.num_states)
+            self.B = torch.zeros(dims.num_actions, dims.num_states, dims.num_states)
             # Action 0: stay in place
             self.B[0] = torch.eye(dims.num_states)
             # Action 1: shift states
-            self.B[1] = torch.roll(
-                torch.eye(
-                    dims.num_states),
-                shifts=1,
-                dims=0)
+            self.B[1] = torch.roll(torch.eye(dims.num_states), shifts=1, dims=0)
 
             # Prior preferences (goals)
             self.C = torch.tensor([0.0, 1.0, 0.0], dtype=torch.float32)
@@ -130,8 +119,7 @@ def simple_generative_model(model_dimensions, model_parameters):
             obs_probs = self.A[:, state_idx]
             return torch.multinomial(obs_probs, 1).squeeze()
 
-        def compute_expected_observations(
-                self, beliefs: torch.Tensor) -> torch.Tensor:
+        def compute_expected_observations(self, beliefs: torch.Tensor) -> torch.Tensor:
             """Compute expected observations given beliefs."""
             return torch.matmul(self.A, beliefs)
 
@@ -147,8 +135,7 @@ def simple_generative_model(model_dimensions, model_parameters):
                 expected_obs = self.compute_expected_observations(beliefs)
 
                 # Epistemic value (information gain)
-                entropy = -torch.sum(expected_obs *
-                                     torch.log(expected_obs + 1e-8))
+                entropy = -torch.sum(expected_obs * torch.log(expected_obs + 1e-8))
 
                 # Pragmatic value (preference satisfaction)
                 preference = torch.dot(expected_obs, self.C)
@@ -168,10 +155,7 @@ def simple_generative_model(model_dimensions, model_parameters):
                 # batch of state indices
                 return self.A[:, states]
 
-        def transition_model(
-                self,
-                states: torch.Tensor,
-                actions: torch.Tensor) -> torch.Tensor:
+        def transition_model(self, states: torch.Tensor, actions: torch.Tensor) -> torch.Tensor:
             """Compute p(s'|s, a)"""
             if actions.dim() == 0:
                 action = actions.item()
@@ -185,9 +169,7 @@ def simple_generative_model(model_dimensions, model_parameters):
                 # states is indices
                 return self.B[action, :, states]
 
-        def get_preferences(
-                self,
-                timestep: Optional[int] = None) -> torch.Tensor:
+        def get_preferences(self, timestep: Optional[int] = None) -> torch.Tensor:
             """Get prior preferences p(o|C)"""
             return self.C
 
@@ -213,13 +195,11 @@ def continuous_generative_model(model_parameters):
             super().__init__(dims, params)
 
             # Linear observation model
-            self.A = torch.tensor(
-                [[1.0, 0.0], [0.0, 1.0]], dtype=torch.float32)
+            self.A = torch.tensor([[1.0, 0.0], [0.0, 1.0]], dtype=torch.float32)
             self.obs_noise = 0.1
 
             # Linear dynamics
-            self.B = torch.tensor(
-                [[0.95, 0.0], [0.0, 0.95]], dtype=torch.float32)
+            self.B = torch.tensor([[0.95, 0.0], [0.0, 0.95]], dtype=torch.float32)
             self.process_noise = 0.05
 
             # Goal state
@@ -231,8 +211,7 @@ def continuous_generative_model(model_parameters):
             noise = torch.randn_like(obs) * self.obs_noise
             return obs + noise
 
-        def compute_expected_observations(
-                self, state: torch.Tensor) -> torch.Tensor:
+        def compute_expected_observations(self, state: torch.Tensor) -> torch.Tensor:
             """Compute expected observations."""
             return torch.matmul(self.A, state)
 
@@ -258,16 +237,11 @@ def continuous_generative_model(model_parameters):
             """Compute p(o|s)"""
             return self.compute_expected_observations(states)
 
-        def transition_model(
-                self,
-                states: torch.Tensor,
-                actions: torch.Tensor) -> torch.Tensor:
+        def transition_model(self, states: torch.Tensor, actions: torch.Tensor) -> torch.Tensor:
             """Compute p(s'|s, a)"""
             return torch.matmul(self.B, states) + actions
 
-        def get_preferences(
-                self,
-                timestep: Optional[int] = None) -> torch.Tensor:
+        def get_preferences(self, timestep: Optional[int] = None) -> torch.Tensor:
             """Get prior preferences p(o|C)"""
             return self.goal
 
@@ -286,21 +260,9 @@ def hierarchical_generative_model(model_parameters):
         def __init__(self, params: ModelParameters):
             # Define dimensions for each level
             self.levels = [
-                ModelDimensions(
-                    num_states=8,
-                    num_observations=4,
-                    num_actions=3,
-                    time_horizon=5),
-                ModelDimensions(
-                    num_states=4,
-                    num_observations=8,
-                    num_actions=2,
-                    time_horizon=10),
-                ModelDimensions(
-                    num_states=2,
-                    num_observations=4,
-                    num_actions=1,
-                    time_horizon=20),
+                ModelDimensions(num_states=8, num_observations=4, num_actions=3, time_horizon=5),
+                ModelDimensions(num_states=4, num_observations=8, num_actions=2, time_horizon=10),
+                ModelDimensions(num_states=2, num_observations=4, num_actions=1, time_horizon=20),
             ]
             super().__init__(self.levels[0], params)
 
@@ -308,17 +270,17 @@ def hierarchical_generative_model(model_parameters):
             self.level_models = []
             for dims in self.levels:
                 level_model = {
-                    "A": torch.rand(
-                        dims.num_observations, dims.num_states), "B": torch.rand(
-                        dims.num_actions, dims.num_states, dims.num_states), "C": torch.rand(
-                        dims.num_observations), "D": torch.ones(
-                        dims.num_states) / dims.num_states, }
+                    "A": torch.rand(dims.num_observations, dims.num_states),
+                    "B": torch.rand(dims.num_actions, dims.num_states, dims.num_states),
+                    "C": torch.rand(dims.num_observations),
+                    "D": torch.ones(dims.num_states) / dims.num_states,
+                }
                 # Normalize probability distributions
-                level_model["A"] = level_model["A"] / \
-                    level_model["A"].sum(dim=0, keepdim=True)
+                level_model["A"] = level_model["A"] / level_model["A"].sum(dim=0, keepdim=True)
                 for a in range(dims.num_actions):
-                    level_model["B"][a] = level_model["B"][a] / \
-                        level_model["B"][a].sum(dim=0, keepdim=True)
+                    level_model["B"][a] = level_model["B"][a] / level_model["B"][a].sum(
+                        dim=0, keepdim=True
+                    )
                 self.level_models.append(level_model)
 
         def get_level_model(self, level: int) -> Dict[str, torch.Tensor]:
@@ -348,10 +310,7 @@ def hierarchical_generative_model(model_parameters):
             else:
                 return level_0["A"][:, states]
 
-        def transition_model(
-                self,
-                states: torch.Tensor,
-                actions: torch.Tensor) -> torch.Tensor:
+        def transition_model(self, states: torch.Tensor, actions: torch.Tensor) -> torch.Tensor:
             """Compute p(s'|s, a) for first level"""
             level_0 = self.level_models[0]
             if actions.dim() == 0:
@@ -364,9 +323,7 @@ def hierarchical_generative_model(model_parameters):
             else:
                 return level_0["B"][action, :, states]
 
-        def get_preferences(
-                self,
-                timestep: Optional[int] = None) -> torch.Tensor:
+        def get_preferences(self, timestep: Optional[int] = None) -> torch.Tensor:
             """Get prior preferences p(o|C) for first level"""
             return self.level_models[0]["C"]
 
@@ -413,8 +370,7 @@ def sample_beliefs():
         if beliefs[key].dim() == 1:
             beliefs[key] = beliefs[key] / beliefs[key].sum()
         else:
-            beliefs[key] = beliefs[key] / \
-                beliefs[key].sum(dim=-1, keepdim=True)
+            beliefs[key] = beliefs[key] / beliefs[key].sum(dim=-1, keepdim=True)
     return beliefs
 
 

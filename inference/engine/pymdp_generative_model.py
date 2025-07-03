@@ -25,8 +25,7 @@ class PyMDPGenerativeModel:
     in the format expected by pymdp.Agent.
     """
 
-    def __init__(self, dimensions: ModelDimensions,
-                 parameters: ModelParameters) -> None:
+    def __init__(self, dimensions: ModelDimensions, parameters: ModelParameters) -> None:
         self.dims = dimensions
         self.params = parameters
         # Initialize pymdp-compatible matrices as numpy arrays
@@ -63,10 +62,7 @@ class PyMDPGenerativeModel:
                 B[s', s, a] = p(s'|s, a) - probability of next state s' given current state s and action a
         """
 
-        B = np.zeros(
-            (self.dims.num_states,
-             self.dims.num_states,
-             self.dims.num_actions))
+        B = np.zeros((self.dims.num_states, self.dims.num_states, self.dims.num_actions))
         for a in range(self.dims.num_actions):
             # Create random transition matrix for this action
             B_a = np.random.rand(self.dims.num_states, self.dims.num_states)
@@ -126,8 +122,7 @@ class PyMDPGenerativeModel:
         )}"
         # Ensure proper normalization for each action
         for a in range(self.dims.num_actions):
-            self.B[:, :, a] = B[:, :, a] / \
-                B[:, :, a].sum(axis=0, keepdims=True)
+            self.B[:, :, a] = B[:, :, a] / B[:, :, a].sum(axis=0, keepdims=True)
 
     def set_C_matrix(self, C: Union[np.ndarray, torch.Tensor]) -> None:
         """Set preference matrix from external source"""
@@ -167,9 +162,7 @@ class PyMDPGenerativeModel:
         return self.A, self.B, self.C, self.D
 
     @classmethod
-    def from_discrete_model(
-            cls,
-            discrete_model: DiscreteGenerativeModel) -> "PyMDPGenerativeModel":
+    def from_discrete_model(cls, discrete_model: DiscreteGenerativeModel) -> "PyMDPGenerativeModel":
         """
         Create PyMDPGenerativeModel from existing DiscreteGenerativeModel.
         Args:
@@ -188,8 +181,7 @@ class PyMDPGenerativeModel:
         # C matrix might be 1D [obs] or 2D [obs, time]
         if discrete_model.C.dim() == 1:
             # Expand to [obs, time_horizon]
-            C_expanded = discrete_model.C.unsqueeze(
-                1).repeat(1, discrete_model.dims.time_horizon)
+            C_expanded = discrete_model.C.unsqueeze(1).repeat(1, discrete_model.dims.time_horizon)
             pymdp_model.set_C_matrix(C_expanded)
         else:
             pymdp_model.set_C_matrix(discrete_model.C)
@@ -205,21 +197,16 @@ class PyMDPGenerativeModelAdapter:
     breaking existing code.
     """
 
-    def __init__(self,
-                 base_model: Union[DiscreteGenerativeModel,
-                                   PyMDPGenerativeModel]) -> None:
+    def __init__(self, base_model: Union[DiscreteGenerativeModel, PyMDPGenerativeModel]) -> None:
         self.base_model = base_model
         if isinstance(base_model, DiscreteGenerativeModel):
-            self.pymdp_model = PyMDPGenerativeModel.from_discrete_model(
-                base_model)
+            self.pymdp_model = PyMDPGenerativeModel.from_discrete_model(base_model)
         elif isinstance(base_model, PyMDPGenerativeModel):
             self.pymdp_model = base_model
         else:
             raise ValueError(f"Unsupported model type: {type(base_model)}")
 
-    def observation_model(self,
-                          states: Union[np.ndarray,
-                                        torch.Tensor]) -> np.ndarray:
+    def observation_model(self, states: Union[np.ndarray, torch.Tensor]) -> np.ndarray:
         """Compute observations using pymdp format"""
         if isinstance(states, torch.Tensor):
             states = states.detach().cpu().numpy()
@@ -227,10 +214,7 @@ class PyMDPGenerativeModelAdapter:
         result: np.ndarray = self.pymdp_model.A @ states
         return result
 
-    def transition_model(self,
-                         states: Union[np.ndarray,
-                                       torch.Tensor],
-                         action: int) -> np.ndarray:
+    def transition_model(self, states: Union[np.ndarray, torch.Tensor], action: int) -> np.ndarray:
         """Compute state transitions using pymdp format"""
         if isinstance(states, torch.Tensor):
             states = states.detach().cpu().numpy()

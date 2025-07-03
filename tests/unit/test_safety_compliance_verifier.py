@@ -104,16 +104,10 @@ class TestSafetyComplianceVerifier:
         """Sample deployment context for testing."""
         return {
             "edge_location": "manufacturing_facility_01",
-            "compliance_requirements": [
-                "GDPR",
-                "ISO_27001"],
+            "compliance_requirements": ["GDPR", "ISO_27001"],
             "security_level": "high",
-            "network_constraints": {
-                "bandwidth": "limited",
-                "latency": "low"},
-            "operational_requirements": {
-                "uptime": "99.9%",
-                "response_time": "< 100ms"},
+            "network_constraints": {"bandwidth": "limited", "latency": "low"},
+            "operational_requirements": {"uptime": "99.9%", "response_time": "< 100ms"},
         }
 
     def test_verifier_initialization(self, verifier):
@@ -247,8 +241,7 @@ class TestSafetyComplianceVerifier:
             mock_failsafe.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_verify_markov_blanket_integrity(
-            self, verifier, sample_coalition_config):
+    async def test_verify_markov_blanket_integrity(self, verifier, sample_coalition_config):
         """Test Markov blanket integrity verification."""
         # Mock the verification results
         mock_results = {
@@ -275,8 +268,7 @@ class TestSafetyComplianceVerifier:
             assert result["overall_integrity"] >= 0.0
 
     @pytest.mark.asyncio
-    async def test_verify_boundary_integrity(
-            self, verifier, sample_coalition_config):
+    async def test_verify_boundary_integrity(self, verifier, sample_coalition_config):
         """Test boundary integrity verification."""
         # Mock boundary monitoring results
         mock_events = []
@@ -343,11 +335,7 @@ class TestSafetyComplianceVerifier:
 
         assert isinstance(result, ComplianceCheck)
         assert result.requirement_id == "gdpr_data_minimization"
-        assert result.status in [
-            "passed",
-            "failed",
-            "warning",
-            "not_applicable"]
+        assert result.status in ["passed", "failed", "warning", "not_applicable"]
         assert 0.0 <= result.score <= 100.0
         assert isinstance(result.evidence, dict)
         assert isinstance(result.findings, list)
@@ -366,11 +354,7 @@ class TestSafetyComplianceVerifier:
 
         assert isinstance(result, ComplianceCheck)
         assert result.requirement_id == "iso_encryption"
-        assert result.status in [
-            "passed",
-            "failed",
-            "warning",
-            "not_applicable"]
+        assert result.status in ["passed", "failed", "warning", "not_applicable"]
 
     @pytest.mark.asyncio
     async def test_verify_compliance_requirement_edge(
@@ -400,8 +384,7 @@ class TestSafetyComplianceVerifier:
 
             assert isinstance(result, dict)
             assert len(result) > 0
-            assert all(isinstance(protocol, FailsafeProtocol)
-                       for protocol in result.values())
+            assert all(isinstance(protocol, FailsafeProtocol) for protocol in result.values())
 
             # Verify all protocols were tested
             expected_protocols = [
@@ -415,8 +398,7 @@ class TestSafetyComplianceVerifier:
                 assert result[protocol_id].test_successful is True
 
     @pytest.mark.asyncio
-    async def test_test_failsafe_protocol(
-            self, verifier, sample_coalition_config):
+    async def test_test_failsafe_protocol(self, verifier, sample_coalition_config):
         """Test individual failsafe protocol testing."""
         protocol = verifier.failsafe_protocols["emergency_shutdown"]
 
@@ -456,14 +438,14 @@ class TestSafetyComplianceVerifier:
         }
 
         result = verifier._assess_deployment_risks(
-            markov_results, boundary_results, compliance_checks, failsafe_status)
+            markov_results, boundary_results, compliance_checks, failsafe_status
+        )
 
         assert isinstance(result, dict)
         assert "overall_risk_level" in result
         assert "risk_factors" in result
         assert "mitigation_strategies" in result
-        assert result["overall_risk_level"] in [
-            "low", "medium", "high", "critical"]
+        assert result["overall_risk_level"] in ["low", "medium", "high", "critical"]
 
     def test_calculate_compliance_scores(self, verifier):
         """Test compliance score calculation."""
@@ -500,7 +482,8 @@ class TestSafetyComplianceVerifier:
         }
 
         result = verifier._calculate_compliance_scores(
-            markov_results, boundary_results, compliance_checks, failsafe_status)
+            markov_results, boundary_results, compliance_checks, failsafe_status
+        )
 
         assert isinstance(result, dict)
         assert "safety" in result
@@ -536,11 +519,8 @@ class TestSafetyComplianceVerifier:
         risk_assessment = {"overall_risk_level": "high"}
 
         result = verifier._generate_safety_recommendations(
-            markov_results,
-            boundary_results,
-            compliance_checks,
-            failsafe_status,
-            risk_assessment)
+            markov_results, boundary_results, compliance_checks, failsafe_status, risk_assessment
+        )
 
         assert isinstance(result, dict)
         assert "critical_issues" in result
@@ -592,8 +572,7 @@ class TestSafetyComplianceVerifier:
             )
         ]
 
-        result = verifier._compile_safety_metrics(
-            boundary_results, compliance_checks)
+        result = verifier._compile_safety_metrics(boundary_results, compliance_checks)
 
         # Should return a mock safety metrics object
         assert result is not None
@@ -838,12 +817,12 @@ class TestEdgeCasesAndErrorHandling:
         failsafe_status = {}
 
         result = verifier._calculate_compliance_scores(
-            markov_results, boundary_results, compliance_checks, failsafe_status)
+            markov_results, boundary_results, compliance_checks, failsafe_status
+        )
 
         # Should handle invalid values gracefully
         assert isinstance(result, dict)
-        assert all(isinstance(score, (int, float))
-                   for score in result.values())
+        assert all(isinstance(score, (int, float)) for score in result.values())
 
     @patch("coalitions.readiness.safety_compliance_verifier.logger")
     def test_logging_functionality(self, mock_logger, verifier):

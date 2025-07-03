@@ -199,8 +199,7 @@ except ImportError:
             super().__init__(config)
             self.formation_history = []
 
-        def multi_objective_formation(
-                self, agents: List[Agent]) -> List[Coalition]:
+        def multi_objective_formation(self, agents: List[Agent]) -> List[Coalition]:
             return self.form_coalitions(agents)
 
 
@@ -361,12 +360,9 @@ class TestCoalitionBuilder:
             coalition = coalitions[0]
 
             # Calculate value using different methods
-            utility_value = coalition_builder.calculate_utility_value(
-                coalition)
-            efficiency_value = coalition_builder.calculate_efficiency_value(
-                coalition)
-            synergy_value = coalition_builder.calculate_synergy_value(
-                coalition)
+            utility_value = coalition_builder.calculate_utility_value(coalition)
+            efficiency_value = coalition_builder.calculate_efficiency_value(coalition)
+            synergy_value = coalition_builder.calculate_synergy_value(coalition)
 
             assert utility_value >= 0
             assert efficiency_value >= 0
@@ -376,20 +372,17 @@ class TestCoalitionBuilder:
             total_value = coalition_builder.calculate_total_value(coalition)
             assert total_value > 0
 
-    def test_coalition_compatibility_check(
-            self, coalition_builder, test_agents):
+    def test_coalition_compatibility_check(self, coalition_builder, test_agents):
         """Test coalition compatibility checking."""
         if not IMPORT_SUCCESS:
             return
 
         # Test compatibility between different agents
-        agent_pairs = [(test_agents[i], test_agents[j])
-                       for i in range(3) for j in range(i + 1, 4)]
+        agent_pairs = [(test_agents[i], test_agents[j]) for i in range(3) for j in range(i + 1, 4)]
 
         compatibility_results = []
         for agent1, agent2 in agent_pairs:
-            compatibility = coalition_builder.check_compatibility(
-                agent1, agent2)
+            compatibility = coalition_builder.check_compatibility(agent1, agent2)
             compatibility_results.append(compatibility)
 
         # Verify compatibility results
@@ -403,11 +396,9 @@ class TestCoalitionBuilder:
 
             # Recommendation should align with score
             if score > 0.7:
-                assert result["recommendation"] in [
-                    "highly_compatible", "compatible"]
+                assert result["recommendation"] in ["highly_compatible", "compatible"]
             elif score < 0.3:
-                assert result["recommendation"] in [
-                    "incompatible", "poor_match"]
+                assert result["recommendation"] in ["incompatible", "poor_match"]
 
 
 # Module-level fixture for diverse agents (accessible to all test classes)
@@ -519,15 +510,13 @@ class TestAdvancedCoalitionBuilder:
         else:
             return Mock()
 
-    def test_multi_objective_coalition_formation(
-            self, advanced_builder, diverse_agents):
+    def test_multi_objective_coalition_formation(self, advanced_builder, diverse_agents):
         """Test multi-objective coalition formation."""
         if not IMPORT_SUCCESS:
             return
 
         # Form coalitions with multiple objectives
-        multi_obj_result = advanced_builder.multi_objective_formation(
-            diverse_agents)
+        multi_obj_result = advanced_builder.multi_objective_formation(diverse_agents)
 
         assert "coalitions" in multi_obj_result
         assert "pareto_frontier" in multi_obj_result
@@ -552,8 +541,7 @@ class TestAdvancedCoalitionBuilder:
             assert scores["fairness"] >= 0
             assert scores["stability"] >= 0
 
-    def test_hierarchical_coalition_formation(
-            self, advanced_builder, diverse_agents):
+    def test_hierarchical_coalition_formation(self, advanced_builder, diverse_agents):
         """Test hierarchical coalition formation."""
         if not IMPORT_SUCCESS:
             return
@@ -561,8 +549,7 @@ class TestAdvancedCoalitionBuilder:
         advanced_builder.config.coalition_type = CoalitionType.HIERARCHICAL
 
         # Form hierarchical coalitions
-        hierarchical_result = advanced_builder.form_hierarchical_coalitions(
-            diverse_agents)
+        hierarchical_result = advanced_builder.form_hierarchical_coalitions(diverse_agents)
 
         assert "hierarchy_levels" in hierarchical_result
         assert "parent_child_relationships" in hierarchical_result
@@ -585,8 +572,7 @@ class TestAdvancedCoalitionBuilder:
             assert isinstance(children_ids, list)
             assert len(children_ids) > 0
 
-    def test_temporal_coalition_dynamics(
-            self, advanced_builder, diverse_agents):
+    def test_temporal_coalition_dynamics(self, advanced_builder, diverse_agents):
         """Test temporal coalition dynamics."""
         if not IMPORT_SUCCESS:
             return
@@ -595,8 +581,7 @@ class TestAdvancedCoalitionBuilder:
         advanced_builder.config.time_horizon = 5
 
         # Simulate temporal coalition evolution
-        temporal_result = advanced_builder.simulate_temporal_evolution(
-            diverse_agents, time_steps=5)
+        temporal_result = advanced_builder.simulate_temporal_evolution(diverse_agents, time_steps=5)
 
         assert "temporal_coalitions" in temporal_result
         assert "evolution_patterns" in temporal_result
@@ -631,7 +616,8 @@ class TestAdvancedCoalitionBuilder:
 
         # Form coalitions under uncertainty
         uncertainty_result = advanced_builder.form_coalitions_under_uncertainty(
-            diverse_agents, uncertain_scenarios)
+            diverse_agents, uncertain_scenarios
+        )
 
         assert "robust_coalitions" in uncertainty_result
         assert "scenario_analysis" in uncertainty_result
@@ -649,8 +635,7 @@ class TestAdvancedCoalitionBuilder:
             scenario_name = scenario["scenario"]
             assert scenario_name in scenario_analysis
 
-    def test_adaptive_coalition_formation(
-            self, advanced_builder, diverse_agents):
+    def test_adaptive_coalition_formation(self, advanced_builder, diverse_agents):
         """Test adaptive coalition formation."""
         if not IMPORT_SUCCESS:
             return
@@ -670,8 +655,7 @@ class TestAdvancedCoalitionBuilder:
 
         for change in environmental_changes:
             # Adapt coalitions to environmental change
-            adaptation_result = advanced_builder.adapt_coalitions(
-                current_coalitions, change)
+            adaptation_result = advanced_builder.adapt_coalitions(current_coalitions, change)
             adaptation_results.append(adaptation_result)
             current_coalitions = adaptation_result["adapted_coalitions"]
 
@@ -746,17 +730,13 @@ class TestGameTheoreticCoalitionFormation:
 
         return agents
 
-    def test_cooperative_game_setup(
-            self,
-            game_theoretic_builder,
-            strategic_agents):
+    def test_cooperative_game_setup(self, game_theoretic_builder, strategic_agents):
         """Test cooperative game setup."""
         if not IMPORT_SUCCESS:
             return
 
         # Setup cooperative game
-        game_setup = game_theoretic_builder.setup_cooperative_game(
-            strategic_agents)
+        game_setup = game_theoretic_builder.setup_cooperative_game(strategic_agents)
 
         assert "characteristic_function" in game_setup
         assert "player_set" in game_setup
@@ -778,19 +758,16 @@ class TestGameTheoreticCoalitionFormation:
         for coalition_key, value in coalition_values.items():
             if "," in coalition_key:  # Multi-agent coalition
                 member_ids = coalition_key.split(",")
-                individual_sum = sum(coalition_values.get(agent_id, 0)
-                                     for agent_id in member_ids)
+                individual_sum = sum(coalition_values.get(agent_id, 0) for agent_id in member_ids)
                 assert value >= individual_sum  # Superadditivity
 
-    def test_core_solution_computation(
-            self, game_theoretic_builder, strategic_agents):
+    def test_core_solution_computation(self, game_theoretic_builder, strategic_agents):
         """Test core solution computation."""
         if not IMPORT_SUCCESS:
             return
 
         # Compute core solution
-        core_result = game_theoretic_builder.compute_core_solution(
-            strategic_agents)
+        core_result = game_theoretic_builder.compute_core_solution(strategic_agents)
 
         assert "core_allocations" in core_result
         assert "core_exists" in core_result
@@ -806,18 +783,17 @@ class TestGameTheoreticCoalitionFormation:
             # Core allocations should satisfy efficiency
             total_allocation = sum(core_allocations.values())
             grand_coalition_value = game_theoretic_builder.get_grand_coalition_value(
-                strategic_agents)
+                strategic_agents
+            )
             assert abs(total_allocation - grand_coalition_value) < 1e-6
 
-    def test_shapley_value_computation(
-            self, game_theoretic_builder, strategic_agents):
+    def test_shapley_value_computation(self, game_theoretic_builder, strategic_agents):
         """Test Shapley value computation."""
         if not IMPORT_SUCCESS:
             return
 
         # Compute Shapley values
-        shapley_result = game_theoretic_builder.compute_shapley_values(
-            strategic_agents)
+        shapley_result = game_theoretic_builder.compute_shapley_values(strategic_agents)
 
         assert "shapley_values" in shapley_result
         assert "marginal_contributions" in shapley_result
@@ -828,8 +804,7 @@ class TestGameTheoreticCoalitionFormation:
 
         # Shapley values should satisfy efficiency
         total_shapley = sum(shapley_values.values())
-        grand_coalition_value = game_theoretic_builder.get_grand_coalition_value(
-            strategic_agents)
+        grand_coalition_value = game_theoretic_builder.get_grand_coalition_value(strategic_agents)
         assert abs(total_shapley - grand_coalition_value) < 1e-6
 
         # Shapley values should satisfy symmetry
@@ -838,17 +813,13 @@ class TestGameTheoreticCoalitionFormation:
             # Should have marginal contribution data
             assert len(contributions) > 0
 
-    def test_nucleolus_solution(
-            self,
-            game_theoretic_builder,
-            strategic_agents):
+    def test_nucleolus_solution(self, game_theoretic_builder, strategic_agents):
         """Test nucleolus solution computation."""
         if not IMPORT_SUCCESS:
             return
 
         # Compute nucleolus
-        nucleolus_result = game_theoretic_builder.compute_nucleolus(
-            strategic_agents)
+        nucleolus_result = game_theoretic_builder.compute_nucleolus(strategic_agents)
 
         assert "nucleolus_allocation" in nucleolus_result
         assert "excess_vector" in nucleolus_result
@@ -859,23 +830,20 @@ class TestGameTheoreticCoalitionFormation:
 
         # Nucleolus should satisfy efficiency
         total_nucleolus = sum(nucleolus_allocation.values())
-        grand_coalition_value = game_theoretic_builder.get_grand_coalition_value(
-            strategic_agents)
+        grand_coalition_value = game_theoretic_builder.get_grand_coalition_value(strategic_agents)
         assert abs(total_nucleolus - grand_coalition_value) < 1e-6
 
         # Excess vector should be lexicographically optimized
         assert len(excess_vector) > 0
         assert all(isinstance(excess, float) for excess in excess_vector)
 
-    def test_nash_equilibrium_analysis(
-            self, game_theoretic_builder, strategic_agents):
+    def test_nash_equilibrium_analysis(self, game_theoretic_builder, strategic_agents):
         """Test Nash equilibrium analysis."""
         if not IMPORT_SUCCESS:
             return
 
         # Convert to non-cooperative game for Nash analysis
-        non_coop_result = game_theoretic_builder.analyze_nash_equilibrium(
-            strategic_agents)
+        non_coop_result = game_theoretic_builder.analyze_nash_equilibrium(strategic_agents)
 
         assert "nash_equilibria" in non_coop_result
         assert "strategy_profiles" in non_coop_result
@@ -902,8 +870,7 @@ class TestGameTheoreticCoalitionFormation:
             return
 
         # Design mechanism for truthful coalition formation
-        mechanism_result = game_theoretic_builder.design_formation_mechanism(
-            strategic_agents)
+        mechanism_result = game_theoretic_builder.design_formation_mechanism(strategic_agents)
 
         assert "mechanism_rules" in mechanism_result
         assert "incentive_compatibility" in mechanism_result
@@ -930,9 +897,8 @@ class TestCoalitionStabilityAnalysis:
     def stability_config(self):
         """Create stability analysis config."""
         return CoalitionConfig(
-            stability_metric=StabilityMetric.CORE_STABILITY,
-            enable_temporal=True,
-            time_horizon=10)
+            stability_metric=StabilityMetric.CORE_STABILITY, enable_temporal=True, time_horizon=10
+        )
 
     @pytest.fixture
     def stability_analyzer(self, stability_config):
@@ -950,8 +916,7 @@ class TestCoalitionStabilityAnalysis:
         # Technology coalition
         tech_coalition = Coalition(
             coalition_id="tech_coalition",
-            members=[
-                agent for agent in diverse_agents if agent.agent_id.startswith("tech_")],
+            members=[agent for agent in diverse_agents if agent.agent_id.startswith("tech_")],
             formation_time=0.0,
             expected_value=300.0,
             actual_value=280.0,
@@ -961,8 +926,7 @@ class TestCoalitionStabilityAnalysis:
         # Business coalition
         biz_coalition = Coalition(
             coalition_id="business_coalition",
-            members=[
-                agent for agent in diverse_agents if agent.agent_id.startswith("biz_")],
+            members=[agent for agent in diverse_agents if agent.agent_id.startswith("biz_")],
             formation_time=0.0,
             expected_value=250.0,
             actual_value=270.0,
@@ -971,10 +935,7 @@ class TestCoalitionStabilityAnalysis:
 
         return coalitions
 
-    def test_core_stability_analysis(
-            self,
-            stability_analyzer,
-            formed_coalitions):
+    def test_core_stability_analysis(self, stability_analyzer, formed_coalitions):
         """Test core stability analysis."""
         if not IMPORT_SUCCESS:
             return
@@ -982,8 +943,7 @@ class TestCoalitionStabilityAnalysis:
         # Analyze core stability
         stability_results = []
         for coalition in formed_coalitions:
-            stability_result = stability_analyzer.analyze_core_stability(
-                coalition)
+            stability_result = stability_analyzer.analyze_core_stability(coalition)
             stability_results.append(stability_result)
 
         # Verify stability analysis
@@ -1001,8 +961,7 @@ class TestCoalitionStabilityAnalysis:
                 blocking_coalitions = result["blocking_coalitions"]
                 assert len(blocking_coalitions) > 0
 
-    def test_dynamic_stability_tracking(
-            self, stability_analyzer, formed_coalitions):
+    def test_dynamic_stability_tracking(self, stability_analyzer, formed_coalitions):
         """Test dynamic stability tracking over time."""
         if not IMPORT_SUCCESS:
             return
@@ -1035,10 +994,7 @@ class TestCoalitionStabilityAnalysis:
             assert "stability_variance" in trend
             assert "prediction" in trend
 
-    def test_perturbation_analysis(
-            self,
-            stability_analyzer,
-            formed_coalitions):
+    def test_perturbation_analysis(self, stability_analyzer, formed_coalitions):
         """Test perturbation analysis for stability."""
         if not IMPORT_SUCCESS:
             return
@@ -1055,8 +1011,7 @@ class TestCoalitionStabilityAnalysis:
 
         for perturbation in perturbations:
             for coalition in formed_coalitions:
-                result = stability_analyzer.analyze_perturbation_impact(
-                    coalition, perturbation)
+                result = stability_analyzer.analyze_perturbation_impact(coalition, perturbation)
                 perturbation_results.append(result)
 
         # Verify perturbation analysis
@@ -1072,8 +1027,7 @@ class TestCoalitionStabilityAnalysis:
             assert -1 <= stability_impact <= 1  # Impact can be positive or negative
             assert 0 <= resilience_score <= 1  # Resilience is always positive
 
-    def test_stability_improvement_recommendations(
-            self, stability_analyzer, formed_coalitions):
+    def test_stability_improvement_recommendations(self, stability_analyzer, formed_coalitions):
         """Test stability improvement recommendations."""
         if not IMPORT_SUCCESS:
             return
@@ -1081,8 +1035,7 @@ class TestCoalitionStabilityAnalysis:
         # Get stability improvement recommendations
         improvement_results = []
         for coalition in formed_coalitions:
-            improvement_result = stability_analyzer.recommend_stability_improvements(
-                coalition)
+            improvement_result = stability_analyzer.recommend_stability_improvements(coalition)
             improvement_results.append(improvement_result)
 
         # Verify recommendations
@@ -1145,8 +1098,7 @@ class TestCoalitionFormationAlgorithms:
             return
 
         config = CoalitionConfig(formation_algorithm=FormationAlgorithm.GREEDY)
-        greedy_builder = GreedyCoalitionFormation(
-            config) if IMPORT_SUCCESS else Mock()
+        greedy_builder = GreedyCoalitionFormation(config) if IMPORT_SUCCESS else Mock()
 
         # Run greedy algorithm
         greedy_result = greedy_builder.form_coalitions(algorithm_test_agents)
@@ -1174,10 +1126,8 @@ class TestCoalitionFormationAlgorithms:
         if not IMPORT_SUCCESS:
             return
 
-        config = CoalitionConfig(
-            formation_algorithm=FormationAlgorithm.OPTIMAL)
-        optimal_builder = OptimalCoalitionFormation(
-            config) if IMPORT_SUCCESS else Mock()
+        config = CoalitionConfig(formation_algorithm=FormationAlgorithm.OPTIMAL)
+        optimal_builder = OptimalCoalitionFormation(config) if IMPORT_SUCCESS else Mock()
 
         # Run optimal algorithm (on smaller subset for tractability)
         small_agent_set = algorithm_test_agents[:5]  # Reduce complexity
@@ -1199,14 +1149,11 @@ class TestCoalitionFormationAlgorithms:
         if not IMPORT_SUCCESS:
             return
 
-        config = CoalitionConfig(
-            formation_algorithm=FormationAlgorithm.HEURISTIC)
-        heuristic_builder = HeuristicCoalitionFormation(
-            config) if IMPORT_SUCCESS else Mock()
+        config = CoalitionConfig(formation_algorithm=FormationAlgorithm.HEURISTIC)
+        heuristic_builder = HeuristicCoalitionFormation(config) if IMPORT_SUCCESS else Mock()
 
         # Run heuristic algorithm
-        heuristic_result = heuristic_builder.form_coalitions(
-            algorithm_test_agents)
+        heuristic_result = heuristic_builder.form_coalitions(algorithm_test_agents)
 
         assert "coalitions" in heuristic_result
         assert "heuristic_rules" in heuristic_result
@@ -1226,14 +1173,11 @@ class TestCoalitionFormationAlgorithms:
         if not IMPORT_SUCCESS:
             return
 
-        config = CoalitionConfig(
-            formation_algorithm=FormationAlgorithm.DISTRIBUTED)
-        distributed_builder = DistributedCoalitionFormation(
-            config) if IMPORT_SUCCESS else Mock()
+        config = CoalitionConfig(formation_algorithm=FormationAlgorithm.DISTRIBUTED)
+        distributed_builder = DistributedCoalitionFormation(config) if IMPORT_SUCCESS else Mock()
 
         # Run distributed algorithm
-        distributed_result = distributed_builder.form_coalitions(
-            algorithm_test_agents)
+        distributed_result = distributed_builder.form_coalitions(algorithm_test_agents)
 
         assert "coalitions" in distributed_result
         assert "communication_rounds" in distributed_result
@@ -1258,14 +1202,12 @@ class TestCoalitionFormationAlgorithms:
             return
 
         config = CoalitionConfig(
-            formation_algorithm=FormationAlgorithm.EVOLUTIONARY,
-            max_iterations=50)
-        evolutionary_builder = EvolutionaryCoalitionFormation(
-            config) if IMPORT_SUCCESS else Mock()
+            formation_algorithm=FormationAlgorithm.EVOLUTIONARY, max_iterations=50
+        )
+        evolutionary_builder = EvolutionaryCoalitionFormation(config) if IMPORT_SUCCESS else Mock()
 
         # Run evolutionary algorithm
-        evolutionary_result = evolutionary_builder.form_coalitions(
-            algorithm_test_agents)
+        evolutionary_result = evolutionary_builder.form_coalitions(algorithm_test_agents)
 
         assert "coalitions" in evolutionary_result
         assert "evolution_history" in evolutionary_result
@@ -1303,14 +1245,11 @@ class TestCoalitionFormationAlgorithms:
             config = CoalitionConfig(formation_algorithm=algorithm)
 
             if algorithm == FormationAlgorithm.GREEDY:
-                builder = GreedyCoalitionFormation(
-                    config) if IMPORT_SUCCESS else Mock()
+                builder = GreedyCoalitionFormation(config) if IMPORT_SUCCESS else Mock()
             elif algorithm == FormationAlgorithm.HEURISTIC:
-                builder = HeuristicCoalitionFormation(
-                    config) if IMPORT_SUCCESS else Mock()
+                builder = HeuristicCoalitionFormation(config) if IMPORT_SUCCESS else Mock()
             else:
-                builder = DistributedCoalitionFormation(
-                    config) if IMPORT_SUCCESS else Mock()
+                builder = DistributedCoalitionFormation(config) if IMPORT_SUCCESS else Mock()
 
             # Run algorithm and measure performance
             start_time = time.time()
@@ -1353,8 +1292,7 @@ class TestCoalitionFormationIntegration:
             ensure_fairness=True,
         )
 
-        coalition_engine = CoalitionFormationEngine(
-            config) if IMPORT_SUCCESS else Mock()
+        coalition_engine = CoalitionFormationEngine(config) if IMPORT_SUCCESS else Mock()
 
         # Create diverse agent ecosystem
         ecosystem_agents = []
@@ -1383,8 +1321,7 @@ class TestCoalitionFormationIntegration:
 
         if IMPORT_SUCCESS:
             # Phase 1: Initial Coalition Formation
-            formation_result = coalition_engine.execute_formation_process(
-                ecosystem_agents)
+            formation_result = coalition_engine.execute_formation_process(ecosystem_agents)
 
             assert "initial_coalitions" in formation_result
             assert "formation_rationale" in formation_result
@@ -1394,8 +1331,7 @@ class TestCoalitionFormationIntegration:
             # Phase 2: Coalition Operation and Monitoring
             operation_results = []
             for coalition in initial_coalitions:
-                operation_result = coalition_engine.monitor_coalition_operation(
-                    coalition)
+                operation_result = coalition_engine.monitor_coalition_operation(coalition)
                 operation_results.append(operation_result)
 
             # Phase 3: Dynamic Adaptation
@@ -1414,22 +1350,16 @@ class TestCoalitionFormationIntegration:
                 assert "adaptation_strategy" in adaptation_result
 
             # Phase 4: Coalition Dissolution/Reformation
-            lifecycle_completion = coalition_engine.complete_coalition_lifecycle(
-                initial_coalitions)
+            lifecycle_completion = coalition_engine.complete_coalition_lifecycle(initial_coalitions)
 
             assert "dissolution_analysis" in lifecycle_completion
             assert "reformation_opportunities" in lifecycle_completion
             assert "lessons_learned" in lifecycle_completion
 
-    def _generate_type_specific_capabilities(
-            self, agent_type: str) -> Dict[str, float]:
+    def _generate_type_specific_capabilities(self, agent_type: str) -> Dict[str, float]:
         """Generate capabilities specific to agent type."""
         base_capabilities = {
-            "technology_startup": {
-                "innovation": 0.9,
-                "agility": 0.8,
-                "funding": 0.3,
-                "scale": 0.2},
+            "technology_startup": {"innovation": 0.9, "agility": 0.8, "funding": 0.3, "scale": 0.2},
             "established_corporation": {
                 "resources": 0.9,
                 "scale": 0.9,
@@ -1463,8 +1393,7 @@ class TestCoalitionFormationIntegration:
         }
         return base_capabilities.get(agent_type, {"generic_skill": 0.5})
 
-    def _generate_type_specific_resources(
-            self, agent_type: str) -> Dict[str, float]:
+    def _generate_type_specific_resources(self, agent_type: str) -> Dict[str, float]:
         """Generate resources specific to agent type."""
         base_resources = {
             "technology_startup": {"funding": 500, "team_size": 10, "ip_portfolio": 0.3},
@@ -1480,15 +1409,10 @@ class TestCoalitionFormationIntegration:
         }
         return base_resources.get(agent_type, {"generic_resource": 100})
 
-    def _generate_type_specific_preferences(
-            self, agent_type: str) -> Dict[str, float]:
+    def _generate_type_specific_preferences(self, agent_type: str) -> Dict[str, float]:
         """Generate preferences specific to agent type."""
         base_preferences = {
-            "technology_startup": {
-                "growth": 0.9,
-                "innovation": 0.8,
-                "profit": 0.7,
-                "risk": 0.6},
+            "technology_startup": {"growth": 0.9, "innovation": 0.8, "profit": 0.7, "risk": 0.6},
             "established_corporation": {
                 "profit": 0.9,
                 "stability": 0.8,
@@ -1533,13 +1457,12 @@ class TestCoalitionFormationIntegration:
 
         for i in range(num_agents):
             agent = Agent(
-                agent_id=f"large_scale_agent_{i}", capabilities={
-                    f"skill_{j}": np.random.uniform(
-                        0.1, 0.9) for j in range(5)}, resources={
-                    f"resource_{j}": np.random.uniform(
-                        100, 1000) for j in range(3)}, preferences={
-                    f"preference_{j}": np.random.uniform(
-                        0.0, 1.0) for j in range(4)}, constraints={}, )
+                agent_id=f"large_scale_agent_{i}",
+                capabilities={f"skill_{j}": np.random.uniform(0.1, 0.9) for j in range(5)},
+                resources={f"resource_{j}": np.random.uniform(100, 1000) for j in range(3)},
+                preferences={f"preference_{j}": np.random.uniform(0.0, 1.0) for j in range(4)},
+                constraints={},
+            )
             large_agent_population.append(agent)
 
         # Configure for scalability
@@ -1549,14 +1472,12 @@ class TestCoalitionFormationIntegration:
             scalability_optimization=True,
         )
 
-        scalable_builder = AdvancedCoalitionBuilder(
-            scalable_config) if IMPORT_SUCCESS else Mock()
+        scalable_builder = AdvancedCoalitionBuilder(scalable_config) if IMPORT_SUCCESS else Mock()
 
         if IMPORT_SUCCESS:
             # Measure scalability
             start_time = time.time()
-            large_scale_result = scalable_builder.form_coalitions(
-                large_agent_population)
+            large_scale_result = scalable_builder.form_coalitions(large_agent_population)
             formation_time = time.time() - start_time
 
             assert "coalitions" in large_scale_result

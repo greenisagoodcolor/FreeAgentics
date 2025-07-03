@@ -14,19 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import AgentTemplateSelector from "@/components/dashboard/AgentTemplateSelector";
 
-// Define DashboardView type locally
-export type DashboardView =
-  | "ceo-demo"
-  | "executive"
-  | "technical"
-  | "research"
-  | "minimal";
-
-interface AgentPanelProps {
-  view: DashboardView;
-}
-
-export default function AgentPanel({ view }: AgentPanelProps) {
+export default function AgentPanel() {
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
 

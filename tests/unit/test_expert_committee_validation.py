@@ -92,8 +92,7 @@ class TestExpertProfile:
         assert expert.name == "Test Expert"
         assert expert.domain == ExpertDomain.MULTI_AGENT_SYSTEMS
         assert expert.credentials == ["PhD", "Industry Expert"]
-        assert expert.validation_authority == [
-            "agent_design", "safety_protocols"]
+        assert expert.validation_authority == ["agent_design", "safety_protocols"]
         assert expert.contact_info == {"email": "test@example.com"}
         assert expert.active is True
 
@@ -136,14 +135,11 @@ class TestExpertCommitteeInitialization:
 
     def test_expert_domains_coverage(self, expert_committee):
         """Test that experts cover all required domains."""
-        expert_domains = [
-            expert.domain for expert in expert_committee.experts.values()]
+        expert_domains = [expert.domain for expert in expert_committee.experts.values()]
 
         # Should have multiple experts in key domains
-        mas_experts = [d for d in expert_domains if d ==
-                       ExpertDomain.MULTI_AGENT_SYSTEMS]
-        arch_experts = [d for d in expert_domains if d ==
-                        ExpertDomain.SOFTWARE_ARCHITECTURE]
+        mas_experts = [d for d in expert_domains if d == ExpertDomain.MULTI_AGENT_SYSTEMS]
+        arch_experts = [d for d in expert_domains if d == ExpertDomain.SOFTWARE_ARCHITECTURE]
 
         assert len(mas_experts) == 3  # Harrison, João, Jerry
         assert len(arch_experts) == 3  # Robert, Rich, Kent
@@ -152,10 +148,7 @@ class TestExpertCommitteeInitialization:
 class TestReviewSubmission:
     """Test review submission functionality."""
 
-    def test_submit_for_review_basic(
-            self,
-            expert_committee,
-            sample_business_model):
+    def test_submit_for_review_basic(self, expert_committee, sample_business_model):
         """Test basic review submission."""
         review_id = expert_committee.submit_for_review(
             coalition_id="test_coalition",
@@ -171,10 +164,7 @@ class TestReviewSubmission:
         assert review.review_type == "business_intelligence"
         assert review.overall_status == ValidationStatus.PENDING
 
-    def test_submit_multiple_reviews(
-            self,
-            expert_committee,
-            sample_business_model):
+    def test_submit_multiple_reviews(self, expert_committee, sample_business_model):
         """Test submitting multiple reviews."""
         review_id1 = expert_committee.submit_for_review(
             coalition_id="coalition1",
@@ -213,9 +203,7 @@ class TestExpertValidationSimulation:
 
         assert completed_review.review_id == review_id
         assert completed_review.completion_timestamp is not None
-        assert len(
-            completed_review.expert_results) == len(
-            expert_committee.experts)
+        assert len(completed_review.expert_results) == len(expert_committee.experts)
         assert completed_review.consensus_score > 0
         assert completed_review.overall_status in [
             ValidationStatus.APPROVED,
@@ -253,21 +241,17 @@ class TestExpertValidationSimulation:
 class TestExpertEvaluationMethods:
     """Test individual expert evaluation methods."""
 
-    def test_evaluate_multi_agent_aspects(
-            self, expert_committee, sample_business_model):
+    def test_evaluate_multi_agent_aspects(self, expert_committee, sample_business_model):
         """Test multi-agent system evaluation."""
-        score = expert_committee._evaluate_multi_agent_aspects(
-            sample_business_model, {})
+        score = expert_committee._evaluate_multi_agent_aspects(sample_business_model, {})
 
         # Should score well with complete business model
         assert 0.0 <= score <= 1.0
         assert score >= 0.8  # Should be high with comprehensive model
 
-    def test_evaluate_business_intelligence(
-            self, expert_committee, sample_business_model):
+    def test_evaluate_business_intelligence(self, expert_committee, sample_business_model):
         """Test business intelligence evaluation."""
-        score = expert_committee._evaluate_business_intelligence(
-            sample_business_model)
+        score = expert_committee._evaluate_business_intelligence(sample_business_model)
 
         assert 0.0 <= score <= 1.0
         # Should score well with complete executive summary and metrics
@@ -277,8 +261,7 @@ class TestExpertEvaluationMethods:
 class TestReviewStatusAndQueries:
     """Test review status and query functionality."""
 
-    def test_get_review_status_active(
-            self, expert_committee, sample_business_model):
+    def test_get_review_status_active(self, expert_committee, sample_business_model):
         """Test getting status of active review."""
         review_id = expert_committee.submit_for_review(
             coalition_id="status_test",
@@ -311,8 +294,7 @@ class TestTaskMathematicalValidation:
             "risk_assessment_framework": "Comprehensive evaluation",
         }
 
-        result = expert_committee.validate_task_37_mathematical_rigor(
-            implementation_details)
+        result = expert_committee.validate_task_37_mathematical_rigor(implementation_details)
 
         assert isinstance(result, ValidationResult)
         assert result.expert_id == "committee_mathematical_review"

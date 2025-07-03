@@ -39,10 +39,7 @@ class PyMDPPolicySelector(PolicySelector):
     with validated pymdp functions to resolve algorithmic bugs.
     """
 
-    def __init__(
-            self,
-            config: PolicyConfig,
-            generative_model: PyMDPGenerativeModel) -> None:
+    def __init__(self, config: PolicyConfig, generative_model: PyMDPGenerativeModel) -> None:
         super().__init__(config)
         self.generative_model = generative_model
         # Get pymdp matrices
@@ -59,20 +56,14 @@ class PyMDPPolicySelector(PolicySelector):
         if self.config.num_policies is not None:
             policies = []
             for _ in range(self.config.num_policies):
-                actions = np.random.randint(
-                    0, num_actions, self.config.policy_length)
-                policies.append(
-                    Policy(
-                        actions.tolist(),
-                        self.config.planning_horizon))
+                actions = np.random.randint(0, num_actions, self.config.policy_length)
+                policies.append(Policy(actions.tolist(), self.config.planning_horizon))
             return policies
         elif self.config.policy_length == 1:
             return [Policy([a]) for a in range(num_actions)]
         else:
-            all_combos = itertools.product(
-                range(num_actions), repeat=self.config.policy_length)
-            return [Policy(list(combo), self.config.planning_horizon)
-                    for combo in all_combos]
+            all_combos = itertools.product(range(num_actions), repeat=self.config.policy_length)
+            return [Policy(list(combo), self.config.planning_horizon) for combo in all_combos]
 
     def select_policy(
         self,
@@ -121,8 +112,7 @@ class PyMDPPolicySelector(PolicySelector):
             # Deterministic selection (lowest free energy)
             action_idx = int(np.argmin(free_energies_array))
             # Convert back to our Policy format
-        selected_policy = Policy(
-            [int(action_idx)], self.config.planning_horizon)
+        selected_policy = Policy([int(action_idx)], self.config.planning_horizon)
         # Convert to PyTorch tensor for compatibility with existing tests
         policy_probs_tensor = torch.from_numpy(policy_probs).float()
         return selected_policy, policy_probs_tensor
@@ -147,45 +137,48 @@ class PyMDPPolicySelector(PolicySelector):
             pragmatic_value: Preference satisfaction component (tensor)
         """
         beliefs_np, action_idx = self._prepare_computation_inputs(policy, beliefs)
-        
+
         # Try computation strategies in order of preference
         computation_strategies = [
             self._compute_with_pymdp,
             self._compute_with_enhanced_fallback,
-            self._compute_with_emergency_fallback
+            self._compute_with_emergency_fallback,
         ]
-        
+
         for strategy in computation_strategies:
             try:
                 return strategy(beliefs_np, action_idx, preferences)
             except Exception as e:
                 logger.warning(f"Computation strategy {strategy.__name__} failed: {e}")
                 continue
-        
+
         # This should never be reached due to emergency fallback
         return self._compute_with_emergency_fallback(beliefs_np, action_idx, preferences)
 
-    def _prepare_computation_inputs(self, policy: Policy, beliefs: torch.Tensor) -> Tuple[np.ndarray, int]:
+    def _prepare_computation_inputs(
+        self, policy: Policy, beliefs: torch.Tensor
+    ) -> Tuple[np.ndarray, int]:
         """Prepare inputs for free energy computation"""
         beliefs_np = beliefs.detach().cpu().numpy()
-        
+
         if isinstance(policy, Policy):
             action_idx = int(policy.actions[0]) if len(policy.actions) > 0 else 0
         else:
             raise ValueError(f"Unsupported policy type: {type(policy)}")
-        
+
         return beliefs_np, action_idx
 
-    def _compute_with_pymdp(self, beliefs_np: np.ndarray, action_idx: int, 
-                           preferences: Optional[torch.Tensor]) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def _compute_with_pymdp(
+        self, beliefs_np: np.ndarray, action_idx: int, preferences: Optional[torch.Tensor]
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Compute using PyMDP agent"""
         self.agent.qs = [beliefs_np]
         self.agent.infer_policies()
-        
+
         G = self._extract_free_energy_from_agent(action_idx)
         epistemic_value = G * 0.5
         pragmatic_value = G * 0.5
-        
+
         return torch.tensor(G), torch.tensor(epistemic_value), torch.tensor(pragmatic_value)
 
     def _extract_free_energy_from_agent(self, action_idx: int) -> float:
@@ -199,8 +192,11 @@ class PyMDPPolicySelector(PolicySelector):
 
     def _extract_from_G_attribute(self, action_idx: int) -> float:
         """Extract free energy from agent's G attribute"""
-        if (isinstance(self.agent.G, list) and isinstance(action_idx, int) and 
-            len(self.agent.G) > action_idx):
+        if (
+            isinstance(self.agent.G, list)
+            and isinstance(action_idx, int)
+            and len(self.agent.G) > action_idx
+        ):
             return float(self.agent.G[action_idx])
         elif hasattr(self.agent.G, "__getitem__") and isinstance(action_idx, int):
             try:
@@ -218,21 +214,24 @@ class PyMDPPolicySelector(PolicySelector):
         else:
             return 1.0
 
-    def _compute_with_enhanced_fallback(self, beliefs_np: np.ndarray, action_idx: int,
-                                      preferences: Optional[torch.Tensor]) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def _compute_with_enhanced_fallback(
+        self, beliefs_np: np.ndarray, action_idx: int, preferences: Optional[torch.Tensor]
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Enhanced fallback computation without PyMDP"""
         logger.info("Using enhanced non-PyMDP fallback calculations")
-        
+
         base_G = 1.0 + 0.1 * float(action_idx)
         uncertainty_component = self._calculate_belief_uncertainty(beliefs_np)
         preference_component = self._calculate_preference_component(preferences, action_idx)
-        
+
         G = base_G + uncertainty_component + preference_component
         epistemic_value = uncertainty_component + base_G * 0.3
         pragmatic_value = preference_component + base_G * 0.7
-        
-        logger.info(f"Non-PyMDP fallback: G={G:.3f}, epistemic={epistemic_value:.3f}, pragmatic={pragmatic_value:.3f}")
-        
+
+        logger.info(
+            f"Non-PyMDP fallback: G={G:.3f}, epistemic={epistemic_value:.3f}, pragmatic={pragmatic_value:.3f}"
+        )
+
         return torch.tensor(G), torch.tensor(epistemic_value), torch.tensor(pragmatic_value)
 
     def _calculate_belief_uncertainty(self, beliefs_np: np.ndarray) -> float:
@@ -240,28 +239,31 @@ class PyMDPPolicySelector(PolicySelector):
         belief_entropy = -float(np.sum(beliefs_np * np.log(beliefs_np + 1e-16)))
         return belief_entropy * 0.1
 
-    def _calculate_preference_component(self, preferences: Optional[torch.Tensor], action_idx: int) -> float:
+    def _calculate_preference_component(
+        self, preferences: Optional[torch.Tensor], action_idx: int
+    ) -> float:
         """Calculate preference component"""
         if preferences is None:
             return 0.0
-        
+
         if isinstance(preferences, torch.Tensor):
             preferences_np = preferences.detach().cpu().numpy()
         else:
             preferences_np = np.array(preferences)
-        
+
         if isinstance(action_idx, int) and len(preferences_np) > action_idx:
             return -preferences_np[action_idx] * 0.1
-        
+
         return 0.0
 
-    def _compute_with_emergency_fallback(self, beliefs_np: np.ndarray, action_idx: int,
-                                       preferences: Optional[torch.Tensor]) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def _compute_with_emergency_fallback(
+        self, beliefs_np: np.ndarray, action_idx: int, preferences: Optional[torch.Tensor]
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Emergency fallback with minimal computation"""
         G = 1.0 + 0.1 * float(action_idx) if isinstance(action_idx, int) else 1.0
         epistemic_value = G * 0.5
         pragmatic_value = G * 0.5
-        
+
         return torch.tensor(G), torch.tensor(epistemic_value), torch.tensor(pragmatic_value)
 
 
@@ -285,7 +287,7 @@ class PyMDPPolicyAdapter:
         """
         self.config = config
         self._agent_cache: Dict[str, Any] = {}
-        
+
         generative_model = self._resolve_generative_model(second_arg)
         pymdp_model = self._convert_to_pymdp_model(generative_model)
         self._create_pymdp_selector(config, pymdp_model)
@@ -295,7 +297,7 @@ class PyMDPPolicyAdapter:
         """Resolve the generative model from the second argument"""
         if second_arg is None:
             return None
-        
+
         try:
             if isinstance(second_arg, InferenceAlgorithm):
                 logger.info("Using old interface (config, inference) - creating default model")
@@ -317,7 +319,8 @@ class PyMDPPolicyAdapter:
     def _create_default_model(self) -> PyMDPGenerativeModel:
         """Create default model for compatibility with old interface"""
         return create_pymdp_generative_model(
-            num_states=4, num_observations=3, num_actions=2, time_horizon=3)
+            num_states=4, num_observations=3, num_actions=2, time_horizon=3
+        )
 
     def _convert_other_model_format(self, generative_model: Any) -> PyMDPGenerativeModel:
         """Convert other model formats to PyMDP"""
@@ -330,26 +333,30 @@ class PyMDPPolicyAdapter:
             logger.error(f"Could not convert generative model: {e}")
             return self._create_default_model()
 
-    def _convert_discrete_model(self, generative_model: DiscreteGenerativeModel) -> PyMDPGenerativeModel:
+    def _convert_discrete_model(
+        self, generative_model: DiscreteGenerativeModel
+    ) -> PyMDPGenerativeModel:
         """Convert DiscreteGenerativeModel to PyMDP format"""
         logger.info(
             f"Converting DiscreteGenerativeModel with "
             f"{generative_model.dims.num_states} states, "
             f"{generative_model.dims.num_observations} observations, "
-            f"{generative_model.dims.num_actions} actions")
+            f"{generative_model.dims.num_actions} actions"
+        )
         return PyMDPGenerativeModel.from_discrete_model(generative_model)
 
     def _extract_and_create_model(self, generative_model: Any) -> PyMDPGenerativeModel:
         """Extract dimensions from unknown model and create PyMDP model"""
         logger.warning(f"Unknown generative model type: {type(generative_model)}")
-        
+
         try:
             dimensions = self._extract_model_dimensions(generative_model)
             logger.info(
                 f"Extracted dimensions: {dimensions['num_states']} states, "
                 f"{dimensions['num_observations']} observations, "
-                f"{dimensions['num_actions']} actions")
-            
+                f"{dimensions['num_actions']} actions"
+            )
+
             return create_pymdp_generative_model(**dimensions)
         except Exception as dim_e:
             logger.error(f"Failed to extract dimensions: {dim_e}")
@@ -370,24 +377,32 @@ class PyMDPPolicyAdapter:
             "num_states": dims.num_states,
             "num_observations": dims.num_observations,
             "num_actions": dims.num_actions,
-            "time_horizon": getattr(dims, "time_horizon", 3)
+            "time_horizon": getattr(dims, "time_horizon", 3),
         }
 
     def _extract_from_matrices(self, generative_model: Any) -> Dict[str, int]:
         """Extract dimensions from A and B matrices"""
-        A_shape = (generative_model.A.shape if hasattr(generative_model.A, "shape") 
-                  else generative_model.A.size())
-        B_shape = (generative_model.B.shape if hasattr(generative_model.B, "shape") 
-                  else generative_model.B.size())
-        
+        A_shape = (
+            generative_model.A.shape
+            if hasattr(generative_model.A, "shape")
+            else generative_model.A.size()
+        )
+        B_shape = (
+            generative_model.B.shape
+            if hasattr(generative_model.B, "shape")
+            else generative_model.B.size()
+        )
+
         return {
             "num_observations": A_shape[0],
             "num_states": A_shape[1],
             "num_actions": B_shape[2] if len(B_shape) > 2 else 2,
-            "time_horizon": 3
+            "time_horizon": 3,
         }
 
-    def _create_pymdp_selector(self, config: PolicyConfig, pymdp_model: PyMDPGenerativeModel) -> None:
+    def _create_pymdp_selector(
+        self, config: PolicyConfig, pymdp_model: PyMDPGenerativeModel
+    ) -> None:
         """Create the underlying PyMDP selector"""
         self.pymdp_selector = PyMDPPolicySelector(config, pymdp_model)
 
@@ -445,43 +460,37 @@ class PyMDPPolicyAdapter:
             logger.debug(f"Using cached PyMDP selector for model {model_hash}")
             return self._agent_cache[model_hash]
         # Create new selector and cache it
-        logger.info(
-            f"Creating new cached PyMDP selector for model {model_hash}")
+        logger.info(f"Creating new cached PyMDP selector for model {model_hash}")
         try:
             if isinstance(generative_model, DiscreteGenerativeModel):
                 # Convert the generative model to pymdp format
-                pymdp_model = PyMDPGenerativeModel.from_discrete_model(
-                    generative_model)
+                pymdp_model = PyMDPGenerativeModel.from_discrete_model(generative_model)
                 # Create a new selector with the correct model
                 new_selector = PyMDPPolicySelector(self.config, pymdp_model)
                 # Cache the selector
                 self._agent_cache[model_hash] = new_selector
-                logger.debug(
-                    f"Cached new PyMDP selector for model {model_hash}")
+                logger.debug(f"Cached new PyMDP selector for model {model_hash}")
                 return new_selector
             else:
                 # Use the default model from the main selector
                 logger.debug(
                     f"Using default selector for unknown model type: {
-                        type(generative_model)}")
+                        type(generative_model)}"
+                )
                 return self.pymdp_selector
         except Exception as e:
-            logger.warning(
-                f"Could not create cached selector for model {model_hash}: {e}")
+            logger.warning(f"Could not create cached selector for model {model_hash}: {e}")
             # Fallback to default selector
             return self.pymdp_selector
 
     def select_policy(
-            self,
-            beliefs: Any,
-            generative_model: Any = None,
-            preferences: Any = None) -> Any:
+        self, beliefs: Any, generative_model: Any = None, preferences: Any = None
+    ) -> Any:
         """Adapter method for existing interface"""
         # ✅ CRITICAL FIX: Use cached selector instead of creating new ones
         # This prevents the Einstein summation error from excessive agent
         # creation
-        if generative_model is not None and not isinstance(
-                generative_model, PyMDPGenerativeModel):
+        if generative_model is not None and not isinstance(generative_model, PyMDPGenerativeModel):
             # Get cached selector instead of creating a new one every time
             cached_selector = self._get_cached_selector(generative_model)
             return cached_selector.select_policy(
@@ -502,18 +511,17 @@ class PyMDPPolicyAdapter:
 
     def _is_integration_test_interface(self, args: tuple) -> bool:
         """Check if arguments match integration test interface: (beliefs, A, B, C)"""
-        return len(args) == 4 and all(hasattr(arg, "shape")
-                                      for arg in args[1:])
+        return len(args) == 4 and all(hasattr(arg, "shape") for arg in args[1:])
 
     def _handle_integration_test_interface(self, args: tuple) -> torch.Tensor:
         """Handle integration test interface: compute_expected_free_energy(beliefs, A, B, C)"""
         beliefs, A, B, C = args
         try:
-            matrices = self._prepare_matrices_for_integration_test(
-                beliefs, A, B, C)
+            matrices = self._prepare_matrices_for_integration_test(beliefs, A, B, C)
             temp_agent = self._get_or_create_cached_agent(matrices)
             free_energies = self._compute_free_energies_from_agent(
-                temp_agent, matrices["num_actions"])
+                temp_agent, matrices["num_actions"]
+            )
             return torch.tensor(free_energies, dtype=torch.float32)
         except Exception as e:
             logger.warning(f"Error in integration test interface: {e}")
@@ -521,15 +529,14 @@ class PyMDPPolicyAdapter:
 
     def _handle_standard_interface(self, args: tuple, kwargs: dict) -> Any:
         """Handle standard interface: compute_expected_free_energy(policy, beliefs, ...)"""
-        policy, beliefs, generative_model, preferences = self._extract_standard_args(
-            args, kwargs)
+        policy, beliefs, generative_model, preferences = self._extract_standard_args(args, kwargs)
 
         if self._should_use_cached_selector(generative_model):
             return self._compute_with_cached_selector(
-                policy, beliefs, preferences, generative_model)
+                policy, beliefs, preferences, generative_model
+            )
         else:
-            return self._compute_with_pymdp_selector(
-                policy, beliefs, preferences)
+            return self._compute_with_pymdp_selector(policy, beliefs, preferences)
 
     def _prepare_matrices_for_integration_test(self, beliefs, A, B, C) -> dict:
         """Prepare matrices with deep copies to prevent tensor corruption"""
@@ -551,22 +558,19 @@ class PyMDPPolicyAdapter:
             matrices["beliefs"] = np.array(beliefs, copy=True)
 
         # Infer dimensions
-        matrices.update(
-            self._infer_matrix_dimensions(
-                matrices["A"],
-                matrices["B"]))
+        matrices.update(self._infer_matrix_dimensions(matrices["A"], matrices["B"]))
         return matrices
 
     def _infer_matrix_dimensions(self, A_np, B_np) -> dict:
         """Infer matrix dimensions from A and B matrices"""
         if hasattr(A_np, "shape"):
             num_observations = A_np.shape[0] if len(A_np.shape) > 1 else 1
-            num_states = A_np.shape[1] if len(
-                A_np.shape) > 1 else A_np.shape[0]
+            num_states = A_np.shape[1] if len(A_np.shape) > 1 else A_np.shape[0]
         else:
             num_observations = len(A_np) if hasattr(A_np, "__len__") else 1
-            num_states = (len(A_np[0]) if hasattr(A_np, "__len__") and
-                          hasattr(A_np[0], "__len__") else 1)
+            num_states = (
+                len(A_np[0]) if hasattr(A_np, "__len__") and hasattr(A_np[0], "__len__") else 1
+            )
 
         if hasattr(B_np, "shape"):
             num_actions = B_np.shape[2] if len(B_np.shape) > 2 else 2
@@ -576,7 +580,7 @@ class PyMDPPolicyAdapter:
         return {
             "num_observations": num_observations,
             "num_states": num_states,
-            "num_actions": num_actions
+            "num_actions": num_actions,
         }
 
     def _get_or_create_cached_agent(self, matrices: dict):
@@ -591,10 +595,7 @@ class PyMDPPolicyAdapter:
             temp_agent = self._agent_cache[temp_model_hash]
         else:
             logger.info(f"Creating cached temp agent for {temp_model_hash}")
-            temp_agent = PyMDPAgent(
-                A=matrices["A"],
-                B=matrices["B"],
-                C=matrices["C"])
+            temp_agent = PyMDPAgent(A=matrices["A"], B=matrices["B"], C=matrices["C"])
             self._agent_cache[temp_model_hash] = temp_agent
 
         # Set beliefs and run inference
@@ -602,8 +603,7 @@ class PyMDPPolicyAdapter:
         temp_agent.infer_policies()
         return temp_agent
 
-    def _compute_free_energies_from_agent(
-            self, temp_agent, num_actions: int) -> list:
+    def _compute_free_energies_from_agent(self, temp_agent, num_actions: int) -> list:
         """Extract free energies from PyMDP agent"""
         if hasattr(temp_agent, "G") and temp_agent.G is not None:
             if isinstance(temp_agent.G, list):
@@ -612,13 +612,11 @@ class PyMDPPolicyAdapter:
                 base_G = float(temp_agent.G)
                 return [base_G + 0.01 * i for i in range(num_actions)]
         elif hasattr(temp_agent, "q_pi") and temp_agent.q_pi is not None:
-            return self._convert_policy_probs_to_free_energy(
-                temp_agent.q_pi, num_actions)
+            return self._convert_policy_probs_to_free_energy(temp_agent.q_pi, num_actions)
         else:
             return [1.0 + 0.1 * i for i in range(num_actions)]
 
-    def _convert_policy_probs_to_free_energy(
-            self, q_pi, num_actions: int) -> list:
+    def _convert_policy_probs_to_free_energy(self, q_pi, num_actions: int) -> list:
         """Convert policy probabilities to free energy: G = -log(prob)"""
         free_energies = []
         for i in range(num_actions):
@@ -640,22 +638,17 @@ class PyMDPPolicyAdapter:
         """Extract arguments for standard interface"""
         policy = args[0] if len(args) > 0 else kwargs.get("policy")
         beliefs = args[1] if len(args) > 1 else kwargs.get("beliefs")
-        generative_model = args[2] if len(
-            args) > 2 else kwargs.get("generative_model")
+        generative_model = args[2] if len(args) > 2 else kwargs.get("generative_model")
         preferences = args[3] if len(args) > 3 else kwargs.get("preferences")
         return policy, beliefs, generative_model, preferences
 
     def _should_use_cached_selector(self, generative_model) -> bool:
         """Check if we should use cached selector instead of PyMDP model"""
-        return (generative_model is not None and
-                not isinstance(generative_model, PyMDPGenerativeModel))
+        return generative_model is not None and not isinstance(
+            generative_model, PyMDPGenerativeModel
+        )
 
-    def _compute_with_cached_selector(
-            self,
-            policy,
-            beliefs,
-            preferences,
-            generative_model) -> Any:
+    def _compute_with_cached_selector(self, policy, beliefs, preferences, generative_model) -> Any:
         """Compute using cached selector"""
         cached_selector = self._get_cached_selector(generative_model)
         result = cached_selector.compute_expected_free_energy(
@@ -663,8 +656,7 @@ class PyMDPPolicyAdapter:
         )
         return self._format_result_for_caller(result)
 
-    def _compute_with_pymdp_selector(
-            self, policy, beliefs, preferences) -> Any:
+    def _compute_with_pymdp_selector(self, policy, beliefs, preferences) -> Any:
         """Compute using PyMDP selector"""
         result = self.pymdp_selector.compute_expected_free_energy(
             policy, beliefs, self.pymdp_selector.generative_model, preferences
@@ -675,10 +667,7 @@ class PyMDPPolicyAdapter:
         """Format result based on caller expectations"""
         caller_name = self._get_caller_name()
 
-        if caller_name in [
-            "compute_pragmatic_value",
-            "compute_epistemic_value",
-                "_simulate"]:
+        if caller_name in ["compute_pragmatic_value", "compute_epistemic_value", "_simulate"]:
             G, epistemic, pragmatic = result
             return torch.tensor(G), epistemic, pragmatic
         else:
@@ -731,20 +720,21 @@ def replace_discrete_expected_free_energy(
     elif model_type_name == "DiscreteGenerativeModel" or hasattr(generative_model, "dims"):
         # Handle DiscreteGenerativeModel or similar models with dims
         try:
-            pymdp_model = PyMDPGenerativeModel.from_discrete_model(
-                generative_model)
+            pymdp_model = PyMDPGenerativeModel.from_discrete_model(generative_model)
         except Exception as e:
             logger.warning(f"Failed to convert model {model_type_name}: {e}")
             raise ValueError(
                 f"Cannot convert {
-                    type(generative_model)} to pymdp format")
+                    type(generative_model)} to pymdp format"
+            )
     elif hasattr(generative_model, "get_pymdp_matrices"):
         # Handle objects that have PyMDP interface (like mocks)
         pymdp_model = generative_model
     else:
         raise ValueError(
             f"Cannot convert {
-                type(generative_model)} to pymdp format")
+                type(generative_model)} to pymdp format"
+        )
 
     return create_pymdp_policy_selector(config, pymdp_model)
 
@@ -757,10 +747,8 @@ if __name__ == "__main__":
     )
     # Create policy selector
     config = PolicyConfig(
-        planning_horizon=3,
-        policy_length=1,
-        epistemic_weight=1.0,
-        pragmatic_weight=1.0)
+        planning_horizon=3, policy_length=1, epistemic_weight=1.0, pragmatic_weight=1.0
+    )
     selector = create_pymdp_policy_selector(config, pymdp_model)
     # Test policy selection
     beliefs = np.array([0.25, 0.25, 0.25, 0.25])

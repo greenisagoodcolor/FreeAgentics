@@ -262,8 +262,7 @@ class MetricsDatabase:
             for row in cursor.fetchall():
                 result = dict(row)
                 if result["additional_metrics"]:
-                    result["additional_metrics"] = json.loads(
-                        result["additional_metrics"])
+                    result["additional_metrics"] = json.loads(result["additional_metrics"])
                 results.append(result)
             return results
 
@@ -380,8 +379,7 @@ class MetricsCollector:
         try:
             for metrics in self._graph_metrics_buffer:
                 self.db.insert_graph_metrics(metrics)
-            logger.info(
-                f"Flushed {len(self._graph_metrics_buffer)} graph metrics")
+            logger.info(f"Flushed {len(self._graph_metrics_buffer)} graph metrics")
             self._graph_metrics_buffer.clear()
         except Exception as e:
             logger.error(f"Error flushing graph metrics: {e}")
@@ -393,8 +391,7 @@ class MetricsCollector:
         try:
             for metrics in self._model_metrics_buffer:
                 self.db.insert_model_metrics(metrics)
-            logger.info(
-                f"Flushed {len(self._model_metrics_buffer)} model metrics")
+            logger.info(f"Flushed {len(self._model_metrics_buffer)} model metrics")
             self._model_metrics_buffer.clear()
         except Exception as e:
             logger.error(f"Error flushing model metrics: {e}")
@@ -406,8 +403,7 @@ class MetricsCollector:
         try:
             for metrics in self._system_metrics_buffer:
                 self.db.insert_system_metrics(metrics)
-            logger.info(
-                f"Flushed {len(self._system_metrics_buffer)} system metrics")
+            logger.info(f"Flushed {len(self._system_metrics_buffer)} system metrics")
             self._system_metrics_buffer.clear()
         except Exception as e:
             logger.error(f"Error flushing system metrics: {e}")
@@ -456,13 +452,11 @@ class MetricsCollector:
             },
         }
         daily_stats = self.db.get_aggregated_stats(start_time, end_time, "day")
-        hourly_stats = self.db.get_aggregated_stats(
-            start_time, end_time, "hour")
+        hourly_stats = self.db.get_aggregated_stats(start_time, end_time, "hour")
         report["daily_statistics"] = daily_stats
         report["hourly_statistics"] = hourly_stats
         report["real_time_stats"] = self.get_real_time_stats()
-        failures = self.db.query_graph_metrics(
-            start_time=start_time, end_time=end_time, limit=100)
+        failures = self.db.query_graph_metrics(start_time=start_time, end_time=end_time, limit=100)
         failures = [f for f in failures if not f["success"]]
         report["recent_failures"] = failures[:10]
         with open(output_path, "w") as f:

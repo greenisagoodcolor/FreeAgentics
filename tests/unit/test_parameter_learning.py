@@ -34,10 +34,7 @@ class TestLearningConfig:
 
     def test_custom_config(self) -> None:
         """Test custom learning configuration"""
-        config = LearningConfig(
-            learning_rate_A=0.05,
-            use_bayesian_learning=False,
-            use_gpu=False)
+        config = LearningConfig(learning_rate_A=0.05, use_bayesian_learning=False, use_gpu=False)
         assert config.learning_rate_A == 0.05
         assert config.use_bayesian_learning is False
         assert config.use_gpu is False
@@ -113,10 +110,7 @@ class TestDiscreteParameterLearner:
     def setup_method(self) -> None:
         """Setup for tests"""
         self.config = LearningConfig(use_gpu=False)
-        self.model_dims = {
-            "num_states": 4,
-            "num_observations": 3,
-            "num_actions": 2}
+        self.model_dims = {"num_states": 4, "num_observations": 3, "num_actions": 2}
         self.learner = DiscreteParameterLearner(self.config, self.model_dims)
         dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
         params = ModelParameters(use_gpu=False)
@@ -228,11 +222,9 @@ class TestContinuousParameterLearner:
         actions = torch.randn(5, 2)
         next_states = torch.randn(5, 4)
         initial_params = [p.clone() for p in self.model.trans_net.parameters()]
-        loss = self.learner._update_transition_model(
-            states, actions, next_states, self.model)
+        loss = self.learner._update_transition_model(states, actions, next_states, self.model)
         assert loss > 0
-        for initial, current in zip(
-                initial_params, self.model.trans_net.parameters()):
+        for initial, current in zip(initial_params, self.model.trans_net.parameters()):
             assert not torch.allclose(initial, current)
 
     def test_observation_model_update(self) -> None:
@@ -240,11 +232,9 @@ class TestContinuousParameterLearner:
         states = torch.randn(5, 4)
         observations = torch.randn(5, 3)
         initial_params = [p.clone() for p in self.model.obs_net.parameters()]
-        loss = self.learner._update_observation_model(
-            states, observations, self.model)
+        loss = self.learner._update_observation_model(states, observations, self.model)
         assert loss > 0
-        for initial, current in zip(
-                initial_params, self.model.obs_net.parameters()):
+        for initial, current in zip(initial_params, self.model.obs_net.parameters()):
             assert not torch.allclose(initial, current)
 
     def test_get_learning_rates(self) -> None:
@@ -271,8 +261,7 @@ class TestOnlineParameterLearner:
         self.model = DiscreteGenerativeModel(dims, params)
         model_dims = {"num_states": 4, "num_observations": 3, "num_actions": 2}
         param_learner = DiscreteParameterLearner(self.config, model_dims)
-        self.learner = OnlineParameterLearner(
-            self.config, self.model, param_learner)
+        self.learner = OnlineParameterLearner(self.config, self.model, param_learner)
 
     def test_initialization(self) -> None:
         """Test online learner initialization"""
@@ -353,8 +342,7 @@ class TestCreateParameterLearner:
         """Test creating discrete parameter learner"""
         config = LearningConfig(use_gpu=False)
         model_dims = {"num_states": 4, "num_observations": 3, "num_actions": 2}
-        learner = create_parameter_learner(
-            "discrete", config, model_dims=model_dims)
+        learner = create_parameter_learner("discrete", config, model_dims=model_dims)
         assert isinstance(learner, DiscreteParameterLearner)
         assert learner.num_states == 4
 
@@ -373,8 +361,7 @@ class TestCreateParameterLearner:
         dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
         params = ModelParameters(use_gpu=False)
         model = DiscreteGenerativeModel(dims, params)
-        learner = create_parameter_learner(
-            "online", config, generative_model=model)
+        learner = create_parameter_learner("online", config, generative_model=model)
         assert isinstance(learner, OnlineParameterLearner)
         assert isinstance(learner.parameter_learner, DiscreteParameterLearner)
 

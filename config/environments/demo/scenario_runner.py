@@ -19,8 +19,8 @@ from psycopg2.extras import RealDictCursor
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -138,7 +138,8 @@ class ScenarioRunner:
                         "resources": resources,
                         "message": f"{
                             explorer['name']} discovers {resources} in {location}!",
-                    })
+                    }
+                )
 
                 # Update agent stats
                 self.update_agent_experience(explorer["id"], "discovery")
@@ -153,7 +154,8 @@ class ScenarioRunner:
                 "agent": explorer["name"],
                 "message": f"{
                     explorer['name']} analyzes exploration data to find optimal paths",
-            })
+            }
+        )
 
         await asyncio.sleep(3)
 
@@ -166,7 +168,8 @@ class ScenarioRunner:
                 "message": f"{
                     explorer['name']} shares discovered locations with other agents",
                 "knowledge_shared": 4,
-            })
+            }
+        )
 
         # Log scenario completion
         self.log_scenario_completion(scenario["id"], explorer["id"])
@@ -188,13 +191,12 @@ class ScenarioRunner:
             {
                 "scenario": "merchant_trade",
                 "phase": "start",
-                "agents": [
-                    merchant1["name"],
-                    merchant2["name"]],
+                "agents": [merchant1["name"], merchant2["name"]],
                 "message": f"Trading session begins between {
                     merchant1['name']} and {
                     merchant2['name']}",
-            })
+            }
+        )
 
         # Phase 1: Market analysis
         await asyncio.sleep(2)
@@ -281,7 +283,8 @@ class ScenarioRunner:
                 "agent": scholar["name"],
                 "message": f"{
                     scholar['name']} begins research into agent collaboration patterns",
-            })
+            }
+        )
 
         # Phase 1: Data collection
         await asyncio.sleep(3)
@@ -293,7 +296,8 @@ class ScenarioRunner:
                 "message": f"{
                     scholar['name']} collects behavioral data from 50 agent interactions",
                 "data_points": 50,
-            })
+            }
+        )
 
         # Phase 2: Pattern analysis
         await asyncio.sleep(4)
@@ -324,7 +328,8 @@ class ScenarioRunner:
                 "message": f"{
                     scholar['name']} formulates the 'Emergent Cooperation Theory'",
                 "confidence": 0.89,
-            })
+            }
+        )
 
         await asyncio.sleep(2)
 
@@ -337,7 +342,8 @@ class ScenarioRunner:
                 "message": f"{
                     scholar['name']} publishes research findings to the knowledge graph",
                 "impact": "High",
-            })
+            }
+        )
 
         # Update stats
         self.update_agent_experience(scholar["id"], "research")
@@ -365,15 +371,12 @@ class ScenarioRunner:
                 "agent": guardian["name"],
                 "message": f"{
                     guardian['name']} begins security patrol of the territory",
-            })
+            }
+        )
 
         # Phase 1: Perimeter establishment
         await asyncio.sleep(2)
-        checkpoints = [
-            "North Gate",
-            "East Tower",
-            "South Bridge",
-            "West Outpost"]
+        checkpoints = ["North Gate", "East Tower", "South Bridge", "West Outpost"]
 
         for checkpoint in checkpoints:
             self.broadcast_scenario_event(
@@ -400,7 +403,8 @@ class ScenarioRunner:
                     "message": f"{
                         guardian['name']} detects unusual activity at {threat_location}!",
                     "threat_level": "medium",
-                })
+                }
+            )
 
             await asyncio.sleep(3)
 
@@ -413,7 +417,8 @@ class ScenarioRunner:
                     "message": f"{
                         guardian['name']} investigates and neutralizes the threat",
                     "outcome": "success",
-                })
+                }
+            )
 
         # Phase 4: Report
         await asyncio.sleep(2)
@@ -425,7 +430,8 @@ class ScenarioRunner:
                 "message": f"{
                     guardian['name']} completes patrol. Territory secure.",
                 "incidents": 1 if random.random() > 0.5 else 0,
-            })
+            }
+        )
 
         # Update stats
         self.update_agent_experience(guardian["id"], "patrol")
@@ -458,7 +464,8 @@ class ScenarioRunner:
                 "team": team_names,
                 "message": f"Team forms for complex mission: {
                     ', '.join(team_names)}",
-            })
+            }
+        )
 
         # Phase 1: Mission briefing
         await asyncio.sleep(3)
@@ -467,7 +474,8 @@ class ScenarioRunner:
                 "scenario": "multi_agent_collaboration",
                 "phase": "planning",
                 "message": "Team objective: Establish a new outpost in uncharted territory",
-            })
+            }
+        )
 
         # Phase 2: Role assignment
         await asyncio.sleep(2)
@@ -519,7 +527,8 @@ class ScenarioRunner:
                 "team": team_names,
                 "message": "Outpost successfully established! Team efficiency: 94%",
                 "rewards_distributed": len(team),
-            })
+            }
+        )
 
         # Update all team members
         for agent in team:
@@ -539,18 +548,14 @@ class ScenarioRunner:
 
             # Store in recent scenarios
             self.redis_client.lpush("demo:recent_scenarios", json.dumps(event))
-            self.redis_client.ltrim(
-                "demo:recent_scenarios", 0, 49)  # Keep last 50
+            self.redis_client.ltrim("demo:recent_scenarios", 0, 49)  # Keep last 50
 
             logger.info(f"Scenario event: {event.get('message', 'Unknown')}")
 
         except Exception as e:
             logger.error(f"Failed to broadcast scenario event: {e}")
 
-    def update_agent_experience(
-            self,
-            agent_id: str,
-            experience_type: str) -> None:
+    def update_agent_experience(self, agent_id: str, experience_type: str) -> None:
         """Update agent experience from scenario"""
         try:
             with self.db_conn.cursor() as cursor:
@@ -626,7 +631,8 @@ class ScenarioRunner:
         """Main scenario execution loop"""
         logger.info(
             f"Starting scenario runner with interval: {
-                self.scenario_interval}s")
+                self.scenario_interval}s"
+        )
 
         # Load scenarios
         scenarios = self.load_scenarios()
@@ -662,7 +668,8 @@ class ScenarioRunner:
                     else:
                         logger.warning(
                             f"No handler for scenario: {
-                                scenario['name']}")
+                                scenario['name']}"
+                        )
 
                     # Wait before next scenario
                     await asyncio.sleep(self.scenario_interval)

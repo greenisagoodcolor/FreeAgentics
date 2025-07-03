@@ -95,10 +95,7 @@ class IBehaviorTree(ABC):
         """Remove a behavior from the tree"""
 
     @abstractmethod
-    def evaluate(self,
-                 agent: Agent,
-                 context: Dict[str,
-                               Any]) -> Optional[IAgentBehavior]:
+    def evaluate(self, agent: Agent, context: Dict[str, Any]) -> Optional[IAgentBehavior]:
         """Evaluate the tree and return the best behavior to execute"""
 
 
@@ -142,10 +139,7 @@ class IAgentRegistry(ABC):
         """Find agents by type"""
 
     @abstractmethod
-    def find_agents_in_range(
-            self,
-            position: Position,
-            radius: float) -> List[Agent]:
+    def find_agents_in_range(self, position: Position, radius: float) -> List[Agent]:
         """Find agents within a specified range of a position"""
 
 
@@ -153,8 +147,7 @@ class ICommunicationProtocol(ABC):
     """Abstract interface for agent communication protocols"""
 
     @abstractmethod
-    def send_message(self, from_agent: str, to_agent: str,
-                     message: Dict[str, Any]) -> bool:
+    def send_message(self, from_agent: str, to_agent: str, message: Dict[str, Any]) -> bool:
         """Send a message from one agent to another"""
 
     @abstractmethod
@@ -184,8 +177,7 @@ class IWorldInterface(ABC):
         """Move agent to new position"""
 
     @abstractmethod
-    def get_nearby_objects(self, position: Position,
-                           radius: float) -> List[Dict[str, Any]]:
+    def get_nearby_objects(self, position: Position, radius: float) -> List[Dict[str, Any]]:
         """Get objects near a position"""
 
     @abstractmethod
@@ -197,8 +189,7 @@ class IActiveInferenceInterface(ABC):
     """Abstract interface for Active Inference integration"""
 
     @abstractmethod
-    def update_beliefs(self, agent: Agent,
-                       observations: NDArray[np.float64]) -> None:
+    def update_beliefs(self, agent: Agent, observations: NDArray[np.float64]) -> None:
         """Update agent beliefs based on observations"""
 
     @abstractmethod
@@ -226,11 +217,7 @@ class IAgentEventHandler(ABC):
         """Handle agent destruction event"""
 
     @abstractmethod
-    def on_agent_moved(
-            self,
-            agent: Agent,
-            old_position: Position,
-            new_position: Position) -> None:
+    def on_agent_moved(self, agent: Agent, old_position: Position, new_position: Position) -> None:
         """Called when an agent moves"""
 
     @abstractmethod
@@ -330,10 +317,7 @@ class IMarkovBlanketInterface(ABC):
         """Get the current dimensions of the Markov blanket"""
 
     @abstractmethod
-    def update_states(
-            self,
-            agent_state: Any,
-            environment_state: np.ndarray) -> None:
+    def update_states(self, agent_state: Any, environment_state: np.ndarray) -> None:
         """Update the internal and boundary states of the Markov blanket"""
 
     @abstractmethod
@@ -353,6 +337,5 @@ class IMarkovBlanketInterface(ABC):
         """Get the current state of the boundary"""
 
     @abstractmethod
-    def set_violation_handler(
-            self, handler: Callable[["BoundaryViolationEvent"], None]) -> None:
+    def set_violation_handler(self, handler: Callable[["BoundaryViolationEvent"], None]) -> None:
         """Set a handler for boundary violation events"""

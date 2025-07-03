@@ -143,8 +143,7 @@ class CacheManager:
                 logger.error(f"Failed to load data for key {key}: {e}")
         return None
 
-    def set(self, key: str, data: Any,
-            metadata: Optional[Dict[str, Any]] = None) -> None:
+    def set(self, key: str, data: Any, metadata: Optional[Dict[str, Any]] = None) -> None:
         """
         Set item in cache.
         Args:
@@ -204,8 +203,7 @@ class CacheManager:
                     data = pickle.loads(gzip.decompress(f.read()))
                 else:
                     data = pickle.load(f)
-            self.disk_metadata[key]["last_accessed"] = datetime.now(
-            ).isoformat()
+            self.disk_metadata[key]["last_accessed"] = datetime.now().isoformat()
             self.disk_metadata[key]["access_count"] += 1
             self._save_disk_metadata()
             return data
@@ -214,11 +212,7 @@ class CacheManager:
             self._remove_from_disk(key)
             return None
 
-    def _add_to_memory(
-            self,
-            key: str,
-            data: Any,
-            entry: Optional[CacheEntry] = None):
+    def _add_to_memory(self, key: str, data: Any, entry: Optional[CacheEntry] = None):
         """Add item to memory cache"""
         with self._lock:
             if entry is None:
@@ -231,8 +225,9 @@ class CacheManager:
                     created_at=now,
                     last_accessed=now,
                 )
-            while (self._memory_size + entry.size_bytes >
-                    self.max_memory_bytes and self._memory_cache):
+            while (
+                self._memory_size + entry.size_bytes > self.max_memory_bytes and self._memory_cache
+            ):
                 self._evict_from_memory()
             if key in self._memory_cache:
                 old_entry = self._memory_cache[key]
@@ -245,8 +240,7 @@ class CacheManager:
         """Add item to disk cache"""
         cache_file = self.cache_dir / f"{key}.pkl"
         try:
-            current_disk_size = sum(
-                f.stat().st_size for f in self.cache_dir.glob("*.pkl"))
+            current_disk_size = sum(f.stat().st_size for f in self.cache_dir.glob("*.pkl"))
             if current_disk_size + entry.size_bytes > self.max_disk_bytes:
                 self._evict_from_disk()
             with open(cache_file, "wb") as f:
@@ -278,9 +272,7 @@ class CacheManager:
 
     def _evict_from_disk(self):
         """Evict least recently used items from disk"""
-        sorted_entries = sorted(
-            self.disk_metadata.items(),
-            key=lambda x: x[1]["last_accessed"])
+        sorted_entries = sorted(self.disk_metadata.items(), key=lambda x: x[1]["last_accessed"])
         num_to_evict = max(1, len(sorted_entries) // 10)
         for key, _ in sorted_entries[:num_to_evict]:
             self._remove_from_disk(key)
@@ -323,8 +315,7 @@ class CacheManager:
         elif isinstance(data, (list, tuple)):
             return sum(self._estimate_size(item) for item in data)
         elif isinstance(data, dict):
-            return sum((self._estimate_size(k) + self._estimate_size(v)
-                       for k, v in data.items()))
+            return sum((self._estimate_size(k) + self._estimate_size(v) for k, v in data.items()))
         else:
             try:
                 return len(pickle.dumps(data))
@@ -352,8 +343,7 @@ class CacheManager:
     def get_stats(self) -> Dict[str, Any]:
         """Get cache statistics"""
         total_requests = self.stats["hits"] + self.stats["misses"]
-        hit_rate = self.stats["hits"] / \
-            total_requests if total_requests > 0 else 0
+        hit_rate = self.stats["hits"] / total_requests if total_requests > 0 else 0
         return {
             "hits": self.stats["hits"],
             "misses": self.stats["misses"],
@@ -365,11 +355,7 @@ class CacheManager:
             "disk_entries": len(self.disk_metadata),
         }
 
-    def warm_cache(
-            self,
-            keys: List[str],
-            loader_fn: Callable,
-            parallel: bool = True):
+    def warm_cache(self, keys: List[str], loader_fn: Callable, parallel: bool = True):
         """
         Warm cache with specified keys.
         Args:
@@ -380,20 +366,13 @@ class CacheManager:
         logger.info(f"Warming cache with {len(keys)} keys")
         if parallel:
             with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-                futures = {
-                    executor.submit(
-                        self.get,
-                        key,
-                        loader_fn,
-                        (key,
-                         )): key for key in keys}
+                futures = {executor.submit(self.get, key, loader_fn, (key,)): key for key in keys}
                 for future in concurrent.futures.as_completed(futures):
                     key = futures[future]
                     try:
                         future.result()
                     except Exception as e:
-                        logger.error(
-                            f"Failed to warm cache for key {key}: {e}")
+                        logger.error(f"Failed to warm cache for key {key}: {e}")
         else:
             for key in keys:
                 try:
@@ -427,8 +406,7 @@ class GraphFeatureCache(CacheManager):
         )
         self.set(key, features, metadata)
 
-    def get_graph_features(self, graph_id: str,
-                           feature_type: str) -> Optional[torch.Tensor]:
+    def get_graph_features(self, graph_id: str, feature_type: str) -> Optional[torch.Tensor]:
         """Get cached graph features"""
         key = f"features_{graph_id}_{feature_type}"
         return self.get(key)
@@ -491,8 +469,7 @@ def cached(cache_manager: CacheManager, key_prefix: str = ""):
 
     def decorator(func):
         def wrapper(*args, **kwargs):
-            cache_key = cache_manager._generate_key(
-                key_prefix, func.__name__, *args, **kwargs)
+            cache_key = cache_manager._generate_key(key_prefix, func.__name__, *args, **kwargs)
             result = cache_manager.get(cache_key)
             if result is not None:
                 return result
@@ -506,10 +483,7 @@ def cached(cache_manager: CacheManager, key_prefix: str = ""):
 
 
 if __name__ == "__main__":
-    cache = CacheManager(
-        cache_dir=".cache/gnn_example",
-        max_memory_mb=512,
-        max_disk_gb=5)
+    cache = CacheManager(cache_dir=".cache/gnn_example", max_memory_mb=512, max_disk_gb=5)
 
     @cached(cache, "computation")
     def expensive_computation(x: int, y: int) -> int:
@@ -525,8 +499,7 @@ if __name__ == "__main__":
     feature_cache = GraphFeatureCache()
     features = torch.randn(100, 64)
     feature_cache.cache_graph_features("graph_1", "node_embeddings", features)
-    cached_features = feature_cache.get_graph_features(
-        "graph_1", "node_embeddings")
+    cached_features = feature_cache.get_graph_features("graph_1", "node_embeddings")
     print(
         f"\nCached features shape: {(cached_features.shape if cached_features is not None else 'None')}"
     )

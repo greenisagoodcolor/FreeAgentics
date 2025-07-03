@@ -275,10 +275,7 @@ except ImportError:
             self.is_monitoring = False
             return True
 
-        def scale_horizontally(
-                self,
-                target_instances: int,
-                reason: str = "manual") -> ScalingEvent:
+        def scale_horizontally(self, target_instances: int, reason: str = "manual") -> ScalingEvent:
             event = ScalingEvent(
                 event_id=f"SCALE-{uuid.uuid4().hex[:8]}",
                 scaling_type="horizontal",
@@ -296,14 +293,12 @@ except ImportError:
             # Simulate scaling operation
             if target_instances < self.config.min_instances:
                 event.success = False
-                event.error_message = (
-                    f"Cannot scale below minimum instances ({
-                        self.config.min_instances})")
+                event.error_message = f"Cannot scale below minimum instances ({
+                        self.config.min_instances})"
             elif target_instances > self.config.max_instances:
                 event.success = False
-                event.error_message = (
-                    f"Cannot scale above maximum instances ({
-                        self.config.max_instances})")
+                event.error_message = f"Cannot scale above maximum instances ({
+                        self.config.max_instances})"
             else:
                 self.current_instances = target_instances
                 event.success = True
@@ -317,9 +312,7 @@ except ImportError:
             self.scaling_history.append(event)
             return event
 
-        def auto_scale(self,
-                       metrics: Dict[str,
-                                     float]) -> Optional[ScalingEvent]:
+        def auto_scale(self, metrics: Dict[str, float]) -> Optional[ScalingEvent]:
             if not self.config.auto_scaling_enabled:
                 return None
 
@@ -355,21 +348,16 @@ except ImportError:
                     self.current_instances + max(1, int(self.current_instances * 0.5)),
                     self.config.max_instances,
                 )
-                return self.scale_horizontally(
-                    target_instances, "auto_scale_up")
+                return self.scale_horizontally(target_instances, "auto_scale_up")
 
             elif scale_down_needed:
                 # Scale down
-                target_instances = max(
-                    self.current_instances - 1,
-                    self.config.min_instances)
-                return self.scale_horizontally(
-                    target_instances, "auto_scale_down")
+                target_instances = max(self.current_instances - 1, self.config.min_instances)
+                return self.scale_horizontally(target_instances, "auto_scale_down")
 
             return None
 
-        def predict_scaling_needs(
-                self, time_horizon_minutes: int = 60) -> Dict[str, Any]:
+        def predict_scaling_needs(self, time_horizon_minutes: int = 60) -> Dict[str, Any]:
             if len(self.load_metrics) < 10:
                 return {"error": "Insufficient historical data"}
 
@@ -381,16 +369,16 @@ except ImportError:
             memory_values = [m["memory"] for m in recent_metrics]
             request_values = [m["requests"] for m in recent_metrics]
 
-            cpu_trend = np.polyfit(range(10), cpu_values, 1)[
-                0] if len(cpu_values) > 1 else 0
-            memory_trend = (np.polyfit(range(10), memory_values, 1)
-                            [0] if len(memory_values) > 1 else 0)
-            request_trend = (np.polyfit(range(10), request_values, 1)
-                             [0] if len(request_values) > 1 else 0)
+            cpu_trend = np.polyfit(range(10), cpu_values, 1)[0] if len(cpu_values) > 1 else 0
+            memory_trend = (
+                np.polyfit(range(10), memory_values, 1)[0] if len(memory_values) > 1 else 0
+            )
+            request_trend = (
+                np.polyfit(range(10), request_values, 1)[0] if len(request_values) > 1 else 0
+            )
 
             # Project forward
-            projected_cpu = max(
-                0, min(1, cpu_values[-1] + cpu_trend * time_horizon_minutes / 10))
+            projected_cpu = max(0, min(1, cpu_values[-1] + cpu_trend * time_horizon_minutes / 10))
             projected_memory = max(
                 0, min(1, memory_values[-1] + memory_trend * time_horizon_minutes / 10)
             )
@@ -469,10 +457,7 @@ except ImportError:
             self.circuit_breakers[service_id] = circuit_breaker
             return circuit_breaker
 
-        def trigger_circuit_breaker(
-                self,
-                service_id: str,
-                failure: bool) -> str:
+        def trigger_circuit_breaker(self, service_id: str, failure: bool) -> str:
             if service_id not in self.circuit_breakers:
                 self.configure_circuit_breaker(service_id)
 
@@ -493,15 +478,17 @@ except ImportError:
                     cb["failure_count"] = 0
 
             # Check for half-open transition
-            if (cb["state"] == "open" and cb["last_failure"] and (
-                    datetime.now() - cb["last_failure"]).seconds > cb["timeout"]):
+            if (
+                cb["state"] == "open"
+                and cb["last_failure"]
+                and (datetime.now() - cb["last_failure"]).seconds > cb["timeout"]
+            ):
                 cb["state"] = "half_open"
                 cb["success_count"] = 0
 
             return cb["state"]
 
-        def simulate_failure(
-                self, scenario: FailureScenario) -> Dict[str, Any]:
+        def simulate_failure(self, scenario: FailureScenario) -> Dict[str, Any]:
             """Simulate a failure scenario for testing resilience"""
 
             # Apply failure to affected services
@@ -614,11 +601,12 @@ except ImportError:
                             "reason": "High memory utilization",
                             "current_instances": self.current_instances,
                             "recommended_instances": min(
-                                self.current_instances + 2,
-                                self.config.max_instances),
+                                self.current_instances + 2, self.config.max_instances
+                            ),
                             "urgency": "high",
                             "expected_benefit": "Prevent memory exhaustion and improve stability",
-                        })
+                        }
+                    )
 
             return recommendations
 
@@ -758,8 +746,7 @@ class TestScalabilityManager:
             "request_rate": 200,
         }
 
-        scale_down_event = self.scalability_manager.auto_scale(
-            low_load_metrics)
+        scale_down_event = self.scalability_manager.auto_scale(low_load_metrics)
 
         if scale_down_event:  # May be None if already at min
             assert isinstance(scale_down_event, ScalingEvent)
@@ -774,8 +761,7 @@ class TestScalabilityManager:
             "request_rate": 800,
         }
 
-        no_scale_event = self.scalability_manager.auto_scale(
-            normal_load_metrics)
+        no_scale_event = self.scalability_manager.auto_scale(normal_load_metrics)
         assert no_scale_event is None
 
     def test_predictive_scaling(self):
@@ -816,11 +802,7 @@ class TestScalabilityManager:
 
     def test_service_health_monitoring(self):
         """Test service health monitoring"""
-        service_ids = [
-            "api-service",
-            "user-service",
-            "payment-service",
-            "notification-service"]
+        service_ids = ["api-service", "user-service", "payment-service", "notification-service"]
 
         health_results = {}
 
@@ -874,13 +856,11 @@ class TestScalabilityManager:
         # Test failure accumulation
         # First 2 failures - should remain closed
         for i in range(2):
-            state = self.scalability_manager.trigger_circuit_breaker(
-                service_id, failure=True)
+            state = self.scalability_manager.trigger_circuit_breaker(service_id, failure=True)
             assert state == "closed"
 
         # Third failure - should open circuit
-        state = self.scalability_manager.trigger_circuit_breaker(
-            service_id, failure=True)
+        state = self.scalability_manager.trigger_circuit_breaker(service_id, failure=True)
         assert state == "open"
 
         # Verify circuit breaker is open
@@ -893,15 +873,13 @@ class TestScalabilityManager:
         cb["last_failure"] = datetime.now() - timedelta(seconds=cb["timeout"] + 1)
 
         # Next call should transition to half-open
-        state = self.scalability_manager.trigger_circuit_breaker(
-            service_id, failure=False)
+        state = self.scalability_manager.trigger_circuit_breaker(service_id, failure=False)
         # State might be half-open or closed depending on implementation
         assert state in ["half_open", "closed"]
 
         # Multiple successes should close the circuit
         for _ in range(3):
-            state = self.scalability_manager.trigger_circuit_breaker(
-                service_id, failure=False)
+            state = self.scalability_manager.trigger_circuit_breaker(service_id, failure=False)
 
         assert state == "closed"
         assert self.scalability_manager.circuit_breakers[service_id]["failure_count"] == 0
@@ -919,14 +897,12 @@ class TestScalabilityManager:
         )
 
         # Simulate failure
-        failure_results = self.scalability_manager.simulate_failure(
-            failure_scenario)
+        failure_results = self.scalability_manager.simulate_failure(failure_scenario)
 
         # Verify failure simulation results
         assert isinstance(failure_results, dict)
         assert failure_results["scenario_id"] == "CHAOS-001"
-        assert failure_results["affected_services"] == [
-            "payment-service", "user-service"]
+        assert failure_results["affected_services"] == ["payment-service", "user-service"]
         assert "impact_metrics" in failure_results
         assert "requests_affected" in failure_results
         assert "estimated_revenue_impact" in failure_results
@@ -946,8 +922,7 @@ class TestScalabilityManager:
             # Service unavailable should show complete failure
             if failure_scenario.failure_mode == FailureMode.SERVICE_UNAVAILABLE:
                 assert during_failure["error_rate"] > pre_failure["error_rate"]
-                assert during_failure["status"] in [
-                    HealthStatus.UNHEALTHY, HealthStatus.DEGRADED]
+                assert during_failure["status"] in [HealthStatus.UNHEALTHY, HealthStatus.DEGRADED]
 
         # Verify business impact calculations
         assert failure_results["requests_affected"] > 0
@@ -966,22 +941,12 @@ class TestScalabilityManager:
         # Generate load patterns that should trigger recommendations
         load_patterns = [
             # High CPU load
-            {"cpu_utilization": 0.85,
-             "memory_utilization": 0.6,
-             "request_rate": 1200},
-            {"cpu_utilization": 0.90,
-             "memory_utilization": 0.65,
-             "request_rate": 1300},
-            {"cpu_utilization": 0.88,
-             "memory_utilization": 0.6,
-             "request_rate": 1250},
+            {"cpu_utilization": 0.85, "memory_utilization": 0.6, "request_rate": 1200},
+            {"cpu_utilization": 0.90, "memory_utilization": 0.65, "request_rate": 1300},
+            {"cpu_utilization": 0.88, "memory_utilization": 0.6, "request_rate": 1250},
             # High memory load
-            {"cpu_utilization": 0.6,
-             "memory_utilization": 0.90,
-             "request_rate": 800},
-            {"cpu_utilization": 0.65,
-             "memory_utilization": 0.88,
-             "request_rate": 850},
+            {"cpu_utilization": 0.6, "memory_utilization": 0.90, "request_rate": 800},
+            {"cpu_utilization": 0.65, "memory_utilization": 0.88, "request_rate": 850},
         ]
 
         # Apply load patterns
@@ -1005,22 +970,18 @@ class TestScalabilityManager:
             assert "expected_benefit" in recommendation
 
             # Verify recommendation properties
-            assert recommendation["type"] in [
-                "scale_out", "scale_in", "scale_up", "scale_down"]
-            assert recommendation["urgency"] in [
-                "low", "medium", "high", "critical"]
+            assert recommendation["type"] in ["scale_out", "scale_in", "scale_up", "scale_down"]
+            assert recommendation["urgency"] in ["low", "medium", "high", "critical"]
             assert recommendation["current_instances"] > 0
             assert recommendation["recommended_instances"] >= self.config.min_instances
             assert recommendation["recommended_instances"] <= self.config.max_instances
 
         # Should have scale-out recommendations due to high load
-        scale_out_recommendations = [
-            r for r in recommendations if r["type"] == "scale_out"]
+        scale_out_recommendations = [r for r in recommendations if r["type"] == "scale_out"]
         assert len(scale_out_recommendations) > 0
 
         # High urgency recommendations should exist for very high load
-        high_urgency_recommendations = [
-            r for r in recommendations if r["urgency"] == "high"]
+        high_urgency_recommendations = [r for r in recommendations if r["urgency"] == "high"]
         assert len(high_urgency_recommendations) > 0
 
 
@@ -1060,8 +1021,7 @@ class TestResilienceEngine:
                 raise Exception("Service unavailable")
             return "success"
 
-        result = self.resilience_engine.retry_with_backoff(
-            failing_operation, retry_config)
+        result = self.resilience_engine.retry_with_backoff(failing_operation, retry_config)
 
         assert result == "success"
         assert len(operation_results) == 3  # Should retry until success
@@ -1088,10 +1048,7 @@ class TestResilienceEngine:
         """Test timeout management"""
         timeout_config = {
             "default_timeout": 30,
-            "service_timeouts": {
-                "payment-service": 60,
-                "external-api": 10,
-                "database": 5},
+            "service_timeouts": {"payment-service": 60, "external-api": 10, "database": 5},
         }
 
         result = self.resilience_engine.configure_timeouts(timeout_config)
@@ -1174,8 +1131,7 @@ class TestAutoScaler:
             for i in range(24)
         ]
 
-        prediction = self.auto_scaler.predict_future_load(
-            historical_data, horizon_hours=4)
+        prediction = self.auto_scaler.predict_future_load(historical_data, horizon_hours=4)
 
         assert isinstance(prediction, dict)
         assert "predicted_load" in prediction
@@ -1208,11 +1164,7 @@ class TestLoadBalancer:
             {"id": "server3", "weight": 1, "health": "unhealthy"},
         ]
 
-        algorithms = [
-            "round_robin",
-            "weighted_round_robin",
-            "least_connections",
-            "ip_hash"]
+        algorithms = ["round_robin", "weighted_round_robin", "least_connections", "ip_hash"]
 
         for algorithm in algorithms:
             result = self.load_balancer.configure_algorithm(algorithm, servers)
@@ -1336,11 +1288,7 @@ class TestIntegrationScenarios:
         self.scalability_manager.start_monitoring()
 
         # 1. Establish healthy baseline
-        services = [
-            "api-service",
-            "user-service",
-            "payment-service",
-            "notification-service"]
+        services = ["api-service", "user-service", "payment-service", "notification-service"]
 
         baseline_health = {}
         for service in services:
@@ -1348,8 +1296,7 @@ class TestIntegrationScenarios:
             baseline_health[service] = health
 
             # Configure circuit breaker for each service
-            self.scalability_manager.configure_circuit_breaker(
-                service, threshold=3)
+            self.scalability_manager.configure_circuit_breaker(service, threshold=3)
 
         # 2. Test cascade failure scenario
         cascade_failure = FailureScenario(
@@ -1361,8 +1308,7 @@ class TestIntegrationScenarios:
         )
 
         # Simulate initial failure
-        failure_results = self.scalability_manager.simulate_failure(
-            cascade_failure)
+        failure_results = self.scalability_manager.simulate_failure(cascade_failure)
 
         # 3. Check circuit breaker activation
         payment_cb = self.scalability_manager.circuit_breakers["payment-service"]
@@ -1378,8 +1324,7 @@ class TestIntegrationScenarios:
             latency_increase=1000,  # 1 second increase
         )
 
-        dependent_results = self.scalability_manager.simulate_failure(
-            dependent_failure)
+        dependent_results = self.scalability_manager.simulate_failure(dependent_failure)
 
         # 5. Verify failure impact calculation
         assert failure_results["requests_affected"] > 0
@@ -1393,18 +1338,15 @@ class TestIntegrationScenarios:
 
         # 6. Test recovery mechanisms
         # Simulate service recovery
-        for service in cascade_failure.affected_services + \
-                dependent_failure.affected_services:
+        for service in cascade_failure.affected_services + dependent_failure.affected_services:
             # Multiple successful calls to trigger circuit breaker recovery
             for _ in range(5):
-                self.scalability_manager.trigger_circuit_breaker(
-                    service, failure=False)
+                self.scalability_manager.trigger_circuit_breaker(service, failure=False)
 
         # 7. Verify circuit breaker states after recovery
         for service in ["payment-service", "user-service"]:
             cb = self.scalability_manager.circuit_breakers[service]
-            assert cb["state"] in [
-                "closed", "half_open"]  # Should be recovering
+            assert cb["state"] in ["closed", "half_open"]  # Should be recovering
 
     def test_auto_scaling_under_stress(self):
         """Test auto-scaling behavior under stress conditions"""
@@ -1462,9 +1404,7 @@ class TestIntegrationScenarios:
         assert len(scaling_events) > 0
 
         # 3. Analyze scaling behavior
-        scale_out_events = [
-            e for _,
-            e in scaling_events if e.direction == ScalingDirection.OUT]
+        scale_out_events = [e for _, e in scaling_events if e.direction == ScalingDirection.OUT]
         assert len(scale_out_events) > 0
 
         # Verify scaling was triggered by appropriate metrics
@@ -1501,8 +1441,7 @@ class TestIntegrationScenarios:
             duration_seconds=180,
         )
 
-        network_results = self.scalability_manager.simulate_failure(
-            network_partition)
+        network_results = self.scalability_manager.simulate_failure(network_partition)
 
         # 2. Test resource exhaustion scenario
         resource_exhaustion = FailureScenario(
@@ -1513,8 +1452,7 @@ class TestIntegrationScenarios:
             duration_seconds=240,
         )
 
-        resource_results = self.scalability_manager.simulate_failure(
-            resource_exhaustion)
+        resource_results = self.scalability_manager.simulate_failure(resource_exhaustion)
 
         # 3. Test rate limiting scenario
         rate_limiting = FailureScenario(
@@ -1537,20 +1475,15 @@ class TestIntegrationScenarios:
             assert results["requests_affected"] > 0
 
         # 5. Calculate cumulative impact
-        total_requests_affected = sum(
-            r["requests_affected"] for r in all_results)
-        total_revenue_impact = sum(
-            r["estimated_revenue_impact"] for r in all_results)
+        total_requests_affected = sum(r["requests_affected"] for r in all_results)
+        total_revenue_impact = sum(r["estimated_revenue_impact"] for r in all_results)
 
         assert total_requests_affected > 0
         assert total_revenue_impact > 0
 
         # 6. Verify circuit breakers activated for all affected services
         affected_services = set()
-        for scenario in [
-                network_partition,
-                resource_exhaustion,
-                rate_limiting]:
+        for scenario in [network_partition, resource_exhaustion, rate_limiting]:
             affected_services.update(scenario.affected_services)
 
         for service in affected_services:

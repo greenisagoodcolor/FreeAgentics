@@ -78,8 +78,7 @@ class TestAnalyzer:
         ]
 
         try:
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=60)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
 
             output = result.stdout + result.stderr
 
@@ -129,8 +128,7 @@ class TestAnalyzer:
         error_msg = error_info.get("error_message", "")
 
         # Categorize by common patterns
-        if "Mock" in error_msg and (
-                "operand" in error_msg or "attribute" in error_msg):
+        if "Mock" in error_msg and ("operand" in error_msg or "attribute" in error_msg):
             return "Mock_Numeric_Operations"
         elif "Factory" in error_msg or "should exist" in error_msg:
             return "Missing_Factory_Functions"
@@ -166,12 +164,10 @@ class TestAnalyzer:
 
                 # Categorize error
                 if module_result.get("error_info"):
-                    category = self.categorize_error(
-                        module_result["error_info"])
+                    category = self.categorize_error(module_result["error_info"])
                     if category not in self.results["error_patterns"]:
                         self.results["error_patterns"][category] = []
-                    self.results["error_patterns"][category].append(
-                        module_result["path"])
+                    self.results["error_patterns"][category].append(module_result["path"])
 
             # Update totals
             self.results["summary"]["total_tests"] += (
@@ -179,14 +175,10 @@ class TestAnalyzer:
                 + module_result.get("failed", 0)
                 + module_result.get("errors", 0)
             )
-            self.results["summary"]["passed_tests"] += module_result.get(
-                "passed", 0)
-            self.results["summary"]["failed_tests"] += module_result.get(
-                "failed", 0)
-            self.results["summary"]["error_tests"] += module_result.get(
-                "errors", 0)
-            self.results["summary"]["skipped_tests"] += module_result.get(
-                "skipped", 0)
+            self.results["summary"]["passed_tests"] += module_result.get("passed", 0)
+            self.results["summary"]["failed_tests"] += module_result.get("failed", 0)
+            self.results["summary"]["error_tests"] += module_result.get("errors", 0)
+            self.results["summary"]["skipped_tests"] += module_result.get("skipped", 0)
 
             self.results["modules"][str(module)] = module_result
 
@@ -205,13 +197,15 @@ class TestAnalyzer:
                 summary['passed_modules']} ({
                 summary['passed_modules'] /
                 summary['total_modules'] *
-                100:.1f}%)")
+                100:.1f}%)"
+        )
         report.append(
             f"- **Failed Modules**: {
                 summary['failed_modules']} ({
                 summary['failed_modules'] /
                 summary['total_modules'] *
-                100:.1f}%)")
+                100:.1f}%)"
+        )
         report.append(f"- **Total Tests**: {summary['total_tests']}")
         passed_pct = (
             f"{summary['passed_tests'] / summary['total_tests'] * 100:.1f}"
@@ -223,18 +217,16 @@ class TestAnalyzer:
             if summary["total_tests"] > 0
             else "0"
         )
-        report.append(
-            f"- **Passed Tests**: {summary['passed_tests']} ({passed_pct}%)")
-        report.append(
-            f"- **Failed Tests**: {summary['failed_tests']} ({failed_pct}%)")
+        report.append(f"- **Passed Tests**: {summary['passed_tests']} ({passed_pct}%)")
+        report.append(f"- **Failed Tests**: {summary['failed_tests']} ({failed_pct}%)")
         report.append(f"- **Error Tests**: {summary['error_tests']}")
         report.append(f"- **Skipped Tests**: {summary['skipped_tests']}")
 
         # Error Pattern Analysis
         report.append("\n## Error Pattern Analysis")
         for category, modules in sorted(
-            self.results["error_patterns"].items(), key=lambda x: len(
-                x[1]), reverse=True):
+            self.results["error_patterns"].items(), key=lambda x: len(x[1]), reverse=True
+        ):
             report.append(f"\n### {category} ({len(modules)} modules)")
             for module in modules[:5]:  # Show first 5
                 report.append(f"- {module}")
@@ -253,13 +245,11 @@ class TestAnalyzer:
             report.append(f"\n### {Path(path).name}")
             if info.get("error_info"):
                 error_info = info["error_info"]
-                report.append(
-                    f"- **Error Type**: {error_info.get('error_type', 'Unknown')}")
+                report.append(f"- **Error Type**: {error_info.get('error_type', 'Unknown')}")
                 report.append(
                     f"- **Error Message**: {error_info.get('error_message', 'No message')}"
                 )
-                report.append(
-                    f"- **Failed Tests**: {len(error_info.get('failed_tests', []))}")
+                report.append(f"- **Failed Tests**: {len(error_info.get('failed_tests', []))}")
                 if error_info.get("failed_tests"):
                     for test in error_info["failed_tests"][:3]:
                         report.append(f"  - {test}")
@@ -270,19 +260,14 @@ class TestAnalyzer:
 
         # Sort error patterns by frequency
         sorted_patterns = sorted(
-            self.results["error_patterns"].items(),
-            key=lambda x: len(
-                x[1]),
-            reverse=True)
+            self.results["error_patterns"].items(), key=lambda x: len(x[1]), reverse=True
+        )
 
         for i, (category, modules) in enumerate(sorted_patterns[:5], 1):
-            report.append(
-                f"\n{i}. **Fix {category}** ({len(modules)} modules affected)")
+            report.append(f"\n{i}. **Fix {category}** ({len(modules)} modules affected)")
             if category == "Mock_Numeric_Operations":
-                report.append(
-                    "   - Use NumericMock from tests.fixtures.numeric_mocks")
-                report.append(
-                    "   - Replace Mock objects in mathematical operations")
+                report.append("   - Use NumericMock from tests.fixtures.numeric_mocks")
+                report.append("   - Replace Mock objects in mathematical operations")
             elif category == "Missing_Factory_Functions":
                 report.append("   - Implement missing factory functions")
                 report.append("   - Check for create_* functions in modules")
@@ -291,11 +276,9 @@ class TestAnalyzer:
                 report.append("   - Ensure all modules are properly installed")
             elif category == "Tensor_Type_Errors":
                 report.append("   - Use proper tensor mocks")
-                report.append(
-                    "   - Check tensor shape and dtype compatibility")
+                report.append("   - Check tensor shape and dtype compatibility")
             elif category == "API_Contract_Violations":
-                report.append(
-                    "   - Update test expectations to match implementation")
+                report.append("   - Update test expectations to match implementation")
                 report.append("   - Add schema validation")
 
         return "\n".join(report)
@@ -326,8 +309,7 @@ if __name__ == "__main__":
     print("ANALYSIS COMPLETE")
     print("=" * 60)
     summary = analyzer.results["summary"]
-    print(
-        f"Modules: {summary['passed_modules']}/{summary['total_modules']} passed")
+    print(f"Modules: {summary['passed_modules']}/{summary['total_modules']} passed")
     print(f"Tests: {summary['passed_tests']}/{summary['total_tests']} passed")
     success_rate = (
         f"{summary['passed_tests'] / summary['total_tests'] * 100:.1f}%"

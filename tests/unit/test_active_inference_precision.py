@@ -66,23 +66,17 @@ class TestGradientPrecisionOptimizer:
     def setup_method(self):
         """Set up test optimizer."""
         self.config = PrecisionConfig(
-            learning_rate=0.1,
-            min_precision=0.1,
-            max_precision=10.0,
-            init_precision=1.0)
+            learning_rate=0.1, min_precision=0.1, max_precision=10.0, init_precision=1.0
+        )
         self.num_modalities = 3
-        self.optimizer = GradientPrecisionOptimizer(
-            self.config, self.num_modalities)
+        self.optimizer = GradientPrecisionOptimizer(self.config, self.num_modalities)
 
     def test_initialization(self):
         """Test optimizer initialization."""
         assert self.optimizer.config == self.config
         assert self.optimizer.num_modalities == 3
         assert self.optimizer.log_precision.shape == (3,)
-        assert torch.allclose(
-            torch.exp(
-                self.optimizer.log_precision),
-            torch.ones(3))
+        assert torch.allclose(torch.exp(self.optimizer.log_precision), torch.ones(3))
         assert self.optimizer.error_history == []
 
     def test_optimize_precision_1d_errors(self):
@@ -138,13 +132,8 @@ class TestGradientPrecisionOptimizer:
 
         # Should only keep last 3
         assert len(self.optimizer.error_history) == 3
-        assert torch.allclose(
-            self.optimizer.error_history[0],
-            torch.ones(
-                1,
-                3) * 3)
-        assert torch.allclose(
-            self.optimizer.error_history[-1], torch.ones(1, 3) * 5)
+        assert torch.allclose(self.optimizer.error_history[0], torch.ones(1, 3) * 3)
+        assert torch.allclose(self.optimizer.error_history[-1], torch.ones(1, 3) * 5)
 
     def test_estimate_volatility_insufficient_history(self):
         """Test volatility estimation with insufficient history."""
@@ -189,9 +178,7 @@ class TestGradientPrecisionOptimizer:
         self.optimizer.adapt_to_volatility()
 
         # Precision should have changed
-        assert not torch.allclose(
-            self.optimizer.log_precision,
-            initial_log_precision)
+        assert not torch.allclose(self.optimizer.log_precision, initial_log_precision)
 
     def test_precision_bounds(self):
         """Test precision respects min/max bounds."""
@@ -220,8 +207,7 @@ class TestHierarchicalPrecisionOptimizer:
             level_coupling=0.3,
         )
         self.level_dims = [2, 3, 4]  # 3 levels with different dimensions
-        self.optimizer = HierarchicalPrecisionOptimizer(
-            self.config, self.level_dims)
+        self.optimizer = HierarchicalPrecisionOptimizer(self.config, self.level_dims)
 
     def test_initialization(self):
         """Test hierarchical optimizer initialization."""
@@ -237,9 +223,7 @@ class TestHierarchicalPrecisionOptimizer:
 
         # Check all initialized to init_precision
         for level_precision in self.optimizer.level_precisions:
-            assert torch.allclose(
-                torch.exp(level_precision),
-                torch.ones_like(level_precision))
+            assert torch.allclose(torch.exp(level_precision), torch.ones_like(level_precision))
 
         # Check coupling weights
         assert len(self.optimizer.coupling_weights) == 2  # num_levels - 1
@@ -334,10 +318,8 @@ class TestMetaLearningPrecisionOptimizer:
     def setup_method(self):
         """Set up test optimizer."""
         self.config = PrecisionConfig(
-            init_precision=2.0,
-            min_precision=0.1,
-            max_precision=10.0,
-            meta_learning_rate=0.01)
+            init_precision=2.0, min_precision=0.1, max_precision=10.0, meta_learning_rate=0.01
+        )
         self.input_dim = 5
         self.hidden_dim = 32
         self.num_modalities = 3
@@ -366,9 +348,7 @@ class TestMetaLearningPrecisionOptimizer:
 
         # Check base precision
         assert self.optimizer.base_precision.shape == (3,)
-        assert torch.allclose(
-            self.optimizer.base_precision,
-            torch.ones(3) * 2.0)
+        assert torch.allclose(self.optimizer.base_precision, torch.ones(3) * 2.0)
 
         # Check context buffer
         assert self.optimizer.context_buffer == []
@@ -451,13 +431,8 @@ class TestMetaLearningPrecisionOptimizer:
 
         assert len(self.optimizer.context_buffer) == 5
         # Should have kept last 5
-        assert torch.allclose(
-            self.optimizer.context_buffer[0][0],
-            torch.ones(
-                1,
-                3) * 5)
-        assert torch.allclose(
-            self.optimizer.context_buffer[-1][0], torch.ones(1, 3) * 9)
+        assert torch.allclose(self.optimizer.context_buffer[0][0], torch.ones(1, 3) * 5)
+        assert torch.allclose(self.optimizer.context_buffer[-1][0], torch.ones(1, 3) * 9)
 
     def test_meta_update_insufficient_data(self):
         """Test meta update with insufficient data."""
@@ -525,19 +500,13 @@ class TestAdaptivePrecisionController:
         assert self.controller.context_dim == 5
 
         # Check optimizers
-        assert isinstance(
-            self.controller.gradient_optimizer,
-            GradientPrecisionOptimizer)
-        assert isinstance(
-            self.controller.meta_optimizer,
-            MetaLearningPrecisionOptimizer)
+        assert isinstance(self.controller.gradient_optimizer, GradientPrecisionOptimizer)
+        assert isinstance(self.controller.meta_optimizer, MetaLearningPrecisionOptimizer)
 
         # Check strategy
         assert self.controller.strategy == "gradient"
-        assert self.controller.performance_history == {
-            "gradient": [], "meta": [], "hybrid": []}
-        assert self.controller.strategy_performance == {
-            "gradient": 0.0, "meta": 0.0, "hybrid": 0.0}
+        assert self.controller.performance_history == {"gradient": [], "meta": [], "hybrid": []}
+        assert self.controller.strategy_performance == {"gradient": 0.0, "meta": 0.0, "hybrid": 0.0}
 
     def test_optimize_gradient_strategy(self):
         """Test optimization with gradient strategy."""
@@ -547,8 +516,7 @@ class TestAdaptivePrecisionController:
 
         assert precision.shape == (3,)
         assert len(self.controller.performance_history["gradient"]) == 1
-        assert self.controller.performance_history["gradient"][0] == errors.abs(
-        ).mean().item()
+        assert self.controller.performance_history["gradient"][0] == errors.abs().mean().item()
 
     def test_optimize_meta_strategy(self):
         """Test optimization with meta strategy."""
@@ -596,18 +564,15 @@ class TestAdaptivePrecisionController:
     def test_evaluate_strategy_with_history(self):
         """Test strategy evaluation with performance history."""
         # Add performance history
-        self.controller.performance_history["gradient"] = [
-            0.5, 0.4, 0.3, 0.2, 0.1]
+        self.controller.performance_history["gradient"] = [0.5, 0.4, 0.3, 0.2, 0.1]
         self.controller.performance_history["meta"] = [0.8, 0.7, 0.6]
         self.controller.performance_history["hybrid"] = []
 
         self.controller.evaluate_strategy()
 
         # Should compute averages
-        assert self.controller.strategy_performance["gradient"] == pytest.approx(
-            0.3)
-        assert self.controller.strategy_performance["meta"] == pytest.approx(
-            0.7)
+        assert self.controller.strategy_performance["gradient"] == pytest.approx(0.3)
+        assert self.controller.strategy_performance["meta"] == pytest.approx(0.7)
         assert self.controller.strategy_performance["hybrid"] == float("inf")
 
     @patch("torch.randint")
@@ -617,8 +582,7 @@ class TestAdaptivePrecisionController:
 
         # Set up poor performance for current strategy
         self.controller.strategy = "gradient"
-        self.controller.performance_history["gradient"] = [
-            2.0] * 15  # High error
+        self.controller.performance_history["gradient"] = [2.0] * 15  # High error
 
         self.controller.evaluate_strategy()
 
@@ -629,8 +593,7 @@ class TestAdaptivePrecisionController:
         """Test volatility estimate with gradient strategy."""
         # Add some errors to gradient optimizer
         for i in range(3):
-            self.controller.gradient_optimizer.optimize_precision(
-                torch.randn(3))
+            self.controller.gradient_optimizer.optimize_precision(torch.randn(3))
 
         volatility = self.controller.get_volatility_estimate()
         assert volatility.shape == (3,)
@@ -684,16 +647,14 @@ class TestCreatePrecisionOptimizer:
     def test_create_gradient_optimizer_custom_config(self):
         """Test creating gradient optimizer with custom config."""
         config = PrecisionConfig(learning_rate=0.05)
-        optimizer = create_precision_optimizer(
-            "gradient", config, num_modalities=2)
+        optimizer = create_precision_optimizer("gradient", config, num_modalities=2)
 
         assert isinstance(optimizer, GradientPrecisionOptimizer)
         assert optimizer.config.learning_rate == 0.05
 
     def test_create_hierarchical_optimizer(self):
         """Test creating hierarchical optimizer."""
-        optimizer = create_precision_optimizer(
-            "hierarchical", level_dims=[2, 3, 4])
+        optimizer = create_precision_optimizer("hierarchical", level_dims=[2, 3, 4])
 
         assert isinstance(optimizer, HierarchicalPrecisionOptimizer)
         assert optimizer.level_dims == [2, 3, 4]
@@ -711,8 +672,7 @@ class TestCreatePrecisionOptimizer:
 
     def test_create_adaptive_controller(self):
         """Test creating adaptive controller."""
-        optimizer = create_precision_optimizer(
-            "adaptive", num_modalities=3, context_dim=8)
+        optimizer = create_precision_optimizer("adaptive", num_modalities=3, context_dim=8)
 
         assert isinstance(optimizer, AdaptivePrecisionController)
         assert optimizer.num_modalities == 3

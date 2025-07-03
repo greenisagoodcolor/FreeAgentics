@@ -64,13 +64,8 @@ except ImportError:
 
         def generate_base_model(self, agent_name, agent_class, personality):
             return {
-                "model": {
-                    "name": agent_name,
-                    "type": "ActiveInference",
-                    "version": "1.0"},
-                "state_space": {
-                    "S_energy": {
-                        "type": "Real[0, 100]"}},
+                "model": {"name": agent_name, "type": "ActiveInference", "version": "1.0"},
+                "state_space": {"S_energy": {"type": "Real[0, 100]"}},
                 "connections": {},
                 "update_equations": {},
             }
@@ -160,21 +155,15 @@ class TestGMNExecutor:
         assert hasattr(executor, "validator")
         assert executor._epsilon == 1e-10
 
-    def test_execute_inference_basic(
-            self,
-            executor,
-            sample_model,
-            sample_observation):
+    def test_execute_inference_basic(self, executor, sample_model, sample_observation):
         """Test basic inference execution."""
         if not IMPORT_SUCCESS:
-            result = executor.execute_inference(
-                sample_model, sample_observation)
+            result = executor.execute_inference(sample_model, sample_observation)
             assert isinstance(result, InferenceResult)
             return
 
         # Mock validator to return valid
-        executor.validator.validate = Mock(
-            return_value=Mock(is_valid=True, errors=[]))
+        executor.validator.validate = Mock(return_value=Mock(is_valid=True, errors=[]))
 
         result = executor.execute_inference(sample_model, sample_observation)
 
@@ -185,17 +174,12 @@ class TestGMNExecutor:
         assert isinstance(result.beliefs, dict)
         assert 0 <= result.confidence <= 1
 
-    def test_initialize_beliefs(
-            self,
-            executor,
-            sample_model,
-            sample_observation):
+    def test_initialize_beliefs(self, executor, sample_model, sample_observation):
         """Test belief initialization."""
         if not IMPORT_SUCCESS:
             return
 
-        beliefs = executor._initialize_beliefs(
-            sample_model["state_space"], sample_observation)
+        beliefs = executor._initialize_beliefs(sample_model["state_space"], sample_observation)
 
         assert "S_energy" in beliefs
         assert beliefs["S_energy"]["mean"] == 75.0
@@ -214,14 +198,9 @@ class TestGMNExecutor:
 
         observation = {"energy": 70, "position": 0.6}
 
-        connections = {
-            "C_pref": {
-                "preferences": {
-                    "Exploration": 0.7,
-                    "Resources": 0.3}}}
+        connections = {"C_pref": {"preferences": {"Exploration": 0.7, "Resources": 0.3}}}
 
-        free_energy = executor._calculate_free_energy(
-            beliefs, observation, connections)
+        free_energy = executor._calculate_free_energy(beliefs, observation, connections)
 
         assert isinstance(free_energy, float)
         assert np.isfinite(free_energy)
@@ -262,23 +241,13 @@ class TestGMNExecutor:
         if not IMPORT_SUCCESS:
             return
 
-        beliefs = {
-            "S_energy": {
-                "mean": 75,
-                "variance": 0.1,
-                "range": [
-                    0,
-                    100]}}
+        beliefs = {"S_energy": {"mean": 75, "variance": 0.1, "range": [0, 100]}}
 
         observation = {"energy": 80}  # Higher than belief
 
-        update_equations = {
-            "belief_update": {
-                "state": "S_energy",
-                "formula": "prediction_error"}}
+        update_equations = {"belief_update": {"state": "S_energy", "formula": "prediction_error"}}
 
-        updated = executor._update_beliefs(
-            beliefs, "explore", observation, update_equations)
+        updated = executor._update_beliefs(beliefs, "explore", observation, update_equations)
 
         # Should move mean towards observation
         assert updated["S_energy"]["mean"] > beliefs["S_energy"]["mean"]
@@ -435,20 +404,17 @@ class TestGMNGenerator:
         assert hasattr(generator, "template_cache")
         assert isinstance(generator.template_cache, dict)
 
-    def test_generate_base_model_explorer(
-            self, generator, explorer_personality):
+    def test_generate_base_model_explorer(self, generator, explorer_personality):
         """Test generating explorer model."""
         if not IMPORT_SUCCESS:
-            model = generator.generate_base_model(
-                "Explorer-1", "Explorer", explorer_personality)
+            model = generator.generate_base_model("Explorer-1", "Explorer", explorer_personality)
             assert model["model"]["name"] == "Explorer-1"
             return
 
         # Mock validator
         generator.validator.validate_model = Mock(return_value=(True, []))
 
-        model = generator.generate_base_model(
-            "Explorer-Alpha", "Explorer", explorer_personality)
+        model = generator.generate_base_model("Explorer-Alpha", "Explorer", explorer_personality)
 
         assert model["model"]["name"] == "Explorer-Alpha"
         assert model["model"]["class"] == "Explorer"
@@ -460,16 +426,14 @@ class TestGMNGenerator:
         prefs = model["connections"]["C_pref"]["preferences"]
         assert prefs["Exploration"] > prefs["Resources"]
 
-    def test_generate_base_model_merchant(
-            self, generator, merchant_personality):
+    def test_generate_base_model_merchant(self, generator, merchant_personality):
         """Test generating merchant model."""
         if not IMPORT_SUCCESS:
             return
 
         generator.validator.validate_model = Mock(return_value=(True, []))
 
-        model = generator.generate_base_model(
-            "Merchant-Beta", "Merchant", merchant_personality)
+        model = generator.generate_base_model("Merchant-Beta", "Merchant", merchant_personality)
 
         assert model["model"]["class"] == "Merchant"
         assert "S_inventory" in model["state_space"]
@@ -501,16 +465,14 @@ class TestGMNGenerator:
 
         # High curiosity personality
         curious_personality = {"curiosity": 85, "risk_tolerance": 30}
-        state_space = generator._generate_state_space(
-            "Explorer", curious_personality)
+        state_space = generator._generate_state_space("Explorer", curious_personality)
 
         assert "S_novelty_seeking" in state_space
         assert "S_risk_assessment" not in state_space  # Low risk tolerance
 
         # High risk tolerance personality
         risky_personality = {"curiosity": 30, "risk_tolerance": 85}
-        state_space = generator._generate_state_space(
-            "Explorer", risky_personality)
+        state_space = generator._generate_state_space("Explorer", risky_personality)
 
         assert "S_novelty_seeking" not in state_space  # Low curiosity
         assert "S_risk_assessment" in state_space
@@ -588,11 +550,8 @@ class TestGMNGenerator:
             return
 
         model = {
-            "connections": {
-                "C_pref": {
-                    "preferences": {
-                        "Exploration": 0.5}},
-                "C_likelihood": {}}}
+            "connections": {"C_pref": {"preferences": {"Exploration": 0.5}}, "C_likelihood": {}}
+        }
 
         # Test action bias pattern
         action_pattern = {
@@ -649,28 +608,19 @@ class TestGMNGenerator:
             return
 
         model = {
-            "model": {
-                "name": "TestAgent",
-                "type": "ActiveInference",
-                "class": "Explorer"},
-            "metadata": {
-                "model_version": 2},
-            "state_space": {
-                "S_energy": {
-                    "type": "Real[0, 100]",
-                    "description": "Energy"}},
+            "model": {"name": "TestAgent", "type": "ActiveInference", "class": "Explorer"},
+            "metadata": {"model_version": 2},
+            "state_space": {"S_energy": {"type": "Real[0, 100]", "description": "Energy"}},
             "connections": {
-                "C_pref": {
-                    "type": "observation -> Real[0, 1]",
-                            "preferences": {
-                                "Exploration": 0.7}}},
+                "C_pref": {"type": "observation -> Real[0, 1]", "preferences": {"Exploration": 0.7}}
+            },
             "update_equations": {
                 "belief_update": {
                     "state": "S_energy",
                     "formula": "update_formula",
-                    "parameters": {
-                        "learning_rate": 0.1},
-                }},
+                    "parameters": {"learning_rate": 0.1},
+                }
+            },
         }
 
         output_file = tmp_path / "test_export.gnn.md"
@@ -687,8 +637,7 @@ class TestGMNGenerator:
         if not IMPORT_SUCCESS:
             return
 
-        generator.validator.validate_model = Mock(
-            return_value=(False, ["Invalid state space"]))
+        generator.validator.validate_model = Mock(return_value=(False, ["Invalid state space"]))
 
         with pytest.raises(ValueError, match="validation failed"):
             generator.generate_base_model("Test", "Explorer", {})
@@ -708,22 +657,14 @@ class TestGMNValidator:
         if IMPORT_SUCCESS:
             model = GMNModel(name="ValidModel", description="Test model")
             model.state_space = {
-                "S_energy": {
-                    "type": "Real",
-                    "constraints": {
-                        "min": 0,
-                        "max": 100}}}
+                "S_energy": {"type": "Real", "constraints": {"min": 0, "max": 100}}
+            }
             model.preferences = {
-                "exploration_pref": {
-                    "input": "observation",
-                    "output": "Real[0, 1]",
-                    "details": []}}
+                "exploration_pref": {"input": "observation", "output": "Real[0, 1]", "details": []}
+            }
             return model
         else:
-            return GMNModel(
-                "ValidModel", "Test model", {
-                    "S_energy": {
-                        "type": "Real"}})
+            return GMNModel("ValidModel", "Test model", {"S_energy": {"type": "Real"}})
 
     def test_validator_initialization(self, validator):
         """Test validator initialization."""
@@ -779,14 +720,11 @@ class TestGMNValidator:
 
         model = GMNModel(name="Test")
         model.state_space = {
-            "valid_real": {
-                "type": "Real", "constraints": {
-                    "min": 0, "max": 100}}, "valid_int": {
-                "type": "Integer", "constraints": {
-                    "min": 0, "max": 10}}, "invalid_type": {
-                        "type": "InvalidType"}, "missing_type": {
-                            "constraints": {
-                                "min": 0}}, }
+            "valid_real": {"type": "Real", "constraints": {"min": 0, "max": 100}},
+            "valid_int": {"type": "Integer", "constraints": {"min": 0, "max": 10}},
+            "invalid_type": {"type": "InvalidType"},
+            "missing_type": {"constraints": {"min": 0}},
+        }
 
         result = validator.validate(model)
 
@@ -800,18 +738,15 @@ class TestGMNValidator:
 
         model = GMNModel(name="Test")
         model.state_space = {
-            "invalid_range": {
-                "type": "Real", "constraints": {
-                    "min": 100, "max": 0}}, "equal_range": {
-                "type": "Real", "constraints": {
-                    "min": 50, "max": 50}}, "no_constraints": {
-                        "type": "Real"}, }
+            "invalid_range": {"type": "Real", "constraints": {"min": 100, "max": 0}},
+            "equal_range": {"type": "Real", "constraints": {"min": 50, "max": 50}},
+            "no_constraints": {"type": "Real"},
+        }
 
         result = validator.validate(model)
 
         assert any(e.error_code == "INVALID_RANGE" for e in result.errors)
-        assert any(
-            w.error_code == "SINGLE_VALUE_RANGE" for w in result.warnings)
+        assert any(w.error_code == "SINGLE_VALUE_RANGE" for w in result.warnings)
         assert any(w.error_code == "MISSING_BOUNDS" for w in result.warnings)
 
     def test_validate_h3cell_constraints(self, validator):
@@ -821,19 +756,15 @@ class TestGMNValidator:
 
         model = GMNModel(name="Test")
         model.state_space = {
-            "valid_h3": {
-                "type": "H3Cell", "constraints": {
-                    "resolution": 7}}, "invalid_res": {
-                "type": "H3Cell", "constraints": {
-                    "resolution": 20}}, "missing_res": {
-                        "type": "H3Cell", "constraints": {}}, }
+            "valid_h3": {"type": "H3Cell", "constraints": {"resolution": 7}},
+            "invalid_res": {"type": "H3Cell", "constraints": {"resolution": 20}},
+            "missing_res": {"type": "H3Cell", "constraints": {}},
+        }
 
         result = validator.validate(model)
 
-        assert any(
-            e.error_code == "INVALID_H3_RESOLUTION" for e in result.errors)
-        assert any(
-            w.error_code == "MISSING_H3_RESOLUTION" for w in result.warnings)
+        assert any(e.error_code == "INVALID_H3_RESOLUTION" for e in result.errors)
+        assert any(w.error_code == "MISSING_H3_RESOLUTION" for w in result.warnings)
 
     def test_validate_connections(self, validator):
         """Test connection validation."""
@@ -851,8 +782,7 @@ class TestGMNValidator:
 
         result = validator.validate(model)
 
-        assert any(
-            w.error_code == "DUPLICATE_CONNECTION" for w in result.warnings)
+        assert any(w.error_code == "DUPLICATE_CONNECTION" for w in result.warnings)
         assert any(w.error_code == "SELF_LOOP" for w in result.warnings)
 
     def test_validate_update_equations(self, validator):
@@ -870,8 +800,7 @@ class TestGMNValidator:
 
         result = validator.validate(model)
 
-        assert any(
-            w.error_code == "UNDEFINED_UPDATE_VAR" for w in result.warnings)
+        assert any(w.error_code == "UNDEFINED_UPDATE_VAR" for w in result.warnings)
         assert any(e.error_code == "DANGEROUS_PATTERN" for e in result.errors)
 
     def test_validate_preferences(self, validator):
@@ -890,8 +819,7 @@ class TestGMNValidator:
         result = validator.validate(model)
 
         assert any(e.error_code == "MISSING_PREF_INPUT" for e in result.errors)
-        assert any(
-            w.error_code == "INVALID_PREF_NAME" for w in result.warnings)
+        assert any(w.error_code == "INVALID_PREF_NAME" for w in result.warnings)
 
     def test_circular_dependency_detection(self, validator):
         """Test circular dependency detection."""
@@ -907,8 +835,7 @@ class TestGMNValidator:
 
         result = validator.validate(model)
 
-        assert any(
-            w.error_code == "CIRCULAR_DEPENDENCY" for w in result.warnings)
+        assert any(w.error_code == "CIRCULAR_DEPENDENCY" for w in result.warnings)
 
     def test_security_validation(self, validator):
         """Test security validation."""
@@ -1018,8 +945,7 @@ class TestSafeGNNProcessing:
 
         large_file = tmp_path / "large.gnn.md"
         # Create file larger than limit
-        large_content = "x" * \
-            (ValidationConstraints.MAX_FILE_SIZE_MB * 1024 * 1024 + 1)
+        large_content = "x" * (ValidationConstraints.MAX_FILE_SIZE_MB * 1024 * 1024 + 1)
         large_file.write_text(large_content)
 
         with pytest.raises(ValueError, match="File too large"):
@@ -1040,8 +966,7 @@ class TestIntegration:
         generator.validator.validate_model = Mock(return_value=(True, []))
 
         personality = {"exploration": 70, "cooperation": 50, "efficiency": 50}
-        model = generator.generate_base_model(
-            "TestAgent", "Explorer", personality)
+        model = generator.generate_base_model("TestAgent", "Explorer", personality)
 
         # Validate model
         validator = GMNValidator()
@@ -1076,8 +1001,8 @@ class TestIntegration:
 
         # Create initial model
         base_model = generator.generate_base_model(
-            "EvolvingAgent", "Explorer", {
-                "exploration": 50, "cooperation": 50, "efficiency": 50})
+            "EvolvingAgent", "Explorer", {"exploration": 50, "cooperation": 50, "efficiency": 50}
+        )
 
         # Simulate experience
         experience = {
@@ -1089,8 +1014,7 @@ class TestIntegration:
         }
 
         # Evolve model
-        evolved_model = generator.generate_from_experience(
-            base_model, experience)
+        evolved_model = generator.generate_from_experience(base_model, experience)
 
         # Verify evolution
         assert "S_world_model" in evolved_model["state_space"]

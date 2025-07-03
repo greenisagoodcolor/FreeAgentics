@@ -16,19 +16,19 @@ import asyncio
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+
 # from enum import Enum  # unused
 from typing import Any, Callable, Dict, List, Optional
 
 import numpy as np
 
 from agents.base.data_model import Agent
-from agents.base.markov_blanket import (
+from agents.base.markov_blanket import (  # MarkovBlanketInterface,  # unused
     AgentState,
     BoundaryMetrics,
     BoundaryState,
     BoundaryViolationEvent,
     MarkovBlanketFactory,
-    # MarkovBlanketInterface,  # unused
     PyMDPMarkovBlanket,
 )
 
@@ -182,7 +182,9 @@ class MarkovBlanketVerificationService:
             if len(self.monitored_agents) >= self.config.max_agents_monitored:
                 logger.error(
                     f"Cannot register agent {
-                        agent.agent_id}: " "Maximum agents limit reached")
+                        agent.agent_id}: "
+                    "Maximum agents limit reached"
+                )
                 return False
 
             if agent.agent_id in self.monitored_agents:
@@ -248,10 +250,7 @@ class MarkovBlanketVerificationService:
         if agent_id in self.monitored_agents:
             self.agent_states[agent_id] = agent_state
 
-    def update_environment_state(
-            self,
-            agent_id: str,
-            environment_state: np.ndarray) -> None:
+    def update_environment_state(self, agent_id: str, environment_state: np.ndarray) -> None:
         """Update environment state for boundary monitoring"""
         if agent_id in self.monitored_agents:
             self.environment_states[agent_id] = environment_state
@@ -276,9 +275,7 @@ class MarkovBlanketVerificationService:
         """Get system-wide monitoring metrics"""
         return self.system_metrics
 
-    def get_violation_history(
-            self,
-            agent_id: Optional[str] = None) -> List[BoundaryViolationEvent]:
+    def get_violation_history(self, agent_id: Optional[str] = None) -> List[BoundaryViolationEvent]:
         """Get violation history for an agent or all agents"""
         if agent_id:
             if agent_id in self.monitored_agents:
@@ -294,13 +291,11 @@ class MarkovBlanketVerificationService:
         all_violations.sort(key=lambda v: v.timestamp, reverse=True)
         return all_violations
 
-    def add_violation_handler(
-            self, handler: Callable[[BoundaryViolationEvent], None]) -> None:
+    def add_violation_handler(self, handler: Callable[[BoundaryViolationEvent], None]) -> None:
         """Add a handler for boundary violation events"""
         self.violation_handlers.append(handler)
 
-    def add_metrics_handler(
-            self, handler: Callable[[str, BoundaryMetrics], None]) -> None:
+    def add_metrics_handler(self, handler: Callable[[str, BoundaryMetrics], None]) -> None:
         """Add a handler for metrics updates"""
         self.metrics_handlers.append(handler)
 
@@ -432,8 +427,7 @@ class MarkovBlanketVerificationService:
                 monitoring_state.violation_count += 1
 
                 # Maintain violation history limit
-                if len(
-                        monitoring_state.recent_violations) > self.config.max_violation_history:
+                if len(monitoring_state.recent_violations) > self.config.max_violation_history:
                     monitoring_state.recent_violations.pop(0)
 
                 # Check alert cooldown
@@ -500,15 +494,14 @@ class MarkovBlanketVerificationService:
                 integrity_scores.append(metrics.boundary_integrity)
 
                 boundary_state = monitoring_state.markov_blanket.get_boundary_state()
-                if boundary_state in [
-                        BoundaryState.COMPROMISED,
-                        BoundaryState.VIOLATED]:
+                if boundary_state in [BoundaryState.COMPROMISED, BoundaryState.VIOLATED]:
                     compromised_count += 1
 
                 # Count recent violations (last 5 minutes)
                 recent_threshold = datetime.now() - timedelta(minutes=5)
                 recent_violations = [
-                    v for v in monitoring_state.recent_violations if v.timestamp > recent_threshold]
+                    v for v in monitoring_state.recent_violations if v.timestamp > recent_threshold
+                ]
                 active_violations += len(recent_violations)
 
             # Update system metrics

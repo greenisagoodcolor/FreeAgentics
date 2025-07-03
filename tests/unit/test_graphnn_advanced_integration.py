@@ -304,8 +304,7 @@ class TestGraphNNIntegrator:
         # Extract features at each scale
         scale_features = []
         for scale_data in multi_graph_data["scales"]:
-            features = integrator.extract_scale_features(
-                scale_data["x"], scale_data["edge_index"])
+            features = integrator.extract_scale_features(scale_data["x"], scale_data["edge_index"])
             scale_features.append(features)
 
         # Compute cross-scale attention
@@ -321,8 +320,7 @@ class TestGraphNNIntegrator:
         scale_importance = attention_result["scale_importance"]
 
         # Attention scores should sum to 1
-        assert torch.allclose(attention_scores.sum(
-            dim=-1), torch.ones(attention_scores.shape[:-1]))
+        assert torch.allclose(attention_scores.sum(dim=-1), torch.ones(attention_scores.shape[:-1]))
         assert torch.allclose(scale_importance.sum(), torch.tensor(1.0))
 
 
@@ -371,15 +369,11 @@ class TestHybridGraphModel:
         edge_attr = torch.randn(30, 16)
 
         # Process through both branches
-        parallel_output = hybrid_model.parallel_forward(
-            x, edge_index, edge_attr)
-        sequential_output = hybrid_model.sequential_forward(
-            x, edge_index, edge_attr)
+        parallel_output = hybrid_model.parallel_forward(x, edge_index, edge_attr)
+        sequential_output = hybrid_model.sequential_forward(x, edge_index, edge_attr)
 
-        assert parallel_output.shape == (
-            num_nodes, hybrid_model.config.output_dim)
-        assert sequential_output.shape == (
-            num_nodes, hybrid_model.config.output_dim)
+        assert parallel_output.shape == (num_nodes, hybrid_model.config.output_dim)
+        assert sequential_output.shape == (num_nodes, hybrid_model.config.output_dim)
 
         # Outputs should be different
         assert not torch.allclose(parallel_output, sequential_output)
@@ -390,19 +384,12 @@ class TestHybridGraphModel:
             return
 
         # Create test data with different complexities
-        simple_graph = {
-            "x": torch.randn(
-                10, 64), "edge_index": torch.randint(
-                0, 10, (2, 15))}
+        simple_graph = {"x": torch.randn(10, 64), "edge_index": torch.randint(0, 10, (2, 15))}
 
-        complex_graph = {
-            "x": torch.randn(
-                50, 64), "edge_index": torch.randint(
-                0, 50, (2, 200))}
+        complex_graph = {"x": torch.randn(50, 64), "edge_index": torch.randint(0, 50, (2, 200))}
 
         # Dynamic routing should choose appropriate branch
-        simple_routing = hybrid_model.dynamic_route(
-            simple_graph["x"], simple_graph["edge_index"])
+        simple_routing = hybrid_model.dynamic_route(simple_graph["x"], simple_graph["edge_index"])
         complex_routing = hybrid_model.dynamic_route(
             complex_graph["x"], complex_graph["edge_index"]
         )
@@ -466,16 +453,10 @@ class TestMultiScaleGraphNN:
 
         # Create graphs at different scales
         scales = [
-            {
-                "x": torch.randn(
-                    20, 64), "edge_index": torch.randint(
-                    0, 20, (2, 40))}, {
-                "x": torch.randn(
-                    40, 64), "edge_index": torch.randint(
-                    0, 40, (2, 120))}, {
-                "x": torch.randn(
-                    80, 64), "edge_index": torch.randint(
-                    0, 80, (2, 320))}, ]
+            {"x": torch.randn(20, 64), "edge_index": torch.randint(0, 20, (2, 40))},
+            {"x": torch.randn(40, 64), "edge_index": torch.randint(0, 40, (2, 120))},
+            {"x": torch.randn(80, 64), "edge_index": torch.randint(0, 80, (2, 320))},
+        ]
 
         # Extract scale-invariant features
         invariant_features = []
@@ -535,8 +516,7 @@ class TestAdaptiveGraphNN:
             target = torch.randn(15, 32)
 
             # Adaptation step
-            adaptation_result = adaptive_model.adapt_online(
-                x, edge_index, target)
+            adaptation_result = adaptive_model.adapt_online(x, edge_index, target)
             adaptation_steps.append(adaptation_result)
 
         # Parameters should have adapted
@@ -544,8 +524,7 @@ class TestAdaptiveGraphNN:
         assert not torch.allclose(initial_params, final_params)
 
         # Adaptation should improve performance
-        adaptation_losses = [step["adaptation_loss"].item()
-                             for step in adaptation_steps]
+        adaptation_losses = [step["adaptation_loss"].item() for step in adaptation_steps]
         # Loss should decrease
         assert adaptation_losses[-1] < adaptation_losses[0]
 
@@ -576,16 +555,14 @@ class TestAdaptiveGraphNN:
 
         # Learn Task A
         for data in task_a_data:
-            adaptive_model.adapt_online(
-                data["x"], data["edge_index"], data["target"])
+            adaptive_model.adapt_online(data["x"], data["edge_index"], data["target"])
 
         # Evaluate on Task A
         task_a_performance_before = adaptive_model.evaluate_task(task_a_data)
 
         # Learn Task B
         for data in task_b_data:
-            adaptive_model.adapt_online(
-                data["x"], data["edge_index"], data["target"])
+            adaptive_model.adapt_online(data["x"], data["edge_index"], data["target"])
 
         # Evaluate on Task A again
         task_a_performance_after = adaptive_model.evaluate_task(task_a_data)
@@ -686,14 +663,11 @@ class TestFederatedGraphNN:
         assert "communication_cost" in global_update
 
         # Apply global update
-        federated_model.apply_global_update(
-            global_update["aggregated_parameters"])
+        federated_model.apply_global_update(global_update["aggregated_parameters"])
 
         # Verify update was applied
         new_global_params = federated_model.get_global_parameters()
-        assert not torch.allclose(
-            new_global_params,
-            federated_model.initial_global_parameters)
+        assert not torch.allclose(new_global_params, federated_model.initial_global_parameters)
 
     def test_differential_privacy(self, federated_model):
         """Test differential privacy mechanism."""
@@ -708,12 +682,10 @@ class TestFederatedGraphNN:
         }
 
         # Compute gradients without privacy
-        gradients_no_privacy = federated_model.compute_gradients(
-            client_data, add_noise=False)
+        gradients_no_privacy = federated_model.compute_gradients(client_data, add_noise=False)
 
         # Compute gradients with privacy
-        gradients_with_privacy = federated_model.compute_gradients(
-            client_data, add_noise=True)
+        gradients_with_privacy = federated_model.compute_gradients(client_data, add_noise=True)
 
         # Gradients should be different due to noise
         assert not torch.allclose(gradients_no_privacy, gradients_with_privacy)
@@ -754,8 +726,7 @@ class TestEfficientGraphNN:
         initial_flops = efficient_model.count_flops()
 
         # Apply pruning
-        pruning_result = efficient_model.apply_pruning(
-            ratio=efficient_model.config.pruning_ratio)
+        pruning_result = efficient_model.apply_pruning(ratio=efficient_model.config.pruning_ratio)
 
         # Post-pruning statistics
         pruned_params = efficient_model.count_parameters()
@@ -802,10 +773,8 @@ class TestEfficientGraphNN:
             return
 
         # Create teacher model (larger)
-        teacher_config = GraphNNConfig(
-            hidden_dims=[512, 256, 128], num_layers=6)
-        teacher_model = EfficientGraphNN(
-            teacher_config) if IMPORT_SUCCESS else Mock()
+        teacher_config = GraphNNConfig(hidden_dims=[512, 256, 128], num_layers=6)
+        teacher_model = EfficientGraphNN(teacher_config) if IMPORT_SUCCESS else Mock()
 
         # Student model (smaller - efficient_model)
         student_model = efficient_model
@@ -858,18 +827,12 @@ class TestAutoMLGraphNN:
 
         # Define search space
         search_space = {
-            "num_layers": [
-                2, 3, 4, 5], "hidden_dims": [
-                [
-                    64, 32], [
-                    128, 64], [
-                        256, 128, 64]], "layer_types": [
-                            [
-                                "conv", "conv"], [
-                                    "conv", "attention"], [
-                                        "attention", "sage", "conv"]], "dropout": [
-                                            0.1, 0.2, 0.3], "learning_rate": [
-                                                0.001, 0.01, 0.1], }
+            "num_layers": [2, 3, 4, 5],
+            "hidden_dims": [[64, 32], [128, 64], [256, 128, 64]],
+            "layer_types": [["conv", "conv"], ["conv", "attention"], ["attention", "sage", "conv"]],
+            "dropout": [0.1, 0.2, 0.3],
+            "learning_rate": [0.001, 0.01, 0.1],
+        }
 
         # Sample training data
         train_data = {
@@ -879,8 +842,7 @@ class TestAutoMLGraphNN:
         }
 
         # Architecture search
-        search_result = automl_model.architecture_search(
-            search_space, train_data, num_trials=10)
+        search_result = automl_model.architecture_search(search_space, train_data, num_trials=10)
 
         assert "best_architecture" in search_result
         assert "best_performance" in search_result
@@ -937,8 +899,9 @@ class TestAutoMLGraphNN:
         best_hp = hp_result["best_hyperparameters"]
 
         # Best hyperparameters should be within bounds
-        assert (hp_space["learning_rate"][0] <=
-                best_hp["learning_rate"] <= hp_space["learning_rate"][1])
+        assert (
+            hp_space["learning_rate"][0] <= best_hp["learning_rate"] <= hp_space["learning_rate"][1]
+        )
         assert hp_space["dropout"][0] <= best_hp["dropout"] <= hp_space["dropout"][1]
         assert best_hp["batch_size"] in hp_space["batch_size"]
 

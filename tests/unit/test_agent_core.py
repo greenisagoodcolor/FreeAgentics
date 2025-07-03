@@ -39,12 +39,8 @@ except ImportError:
 
     class AgentData:
         def __init__(
-                self,
-                agent_id=None,
-                name="Agent",
-                agent_type="basic",
-                position=None,
-                **kwargs):
+            self, agent_id=None, name="Agent", agent_type="basic", position=None, **kwargs
+        ):
             self.agent_id = agent_id or str(uuid.uuid4())
             self.name = name
             self.agent_type = agent_type
@@ -103,19 +99,16 @@ class TestAgentCore:
         """Provide sample agent data for testing."""
         position = Position(0.0, 0.0, 0.0) if IMPORT_SUCCESS else Mock()
         return AgentData(
-            agent_id="test-agent-001",
-            name="TestAgent",
-            agent_type="test_agent",
-            position=position)
+            agent_id="test-agent-001", name="TestAgent", agent_type="test_agent", position=position
+        )
 
     @pytest.fixture
     def mock_agent(self, sample_agent_data, sample_config_provider):
         """Create a mock agent instance for testing."""
         if IMPORT_SUCCESS:
             return BaseAgent(
-                agent_data=sample_agent_data,
-                config_provider=sample_config_provider,
-                constraints={})
+                agent_data=sample_agent_data, config_provider=sample_config_provider, constraints={}
+            )
         else:
             # Return mock for test compatibility
             mock = Mock()
@@ -125,26 +118,21 @@ class TestAgentCore:
             mock._is_paused = False
             return mock
 
-    def test_agent_initialization(
-            self,
-            sample_agent_data,
-            sample_config_provider):
+    def test_agent_initialization(self, sample_agent_data, sample_config_provider):
         """Test Agent initialization with various configurations."""
         if not IMPORT_SUCCESS:
             pytest.skip("BaseAgent not available, skipping test")
 
         # Test basic initialization with AgentData
         agent = BaseAgent(
-            agent_data=sample_agent_data,
-            config_provider=sample_config_provider,
-            constraints={})
+            agent_data=sample_agent_data, config_provider=sample_config_provider, constraints={}
+        )
         assert agent.data.agent_id == sample_agent_data.agent_id
         assert agent.data.name == sample_agent_data.name
         assert agent.data.agent_type == sample_agent_data.agent_type
 
         # Test initialization without config provider
-        agent_no_config = BaseAgent(
-            agent_data=sample_agent_data, constraints={})
+        agent_no_config = BaseAgent(agent_data=sample_agent_data, constraints={})
         assert agent_no_config.data.agent_id == sample_agent_data.agent_id
 
         # Test backward compatibility - individual parameters
@@ -166,18 +154,13 @@ class TestAgentCore:
         # Test valid agent IDs using backward compatibility
         valid_ids = ["agent-001", "test_agent_123", "agent.v2"]
         for agent_id in valid_ids:
-            agent = BaseAgent(
-                agent_id=agent_id,
-                name="TestAgent",
-                constraints={})
+            agent = BaseAgent(agent_id=agent_id, name="TestAgent", constraints={})
             assert agent.data.agent_id == agent_id
 
         # Test uniqueness
         agents = [
-            BaseAgent(
-                agent_id=f"agent-{i}",
-                name="TestAgent",
-                constraints={}) for i in range(5)]
+            BaseAgent(agent_id=f"agent-{i}", name="TestAgent", constraints={}) for i in range(5)
+        ]
         agent_ids = [agent.data.agent_id for agent in agents]
         assert len(set(agent_ids)) == len(agent_ids)  # All unique
 
@@ -217,11 +200,7 @@ class TestAgentCore:
             assert component is None
 
             # Test getting existing components
-            existing_components = [
-                "state_manager",
-                "perception",
-                "decision",
-                "memory"]
+            existing_components = ["state_manager", "perception", "decision", "memory"]
             for comp_name in existing_components:
                 component = mock_agent.get_component(comp_name)
                 # Component may or may not exist depending on initialization
@@ -368,12 +347,7 @@ class TestAgentCore:
         # Should not crash with concurrent access
         assert len(results) == 3
 
-    @pytest.mark.parametrize("agent_type",
-                             ["explorer",
-                              "guardian",
-                              "merchant",
-                              "scholar",
-                              "basic"])
+    @pytest.mark.parametrize("agent_type", ["explorer", "guardian", "merchant", "scholar", "basic"])
     def test_agent_type_variations(self, agent_type, sample_config_provider):
         """Test agent creation with different types."""
         if not IMPORT_SUCCESS:

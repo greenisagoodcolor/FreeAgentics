@@ -57,12 +57,7 @@ except ImportError:
         message_passing_steps: int = 3
 
     class GraphStructure:
-        def __init__(
-                self,
-                num_nodes,
-                edge_index,
-                edge_attr=None,
-                node_attr=None):
+        def __init__(self, num_nodes, edge_index, edge_attr=None, node_attr=None):
             self.num_nodes = num_nodes
             self.edge_index = edge_index
             self.edge_attr = edge_attr
@@ -143,8 +138,7 @@ class TestGraphStructure:
     def test_graph_structure_creation(self):
         """Test creating graph structure."""
         num_nodes = 5
-        edge_index = torch.tensor(
-            [[0, 1, 2, 3, 4], [1, 2, 3, 4, 0]], dtype=torch.long)
+        edge_index = torch.tensor([[0, 1, 2, 3, 4], [1, 2, 3, 4, 0]], dtype=torch.long)
         edge_attr = torch.randn(5, 16)
         node_attr = torch.randn(5, 32)
 
@@ -178,8 +172,7 @@ class TestGraphStructure:
         if not IMPORT_SUCCESS:
             return
 
-        edge_index = torch.tensor(
-            [[0, 1, 1, 2, 2, 3], [1, 0, 2, 1, 3, 2]], dtype=torch.long)
+        edge_index = torch.tensor([[0, 1, 1, 2, 2, 3], [1, 0, 2, 1, 3, 2]], dtype=torch.long)
         graph = GraphStructure(4, edge_index)
 
         assert graph.num_edges == 6
@@ -258,8 +251,7 @@ class TestEdgeFeatures:
             return
 
         node_features = torch.randn(5, 64)
-        edge_index = torch.tensor(
-            [[0, 1, 2, 3], [1, 2, 3, 4]], dtype=torch.long)
+        edge_index = torch.tensor([[0, 1, 2, 3], [1, 2, 3, 4]], dtype=torch.long)
 
         edge_features = EdgeFeatures.from_node_pairs(
             node_features, edge_index, combination="concat"
@@ -312,12 +304,10 @@ class TestMessagePassing:
             return
 
         node_features = torch.randn(5, 64)
-        edge_index = torch.tensor(
-            [[0, 1, 2, 3], [1, 2, 3, 4]], dtype=torch.long)
+        edge_index = torch.tensor([[0, 1, 2, 3], [1, 2, 3, 4]], dtype=torch.long)
         edge_features = torch.randn(4, 32)
 
-        messages = message_passing.compute_messages(
-            node_features, edge_index, edge_features)
+        messages = message_passing.compute_messages(node_features, edge_index, edge_features)
 
         assert messages.shape[0] == 4  # Number of edges
         assert messages.shape[1] == 64  # Hidden dim
@@ -328,8 +318,9 @@ class TestMessagePassing:
             return
 
         messages = torch.randn(10, 64)
-        edge_index = torch.tensor([[0, 0, 1, 1, 2, 2, 3, 3, 4, 4], [
-            1, 2, 0, 3, 0, 4, 1, 4, 2, 3]], dtype=torch.long)
+        edge_index = torch.tensor(
+            [[0, 0, 1, 1, 2, 2, 3, 3, 4, 4], [1, 2, 0, 3, 0, 4, 1, 4, 2, 3]], dtype=torch.long
+        )
         num_nodes = 5
 
         aggregated = message_passing.aggregate(messages, edge_index, num_nodes)
@@ -339,8 +330,7 @@ class TestMessagePassing:
         # Test different aggregation methods
         for agg_type in ["mean", "sum", "max"]:
             message_passing.aggregation = agg_type
-            agg_result = message_passing.aggregate(
-                messages, edge_index, num_nodes)
+            agg_result = message_passing.aggregate(messages, edge_index, num_nodes)
             assert agg_result.shape == (num_nodes, 64)
 
     def test_update_nodes(self, message_passing):
@@ -351,8 +341,7 @@ class TestMessagePassing:
         node_features = torch.randn(5, 64)
         aggregated_messages = torch.randn(5, 64)
 
-        updated = message_passing.update_nodes(
-            node_features, aggregated_messages)
+        updated = message_passing.update_nodes(node_features, aggregated_messages)
 
         assert updated.shape == node_features.shape
 
@@ -396,11 +385,9 @@ class TestGraphAttention:
             return
 
         node_features = torch.randn(5, 64)
-        edge_index = torch.tensor(
-            [[0, 1, 2, 3], [1, 2, 3, 4]], dtype=torch.long)
+        edge_index = torch.tensor([[0, 1, 2, 3], [1, 2, 3, 4]], dtype=torch.long)
 
-        scores = graph_attention.compute_attention_scores(
-            node_features, edge_index)
+        scores = graph_attention.compute_attention_scores(node_features, edge_index)
 
         assert scores.shape == (4, 4)  # (num_edges, num_heads)
 
@@ -410,8 +397,7 @@ class TestGraphAttention:
             return
 
         node_features = torch.randn(5, 64)
-        edge_index = torch.tensor(
-            [[0, 1, 2, 3, 4], [1, 2, 3, 4, 0]], dtype=torch.long)
+        edge_index = torch.tensor([[0, 1, 2, 3, 4], [1, 2, 3, 4, 0]], dtype=torch.long)
 
         attended_features = graph_attention(node_features, edge_index)
 
@@ -546,7 +532,8 @@ class TestGraphPooling:
 
         # Apply hierarchical pooling
         pooled_features, pooled_edge_index, cluster_assignment = graph_pooling.hierarchical_pool(
-            node_features, edge_index, ratio=0.5)
+            node_features, edge_index, ratio=0.5
+        )
 
         assert pooled_features.shape[0] == 10  # 50% of nodes
         assert pooled_features.shape[1] == 64
@@ -635,8 +622,7 @@ class TestGNNEncoder:
         node_features = torch.randn(10, 64)
         edge_index = torch.randint(0, 10, (2, 20))
 
-        encoded, layer_outputs = encoder(
-            node_features, edge_index, return_all_layers=True)
+        encoded, layer_outputs = encoder(node_features, edge_index, return_all_layers=True)
 
         assert len(layer_outputs) == 3
         assert all(out.shape == (10, 128) for out in layer_outputs)
@@ -722,15 +708,12 @@ class TestGraphEmbedding:
         if not IMPORT_SUCCESS:
             return
 
-        edge_index = torch.tensor(
-            [[0, 1, 1, 2, 2, 3], [1, 0, 2, 1, 3, 2]], dtype=torch.long)
+        edge_index = torch.tensor([[0, 1, 1, 2, 2, 3], [1, 0, 2, 1, 3, 2]], dtype=torch.long)
         num_nodes = 4
 
-        pos_encoding = graph_embedding.compute_positional_encoding(
-            edge_index, num_nodes)
+        pos_encoding = graph_embedding.compute_positional_encoding(edge_index, num_nodes)
 
-        assert pos_encoding.shape == (
-            num_nodes, graph_embedding.pos_encoding_dim)
+        assert pos_encoding.shape == (num_nodes, graph_embedding.pos_encoding_dim)
 
     def test_structural_features(self, graph_embedding):
         """Test structural feature extraction."""
@@ -742,8 +725,7 @@ class TestGraphEmbedding:
         )
         num_nodes = 5
 
-        struct_features = graph_embedding.compute_structural_features(
-            edge_index, num_nodes)
+        struct_features = graph_embedding.compute_structural_features(edge_index, num_nodes)
 
         assert struct_features.shape[0] == num_nodes
         assert "degree" in struct_features
@@ -758,8 +740,7 @@ class TestGraphEmbedding:
         node_features = torch.randn(10, 64)
         edge_index = torch.randint(0, 10, (2, 30))
 
-        embeddings = graph_embedding.compute_embeddings(
-            node_features, edge_index)
+        embeddings = graph_embedding.compute_embeddings(node_features, edge_index)
 
         assert embeddings.shape[0] == 10
         assert embeddings.shape[1] > 64  # Includes structural features
@@ -819,8 +800,7 @@ class TestBeliefGraphConverter:
         agent_beliefs = [torch.randn(4) for _ in range(10)]
         group_structure = [[0, 1, 2], [3, 4, 5], [6, 7, 8, 9]]
 
-        graph = converter.create_hierarchical_graph(
-            agent_beliefs, group_structure)
+        graph = converter.create_hierarchical_graph(agent_beliefs, group_structure)
 
         assert graph.num_nodes == 14  # 10 agents + 3 groups + 1 root
         assert hasattr(graph, "hierarchy_levels")
@@ -858,8 +838,7 @@ class TestGraphBeliefPropagation:
             return
 
         beliefs = torch.softmax(torch.randn(5, 4), dim=1)
-        edge_index = torch.tensor(
-            [[0, 1, 2, 3, 4], [1, 2, 3, 4, 0]], dtype=torch.long)
+        edge_index = torch.tensor([[0, 1, 2, 3, 4], [1, 2, 3, 4, 0]], dtype=torch.long)
 
         updated_beliefs = propagator.propagate_step(beliefs, edge_index)
 
@@ -942,11 +921,7 @@ class TestGNNInferenceEngine:
             return
 
         # Create belief states for multiple agents
-        belief_states = [
-            BeliefState(
-                torch.softmax(
-                    torch.randn(4),
-                    dim=0)) for _ in range(5)]
+        belief_states = [BeliefState(torch.softmax(torch.randn(4), dim=0)) for _ in range(5)]
 
         observations = torch.randn(5, 10)
 
@@ -966,14 +941,12 @@ class TestGNNInferenceEngine:
 
         batch_beliefs = []
         for _ in range(batch_size):
-            beliefs = [BeliefState(torch.softmax(torch.randn(5), dim=0))
-                       for _ in range(num_agents)]
+            beliefs = [BeliefState(torch.softmax(torch.randn(5), dim=0)) for _ in range(num_agents)]
             batch_beliefs.append(beliefs)
 
         batch_observations = torch.randn(batch_size, num_agents, 8)
 
-        batch_updated = engine.batch_inference(
-            batch_beliefs, batch_observations)
+        batch_updated = engine.batch_inference(batch_beliefs, batch_observations)
 
         assert len(batch_updated) == batch_size
         assert all(len(beliefs) == num_agents for beliefs in batch_updated)
@@ -984,11 +957,7 @@ class TestGNNInferenceEngine:
             return
 
         # Individual level beliefs
-        individual_beliefs = [
-            BeliefState(
-                torch.softmax(
-                    torch.randn(4),
-                    dim=0)) for _ in range(12)]
+        individual_beliefs = [BeliefState(torch.softmax(torch.randn(4), dim=0)) for _ in range(12)]
 
         # Group structure
         groups = [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11]]
@@ -1009,11 +978,7 @@ class TestGNNInferenceEngine:
             return
 
         # Initial beliefs
-        beliefs = [
-            BeliefState(
-                torch.softmax(
-                    torch.randn(4),
-                    dim=0)) for _ in range(3)]
+        beliefs = [BeliefState(torch.softmax(torch.randn(4), dim=0)) for _ in range(3)]
 
         # Run temporal inference
         time_steps = 10
@@ -1021,8 +986,7 @@ class TestGNNInferenceEngine:
 
         for t in range(time_steps):
             observations = torch.randn(3, 6)
-            beliefs = engine.temporal_inference_step(
-                beliefs, observations, belief_history)
+            beliefs = engine.temporal_inference_step(beliefs, observations, belief_history)
             belief_history.append(beliefs)
 
         assert len(belief_history) == time_steps + 1
@@ -1063,8 +1027,7 @@ class TestGNNIntegration:
 
         # Mock active inference engine
         active_engine = Mock(spec=ActiveInferenceEngine)
-        active_engine.belief_state = BeliefState(
-            torch.softmax(torch.randn(4), dim=0))
+        active_engine.belief_state = BeliefState(torch.softmax(torch.randn(4), dim=0))
 
         # Connect GNN to active inference
         gnn_integration.connect_active_inference(active_engine)
@@ -1103,12 +1066,10 @@ class TestGNNIntegration:
 
         # Run some inference steps
         for _ in range(5):
-            beliefs = [BeliefState(torch.softmax(torch.randn(4), dim=0))
-                       for _ in range(3)]
+            beliefs = [BeliefState(torch.softmax(torch.randn(4), dim=0)) for _ in range(3)]
             observations = torch.randn(3, 6)
 
-            gnn_integration.inference_engine.inference_step(
-                beliefs, observations)
+            gnn_integration.inference_engine.inference_step(beliefs, observations)
 
         # Get performance metrics
         metrics = gnn_integration.get_performance_metrics()

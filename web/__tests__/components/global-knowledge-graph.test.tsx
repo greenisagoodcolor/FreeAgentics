@@ -301,11 +301,8 @@ describe("GlobalKnowledgeGraph", () => {
       thresholds: [],
     })) as any;
 
-    // Mock requestAnimationFrame for D3 animations
-    global.requestAnimationFrame = jest.fn((cb) => {
-      setTimeout(cb, 16); // Simulate 60fps
-      return 1;
-    });
+    // Mock requestAnimationFrame for D3 animations - prevent recursive calls
+    global.requestAnimationFrame = jest.fn(() => 1); // Don't execute callback to prevent infinite loops
     global.cancelAnimationFrame = jest.fn();
   });
 
@@ -594,17 +591,31 @@ describe("GlobalKnowledgeGraph", () => {
       expect(container.querySelector("svg")).toBeInTheDocument();
       expect(screen.getByText("Global Knowledge Graph")).toBeInTheDocument();
 
-      // Simulate SVG click interaction
+      // Wait for D3 initialization and then simulate interaction
+      await act(async () => {
+        // Allow time for D3 simulation to initialize
+        await new Promise(resolve => setTimeout(resolve, 100));
+      });
+
+      // Simulate SVG click interaction with proper coordinates
       const svg = container.querySelector("svg");
       if (svg) {
         await act(async () => {
-          fireEvent.click(svg);
+          // Create a more realistic mouse event with coordinates
+          const event = new MouseEvent("click", {
+            bubbles: true,
+            cancelable: true,
+            clientX: 100,
+            clientY: 100,
+          });
+          svg.dispatchEvent(event);
         });
       }
 
-      // Component should handle node interactions without errors
+      // Component should handle node interactions without errors (callback may or may not be called based on D3 state)
       expect(container).toBeTruthy();
       expect(onSelectNode).toBeDefined();
+      // Note: We don't assert the callback was called because D3 node selection depends on actual nodes being rendered
     });
 
     test("handles different node types", async () => {

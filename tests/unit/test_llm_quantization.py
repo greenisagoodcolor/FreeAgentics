@@ -143,12 +143,7 @@ class TestQuantizationMethod:
 
     def test_quantization_methods_exist(self):
         """Test all quantization methods exist."""
-        expected_methods = [
-            "DYNAMIC",
-            "STATIC",
-            "QAT",
-            "PTQ",
-            "MIXED_PRECISION"]
+        expected_methods = ["DYNAMIC", "STATIC", "QAT", "PTQ", "MIXED_PRECISION"]
 
         for method in expected_methods:
             assert hasattr(QuantizationMethod, method)
@@ -226,9 +221,8 @@ class TestQuantizationProfile:
         """Test creating quantization profile."""
         config = QuantizationConfig(bit_depth=BitDepth.INT8)
         profile = QuantizationProfile(
-            name="mobile_optimized",
-            description="Optimized for mobile deployment",
-            config=config)
+            name="mobile_optimized", description="Optimized for mobile deployment", config=config
+        )
 
         assert profile.name == "mobile_optimized"
         assert profile.description == "Optimized for mobile deployment"
@@ -244,23 +238,17 @@ class TestQuantizationProfile:
             QuantizationProfile(
                 "server_performance",
                 "High performance server deployment",
-                QuantizationConfig(
-                    method=QuantizationMethod.STATIC,
-                    bit_depth=BitDepth.INT8),
+                QuantizationConfig(method=QuantizationMethod.STATIC, bit_depth=BitDepth.INT8),
             ),
             QuantizationProfile(
                 "edge_efficient",
                 "Edge device deployment",
-                QuantizationConfig(
-                    method=QuantizationMethod.DYNAMIC,
-                    bit_depth=BitDepth.INT4),
+                QuantizationConfig(method=QuantizationMethod.DYNAMIC, bit_depth=BitDepth.INT4),
             ),
             QuantizationProfile(
                 "mobile_extreme",
                 "Extreme mobile optimization",
-                QuantizationConfig(
-                    method=QuantizationMethod.PTQ,
-                    bit_depth=BitDepth.INT2),
+                QuantizationConfig(method=QuantizationMethod.PTQ, bit_depth=BitDepth.INT2),
             ),
         ]
 
@@ -443,9 +431,7 @@ class TestActivationQuantizer:
     def quantizer(self):
         """Create activation quantizer."""
         if IMPORT_SUCCESS:
-            config = QuantizationConfig(
-                method=QuantizationMethod.DYNAMIC,
-                bit_depth=BitDepth.INT8)
+            config = QuantizationConfig(method=QuantizationMethod.DYNAMIC, bit_depth=BitDepth.INT8)
             return ActivationQuantizer(config)
         else:
             return Mock()
@@ -506,8 +492,8 @@ class TestMixedPrecisionQuantizer:
         """Create mixed precision quantizer."""
         if IMPORT_SUCCESS:
             config = QuantizationConfig(
-                method=QuantizationMethod.MIXED_PRECISION,
-                bit_depth=BitDepth.MIXED)
+                method=QuantizationMethod.MIXED_PRECISION, bit_depth=BitDepth.MIXED
+            )
             return MixedPrecisionQuantizer(config)
         else:
             return Mock()
@@ -560,8 +546,7 @@ class TestMixedPrecisionQuantizer:
         assert all(0 <= score <= 1 for score in sensitivity_scores.values())
 
         # High sensitivity layers should get higher precision
-        precision_map = quantizer.assign_precisions_by_sensitivity(
-            sensitivity_scores)
+        precision_map = quantizer.assign_precisions_by_sensitivity(sensitivity_scores)
         assert all(layer in precision_map for layer in layers)
 
 
@@ -623,11 +608,7 @@ class TestModelQuantizer:
         qat_model = quantizer.prepare_qat(mock_model)
 
         assert qat_model is not None
-        assert hasattr(
-            qat_model,
-            "qconfig") or hasattr(
-            quantizer,
-            "qat_prepared")
+        assert hasattr(qat_model, "qconfig") or hasattr(quantizer, "qat_prepared")
 
     def test_export_quantized_model(self, quantizer, tmp_path):
         """Test exporting quantized model."""
@@ -692,19 +673,15 @@ class TestPerformanceAnalyzer:
 
         # Mock models with slightly different outputs
         original_model = Mock()
-        original_model.forward = Mock(
-            return_value=torch.tensor([[0.1, 0.7, 0.2]]))
+        original_model.forward = Mock(return_value=torch.tensor([[0.1, 0.7, 0.2]]))
 
         quantized_model = Mock()
-        quantized_model.forward = Mock(
-            return_value=torch.tensor([[0.12, 0.68, 0.2]]))
+        quantized_model.forward = Mock(return_value=torch.tensor([[0.12, 0.68, 0.2]]))
 
         # Test data
-        test_data = [(torch.randn(1, 10), torch.tensor([1]))
-                     for _ in range(10)]
+        test_data = [(torch.randn(1, 10), torch.tensor([1])) for _ in range(10)]
 
-        accuracy_loss = analyzer.compare_accuracy(
-            original_model, quantized_model, test_data)
+        accuracy_loss = analyzer.compare_accuracy(original_model, quantized_model, test_data)
 
         assert 0 <= accuracy_loss <= 1
 
@@ -714,11 +691,7 @@ class TestPerformanceAnalyzer:
             return
 
         model = Mock()
-        model.parameters = Mock(
-            return_value=[
-                torch.randn(
-                    100, 100), torch.randn(
-                    50, 50)])
+        model.parameters = Mock(return_value=[torch.randn(100, 100), torch.randn(50, 50)])
 
         memory_mb = analyzer.calculate_model_size(model)
 
@@ -767,11 +740,7 @@ class TestOllamaModel:
 
     def test_model_creation(self):
         """Test creating Ollama model."""
-        model = OllamaModel(
-            name="llama2",
-            tag="7b-q4_0",
-            size_gb=3.8,
-            quantization="q4_0")
+        model = OllamaModel(name="llama2", tag="7b-q4_0", size_gb=3.8, quantization="q4_0")
 
         assert model.name == "llama2"
         assert model.tag == "7b-q4_0"
@@ -1033,10 +1002,7 @@ class TestModelConverter:
 
         # Mock PyTorch model
         mock_model = Mock()
-        mock_model.state_dict = Mock(
-            return_value={
-                "layer": torch.randn(
-                    10, 10)})
+        mock_model.state_dict = Mock(return_value={"layer": torch.randn(10, 10)})
 
         # Convert
         output_path = tmp_path / "model.ollama"
@@ -1252,10 +1218,8 @@ class TestIntegrationWithQuantization:
         # Mock model
         mock_model = Mock()
         mock_model.state_dict = Mock(
-            return_value={
-                "layer1": torch.randn(
-                    100, 100), "layer2": torch.randn(
-                    50, 50)})
+            return_value={"layer1": torch.randn(100, 100), "layer2": torch.randn(50, 50)}
+        )
 
         # Quantize
         quantized_model = quantizer.quantize_model(mock_model)
@@ -1282,10 +1246,7 @@ class TestIntegrationWithQuantization:
 
         models = []
         for quant in quantizations:
-            model = OllamaModel(
-                name="llama2",
-                tag=f"7b-{quant}",
-                quantization=quant)
+            model = OllamaModel(name="llama2", tag=f"7b-{quant}", quantization=quant)
             models.append(model)
 
         # Verify different quantizations
@@ -1293,12 +1254,7 @@ class TestIntegrationWithQuantization:
         assert all(m.quantization in quantizations for m in models)
 
         # Approximate size differences
-        size_map = {
-            "q4_0": 3.8,
-            "q4_1": 4.2,
-            "q5_0": 4.7,
-            "q5_1": 5.1,
-            "q8_0": 7.2}
+        size_map = {"q4_0": 3.8, "q4_1": 4.2, "q5_0": 4.7, "q5_1": 5.1, "q8_0": 7.2}
 
         for model in models:
             if model.quantization in size_map:
@@ -1313,13 +1269,7 @@ class TestIntegrationWithQuantization:
         OllamaClient(OllamaConfig())
         PerformanceAnalyzer()
 
-        models_to_test = [
-            OllamaModel(
-                "llama2",
-                "7b-q4_0"),
-            OllamaModel(
-                "llama2",
-                "7b-q8_0")]
+        models_to_test = [OllamaModel("llama2", "7b-q4_0"), OllamaModel("llama2", "7b-q8_0")]
 
         benchmark_results = {}
 

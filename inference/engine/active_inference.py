@@ -111,8 +111,7 @@ class InferenceAlgorithm(ABC):
     ) -> torch.Tensor:
         """Infer hidden states given observations following PyMDP conventions."""
 
-    def validate_pymdp_matrices(
-            self, generative_model: GenerativeModel) -> bool:
+    def validate_pymdp_matrices(self, generative_model: GenerativeModel) -> bool:
         """Validate that generative model matrices follow PyMDP conventions using Template Method pattern."""
         if not hasattr(generative_model, "A"):
             return True  # Not a discrete model
@@ -120,7 +119,7 @@ class InferenceAlgorithm(ABC):
         validation_steps = [
             self._validate_a_matrix,
             self._validate_b_matrix,
-            self._validate_d_vector
+            self._validate_d_vector,
         ]
 
         for validation_step in validation_steps:
@@ -178,9 +177,7 @@ class InferenceAlgorithm(ABC):
 
         return True
 
-    def get_model_dimensions(
-            self,
-            generative_model: GenerativeModel) -> ModelDimensions:
+    def get_model_dimensions(self, generative_model: GenerativeModel) -> ModelDimensions:
         """Extract model dimensions following PyMDP conventions."""
         if hasattr(generative_model, "dims"):
             return generative_model.dims
@@ -199,9 +196,8 @@ class InferenceAlgorithm(ABC):
             num_actions = 2
 
         return ModelDimensions(
-            num_states=num_states,
-            num_observations=num_obs,
-            num_actions=num_actions)
+            num_states=num_states, num_observations=num_obs, num_actions=num_actions
+        )
 
 
 class VariationalMessagePassing(InferenceAlgorithm):
@@ -241,9 +237,12 @@ class VariationalMessagePassing(InferenceAlgorithm):
         inference_strategy = self._select_inference_strategy(observations)
         return inference_strategy.infer(observations, generative_model, belief)
 
-    def _prepare_belief(self, prior_beliefs: Optional[torch.Tensor], 
-                       prior: Optional[torch.Tensor], 
-                       generative_model: GenerativeModel) -> torch.Tensor:
+    def _prepare_belief(
+        self,
+        prior_beliefs: Optional[torch.Tensor],
+        prior: Optional[torch.Tensor],
+        generative_model: GenerativeModel,
+    ) -> torch.Tensor:
         """Prepare initial belief state"""
         belief = prior_beliefs if prior_beliefs is not None else prior
         state_dim = self._get_state_dimension(generative_model)
@@ -263,7 +262,7 @@ class VariationalMessagePassing(InferenceAlgorithm):
             return num_states.num_states
         return 4
 
-    def _select_inference_strategy(self, observations: torch.Tensor) -> 'InferenceStrategy':
+    def _select_inference_strategy(self, observations: torch.Tensor) -> "InferenceStrategy":
         """Select appropriate inference strategy based on observation type"""
         if self._is_single_discrete_observation(observations):
             return SingleDiscreteInferenceStrategy()
@@ -276,9 +275,11 @@ class VariationalMessagePassing(InferenceAlgorithm):
 
     def _is_single_discrete_observation(self, observations: torch.Tensor) -> bool:
         """Check if observation is a single discrete index"""
-        return (observations.dim() == 0 or 
-                (observations.dim() == 1 and len(observations) == 1 and 
-                 observations.dtype in [torch.int64, torch.int32, torch.long]))
+        return observations.dim() == 0 or (
+            observations.dim() == 1
+            and len(observations) == 1
+            and observations.dtype in [torch.int64, torch.int32, torch.long]
+        )
 
     def _is_soft_observation_distribution(self, observations: torch.Tensor) -> bool:
         """Check if observation is a soft distribution"""
@@ -286,21 +287,28 @@ class VariationalMessagePassing(InferenceAlgorithm):
 
     def _is_batch_discrete_observations(self, observations: torch.Tensor) -> bool:
         """Check if observation is a batch of discrete indices"""
-        return (observations.dim() == 1 and len(observations) > 1 and 
-                observations.dtype in [torch.int64, torch.int32, torch.long])
+        return (
+            observations.dim() == 1
+            and len(observations) > 1
+            and observations.dtype in [torch.int64, torch.int32, torch.long]
+        )
 
 
 class InferenceStrategy:
     """Base strategy for inference algorithms"""
-    def infer(self, observations: torch.Tensor, generative_model: GenerativeModel, 
-              belief: torch.Tensor) -> torch.Tensor:
+
+    def infer(
+        self, observations: torch.Tensor, generative_model: GenerativeModel, belief: torch.Tensor
+    ) -> torch.Tensor:
         raise NotImplementedError
 
 
 class SingleDiscreteInferenceStrategy(InferenceStrategy):
     """Strategy for single discrete observations"""
-    def infer(self, observations: torch.Tensor, generative_model: GenerativeModel, 
-              belief: torch.Tensor) -> torch.Tensor:
+
+    def infer(
+        self, observations: torch.Tensor, generative_model: GenerativeModel, belief: torch.Tensor
+    ) -> torch.Tensor:
         obs_idx = observations.item() if observations.dim() == 0 else observations[0].item()
 
         if hasattr(generative_model, "A"):
@@ -314,8 +322,10 @@ class SingleDiscreteInferenceStrategy(InferenceStrategy):
 
 class SoftObservationInferenceStrategy(InferenceStrategy):
     """Strategy for soft observation distributions"""
-    def infer(self, observations: torch.Tensor, generative_model: GenerativeModel, 
-              belief: torch.Tensor) -> torch.Tensor:
+
+    def infer(
+        self, observations: torch.Tensor, generative_model: GenerativeModel, belief: torch.Tensor
+    ) -> torch.Tensor:
         obs_dist = observations[0]
         state_dim = len(belief)
 
@@ -333,8 +343,10 @@ class SoftObservationInferenceStrategy(InferenceStrategy):
 
 class BatchDiscreteInferenceStrategy(InferenceStrategy):
     """Strategy for batch of discrete observations"""
-    def infer(self, observations: torch.Tensor, generative_model: GenerativeModel, 
-              belief: torch.Tensor) -> torch.Tensor:
+
+    def infer(
+        self, observations: torch.Tensor, generative_model: GenerativeModel, belief: torch.Tensor
+    ) -> torch.Tensor:
         batch_beliefs = []
         current_belief = belief.clone() if belief.dim() == 1 else belief
         state_dim = len(belief)
@@ -357,8 +369,10 @@ class BatchDiscreteInferenceStrategy(InferenceStrategy):
 
 class DefaultInferenceStrategy(InferenceStrategy):
     """Default strategy for other observation types"""
-    def infer(self, observations: torch.Tensor, generative_model: GenerativeModel, 
-              belief: torch.Tensor) -> torch.Tensor:
+
+    def infer(
+        self, observations: torch.Tensor, generative_model: GenerativeModel, belief: torch.Tensor
+    ) -> torch.Tensor:
         state_dim = len(belief)
 
         if belief is not None:
@@ -399,11 +413,12 @@ class DefaultInferenceStrategy(InferenceStrategy):
         prior_tensor = self._extract_prior_tensor(generative_model, beliefs)
         complexity = self._compute_complexity_term(beliefs, prior_tensor)
         log_likelihood = self._compute_accuracy_term(beliefs, observations, generative_model)
-        
+
         return complexity - log_likelihood
 
-    def _normalize_tensor_dimensions(self, beliefs: torch.Tensor, 
-                                   observations: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+    def _normalize_tensor_dimensions(
+        self, beliefs: torch.Tensor, observations: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """Ensure proper tensor dimensions"""
         if beliefs.dim() == 0:
             beliefs = beliefs.unsqueeze(0)
@@ -411,8 +426,9 @@ class DefaultInferenceStrategy(InferenceStrategy):
             observations = observations.unsqueeze(0)
         return beliefs, observations
 
-    def _extract_prior_tensor(self, generative_model: GenerativeModel, 
-                             beliefs: torch.Tensor) -> torch.Tensor:
+    def _extract_prior_tensor(
+        self, generative_model: GenerativeModel, beliefs: torch.Tensor
+    ) -> torch.Tensor:
         """Extract prior tensor from generative model"""
         if hasattr(generative_model, "get_initial_prior"):
             prior = generative_model.get_initial_prior()
@@ -421,66 +437,75 @@ class DefaultInferenceStrategy(InferenceStrategy):
         else:
             # Uniform prior as fallback
             prior = torch.ones_like(beliefs) / beliefs.shape[-1]
-        
+
         return self._convert_prior_to_tensor(prior)
 
     def _convert_prior_to_tensor(self, prior) -> torch.Tensor:
         """Convert prior to tensor format"""
         if isinstance(prior, tuple):
             # Handle continuous case where prior might be (mean, var)
-            return (prior[0] if isinstance(prior[0], torch.Tensor) 
-                   else torch.tensor(prior[0]))
+            return prior[0] if isinstance(prior[0], torch.Tensor) else torch.tensor(prior[0])
         else:
             return prior if isinstance(prior, torch.Tensor) else torch.tensor(prior)
 
-    def _compute_complexity_term(self, beliefs: torch.Tensor, 
-                               prior_tensor: torch.Tensor) -> torch.Tensor:
+    def _compute_complexity_term(
+        self, beliefs: torch.Tensor, prior_tensor: torch.Tensor
+    ) -> torch.Tensor:
         """Compute complexity term: KL[q(s)||p(s)]"""
-        return torch.sum(
-            beliefs * (torch.log(beliefs + 1e-16) - torch.log(prior_tensor + 1e-16))
-        )
+        return torch.sum(beliefs * (torch.log(beliefs + 1e-16) - torch.log(prior_tensor + 1e-16)))
 
-    def _compute_accuracy_term(self, beliefs: torch.Tensor, observations: torch.Tensor, 
-                             generative_model: GenerativeModel) -> torch.Tensor:
+    def _compute_accuracy_term(
+        self, beliefs: torch.Tensor, observations: torch.Tensor, generative_model: GenerativeModel
+    ) -> torch.Tensor:
         """Compute accuracy term: E_q[ln p(o|s)]"""
         if self._has_discrete_observations(generative_model, observations):
             return self._compute_discrete_likelihood(beliefs, observations, generative_model)
         else:
             return self._compute_continuous_likelihood(beliefs, observations)
 
-    def _has_discrete_observations(self, generative_model: GenerativeModel, 
-                                 observations: torch.Tensor) -> bool:
+    def _has_discrete_observations(
+        self, generative_model: GenerativeModel, observations: torch.Tensor
+    ) -> bool:
         """Check if observations are discrete and model has A matrix"""
-        return (hasattr(generative_model, "A") and 
-                observations.dtype in [torch.int64, torch.int32, torch.long])
+        return hasattr(generative_model, "A") and observations.dtype in [
+            torch.int64,
+            torch.int32,
+            torch.long,
+        ]
 
-    def _compute_discrete_likelihood(self, beliefs: torch.Tensor, observations: torch.Tensor, 
-                                   generative_model: GenerativeModel) -> torch.Tensor:
+    def _compute_discrete_likelihood(
+        self, beliefs: torch.Tensor, observations: torch.Tensor, generative_model: GenerativeModel
+    ) -> torch.Tensor:
         """Compute likelihood for discrete observations using A matrix"""
         if isinstance(observations, (int, float)) or observations.dim() == 0:
-            return self._compute_single_observation_likelihood(beliefs, observations, generative_model)
+            return self._compute_single_observation_likelihood(
+                beliefs, observations, generative_model
+            )
         else:
-            return self._compute_batch_observation_likelihood(beliefs, observations, generative_model)
+            return self._compute_batch_observation_likelihood(
+                beliefs, observations, generative_model
+            )
 
-    def _compute_single_observation_likelihood(self, beliefs: torch.Tensor, observations: torch.Tensor, 
-                                             generative_model: GenerativeModel) -> torch.Tensor:
+    def _compute_single_observation_likelihood(
+        self, beliefs: torch.Tensor, observations: torch.Tensor, generative_model: GenerativeModel
+    ) -> torch.Tensor:
         """Compute likelihood for single observation"""
         obs_idx = int(observations.item()) if observations.dim() == 0 else int(observations)
         return torch.sum(beliefs * torch.log(generative_model.A[obs_idx, :] + 1e-16))
 
-    def _compute_batch_observation_likelihood(self, beliefs: torch.Tensor, observations: torch.Tensor, 
-                                            generative_model: GenerativeModel) -> torch.Tensor:
+    def _compute_batch_observation_likelihood(
+        self, beliefs: torch.Tensor, observations: torch.Tensor, generative_model: GenerativeModel
+    ) -> torch.Tensor:
         """Compute likelihood for batch of observations"""
         log_likelihood = torch.tensor(0.0)
         for i, obs in enumerate(observations):
             belief_i = beliefs[i] if beliefs.dim() > 1 else beliefs
-            log_likelihood += torch.sum(
-                belief_i * torch.log(generative_model.A[obs, :] + 1e-16)
-            )
+            log_likelihood += torch.sum(belief_i * torch.log(generative_model.A[obs, :] + 1e-16))
         return log_likelihood
 
-    def _compute_continuous_likelihood(self, beliefs: torch.Tensor, 
-                                     observations: torch.Tensor) -> torch.Tensor:
+    def _compute_continuous_likelihood(
+        self, beliefs: torch.Tensor, observations: torch.Tensor
+    ) -> torch.Tensor:
         """Compute likelihood for continuous observations (fallback)"""
         return torch.sum(beliefs * torch.log(observations + 1e-16))
 
@@ -514,8 +539,7 @@ class DefaultInferenceStrategy(InferenceStrategy):
                 exploration_constant=self.config.precision_parameter,
                 eps=self.eps,
             )
-            self._policy_selector = DiscreteExpectedFreeEnergy(
-                policy_config, self)
+            self._policy_selector = DiscreteExpectedFreeEnergy(policy_config, self)
 
         # Compute expected free energy for each policy
         G_values = []
@@ -528,8 +552,7 @@ class DefaultInferenceStrategy(InferenceStrategy):
         G_tensor = torch.stack(G_values)
 
         # Compute policy posterior: Q(π) ∝ exp(-βG(π))
-        policy_posterior = F.softmax(-G_tensor *
-                                     self.config.precision_parameter, dim=0)
+        policy_posterior = F.softmax(-G_tensor * self.config.precision_parameter, dim=0)
 
         return policy_posterior
 
@@ -582,8 +605,7 @@ class DefaultInferenceStrategy(InferenceStrategy):
                     self.belief_history.pop(0)
 
             # Bayesian update
-            current_beliefs = self.infer_states(
-                obs, generative_model, current_beliefs)
+            current_beliefs = self.infer_states(obs, generative_model, current_beliefs)
 
             belief_sequence.append(current_beliefs.clone())
 
@@ -593,10 +615,7 @@ class DefaultInferenceStrategy(InferenceStrategy):
 class BeliefPropagation(InferenceAlgorithm):
     """Belief Propagation for Active Inference"""
 
-    def __init__(
-            self,
-            config: InferenceConfig,
-            num_particles: Optional[int] = None) -> None:
+    def __init__(self, config: InferenceConfig, num_particles: Optional[int] = None) -> None:
         """Initialize the Belief Propagation algorithm"""
         super().__init__(config)
         # Accept num_particles for backward compatibility but don't use it
@@ -636,11 +655,7 @@ class BeliefPropagation(InferenceAlgorithm):
         # Check if this is a continuous model - look for specific continuous model characteristics
         # DiscreteGenerativeModel has A, B, C, D matrices while
         # ContinuousGenerativeModel has neural networks
-        is_continuous = hasattr(
-            generative_model,
-            "obs_net") or not hasattr(
-            generative_model,
-            "A")
+        is_continuous = hasattr(generative_model, "obs_net") or not hasattr(generative_model, "A")
 
         if is_continuous:
             # For continuous models, return particles format
@@ -689,11 +704,7 @@ class GradientDescentInference(InferenceAlgorithm):
             return prior_beliefs
         else:
             # For continuous models, return (mean, var) tuple as expected
-            if hasattr(
-                    generative_model,
-                    "obs_net") or not hasattr(
-                    generative_model,
-                    "A"):
+            if hasattr(generative_model, "obs_net") or not hasattr(generative_model, "A"):
                 # Return mean and variance tensors with proper shape
                 if observations.dim() == 0:
                     mean = torch.zeros(2)  # Default 2D continuous state
@@ -769,11 +780,7 @@ class NaturalGradientInference(InferenceAlgorithm):
             return prior_beliefs
         else:
             # For continuous models, return (mean, var) tuple as expected
-            if hasattr(
-                    generative_model,
-                    "obs_net") or not hasattr(
-                    generative_model,
-                    "A"):
+            if hasattr(generative_model, "obs_net") or not hasattr(generative_model, "A"):
                 # Return mean and variance tensors with proper shape
                 if observations.dim() == 0:
                     mean = torch.zeros(2)  # Default 2D continuous state
@@ -829,8 +836,7 @@ class ExpectationMaximization(InferenceAlgorithm):
         else:
             num_states = getattr(generative_model, "dims", None)
             if num_states and hasattr(num_states, "num_states"):
-                return torch.ones(num_states.num_states) / \
-                    num_states.num_states
+                return torch.ones(num_states.num_states) / num_states.num_states
             else:
                 return torch.ones(4) / 4
 
@@ -858,11 +864,7 @@ class ExpectationMaximization(InferenceAlgorithm):
             beliefs_tensor = self.infer_states(observations, generative_model)
 
         # M-step: update model parameters using the inferred beliefs
-        self.update_parameters(
-            observations,
-            beliefs_tensor,
-            generative_model,
-            actions)
+        self.update_parameters(observations, beliefs_tensor, generative_model, actions)
 
         return beliefs_tensor
 
@@ -879,11 +881,9 @@ class ExpectationMaximization(InferenceAlgorithm):
             # For discrete models, update transition and observation matrices
             # Simple parameter update - add small random noise to ensure change
             with torch.no_grad():
-                generative_model.A.data += torch.randn_like(
-                    generative_model.A) * 0.01
+                generative_model.A.data += torch.randn_like(generative_model.A) * 0.01
                 if hasattr(generative_model, "B"):
-                    generative_model.B.data += torch.randn_like(
-                        generative_model.B) * 0.01
+                    generative_model.B.data += torch.randn_like(generative_model.B) * 0.01
         elif hasattr(generative_model, "parameters"):
             # For other models, update parameters
             for param in generative_model.parameters():
@@ -895,8 +895,7 @@ class ExpectationMaximization(InferenceAlgorithm):
 class ParticleFilterInference(InferenceAlgorithm):
     """Particle Filter Inference for Active Inference"""
 
-    def __init__(self, config: InferenceConfig,
-                 num_particles: int = 100) -> None:
+    def __init__(self, config: InferenceConfig, num_particles: int = 100) -> None:
         """Initialize the Particle Filter Inference algorithm"""
         super().__init__(config)
         self.num_particles = num_particles
@@ -936,9 +935,9 @@ class ParticleFilterInference(InferenceAlgorithm):
 
             # Check if this is a continuous model - look for specific continuous model
             # characteristics
-            is_continuous = hasattr(
-                generative_model, "obs_net") or not hasattr(
-                generative_model, "A")
+            is_continuous = hasattr(generative_model, "obs_net") or not hasattr(
+                generative_model, "A"
+            )
 
             if is_continuous:
                 # For continuous models, particles are state vectors
@@ -946,23 +945,17 @@ class ParticleFilterInference(InferenceAlgorithm):
                 if belief.dim() > 1:
                     belief = belief.flatten()
                 current_particles = (
-                    belief.unsqueeze(0).expand(
-                        self.num_particles,
-                        belief.shape[0]) +
-                    torch.randn(
-                        self.num_particles,
-                        belief.shape[0]) *
-                    0.1)
-                current_weights = torch.ones(
-                    self.num_particles) / self.num_particles
+                    belief.unsqueeze(0).expand(self.num_particles, belief.shape[0])
+                    + torch.randn(self.num_particles, belief.shape[0]) * 0.1
+                )
+                current_weights = torch.ones(self.num_particles) / self.num_particles
             else:
                 # For discrete models, particles are categorical state indices
                 # Sample particle state indices from the belief distribution
                 current_particles = torch.multinomial(
                     belief, self.num_particles, replacement=True
                 ).float()
-                current_weights = torch.ones(
-                    self.num_particles) / self.num_particles
+                current_weights = torch.ones(self.num_particles) / self.num_particles
 
         # Compute mean from particles
         if current_particles.dim() == 1:
@@ -1001,9 +994,8 @@ class ParticleFilterInference(InferenceAlgorithm):
 
 
 def create_inference_algorithm(
-        algorithm_type: str,
-        config: Optional[InferenceConfig] = None,
-        **kwargs: Any) -> InferenceAlgorithm:
+    algorithm_type: str, config: Optional[InferenceConfig] = None, **kwargs: Any
+) -> InferenceAlgorithm:
     """Create inference algorithms from type specification"""
     if config is None:
         config = InferenceConfig()
@@ -1051,8 +1043,7 @@ class ActiveInferenceEngine:
         """Initialize the Active Inference Engine with PyMDP compatibility."""
         self.generative_model = generative_model
         self.config = config or InferenceConfig()
-        self.inference_algorithm = create_inference_algorithm(
-            self.config.algorithm, self.config)
+        self.inference_algorithm = create_inference_algorithm(self.config.algorithm, self.config)
 
         # State tracking
         self.current_beliefs: Optional[torch.Tensor] = None
@@ -1130,17 +1121,15 @@ class ActiveInferenceEngine:
                 belief_trajectory.append(beliefs)
             return belief_trajectory
 
-    def run_inference(self,
-                      observations: List[torch.Tensor]) -> List[torch.Tensor]:
+    def run_inference(self, observations: List[torch.Tensor]) -> List[torch.Tensor]:
         """
         Run inference over a sequence of observations (legacy method for backward compatibility).
         """
-        return self.run_temporal_inference(
-            observations, use_temporal_processing=False)
+        return self.run_temporal_inference(observations, use_temporal_processing=False)
 
-    def compute_free_energy(self,
-                            observations: Optional[torch.Tensor] = None,
-                            beliefs: Optional[torch.Tensor] = None) -> torch.Tensor:
+    def compute_free_energy(
+        self, observations: Optional[torch.Tensor] = None, beliefs: Optional[torch.Tensor] = None
+    ) -> torch.Tensor:
         """Compute variational free energy F = E[ln Q(s) - ln P(o,s)].
 
         Args:
@@ -1153,14 +1142,12 @@ class ActiveInferenceEngine:
         if observations is None and len(self.observation_history) > 0:
             observations = self.observation_history[-1]
         elif observations is None:
-            raise ValueError(
-                "No observations available for free energy computation")
+            raise ValueError("No observations available for free energy computation")
 
         if beliefs is None:
             beliefs = self.current_beliefs
         if beliefs is None:
-            raise ValueError(
-                "No beliefs available for free energy computation")
+            raise ValueError("No beliefs available for free energy computation")
 
         if hasattr(self.inference_algorithm, "compute_free_energy"):
             return self.inference_algorithm.compute_free_energy(
@@ -1171,8 +1158,7 @@ class ActiveInferenceEngine:
                 "Inference algorithm does not support free energy computation"
             )
 
-    def update_model_parameters(
-            self, learning_rate: Optional[float] = None) -> None:
+    def update_model_parameters(self, learning_rate: Optional[float] = None) -> None:
         """Update generative model parameters using recent experience.
 
         Args:
@@ -1183,17 +1169,12 @@ class ActiveInferenceEngine:
 
         # Use EM algorithm for parameter updates if available
         if hasattr(self.inference_algorithm, "update_parameters"):
-            if len(
-                    self.observation_history) > 0 and len(
-                    self.belief_trajectory) > 0:
-                recent_obs = self.observation_history[-min(
-                    5, len(self.observation_history)):]
-                recent_beliefs = self.belief_trajectory[-min(
-                    5, len(self.belief_trajectory)):]
+            if len(self.observation_history) > 0 and len(self.belief_trajectory) > 0:
+                recent_obs = self.observation_history[-min(5, len(self.observation_history)) :]
+                recent_beliefs = self.belief_trajectory[-min(5, len(self.belief_trajectory)) :]
 
                 for obs, beliefs in zip(recent_obs, recent_beliefs):
-                    self.inference_algorithm.update_parameters(
-                        obs, beliefs, self.generative_model)
+                    self.inference_algorithm.update_parameters(obs, beliefs, self.generative_model)
 
     def reset(self):
         """Reset engine state while preserving model."""
@@ -1238,15 +1219,13 @@ class ActiveInferenceEngine:
         prior_beliefs: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
         """Run inference on observations (legacy method for backward compatibility)."""
-        return self.inference_algorithm.infer_states(
-            observations, generative_model, prior_beliefs)
+        return self.inference_algorithm.infer_states(observations, generative_model, prior_beliefs)
 
 
 # GNN/GMN Integration Functions for LLM Compatibility
 
 
-def create_gnn_compatible_inference_config(
-        gnn_spec: Dict[str, Any]) -> InferenceConfig:
+def create_gnn_compatible_inference_config(gnn_spec: Dict[str, Any]) -> InferenceConfig:
     """Create inference configuration from GNN specification for LLM integration.
 
     Args:
@@ -1259,12 +1238,8 @@ def create_gnn_compatible_inference_config(
     algorithm = gnn_spec.get("inference_settings", {}).get(
         "algorithm", "variational_message_passing"
     )
-    precision = gnn_spec.get(
-        "inference_settings", {}).get(
-        "precision_parameter", 1.0)
-    temporal_window = gnn_spec.get(
-        "time_settings", {}).get(
-        "temporal_window", 5)
+    precision = gnn_spec.get("inference_settings", {}).get("precision_parameter", 1.0)
+    temporal_window = gnn_spec.get("time_settings", {}).get("temporal_window", 5)
 
     # Create configuration
     config = InferenceConfig(
@@ -1315,19 +1290,18 @@ def create_pymdp_compatible_engine(
                 policy_config.gnn_metadata = gnn_spec
 
             # Create inference algorithm for policy selector
-            inference_alg = create_inference_algorithm(
-                config.algorithm, config)
+            inference_alg = create_inference_algorithm(config.algorithm, config)
 
             policy_selector = create_policy_selector(
-                "discrete", config=policy_config, inference_algorithm=inference_alg)
+                "discrete", config=policy_config, inference_algorithm=inference_alg
+            )
         except ImportError:
             logger.warning("Policy selection module not available")
 
     # Create engine
     engine = ActiveInferenceEngine(
-        generative_model=generative_model,
-        config=config,
-        policy_selector=policy_selector)
+        generative_model=generative_model, config=config, policy_selector=policy_selector
+    )
 
     return engine
 
@@ -1418,4 +1392,5 @@ if __name__ == "__main__":
         f"GNN compatibility: {
             validate_gnn_inference_compatibility(
                 engine,
-                gnn_spec)}")
+                gnn_spec)}"
+    )

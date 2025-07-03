@@ -63,7 +63,8 @@ class SafetyViolation:
             "resolved": self.resolved,
             "timestamp": self.timestamp.isoformat(),
             "resolution_timestamp": (
-                self.resolution_timestamp.isoformat() if self.resolution_timestamp else None),
+                self.resolution_timestamp.isoformat() if self.resolution_timestamp else None
+            ),
         }
 
 
@@ -228,6 +229,7 @@ class MarkovBlanketSafetyProtocol(SafetyProtocol):
         violation.mitigation_actions = actions
         logger.warning(
             f"Handling Markov blanket violation for agent {
-                violation.agent_id}: {actions}")
+                violation.agent_id}: {actions}"
+        )
 
         return actions

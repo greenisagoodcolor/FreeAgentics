@@ -187,18 +187,13 @@ class TestEntropyBasedSeeker:
     @pytest.fixture
     def config(self):
         """Create test configuration."""
-        return ActiveLearningConfig(
-            information_metric=InformationMetric.ENTROPY,
-            use_gpu=False)
+        return ActiveLearningConfig(information_metric=InformationMetric.ENTROPY, use_gpu=False)
 
     @pytest.fixture
     def generative_model(self):
         """Create test generative model."""
         if IMPORT_SUCCESS:
-            dims = ModelDimensions(
-                num_states=4,
-                num_observations=3,
-                num_actions=2)
+            dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
             params = ModelParameters(use_gpu=False)
             return DiscreteGenerativeModel(dims, params)
         else:
@@ -246,8 +241,7 @@ class TestEntropyBasedSeeker:
         beliefs = torch.softmax(torch.randn(4), dim=0)
         possible_observations = torch.randn(3, 5)  # 3 possible observations
 
-        info_values = seeker.compute_information_value(
-            beliefs, possible_observations)
+        info_values = seeker.compute_information_value(beliefs, possible_observations)
 
         assert info_values.shape == (3,)
         assert torch.all(torch.isfinite(info_values))
@@ -260,8 +254,7 @@ class TestEntropyBasedSeeker:
         beliefs = torch.softmax(torch.randn(4), dim=0)
         available_actions = torch.eye(2)  # 2 actions
 
-        selected_action = seeker.select_informative_action(
-            beliefs, available_actions)
+        selected_action = seeker.select_informative_action(beliefs, available_actions)
 
         assert isinstance(selected_action, torch.Tensor)
         assert 0 <= selected_action.item() < 2
@@ -274,17 +267,14 @@ class TestMutualInformationSeeker:
     def config(self):
         """Create test configuration."""
         return ActiveLearningConfig(
-            information_metric=InformationMetric.MUTUAL_INFORMATION,
-            use_gpu=False)
+            information_metric=InformationMetric.MUTUAL_INFORMATION, use_gpu=False
+        )
 
     @pytest.fixture
     def generative_model(self):
         """Create test generative model."""
         if IMPORT_SUCCESS:
-            dims = ModelDimensions(
-                num_states=4,
-                num_observations=3,
-                num_actions=2)
+            dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
             params = ModelParameters(use_gpu=False)
             return DiscreteGenerativeModel(dims, params)
         else:
@@ -303,8 +293,7 @@ class TestMutualInformationSeeker:
     def seeker(self, config, generative_model, inference_algorithm):
         """Create mutual information seeker."""
         if IMPORT_SUCCESS:
-            return MutualInformationSeeker(
-                config, generative_model, inference_algorithm)
+            return MutualInformationSeeker(config, generative_model, inference_algorithm)
         else:
             return Mock()
 
@@ -334,8 +323,7 @@ class TestMutualInformationSeeker:
         beliefs = torch.softmax(torch.randn(4), dim=0)
         possible_observations = torch.randn(3, 5)
 
-        info_values = seeker.compute_information_value(
-            beliefs, possible_observations)
+        info_values = seeker.compute_information_value(beliefs, possible_observations)
 
         assert info_values.shape == (3,)
         assert torch.all(info_values >= 0)  # MI is non-negative
@@ -348,8 +336,7 @@ class TestMutualInformationSeeker:
         beliefs = torch.softmax(torch.randn(4), dim=0)
         available_actions = torch.eye(2)
 
-        selected_action = seeker.select_informative_action(
-            beliefs, available_actions)
+        selected_action = seeker.select_informative_action(beliefs, available_actions)
 
         assert isinstance(selected_action, torch.Tensor)
         assert 0 <= selected_action.item() < 2
@@ -361,19 +348,13 @@ class TestActiveLearningAgent:
     @pytest.fixture
     def config(self):
         """Create test configuration."""
-        return ActiveLearningConfig(
-            exploration_weight=0.3,
-            novelty_weight=0.2,
-            use_gpu=False)
+        return ActiveLearningConfig(exploration_weight=0.3, novelty_weight=0.2, use_gpu=False)
 
     @pytest.fixture
     def generative_model(self):
         """Create test generative model."""
         if IMPORT_SUCCESS:
-            dims = ModelDimensions(
-                num_states=4,
-                num_observations=3,
-                num_actions=2)
+            dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
             params = ModelParameters(use_gpu=False)
             return DiscreteGenerativeModel(dims, params)
         else:
@@ -398,12 +379,7 @@ class TestActiveLearningAgent:
             return Mock()
 
     @pytest.fixture
-    def agent(
-            self,
-            config,
-            generative_model,
-            inference_algorithm,
-            policy_selector):
+    def agent(self, config, generative_model, inference_algorithm, policy_selector):
         """Create active learning agent."""
         if IMPORT_SUCCESS:
             return ActiveLearningAgent(
@@ -448,8 +424,7 @@ class TestActiveLearningAgent:
         policies = [Policy([0]), Policy([1])]
         preferences = torch.randn(3)
 
-        pragmatic_values = agent.compute_pragmatic_value(
-            beliefs, policies, preferences)
+        pragmatic_values = agent.compute_pragmatic_value(beliefs, policies, preferences)
 
         assert pragmatic_values.shape == (2,)
         assert torch.all(torch.isfinite(pragmatic_values))
@@ -462,8 +437,7 @@ class TestActiveLearningAgent:
         beliefs = torch.softmax(torch.randn(4), dim=0)
         available_actions = torch.eye(2)
 
-        action, info = agent.select_exploratory_action(
-            beliefs, available_actions)
+        action, info = agent.select_exploratory_action(beliefs, available_actions)
 
         assert isinstance(action, int)
         assert 0 <= action < 2
@@ -525,10 +499,7 @@ class TestInformationGainPlanner:
     def generative_model(self):
         """Create test generative model."""
         if IMPORT_SUCCESS:
-            dims = ModelDimensions(
-                num_states=4,
-                num_observations=3,
-                num_actions=2)
+            dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
             params = ModelParameters(use_gpu=False)
             return DiscreteGenerativeModel(dims, params)
         else:
@@ -546,8 +517,7 @@ class TestInformationGainPlanner:
     def planner(self, config, generative_model, info_seeker):
         """Create information gain planner."""
         if IMPORT_SUCCESS:
-            return InformationGainPlanner(
-                config, generative_model, info_seeker)
+            return InformationGainPlanner(config, generative_model, info_seeker)
         else:
             return Mock()
 
@@ -661,11 +631,7 @@ class TestMonteCarloTreeSearch:
     @pytest.fixture
     def config(self):
         """Create planning configuration."""
-        return PlanningConfig(
-            planning_horizon=5,
-            max_depth=3,
-            num_simulations=10,
-            use_gpu=False)
+        return PlanningConfig(planning_horizon=5, max_depth=3, num_simulations=10, use_gpu=False)
 
     @pytest.fixture
     def policy_selector(self):
@@ -689,10 +655,7 @@ class TestMonteCarloTreeSearch:
     def generative_model(self):
         """Create generative model."""
         if IMPORT_SUCCESS:
-            dims = ModelDimensions(
-                num_states=4,
-                num_observations=3,
-                num_actions=2)
+            dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
             params = ModelParameters(use_gpu=False)
             return DiscreteGenerativeModel(dims, params)
         else:
@@ -702,8 +665,7 @@ class TestMonteCarloTreeSearch:
     def mcts(self, config, policy_selector, inference_algorithm):
         """Create MCTS planner."""
         if IMPORT_SUCCESS:
-            return MonteCarloTreeSearch(
-                config, policy_selector, inference_algorithm)
+            return MonteCarloTreeSearch(config, policy_selector, inference_algorithm)
         else:
             return Mock()
 
@@ -726,8 +688,7 @@ class TestMonteCarloTreeSearch:
         initial_beliefs = torch.softmax(torch.randn(4), dim=0)
         preferences = torch.randn(3)
 
-        policy, value = mcts.plan(
-            initial_beliefs, generative_model, preferences)
+        policy, value = mcts.plan(initial_beliefs, generative_model, preferences)
 
         assert isinstance(policy, Policy)
         assert isinstance(value, float)
@@ -754,18 +715,8 @@ class TestMonteCarloTreeSearch:
 
         # Create simple trajectory
         node1 = TreeNode(torch.softmax(torch.randn(4), dim=0))
-        node2 = TreeNode(
-            torch.softmax(
-                torch.randn(4),
-                dim=0),
-            action=0,
-            parent=node1)
-        node3 = TreeNode(
-            torch.softmax(
-                torch.randn(4),
-                dim=0),
-            action=1,
-            parent=node2)
+        node2 = TreeNode(torch.softmax(torch.randn(4), dim=0), action=0, parent=node1)
+        node3 = TreeNode(torch.softmax(torch.randn(4), dim=0), action=1, parent=node2)
 
         trajectory = [node1, node2, node3]
         value = mcts.evaluate_trajectory(trajectory, generative_model)
@@ -804,8 +755,7 @@ class TestBeamSearchPlanner:
     def beam_planner(self, config, policy_selector, inference_algorithm):
         """Create beam search planner."""
         if IMPORT_SUCCESS:
-            return BeamSearchPlanner(
-                config, policy_selector, inference_algorithm)
+            return BeamSearchPlanner(config, policy_selector, inference_algorithm)
         else:
             return Mock()
 
@@ -871,17 +821,13 @@ class TestTrajectorySampling:
     @pytest.fixture
     def config(self):
         """Create planning configuration."""
-        return PlanningConfig(
-            planning_horizon=3,
-            num_trajectories=5,
-            use_gpu=False)
+        return PlanningConfig(planning_horizon=3, num_trajectories=5, use_gpu=False)
 
     @pytest.fixture
     def sampling_planner(self, config, policy_selector, inference_algorithm):
         """Create trajectory sampling planner."""
         if IMPORT_SUCCESS:
-            return TrajectorySampling(
-                config, policy_selector, inference_algorithm)
+            return TrajectorySampling(config, policy_selector, inference_algorithm)
         else:
             return Mock()
 
@@ -892,8 +838,7 @@ class TestTrajectorySampling:
 
         initial_beliefs = torch.softmax(torch.randn(4), dim=0)
 
-        policy, value = sampling_planner.plan(
-            initial_beliefs, generative_model)
+        policy, value = sampling_planner.plan(initial_beliefs, generative_model)
 
         assert isinstance(policy, Policy)
         assert isinstance(value, float)
@@ -907,18 +852,12 @@ class TestAdaptiveHorizonPlanner:
     def base_planner(self, config, policy_selector, inference_algorithm):
         """Create base planner."""
         if IMPORT_SUCCESS:
-            return MonteCarloTreeSearch(
-                config, policy_selector, inference_algorithm)
+            return MonteCarloTreeSearch(config, policy_selector, inference_algorithm)
         else:
             return Mock()
 
     @pytest.fixture
-    def adaptive_planner(
-            self,
-            config,
-            policy_selector,
-            inference_algorithm,
-            base_planner):
+    def adaptive_planner(self, config, policy_selector, inference_algorithm, base_planner):
         """Create adaptive horizon planner."""
         if IMPORT_SUCCESS:
             return AdaptiveHorizonPlanner(
@@ -935,8 +874,7 @@ class TestAdaptiveHorizonPlanner:
         # Test with high uncertainty beliefs
         high_uncertainty_beliefs = torch.ones(4) / 4  # Uniform
 
-        policy, value = adaptive_planner.plan(
-            high_uncertainty_beliefs, generative_model)
+        policy, value = adaptive_planner.plan(high_uncertainty_beliefs, generative_model)
 
         assert isinstance(policy, Policy)
         assert isinstance(value, float)
@@ -948,8 +886,7 @@ class TestAdaptiveHorizonPlanner:
 
         # High uncertainty (uniform)
         uniform_beliefs = torch.ones(4) / 4
-        high_uncertainty = adaptive_planner._measure_uncertainty(
-            uniform_beliefs)
+        high_uncertainty = adaptive_planner._measure_uncertainty(uniform_beliefs)
 
         # Low uncertainty (peaked)
         peaked_beliefs = torch.tensor([0.9, 0.05, 0.03, 0.02])
@@ -992,15 +929,12 @@ class TestFactoryFunctions:
         if not IMPORT_SUCCESS:
             return
 
-        config = ActiveLearningConfig(
-            information_metric=InformationMetric.ENTROPY,
-            use_gpu=False)
+        config = ActiveLearningConfig(information_metric=InformationMetric.ENTROPY, use_gpu=False)
         dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
         params = ModelParameters(use_gpu=False)
         gen_model = DiscreteGenerativeModel(dims, params)
 
-        planner = create_active_learner(
-            "planner", config=config, generative_model=gen_model)
+        planner = create_active_learner("planner", config=config, generative_model=gen_model)
 
         assert isinstance(planner, InformationGainPlanner)
 

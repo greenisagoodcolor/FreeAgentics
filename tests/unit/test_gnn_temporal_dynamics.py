@@ -243,11 +243,7 @@ class TestTemporalGNN:
             edge_index = torch.randint(0, num_nodes, (2, num_edges))
             edge_attr = torch.randn(num_edges, 16)
 
-            snapshot = GraphSnapshot(
-                x=x,
-                edge_index=edge_index,
-                edge_attr=edge_attr,
-                timestamp=t)
+            snapshot = GraphSnapshot(x=x, edge_index=edge_index, edge_attr=edge_attr, timestamp=t)
             snapshots.append(snapshot)
 
         return snapshots
@@ -284,8 +280,7 @@ class TestTemporalGNN:
         seq_len = len(temporal_graph_sequence)
         num_nodes = temporal_graph_sequence[0].num_nodes
 
-        assert sequence_output.shape == (
-            seq_len, num_nodes, temporal_gnn.config.output_dim)
+        assert sequence_output.shape == (seq_len, num_nodes, temporal_gnn.config.output_dim)
         assert final_state.shape == (num_nodes, temporal_gnn.config.output_dim)
 
     def test_temporal_attention(self, temporal_gnn, temporal_graph_sequence):
@@ -294,8 +289,7 @@ class TestTemporalGNN:
             return
 
         # Process with attention
-        attention_result = temporal_gnn.temporal_attention(
-            temporal_graph_sequence)
+        attention_result = temporal_gnn.temporal_attention(temporal_graph_sequence)
 
         assert "attended_features" in attention_result
         assert "temporal_weights" in attention_result
@@ -304,10 +298,7 @@ class TestTemporalGNN:
         temporal_weights = attention_result["temporal_weights"]
 
         # Attention weights should sum to 1 across time
-        assert torch.allclose(
-            temporal_weights.sum(
-                dim=0), torch.ones(
-                temporal_weights.shape[1]))
+        assert torch.allclose(temporal_weights.sum(dim=0), torch.ones(temporal_weights.shape[1]))
 
         # Earlier timesteps might have lower weights (recency bias)
         weight_trend = temporal_weights.mean(dim=1)
@@ -320,8 +311,7 @@ class TestTemporalGNN:
             return
 
         # Initialize memory
-        memory_state = temporal_gnn.initialize_memory(
-            temporal_graph_sequence[0].num_nodes)
+        memory_state = temporal_gnn.initialize_memory(temporal_graph_sequence[0].num_nodes)
 
         memory_evolution = []
         for snapshot in temporal_graph_sequence:
@@ -368,10 +358,7 @@ class TestDynamicGraphConv:
     @pytest.fixture
     def config(self):
         """Create dynamic conv config."""
-        return TemporalConfig(
-            input_dim=64,
-            hidden_dim=128,
-            model_type=TemporalModelType.SAGE)
+        return TemporalConfig(input_dim=64, hidden_dim=128, model_type=TemporalModelType.SAGE)
 
     @pytest.fixture
     def dynamic_conv(self, config):
@@ -381,15 +368,13 @@ class TestDynamicGraphConv:
         else:
             return Mock()
 
-    def test_edge_evolution_modeling(
-            self, dynamic_conv, temporal_graph_sequence):
+    def test_edge_evolution_modeling(self, dynamic_conv, temporal_graph_sequence):
         """Test modeling of edge evolution."""
         if not IMPORT_SUCCESS:
             return
 
         # Track edge changes between consecutive snapshots
-        edge_evolution = dynamic_conv.track_edge_evolution(
-            temporal_graph_sequence)
+        edge_evolution = dynamic_conv.track_edge_evolution(temporal_graph_sequence)
 
         assert "edge_additions" in edge_evolution
         assert "edge_deletions" in edge_evolution
@@ -409,8 +394,7 @@ class TestDynamicGraphConv:
             return
 
         # Adaptive aggregation that changes based on temporal context
-        aggregation_result = dynamic_conv.adaptive_aggregation(
-            temporal_graph_sequence)
+        aggregation_result = dynamic_conv.adaptive_aggregation(temporal_graph_sequence)
 
         assert "aggregated_features" in aggregation_result
         assert "aggregation_weights" in aggregation_result
@@ -423,15 +407,13 @@ class TestDynamicGraphConv:
         assert aggregation_weights.shape[0] == len(temporal_graph_sequence)
         assert temporal_importance.shape[0] == len(temporal_graph_sequence)
 
-    def test_structural_change_detection(
-            self, dynamic_conv, temporal_graph_sequence):
+    def test_structural_change_detection(self, dynamic_conv, temporal_graph_sequence):
         """Test detection of structural changes."""
         if not IMPORT_SUCCESS:
             return
 
         # Detect significant structural changes
-        change_detection = dynamic_conv.detect_structural_changes(
-            temporal_graph_sequence)
+        change_detection = dynamic_conv.detect_structural_changes(temporal_graph_sequence)
 
         assert "change_points" in change_detection
         assert "change_magnitude" in change_detection
@@ -453,10 +435,8 @@ class TestGraphLSTM:
     def config(self):
         """Create Graph LSTM config."""
         return TemporalConfig(
-            input_dim=64,
-            hidden_dim=128,
-            model_type=TemporalModelType.LSTM,
-            bidirectional=False)
+            input_dim=64, hidden_dim=128, model_type=TemporalModelType.LSTM, bidirectional=False
+        )
 
     @pytest.fixture
     def graph_lstm(self, config):
@@ -480,8 +460,7 @@ class TestGraphLSTM:
         lstm_outputs = []
         for snapshot in temporal_graph_sequence:
             # LSTM step
-            h_new, c_new = graph_lstm.lstm_step(
-                snapshot.x, snapshot.edge_index, h_state, c_state)
+            h_new, c_new = graph_lstm.lstm_step(snapshot.x, snapshot.edge_index, h_state, c_state)
             lstm_outputs.append(h_new)
             h_state, c_state = h_new, c_new
 
@@ -499,8 +478,7 @@ class TestGraphLSTM:
             return
 
         # Analyze forget gate activations
-        forget_analysis = graph_lstm.analyze_forget_gates(
-            temporal_graph_sequence)
+        forget_analysis = graph_lstm.analyze_forget_gates(temporal_graph_sequence)
 
         assert "forget_activations" in forget_analysis
         assert "forgetting_patterns" in forget_analysis
@@ -536,8 +514,7 @@ class TestGraphLSTM:
             temporal_sequence.append(snapshot)
 
         # Bidirectional processing
-        bidirectional_result = bidirectional_lstm.bidirectional_forward(
-            temporal_sequence)
+        bidirectional_result = bidirectional_lstm.bidirectional_forward(temporal_sequence)
 
         assert "forward_output" in bidirectional_result
         assert "backward_output" in bidirectional_result
@@ -573,17 +550,13 @@ class TestGraphTransformer:
         else:
             return Mock()
 
-    def test_temporal_self_attention(
-            self,
-            graph_transformer,
-            temporal_graph_sequence):
+    def test_temporal_self_attention(self, graph_transformer, temporal_graph_sequence):
         """Test temporal self-attention mechanism."""
         if not IMPORT_SUCCESS:
             return
 
         # Temporal self-attention across the sequence
-        attention_result = graph_transformer.temporal_self_attention(
-            temporal_graph_sequence)
+        attention_result = graph_transformer.temporal_self_attention(temporal_graph_sequence)
 
         assert "attention_output" in attention_result
         assert "attention_weights" in attention_result
@@ -597,18 +570,17 @@ class TestGraphTransformer:
         assert attention_weights.shape[:2] == (seq_len, seq_len)
 
         # Attention weights should sum to 1
-        assert torch.allclose(attention_weights.sum(
-            dim=-1), torch.ones(attention_weights.shape[:-1]))
+        assert torch.allclose(
+            attention_weights.sum(dim=-1), torch.ones(attention_weights.shape[:-1])
+        )
 
-    def test_spatial_temporal_attention(
-            self, graph_transformer, temporal_graph_sequence):
+    def test_spatial_temporal_attention(self, graph_transformer, temporal_graph_sequence):
         """Test spatial-temporal attention mechanism."""
         if not IMPORT_SUCCESS:
             return
 
         # Combined spatial and temporal attention
-        st_attention_result = graph_transformer.spatial_temporal_attention(
-            temporal_graph_sequence)
+        st_attention_result = graph_transformer.spatial_temporal_attention(temporal_graph_sequence)
 
         assert "spatial_attention" in st_attention_result
         assert "temporal_attention" in st_attention_result
@@ -625,10 +597,7 @@ class TestGraphTransformer:
         assert spatial_attention.shape[0] == seq_len
         assert temporal_attention.shape[0] == seq_len
 
-    def test_positional_encoding(
-            self,
-            graph_transformer,
-            temporal_graph_sequence):
+    def test_positional_encoding(self, graph_transformer, temporal_graph_sequence):
         """Test positional encoding for temporal sequences."""
         if not IMPORT_SUCCESS:
             return
@@ -652,8 +621,7 @@ class TestGraphTransformer:
         assert temporal_embeddings.shape == (seq_len, hidden_dim)
 
         # Different positions should have different encodings
-        assert not torch.allclose(
-            position_embeddings[0], position_embeddings[-1])
+        assert not torch.allclose(position_embeddings[0], position_embeddings[-1])
 
 
 class TestDiffusionGNN:
@@ -663,9 +631,8 @@ class TestDiffusionGNN:
     def config(self):
         """Create diffusion GNN config."""
         return TemporalConfig(
-            model_type=TemporalModelType.DIFFUSION,
-            enable_diffusion=True,
-            diffusion_steps=50)
+            model_type=TemporalModelType.DIFFUSION, enable_diffusion=True, diffusion_steps=50
+        )
 
     @pytest.fixture
     def diffusion_gnn(self, config):
@@ -691,10 +658,8 @@ class TestDiffusionGNN:
 
         # Simulate diffusion
         diffusion_result = diffusion_gnn.simulate_diffusion(
-            initial_state,
-            edge_index,
-            edge_weights,
-            steps=diffusion_gnn.config.diffusion_steps)
+            initial_state, edge_index, edge_weights, steps=diffusion_gnn.config.diffusion_steps
+        )
 
         assert "diffusion_trajectory" in diffusion_result
         assert "final_state" in diffusion_result
@@ -726,8 +691,7 @@ class TestDiffusionGNN:
         edge_index = torch.randint(0, num_nodes, (2, 60))
 
         # Propagate influence
-        influence_result = diffusion_gnn.propagate_influence(
-            initial_influence, edge_index)
+        influence_result = diffusion_gnn.propagate_influence(initial_influence, edge_index)
 
         assert "influence_trajectory" in influence_result
         assert "final_influence" in influence_result
@@ -770,8 +734,7 @@ class TestDiffusionGNN:
             diffusion_histories.append(history)
 
         # Train prediction model
-        prediction_result = diffusion_gnn.train_diffusion_predictor(
-            diffusion_histories)
+        prediction_result = diffusion_gnn.train_diffusion_predictor(diffusion_histories)
 
         assert "model_accuracy" in prediction_result
         assert "prediction_error" in prediction_result
@@ -841,8 +804,7 @@ class TestEpidemicGNN:
         peak_infection = epidemic_result["peak_infection"]
 
         # Check trajectory dimensions
-        assert epidemic_trajectory.shape == (
-            101, num_nodes, 3)  # steps+1, nodes, SIR
+        assert epidemic_trajectory.shape == (101, num_nodes, 3)  # steps+1, nodes, SIR
 
         # At each time step, S+I+R should sum to 1 for each node
         state_sums = epidemic_trajectory.sum(dim=-1)
@@ -876,7 +838,8 @@ class TestEpidemicGNN:
         )
 
         intervention_result = epidemic_gnn.simulate_epidemic(
-            num_nodes, edge_index, initial_infected, interventions=interventions)
+            num_nodes, edge_index, initial_infected, interventions=interventions
+        )
 
         assert "baseline_peak" in baseline_result
         assert "intervention_peak" in intervention_result
@@ -928,10 +891,7 @@ class TestTemporalAnomalyDetector:
     @pytest.fixture
     def config(self):
         """Create anomaly detector config."""
-        return TemporalConfig(
-            sequence_length=15,
-            enable_memory=True,
-            memory_decay=0.9)
+        return TemporalConfig(sequence_length=15, enable_memory=True, memory_decay=0.9)
 
     @pytest.fixture
     def anomaly_detector(self, config):
@@ -957,15 +917,13 @@ class TestTemporalAnomalyDetector:
             for t in range(seq_len):
                 x = torch.randn(num_nodes, 64) + 0.1 * t
                 edge_index = torch.randint(0, num_nodes, (2, 25))
-                snapshot = GraphSnapshot(
-                    x=x, edge_index=edge_index, timestamp=t)
+                snapshot = GraphSnapshot(x=x, edge_index=edge_index, timestamp=t)
                 sequence.append(snapshot)
 
             normal_sequences.append(sequence)
 
         # Learn normal patterns
-        learning_result = anomaly_detector.learn_normal_patterns(
-            normal_sequences)
+        learning_result = anomaly_detector.learn_normal_patterns(normal_sequences)
 
         assert "pattern_embeddings" in learning_result
         assert "normal_distribution" in learning_result
@@ -1038,8 +996,7 @@ class TestTemporalAnomalyDetector:
             sequence_with_change.append(snapshot)
 
         # Detect change points
-        change_detection = anomaly_detector.detect_change_points(
-            sequence_with_change)
+        change_detection = anomaly_detector.detect_change_points(sequence_with_change)
 
         assert "change_points" in change_detection
         assert "change_scores" in change_detection
@@ -1093,8 +1050,7 @@ class TestOnlineTemporalGNN:
             x = torch.randn(num_nodes, 64)
             edge_index = torch.randint(0, num_nodes, (2, 30))
 
-            new_snapshot = GraphSnapshot(
-                x=x, edge_index=edge_index, timestamp=step)
+            new_snapshot = GraphSnapshot(x=x, edge_index=edge_index, timestamp=step)
 
             # Incremental update
             update_result = online_gnn.incremental_update(new_snapshot)
@@ -1131,8 +1087,7 @@ class TestOnlineTemporalGNN:
             online_gnn.incremental_update(snapshot)
 
         # Evaluate on Task A
-        task_a_performance_before = online_gnn.evaluate_performance(
-            task_a_data)
+        task_a_performance_before = online_gnn.evaluate_performance(task_a_data)
 
         # Task B: Different graph pattern
         task_b_data = []
@@ -1174,8 +1129,7 @@ class TestOnlineTemporalGNN:
                 x = torch.randn(10, 64) * 2.0
 
             edge_index = torch.randint(0, 10, (2, 15))
-            snapshot = GraphSnapshot(
-                x=x, edge_index=edge_index, timestamp=step)
+            snapshot = GraphSnapshot(x=x, edge_index=edge_index, timestamp=step)
 
             # Update with adaptive learning rate
             result = online_gnn.adaptive_update(snapshot)
@@ -1199,9 +1153,8 @@ class TestTemporalGNNIntegration:
             return
 
         config = TemporalConfig(
-            sequence_length=20,
-            enable_memory=True,
-            model_type=TemporalModelType.TRANSFORMER)
+            sequence_length=20, enable_memory=True, model_type=TemporalModelType.TRANSFORMER
+        )
 
         temporal_system = TemporalGNN(config)
 
@@ -1225,16 +1178,14 @@ class TestTemporalGNNIntegration:
             for t in range(seq_len):
                 x = torch.randn(15, 64) + 0.01 * t * interval
                 edge_index = torch.randint(0, 15, (2, 25))
-                snapshot = GraphSnapshot(
-                    x=x, edge_index=edge_index, timestamp=t * interval)
+                snapshot = GraphSnapshot(x=x, edge_index=edge_index, timestamp=t * interval)
                 sequence.append(snapshot)
 
             scale_data[scale] = sequence
 
         # Multi-scale analysis
         if IMPORT_SUCCESS:
-            multi_scale_result = temporal_system.multi_scale_analysis(
-                scale_data)
+            multi_scale_result = temporal_system.multi_scale_analysis(scale_data)
 
             assert "scale_features" in multi_scale_result
             assert "cross_scale_patterns" in multi_scale_result
@@ -1254,8 +1205,7 @@ class TestTemporalGNNIntegration:
             sequence_length=5,  # Short window for real-time
         )
 
-        realtime_processor = StreamingProcessor(
-            config) if IMPORT_SUCCESS else Mock()
+        realtime_processor = StreamingProcessor(config) if IMPORT_SUCCESS else Mock()
 
         # Simulate real-time data stream
         processing_times = []
@@ -1266,8 +1216,7 @@ class TestTemporalGNNIntegration:
             edge_index = torch.randint(0, 20, (2, 40))
             timestamp = step * 0.1  # 100ms intervals
 
-            snapshot = GraphSnapshot(
-                x=x, edge_index=edge_index, timestamp=timestamp)
+            snapshot = GraphSnapshot(x=x, edge_index=edge_index, timestamp=timestamp)
 
             # Process in real-time
             start_time = time.time()
@@ -1293,10 +1242,7 @@ class TestTemporalGNNIntegration:
         if not IMPORT_SUCCESS:
             return
 
-        config = TemporalConfig(
-            enable_causality=True,
-            causal_window=5,
-            sequence_length=15)
+        config = TemporalConfig(enable_causality=True, causal_window=5, sequence_length=15)
 
         causal_gnn = CausalGNN(config) if IMPORT_SUCCESS else Mock()
 

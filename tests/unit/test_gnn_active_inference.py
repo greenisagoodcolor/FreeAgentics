@@ -59,12 +59,12 @@ class TestGNNActiveInferenceAdapter:
         g_values = torch.randn(2)
 
         self.mock_belief_updater.update_beliefs.return_value = updated_beliefs
-        self.mock_policy_selector.select_policy.return_value = (
-            mock_policy, g_values)
+        self.mock_policy_selector.select_policy.return_value = (mock_policy, g_values)
 
         # Call update_beliefs
         result_beliefs, result_policy, result_g_values = self.adapter.update_beliefs(
-            current_beliefs, observation)
+            current_beliefs, observation
+        )
 
         # Verify calls
         self.mock_belief_updater.update_beliefs.assert_called_once_with(
@@ -90,12 +90,12 @@ class TestGNNActiveInferenceAdapter:
         g_values = torch.randn(2)
 
         self.mock_belief_updater.update_beliefs.return_value = updated_beliefs
-        self.mock_policy_selector.select_policy.return_value = (
-            mock_policy, g_values)
+        self.mock_policy_selector.select_policy.return_value = (mock_policy, g_values)
 
         # Call update_beliefs with preferences
         result_beliefs, result_policy, result_g_values = self.adapter.update_beliefs(
-            current_beliefs, observation, preferences)
+            current_beliefs, observation, preferences
+        )
 
         # Verify policy selector was called with preferences
         self.mock_policy_selector.select_policy.assert_called_once_with(
@@ -118,12 +118,12 @@ class TestGNNActiveInferenceAdapter:
         g_values = torch.randn(batch_size, 2)
 
         self.mock_belief_updater.update_beliefs.return_value = updated_beliefs
-        self.mock_policy_selector.select_policy.return_value = (
-            mock_policy, g_values)
+        self.mock_policy_selector.select_policy.return_value = (mock_policy, g_values)
 
         # Call update_beliefs
         result_beliefs, result_policy, result_g_values = self.adapter.update_beliefs(
-            current_beliefs, observation)
+            current_beliefs, observation
+        )
 
         # Verify tensor shapes are preserved
         assert result_beliefs.shape == (batch_size, 4)
@@ -137,8 +137,7 @@ class TestGNNActiveInferenceAdapter:
         observation = torch.randn(3)
 
         # Mock belief updater to raise exception
-        self.mock_belief_updater.update_beliefs.side_effect = RuntimeError(
-            "Belief update failed")
+        self.mock_belief_updater.update_beliefs.side_effect = RuntimeError("Belief update failed")
 
         # Should propagate the error
         with pytest.raises(RuntimeError, match="Belief update failed"):
@@ -152,8 +151,7 @@ class TestGNNActiveInferenceAdapter:
 
         # Mock successful belief update but failed policy selection
         self.mock_belief_updater.update_beliefs.return_value = updated_beliefs
-        self.mock_policy_selector.select_policy.side_effect = ValueError(
-            "Policy selection failed")
+        self.mock_policy_selector.select_policy.side_effect = ValueError("Policy selection failed")
 
         # Should propagate the error
         with pytest.raises(ValueError, match="Policy selection failed"):
@@ -168,12 +166,12 @@ class TestGNNActiveInferenceAdapter:
         g_values = torch.randn(2)
 
         self.mock_belief_updater.update_beliefs.return_value = updated_beliefs
-        self.mock_policy_selector.select_policy.return_value = (
-            mock_policy, g_values)
+        self.mock_policy_selector.select_policy.return_value = (mock_policy, g_values)
 
         # Call with explicit None preferences
         result_beliefs, result_policy, result_g_values = self.adapter.update_beliefs(
-            current_beliefs, observation, preferences=None)
+            current_beliefs, observation, preferences=None
+        )
 
         # Verify policy selector was called with None
         self.mock_policy_selector.select_policy.assert_called_once_with(
@@ -189,8 +187,7 @@ class TestGNNActiveInferenceAdapter:
         g_values = torch.randn(2)
 
         self.mock_belief_updater.update_beliefs.return_value = updated_beliefs
-        self.mock_policy_selector.select_policy.return_value = (
-            mock_policy, g_values)
+        self.mock_policy_selector.select_policy.return_value = (mock_policy, g_values)
 
         result = self.adapter.update_beliefs(current_beliefs, observation)
 
@@ -232,8 +229,7 @@ class TestGNNActiveInferenceAdapterIntegration:
         )
 
         # Test full workflow
-        current_beliefs = torch.softmax(
-            torch.randn(5), dim=0)  # Proper belief distribution
+        current_beliefs = torch.softmax(torch.randn(5), dim=0)  # Proper belief distribution
         observation = torch.randn(4)
         preferences = torch.randn(3)
 
@@ -248,7 +244,8 @@ class TestGNNActiveInferenceAdapterIntegration:
 
         # Execute
         result_beliefs, result_policy, result_g_values = adapter.update_beliefs(
-            current_beliefs, observation, preferences)
+            current_beliefs, observation, preferences
+        )
 
         # Verify components were called with correct arguments
         belief_updater.update_beliefs.assert_called_once_with(
@@ -286,20 +283,17 @@ class TestGNNActiveInferenceAdapterIntegration:
 
             # Mock updated beliefs that gradually concentrate
             concentration = 1.0 + t * 0.5
-            updated_beliefs = torch.softmax(
-                torch.randn(4) * concentration, dim=0)
+            updated_beliefs = torch.softmax(torch.randn(4) * concentration, dim=0)
 
             mock_policy = Mock()
             mock_policy.timestep = t
             g_values = torch.randn(2)
 
             belief_updater.update_beliefs.return_value = updated_beliefs
-            policy_selector.select_policy.return_value = (
-                mock_policy, g_values)
+            policy_selector.select_policy.return_value = (mock_policy, g_values)
 
             # Update beliefs
-            beliefs, policy, g_vals = adapter.update_beliefs(
-                beliefs, observation)
+            beliefs, policy, g_vals = adapter.update_beliefs(beliefs, observation)
 
             # Verify beliefs are valid distributions
             assert torch.allclose(beliefs.sum(), torch.tensor(1.0), atol=1e-6)
@@ -338,8 +332,7 @@ class TestGNNActiveInferenceAdapterIntegration:
         observation = torch.randn(3)
 
         for _ in range(10):
-            beliefs, policy, g_values = adapter.update_beliefs(
-                beliefs, observation)
+            beliefs, policy, g_values = adapter.update_beliefs(beliefs, observation)
 
             # Each call should return new tensor instances
             # (In real implementation, this helps prevent memory leaks)
@@ -366,11 +359,11 @@ class TestGNNActiveInferenceAdapterEdgeCases:
         observation = torch.tensor(0.5)  # Scalar
 
         belief_updater.update_beliefs.return_value = torch.tensor(0.8)
-        policy_selector.select_policy.return_value = (
-            Mock(), torch.tensor(0.3))
+        policy_selector.select_policy.return_value = (Mock(), torch.tensor(0.3))
 
         result_beliefs, result_policy, result_g_values = adapter.update_beliefs(
-            current_beliefs, observation)
+            current_beliefs, observation
+        )
 
         assert result_beliefs.dim() == 0  # Scalar
         assert result_g_values.dim() == 0  # Scalar
@@ -394,7 +387,8 @@ class TestGNNActiveInferenceAdapterEdgeCases:
         policy_selector.select_policy.return_value = (Mock(), torch.empty(0))
 
         result_beliefs, result_policy, result_g_values = adapter.update_beliefs(
-            current_beliefs, observation)
+            current_beliefs, observation
+        )
 
         assert result_beliefs.numel() == 0
         assert result_g_values.numel() == 0

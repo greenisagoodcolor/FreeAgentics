@@ -103,8 +103,7 @@ class GNNValidator:
         Returns:
             Validation results
         """
-        results: Dict[str, Any] = {"valid": True,
-                                   "errors": [], "warnings": [], "info": {}}
+        results: Dict[str, Any] = {"valid": True, "errors": [], "warnings": [], "info": {}}
         try:
             model.eval()
             with torch.no_grad():
@@ -114,8 +113,7 @@ class GNNValidator:
                 if output.dim() == 0:
                     errors_list = results["errors"]
                     assert isinstance(errors_list, list)
-                    errors_list.append(
-                        "Model output is scalar, expected tensor")
+                    errors_list.append("Model output is scalar, expected tensor")
                     results["valid"] = False
                 info_dict = results["info"]
                 assert isinstance(info_dict, dict)
@@ -130,8 +128,7 @@ class GNNValidator:
         self._check_parameter_initialization(model, results)
         return results
 
-    def _check_gradient_flow(self, model: torch.nn.Module,
-                             results: Dict[str, Any]) -> None:
+    def _check_gradient_flow(self, model: torch.nn.Module, results: Dict[str, Any]) -> None:
         """Check if gradients can flow through the model"""
         model.train()
         for param in model.parameters():
@@ -183,8 +180,7 @@ class GNNValidator:
             if param.abs().max() < 1e-08:
                 warnings_list = results["warnings"]
                 assert isinstance(warnings_list, list)
-                warnings_list.append(
-                    f"Parameter might be zero-initialized: {name}")
+                warnings_list.append(f"Parameter might be zero-initialized: {name}")
 
     def validate_processing_pipeline(
         self, pipeline_components: Dict[str, Any], test_graphs: List[GraphData]
@@ -217,14 +213,11 @@ class GNNValidator:
             )
         return results
 
-    def _validate_feature_extractor(self,
-                                    extractor: NodeFeatureExtractor,
-                                    graphs: List[GraphData],
-                                    results: Dict[str,
-                                                  Any]) -> None:
+    def _validate_feature_extractor(
+        self, extractor: NodeFeatureExtractor, graphs: List[GraphData], results: Dict[str, Any]
+    ) -> None:
         """Validate feature extractor"""
-        component_results: Dict[str, Any] = {
-            "valid": True, "errors": [], "warnings": []}
+        component_results: Dict[str, Any] = {"valid": True, "errors": [], "warnings": []}
         for i, graph in enumerate(graphs[:5]):
             try:
                 nodes = [
@@ -248,14 +241,11 @@ class GNNValidator:
         if not component_results["valid"]:
             results["valid"] = False
 
-    def _validate_edge_processor(self,
-                                 processor: EdgeProcessor,
-                                 graphs: List[GraphData],
-                                 results: Dict[str,
-                                               Any]) -> None:
+    def _validate_edge_processor(
+        self, processor: EdgeProcessor, graphs: List[GraphData], results: Dict[str, Any]
+    ) -> None:
         """Validate edge processor"""
-        component_results: Dict[str, Any] = {
-            "valid": True, "errors": [], "warnings": []}
+        component_results: Dict[str, Any] = {"valid": True, "errors": [], "warnings": []}
         for i, graph in enumerate(graphs[:5]):
             try:
                 if graph.edge_index.size(1) > 0:
@@ -269,8 +259,7 @@ class GNNValidator:
             except Exception as e:
                 errors_list = component_results["errors"]
                 assert isinstance(errors_list, list)
-                errors_list.append(
-                    f"Graph {i}: Edge processing failed - {str(e)}")
+                errors_list.append(f"Graph {i}: Edge processing failed - {str(e)}")
                 component_results["valid"] = False
         comp_results_dict = results["component_results"]
         assert isinstance(comp_results_dict, dict)
@@ -278,14 +267,11 @@ class GNNValidator:
         if not component_results["valid"]:
             results["valid"] = False
 
-    def _validate_batch_processor(self,
-                                  processor: GraphBatchProcessor,
-                                  graphs: List[GraphData],
-                                  results: Dict[str,
-                                                Any]) -> None:
+    def _validate_batch_processor(
+        self, processor: GraphBatchProcessor, graphs: List[GraphData], results: Dict[str, Any]
+    ) -> None:
         """Validate batch processor"""
-        component_results: Dict[str, Any] = {
-            "valid": True, "errors": [], "warnings": []}
+        component_results: Dict[str, Any] = {"valid": True, "errors": [], "warnings": []}
         try:
             batch = processor.create_batch(graphs)
             expected_nodes = sum(g.node_features.size(0) for g in graphs)
@@ -300,7 +286,8 @@ class GNNValidator:
                 assert isinstance(errors_list, list)
                 errors_list.append(
                     f"Node count mismatch: {
-                        batch.x.size(0)} vs {expected_nodes}")
+                        batch.x.size(0)} vs {expected_nodes}"
+                )
                 component_results["valid"] = False
             unbatched = processor.unbatch(batch)
             if len(unbatched) != len(graphs):
@@ -309,7 +296,8 @@ class GNNValidator:
                 errors_list.append(
                     f"Unbatch count mismatch: {
                         len(unbatched)} vs {
-                        len(graphs)}")
+                        len(graphs)}"
+                )
                 component_results["valid"] = False
         except Exception as e:
             errors_list = component_results["errors"]
@@ -345,9 +333,7 @@ class GNNValidator:
                 pred_classes = (predictions > 0).long()
             correct = (pred_classes == targets).float()
             metrics.accuracy = correct.mean().item()
-            num_classes = max(
-                targets.max().item() + 1,
-                pred_classes.max().item() + 1)
+            num_classes = max(targets.max().item() + 1, pred_classes.max().item() + 1)
             if num_classes == 2:
                 tp = ((pred_classes == 1) & (targets == 1)).sum().float()
                 fp = ((pred_classes == 1) & (targets == 0)).sum().float()
@@ -453,8 +439,7 @@ class GNNTestSuite:
 
     def _test_parser(self, results: Dict[str, Any]) -> None:
         """Test GNN parser"""
-        component_results: Dict[str, Any] = {
-            "passed": 0, "failed": 0, "errors": []}
+        component_results: Dict[str, Any] = {"passed": 0, "failed": 0, "errors": []}
         parser = GMNParser()
         try:
             valid_model = "\n---\nname: TestModel\ntype: graph_neural_network\nversion: 1.0\n---\n\n## Architecture\n\n```yaml\nlayers:\n  - type: GCN\n    units: 64\n```\n"
@@ -477,14 +462,12 @@ class GNNTestSuite:
 
     def _test_feature_extractor(self, results: Dict[str, Any]) -> None:
         """Test feature extractor"""
-        component_results: Dict[str, Any] = {
-            "passed": 0, "failed": 0, "errors": []}
+        component_results: Dict[str, Any] = {"passed": 0, "failed": 0, "errors": []}
         try:
             feature_configs = [
-                FeatureConfig(
-                    name="feat1", type=FeatureType.NUMERICAL), FeatureConfig(
-                    name="feat2", type=FeatureType.CATEGORICAL, values=[
-                        "a", "b"]), ]
+                FeatureConfig(name="feat1", type=FeatureType.NUMERICAL),
+                FeatureConfig(name="feat2", type=FeatureType.CATEGORICAL, values=["a", "b"]),
+            ]
             extractor = NodeFeatureExtractor(feature_configs)
             node_data = [{"feat1": 0.5, "feat2": "a"}]
             result = extractor.extract_features(node_data)
@@ -501,8 +484,7 @@ class GNNTestSuite:
 
     def _test_edge_processor(self, results: Dict[str, Any]) -> None:
         """Test edge processor"""
-        component_results: Dict[str, Any] = {
-            "passed": 0, "failed": 0, "errors": []}
+        component_results: Dict[str, Any] = {"passed": 0, "failed": 0, "errors": []}
         try:
             config = EdgeConfig()
             processor = EdgeProcessor(config)
@@ -521,8 +503,7 @@ class GNNTestSuite:
 
     def _test_layers(self, results: Dict[str, Any]) -> None:
         """Test GNN layers"""
-        component_results: Dict[str, Any] = {
-            "passed": 0, "failed": 0, "errors": []}
+        component_results: Dict[str, Any] = {"passed": 0, "failed": 0, "errors": []}
         try:
             layer = GCNLayer(32, 64)
             x = torch.randn(10, 32)
@@ -546,8 +527,7 @@ class GNNTestSuite:
 
     def _test_batch_processor(self, results: Dict[str, Any]) -> None:
         """Test batch processor"""
-        component_results: Dict[str, Any] = {
-            "passed": 0, "failed": 0, "errors": []}
+        component_results: Dict[str, Any] = {"passed": 0, "failed": 0, "errors": []}
         try:
             processor = GraphBatchProcessor(use_torch_geometric=False)
             graphs = create_test_graphs(2)
@@ -569,13 +549,11 @@ class GNNTestSuite:
         """
         Run integration tests for a given model.
         """
-        results: Dict[str, Any] = {"passed": 0,
-                                   "failed": 0, "errors": [], "performance": {}}
+        results: Dict[str, Any] = {"passed": 0, "failed": 0, "errors": [], "performance": {}}
         validator = GNNValidator()
         start_time = time.time()
         try:
-            arch_results = validator.validate_model_architecture(
-                model, test_graphs[0])
+            arch_results = validator.validate_model_architecture(model, test_graphs[0])
             if arch_results["valid"]:
                 results["passed"] += 1
             else:
@@ -642,12 +620,13 @@ class GNNTestSuite:
                 times.append(time.time() - start_time)
             avg_time = np.mean(times[1:])
             memory_usage = (
-                (batch.x.element_size() *
-                 batch.x.nelement() +
-                 batch.edge_index.element_size() *
-                 batch.edge_index.nelement()) /
-                1024 /
-                1024)
+                (
+                    batch.x.element_size() * batch.x.nelement()
+                    + batch.edge_index.element_size() * batch.edge_index.nelement()
+                )
+                / 1024
+                / 1024
+            )
             metrics = ValidationMetrics(accuracy=0.0, loss=0.0)
             result = BenchmarkResult(
                 dataset_name=dataset_name,
@@ -663,10 +642,8 @@ class GNNTestSuite:
 
 
 def create_test_graphs(
-        num_graphs: int = 10,
-        min_nodes: int = 5,
-        max_nodes: int = 20,
-        feature_dim: int = 32) -> List[GraphData]:
+    num_graphs: int = 10, min_nodes: int = 5, max_nodes: int = 20, feature_dim: int = 32
+) -> List[GraphData]:
     """
     Create synthetic test graphs.
     Args:
@@ -682,8 +659,7 @@ def create_test_graphs(
         num_nodes = np.random.randint(min_nodes, max_nodes + 1)
         num_edges = np.random.randint(num_nodes, num_nodes * 3)
         x = torch.randn(num_nodes, feature_dim)
-        edge_index = torch.randint(
-            0, num_nodes, (2, num_edges), dtype=torch.long)
+        edge_index = torch.randint(0, num_nodes, (2, num_edges), dtype=torch.long)
         # Ensure no self-loops in the random graph for simplicity
         edge_index = edge_index[:, edge_index[0] != edge_index[1]]
         # GraphData from feature_extractor doesn't have target field
@@ -702,8 +678,7 @@ if __name__ == "__main__":
     test_suite = GNNTestSuite()
     print("Running unit tests...")
     unit_results = test_suite.run_unit_tests()
-    print(
-        f"Unit tests: {unit_results['passed']}/{unit_results['total_tests']} passed")
+    print(f"Unit tests: {unit_results['passed']}/{unit_results['total_tests']} passed")
     # Create layer configs for GNNStack
     layer_configs = [
         LayerConfig(in_channels=32, out_channels=64),

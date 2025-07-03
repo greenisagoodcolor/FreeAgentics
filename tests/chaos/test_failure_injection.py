@@ -45,8 +45,7 @@ class TestBasicFailureInjection:
 
             # Inject failure into random component
             with patch(f"infrastructure.{failed_component}.connect") as mock:
-                mock.side_effect = ConnectionError(
-                    f"{failed_component} failed")
+                mock.side_effect = ConnectionError(f"{failed_component} failed")
 
                 # System should handle the failure
                 try:
@@ -55,8 +54,7 @@ class TestBasicFailureInjection:
                     assert result is not None or True  # Basic check
                 except Exception as e:
                     # Verify error is handled appropriately
-                    assert failed_component in str(
-                        e).lower() or "connection" in str(e).lower()
+                    assert failed_component in str(e).lower() or "connection" in str(e).lower()
 
     async def _test_system_operation(self):
         """Test a basic system operation."""
@@ -146,8 +144,7 @@ class TestNetworkFailures:
                 failure_count += 1
                 # Simulate network failure
                 with patch("asyncio.open_connection") as mock_conn:
-                    mock_conn.side_effect = ConnectionError(
-                        "Network unreachable")
+                    mock_conn.side_effect = ConnectionError("Network unreachable")
 
                     try:
                         await self._test_network_operation()
@@ -258,8 +255,7 @@ class TestResourceExhaustionHandling:
                     open_files.append(temp_file)
                 except OSError as e:
                     # System should handle FD exhaustion gracefully
-                    assert "descriptor" in str(
-                        e).lower() or "resource" in str(e).lower()
+                    assert "descriptor" in str(e).lower() or "resource" in str(e).lower()
                     break
 
             # System should still function with remaining resources
@@ -288,8 +284,7 @@ class TestResourceExhaustionHandling:
 
             # Wait for completion with timeout
             completed_tasks = 0
-            for future in concurrent.futures.as_completed(
-                    futures, timeout=5.0):
+            for future in concurrent.futures.as_completed(futures, timeout=5.0):
                 try:
                     result = future.result()
                     if result:

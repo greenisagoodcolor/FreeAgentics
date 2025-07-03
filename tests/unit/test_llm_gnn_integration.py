@@ -146,9 +146,8 @@ except ImportError:
 
         async def generate(self, request):
             return LLMResponse(
-                text="Generated text response",
-                tokens_used=100,
-                model=self.config.model)
+                text="Generated text response", tokens_used=100, model=self.config.model
+            )
 
         async def embed(self, texts):
             # Standard embedding dimension
@@ -227,9 +226,8 @@ class TestLLMProvider:
             return
 
         request = LLMRequest(
-            prompt="Explain graph neural networks in simple terms.",
-            max_tokens=200,
-            temperature=0.3)
+            prompt="Explain graph neural networks in simple terms.", max_tokens=200, temperature=0.3
+        )
 
         response = await provider.generate(request)
 
@@ -249,9 +247,7 @@ class TestLLMProvider:
         request = LLMRequest(
             prompt="Generate a JSON object describing a simple graph with 3 nodes and 2 edges.",
             structured_output=True,
-            metadata={
-                "output_format": "json",
-                "schema": "graph"},
+            metadata={"output_format": "json", "schema": "graph"},
         )
 
         response = await provider.generate(request)
@@ -283,9 +279,7 @@ class TestLLMProvider:
         if not IMPORT_SUCCESS:
             return
 
-        requests = [
-            LLMRequest(
-                prompt=f"Describe node {i} in a graph.") for i in range(5)]
+        requests = [LLMRequest(prompt=f"Describe node {i} in a graph.") for i in range(5)]
 
         responses = await provider.batch_generate(requests)
 
@@ -301,8 +295,8 @@ class TestLLMProvider:
             return
 
         request = LLMRequest(
-            prompt="Explain the relationship between graphs and language models.",
-            max_tokens=300)
+            prompt="Explain the relationship between graphs and language models.", max_tokens=300
+        )
 
         streaming_responses = []
         async for chunk in provider.stream_generate(request):
@@ -390,9 +384,7 @@ class TestLLMGNNBridge:
             "edge_attr": edge_attr,
             "node_labels": node_labels,
             "edge_labels": edge_labels,
-            "graph_metadata": {
-                "domain": "social_network",
-                "task": "node_classification"},
+            "graph_metadata": {"domain": "social_network", "task": "node_classification"},
         }
 
     @pytest.mark.asyncio
@@ -528,8 +520,7 @@ class TestLLMGNNBridge:
 
         # Attention weights should sum to 1
         assert torch.allclose(text_attention.sum(), torch.tensor(1.0))
-        assert torch.allclose(graph_attention.sum(
-            dim=-1), torch.ones(graph_attention.shape[:-1]))
+        assert torch.allclose(graph_attention.sum(dim=-1), torch.ones(graph_attention.shape[:-1]))
 
 
 class TestGraphAugmentedLLM:
@@ -646,8 +637,8 @@ class TestLLMGuidedGNN:
     def config(self):
         """Create LLM-guided GNN config."""
         return LLMGNNConfig(
-            integration_mode=IntegrationMode.FEEDBACK_LOOP,
-            graph_context_window=256)
+            integration_mode=IntegrationMode.FEEDBACK_LOOP, graph_context_window=256
+        )
 
     @pytest.fixture
     def llm_gnn(self, config):
@@ -706,14 +697,8 @@ class TestLLMGuidedGNN:
         class_probs = classification_result["class_probabilities"]
 
         # Should have probabilities for each class
-        assert class_probs.shape == (
-            graph_data["x"].shape[0],
-            len(class_descriptions))
-        assert torch.allclose(
-            class_probs.sum(
-                dim=-1),
-            torch.ones(
-                class_probs.shape[0]))
+        assert class_probs.shape == (graph_data["x"].shape[0], len(class_descriptions))
+        assert torch.allclose(class_probs.sum(dim=-1), torch.ones(class_probs.shape[0]))
 
     @pytest.mark.asyncio
     async def test_adaptive_architecture(self, llm_gnn, graph_data):
@@ -789,8 +774,7 @@ class TestKnowledgeGraphLLM:
         # Convert to tensor format
         num_entities = len(entities)
         entity_features = torch.randn(num_entities, 64)
-        edge_index = torch.tensor([[r["source"], r["target"]]
-                                  for r in relations]).t()
+        edge_index = torch.tensor([[r["source"], r["target"]] for r in relations]).t()
         edge_attr = torch.tensor([r["weight"] for r in relations]).unsqueeze(1)
 
         return {
@@ -833,8 +817,7 @@ class TestKnowledgeGraphLLM:
         assert any("work" in t for t in relation_types)
 
     @pytest.mark.asyncio
-    async def test_knowledge_graph_question_answering(
-            self, kg_llm, knowledge_graph):
+    async def test_knowledge_graph_question_answering(self, kg_llm, knowledge_graph):
         """Test question answering using knowledge graph."""
         if not IMPORT_SUCCESS:
             return
@@ -910,17 +893,14 @@ class TestLLMGNNIntegrationScenarios:
             return
 
         config = LLMGNNConfig(
-            integration_mode=IntegrationMode.MULTI_MODAL,
-            cross_modal_attention=True)
+            integration_mode=IntegrationMode.MULTI_MODAL, cross_modal_attention=True
+        )
 
         multi_modal_system = HybridLLMGNN(config)
 
         # Multi-modal input
         text_input = "Analyze the collaboration network in this research team."
-        graph_data = {
-            "x": torch.randn(
-                20, 64), "edge_index": torch.randint(
-                0, 20, (2, 40))}
+        graph_data = {"x": torch.randn(20, 64), "edge_index": torch.randint(0, 20, (2, 40))}
         structured_data = {
             "publications": 150,
             "citations": 2500,
@@ -953,8 +933,8 @@ class TestLLMGNNIntegrationScenarios:
             return
 
         config = LLMGNNConfig(
-            integration_mode=IntegrationMode.ITERATIVE,
-            enable_graph_reasoning=True)
+            integration_mode=IntegrationMode.ITERATIVE, enable_graph_reasoning=True
+        )
 
         conversational_system = GraphAugmentedLLM(config)
 
@@ -1111,10 +1091,8 @@ class TestLLMGNNIntegrationScenarios:
             }
 
         # Verify scaling behavior
-        times = [result["processing_time"]
-                 for result in scalability_results.values()]
-        memories = [result["memory_usage"]
-                    for result in scalability_results.values()]
+        times = [result["processing_time"] for result in scalability_results.values()]
+        memories = [result["memory_usage"] for result in scalability_results.values()]
 
         # Should show scaling trends
         assert times == sorted(times)  # Processing time should increase

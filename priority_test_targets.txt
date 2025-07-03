@@ -1,0 +1,93 @@
+PRIORITY TEST TARGETS - MODULES WITHOUT TESTS
+============================================
+
+CRITICAL PRIORITY (Core functionality that must be tested):
+----------------------------------------------------------
+
+API Modules:
+1. api/graphql/schema.py - GraphQL API schema
+2. api/websocket/real_time_updates.py - Real-time updates
+
+Agent Modules:
+3. agents/base/agent.py - Base agent implementation
+4. agents/base/belief_synchronization.py - Belief synchronization
+5. agents/base/data_model.py - Agent data models
+
+Infrastructure Modules:
+6. infrastructure/database/connection.py - Database connectivity
+7. infrastructure/database/models.py - Database models
+8. infrastructure/hardware/resource_manager.py - Resource management
+9. infrastructure/safety/boundary_monitoring_service.py - Safety boundaries
+10. infrastructure/safety/markov_blanket_verification.py - Markov blanket verification
+
+Inference Modules:
+11. inference/algorithms/variational_message_passing.py - Core VMP algorithm
+12. inference/gnn/model.py - GNN model implementation
+13. inference/gnn/layers.py - GNN layers
+14. inference/llm/provider_interface.py - LLM provider interface
+15. inference/llm/local_llm_manager.py - Local LLM management
+
+Coalition Modules:
+16. coalitions/coalition/coalition_models.py - Coalition data models
+17. coalitions/contracts/coalition_contract.py - Coalition contracts
+18. coalitions/formation/coalition_formation_algorithms.py - Formation algorithms
+
+
+HIGH PRIORITY (Important supporting functionality):
+--------------------------------------------------
+
+API Modules:
+19. api/websocket/coalition_monitoring.py - Coalition monitoring
+20. api/websocket/markov_blanket_monitoring.py - Markov blanket monitoring
+
+Infrastructure Modules:
+21. infrastructure/deployment/deployment_verification.py - Deployment verification
+22. infrastructure/hardware/offline_capabilities.py - Offline capabilities
+23. infrastructure/export/export_builder.py - Export builder
+
+Inference Modules:
+24. inference/gnn/executor.py - GNN executor
+25. inference/gnn/validator.py - GNN validator
+26. inference/llm/belief_integration.py - LLM-belief integration
+
+Coalition Modules:
+27. coalitions/contracts/resource_sharing.py - Resource sharing
+28. coalitions/deployment/deployment_manifest.py - Deployment manifests
+
+
+MEDIUM PRIORITY (Behavioral and supporting modules):
+---------------------------------------------------
+
+Agent Modules:
+29. agents/explorer/explorer_behavior.py - Explorer behaviors
+30. agents/guardian/guardian_behavior.py - Guardian behaviors
+31. agents/merchant/merchant_behavior.py - Merchant behaviors
+32. agents/scholar/scholar_behavior.py - Scholar behaviors
+
+Infrastructure Modules:
+33. infrastructure/deployment/hardware_compatibility.py - Hardware compatibility
+34. infrastructure/export/model_compression.py - Model compression
+35. infrastructure/hardware/hal_core.py - Hardware abstraction layer
+
+Inference Modules:
+36. inference/gnn/generator.py - GNN generator
+37. inference/gnn/parser.py - GNN parser
+38. inference/llm/ollama_integration.py - Ollama integration
+
+Coalition Modules:
+39. coalitions/coalition/business_opportunities.py - Business opportunities
+40. coalitions/formation/preference_matching.py - Preference matching
+41. coalitions/formation/stability_analysis.py - Stability analysis
+
+
+CURRENT TEST COVERAGE BY MODULE:
+-------------------------------
+API: 20.0% (1/5)
+Agents: 75.6% (34/45)
+Infrastructure: 10.3% (3/29)
+Inference: 54.0% (27/50)
+Coalitions: 40.9% (9/22)
+
+OVERALL: 49.0% (74/151)
+
+TARGET: 80% coverage across all modules

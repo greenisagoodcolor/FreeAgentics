@@ -144,14 +144,10 @@ class TechnicalReadinessReport:
             "performance_score": self.performance_score,
             "compatibility_score": self.compatibility_score,
             "resource_score": self.resource_score,
-            "hardware_profile": asdict(
-                self.hardware_profile),
-            "resource_requirements": asdict(
-                self.resource_requirements),
-            "compatibility_results": [
-                asdict(r) for r in self.compatibility_results],
-            "performance_benchmarks": [
-                b.to_dict() for b in self.performance_benchmarks],
+            "hardware_profile": asdict(self.hardware_profile),
+            "resource_requirements": asdict(self.resource_requirements),
+            "compatibility_results": [asdict(r) for r in self.compatibility_results],
+            "performance_benchmarks": [b.to_dict() for b in self.performance_benchmarks],
             "issues": self.issues,
             "recommendations": self.recommendations,
             "deployment_ready": self.deployment_ready,
@@ -192,7 +188,8 @@ class EdgePerformanceBenchmarker:
                     logger.info(
                         f"Benchmark {benchmark_name} completed: {
                             result.value:.2f} {
-                            result.unit}")
+                            result.unit}"
+                    )
             except Exception as e:
                 logger.error(f"Benchmark {benchmark_name} failed: {str(e)}")
                 # Create a failed benchmark result
@@ -260,10 +257,7 @@ class EdgePerformanceBenchmarker:
 
         baseline_memory_mb = 512.0  # 512 MB baseline
         performance_ratio = baseline_memory_mb / memory_footprint
-        passed = memory_footprint <= (
-            requirements.min_ram_gb *
-            1024 *
-            0.8)  # 80% of available RAM
+        passed = memory_footprint <= (requirements.min_ram_gb * 1024 * 0.8)  # 80% of available RAM
 
         return PerformanceBenchmark(
             benchmark_name="memory_footprint",
@@ -292,8 +286,7 @@ class EdgePerformanceBenchmarker:
             _ = np.dot(data, data.T)  # Matrix operations
             await asyncio.sleep(0.001)  # Simulated processing
 
-        inference_latency_ms = (time.time() - start_time) * \
-            1000 / 10  # Average per inference
+        inference_latency_ms = (time.time() - start_time) * 1000 / 10  # Average per inference
 
         performance_ratio = baseline_inference_ms / inference_latency_ms
         passed = inference_latency_ms <= requirements.max_latency_ms
@@ -365,13 +358,11 @@ class EdgePerformanceBenchmarker:
         bytes_recv = net_io_end.bytes_recv - net_io_start.bytes_recv
         total_bytes = bytes_sent + bytes_recv
 
-        throughput_mbps = (total_bytes * 8) / (duration *
-                                               1024 * 1024)  # Convert to Mbps
+        throughput_mbps = (total_bytes * 8) / (duration * 1024 * 1024)  # Convert to Mbps
 
         # Use system's maximum interface speed as approximation
         net_stats = psutil.net_if_stats()
-        max_speed = max([stat.speed for stat in net_stats.values()
-                        if stat.speed > 0], default=1000)
+        max_speed = max([stat.speed for stat in net_stats.values() if stat.speed > 0], default=1000)
         actual_throughput = min(throughput_mbps, max_speed)
 
         performance_ratio = actual_throughput / baseline_throughput_mbps
@@ -471,11 +462,14 @@ class EdgePerformanceBenchmarker:
 
         try:
             current_temp = self._get_cpu_temperature()
-            performance_ratio = self._calculate_thermal_performance_ratio(baseline_temp_celsius, current_temp)
+            performance_ratio = self._calculate_thermal_performance_ratio(
+                baseline_temp_celsius, current_temp
+            )
             passed = self._evaluate_thermal_requirements(current_temp, requirements)
-            
+
             return self._create_thermal_benchmark_result(
-                current_temp, baseline_temp_celsius, performance_ratio, passed)
+                current_temp, baseline_temp_celsius, performance_ratio, passed
+            )
 
         except Exception as e:
             logger.warning(f"Could not measure temperature: {str(e)}")
@@ -484,12 +478,12 @@ class EdgePerformanceBenchmarker:
     def _get_cpu_temperature(self) -> float:
         """Get CPU temperature using platform-specific methods"""
         platform_name = platform.system()
-        
+
         temperature_strategies = {
             "Linux": self._get_linux_temperature,
             "Darwin": self._get_macos_temperature,
         }
-        
+
         strategy = temperature_strategies.get(platform_name, self._get_default_temperature)
         return strategy()
 
@@ -507,7 +501,7 @@ class EdgePerformanceBenchmarker:
                     return temp_millicelsius / 1000.0
             except (FileNotFoundError, ValueError):
                 continue
-        
+
         return 45.0  # Default reasonable temperature
 
     def _get_macos_temperature(self) -> float:
@@ -522,18 +516,21 @@ class EdgePerformanceBenchmarker:
         """Get default temperature for unsupported platforms"""
         return 45.0  # Default for Windows/other
 
-    def _calculate_thermal_performance_ratio(self, baseline_temp: float, current_temp: float) -> float:
+    def _calculate_thermal_performance_ratio(
+        self, baseline_temp: float, current_temp: float
+    ) -> float:
         """Calculate thermal performance ratio"""
         return baseline_temp / current_temp
 
-    def _evaluate_thermal_requirements(self, current_temp: float, 
-                                     requirements: ResourceRequirements) -> bool:
+    def _evaluate_thermal_requirements(
+        self, current_temp: float, requirements: ResourceRequirements
+    ) -> bool:
         """Evaluate if thermal requirements are met"""
-        return (not requirements.max_temp_celsius or 
-                current_temp <= requirements.max_temp_celsius)
+        return not requirements.max_temp_celsius or current_temp <= requirements.max_temp_celsius
 
-    def _create_thermal_benchmark_result(self, current_temp: float, baseline_temp: float,
-                                       performance_ratio: float, passed: bool) -> PerformanceBenchmark:
+    def _create_thermal_benchmark_result(
+        self, current_temp: float, baseline_temp: float, performance_ratio: float, passed: bool
+    ) -> PerformanceBenchmark:
         """Create successful thermal benchmark result"""
         return PerformanceBenchmark(
             benchmark_name="thermal_stability",
@@ -578,8 +575,7 @@ class TechnicalReadinessValidator:
 
         logger.info("Technical readiness validator initialized")
 
-    def _initialize_platform_requirements(
-            self) -> Dict[EdgePlatform, ResourceRequirements]:
+    def _initialize_platform_requirements(self) -> Dict[EdgePlatform, ResourceRequirements]:
         """Initialize platform-specific resource requirements"""
         return {
             EdgePlatform.RASPBERRY_PI: ResourceRequirements(
@@ -669,8 +665,7 @@ class TechnicalReadinessValidator:
         Returns:
             Comprehensive technical readiness report
         """
-        logger.info(
-            f"Starting technical readiness assessment for coalition {coalition_id}")
+        logger.info(f"Starting technical readiness assessment for coalition {coalition_id}")
         start_time = time.time()
 
         try:
@@ -699,14 +694,13 @@ class TechnicalReadinessValidator:
 
             # Step 6: Score calculation and analysis
             scores = self._calculate_readiness_scores(
-                hardware_profile,
-                requirements,
-                compatibility_results,
-                performance_benchmarks)
+                hardware_profile, requirements, compatibility_results, performance_benchmarks
+            )
 
             # Step 7: Issue and recommendation analysis
             issues, recommendations = self._analyze_issues_and_recommendations(
-                hardware_profile, requirements, compatibility_results, performance_benchmarks)
+                hardware_profile, requirements, compatibility_results, performance_benchmarks
+            )
 
             # Step 8: Determine readiness level
             readiness_level = self._determine_readiness_level(scores["overall_score"])
@@ -745,8 +739,7 @@ class TechnicalReadinessValidator:
             logger.error(f"Technical readiness assessment failed: {str(e)}")
             raise
 
-    def _determine_target_platform(
-            self, hardware_profile: HardwareProfile) -> EdgePlatform:
+    def _determine_target_platform(self, hardware_profile: HardwareProfile) -> EdgePlatform:
         """Determine target platform based on hardware profile"""
         arch = hardware_profile.architecture.lower()
         name = hardware_profile.name.lower()
@@ -781,8 +774,7 @@ class TechnicalReadinessValidator:
 
         try:
             # Run compatibility tests using existing infrastructure
-            test_results = self.compatibility_tester.run_tests(
-                package_dir, hardware_profile)
+            test_results = self.compatibility_tester.run_tests(package_dir, hardware_profile)
 
             # Convert to TestResult objects
             compatibility_results = []
@@ -861,8 +853,7 @@ class TechnicalReadinessValidator:
 
         # RAM check
         if hardware_profile.ram_gb < requirements.min_ram_gb:
-            deficit = (requirements.min_ram_gb - hardware_profile.ram_gb) / \
-                requirements.min_ram_gb
+            deficit = (requirements.min_ram_gb - hardware_profile.ram_gb) / requirements.min_ram_gb
             score -= deficit * 25
 
         # Storage check
@@ -878,14 +869,12 @@ class TechnicalReadinessValidator:
 
         return max(0.0, score)
 
-    def _calculate_compatibility_score(
-            self, compatibility_results: List[TestResult]) -> float:
+    def _calculate_compatibility_score(self, compatibility_results: List[TestResult]) -> float:
         """Calculate compatibility test score"""
         if not compatibility_results:
             return 50.0  # Default if no tests run
 
-        passed_tests = sum(
-            1 for r in compatibility_results if r.status == TestStatus.PASSED)
+        passed_tests = sum(1 for r in compatibility_results if r.status == TestStatus.PASSED)
         total_tests = len(compatibility_results)
 
         return (passed_tests / total_tests) * 100.0
@@ -971,62 +960,92 @@ class TechnicalReadinessValidator:
 
         return issues, recommendations
 
-    def _analyze_hardware_issues(self, hardware_profile: HardwareProfile, 
-                               requirements: ResourceRequirements,
-                               issues: List[str], recommendations: List[str]) -> None:
+    def _analyze_hardware_issues(
+        self,
+        hardware_profile: HardwareProfile,
+        requirements: ResourceRequirements,
+        issues: List[str],
+        recommendations: List[str],
+    ) -> None:
         """Analyze hardware-related issues"""
         self._check_cpu_requirements(hardware_profile, requirements, issues, recommendations)
         self._check_ram_requirements(hardware_profile, requirements, issues, recommendations)
         self._check_storage_requirements(hardware_profile, requirements, issues, recommendations)
         self._check_gpu_requirements(hardware_profile, requirements, issues, recommendations)
 
-    def _check_cpu_requirements(self, hardware_profile: HardwareProfile,
-                               requirements: ResourceRequirements,
-                               issues: List[str], recommendations: List[str]) -> None:
+    def _check_cpu_requirements(
+        self,
+        hardware_profile: HardwareProfile,
+        requirements: ResourceRequirements,
+        issues: List[str],
+        recommendations: List[str],
+    ) -> None:
         """Check CPU core requirements"""
         if hardware_profile.cpu_cores < requirements.min_cpu_cores:
             issues.append(
-                f"Insufficient CPU cores: {hardware_profile.cpu_cores} < {requirements.min_cpu_cores}")
+                f"Insufficient CPU cores: {hardware_profile.cpu_cores} < {requirements.min_cpu_cores}"
+            )
             recommendations.append("Consider upgrading to a device with more CPU cores")
 
-    def _check_ram_requirements(self, hardware_profile: HardwareProfile,
-                              requirements: ResourceRequirements,
-                              issues: List[str], recommendations: List[str]) -> None:
+    def _check_ram_requirements(
+        self,
+        hardware_profile: HardwareProfile,
+        requirements: ResourceRequirements,
+        issues: List[str],
+        recommendations: List[str],
+    ) -> None:
         """Check RAM requirements"""
         if hardware_profile.ram_gb < requirements.min_ram_gb:
             issues.append(
-                f"Insufficient RAM: {hardware_profile.ram_gb:.1f}GB < {requirements.min_ram_gb}GB")
+                f"Insufficient RAM: {hardware_profile.ram_gb:.1f}GB < {requirements.min_ram_gb}GB"
+            )
             recommendations.append("Add more RAM or choose a device with more memory")
 
-    def _check_storage_requirements(self, hardware_profile: HardwareProfile,
-                                  requirements: ResourceRequirements,
-                                  issues: List[str], recommendations: List[str]) -> None:
+    def _check_storage_requirements(
+        self,
+        hardware_profile: HardwareProfile,
+        requirements: ResourceRequirements,
+        issues: List[str],
+        recommendations: List[str],
+    ) -> None:
         """Check storage requirements"""
         if hardware_profile.storage_gb < requirements.min_storage_gb:
             issues.append(
-                f"Insufficient storage: {hardware_profile.storage_gb:.1f}GB < {requirements.min_storage_gb}GB")
+                f"Insufficient storage: {hardware_profile.storage_gb:.1f}GB < {requirements.min_storage_gb}GB"
+            )
             recommendations.append("Add external storage or upgrade internal storage")
 
-    def _check_gpu_requirements(self, hardware_profile: HardwareProfile,
-                              requirements: ResourceRequirements,
-                              issues: List[str], recommendations: List[str]) -> None:
+    def _check_gpu_requirements(
+        self,
+        hardware_profile: HardwareProfile,
+        requirements: ResourceRequirements,
+        issues: List[str],
+        recommendations: List[str],
+    ) -> None:
         """Check GPU requirements"""
         if requirements.requires_gpu and not hardware_profile.gpu_available:
             issues.append("GPU acceleration required but not available")
             recommendations.append(
-                "Choose a device with GPU support or disable GPU-dependent features")
+                "Choose a device with GPU support or disable GPU-dependent features"
+            )
 
-    def _analyze_compatibility_issues(self, compatibility_results: List[TestResult],
-                                    issues: List[str], recommendations: List[str]) -> None:
+    def _analyze_compatibility_issues(
+        self, compatibility_results: List[TestResult], issues: List[str], recommendations: List[str]
+    ) -> None:
         """Analyze compatibility test results"""
         failed_tests = [r for r in compatibility_results if r.status == TestStatus.FAILED]
         if failed_tests:
             issues.append(f"{len(failed_tests)} compatibility tests failed")
             recommendations.append(
-                "Review failed compatibility tests and address underlying issues")
+                "Review failed compatibility tests and address underlying issues"
+            )
 
-    def _analyze_performance_issues(self, performance_benchmarks: List[PerformanceBenchmark],
-                                  issues: List[str], recommendations: List[str]) -> None:
+    def _analyze_performance_issues(
+        self,
+        performance_benchmarks: List[PerformanceBenchmark],
+        issues: List[str],
+        recommendations: List[str],
+    ) -> None:
         """Analyze performance benchmark results"""
         failed_benchmarks = [b for b in performance_benchmarks if not b.passed]
         if failed_benchmarks:
@@ -1034,16 +1053,17 @@ class TechnicalReadinessValidator:
                 issues.append(f"Performance benchmark failed: {benchmark.benchmark_name}")
                 self._add_performance_recommendation(benchmark, recommendations)
 
-    def _add_performance_recommendation(self, benchmark: PerformanceBenchmark,
-                                      recommendations: List[str]) -> None:
+    def _add_performance_recommendation(
+        self, benchmark: PerformanceBenchmark, recommendations: List[str]
+    ) -> None:
         """Add specific recommendation based on failed benchmark"""
         recommendation_map = {
             "agent_startup_time": "Optimize agent initialization and model loading",
             "memory_footprint": "Reduce memory usage or increase available RAM",
             "inference_latency": "Optimize inference pipeline or enable hardware acceleration",
-            "concurrent_agents": "Optimize resource sharing and concurrency handling"
+            "concurrent_agents": "Optimize resource sharing and concurrency handling",
         }
-        
+
         recommendation = recommendation_map.get(benchmark.benchmark_name)
         if recommendation:
             recommendations.append(recommendation)
@@ -1051,11 +1071,9 @@ class TechnicalReadinessValidator:
     def _add_general_recommendations(self, issues: List[str], recommendations: List[str]) -> None:
         """Add general recommendations based on analysis results"""
         if not issues:
-            recommendations.append(
-                "System meets all technical requirements for edge deployment")
+            recommendations.append("System meets all technical requirements for edge deployment")
         else:
-            recommendations.append(
-                "Address identified issues before production deployment")
+            recommendations.append("Address identified issues before production deployment")
 
     def _determine_readiness_level(self, overall_score: float) -> ReadinessLevel:
         """Determine readiness level based on overall score"""
@@ -1077,8 +1095,7 @@ class TechnicalReadinessValidator:
 
         logger.info(f"Technical readiness report saved to {output_path}")
 
-    def generate_summary_report(
-            self, reports: List[TechnicalReadinessReport]) -> Dict[str, Any]:
+    def generate_summary_report(self, reports: List[TechnicalReadinessReport]) -> Dict[str, Any]:
         """Generate summary report from multiple assessments"""
         if not reports:
             return {}

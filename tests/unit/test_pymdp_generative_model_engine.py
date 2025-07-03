@@ -228,9 +228,7 @@ class TestPyMDPParameters:
     def test_parameters_initialization(self, sample_dimensions):
         """Test parameter initialization."""
         # Create observation model (A matrix)
-        A = torch.randn(
-            sample_dimensions.num_observations,
-            sample_dimensions.num_states)
+        A = torch.randn(sample_dimensions.num_observations, sample_dimensions.num_states)
         A = torch.softmax(A, dim=0)
 
         # Create transition model (B matrix)
@@ -254,9 +252,7 @@ class TestPyMDPParameters:
         assert params.B is not None
         assert params.C is not None
         assert params.D is not None
-        assert params.A.shape == (
-            sample_dimensions.num_observations,
-            sample_dimensions.num_states)
+        assert params.A.shape == (sample_dimensions.num_observations, sample_dimensions.num_states)
         assert params.B.shape == (
             sample_dimensions.num_states,
             sample_dimensions.num_states,
@@ -265,18 +261,13 @@ class TestPyMDPParameters:
 
     def test_a_matrix_properties(self, sample_dimensions):
         """Test A matrix properties."""
-        A_raw = torch.randn(
-            sample_dimensions.num_observations,
-            sample_dimensions.num_states)
+        A_raw = torch.randn(sample_dimensions.num_observations, sample_dimensions.num_states)
         A_normalized = torch.softmax(A_raw, dim=0)
 
         a_matrix = A_Matrix(A_normalized)
 
         assert a_matrix.shape == A_normalized.shape
-        assert torch.allclose(
-            a_matrix.matrix.sum(
-                dim=0), torch.ones(
-                sample_dimensions.num_states))
+        assert torch.allclose(a_matrix.matrix.sum(dim=0), torch.ones(sample_dimensions.num_states))
 
     def test_b_matrix_properties(self, sample_dimensions):
         """Test B matrix properties."""
@@ -293,8 +284,9 @@ class TestPyMDPParameters:
         # Each column should sum to 1 (probability distribution over next
         # states)
         for action in range(sample_dimensions.num_actions):
-            assert torch.allclose(b_matrix.matrix[:, :, action].sum(
-                dim=0), torch.ones(sample_dimensions.num_states))
+            assert torch.allclose(
+                b_matrix.matrix[:, :, action].sum(dim=0), torch.ones(sample_dimensions.num_states)
+            )
 
     def test_c_vector_properties(self, sample_dimensions):
         """Test C vector (preferences) properties."""
@@ -368,10 +360,7 @@ class TestPyMDPGenerativeModel:
     def config(self):
         """Create PyMDP config for testing."""
         return PyMDPConfig(
-            dimensions=PyMDPDimensions(
-                num_observations=5,
-                num_states=4,
-                num_actions=3),
+            dimensions=PyMDPDimensions(num_observations=5, num_states=4, num_actions=3),
             learning_rate=0.01,
             use_gpu=False,
         )
@@ -408,9 +397,8 @@ class TestPyMDPGenerativeModel:
 
         # Check normalization
         assert torch.allclose(
-            model.parameters.A.sum(
-                dim=0), torch.ones(
-                model.config.dimensions.num_states))
+            model.parameters.A.sum(dim=0), torch.ones(model.config.dimensions.num_states)
+        )
         assert torch.allclose(model.parameters.D.sum(), torch.tensor(1.0))
 
     def test_belief_update(self, model):
@@ -422,8 +410,7 @@ class TestPyMDPGenerativeModel:
         model.initialize_parameters()
 
         # Create observation
-        observation = torch.randint(
-            0, model.config.dimensions.num_observations, (1,))
+        observation = torch.randint(0, model.config.dimensions.num_observations, (1,))
 
         # Update beliefs
         prior_beliefs = model.beliefs.beliefs.clone()
@@ -489,8 +476,7 @@ class TestPyMDPGenerativeModel:
         initial_B = model.parameters.B.clone()
 
         # Create learning data
-        observations = torch.randint(
-            0, model.config.dimensions.num_observations, (10,))
+        observations = torch.randint(0, model.config.dimensions.num_observations, (10,))
         actions = torch.randint(0, model.config.dimensions.num_actions, (10,))
 
         # Learn from data
@@ -540,9 +526,7 @@ class TestPyMDPFactorGraph:
 
         # Initialize factor graph
         factor_graph.add_factor("obs_factor", variables=["state", "obs"])
-        factor_graph.add_factor(
-            "trans_factor", variables=[
-                "state_t", "state_t1"])
+        factor_graph.add_factor("trans_factor", variables=["state_t", "state_t1"])
 
         # Run message passing
         messages = factor_graph.run_message_passing(max_iterations=10)
@@ -573,10 +557,9 @@ class TestMultiFactorModel:
         """Create multi-factor config."""
         return PyMDPConfig(
             dimensions=PyMDPDimensions(
-                num_factors=3,
-                num_modalities=2,
-                num_observations=5,
-                num_states=4))
+                num_factors=3, num_modalities=2, num_observations=5, num_states=4
+            )
+        )
 
     @pytest.fixture
     def multi_factor_model(self, multi_factor_config):
@@ -586,16 +569,14 @@ class TestMultiFactorModel:
         else:
             return Mock()
 
-    def test_multi_factor_initialization(
-            self, multi_factor_model, multi_factor_config):
+    def test_multi_factor_initialization(self, multi_factor_model, multi_factor_config):
         """Test multi-factor model initialization."""
         if not IMPORT_SUCCESS:
             return
 
         assert multi_factor_model.config == multi_factor_config
         assert hasattr(multi_factor_model, "factor_graphs")
-        assert len(
-            multi_factor_model.factor_graphs) == multi_factor_config.dimensions.num_factors
+        assert len(multi_factor_model.factor_graphs) == multi_factor_config.dimensions.num_factors
 
     def test_factorized_belief_update(self, multi_factor_model):
         """Test factorized belief update."""
@@ -614,8 +595,7 @@ class TestMultiFactorModel:
         multi_factor_model.update_factorized_beliefs(observations)
 
         # Check beliefs for each factor
-        for factor_idx in range(
-                multi_factor_model.config.dimensions.num_factors):
+        for factor_idx in range(multi_factor_model.config.dimensions.num_factors):
             beliefs = multi_factor_model.get_factor_beliefs(factor_idx)
             assert torch.allclose(beliefs.sum(), torch.tensor(1.0))
 
@@ -640,12 +620,10 @@ class TestMultiFactorModel:
         multi_factor_model.initialize_parameters()
 
         # Run hierarchical inference
-        hierarchical_beliefs = multi_factor_model.hierarchical_inference(
-            num_levels=2)
+        hierarchical_beliefs = multi_factor_model.hierarchical_inference(num_levels=2)
 
         assert len(hierarchical_beliefs) == 2  # Two levels
-        assert all(isinstance(beliefs, torch.Tensor)
-                   for beliefs in hierarchical_beliefs)
+        assert all(isinstance(beliefs, torch.Tensor) for beliefs in hierarchical_beliefs)
 
 
 class TestHierarchicalModel:
@@ -656,10 +634,8 @@ class TestHierarchicalModel:
         """Create hierarchical model."""
         if IMPORT_SUCCESS:
             config = PyMDPConfig(
-                dimensions=PyMDPDimensions(
-                    num_states=4,
-                    num_actions=3,
-                    planning_horizon=10))
+                dimensions=PyMDPDimensions(num_states=4, num_actions=3, planning_horizon=10)
+            )
             return HierarchicalModel(config, num_levels=3)
         else:
             return Mock()
@@ -688,12 +664,12 @@ class TestHierarchicalModel:
         }
 
         # Run multi-scale inference
-        beliefs_per_level = hierarchical_model.multi_scale_inference(
-            observations)
+        beliefs_per_level = hierarchical_model.multi_scale_inference(observations)
 
         assert len(beliefs_per_level) == 3
-        assert all(torch.allclose(beliefs.sum(), torch.tensor(1.0))
-                   for beliefs in beliefs_per_level)
+        assert all(
+            torch.allclose(beliefs.sum(), torch.tensor(1.0)) for beliefs in beliefs_per_level
+        )
 
     def test_temporal_abstraction(self, hierarchical_model):
         """Test temporal abstraction across levels."""
@@ -754,8 +730,7 @@ class TestPyMDPOptimizer:
         observations = torch.randint(0, 5, (10,))
 
         # Run VMP
-        optimized_beliefs = optimizer.variational_message_passing(
-            beliefs, observations)
+        optimized_beliefs = optimizer.variational_message_passing(beliefs, observations)
 
         assert torch.allclose(optimized_beliefs.sum(), torch.tensor(1.0))
         assert optimized_beliefs.shape == beliefs.shape
@@ -791,8 +766,7 @@ class TestPyMDPOptimizer:
         gradients = torch.randn(4)
 
         # Compute natural gradients
-        natural_grads = optimizer.compute_natural_gradients(
-            gradients, fisher_info)
+        natural_grads = optimizer.compute_natural_gradients(gradients, fisher_info)
 
         assert natural_grads.shape == gradients.shape
 
@@ -834,8 +808,7 @@ class TestVariationalFreeEnergy:
         # Mock generative model parameters
         A_matrix = torch.softmax(torch.randn(5, 4), dim=0)
 
-        free_energy = free_energy_calculator.compute(
-            beliefs, observation, A_matrix)
+        free_energy = free_energy_calculator.compute(beliefs, observation, A_matrix)
 
         assert isinstance(free_energy, torch.Tensor)
         assert free_energy.numel() == 1
@@ -861,8 +834,7 @@ class TestVariationalFreeEnergy:
         observation = torch.randint(0, 5, (1,))
         A_matrix = torch.softmax(torch.randn(5, 4), dim=0)
 
-        ell = free_energy_calculator.compute_expected_log_likelihood(
-            beliefs, observation, A_matrix)
+        ell = free_energy_calculator.compute_expected_log_likelihood(beliefs, observation, A_matrix)
 
         assert isinstance(ell, torch.Tensor)
 
@@ -873,13 +845,11 @@ class TestVariationalFreeEnergy:
 
         # Uniform distribution should have maximum entropy
         uniform_beliefs = torch.ones(4) / 4
-        uniform_entropy = free_energy_calculator.compute_entropy(
-            uniform_beliefs)
+        uniform_entropy = free_energy_calculator.compute_entropy(uniform_beliefs)
 
         # Concentrated distribution should have low entropy
         concentrated_beliefs = torch.tensor([0.9, 0.05, 0.03, 0.02])
-        concentrated_entropy = free_energy_calculator.compute_entropy(
-            concentrated_beliefs)
+        concentrated_entropy = free_energy_calculator.compute_entropy(concentrated_beliefs)
 
         assert uniform_entropy > concentrated_entropy
         assert uniform_entropy >= 0
@@ -911,8 +881,7 @@ class TestParameterLearning:
         observations = torch.randint(0, 5, (100,))
 
         # Learn A matrix
-        A_learned = parameter_learner.learn_A_matrix(
-            A_initial, states, observations)
+        A_learned = parameter_learner.learn_A_matrix(A_initial, states, observations)
 
         assert A_learned.shape == A_initial.shape
         assert torch.allclose(A_learned.sum(dim=0), torch.ones(4))
@@ -931,8 +900,7 @@ class TestParameterLearning:
         states_t1 = torch.randint(0, 4, (100,))
 
         # Learn B matrix
-        B_learned = parameter_learner.learn_B_matrix(
-            B_initial, states_t, actions, states_t1)
+        B_learned = parameter_learner.learn_B_matrix(B_initial, states_t, actions, states_t1)
 
         assert B_learned.shape == B_initial.shape
         for a in range(3):
@@ -950,8 +918,7 @@ class TestParameterLearning:
         obs_counts = torch.randint(1, 10, (5, 4))
 
         # Bayesian update
-        posterior_alpha = parameter_learner.bayesian_update(
-            prior_alpha, obs_counts)
+        posterior_alpha = parameter_learner.bayesian_update(prior_alpha, obs_counts)
 
         assert posterior_alpha.shape == prior_alpha.shape
         assert torch.all(posterior_alpha >= prior_alpha)
@@ -970,8 +937,7 @@ class TestParameterLearning:
             observation = torch.randint(0, 5, (1,))
 
             # Online update
-            A_matrix = parameter_learner.online_update_A(
-                A_matrix, state, observation)
+            A_matrix = parameter_learner.online_update_A(A_matrix, state, observation)
 
             # Check normalization
             assert torch.allclose(A_matrix.sum(dim=0), torch.ones(4))
@@ -996,10 +962,7 @@ class TestModelSelection:
         # Create multiple model configurations
         models = []
         for i in range(3):
-            config = PyMDPConfig(
-                dimensions=PyMDPDimensions(
-                    num_states=2 + i,
-                    num_actions=2 + i))
+            config = PyMDPConfig(dimensions=PyMDPDimensions(num_states=2 + i, num_actions=2 + i))
             if IMPORT_SUCCESS:
                 model = PyMDPGenerativeModel(config)
                 model.initialize_parameters()
@@ -1011,12 +974,10 @@ class TestModelSelection:
 
         # Compare models
         if models:
-            comparison_results = model_selector.compare_models(
-                models, observations, actions)
+            comparison_results = model_selector.compare_models(models, observations, actions)
 
             assert len(comparison_results) == len(models)
-            assert all(
-                "log_likelihood" in result for result in comparison_results)
+            assert all("log_likelihood" in result for result in comparison_results)
 
     def test_cross_validation(self, model_selector):
         """Test cross-validation for model selection."""
@@ -1053,8 +1014,7 @@ class TestModelSelection:
 
         # Compute information criteria
         aic = model_selector.compute_aic(log_likelihood, num_parameters)
-        bic = model_selector.compute_bic(
-            log_likelihood, num_parameters, num_samples)
+        bic = model_selector.compute_bic(log_likelihood, num_parameters, num_samples)
 
         assert isinstance(aic, float)
         assert isinstance(bic, float)
@@ -1085,8 +1045,7 @@ class TestEvidenceLowerBound:
         # Mock likelihood
         log_likelihood = torch.tensor(-2.0)
 
-        elbo = elbo_calculator.compute_elbo(
-            q_beliefs, p_beliefs, log_likelihood)
+        elbo = elbo_calculator.compute_elbo(q_beliefs, p_beliefs, log_likelihood)
 
         assert isinstance(elbo, torch.Tensor)
         assert elbo.numel() == 1
@@ -1176,10 +1135,7 @@ class TestPyMDPIntegration:
 
         # Create model
         config = PyMDPConfig(
-            dimensions=PyMDPDimensions(
-                num_observations=5,
-                num_states=4,
-                num_actions=3),
+            dimensions=PyMDPDimensions(num_observations=5, num_states=4, num_actions=3),
             enable_learning=True,
             enable_planning=True,
         )
@@ -1203,9 +1159,7 @@ class TestPyMDPIntegration:
                 model.learn_parameters(observation, action)
 
             # Check belief normalization
-            assert torch.allclose(
-                model.beliefs.beliefs.sum(),
-                torch.tensor(1.0))
+            assert torch.allclose(model.beliefs.beliefs.sum(), torch.tensor(1.0))
 
     def test_multi_agent_coordination(self):
         """Test multi-agent coordination with PyMDP."""
@@ -1217,9 +1171,7 @@ class TestPyMDPIntegration:
         agents = []
 
         for i in range(num_agents):
-            config = PyMDPConfig(
-                dimensions=PyMDPDimensions(
-                    num_states=4, num_actions=3))
+            config = PyMDPConfig(dimensions=PyMDPDimensions(num_states=4, num_actions=3))
             agent = PyMDPGenerativeModel(config)
             agent.initialize_parameters()
             agents.append(agent)

@@ -68,9 +68,7 @@ except ImportError:
 
         def update_value(self, new_value):
             self.history.append((datetime.now(), self.value))
-            self.value = max(
-                self.definition.min_value, min(
-                    self.definition.max_value, new_value))
+            self.value = max(self.definition.min_value, min(self.definition.max_value, new_value))
 
     class PersonalityProfile:
         def __init__(self, traits=None):
@@ -128,11 +126,7 @@ class TestTraitInfluence:
 
     def test_influence_completeness(self):
         """Test comprehensive influence type coverage."""
-        expected_influences = [
-            "multiplicative",
-            "additive",
-            "threshold",
-            "modulation"]
+        expected_influences = ["multiplicative", "additive", "threshold", "modulation"]
 
         for influence in expected_influences:
             assert hasattr(TraitInfluence, influence.upper())
@@ -163,9 +157,8 @@ class TestTraitDefinition:
     def test_trait_definition_defaults(self):
         """Test trait definition default values."""
         trait_def = TraitDefinition(
-            name="test_trait",
-            category=TraitCategory.EMOTIONAL,
-            description="Test trait")
+            name="test_trait", category=TraitCategory.EMOTIONAL, description="Test trait"
+        )
 
         assert trait_def.min_value == 0.0
         assert trait_def.max_value == 1.0
@@ -355,24 +348,14 @@ class TestPersonalityProfile:
     def sample_traits(self):
         """Create sample traits for testing."""
         trait_defs = [
-            TraitDefinition(
-                "openness",
-                TraitCategory.COGNITIVE,
-                "Openness to experience"),
-            TraitDefinition(
-                "extroversion",
-                TraitCategory.SOCIAL,
-                "Social extroversion"),
-            TraitDefinition(
-                "agreeableness",
-                TraitCategory.EMOTIONAL,
-                "Agreeableness"),
+            TraitDefinition("openness", TraitCategory.COGNITIVE, "Openness to experience"),
+            TraitDefinition("extroversion", TraitCategory.SOCIAL, "Social extroversion"),
+            TraitDefinition("agreeableness", TraitCategory.EMOTIONAL, "Agreeableness"),
         ]
 
         traits = {}
         for trait_def in trait_defs:
-            traits[trait_def.name] = PersonalityTrait(
-                trait_def, value=random.uniform(0.2, 0.8))
+            traits[trait_def.name] = PersonalityTrait(trait_def, value=random.uniform(0.2, 0.8))
 
         return traits
 
@@ -491,8 +474,7 @@ class TestPersonalityProfile:
             }
 
         assert len(trait_data) == len(profile.traits)
-        assert all(isinstance(data["value"], float)
-                   for data in trait_data.values())
+        assert all(isinstance(data["value"], float) for data in trait_data.values())
 
 
 class TestBigFivePersonality:
@@ -566,8 +548,7 @@ class TestBigFivePersonality:
             # enforced)
             if hasattr(big_five, "get_trait_value"):
                 openness = big_five.get_trait_value("openness")
-                conscientiousness = big_five.get_trait_value(
-                    "conscientiousness")
+                conscientiousness = big_five.get_trait_value("conscientiousness")
 
                 # Traits should be independent
                 assert isinstance(openness, float)
@@ -599,9 +580,8 @@ class TestPersonalitySystem:
             return
 
         trait_def = TraitDefinition(
-            name="leadership",
-            category=TraitCategory.SOCIAL,
-            description="Leadership ability")
+            name="leadership", category=TraitCategory.SOCIAL, description="Leadership ability"
+        )
 
         if hasattr(personality_system, "register_trait_definition"):
             personality_system.register_trait_definition(trait_def)
@@ -645,8 +625,7 @@ class TestPersonalitySystem:
         # Test influence calculations if available
         if hasattr(personality_system, "calculate_action_influence"):
             action = "explore"
-            influence = personality_system.calculate_action_influence(
-                profile, action)
+            influence = personality_system.calculate_action_influence(profile, action)
             assert isinstance(influence, float)
 
     def test_trait_evolution(self, personality_system):
@@ -661,14 +640,12 @@ class TestPersonalitySystem:
         if hasattr(personality_system, "evolve_traits"):
             _ = {}
             if hasattr(profile, "traits"):
-                _ = {
-                    name: trait.value for name,
-                    trait in profile.traits.items()}
+                _ = {name: trait.value for name, trait in profile.traits.items()}
 
             # Simulate evolution
             personality_system.evolve_traits(
-                profile, experiences=[
-                    "positive_interaction", "exploration_success"])
+                profile, experiences=["positive_interaction", "exploration_success"]
+            )
 
             # Some traits might have changed
             # This is implementation-dependent
@@ -682,8 +659,7 @@ class TestPersonalitySystem:
         profile2 = personality_system.create_profile("agent_002")
 
         if hasattr(personality_system, "calculate_compatibility"):
-            compatibility = personality_system.calculate_compatibility(
-                profile1, profile2)
+            compatibility = personality_system.calculate_compatibility(profile1, profile2)
             assert isinstance(compatibility, float)
             assert 0.0 <= compatibility <= 1.0
 
@@ -764,14 +740,10 @@ class TestPersonalitySystem:
 
         if hasattr(personality_system, "get_traits_by_category"):
             # Test filtering by different categories
-            categories = [
-                TraitCategory.COGNITIVE,
-                TraitCategory.EMOTIONAL,
-                TraitCategory.SOCIAL]
+            categories = [TraitCategory.COGNITIVE, TraitCategory.EMOTIONAL, TraitCategory.SOCIAL]
 
             for category in categories:
-                traits = personality_system.get_traits_by_category(
-                    profile, category)
+                traits = personality_system.get_traits_by_category(profile, category)
                 assert isinstance(traits, (list, dict))
 
     def test_system_state_persistence(self, personality_system):

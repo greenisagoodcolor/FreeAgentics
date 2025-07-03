@@ -6,7 +6,7 @@ multi-agent system with Active Inference capabilities.
 """
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 # Create the FastAPI application
@@ -27,6 +27,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Add security headers middleware
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    """Add security headers to all responses."""
+    response = await call_next(request)
+    
+    # Security headers
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    
+    return response
+
 
 @app.get("/")
 async def root():
@@ -43,10 +58,7 @@ async def root():
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
-    return {
-        "status": "healthy",
-        "service": "FreeAgentics API",
-        "version": "2.1.0"}
+    return {"status": "healthy", "service": "FreeAgentics API", "version": "2.1.0"}
 
 
 @app.get("/api/status")
@@ -57,12 +69,7 @@ async def api_status():
         "agents": {
             "total": 0,
             "active": 0,
-            "templates": [
-                "Explorer",
-                "Merchant",
-                "Scholar",
-                "Guardian",
-                "Generalist"],
+            "templates": ["Explorer", "Merchant", "Scholar", "Guardian", "Generalist"],
         },
         "system": {
             "active_inference": "ready",

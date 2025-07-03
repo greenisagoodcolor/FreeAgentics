@@ -200,14 +200,7 @@ class TestModelType:
 
     def test_model_types_exist(self):
         """Test all model types exist."""
-        expected_types = [
-            "GCN",
-            "GAT",
-            "SAGE",
-            "GIN",
-            "GRAPHNET",
-            "TRANSFORMER",
-            "CUSTOM"]
+        expected_types = ["GCN", "GAT", "SAGE", "GIN", "GRAPHNET", "TRANSFORMER", "CUSTOM"]
 
         for model_type in expected_types:
             assert hasattr(ModelType, model_type)
@@ -228,12 +221,7 @@ class TestMappingStrategy:
 
     def test_mapping_strategies_exist(self):
         """Test all mapping strategies exist."""
-        expected_strategies = [
-            "DIRECT",
-            "ADAPTIVE",
-            "HIERARCHICAL",
-            "ENSEMBLE",
-            "TRANSFER"]
+        expected_strategies = ["DIRECT", "ADAPTIVE", "HIERARCHICAL", "ENSEMBLE", "TRANSFER"]
 
         for strategy in expected_strategies:
             assert hasattr(MappingStrategy, strategy)
@@ -272,9 +260,8 @@ class TestLayerMapper:
     def config(self):
         """Create mapping config for testing."""
         return ModelMappingConfig(
-            source_model_type=ModelType.GCN,
-            target_model_type=ModelType.GAT,
-            preserve_weights=True)
+            source_model_type=ModelType.GCN, target_model_type=ModelType.GAT, preserve_weights=True
+        )
 
     @pytest.fixture
     def layer_mapper(self, config):
@@ -320,8 +307,7 @@ class TestLayerMapper:
             return
 
         # Create source attention layer
-        attention_layer = nn.MultiheadAttention(
-            embed_dim=64, num_heads=4, batch_first=True)
+        attention_layer = nn.MultiheadAttention(embed_dim=64, num_heads=4, batch_first=True)
 
         # Map to different attention configuration
         mapped_attention = layer_mapper.map_attention_layer(
@@ -346,8 +332,7 @@ class TestLayerMapper:
         }
 
         for source_activation, target_name in activations.items():
-            mapped_activation = layer_mapper.map_activation(
-                source_activation, target_name)
+            mapped_activation = layer_mapper.map_activation(source_activation, target_name)
             assert isinstance(mapped_activation, nn.Module)
 
     def test_normalization_mapping(self, layer_mapper):
@@ -359,8 +344,7 @@ class TestLayerMapper:
         batch_norm = nn.BatchNorm1d(64)
 
         # Map to layer normalization
-        layer_norm = layer_mapper.map_normalization(
-            batch_norm, target_type="layer_norm")
+        layer_norm = layer_mapper.map_normalization(batch_norm, target_type="layer_norm")
 
         assert isinstance(layer_norm, nn.Module)
         # Dimension should be preserved
@@ -372,14 +356,10 @@ class TestLayerMapper:
             return
 
         # Create source pooling configuration
-        pooling_config = {
-            "type": "global_mean",
-            "input_dim": 128,
-            "output_dim": 64}
+        pooling_config = {"type": "global_mean", "input_dim": 128, "output_dim": 64}
 
         # Map to different pooling type
-        mapped_pooling = layer_mapper.map_pooling_layer(
-            pooling_config, target_type="global_max")
+        mapped_pooling = layer_mapper.map_pooling_layer(pooling_config, target_type="global_max")
 
         assert isinstance(mapped_pooling, nn.Module)
 
@@ -434,8 +414,7 @@ class TestLayerMapper:
         target_layer = nn.Linear(64, 256)  # Different output dimension
 
         # Should handle mismatch gracefully
-        layer_mapper.transfer_parameters_with_adaptation(
-            source_layer, target_layer)
+        layer_mapper.transfer_parameters_with_adaptation(source_layer, target_layer)
 
         # Check that some form of adaptation occurred
         assert target_layer.weight.shape == (256, 64)
@@ -449,10 +428,8 @@ class TestModelBuilder:
     def config(self):
         """Create config for model building."""
         return ModelMappingConfig(
-            target_model_type=ModelType.GAT,
-            max_layers=5,
-            min_hidden_dim=64,
-            max_hidden_dim=256)
+            target_model_type=ModelType.GAT, max_layers=5, min_hidden_dim=64, max_hidden_dim=256
+        )
 
     @pytest.fixture
     def model_builder(self, config):
@@ -480,8 +457,8 @@ class TestModelBuilder:
 
         # Build GCN model
         gcn_model = model_builder.build_gcn_model(
-            input_dim=64, hidden_dims=[
-                128, 128, 64], output_dim=32, num_classes=10)
+            input_dim=64, hidden_dims=[128, 128, 64], output_dim=32, num_classes=10
+        )
 
         assert isinstance(gcn_model, nn.Module)
 
@@ -549,8 +526,8 @@ class TestModelBuilder:
 
         # Build GIN model
         gin_model = model_builder.build_gin_model(
-            input_dim=32, hidden_dims=[
-                64, 64, 32], output_dim=16, num_classes=3, eps=0.1)
+            input_dim=32, hidden_dims=[64, 64, 32], output_dim=16, num_classes=3, eps=0.1
+        )
 
         assert isinstance(gin_model, nn.Module)
 
@@ -570,12 +547,8 @@ class TestModelBuilder:
 
         # Build Graph Transformer model
         transformer_model = model_builder.build_transformer_model(
-            input_dim=64,
-            hidden_dim=128,
-            num_layers=4,
-            num_heads=8,
-            output_dim=32,
-            num_classes=6)
+            input_dim=64, hidden_dim=128, num_layers=4, num_heads=8, output_dim=32, num_classes=6
+        )
 
         assert isinstance(transformer_model, nn.Module)
 
@@ -594,8 +567,7 @@ class TestModelBuilder:
         custom_config = {
             "layers": [
                 {"type": "gcn", "input_dim": 64, "output_dim": 128},
-                {"type": "attention", "input_dim": 128,
-                    "output_dim": 128, "heads": 4},
+                {"type": "attention", "input_dim": 128, "output_dim": 128, "heads": 4},
                 {"type": "gcn", "input_dim": 128, "output_dim": 64},
                 {"type": "classifier", "input_dim": 64, "output_dim": 10},
             ],
@@ -710,14 +682,11 @@ class TestGraphModelMapper:
 
         # Create source GCN model
         source_gcn = nn.Sequential(
-            nn.Linear(
-                64, 128), nn.ReLU(), nn.Linear(
-                128, 64), nn.ReLU(), nn.Linear(
-                64, 10))
+            nn.Linear(64, 128), nn.ReLU(), nn.Linear(128, 64), nn.ReLU(), nn.Linear(64, 10)
+        )
 
         # Map to GAT model
-        target_gat = model_mapper.map_model(
-            source_gcn, target_type=ModelType.GAT)
+        target_gat = model_mapper.map_model(source_gcn, target_type=ModelType.GAT)
 
         assert isinstance(target_gat, nn.Module)
 
@@ -767,16 +736,10 @@ class TestGraphModelMapper:
 
         # Create hierarchical source model
         source_hierarchy = {
-            "encoder": nn.Sequential(
-                nn.Linear(
-                    64, 128), nn.ReLU(), nn.Linear(
-                    128, 256)), "processor": nn.Sequential(
-                nn.Linear(
-                    256, 256), nn.ReLU(), nn.Linear(
-                    256, 128)), "decoder": nn.Sequential(
-                                nn.Linear(
-                                    128, 64), nn.ReLU(), nn.Linear(
-                                        64, 10)), }
+            "encoder": nn.Sequential(nn.Linear(64, 128), nn.ReLU(), nn.Linear(128, 256)),
+            "processor": nn.Sequential(nn.Linear(256, 256), nn.ReLU(), nn.Linear(256, 128)),
+            "decoder": nn.Sequential(nn.Linear(128, 64), nn.ReLU(), nn.Linear(64, 10)),
+        }
 
         # Map hierarchically
         target_hierarchy = model_mapper.hierarchical_map(source_hierarchy)
@@ -917,10 +880,8 @@ class TestGraphModelMapper:
 
         # Create model to quantize
         float_model = nn.Sequential(
-            nn.Linear(
-                64, 128), nn.ReLU(), nn.Linear(
-                128, 64), nn.ReLU(), nn.Linear(
-                64, 10))
+            nn.Linear(64, 128), nn.ReLU(), nn.Linear(128, 64), nn.ReLU(), nn.Linear(64, 10)
+        )
 
         # Quantize model
         quantized_model = model_mapper.quantize_model(float_model)
@@ -963,10 +924,7 @@ class TestModelRegistry:
             return
 
         # Create model to register
-        test_model = nn.Sequential(
-            nn.Linear(
-                64, 128), nn.ReLU(), nn.Linear(
-                128, 10))
+        test_model = nn.Sequential(nn.Linear(64, 128), nn.ReLU(), nn.Linear(128, 10))
 
         model_config = {
             "type": ModelType.GCN,
@@ -978,13 +936,8 @@ class TestModelRegistry:
 
         # Register model
         model_id = registry.register_model(
-            model=test_model,
-            name="test_gcn",
-            config=model_config,
-            tags=[
-                "test",
-                "gcn",
-                "small"])
+            model=test_model, name="test_gcn", config=model_config, tags=["test", "gcn", "small"]
+        )
 
         assert isinstance(model_id, str)
         assert model_id in registry.models
@@ -1015,13 +968,10 @@ class TestModelRegistry:
 
         # Register multiple models
         models = [
-            (nn.Linear(
-                64, 10), "gcn_small", {
-                "type": ModelType.GCN, "size": "small"}), (nn.Linear(
-                    128, 10), "gcn_large", {
-                    "type": ModelType.GCN, "size": "large"}), (nn.Linear(
-                        64, 10), "gat_small", {
-                            "type": ModelType.GAT, "size": "small"}), ]
+            (nn.Linear(64, 10), "gcn_small", {"type": ModelType.GCN, "size": "small"}),
+            (nn.Linear(128, 10), "gcn_large", {"type": ModelType.GCN, "size": "large"}),
+            (nn.Linear(64, 10), "gat_small", {"type": ModelType.GAT, "size": "small"}),
+        ]
 
         for model, name, config in models:
             registry.register_model(model, name, config)
@@ -1035,8 +985,7 @@ class TestModelRegistry:
         assert len(small_models) == 2
 
         # Complex search
-        small_gcn_models = registry.search_models(
-            model_type=ModelType.GCN, size="small")
+        small_gcn_models = registry.search_models(model_type=ModelType.GCN, size="small")
         assert len(small_gcn_models) == 1
 
     def test_model_versioning(self, registry):
@@ -1074,8 +1023,7 @@ class TestModelRegistry:
             "training_dataset": "test_dataset",
         }
 
-        model_id = registry.register_model(
-            test_model, "linear_classifier", metadata=metadata)
+        model_id = registry.register_model(test_model, "linear_classifier", metadata=metadata)
 
         retrieved_metadata = registry.get_metadata(model_id)
         assert retrieved_metadata == metadata
@@ -1087,12 +1035,7 @@ class TestModelRegistry:
             return
 
         # Register models
-        models = [
-            nn.Linear(
-                64, 10), nn.Sequential(
-                nn.Linear(
-                    32, 64), nn.ReLU(), nn.Linear(
-                    64, 5))]
+        models = [nn.Linear(64, 10), nn.Sequential(nn.Linear(32, 64), nn.ReLU(), nn.Linear(64, 5))]
 
         for i, model in enumerate(models):
             registry.register_model(model, f"model_{i}")
@@ -1208,28 +1151,19 @@ class TestConfigurationValidator:
         result = validator.validate_constraints(config_with_constraints)
 
         if not result.is_valid:
-            assert "parameters" in str(
-                result.errors) or "memory" in str(
-                result.errors)
+            assert "parameters" in str(result.errors) or "memory" in str(result.errors)
 
     def test_compatibility_validation(self, validator):
         """Test compatibility validation between configurations."""
         if not IMPORT_SUCCESS:
             return
 
-        source_config = {
-            "model_type": ModelType.GCN,
-            "input_dim": 64,
-            "output_dim": 10}
+        source_config = {"model_type": ModelType.GCN, "input_dim": 64, "output_dim": 10}
 
         # Compatible target config
-        compatible_target_config = {
-            "model_type": ModelType.GAT,
-            "input_dim": 64,
-            "output_dim": 10}
+        compatible_target_config = {"model_type": ModelType.GAT, "input_dim": 64, "output_dim": 10}
 
-        result = validator.validate_compatibility(
-            source_config, compatible_target_config)
+        result = validator.validate_compatibility(source_config, compatible_target_config)
         assert result.is_compatible is True
 
         # Incompatible target config
@@ -1239,8 +1173,7 @@ class TestConfigurationValidator:
             "output_dim": 5,  # Different output dimension
         }
 
-        result = validator.validate_compatibility(
-            source_config, incompatible_target_config)
+        result = validator.validate_compatibility(source_config, incompatible_target_config)
         assert result.is_compatible is False
 
 
@@ -1270,10 +1203,8 @@ class TestModelAnalyzer:
 
         # Create test model
         test_model = nn.Sequential(
-            nn.Linear(
-                64, 128), nn.ReLU(), nn.Linear(
-                128, 256), nn.ReLU(), nn.Linear(
-                256, 10))
+            nn.Linear(64, 128), nn.ReLU(), nn.Linear(128, 256), nn.ReLU(), nn.Linear(256, 10)
+        )
 
         # Analyze complexity
         complexity_metrics = analyzer.analyze_complexity(test_model)
@@ -1308,8 +1239,7 @@ class TestModelAnalyzer:
         layer_analysis = analyzer.analyze_layers(mixed_model)
 
         assert isinstance(layer_analysis, list)
-        assert len(layer_analysis) == len(
-            list(mixed_model.modules())) - 1  # Exclude top-level
+        assert len(layer_analysis) == len(list(mixed_model.modules())) - 1  # Exclude top-level
 
         for layer_info in layer_analysis:
             assert "layer_type" in layer_info
@@ -1323,10 +1253,8 @@ class TestModelAnalyzer:
 
         # Create model with hooks for activation analysis
         model = nn.Sequential(
-            nn.Linear(
-                32, 64), nn.ReLU(), nn.Linear(
-                64, 32), nn.Tanh(), nn.Linear(
-                32, 10))
+            nn.Linear(32, 64), nn.ReLU(), nn.Linear(64, 32), nn.Tanh(), nn.Linear(32, 10)
+        )
 
         # Sample input
         x = torch.randn(20, 32)
@@ -1350,10 +1278,8 @@ class TestModelAnalyzer:
 
         # Create model for gradient analysis
         model = nn.Sequential(
-            nn.Linear(
-                64, 128), nn.ReLU(), nn.Linear(
-                128, 64), nn.ReLU(), nn.Linear(
-                64, 10))
+            nn.Linear(64, 128), nn.ReLU(), nn.Linear(128, 64), nn.ReLU(), nn.Linear(64, 10)
+        )
 
         # Forward and backward pass
         x = torch.randn(16, 64, requires_grad=True)
@@ -1395,8 +1321,7 @@ class TestModelAnalyzer:
         assert isinstance(bottlenecks, list)
 
         # Should detect the severe dimension reduction
-        bottleneck_found = any(
-            b["compression_ratio"] > 10 for b in bottlenecks)
+        bottleneck_found = any(b["compression_ratio"] > 10 for b in bottlenecks)
         assert bottleneck_found
 
     def test_efficiency_metrics(self, analyzer):
@@ -1405,10 +1330,7 @@ class TestModelAnalyzer:
             return
 
         # Create models with different efficiencies
-        efficient_model = nn.Sequential(
-            nn.Linear(
-                64, 64), nn.ReLU(), nn.Linear(
-                64, 10))
+        efficient_model = nn.Sequential(nn.Linear(64, 64), nn.ReLU(), nn.Linear(64, 10))
 
         inefficient_model = nn.Sequential(
             nn.Linear(64, 1024),
@@ -1421,14 +1343,13 @@ class TestModelAnalyzer:
         )
 
         # Compare efficiency
-        efficient_metrics = analyzer.compute_efficiency_metrics(
-            efficient_model)
-        inefficient_metrics = analyzer.compute_efficiency_metrics(
-            inefficient_model)
+        efficient_metrics = analyzer.compute_efficiency_metrics(efficient_model)
+        inefficient_metrics = analyzer.compute_efficiency_metrics(inefficient_model)
 
         # Efficient model should have better metrics
-        assert (efficient_metrics["parameter_efficiency"] >
-                inefficient_metrics["parameter_efficiency"])
+        assert (
+            efficient_metrics["parameter_efficiency"] > inefficient_metrics["parameter_efficiency"]
+        )
         assert efficient_metrics["flop_efficiency"] > inefficient_metrics["flop_efficiency"]
 
 
@@ -1496,13 +1417,11 @@ class TestModelMapperIntegration:
 
         # Create PyTorch model
         pytorch_model = nn.Sequential(
-            nn.Linear(
-                64, 128), nn.BatchNorm1d(128), nn.ReLU(), nn.Linear(
-                128, 10))
+            nn.Linear(64, 128), nn.BatchNorm1d(128), nn.ReLU(), nn.Linear(128, 10)
+        )
 
         # Extract model architecture
-        architecture_spec = mapper.extract_architecture_specification(
-            pytorch_model)
+        architecture_spec = mapper.extract_architecture_specification(pytorch_model)
 
         assert "layers" in architecture_spec
         assert "connections" in architecture_spec
@@ -1613,10 +1532,7 @@ class TestModelMapperIntegration:
         registry = ModelRegistry()
 
         # Create initial model version
-        model_v1 = nn.Sequential(
-            nn.Linear(
-                64, 128), nn.ReLU(), nn.Linear(
-                128, 10))
+        model_v1 = nn.Sequential(nn.Linear(64, 128), nn.ReLU(), nn.Linear(128, 10))
 
         # Register with version control
         _ = registry.register_model(
@@ -1644,8 +1560,7 @@ class TestModelMapperIntegration:
         )
 
         # Test rollback
-        rolled_back_model = registry.rollback_to_version(
-            "evolution_model", "1.0")
+        rolled_back_model = registry.rollback_to_version("evolution_model", "1.0")
 
         assert rolled_back_model is model_v1
 

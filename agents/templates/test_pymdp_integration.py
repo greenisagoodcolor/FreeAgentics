@@ -67,8 +67,7 @@ class TestPyMDPIntegration(unittest.TestCase):
         self.explorer_template = ExplorerTemplate()
 
         # Generate test generative model
-        self.model_params = self.explorer_template.create_generative_model(
-            self.config)
+        self.model_params = self.explorer_template.create_generative_model(self.config)
 
         # Create pymdp agent wrapper
         self.agent_wrapper = create_pymdp_agent(self.model_params, self.config)
@@ -77,36 +76,23 @@ class TestPyMDPIntegration(unittest.TestCase):
         """Test that generative model satisfies mathematical constraints"""
         # Test A matrix (observation model) stochasticity
         A_col_sums = np.sum(self.model_params.A, axis=0)
-        npt.assert_allclose(
-            A_col_sums,
-            1.0,
-            atol=1e-10,
-            err_msg="A matrix columns must sum to 1")
+        npt.assert_allclose(A_col_sums, 1.0, atol=1e-10, err_msg="A matrix columns must sum to 1")
 
         # Test B tensor (transition models) stochasticity
         for policy in range(self.model_params.B.shape[2]):
             B_col_sums = np.sum(self.model_params.B[:, :, policy], axis=0)
             npt.assert_allclose(
-                B_col_sums,
-                1.0,
-                atol=1e-10,
-                err_msg=f"B[:,:,{policy}] must be stochastic")
+                B_col_sums, 1.0, atol=1e-10, err_msg=f"B[:,:,{policy}] must be stochastic"
+            )
 
         # Test D vector (prior) normalization
         D_sum = np.sum(self.model_params.D)
-        npt.assert_allclose(
-            D_sum,
-            1.0,
-            atol=1e-10,
-            err_msg="D vector must sum to 1")
+        npt.assert_allclose(D_sum, 1.0, atol=1e-10, err_msg="D vector must sum to 1")
 
         # Test non-negativity constraints
-        self.assertTrue(np.all(self.model_params.A >= 0),
-                        "A matrix must be non-negative")
-        self.assertTrue(np.all(self.model_params.B >= 0),
-                        "B tensor must be non-negative")
-        self.assertTrue(np.all(self.model_params.D >= 0),
-                        "D vector must be non-negative")
+        self.assertTrue(np.all(self.model_params.A >= 0), "A matrix must be non-negative")
+        self.assertTrue(np.all(self.model_params.B >= 0), "B tensor must be non-negative")
+        self.assertTrue(np.all(self.model_params.D >= 0), "D vector must be non-negative")
 
     def test_belief_state_mathematical_properties(self) -> None:
         """Test that belief states satisfy mathematical properties"""
@@ -115,26 +101,17 @@ class TestPyMDPIntegration(unittest.TestCase):
 
         # Test probability simplex constraint
         belief_sum = np.sum(beliefs.beliefs)
-        npt.assert_allclose(
-            belief_sum,
-            1.0,
-            atol=1e-10,
-            err_msg="Beliefs must sum to 1")
+        npt.assert_allclose(belief_sum, 1.0, atol=1e-10, err_msg="Beliefs must sum to 1")
 
         # Test non-negativity
-        self.assertTrue(np.all(beliefs.beliefs >= 0),
-                        "Beliefs must be non-negative")
+        self.assertTrue(np.all(beliefs.beliefs >= 0), "Beliefs must be non-negative")
 
         # Test confidence bounds
         max_entropy = np.log(len(beliefs.beliefs))
-        self.assertGreaterEqual(
-            beliefs.confidence,
-            0,
-            "Confidence must be non-negative")
+        self.assertGreaterEqual(beliefs.confidence, 0, "Confidence must be non-negative")
         self.assertLessEqual(
-            beliefs.confidence,
-            max_entropy,
-            "Confidence must be bounded by max entropy")
+            beliefs.confidence, max_entropy, "Confidence must be bounded by max entropy"
+        )
 
         # Test entropy consistency
         expected_entropy = entropy(beliefs.beliefs)
@@ -148,8 +125,7 @@ class TestPyMDPIntegration(unittest.TestCase):
     def test_bayesian_belief_update_mathematical_correctness(self) -> None:
         """Test Bayesian belief update: P(s|o) ∝ P(o|s)P(s)"""
         # Get initial beliefs
-        initial_beliefs = self.explorer_template.initialize_beliefs(
-            self.config)
+        initial_beliefs = self.explorer_template.initialize_beliefs(self.config)
 
         # Test observation
         observation = 1  # Second observation
@@ -159,10 +135,8 @@ class TestPyMDPIntegration(unittest.TestCase):
 
         # Analytical Bayesian update for validation
         likelihood = self.model_params.A[observation, :]  # P(o|s)
-        analytical_posterior = initial_beliefs.beliefs * \
-            likelihood  # P(o|s) * P(s)
-        analytical_posterior = analytical_posterior / \
-            np.sum(analytical_posterior)  # Normalize
+        analytical_posterior = initial_beliefs.beliefs * likelihood  # P(o|s) * P(s)
+        analytical_posterior = analytical_posterior / np.sum(analytical_posterior)  # Normalize
 
         # Compare numerical and analytical results
         npt.assert_allclose(
@@ -187,16 +161,16 @@ class TestPyMDPIntegration(unittest.TestCase):
         observation = 0
 
         # Compute free energy using wrapper
-        computed_fe = self.agent_wrapper.compute_free_energy(
-            beliefs, observation)
+        computed_fe = self.agent_wrapper.compute_free_energy(beliefs, observation)
 
         # Analytical free energy computation
         # KL divergence from prior: D_KL[q(s)||P(s)]
         kl_prior = kl_divergence(beliefs.beliefs, self.model_params.D)
 
         # Expected log-likelihood: E_q[ln P(o|s)]
-        log_likelihood = np.dot(beliefs.beliefs, np.log(
-            self.model_params.A[observation, :] + 1e-16))
+        log_likelihood = np.dot(
+            beliefs.beliefs, np.log(self.model_params.A[observation, :] + 1e-16)
+        )
 
         # Free energy = KL divergence - expected log-likelihood
         analytical_fe = kl_prior - log_likelihood
@@ -213,21 +187,19 @@ class TestPyMDPIntegration(unittest.TestCase):
         """Test epistemic value computation for exploration"""
         # Create beliefs with some uncertainty
         beliefs = BeliefState.create_uniform(
-            num_states=self.config.num_states,
-            num_policies=self.config.num_policies)
+            num_states=self.config.num_states, num_policies=self.config.num_policies
+        )
 
         # Create test observation distribution
         obs_distribution = np.array([0.7, 0.2, 0.1])
 
         # Compute epistemic value
-        epistemic_value = self.explorer_template.compute_epistemic_value(
-            beliefs, obs_distribution)
+        epistemic_value = self.explorer_template.compute_epistemic_value(beliefs, obs_distribution)
 
         # Epistemic value should be positive for uncertain beliefs
         self.assertGreater(
-            epistemic_value,
-            0,
-            "Epistemic value should be positive for uncertain beliefs")
+            epistemic_value, 0, "Epistemic value should be positive for uncertain beliefs"
+        )
 
         # Test with certain beliefs (low epistemic value)
         certain_beliefs = BeliefState(
@@ -239,7 +211,8 @@ class TestPyMDPIntegration(unittest.TestCase):
         )
 
         certain_epistemic_value = self.explorer_template.compute_epistemic_value(
-            certain_beliefs, obs_distribution)
+            certain_beliefs, obs_distribution
+        )
 
         # Uncertain beliefs should have higher epistemic value
         self.assertGreater(
@@ -258,48 +231,35 @@ class TestPyMDPIntegration(unittest.TestCase):
 
         # Test policy distribution properties
         npt.assert_allclose(
-            np.sum(policies),
-            1.0,
-            atol=1e-10,
-            err_msg="Policies must form probability distribution")
+            np.sum(policies), 1.0, atol=1e-10, err_msg="Policies must form probability distribution"
+        )
 
-        self.assertTrue(np.all(policies >= 0),
-                        "Policy probabilities must be non-negative")
+        self.assertTrue(np.all(policies >= 0), "Policy probabilities must be non-negative")
 
-        self.assertEqual(len(policies), self.config.num_policies,
-                         "Policy vector must match number of policies")
+        self.assertEqual(
+            len(policies), self.config.num_policies, "Policy vector must match number of policies"
+        )
 
     def test_precision_parameter_integration(self) -> None:
         """Test ADR-005 precision parameter integration"""
         # Validate precision parameters are properly set
         summary = self.agent_wrapper.get_mathematical_summary()
 
-        self.assertIn(
-            "precision_sensory",
-            summary,
-            "Must include sensory precision (γ)")
-        self.assertIn(
-            "precision_policy",
-            summary,
-            "Must include policy precision (β)")
-        self.assertIn(
-            "precision_state",
-            summary,
-            "Must include state precision (α)")
+        self.assertIn("precision_sensory", summary, "Must include sensory precision (γ)")
+        self.assertIn("precision_policy", summary, "Must include policy precision (β)")
+        self.assertIn("precision_state", summary, "Must include state precision (α)")
 
         # Test precision values are positive
-        self.assertGreater(summary["precision_sensory"], 0,
-                           "Sensory precision must be positive")
-        self.assertGreater(summary["precision_policy"], 0,
-                           "Policy precision must be positive")
-        self.assertGreater(summary["precision_state"], 0,
-                           "State precision must be positive")
+        self.assertGreater(summary["precision_sensory"], 0, "Sensory precision must be positive")
+        self.assertGreater(summary["precision_policy"], 0, "Policy precision must be positive")
+        self.assertGreater(summary["precision_state"], 0, "State precision must be positive")
 
     def test_explorer_template_behavioral_properties(self) -> None:
         """Test explorer-specific behavioral properties"""
         # Test epistemic bonus
-        self.assertGreater(self.explorer_template.epistemic_bonus,
-                           0.5, "Explorer should have high epistemic bonus")
+        self.assertGreater(
+            self.explorer_template.epistemic_bonus, 0.5, "Explorer should have high epistemic bonus"
+        )
 
         # Test exploitation weight
         self.assertLess(
@@ -310,14 +270,8 @@ class TestPyMDPIntegration(unittest.TestCase):
 
         # Test behavioral description
         description = self.explorer_template.get_behavioral_description()
-        self.assertIn(
-            "exploration",
-            description.lower(),
-            "Description must mention exploration")
-        self.assertIn(
-            "epistemic",
-            description.lower(),
-            "Description must mention epistemic value")
+        self.assertIn("exploration", description.lower(), "Description must mention exploration")
+        self.assertIn("epistemic", description.lower(), "Description must mention epistemic value")
 
     def test_mathematical_summary_completeness(self) -> None:
         """Test mathematical summary includes all required metrics"""
@@ -335,24 +289,17 @@ class TestPyMDPIntegration(unittest.TestCase):
         ]
 
         for key in required_keys:
-            self.assertIn(
-                key,
-                summary,
-                f"Mathematical summary must include {key}")
+            self.assertIn(key, summary, f"Mathematical summary must include {key}")
 
         # Test belief sum is approximately 1
         npt.assert_allclose(
-            summary["belief_sum"],
-            1.0,
-            atol=1e-10,
-            err_msg="Belief sum must be 1.0")
+            summary["belief_sum"], 1.0, atol=1e-10, err_msg="Belief sum must be 1.0"
+        )
 
         # Test model dimensions match configuration
         dims = summary["model_dimensions"]
         self.assertEqual(dims["num_states"], self.config.num_states)
-        self.assertEqual(
-            dims["num_observations"],
-            self.config.num_observations)
+        self.assertEqual(dims["num_observations"], self.config.num_observations)
         self.assertEqual(dims["num_policies"], self.config.num_policies)
 
     def test_fallback_behavior_without_pymdp(self) -> None:
@@ -379,8 +326,7 @@ class TestPyMDPIntegration(unittest.TestCase):
 
         # Test free energy computation still works
         fe = fallback_wrapper.compute_free_energy(updated_beliefs, 1)
-        self.assertIsInstance(
-            fe, float, "Fallback free energy must return float")
+        self.assertIsInstance(fe, float, "Fallback free energy must return float")
 
     def test_integration_with_agent_data(self) -> None:
         """Test integration with AgentData model"""
@@ -388,8 +334,7 @@ class TestPyMDPIntegration(unittest.TestCase):
 
         # Create agent data using template
         position = Position(1.0, 2.0, 0.0)
-        agent_data = self.explorer_template.create_agent_data(
-            self.config, position)
+        agent_data = self.explorer_template.create_agent_data(self.config, position)
 
         # Validate agent data properties
         self.assertEqual(agent_data.agent_type, "explorer")
@@ -403,9 +348,7 @@ class TestPyMDPIntegration(unittest.TestCase):
         # Validate model dimensions in metadata
         model_dims = metadata["model_dimensions"]
         self.assertEqual(model_dims["num_states"], self.config.num_states)
-        self.assertEqual(
-            model_dims["num_observations"],
-            self.config.num_observations)
+        self.assertEqual(model_dims["num_observations"], self.config.num_observations)
         self.assertEqual(model_dims["num_policies"], self.config.num_policies)
 
 
@@ -438,10 +381,7 @@ class TestMathematicalValidation(unittest.TestCase):
         # Beliefs should converge to certainty about state that generates
         # observation
         max_belief = np.max(beliefs.beliefs)
-        self.assertGreater(
-            max_belief,
-            0.8,
-            "Repeated observations should increase certainty")
+        self.assertGreater(max_belief, 0.8, "Repeated observations should increase certainty")
 
     def test_free_energy_minimization_property(self) -> None:
         """Test that free energy decreases with informative observations"""
@@ -517,7 +457,8 @@ if __name__ == "__main__":
     print(f"Errors: {results['errors']}")
     print(
         f"Mathematical Correctness: {
-            '✅ VALIDATED' if results['success'] else '❌ FAILED'}")
+            '✅ VALIDATED' if results['success'] else '❌ FAILED'}"
+    )
 
     if results["success"]:
         print("\n🎉 All mathematical validations PASSED!")

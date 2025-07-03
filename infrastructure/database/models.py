@@ -109,13 +109,8 @@ class Conversation(Base):
     last_message_at = Column(DateTime)
 
     # Relationships
-    participants = relationship(
-        "ConversationParticipant",
-        back_populates="conversation")
-    messages = relationship(
-        "Message",
-        back_populates="conversation",
-        cascade="all, delete-orphan")
+    participants = relationship("ConversationParticipant", back_populates="conversation")
+    messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan")
 
 
 class ConversationParticipant(Base):
@@ -126,11 +121,7 @@ class ConversationParticipant(Base):
     __tablename__ = "conversation_participants"
 
     id = Column(Integer, primary_key=True)
-    conversation_id = Column(
-        Integer,
-        ForeignKey(
-            "conversations.id",
-            ondelete="CASCADE"))
+    conversation_id = Column(Integer, ForeignKey("conversations.id", ondelete="CASCADE"))
     agent_id = Column(Integer, ForeignKey("agents.id", ondelete="CASCADE"))
 
     # Participant metadata
@@ -157,11 +148,7 @@ class Message(Base):
     __tablename__ = "messages"
 
     id = Column(Integer, primary_key=True, index=True)
-    conversation_id = Column(
-        Integer,
-        ForeignKey(
-            "conversations.id",
-            ondelete="CASCADE"))
+    conversation_id = Column(Integer, ForeignKey("conversations.id", ondelete="CASCADE"))
     sender_id = Column(Integer, ForeignKey("agents.id", ondelete="SET NULL"))
 
     # Message content
@@ -177,12 +164,7 @@ class Message(Base):
     conversation = relationship("Conversation", back_populates="messages")
     sender = relationship("Agent")
 
-    __table_args__ = (
-        Index(
-            "idx_message_conversation_created",
-            "conversation_id",
-            "created_at"),
-    )
+    __table_args__ = (Index("idx_message_conversation_created", "conversation_id", "created_at"),)
 
 
 class KnowledgeGraph(Base):
@@ -300,11 +282,7 @@ class SystemLog(Base):
 
     # Optional context
     agent_id = Column(Integer, ForeignKey("agents.id", ondelete="SET NULL"))
-    conversation_id = Column(
-        Integer,
-        ForeignKey(
-            "conversations.id",
-            ondelete="SET NULL"))
+    conversation_id = Column(Integer, ForeignKey("conversations.id", ondelete="SET NULL"))
     coalition_id = Column(Integer, ForeignKey("coalitions.id", ondelete="SET NULL"))
 
     # Additional data

@@ -41,10 +41,7 @@ class TestInferenceConfig:
 
     def test_custom_config(self) -> None:
         """Test custom configuration"""
-        config = InferenceConfig(
-            num_iterations=32,
-            learning_rate=0.01,
-            use_gpu=False)
+        config = InferenceConfig(num_iterations=32, learning_rate=0.01, use_gpu=False)
         assert config.num_iterations == 32
         assert config.learning_rate == 0.01
         assert config.use_gpu is False
@@ -55,8 +52,7 @@ class TestVariationalMessagePassing:
 
     def setup_method(self) -> None:
         """Set up test model and algorithm"""
-        self.dims = ModelDimensions(
-            num_states=4, num_observations=3, num_actions=2)
+        self.dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
         self.params = ModelParameters(use_gpu=False)
         self.model = DiscreteGenerativeModel(self.dims, self.params)
         # Set up observation model for testing
@@ -110,8 +106,7 @@ class TestVariationalMessagePassing:
         observation = torch.tensor(1)
         # Strong prior for state 0
         prior = torch.tensor([0.9, 0.05, 0.03, 0.02])
-        beliefs_with_prior = self.vmp.infer_states(
-            observation, self.model, prior)
+        beliefs_with_prior = self.vmp.infer_states(observation, self.model, prior)
         # Compare with uniform prior
         beliefs_uniform = self.vmp.infer_states(observation, self.model)
         # Prior should pull beliefs toward state 0
@@ -121,8 +116,7 @@ class TestVariationalMessagePassing:
         """Test free energy calculation"""
         observation = torch.tensor(1)
         beliefs = self.vmp.infer_states(observation, self.model)
-        free_energy = self.vmp.compute_free_energy(
-            beliefs, observation, self.model)
+        free_energy = self.vmp.compute_free_energy(beliefs, observation, self.model)
         assert isinstance(free_energy.item(), float)
         assert not torch.isnan(free_energy)
         assert not torch.isinf(free_energy)
@@ -146,8 +140,7 @@ class TestBeliefPropagation:
 
     def setup_method(self) -> None:
         """Set up test environment"""
-        self.dims = ModelDimensions(
-            num_states=3, num_observations=3, num_actions=2)
+        self.dims = ModelDimensions(num_states=3, num_observations=3, num_actions=2)
         self.params = ModelParameters(use_gpu=False)
         self.model = DiscreteGenerativeModel(self.dims, self.params)
         self.config = InferenceConfig(use_gpu=False)
@@ -166,10 +159,8 @@ class TestBeliefPropagation:
         previous_beliefs = torch.tensor([0.7, 0.2, 0.1])
         action = torch.tensor(0)
         beliefs = self.bp.infer_states(
-            observation,
-            self.model,
-            actions=action,
-            previous_states=previous_beliefs)
+            observation, self.model, actions=action, previous_states=previous_beliefs
+        )
         assert beliefs.shape == (3,)
         assert torch.allclose(beliefs.sum(), torch.tensor(1.0))
         # Should be influenced by both observation and transition
@@ -182,11 +173,9 @@ class TestGradientDescentInference:
 
     def setup_method(self) -> None:
         """Set up continuous model"""
-        self.dims = ModelDimensions(
-            num_states=2, num_observations=2, num_actions=1)
+        self.dims = ModelDimensions(num_states=2, num_observations=2, num_actions=1)
         self.params = ModelParameters(use_gpu=False)
-        self.model = ContinuousGenerativeModel(
-            self.dims, self.params, hidden_dim=16)
+        self.model = ContinuousGenerativeModel(self.dims, self.params, hidden_dim=16)
         self.config = InferenceConfig(use_gpu=False, num_iterations=20)
         self.gd = GradientDescentInference(self.config)
 
@@ -213,8 +202,7 @@ class TestGradientDescentInference:
         """Test free energy for continuous model"""
         observation = torch.randn(2)
         mean, var = self.gd.infer_states(observation, self.model)
-        free_energy = self.gd.compute_free_energy(
-            (mean, var), observation, self.model)
+        free_energy = self.gd.compute_free_energy((mean, var), observation, self.model)
         assert isinstance(free_energy.item(), float)
         assert not torch.isnan(free_energy)
 
@@ -224,11 +212,9 @@ class TestNaturalGradientInference:
 
     def setup_method(self) -> None:
         """Set up test environment"""
-        self.dims = ModelDimensions(
-            num_states=2, num_observations=2, num_actions=1)
+        self.dims = ModelDimensions(num_states=2, num_observations=2, num_actions=1)
         self.params = ModelParameters(use_gpu=False)
-        self.model = ContinuousGenerativeModel(
-            self.dims, self.params, hidden_dim=16)
+        self.model = ContinuousGenerativeModel(self.dims, self.params, hidden_dim=16)
         self.config = InferenceConfig(use_gpu=False, num_iterations=20)
         self.ng = NaturalGradientInference(self.config)
 
@@ -263,8 +249,7 @@ class TestExpectationMaximization:
 
     def setup_method(self) -> None:
         """Set up test environment"""
-        self.dims = ModelDimensions(
-            num_states=3, num_observations=3, num_actions=2)
+        self.dims = ModelDimensions(num_states=3, num_observations=3, num_actions=2)
         self.params = ModelParameters(use_gpu=False, learning_rate=0.1)
         self.model = DiscreteGenerativeModel(self.dims, self.params)
         self.config = InferenceConfig(use_gpu=False)
@@ -284,8 +269,7 @@ class TestExpectationMaximization:
         # Store original parameters
         A_orig = self.model.A.clone()
         # Run EM iteration
-        beliefs = self.em.em_iteration(
-            observations, self.model, actions=actions)
+        beliefs = self.em.em_iteration(observations, self.model, actions=actions)
         assert len(beliefs) == len(observations)
         # Parameters should have changed
         assert not torch.allclose(self.model.A, A_orig)
@@ -311,8 +295,7 @@ class TestParticleFilterInference:
 
     def setup_method(self) -> None:
         """Set up test environment"""
-        self.dims = ModelDimensions(
-            num_states=4, num_observations=3, num_actions=2)
+        self.dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2)
         self.params = ModelParameters(use_gpu=False)
         self.model = DiscreteGenerativeModel(self.dims, self.params)
         self.config = InferenceConfig(use_gpu=False)
@@ -321,8 +304,7 @@ class TestParticleFilterInference:
     def test_particle_initialization(self) -> None:
         """Test particle initialization"""
         observation = torch.tensor(1)
-        mean, particles, weights = self.pf.infer_states(
-            observation, self.model)
+        mean, particles, weights = self.pf.infer_states(observation, self.model)
         assert particles.shape == (50,)  # num_particles
         assert weights.shape == (50,)
         assert torch.allclose(weights.sum(), torch.tensor(1.0))
@@ -346,13 +328,11 @@ class TestParticleFilterInference:
 
     def test_continuous_model_particles(self) -> None:
         """Test particle filter with continuous model"""
-        cont_dims = ModelDimensions(
-            num_states=2, num_observations=2, num_actions=1)
+        cont_dims = ModelDimensions(num_states=2, num_observations=2, num_actions=1)
         cont_params = ModelParameters(use_gpu=False)
         cont_model = ContinuousGenerativeModel(cont_dims, cont_params)
         observation = torch.randn(2)
-        mean, particles, weights = self.pf.infer_states(
-            observation, cont_model)
+        mean, particles, weights = self.pf.infer_states(observation, cont_model)
         assert mean.shape == (2,)  # Continuous state dimension
         assert particles.shape == (50, 2)
         assert weights.shape == (50,)

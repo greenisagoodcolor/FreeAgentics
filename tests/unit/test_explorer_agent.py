@@ -39,13 +39,7 @@ except ImportError:
         TERRITORY = "territory"
 
     class Discovery:
-        def __init__(
-                self,
-                discovery_type,
-                position,
-                description,
-                value=1.0,
-                confidence=1.0):
+        def __init__(self, discovery_type, position, description, value=1.0, confidence=1.0):
             self.discovery_type = discovery_type
             self.position = position
             self.description = description
@@ -291,12 +285,10 @@ class TestExplorer:
 
         if IMPORT_SUCCESS and hasattr(explorer, "get_discoveries_by_type"):
             # Test filtering by type
-            resource_discoveries = explorer.get_discoveries_by_type(
-                DiscoveryType.RESOURCE)
+            resource_discoveries = explorer.get_discoveries_by_type(DiscoveryType.RESOURCE)
             assert len(resource_discoveries) == 2
 
-            location_discoveries = explorer.get_discoveries_by_type(
-                DiscoveryType.LOCATION)
+            location_discoveries = explorer.get_discoveries_by_type(DiscoveryType.LOCATION)
             assert len(location_discoveries) == 1
 
     def test_exploration_range_effects(self, explorer):
@@ -372,16 +364,8 @@ class TestExplorer:
             return
 
         # Create discoveries with different values
-        high_value = Discovery(
-            DiscoveryType.RESOURCE,
-            sample_position,
-            "Rare minerals",
-            value=10.0)
-        low_value = Discovery(
-            DiscoveryType.LOCATION,
-            sample_position,
-            "Empty field",
-            value=1.0)
+        high_value = Discovery(DiscoveryType.RESOURCE, sample_position, "Rare minerals", value=10.0)
+        low_value = Discovery(DiscoveryType.LOCATION, sample_position, "Empty field", value=1.0)
 
         explorer.make_discovery(high_value)
         explorer.make_discovery(low_value)
@@ -403,10 +387,7 @@ class TestExplorer:
             assert isinstance(metrics, dict)
 
             # Check for expected metrics
-            expected_metrics = [
-                "efficiency",
-                "discoveries_count",
-                "areas_mapped"]
+            expected_metrics = ["efficiency", "discoveries_count", "areas_mapped"]
             for metric in expected_metrics:
                 if metric in metrics:
                     assert isinstance(metrics[metric], (int, float))
@@ -435,24 +416,14 @@ class TestExplorer:
         if hasattr(explorer, "is_within_exploration_range"):
             # Test position within range
             close_position = (
-                Position(
-                    1.0,
-                    1.0,
-                    0.0) if IMPORT_SUCCESS else Mock(
-                    x=1.0,
-                    y=1.0,
-                    z=0.0))
+                Position(1.0, 1.0, 0.0) if IMPORT_SUCCESS else Mock(x=1.0, y=1.0, z=0.0)
+            )
             assert explorer.is_within_exploration_range(close_position)
 
             # Test position outside range
             far_position = (
-                Position(
-                    100.0,
-                    100.0,
-                    0.0) if IMPORT_SUCCESS else Mock(
-                    x=100.0,
-                    y=100.0,
-                    z=0.0))
+                Position(100.0, 100.0, 0.0) if IMPORT_SUCCESS else Mock(x=100.0, y=100.0, z=0.0)
+            )
             if explorer.exploration_range < 100:
                 explorer.is_within_exploration_range(far_position)
                 # Result depends on explorer's current position and range
@@ -461,15 +432,11 @@ class TestExplorer:
         """Test how discovery confidence affects behavior."""
         # Create discoveries with different confidence levels
         high_confidence = Discovery(
-            DiscoveryType.RESOURCE,
-            sample_position,
-            "Confirmed gold",
-            confidence=0.95)
+            DiscoveryType.RESOURCE, sample_position, "Confirmed gold", confidence=0.95
+        )
         low_confidence = Discovery(
-            DiscoveryType.ANOMALY,
-            sample_position,
-            "Possible artifact",
-            confidence=0.3)
+            DiscoveryType.ANOMALY, sample_position, "Possible artifact", confidence=0.3
+        )
 
         explorer.make_discovery(high_confidence)
         explorer.make_discovery(low_confidence)
@@ -505,8 +472,7 @@ class TestExplorer:
         # Test how discoveries affect efficiency
         pos = Position(0, 0, 0) if IMPORT_SUCCESS else Mock(x=0, y=0, z=0)
         for i in range(3):
-            discovery = Discovery(DiscoveryType.RESOURCE, pos,
-                                  f"Resource {i}", value=2.0)
+            discovery = Discovery(DiscoveryType.RESOURCE, pos, f"Resource {i}", value=2.0)
             explorer.make_discovery(discovery)
 
         # Efficiency might change based on discoveries
@@ -518,15 +484,9 @@ class TestExplorer:
         import time
 
         # Create discoveries with slight time delays
-        discovery1 = Discovery(
-            DiscoveryType.RESOURCE,
-            sample_position,
-            "First")
+        discovery1 = Discovery(DiscoveryType.RESOURCE, sample_position, "First")
         time.sleep(0.01)  # Small delay
-        discovery2 = Discovery(
-            DiscoveryType.LOCATION,
-            sample_position,
-            "Second")
+        discovery2 = Discovery(DiscoveryType.LOCATION, sample_position, "Second")
 
         explorer.make_discovery(discovery1)
         explorer.make_discovery(discovery2)
@@ -541,24 +501,10 @@ class TestExplorer:
 
         # Add many discoveries
         for i in range(100):
-            pos = Position(
-                i %
-                10,
-                i //
-                10,
-                0) if IMPORT_SUCCESS else Mock(
-                x=i %
-                10,
-                y=i //
-                10,
-                z=0)
+            pos = Position(i % 10, i // 10, 0) if IMPORT_SUCCESS else Mock(x=i % 10, y=i // 10, z=0)
             discovery = Discovery(
-                DiscoveryType.LOCATION,
-                pos,
-                f"Location {i}",
-                value=random.uniform(
-                    0.5,
-                    2.0))
+                DiscoveryType.LOCATION, pos, f"Location {i}", value=random.uniform(0.5, 2.0)
+            )
             explorer.make_discovery(discovery)
 
         assert len(explorer.discoveries) == 100
@@ -663,10 +609,7 @@ class TestExplorerIntegration:
             assert explorer.position == sample_position
 
         # Test discovery position handling
-        discovery = Discovery(
-            DiscoveryType.RESOURCE,
-            sample_position,
-            "Position test resource")
+        discovery = Discovery(DiscoveryType.RESOURCE, sample_position, "Position test resource")
 
         explorer.make_discovery(discovery)
         assert discovery.position == sample_position

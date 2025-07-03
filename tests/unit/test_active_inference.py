@@ -39,10 +39,8 @@ class TestInferenceConfig:
     def test_custom_config(self):
         """Test custom configuration values."""
         config = InferenceConfig(
-            algorithm="belief_propagation",
-            num_iterations=32,
-            learning_rate=0.01,
-            use_gpu=False)
+            algorithm="belief_propagation", num_iterations=32, learning_rate=0.01, use_gpu=False
+        )
         assert config.algorithm == "belief_propagation"
         assert config.num_iterations == 32
         assert config.learning_rate == 0.01
@@ -79,28 +77,19 @@ class TestInferenceAlgorithm:
         inference_config.use_gpu = False
 
         class ConcreteAlgorithm(InferenceAlgorithm):
-            def infer_states(
-                    self,
-                    observations,
-                    generative_model,
-                    prior_beliefs=None):
+            def infer_states(self, observations, generative_model, prior_beliefs=None):
                 return torch.zeros(4)
 
         algo = ConcreteAlgorithm(inference_config)
         assert algo.device.type == "cpu"
 
-    @pytest.mark.skipif(not torch.cuda.is_available(),
-                        reason="CUDA not available")
+    @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA not available")
     def test_device_selection_gpu(self, inference_config):
         """Test GPU device selection when available."""
         inference_config.use_gpu = True
 
         class ConcreteAlgorithm(InferenceAlgorithm):
-            def infer_states(
-                    self,
-                    observations,
-                    generative_model,
-                    prior_beliefs=None):
+            def infer_states(self, observations, generative_model, prior_beliefs=None):
                 return torch.zeros(4)
 
         algo = ConcreteAlgorithm(inference_config)
@@ -136,8 +125,7 @@ class TestVariationalMessagePassing:
         # Should favor state 0 for observation 0
         assert beliefs[0] > beliefs[1]
 
-    def test_continuous_observation_inference(
-            self, inference_config, continuous_generative_model):
+    def test_continuous_observation_inference(self, inference_config, continuous_generative_model):
         """Test state inference with continuous observations."""
         vmp = VariationalMessagePassing(inference_config)
 
@@ -161,8 +149,7 @@ class TestVariationalMessagePassing:
         beliefs_no_prior = vmp.infer_states(obs, simple_generative_model)
 
         # With prior
-        beliefs_with_prior = vmp.infer_states(
-            obs, simple_generative_model, prior_beliefs=prior)
+        beliefs_with_prior = vmp.infer_states(obs, simple_generative_model, prior_beliefs=prior)
 
         # Prior should influence the result
         assert not torch.allclose(beliefs_no_prior, beliefs_with_prior)
@@ -177,8 +164,7 @@ class TestVariationalMessagePassing:
         beliefs = None
 
         for obs in obs_sequence:
-            beliefs = vmp.infer_states(
-                obs, simple_generative_model, prior_beliefs=beliefs)
+            beliefs = vmp.infer_states(obs, simple_generative_model, prior_beliefs=beliefs)
             assert torch.allclose(beliefs.sum(), torch.tensor(1.0))
 
     def test_convergence(self, inference_config, simple_generative_model):
@@ -191,8 +177,7 @@ class TestVariationalMessagePassing:
 
         # Run again with same observation - posterior should shift further toward
         # observed state
-        beliefs2 = vmp.infer_states(
-            obs, simple_generative_model, prior_beliefs=beliefs)
+        beliefs2 = vmp.infer_states(obs, simple_generative_model, prior_beliefs=beliefs)
 
         # Check that beliefs are valid probability distributions
         assert torch.allclose(beliefs.sum(), torch.tensor(1.0))
@@ -214,8 +199,7 @@ class TestVariationalMessagePassing:
 
         # Process each modality
         visual_beliefs = vmp.infer_states(visual_obs, simple_generative_model)
-        auditory_beliefs = vmp.infer_states(
-            auditory_obs, simple_generative_model)
+        auditory_beliefs = vmp.infer_states(auditory_obs, simple_generative_model)
 
         # Combine beliefs (product of experts)
         combined_beliefs = visual_beliefs * auditory_beliefs
@@ -237,10 +221,7 @@ class TestVariationalMessagePassing:
         beliefs = vmp.infer_states(obs, simple_generative_model)
         assert beliefs.shape[0] > 0  # Should return valid beliefs
 
-    def test_numerical_stability(
-            self,
-            inference_config,
-            simple_generative_model):
+    def test_numerical_stability(self, inference_config, simple_generative_model):
         """Test numerical stability with extreme values."""
         vmp = VariationalMessagePassing(inference_config)
 
@@ -284,10 +265,8 @@ class TestBeliefPropagation:
         class CyclicModel(GenerativeModel):
             def __init__(self):
                 dims = ModelDimensions(
-                    num_states=4,
-                    num_observations=4,
-                    num_actions=2,
-                    time_horizon=5)
+                    num_states=4, num_observations=4, num_actions=2, time_horizon=5
+                )
                 params = ModelParameters()
                 super().__init__(dims, params)
                 # Create cyclic dependencies
@@ -300,17 +279,12 @@ class TestBeliefPropagation:
                 else:
                     return torch.matmul(self.A, states)
 
-            def transition_model(
-                    self,
-                    states: torch.Tensor,
-                    actions: torch.Tensor) -> torch.Tensor:
+            def transition_model(self, states: torch.Tensor, actions: torch.Tensor) -> torch.Tensor:
                 # Simple transition for testing
                 return torch.ones(self.dims.num_states) / self.dims.num_states
 
-            def get_preferences(
-                    self, timestep: Optional[int] = None) -> torch.Tensor:
-                return torch.ones(self.dims.num_observations) / \
-                    self.dims.num_observations
+            def get_preferences(self, timestep: Optional[int] = None) -> torch.Tensor:
+                return torch.ones(self.dims.num_observations) / self.dims.num_observations
 
             def get_initial_prior(self) -> torch.Tensor:
                 return torch.ones(self.dims.num_states) / self.dims.num_states
@@ -362,8 +336,7 @@ class TestNaturalGradientInference:
         ngi = NaturalGradientInference(inference_config)
         assert ngi.config == inference_config
 
-    def test_fisher_information_matrix(
-            self, inference_config, simple_generative_model):
+    def test_fisher_information_matrix(self, inference_config, simple_generative_model):
         """Test Fisher information matrix computation."""
         ngi = NaturalGradientInference(inference_config)
         obs = torch.tensor(0, dtype=torch.long)
@@ -399,10 +372,7 @@ class TestParticleFilterInference:
         pfi = ParticleFilterInference(inference_config)
         assert pfi.config == inference_config
 
-    def test_particle_filtering(
-            self,
-            inference_config,
-            continuous_generative_model):
+    def test_particle_filtering(self, inference_config, continuous_generative_model):
         """Test particle filtering for continuous states."""
         pfi = ParticleFilterInference(inference_config)
         obs = torch.tensor([0.5, 0.5], dtype=torch.float32)
@@ -424,8 +394,7 @@ class TestParticleFilterInference:
 class TestHierarchicalInference:
     """Test hierarchical active inference."""
 
-    def test_hierarchical_model_inference(
-            self, inference_config, hierarchical_generative_model):
+    def test_hierarchical_model_inference(self, inference_config, hierarchical_generative_model):
         """Test inference in hierarchical models."""
         vmp = VariationalMessagePassing(inference_config)
 
@@ -440,11 +409,9 @@ class TestHierarchicalInference:
             mock_model.dims = hierarchical_generative_model.levels[level]
 
             beliefs = vmp.infer_states(obs, mock_model)
-            assert beliefs.shape == (
-                hierarchical_generative_model.levels[level].num_states,)
+            assert beliefs.shape == (hierarchical_generative_model.levels[level].num_states,)
 
-    def test_top_down_bottom_up_integration(
-            self, hierarchical_generative_model):
+    def test_top_down_bottom_up_integration(self, hierarchical_generative_model):
         """Test integration of top-down and bottom-up signals."""
         # Get predictions from higher level
         # Level 0 has 8 states, level 1 has 4 states
@@ -452,11 +419,9 @@ class TestHierarchicalInference:
             torch.ones(hierarchical_generative_model.levels[0].num_states)
             / hierarchical_generative_model.levels[0].num_states
         )
-        prediction = hierarchical_generative_model.compute_top_down_prediction(
-            1, higher_state)
+        prediction = hierarchical_generative_model.compute_top_down_prediction(1, higher_state)
 
-        assert prediction.shape == (
-            hierarchical_generative_model.levels[1].num_states,)
+        assert prediction.shape == (hierarchical_generative_model.levels[1].num_states,)
         # Prediction may not be normalized, just check it's valid
         assert not torch.isnan(prediction).any()
         assert not torch.isinf(prediction).any()
@@ -465,8 +430,7 @@ class TestHierarchicalInference:
 class TestPerformanceOptimization:
     """Test performance optimizations."""
 
-    @pytest.mark.skipif(not torch.cuda.is_available(),
-                        reason="CUDA not available")
+    @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA not available")
     def test_gpu_acceleration(self, inference_config, simple_generative_model):
         """Test GPU acceleration."""
         inference_config.use_gpu = True
@@ -505,10 +469,8 @@ class TestPerformanceOptimization:
         class SparseModel(GenerativeModel):
             def __init__(self):
                 dims = ModelDimensions(
-                    num_states=100,
-                    num_observations=50,
-                    num_actions=10,
-                    time_horizon=5)
+                    num_states=100, num_observations=50, num_actions=10, time_horizon=5
+                )
                 params = ModelParameters()
                 super().__init__(dims, params)
                 # Sparse observation model
@@ -522,16 +484,11 @@ class TestPerformanceOptimization:
                 else:
                     return torch.matmul(self.A, states)
 
-            def transition_model(
-                    self,
-                    states: torch.Tensor,
-                    actions: torch.Tensor) -> torch.Tensor:
+            def transition_model(self, states: torch.Tensor, actions: torch.Tensor) -> torch.Tensor:
                 return torch.ones(self.dims.num_states) / self.dims.num_states
 
-            def get_preferences(
-                    self, timestep: Optional[int] = None) -> torch.Tensor:
-                return torch.ones(self.dims.num_observations) / \
-                    self.dims.num_observations
+            def get_preferences(self, timestep: Optional[int] = None) -> torch.Tensor:
+                return torch.ones(self.dims.num_observations) / self.dims.num_observations
 
             def get_initial_prior(self) -> torch.Tensor:
                 return torch.ones(self.dims.num_states) / self.dims.num_states
@@ -560,18 +517,15 @@ class TestIntegration:
         beliefs = None
         for t, obs in enumerate(obs_sequence):
             # Infer states
-            beliefs = vmp.infer_states(
-                obs, simple_generative_model, prior_beliefs=beliefs)
+            beliefs = vmp.infer_states(obs, simple_generative_model, prior_beliefs=beliefs)
             belief_trajectory.append(beliefs)
 
             # Track belief evolution
-            free_energy_trajectory.append(
-                beliefs.max().item())  # Use max belief as proxy
+            free_energy_trajectory.append(beliefs.max().item())  # Use max belief as proxy
 
         # Verify trajectory properties
         assert len(belief_trajectory) == len(obs_sequence)
-        assert all(torch.allclose(b.sum(), torch.tensor(1.0))
-                   for b in belief_trajectory)
+        assert all(torch.allclose(b.sum(), torch.tensor(1.0)) for b in belief_trajectory)
 
         # Check that beliefs are changing (algorithm is working)
         # Note: convergence behavior depends on the specific observation
@@ -600,8 +554,7 @@ class TestIntegration:
         best_policy = policies[best_policy_idx]
 
         assert best_policy.shape[0] > 0
-        assert all(
-            0 <= a < simple_generative_model.dims.num_actions for a in best_policy.flatten())
+        assert all(0 <= a < simple_generative_model.dims.num_actions for a in best_policy.flatten())
 
 
 class TestCreateInferenceAlgorithm:
@@ -610,43 +563,37 @@ class TestCreateInferenceAlgorithm:
     def test_create_vmp(self, inference_config):
         """Test creating VMP algorithm."""
         inference_config.algorithm = "variational_message_passing"
-        algo = create_inference_algorithm(
-            inference_config.algorithm, inference_config)
+        algo = create_inference_algorithm(inference_config.algorithm, inference_config)
         assert isinstance(algo, VariationalMessagePassing)
 
     def test_create_bp(self, inference_config):
         """Test creating BP algorithm."""
         inference_config.algorithm = "belief_propagation"
-        algo = create_inference_algorithm(
-            inference_config.algorithm, inference_config)
+        algo = create_inference_algorithm(inference_config.algorithm, inference_config)
         assert isinstance(algo, BeliefPropagation)
 
     def test_create_gradient_descent(self, inference_config):
         """Test creating gradient descent algorithm."""
         inference_config.algorithm = "gradient_descent"
-        algo = create_inference_algorithm(
-            inference_config.algorithm, inference_config)
+        algo = create_inference_algorithm(inference_config.algorithm, inference_config)
         assert isinstance(algo, GradientDescentInference)
 
     def test_create_natural_gradient(self, inference_config):
         """Test creating natural gradient algorithm."""
         inference_config.algorithm = "natural_gradient"
-        algo = create_inference_algorithm(
-            inference_config.algorithm, inference_config)
+        algo = create_inference_algorithm(inference_config.algorithm, inference_config)
         assert isinstance(algo, NaturalGradientInference)
 
     def test_create_em(self, inference_config):
         """Test creating EM algorithm."""
         inference_config.algorithm = "expectation_maximization"
-        algo = create_inference_algorithm(
-            inference_config.algorithm, inference_config)
+        algo = create_inference_algorithm(inference_config.algorithm, inference_config)
         assert isinstance(algo, ExpectationMaximization)
 
     def test_create_particle_filter(self, inference_config):
         """Test creating particle filter algorithm."""
         inference_config.algorithm = "particle_filter"
-        algo = create_inference_algorithm(
-            inference_config.algorithm, inference_config)
+        algo = create_inference_algorithm(inference_config.algorithm, inference_config)
         assert isinstance(algo, ParticleFilterInference)
 
     def test_invalid_algorithm(self, inference_config):
@@ -658,21 +605,16 @@ class TestCreateInferenceAlgorithm:
 class TestActiveInferenceEngine:
     """Test the main Active Inference Engine."""
 
-    def test_engine_initialization(
-            self,
-            inference_config,
-            simple_generative_model):
+    def test_engine_initialization(self, inference_config, simple_generative_model):
         """Test engine initialization."""
-        engine = ActiveInferenceEngine(
-            simple_generative_model, inference_config)
+        engine = ActiveInferenceEngine(simple_generative_model, inference_config)
         assert engine.generative_model == simple_generative_model
         assert engine.config == inference_config
         assert engine.inference_algorithm is not None
 
     def test_engine_step(self, inference_config, simple_generative_model):
         """Test single inference step."""
-        engine = ActiveInferenceEngine(
-            simple_generative_model, inference_config)
+        engine = ActiveInferenceEngine(simple_generative_model, inference_config)
 
         obs = torch.tensor(0, dtype=torch.long)
         beliefs = engine.step(obs)
@@ -684,8 +626,7 @@ class TestActiveInferenceEngine:
         self, inference_config, simple_generative_model, sample_observations
     ):
         """Test running inference over sequence."""
-        engine = ActiveInferenceEngine(
-            simple_generative_model, inference_config)
+        engine = ActiveInferenceEngine(simple_generative_model, inference_config)
 
         obs_sequence = sample_observations["discrete"]
         belief_trajectory = engine.run_inference(obs_sequence)
@@ -696,8 +637,7 @@ class TestActiveInferenceEngine:
 
     def test_engine_reset(self, inference_config, simple_generative_model):
         """Test resetting engine state."""
-        engine = ActiveInferenceEngine(
-            simple_generative_model, inference_config)
+        engine = ActiveInferenceEngine(simple_generative_model, inference_config)
 
         # Run some inference
         obs = torch.tensor(0, dtype=torch.long)
@@ -707,17 +647,11 @@ class TestActiveInferenceEngine:
         engine.reset()
 
         # Should have no beliefs stored
-        assert getattr(
-            engine,
-            "current_beliefs",
-            None) is None or engine.current_beliefs is None
+        assert getattr(engine, "current_beliefs", None) is None or engine.current_beliefs is None
 
     def test_engine_with_different_algorithms(self, simple_generative_model):
         """Test engine with different inference algorithms."""
-        algorithms = [
-            "variational_message_passing",
-            "belief_propagation",
-            "gradient_descent"]
+        algorithms = ["variational_message_passing", "belief_propagation", "gradient_descent"]
 
         obs = torch.tensor(0, dtype=torch.long)
 

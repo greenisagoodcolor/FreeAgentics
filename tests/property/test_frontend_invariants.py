@@ -72,7 +72,9 @@ class TestFrontendInvariants:
                 text=True,
             )
 
-            assert result.returncode == 0, f"Invariant check failed: {
+            assert (
+                result.returncode == 0
+            ), f"Invariant check failed: {
                 result.stderr}"
             assert "All invariants satisfied" in result.stdout
 
@@ -122,11 +124,7 @@ class TestFrontendInvariants:
         queue_size=st.integers(min_value=1, max_value=1000),
         reconnect_attempts=st.integers(min_value=0, max_value=10),
     )
-    def test_websocket_queue_invariants(
-            self,
-            message_count,
-            queue_size,
-            reconnect_attempts):
+    def test_websocket_queue_invariants(self, message_count, queue_size, reconnect_attempts):
         """
         Test WebSocket message queue invariants:
         1. Queue size bounds
@@ -149,15 +147,15 @@ class TestFrontendInvariants:
             if loss_rate > 0.1:
                 print(
                     f"Warning: Message loss rate {
-                        loss_rate:.2%} exceeds 10% threshold")
+                        loss_rate:.2%} exceeds 10% threshold"
+                )
 
     @given(
         tokens_used=st.integers(min_value=0, max_value=1000000),
         rate_limit=st.integers(min_value=1000, max_value=100000),
         time_window=st.integers(min_value=1, max_value=3600),
     )
-    def test_llm_rate_limit_invariants(
-            self, tokens_used, rate_limit, time_window):
+    def test_llm_rate_limit_invariants(self, tokens_used, rate_limit, time_window):
         """
         Test LLM client rate limiting invariants:
         1. Token usage within limits
@@ -171,8 +169,7 @@ class TestFrontendInvariants:
         if tokens_per_second > limit_per_second and limit_per_second > 0:
             # Calculate required backoff
             # Fix: ensure calculation doesn't produce negative backoff
-            excess_tokens = max(
-                0, tokens_used - (rate_limit * time_window / 60))
+            excess_tokens = max(0, tokens_used - (rate_limit * time_window / 60))
             backoff_time = excess_tokens / limit_per_second if limit_per_second > 0 else 0
             assert backoff_time >= 0, "Backoff time must be non-negative"
 
@@ -250,8 +247,9 @@ class TestDashboardLayoutInvariants:
             if panel["x"] + panel["width"] > grid_width:
                 panel["width"] = grid_width - panel["x"]
 
-            assert 0 <= panel["x"] < grid_width, f"Panel x position {
+            assert (
+                0 <= panel["x"] < grid_width
+            ), f"Panel x position {
                 panel['x']} out of grid"
-            assert panel["x"] + \
-                panel["width"] <= grid_width, "Panel extends beyond grid boundary"
+            assert panel["x"] + panel["width"] <= grid_width, "Panel extends beyond grid boundary"
             assert panel["width"] > 0 and panel["height"] > 0, "Panel dimensions must be positive"

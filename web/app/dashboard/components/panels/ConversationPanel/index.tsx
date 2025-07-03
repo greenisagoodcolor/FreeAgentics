@@ -9,17 +9,6 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-// Define DashboardView type locally
-export type DashboardView =
-  | "ceo-demo"
-  | "executive"
-  | "technical"
-  | "research"
-  | "minimal";
-
-interface ConversationPanelProps {
-  view: DashboardView;
-}
 
 interface ConversationMessage {
   id: string;
@@ -57,7 +46,7 @@ const mockMessages: ConversationMessage[] = [
   },
 ];
 
-export default function ConversationPanel({ view }: ConversationPanelProps) {
+export default function ConversationPanel() {
   const [messages, setMessages] = useState<ConversationMessage[]>(mockMessages);
   const scrollRef = useRef<HTMLDivElement>(null);
 

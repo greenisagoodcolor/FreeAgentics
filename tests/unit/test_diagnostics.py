@@ -49,9 +49,7 @@ class TestBeliefTracker:
     def setup_method(self) -> None:
         """Setup for tests"""
         self.config = DiagnosticConfig(save_figures=False)
-        self.tracker = BeliefTracker(
-            self.config, num_states=4, state_labels=[
-                "A", "B", "C", "D"])
+        self.tracker = BeliefTracker(self.config, num_states=4, state_labels=["A", "B", "C", "D"])
 
     def test_initialization(self) -> None:
         """Test belief tracker initialization"""
@@ -213,8 +211,7 @@ class TestInferenceVisualizer:
         A = torch.tensor([[0.9, 0.1, 0.0], [0.1, 0.8, 0.1]])
         B = torch.rand(3, 3, 2)
         B = B / B.sum(dim=0, keepdim=True)
-        fig = self.visualizer.visualize_inference_graph(
-            states, observations, A, B)
+        fig = self.visualizer.visualize_inference_graph(states, observations, A, B)
         assert fig is not None
         plt.close(fig)
 
@@ -291,8 +288,8 @@ class TestDiagnosticSuite:
     def test_integration(self) -> None:
         """Test integrated diagnostic workflow"""
         tracker = self.suite.create_belief_tracker(
-            "main", num_states=4, state_labels=[
-                "Explore", "Exploit", "Rest", "Flee"])
+            "main", num_states=4, state_labels=["Explore", "Exploit", "Rest", "Flee"]
+        )
         for t in range(20):
             belief = torch.rand(4)
             belief = belief / belief.sum()

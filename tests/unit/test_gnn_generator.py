@@ -124,8 +124,7 @@ class TestGMNGeneratorInitialization:
 
     @patch("inference.gnn.generator.GMNParser")
     @patch("inference.gnn.generator.GMNValidator")
-    def test_initialization_with_mocked_dependencies(
-            self, mock_validator, mock_parser):
+    def test_initialization_with_mocked_dependencies(self, mock_validator, mock_parser):
         """Test initialization with mocked dependencies."""
         generator = GMNGenerator()
 
@@ -142,24 +141,18 @@ class TestGenerateBaseModel:
     @patch.object(GMNGenerator, "_generate_connections")
     @patch.object(GMNGenerator, "_generate_update_equations")
     def test_generate_base_model_structure(
-            self,
-            mock_equations,
-            mock_connections,
-            mock_state_space,
-            gmn_generator,
-            sample_personality):
+        self, mock_equations, mock_connections, mock_state_space, gmn_generator, sample_personality
+    ):
         """Test that generate_base_model creates correct structure."""
         # Setup mocks
         mock_state_space.return_value = {"S_energy": {"type": "Real[0, 100]"}}
-        mock_connections.return_value = {
-            "C_pref": {"type": "observation -> Real[0, 1]"}}
+        mock_connections.return_value = {"C_pref": {"type": "observation -> Real[0, 1]"}}
         mock_equations.return_value = {"belief_update": {"state": "S_beliefs"}}
 
         # Mock validator to return valid
         gmn_generator.validator.validate_model = Mock(return_value=(True, []))
 
-        result = gmn_generator.generate_base_model(
-            "TestAgent", "Explorer", sample_personality)
+        result = gmn_generator.generate_base_model("TestAgent", "Explorer", sample_personality)
 
         # Check structure
         assert "model" in result
@@ -179,8 +172,7 @@ class TestGenerateBaseModel:
         assert result["metadata"]["learning_history"] == []
         assert result["metadata"]["model_version"] == 1
 
-    def test_generate_base_model_all_agent_classes(
-            self, gmn_generator, sample_personality):
+    def test_generate_base_model_all_agent_classes(self, gmn_generator, sample_personality):
         """Test base model generation for all agent classes."""
         agent_classes = ["Explorer", "Merchant", "Scholar", "Guardian"]
 
@@ -195,27 +187,22 @@ class TestGenerateBaseModel:
             assert result["model"]["class"] == agent_class
             assert result["model"]["name"] == f"Test{agent_class}"
 
-    def test_generate_base_model_validation_failure(
-            self, gmn_generator, sample_personality):
+    def test_generate_base_model_validation_failure(self, gmn_generator, sample_personality):
         """Test handling of validation failure during base model generation."""
         # Mock validator to return invalid
-        gmn_generator.validator.validate_model = Mock(
-            return_value=(False, ["Test error"]))
+        gmn_generator.validator.validate_model = Mock(return_value=(False, ["Test error"]))
 
         with pytest.raises(ValueError, match="Generated model validation failed"):
-            gmn_generator.generate_base_model(
-                "TestAgent", "Explorer", sample_personality)
+            gmn_generator.generate_base_model("TestAgent", "Explorer", sample_personality)
 
-    def test_generate_base_model_datetime_creation(
-            self, gmn_generator, sample_personality):
+    def test_generate_base_model_datetime_creation(self, gmn_generator, sample_personality):
         """Test that created timestamp is properly set."""
         gmn_generator.validator.validate_model = Mock(return_value=(True, []))
 
         with patch("inference.gnn.generator.datetime") as mock_datetime:
             mock_datetime.now.return_value.isoformat.return_value = "2024-01-01T12:00:00"
 
-            result = gmn_generator.generate_base_model(
-                "TestAgent", "Explorer", sample_personality)
+            result = gmn_generator.generate_base_model("TestAgent", "Explorer", sample_personality)
 
             assert result["model"]["created"] == "2024-01-01T12:00:00"
 
@@ -263,8 +250,7 @@ class TestClassTemplates:
         assert "S_alertness" in template["key_states"]
         assert "S_allies" in template["key_states"]
 
-    def test_get_class_template_unknown_defaults_to_explorer(
-            self, gmn_generator):
+    def test_get_class_template_unknown_defaults_to_explorer(self, gmn_generator):
         """Test that unknown class defaults to Explorer template."""
         template = gmn_generator._get_class_template("UnknownClass")
         explorer_template = gmn_generator._get_class_template("Explorer")
@@ -307,18 +293,15 @@ class TestStateSpaceGeneration:
         assert "S_territory" in guardian_states
         assert "S_alertness" in guardian_states
 
-    def test_generate_state_space_personality_driven_states(
-            self, gmn_generator):
+    def test_generate_state_space_personality_driven_states(self, gmn_generator):
         """Test personality-driven state generation."""
         high_curiosity = {"curiosity": 0.8}
         high_risk = {"risk_tolerance": 0.9}
 
-        curious_states = gmn_generator._generate_state_space(
-            "Explorer", high_curiosity)
+        curious_states = gmn_generator._generate_state_space("Explorer", high_curiosity)
         assert "S_novelty_seeking" in curious_states
 
-        risky_states = gmn_generator._generate_state_space(
-            "Explorer", high_risk)
+        risky_states = gmn_generator._generate_state_space("Explorer", high_risk)
         assert "S_risk_assessment" in risky_states
 
     def test_generate_state_space_low_personality_traits(self, gmn_generator):
@@ -335,10 +318,7 @@ class TestConnectionGeneration:
 
     def test_generate_connections_basic_structure(self, gmn_generator):
         """Test basic connection structure."""
-        personality = {
-            "exploration": 0.6,
-            "cooperation": 0.3,
-            "efficiency": 0.1}
+        personality = {"exploration": 0.6, "cooperation": 0.3, "efficiency": 0.1}
         connections = gmn_generator._generate_connections(personality)
 
         assert "C_pref" in connections
@@ -353,10 +333,7 @@ class TestConnectionGeneration:
 
     def test_generate_connections_personality_weights(self, gmn_generator):
         """Test that personality traits affect connection weights."""
-        high_exploration = {
-            "exploration": 90,
-            "cooperation": 10,
-            "efficiency": 10}
+        high_exploration = {"exploration": 90, "cooperation": 10, "efficiency": 10}
         connections = gmn_generator._generate_connections(high_exploration)
 
         prefs = connections["C_pref"]["preferences"]
@@ -375,10 +352,7 @@ class TestConnectionGeneration:
 
     def test_generate_connections_zero_personality(self, gmn_generator):
         """Test handling of zero or missing personality traits."""
-        zero_personality = {
-            "exploration": 0,
-            "cooperation": 0,
-            "efficiency": 0}
+        zero_personality = {"exploration": 0, "cooperation": 0, "efficiency": 0}
         connections = gmn_generator._generate_connections(zero_personality)
 
         prefs = connections["C_pref"]["preferences"]
@@ -393,8 +367,7 @@ class TestConnectionGeneration:
         connections = gmn_generator._generate_connections(high_curiosity)
 
         assert "C_novelty" in connections
-        assert "novelty detection" in connections["C_novelty"]["description"].lower(
-        )
+        assert "novelty detection" in connections["C_novelty"]["description"].lower()
 
 
 class TestUpdateEquationGeneration:
@@ -417,8 +390,7 @@ class TestUpdateEquationGeneration:
         assert energy_eq["state"] == "S_energy"
         assert "action_cost" in energy_eq["parameters"]
 
-    def test_generate_update_equations_curiosity_affects_learning_rate(
-            self, gmn_generator):
+    def test_generate_update_equations_curiosity_affects_learning_rate(self, gmn_generator):
         """Test that curiosity affects learning rate."""
         low_curiosity = {"curiosity": 0.1}
         high_curiosity = {"curiosity": 0.9}
@@ -431,8 +403,7 @@ class TestUpdateEquationGeneration:
 
         assert high_lr > low_lr
 
-    def test_generate_update_equations_efficiency_optimization(
-            self, gmn_generator):
+    def test_generate_update_equations_efficiency_optimization(self, gmn_generator):
         """Test that high efficiency adds optimization equation."""
         high_efficiency = {"efficiency": 0.8}
         equations = gmn_generator._generate_update_equations(high_efficiency)
@@ -466,8 +437,7 @@ class TestUpdateEquationGeneration:
 class TestModelRefinement:
     """Test model refinement functionality."""
 
-    def test_refine_model_basic_functionality(
-            self, gmn_generator, sample_base_model):
+    def test_refine_model_basic_functionality(self, gmn_generator, sample_base_model):
         """Test basic model refinement."""
         patterns = []  # No patterns
         gmn_generator.validator.validate_model = Mock(return_value=(True, []))
@@ -481,32 +451,24 @@ class TestModelRefinement:
             assert result["metadata"]["model_version"] == 2
             assert result["metadata"]["refinement_changes"] == []
 
-    def test_refine_model_with_patterns(
-            self,
-            gmn_generator,
-            sample_base_model,
-            sample_patterns):
+    def test_refine_model_with_patterns(self, gmn_generator, sample_base_model, sample_patterns):
         """Test model refinement with patterns."""
         gmn_generator.validator.validate_model = Mock(return_value=(True, []))
 
         with patch.object(gmn_generator, "_apply_pattern_to_model") as mock_apply:
             mock_apply.return_value = {"type": "test_change"}
 
-            result = gmn_generator.refine_model(
-                sample_base_model, sample_patterns)
+            result = gmn_generator.refine_model(sample_base_model, sample_patterns)
 
             # Should have called apply_pattern_to_model for each pattern
             assert mock_apply.call_count == len(sample_patterns)
 
             # Should have recorded changes
-            assert len(result["metadata"]["refinement_changes"]) == len(
-                sample_patterns)
+            assert len(result["metadata"]["refinement_changes"]) == len(sample_patterns)
 
-    def test_refine_model_confidence_threshold(
-            self, gmn_generator, sample_base_model):
+    def test_refine_model_confidence_threshold(self, gmn_generator, sample_base_model):
         """Test confidence threshold filtering."""
-        low_confidence_patterns = [{"confidence": 0.5}
-                                   ]  # Below default threshold of 0.8
+        low_confidence_patterns = [{"confidence": 0.5}]  # Below default threshold of 0.8
         high_confidence_patterns = [{"confidence": 0.9}]  # Above threshold
 
         gmn_generator.validator.validate_model = Mock(return_value=(True, []))
@@ -515,19 +477,16 @@ class TestModelRefinement:
             mock_apply.return_value = {"type": "test_change"}
 
             # Test with low confidence
-            gmn_generator.refine_model(
-                sample_base_model, low_confidence_patterns)
+            gmn_generator.refine_model(sample_base_model, low_confidence_patterns)
             assert mock_apply.call_count == 0
 
             mock_apply.reset_mock()
 
             # Test with high confidence
-            gmn_generator.refine_model(
-                sample_base_model, high_confidence_patterns)
+            gmn_generator.refine_model(sample_base_model, high_confidence_patterns)
             assert mock_apply.call_count == 1
 
-    def test_refine_model_custom_threshold(
-            self, gmn_generator, sample_base_model):
+    def test_refine_model_custom_threshold(self, gmn_generator, sample_base_model):
         """Test custom confidence threshold."""
         patterns = [{"confidence": 0.6}]
         gmn_generator.validator.validate_model = Mock(return_value=(True, []))
@@ -542,22 +501,19 @@ class TestModelRefinement:
             mock_apply.reset_mock()
 
             # With custom threshold (0.5), should apply
-            gmn_generator.refine_model(
-                sample_base_model, patterns, confidence_threshold=0.5)
+            gmn_generator.refine_model(sample_base_model, patterns, confidence_threshold=0.5)
             assert mock_apply.call_count == 1
 
     def test_refine_model_validation_failure_reverts(
         self, gmn_generator, sample_base_model, sample_patterns
     ):
         """Test that validation failure reverts changes."""
-        gmn_generator.validator.validate_model = Mock(
-            return_value=(False, ["Validation error"]))
+        gmn_generator.validator.validate_model = Mock(return_value=(False, ["Validation error"]))
 
         with patch.object(gmn_generator, "_apply_pattern_to_model") as mock_apply:
             mock_apply.return_value = {"type": "test_change"}
 
-            result = gmn_generator.refine_model(
-                sample_base_model, sample_patterns)
+            result = gmn_generator.refine_model(sample_base_model, sample_patterns)
 
             # Should return original model
             assert result == sample_base_model
@@ -566,8 +522,7 @@ class TestModelRefinement:
 class TestPatternApplication:
     """Test pattern application functionality."""
 
-    def test_apply_successful_action_sequence_pattern(
-            self, gmn_generator, sample_base_model):
+    def test_apply_successful_action_sequence_pattern(self, gmn_generator, sample_base_model):
         """Test applying successful action sequence pattern."""
         pattern = {
             "type": "successful_action_sequence",
@@ -579,8 +534,7 @@ class TestPatternApplication:
         with patch("inference.gnn.generator.datetime") as mock_datetime:
             mock_datetime.now.return_value.isoformat.return_value = "2024-01-01T12:00:00"
 
-            result = gmn_generator._apply_pattern_to_model(
-                sample_base_model, pattern)
+            result = gmn_generator._apply_pattern_to_model(sample_base_model, pattern)
 
             assert result is not None
             assert result["pattern_type"] == "successful_action_sequence"
@@ -591,8 +545,7 @@ class TestPatternApplication:
             action_biases = sample_base_model["connections"]["C_pref"]["action_biases"]
             assert "explore" in action_biases
 
-    def test_apply_environmental_correlation_pattern(
-            self, gmn_generator, sample_base_model):
+    def test_apply_environmental_correlation_pattern(self, gmn_generator, sample_base_model):
         """Test applying environmental correlation pattern."""
         pattern = {
             "type": "environmental_correlation",
@@ -604,8 +557,7 @@ class TestPatternApplication:
             "confidence": 0.85,
         }
 
-        result = gmn_generator._apply_pattern_to_model(
-            sample_base_model, pattern)
+        result = gmn_generator._apply_pattern_to_model(sample_base_model, pattern)
 
         assert result is not None
         assert result["pattern_type"] == "environmental_correlation"
@@ -616,8 +568,7 @@ class TestPatternApplication:
         assert len(correlations) == 1
         assert correlations[0]["observation"] == "resource_nearby"
 
-    def test_apply_preference_adjustment_pattern(
-            self, gmn_generator, sample_base_model):
+    def test_apply_preference_adjustment_pattern(self, gmn_generator, sample_base_model):
         """Test applying preference adjustment pattern."""
         pattern = {
             "type": "preference_adjustment",
@@ -629,8 +580,7 @@ class TestPatternApplication:
             "Exploration"
         ]
 
-        result = gmn_generator._apply_pattern_to_model(
-            sample_base_model, pattern)
+        result = gmn_generator._apply_pattern_to_model(sample_base_model, pattern)
 
         assert result is not None
         assert result["pattern_type"] == "preference_adjustment"
@@ -640,13 +590,11 @@ class TestPatternApplication:
         new_exploration = sample_base_model["connections"]["C_pref"]["preferences"]["Exploration"]
         assert new_exploration == original_exploration + 0.1
 
-    def test_apply_pattern_unknown_type(
-            self, gmn_generator, sample_base_model):
+    def test_apply_pattern_unknown_type(self, gmn_generator, sample_base_model):
         """Test applying unknown pattern type."""
         pattern = {"type": "unknown_pattern_type", "confidence": 0.9}
 
-        result = gmn_generator._apply_pattern_to_model(
-            sample_base_model, pattern)
+        result = gmn_generator._apply_pattern_to_model(sample_base_model, pattern)
 
         # Should return None for unknown pattern types
         assert result is None
@@ -660,14 +608,12 @@ class TestPatternApplication:
             "confidence": 0.9,
         }
 
-        result = gmn_generator._apply_pattern_to_model(
-            sample_base_model, pattern)
+        result = gmn_generator._apply_pattern_to_model(sample_base_model, pattern)
 
         # Should return None when no changes are made
         assert result is None
 
-    def test_apply_pattern_preference_bounds_checking(
-            self, gmn_generator, sample_base_model):
+    def test_apply_pattern_preference_bounds_checking(self, gmn_generator, sample_base_model):
         """Test that preference adjustments respect bounds [0, 1]."""
         # Set initial preference to near maximum
         sample_base_model["connections"]["C_pref"]["preferences"]["Exploration"] = 0.95
@@ -704,8 +650,7 @@ class TestExperienceBasedGeneration:
             mock_extract.assert_called_once_with(sample_experience_summary)
             assert result is not None
 
-    def test_generate_from_experience_adds_world_model(
-            self, gmn_generator, sample_base_model):
+    def test_generate_from_experience_adds_world_model(self, gmn_generator, sample_base_model):
         """Test that sufficient observations add world model state."""
         experience_with_many_observations = {"unique_observations": 75}
         gmn_generator.validator.validate_model = Mock(return_value=(True, []))
@@ -724,30 +669,26 @@ class TestExperienceBasedGeneration:
         self, gmn_generator, sample_experience_summary
     ):
         """Test extraction of action patterns from experience."""
-        patterns = gmn_generator._extract_patterns_from_experience(
-            sample_experience_summary)
+        patterns = gmn_generator._extract_patterns_from_experience(sample_experience_summary)
 
         # Should extract successful action sequence pattern for 'explore'
-        action_patterns = [p for p in patterns if p["type"]
-                           == "successful_action_sequence"]
+        action_patterns = [p for p in patterns if p["type"] == "successful_action_sequence"]
         assert len(action_patterns) >= 1
 
         explore_pattern = next(
-            (p for p in action_patterns if p["dominant_action"] == "explore"), None)
+            (p for p in action_patterns if p["dominant_action"] == "explore"), None
+        )
         assert explore_pattern is not None
-        assert explore_pattern["success_rate"] == 42 / \
-            50  # success_count/count
+        assert explore_pattern["success_rate"] == 42 / 50  # success_count/count
 
     def test_extract_patterns_from_experience_correlation_patterns(
         self, gmn_generator, sample_experience_summary
     ):
         """Test extraction of correlation patterns from experience."""
-        patterns = gmn_generator._extract_patterns_from_experience(
-            sample_experience_summary)
+        patterns = gmn_generator._extract_patterns_from_experience(sample_experience_summary)
 
         # Should extract environmental correlation pattern
-        corr_patterns = [p for p in patterns if p["type"]
-                         == "environmental_correlation"]
+        corr_patterns = [p for p in patterns if p["type"] == "environmental_correlation"]
         assert len(corr_patterns) >= 1
 
         corr_pattern = corr_patterns[0]
@@ -780,8 +721,7 @@ class TestExperienceBasedGeneration:
             "observed_correlations": [{"correlation": 0.3, "occurrences": 2}],
         }
 
-        patterns = gmn_generator._extract_patterns_from_experience(
-            low_experience)
+        patterns = gmn_generator._extract_patterns_from_experience(low_experience)
 
         # Should not extract patterns due to low counts/correlations
         assert len(patterns) == 0
@@ -790,8 +730,7 @@ class TestExperienceBasedGeneration:
 class TestModelExport:
     """Test model export functionality."""
 
-    def test_export_to_gnn_format_file_creation(
-            self, gmn_generator, sample_base_model):
+    def test_export_to_gnn_format_file_creation(self, gmn_generator, sample_base_model):
         """Test that export creates a file with correct content."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".gnn.md", delete=False) as tmp_file:
             file_path = tmp_file.name
@@ -816,8 +755,7 @@ class TestModelExport:
             # Clean up
             Path(file_path).unlink(missing_ok=True)
 
-    def test_export_to_gnn_format_content_structure(
-            self, gmn_generator, sample_base_model):
+    def test_export_to_gnn_format_content_structure(self, gmn_generator, sample_base_model):
         """Test the structure and content of exported GNN format."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".gnn.md", delete=False) as tmp_file:
             file_path = tmp_file.name
@@ -832,8 +770,7 @@ class TestModelExport:
 
             # Check model information
             assert sample_base_model["model"]["name"] in content
-            assert str(sample_base_model["metadata"]
-                       ["model_version"]) in content
+            assert str(sample_base_model["metadata"]["model_version"]) in content
 
             # Check state space entries
             for state_name in sample_base_model["state_space"]:
@@ -851,8 +788,7 @@ class TestModelExport:
             Path(file_path).unlink(missing_ok=True)
 
     @patch("inference.gnn.generator.logger")
-    def test_export_to_gnn_format_logging(
-            self, mock_logger, gmn_generator, sample_base_model):
+    def test_export_to_gnn_format_logging(self, mock_logger, gmn_generator, sample_base_model):
         """Test that export logs completion."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".gnn.md", delete=False) as tmp_file:
             file_path = tmp_file.name
@@ -860,8 +796,7 @@ class TestModelExport:
         try:
             gmn_generator.export_to_gnn_format(sample_base_model, file_path)
 
-            mock_logger.info.assert_called_with(
-                f"Exported GNN model to {file_path}")
+            mock_logger.info.assert_called_with(f"Exported GNN model to {file_path}")
 
         finally:
             Path(file_path).unlink(missing_ok=True)
@@ -876,8 +811,7 @@ class TestIntegrationScenarios:
         gmn_generator.validator.validate_model = Mock(return_value=(True, []))
 
         # 1. Generate base model
-        base_model = gmn_generator.generate_base_model(
-            "TestAgent", "Explorer", sample_personality)
+        base_model = gmn_generator.generate_base_model("TestAgent", "Explorer", sample_personality)
         assert base_model["metadata"]["model_version"] == 1
 
         # 2. Create some patterns
@@ -897,14 +831,10 @@ class TestIntegrationScenarios:
 
         # 4. Generate from experience
         experience = {
-            "action_statistics": {
-                "explore": {
-                    "count": 50,
-                    "success_count": 45}},
+            "action_statistics": {"explore": {"count": 50, "success_count": 45}},
             "unique_observations": 60,
         }
-        final_model = gmn_generator.generate_from_experience(
-            refined_model, experience)
+        final_model = gmn_generator.generate_from_experience(refined_model, experience)
         assert "S_world_model" in final_model["state_space"]
 
     def test_different_agent_classes_generate_different_models(
@@ -930,26 +860,17 @@ class TestIntegrationScenarios:
         assert explorer_prefs["Exploration"] > merchant_prefs["Exploration"]
         assert merchant_prefs["Resources"] > explorer_prefs["Resources"]
 
-    def test_personality_extremes_produce_different_models(
-            self, gmn_generator):
+    def test_personality_extremes_produce_different_models(self, gmn_generator):
         """Test that extreme personalities produce noticeably different models."""
         gmn_generator.validator.validate_model = Mock(return_value=(True, []))
 
-        high_exploration = {
-            "exploration": 100,
-            "cooperation": 0,
-            "efficiency": 0,
-            "curiosity": 100}
-        high_cooperation = {
-            "exploration": 0,
-            "cooperation": 100,
-            "efficiency": 0}
+        high_exploration = {"exploration": 100, "cooperation": 0, "efficiency": 0, "curiosity": 100}
+        high_cooperation = {"exploration": 0, "cooperation": 100, "efficiency": 0}
 
         explorer_model = gmn_generator.generate_base_model(
             "HighExplorer", "Explorer", high_exploration
         )
-        social_model = gmn_generator.generate_base_model(
-            "HighSocial", "Explorer", high_cooperation)
+        social_model = gmn_generator.generate_base_model("HighSocial", "Explorer", high_cooperation)
 
         # Check different characteristics
         explorer_model["connections"]
@@ -963,8 +884,7 @@ class TestIntegrationScenarios:
 class TestErrorHandling:
     """Test error handling and edge cases."""
 
-    def test_model_refinement_with_empty_patterns(
-            self, gmn_generator, sample_base_model):
+    def test_model_refinement_with_empty_patterns(self, gmn_generator, sample_base_model):
         """Test model refinement with empty pattern list."""
         gmn_generator.validator.validate_model = Mock(return_value=(True, []))
 
@@ -1000,20 +920,17 @@ class TestErrorHandling:
             "observed_correlations": []
         }
 
-        patterns = gmn_generator._extract_patterns_from_experience(
-            incomplete_experience)
+        patterns = gmn_generator._extract_patterns_from_experience(incomplete_experience)
 
         # Should handle gracefully
         assert isinstance(patterns, list)
         assert len(patterns) == 0
 
-    def test_state_space_generation_with_empty_personality(
-            self, gmn_generator):
+    def test_state_space_generation_with_empty_personality(self, gmn_generator):
         """Test state space generation with empty personality."""
         empty_personality = {}
 
-        state_space = gmn_generator._generate_state_space(
-            "Explorer", empty_personality)
+        state_space = gmn_generator._generate_state_space("Explorer", empty_personality)
 
         # Should still generate basic states
         assert "S_energy" in state_space

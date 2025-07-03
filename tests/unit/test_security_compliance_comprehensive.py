@@ -137,10 +137,8 @@ except ImportError:
 
         # Encryption configuration
         encryption_algorithms: List[str] = field(
-            default_factory=lambda: [
-                "AES-256-GCM",
-                "ChaCha20-Poly1305",
-                "RSA-4096"])
+            default_factory=lambda: ["AES-256-GCM", "ChaCha20-Poly1305", "RSA-4096"]
+        )
         key_rotation_days: int = 90
         encryption_at_rest: bool = True
         encryption_in_transit: bool = True
@@ -180,10 +178,8 @@ except ImportError:
 
         # Incident response
         incident_response_team: List[str] = field(
-            default_factory=lambda: [
-                "security_analyst",
-                "incident_commander",
-                "legal_counsel"])
+            default_factory=lambda: ["security_analyst", "incident_commander", "legal_counsel"]
+        )
         escalation_thresholds: Dict[str, int] = field(
             default_factory=lambda: {
                 ThreatLevel.HIGH.value: 30,  # minutes
@@ -194,8 +190,8 @@ except ImportError:
 
         # Data protection
         data_classification_levels: List[str] = field(
-            default_factory=lambda: [
-                "public", "internal", "confidential", "restricted"])
+            default_factory=lambda: ["public", "internal", "confidential", "restricted"]
+        )
         data_retention_policies: Dict[str, int] = field(
             default_factory=lambda: {
                 "public": 2555,  # 7 years
@@ -326,8 +322,7 @@ except ImportError:
         # Results
         overall_score: float = 0.0
         compliance_percentage: float = 0.0
-        control_results: Dict[str, Dict[str, Any]
-                              ] = field(default_factory=dict)
+        control_results: Dict[str, Dict[str, Any]] = field(default_factory=dict)
 
         # Findings
         compliant_controls: List[str] = field(default_factory=list)
@@ -392,12 +387,11 @@ except ImportError:
 
             return True
 
-        def detect_threats(
-                self,
-                time_window_hours: int = 24) -> List[SecurityEvent]:
+        def detect_threats(self, time_window_hours: int = 24) -> List[SecurityEvent]:
             cutoff_time = datetime.now() - timedelta(hours=time_window_hours)
             recent_events = [
-                event for event in self.security_events if event.timestamp > cutoff_time]
+                event for event in self.security_events if event.timestamp > cutoff_time
+            ]
 
             # Mock threat detection logic
             threats = []
@@ -407,8 +401,7 @@ except ImportError:
 
             return threats
 
-        def scan_vulnerabilities(
-                self, target_systems: List[str]) -> List[Vulnerability]:
+        def scan_vulnerabilities(self, target_systems: List[str]) -> List[Vulnerability]:
             vulnerabilities = []
 
             # Mock vulnerability scanning
@@ -462,10 +455,7 @@ except ImportError:
             )
             return policy.policy_id
 
-        def assess_compliance(
-                self,
-                framework: str,
-                scope: List[str]) -> ComplianceAssessment:
+        def assess_compliance(self, framework: str, scope: List[str]) -> ComplianceAssessment:
             assessment = ComplianceAssessment(
                 assessment_id=f"ASSESS-{uuid.uuid4().hex[:8].upper()}",
                 framework=framework,
@@ -475,11 +465,9 @@ except ImportError:
 
             # Mock compliance assessment
             total_controls = 50  # Assume 50 controls for any framework
-            compliant_controls = np.random.binomial(
-                total_controls, 0.85)  # 85% compliance rate
+            compliant_controls = np.random.binomial(total_controls, 0.85)  # 85% compliance rate
 
-            assessment.compliance_percentage = (
-                compliant_controls / total_controls) * 100
+            assessment.compliance_percentage = (compliant_controls / total_controls) * 100
             assessment.overall_score = assessment.compliance_percentage / 100
 
             # Generate mock gaps
@@ -550,8 +538,13 @@ except ImportError:
         def get_security_posture(self) -> Dict[str, Any]:
             # Calculate overall security posture
             total_events = len(self.security_events)
-            critical_events = len([e for e in self.security_events if e.severity in [
-                ThreatLevel.CRITICAL.value, ThreatLevel.CATASTROPHIC.value]])
+            critical_events = len(
+                [
+                    e
+                    for e in self.security_events
+                    if e.severity in [ThreatLevel.CRITICAL.value, ThreatLevel.CATASTROPHIC.value]
+                ]
+            )
 
             total_vulns = len(self.vulnerabilities)
             critical_vulns = len(
@@ -735,22 +728,16 @@ class TestSecurityManager:
         assert isinstance(threats, list)
 
         # Verify threat detection logic
-        high_risk_events = [
-            e for e in self.security_manager.security_events if e.risk_score > 0.7]
+        high_risk_events = [e for e in self.security_manager.security_events if e.risk_score > 0.7]
         assert len(threats) == len(high_risk_events)
 
     def test_vulnerability_scanning(self):
         """Test vulnerability scanning functionality"""
         # Define target systems
-        target_systems = [
-            "web_server_1",
-            "database_server",
-            "api_gateway",
-            "file_server"]
+        target_systems = ["web_server_1", "database_server", "api_gateway", "file_server"]
 
         # Perform vulnerability scan
-        vulnerabilities = self.security_manager.scan_vulnerabilities(
-            target_systems)
+        vulnerabilities = self.security_manager.scan_vulnerabilities(target_systems)
 
         # Verify vulnerabilities found
         assert isinstance(vulnerabilities, list)
@@ -765,8 +752,7 @@ class TestSecurityManager:
             assert vuln.cvss_score is None or (0.0 <= vuln.cvss_score <= 10.0)
 
         # Verify vulnerabilities are stored
-        assert len(self.security_manager.vulnerabilities) == len(
-            vulnerabilities)
+        assert len(self.security_manager.vulnerabilities) == len(vulnerabilities)
 
         # Check severity distribution
         severity_counts = defaultdict(int)
@@ -857,15 +843,10 @@ class TestSecurityManager:
 
         for framework in frameworks:
             # Define assessment scope
-            scope = [
-                "production_systems",
-                "data_processing",
-                "access_controls",
-                "monitoring"]
+            scope = ["production_systems", "data_processing", "access_controls", "monitoring"]
 
             # Perform compliance assessment
-            assessment = self.security_manager.assess_compliance(
-                framework, scope)
+            assessment = self.security_manager.assess_compliance(framework, scope)
             assessment_results[framework] = assessment
 
             # Verify assessment results
@@ -919,8 +900,7 @@ class TestSecurityManager:
         self.security_manager.log_security_event(incident_event)
 
         # Investigate the incident
-        investigation = self.security_manager.investigate_incident(
-            incident_event.event_id)
+        investigation = self.security_manager.investigate_incident(incident_event.event_id)
 
         # Verify investigation results
         assert isinstance(investigation, dict)
@@ -955,18 +935,10 @@ class TestSecurityManager:
         # Create diverse security data
         # Add some security events
         events = [
-            SecurityEvent(
-                event_id="EVT-001",
-                severity=ThreatLevel.LOW.value),
-            SecurityEvent(
-                event_id="EVT-002",
-                severity=ThreatLevel.MEDIUM.value),
-            SecurityEvent(
-                event_id="EVT-003",
-                severity=ThreatLevel.HIGH.value),
-            SecurityEvent(
-                event_id="EVT-004",
-                severity=ThreatLevel.CRITICAL.value),
+            SecurityEvent(event_id="EVT-001", severity=ThreatLevel.LOW.value),
+            SecurityEvent(event_id="EVT-002", severity=ThreatLevel.MEDIUM.value),
+            SecurityEvent(event_id="EVT-003", severity=ThreatLevel.HIGH.value),
+            SecurityEvent(event_id="EVT-004", severity=ThreatLevel.CRITICAL.value),
         ]
 
         for event in events:
@@ -977,14 +949,12 @@ class TestSecurityManager:
 
         # Add some policies
         test_policy = SecurityPolicy(
-            policy_id="TEST-POL-001",
-            name="Test Policy",
-            description="Test security policy")
+            policy_id="TEST-POL-001", name="Test Policy", description="Test security policy"
+        )
         self.security_manager.create_security_policy(test_policy)
 
         # Add compliance assessment
-        self.security_manager.assess_compliance(
-            ComplianceFramework.SOC2.value, ["test_scope"])
+        self.security_manager.assess_compliance(ComplianceFramework.SOC2.value, ["test_scope"])
 
         # Get security posture
         posture = self.security_manager.get_security_posture()
@@ -1038,17 +1008,15 @@ class TestThreatDetector:
             {"user": "user1", "login_time": "08:45", "location": "office", "actions": 55},
         ]
 
-        anomalous_behavior = [{"user": "user1",
-                               "login_time": "03:00",
-                               "location": "foreign_country",
-                               "actions": 200}]
+        anomalous_behavior = [
+            {"user": "user1", "login_time": "03:00", "location": "foreign_country", "actions": 200}
+        ]
 
         # Train baseline
         self.threat_detector.train_baseline(normal_behavior)
 
         # Detect anomalies
-        anomalies = self.threat_detector.detect_behavioral_anomalies(
-            anomalous_behavior)
+        anomalies = self.threat_detector.detect_behavioral_anomalies(anomalous_behavior)
 
         assert isinstance(anomalies, list)
         assert len(anomalies) > 0
@@ -1075,8 +1043,7 @@ class TestThreatDetector:
             },
         ]
 
-        intrusion_results = self.threat_detector.analyze_network_traffic(
-            network_traffic)
+        intrusion_results = self.threat_detector.analyze_network_traffic(network_traffic)
 
         assert isinstance(intrusion_results, dict)
         assert "suspicious_connections" in intrusion_results
@@ -1142,11 +1109,7 @@ class TestVulnerabilityScanner:
     @pytest.mark.skipif(not IMPORT_SUCCESS, reason="Module not available")
     def test_container_vulnerability_scan(self):
         """Test container image vulnerability scanning"""
-        container_images = [
-            "nginx:latest",
-            "postgres:13",
-            "python:3.9-slim",
-            "custom-app:v1.2.3"]
+        container_images = ["nginx:latest", "postgres:13", "python:3.9-slim", "custom-app:v1.2.3"]
 
         container_results = self.vuln_scanner.scan_containers(container_images)
 
@@ -1159,16 +1122,19 @@ class TestVulnerabilityScanner:
         """Test dependency vulnerability scanning"""
         dependency_files = [
             {
-                "type": "npm", "file": "package.json", "content": {
-                    "dependencies": {
-                        "express": "4.17.1"}}, }, {
-                    "type": "pip", "file": "requirements.txt", "content": [
-                        "django==3.2.0", "requests==2.25.1"], }, {
-                            "type": "maven", "file": "pom.xml", "content": {
-                                "spring-boot": "2.5.0"}}, ]
+                "type": "npm",
+                "file": "package.json",
+                "content": {"dependencies": {"express": "4.17.1"}},
+            },
+            {
+                "type": "pip",
+                "file": "requirements.txt",
+                "content": ["django==3.2.0", "requests==2.25.1"],
+            },
+            {"type": "maven", "file": "pom.xml", "content": {"spring-boot": "2.5.0"}},
+        ]
 
-        dependency_results = self.vuln_scanner.scan_dependencies(
-            dependency_files)
+        dependency_results = self.vuln_scanner.scan_dependencies(dependency_files)
 
         assert isinstance(dependency_results, dict)
         assert "vulnerable_dependencies" in dependency_results
@@ -1195,10 +1161,10 @@ class TestComplianceEngine:
     def test_soc2_compliance_assessment(self):
         """Test SOC2 compliance assessment"""
         soc2_scope = {
-            "trust_service_criteria": [
-                "security", "availability", "confidentiality"], "systems": [
-                "production", "data_processing", "backup"], "period": {
-                "start": "2023-01-01", "end": "2023-12-31"}, }
+            "trust_service_criteria": ["security", "availability", "confidentiality"],
+            "systems": ["production", "data_processing", "backup"],
+            "period": {"start": "2023-01-01", "end": "2023-12-31"},
+        }
 
         soc2_result = self.compliance_engine.assess_soc2_compliance(soc2_scope)
 
@@ -1211,10 +1177,10 @@ class TestComplianceEngine:
     def test_gdpr_compliance_assessment(self):
         """Test GDPR compliance assessment"""
         gdpr_scope = {
-            "data_processing_activities": [
-                "user_registration", "payment_processing", "analytics"], "data_subjects": [
-                "customers", "employees"], "data_categories": [
-                "personal", "sensitive", "behavioral"], }
+            "data_processing_activities": ["user_registration", "payment_processing", "analytics"],
+            "data_subjects": ["customers", "employees"],
+            "data_categories": ["personal", "sensitive", "behavioral"],
+        }
 
         gdpr_result = self.compliance_engine.assess_gdpr_compliance(gdpr_scope)
 
@@ -1232,8 +1198,7 @@ class TestComplianceEngine:
             "alert_thresholds": {"compliance_score": 0.85},
         }
 
-        monitoring_result = self.compliance_engine.setup_continuous_monitoring(
-            monitoring_config)
+        monitoring_result = self.compliance_engine.setup_continuous_monitoring(monitoring_config)
 
         assert isinstance(monitoring_result, dict)
         assert "monitoring_enabled" in monitoring_result
@@ -1281,13 +1246,8 @@ class TestIntegrationScenarios:
             self.security_manager.create_security_policy(policy)
 
         # 2. Perform vulnerability assessment
-        critical_systems = [
-            "web_server",
-            "database",
-            "api_gateway",
-            "auth_service"]
-        vulnerabilities = self.security_manager.scan_vulnerabilities(
-            critical_systems)
+        critical_systems = ["web_server", "database", "api_gateway", "auth_service"]
+        vulnerabilities = self.security_manager.scan_vulnerabilities(critical_systems)
 
         # 3. Simulate security events
         security_events = [
@@ -1308,11 +1268,8 @@ class TestIntegrationScenarios:
 
         # 4. Conduct compliance assessments
         compliance_results = {}
-        for framework in [
-                ComplianceFramework.SOC2.value,
-                ComplianceFramework.GDPR.value]:
-            assessment = self.security_manager.assess_compliance(
-                framework, critical_systems)
+        for framework in [ComplianceFramework.SOC2.value, ComplianceFramework.GDPR.value]:
+            assessment = self.security_manager.assess_compliance(framework, critical_systems)
             compliance_results[framework] = assessment
 
         # 5. Analyze overall security posture
@@ -1326,8 +1283,9 @@ class TestIntegrationScenarios:
         assert posture["security_score"] > 0.0
 
         # Verify risk assessment integration
-        critical_vulns = [v for v in vulnerabilities if v.severity ==
-                          VulnerabilitySeverity.CRITICAL.value]
+        critical_vulns = [
+            v for v in vulnerabilities if v.severity == VulnerabilitySeverity.CRITICAL.value
+        ]
         high_severity_events = [
             e
             for e in self.security_manager.security_events
@@ -1335,8 +1293,7 @@ class TestIntegrationScenarios:
         ]
 
         # Security score should reflect vulnerabilities and events
-        expected_security_impact = len(
-            critical_vulns) + len(high_severity_events)
+        expected_security_impact = len(critical_vulns) + len(high_severity_events)
         if expected_security_impact > 0:
             assert posture["security_score"] < 1.0
 
@@ -1358,14 +1315,12 @@ class TestIntegrationScenarios:
 
         # 2. Detect and escalate threat
         threats = self.security_manager.detect_threats(time_window_hours=1)
-        critical_threats = [
-            t for t in threats if t.severity == ThreatLevel.CRITICAL.value]
+        critical_threats = [t for t in threats if t.severity == ThreatLevel.CRITICAL.value]
 
         assert len(critical_threats) >= 1
 
         # 3. Initiate incident investigation
-        investigation = self.security_manager.investigate_incident(
-            initial_event.event_id)
+        investigation = self.security_manager.investigate_incident(initial_event.event_id)
 
         assert investigation["status"] == "investigating"
         assert len(investigation["containment_actions"]) > 0
@@ -1434,7 +1389,8 @@ class TestIntegrationScenarios:
                         description="Formal incident response and escalation procedures",
                         category="incident_response",
                     ),
-                ])
+                ]
+            )
 
         # Implement hardening policies
         for policy in hardening_policies:
@@ -1473,12 +1429,10 @@ class TestIntegrationScenarios:
             assessment_results[framework] = assessment
 
         # Analyze cross-framework compliance
-        overall_compliance_scores = [
-            a.compliance_percentage for a in assessment_results.values()]
+        overall_compliance_scores = [a.compliance_percentage for a in assessment_results.values()]
         average_compliance = np.mean(overall_compliance_scores)
 
-        total_gaps = sum(len(a.gaps_identified)
-                         for a in assessment_results.values())
+        total_gaps = sum(len(a.gaps_identified) for a in assessment_results.values())
 
         # Identify common compliance themes
         all_gaps = []
@@ -1491,8 +1445,7 @@ class TestIntegrationScenarios:
         assert total_gaps >= 0
 
         # Check that some frameworks may have different compliance levels
-        compliance_scores = [
-            a.compliance_percentage for a in assessment_results.values()]
+        compliance_scores = [a.compliance_percentage for a in assessment_results.values()]
         compliance_variance = np.var(compliance_scores)
 
         # Frameworks may have different requirements, so some variance is
@@ -1500,8 +1453,7 @@ class TestIntegrationScenarios:
         assert compliance_variance >= 0.0
 
         # Verify all assessments were stored
-        assert len(
-            self.security_manager.compliance_assessments) == len(frameworks)
+        assert len(self.security_manager.compliance_assessments) == len(frameworks)
 
 
 if __name__ == "__main__":

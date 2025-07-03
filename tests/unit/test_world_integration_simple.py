@@ -19,8 +19,8 @@ project_root = os.path.join(os.path.dirname(__file__), "..", "..")
 sys.path.insert(0, project_root)
 # Import the world integration module directly
 spec = importlib.util.spec_from_file_location(
-    "world_integration", os.path.join(
-        project_root, "agents", "base", "world_integration.py"))
+    "world_integration", os.path.join(project_root, "agents", "base", "world_integration.py")
+)
 world_integration = importlib.util.module_from_spec(spec)
 # Mock the world imports to avoid dependency issues
 world_integration.H3World = Mock
@@ -92,11 +92,9 @@ class TestWorldEventSystem(unittest.TestCase):
         def callback(event):
             self.test_events.append(event)
 
-        self.event_system.subscribe_to_events(
-            "agent1", [EventType.AGENT_MOVED], callback)
+        self.event_system.subscribe_to_events("agent1", [EventType.AGENT_MOVED], callback)
         # Check that agent is subscribed
-        self.assertIn("agent1",
-                      self.event_system.subscribers[EventType.AGENT_MOVED])
+        self.assertIn("agent1", self.event_system.subscribers[EventType.AGENT_MOVED])
 
     def test_publish_event(self) -> None:
         """Test event publishing"""
@@ -104,8 +102,7 @@ class TestWorldEventSystem(unittest.TestCase):
         def callback(event):
             self.test_events.append(event)
 
-        self.event_system.subscribe_to_events(
-            "agent1", [EventType.AGENT_MOVED], callback)
+        self.event_system.subscribe_to_events("agent1", [EventType.AGENT_MOVED], callback)
         event = WorldEvent(
             event_type=EventType.AGENT_MOVED,
             location="test_hex",
@@ -120,15 +117,12 @@ class TestWorldEventSystem(unittest.TestCase):
     def test_get_recent_events(self) -> None:
         """Test getting recent events"""
         event = WorldEvent(
-            event_type=EventType.RESOURCE_DEPLETED,
-            location="test_hex",
-            agent_id="agent1")
+            event_type=EventType.RESOURCE_DEPLETED, location="test_hex", agent_id="agent1"
+        )
         self.event_system.publish_event(event)
         recent_events = self.event_system.get_recent_events("test_hex", 10)
         self.assertEqual(len(recent_events), 1)
-        self.assertEqual(
-            recent_events[0].event_type,
-            EventType.RESOURCE_DEPLETED)
+        self.assertEqual(recent_events[0].event_type, EventType.RESOURCE_DEPLETED)
 
 
 class TestAgentWorldManager(unittest.TestCase):
@@ -181,19 +175,15 @@ class TestAgentWorldManager(unittest.TestCase):
         )
         self.assertTrue(result.success)
         self.assertEqual(result.action_type, ActionType.MOVE)
-        self.assertEqual(
-            self.manager.agent_locations["agent1"],
-            "hex_123_neighbor_0")
-        self.assertLess(
-            self.manager.agent_energy["agent1"],
-            100.0)  # Energy consumed
+        self.assertEqual(self.manager.agent_locations["agent1"], "hex_123_neighbor_0")
+        self.assertLess(self.manager.agent_energy["agent1"], 100.0)  # Energy consumed
 
     def test_perform_harvest_action(self) -> None:
         """Test resource harvesting"""
         self.manager.place_agent("agent1", "hex_123")
         result = self.manager.perform_action(
-            "agent1", ActionType.HARVEST_RESOURCE, {
-                "resource_type": "water", "amount": 10.0})
+            "agent1", ActionType.HARVEST_RESOURCE, {"resource_type": "water", "amount": 10.0}
+        )
         self.assertTrue(result.success)
         self.assertEqual(result.action_type, ActionType.HARVEST_RESOURCE)
         self.assertEqual(self.manager.agent_resources["agent1"]["water"], 10.0)

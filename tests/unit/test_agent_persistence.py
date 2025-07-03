@@ -54,20 +54,11 @@ def sample_agent():
     agent.orientation = Orientation(w=1.0, x=0.0, y=0.0, z=0.0)
     agent.velocity = np.array([1.0, 0.0, 0.0])
     agent.status = AgentStatus.IDLE
-    agent.resources = AgentResources(
-        energy=80,
-        health=100,
-        memory_capacity=100,
-        memory_used=10)
-    agent.capabilities = {
-        AgentCapability.MOVEMENT,
-        AgentCapability.COMMUNICATION}
+    agent.resources = AgentResources(energy=80, health=100, memory_capacity=100, memory_used=10)
+    agent.capabilities = {AgentCapability.MOVEMENT, AgentCapability.COMMUNICATION}
     agent.personality = AgentPersonality(
-        openness=0.8,
-        conscientiousness=0.6,
-        extraversion=0.4,
-        agreeableness=0.7,
-        neuroticism=0.3)
+        openness=0.8, conscientiousness=0.6, extraversion=0.4, agreeableness=0.7, neuroticism=0.3
+    )
     agent.experience_count = 100
     agent.short_term_memory = ["memory1", "memory2"]
     agent.long_term_memory = ["long_memory1"]
@@ -109,29 +100,13 @@ def mock_db_agent():
     db_agent.created_at = datetime.now()
     db_agent.updated_at = datetime.now()
     db_agent.state = {
-        "position": {
-            "x": 10.0,
-            "y": 20.0,
-            "z": 0.0},
-        "orientation": {
-            "w": 1.0,
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0},
-        "velocity": [
-            1.0,
-            0.0,
-            0.0],
+        "position": {"x": 10.0, "y": 20.0, "z": 0.0},
+        "orientation": {"w": 1.0, "x": 0.0, "y": 0.0, "z": 0.0},
+        "velocity": [1.0, 0.0, 0.0],
         "status": "idle",
-        "resources": {
-            "energy": 80,
-            "health": 100,
-            "memory_capacity": 100,
-            "memory_used": 10},
+        "resources": {"energy": 80, "health": 100, "memory_capacity": 100, "memory_used": 10},
         "experience_count": 100,
-        "short_term_memory": [
-            "memory1",
-            "memory2"],
+        "short_term_memory": ["memory1", "memory2"],
         "schema_version": AGENT_SCHEMA_VERSION,
     }
     db_agent.config = {
@@ -209,8 +184,7 @@ class TestAgentSaving:
         # External session shouldn't auto-commit
         mock_session.commit.assert_not_called()
 
-    def test_save_agent_update_existing(
-            self, mock_session, sample_agent, mock_db_agent):
+    def test_save_agent_update_existing(self, mock_session, sample_agent, mock_db_agent):
         """Test updating an existing agent."""
         mock_session.query.return_value.filter_by.return_value.first.return_value = mock_db_agent
         persistence = AgentPersistence(session=mock_session)
@@ -224,8 +198,7 @@ class TestAgentSaving:
         # External session shouldn't auto-commit
         mock_session.commit.assert_not_called()
 
-    def test_save_agent_exists_no_update(
-            self, mock_session, sample_agent, mock_db_agent):
+    def test_save_agent_exists_no_update(self, mock_session, sample_agent, mock_db_agent):
         """Test saving agent when exists and update_if_exists=False."""
         mock_session.query.return_value.filter_by.return_value.first.return_value = mock_db_agent
         persistence = AgentPersistence(session=mock_session)
@@ -258,8 +231,7 @@ class TestAgentSaving:
         # External session shouldn't auto-rollback
         mock_session.rollback.assert_not_called()
 
-    def test_save_agent_external_session_no_commit(
-            self, mock_session, sample_agent):
+    def test_save_agent_external_session_no_commit(self, mock_session, sample_agent):
         """Test that external sessions don't auto-commit."""
         mock_session.query.return_value.filter_by.return_value.first.return_value = None
         persistence = AgentPersistence(session=mock_session)
@@ -352,8 +324,7 @@ class TestAgentBatchLoading:
 
         persistence.load_all_agents(agent_type="explorer")
 
-        mock_session.query.return_value.filter_by.assert_called_with(
-            type="explorer")
+        mock_session.query.return_value.filter_by.assert_called_with(type="explorer")
 
     def test_load_all_agents_with_status_filter(self, mock_session):
         """Test loading agents with status filter."""
@@ -526,8 +497,7 @@ class TestAgentSerialization:
         """Test that memory lists are properly truncated."""
         # Add many memory items
         sample_agent.short_term_memory = [f"memory_{i}" for i in range(100)]
-        sample_agent.long_term_memory = [
-            f"long_memory_{i}" for i in range(200)]
+        sample_agent.long_term_memory = [f"long_memory_{i}" for i in range(200)]
 
         persistence = AgentPersistence()
         result = persistence._serialize_agent(sample_agent)
@@ -575,8 +545,7 @@ class TestAgentDeserialization:
         agent = persistence._deserialize_agent(mock_db_agent)
 
         assert isinstance(agent.velocity, np.ndarray)
-        np.testing.assert_array_equal(
-            agent.velocity, np.array([1.0, 0.0, 0.0]))
+        np.testing.assert_array_equal(agent.velocity, np.array([1.0, 0.0, 0.0]))
 
     def test_deserialize_agent_status_and_resources(self, mock_db_agent):
         """Test deserialization of status and resources."""
@@ -595,9 +564,7 @@ class TestAgentDeserialization:
         agent = persistence._deserialize_agent(mock_db_agent)
 
         assert isinstance(agent.capabilities, set)
-        expected_caps = {
-            AgentCapability.MOVEMENT,
-            AgentCapability.COMMUNICATION}
+        expected_caps = {AgentCapability.MOVEMENT, AgentCapability.COMMUNICATION}
         assert agent.capabilities == expected_caps
 
     def test_deserialize_agent_personality(self, mock_db_agent):
@@ -749,12 +716,7 @@ class TestAgentSnapshot:
 
     @patch("agents.base.persistence.uuid.uuid4")
     @patch("agents.base.persistence.datetime")
-    def test_create_snapshot(
-            self,
-            mock_datetime,
-            mock_uuid,
-            mock_session,
-            sample_agent):
+    def test_create_snapshot(self, mock_datetime, mock_uuid, mock_session, sample_agent):
         """Test creating agent snapshot."""
         # Setup mocks
         snapshot_id = "test-snapshot-id"
@@ -769,8 +731,7 @@ class TestAgentSnapshot:
             with patch.object(persistence, "save_agent") as mock_save:
                 mock_save.return_value = True
 
-                result = snapshot_handler.create_snapshot(
-                    sample_agent, "Test snapshot")
+                result = snapshot_handler.create_snapshot(sample_agent, "Test snapshot")
 
                 assert result == snapshot_id
                 assert "snapshots" in sample_agent.metadata
@@ -781,12 +742,10 @@ class TestAgentSnapshot:
                 assert snapshot_data["description"] == "Test snapshot"
                 assert snapshot_data["agent_data"] == {"agent": "data"}
 
-    def test_create_snapshot_limits_snapshots(
-            self, mock_session, sample_agent):
+    def test_create_snapshot_limits_snapshots(self, mock_session, sample_agent):
         """Test that snapshots are limited to 10."""
         # Add 10 existing snapshots
-        sample_agent.metadata["snapshots"] = [
-            {"snapshot_id": f"snapshot_{i}"} for i in range(10)]
+        sample_agent.metadata["snapshots"] = [{"snapshot_id": f"snapshot_{i}"} for i in range(10)]
 
         persistence = AgentPersistence(session=mock_session)
         snapshot_handler = AgentSnapshot(persistence)
@@ -824,8 +783,7 @@ class TestAgentSnapshot:
                 restored_agent = Mock()
                 mock_from_dict.return_value = restored_agent
 
-                result = snapshot_handler.restore_snapshot(
-                    sample_agent.agent_id, snapshot_id)
+                result = snapshot_handler.restore_snapshot(sample_agent.agent_id, snapshot_id)
 
                 assert result == restored_agent
                 mock_from_dict.assert_called_once_with({"restored": "data"})
@@ -838,8 +796,7 @@ class TestAgentSnapshot:
         with patch.object(persistence, "load_agent") as mock_load:
             mock_load.return_value = None
 
-            result = snapshot_handler.restore_snapshot(
-                "nonexistent-id", "snapshot-id")
+            result = snapshot_handler.restore_snapshot("nonexistent-id", "snapshot-id")
 
             assert result is None
 
@@ -947,15 +904,13 @@ class TestIntegrationScenarios:
                 mock_save.return_value = True
 
                 # 1. Create snapshot
-                snapshot_id = snapshot_handler.create_snapshot(
-                    sample_agent, "Before changes")
+                snapshot_id = snapshot_handler.create_snapshot(sample_agent, "Before changes")
                 assert snapshot_id is not None
 
                 # 2. List snapshots
                 with patch.object(persistence, "load_agent") as mock_load:
                     mock_load.return_value = sample_agent
-                    snapshots = snapshot_handler.list_snapshots(
-                        sample_agent.agent_id)
+                    snapshots = snapshot_handler.list_snapshots(sample_agent.agent_id)
                     assert len(snapshots) == 1
 
                     # 3. Restore snapshot

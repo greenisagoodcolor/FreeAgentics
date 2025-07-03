@@ -282,8 +282,7 @@ class TestRunnerSetup:
             ci_mode: Whether to optimize for CI/CD environment
         """
         self.project_root = Path(project_root).resolve()
-        self.output_dir = Path(
-            output_dir) if output_dir else self.project_root / ".test_configs"
+        self.output_dir = Path(output_dir) if output_dir else self.project_root / ".test_configs"
         self.ci_mode = ci_mode
         self.logger = logging.getLogger(__name__)
 
@@ -326,12 +325,10 @@ class TestRunnerSetup:
             )
 
             # Step 3: Create configuration files
-            result.config_files_created = self._create_config_files(
-                result.runner_configs)
+            result.config_files_created = self._create_config_files(result.runner_configs)
 
             # Step 4: Validate configurations
-            result.validation_passed, result.validation_errors = self._validate_setup(
-                result)
+            result.validation_passed, result.validation_errors = self._validate_setup(result)
 
             # Step 5: Calculate performance metrics
             result.estimated_total_duration = self._calculate_total_duration(result)
@@ -354,9 +351,7 @@ class TestRunnerSetup:
 
         return result
 
-    def _create_runner_configs(
-            self,
-            discovery_result: TestDiscoveryResult) -> List[RunnerConfig]:
+    def _create_runner_configs(self, discovery_result: TestDiscoveryResult) -> List[RunnerConfig]:
         """Create runner configurations based on discovered frameworks"""
         configs = []
 
@@ -391,10 +386,7 @@ class TestRunnerSetup:
 
         return mapping.get(framework.lower(), RunnerType.CUSTOM)
 
-    def _create_framework_config(
-            self,
-            runner_type: RunnerType,
-            test_count: int) -> RunnerConfig:
+    def _create_framework_config(self, runner_type: RunnerType, test_count: int) -> RunnerConfig:
         """Create optimized configuration for a specific framework"""
         defaults = self.DEFAULT_CONFIGS.get(runner_type, {})
 
@@ -506,8 +498,7 @@ class TestRunnerSetup:
                 name="parallel",
                 mode=ExecutionMode.PARALLEL,
                 parallel_groups=categorization_result.parallel_execution_groups,
-                max_parallel_runners=len(
-                    categorization_result.parallel_execution_groups),
+                max_parallel_runners=len(categorization_result.parallel_execution_groups),
                 fail_fast=False,
                 required_coverage=80.0,
             )
@@ -708,8 +699,7 @@ timeout = {config.timeout}
             )
 
         if result.parallel_efficiency < 0.5:
-            recommendations.append(
-                "⚡ Low parallel efficiency - optimize test parallelization")
+            recommendations.append("⚡ Low parallel efficiency - optimize test parallelization")
 
         # Validation recommendations
         if not result.validation_passed:
@@ -732,8 +722,7 @@ timeout = {config.timeout}
 
         return recommendations
 
-    def generate_ci_config(self, result: TestRunnerSetupResult,
-                           ci_platform: str = "github") -> str:
+    def generate_ci_config(self, result: TestRunnerSetupResult, ci_platform: str = "github") -> str:
         """Generate CI/CD configuration file"""
         if ci_platform.lower() == "github":
             return self._generate_github_actions_config(result)
@@ -835,15 +824,9 @@ def main():
 
     parser = argparse.ArgumentParser(description="Setup and configure test runners")
     parser.add_argument("project_root", help="Project root directory")
-    parser.add_argument(
-        "--output-dir",
-        "-o",
-        help="Output directory for configurations")
+    parser.add_argument("--output-dir", "-o", help="Output directory for configurations")
     parser.add_argument("--ci-mode", action="store_true", help="Optimize for CI/CD")
-    parser.add_argument(
-        "--ci-platform",
-        default="github",
-        help="CI platform (github, gitlab)")
+    parser.add_argument("--ci-platform", default="github", help="CI platform (github, gitlab)")
     parser.add_argument("--validate", action="store_true", help="Validate setup only")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose logging")
 

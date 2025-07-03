@@ -88,9 +88,7 @@ class TestBaseBehavior:
 
         # Mock has_capability method
         def has_capability(cap):
-            return cap in {
-                AgentCapability.MOVEMENT,
-                AgentCapability.PERCEPTION}
+            return cap in {AgentCapability.MOVEMENT, AgentCapability.PERCEPTION}
 
         agent.has_capability = has_capability
 
@@ -114,28 +112,22 @@ class TestBaseBehavior:
         """Test behavior initialization."""
         assert base_behavior.name == "TestBehavior"
         assert base_behavior.priority == BehaviorPriority.MEDIUM
-        assert base_behavior.required_capabilities == {
-            AgentCapability.MOVEMENT}
+        assert base_behavior.required_capabilities == {AgentCapability.MOVEMENT}
         assert base_behavior.status == BehaviorStatus.READY
         assert base_behavior.last_execution_time is None
         assert base_behavior.cooldown_time == timedelta(seconds=0)
 
     def test_behavior_with_cooldown(self):
         """Test behavior with cooldown period."""
-        behavior = BaseBehavior(
-            name="CooldownBehavior",
-            cooldown_time=timedelta(
-                seconds=5))
+        behavior = BaseBehavior(name="CooldownBehavior", cooldown_time=timedelta(seconds=5))
         assert behavior.cooldown_time == timedelta(seconds=5)
 
-    def test_can_execute_with_capabilities(
-            self, base_behavior, mock_agent, test_context):
+    def test_can_execute_with_capabilities(self, base_behavior, mock_agent, test_context):
         """Test can_execute with sufficient capabilities."""
         result = base_behavior.can_execute(mock_agent, test_context)
         assert result is True
 
-    def test_can_execute_without_capabilities(
-            self, base_behavior, mock_agent, test_context):
+    def test_can_execute_without_capabilities(self, base_behavior, mock_agent, test_context):
         """Test can_execute without required capabilities."""
 
         # Mock agent without movement capability
@@ -147,8 +139,7 @@ class TestBaseBehavior:
         result = base_behavior.can_execute(mock_agent, test_context)
         assert result is False
 
-    def test_can_execute_insufficient_energy(
-            self, base_behavior, mock_agent, test_context):
+    def test_can_execute_insufficient_energy(self, base_behavior, mock_agent, test_context):
         """Test can_execute with insufficient energy."""
         mock_agent.resources.energy = 0.5  # Low energy
 
@@ -159,10 +150,7 @@ class TestBaseBehavior:
 
     def test_can_execute_cooldown_active(self, mock_agent, test_context):
         """Test can_execute during cooldown period."""
-        behavior = BaseBehavior(
-            name="CooldownTest",
-            cooldown_time=timedelta(
-                seconds=10))
+        behavior = BaseBehavior(name="CooldownTest", cooldown_time=timedelta(seconds=10))
 
         # Set recent execution time
         behavior.last_execution_time = datetime.now() - timedelta(seconds=5)
@@ -172,10 +160,7 @@ class TestBaseBehavior:
 
     def test_can_execute_cooldown_expired(self, mock_agent, test_context):
         """Test can_execute after cooldown expires."""
-        behavior = BaseBehavior(
-            name="CooldownTest",
-            cooldown_time=timedelta(
-                seconds=5))
+        behavior = BaseBehavior(name="CooldownTest", cooldown_time=timedelta(seconds=5))
 
         # Set old execution time
         behavior.last_execution_time = datetime.now() - timedelta(seconds=10)
@@ -202,8 +187,7 @@ class TestBaseBehavior:
         assert result["success"] is False
         assert base_behavior.status == BehaviorStatus.FAILURE
 
-    def test_execute_exception_handling(
-            self, base_behavior, mock_agent, test_context):
+    def test_execute_exception_handling(self, base_behavior, mock_agent, test_context):
         """Test exception handling during execution."""
         # Mock custom execution that raises exception
         with patch.object(base_behavior, "_execute_custom", side_effect=Exception("Test error")):
@@ -233,8 +217,7 @@ class TestBaseBehavior:
         # Should return base priority value
         assert priority == BehaviorPriority.MEDIUM.value
 
-    def test_get_priority_with_modifiers(
-            self, base_behavior, mock_agent, test_context):
+    def test_get_priority_with_modifiers(self, base_behavior, mock_agent, test_context):
         """Test priority with modifiers."""
         with patch.object(base_behavior, "_get_priority_modifier", return_value=1.5):
             with patch.object(base_behavior, "_get_personality_modifier", return_value=0.8):
@@ -244,11 +227,7 @@ class TestBaseBehavior:
         expected = BehaviorPriority.MEDIUM.value * 1.5 * 0.8
         assert abs(priority - expected) < 0.001
 
-    def test_get_priority_clamped(
-            self,
-            base_behavior,
-            mock_agent,
-            test_context):
+    def test_get_priority_clamped(self, base_behavior, mock_agent, test_context):
         """Test priority is clamped to [0, 1] range."""
         with patch.object(base_behavior, "_get_priority_modifier", return_value=2.0):
             priority = base_behavior.get_priority(mock_agent, test_context)
@@ -277,31 +256,21 @@ class TestBaseBehavior:
         modifier = base_behavior._get_personality_modifier(mock_agent)
         assert modifier == 1.0
 
-    def test_default_energy_cost(
-            self,
-            base_behavior,
-            mock_agent,
-            test_context):
+    def test_default_energy_cost(self, base_behavior, mock_agent, test_context):
         """Test default energy cost."""
         cost = base_behavior.get_energy_cost(mock_agent, test_context)
         assert cost == 1.0
 
-    def test_custom_execution_methods(
-            self,
-            base_behavior,
-            mock_agent,
-            test_context):
+    def test_custom_execution_methods(self, base_behavior, mock_agent, test_context):
         """Test custom execution method defaults."""
         # Default implementations should work
-        assert base_behavior._can_execute_custom(
-            mock_agent, test_context) is True
+        assert base_behavior._can_execute_custom(mock_agent, test_context) is True
 
         result = base_behavior._execute_custom(mock_agent, test_context)
         assert result["success"] is True
         assert result["behavior"] == "TestBehavior"
 
-        modifier = base_behavior._get_priority_modifier(
-            mock_agent, test_context)
+        modifier = base_behavior._get_priority_modifier(mock_agent, test_context)
         assert modifier == 1.0
 
 
@@ -335,11 +304,7 @@ class TestIdleBehavior:
         assert idle_behavior.priority == BehaviorPriority.BACKGROUND
         assert idle_behavior.required_capabilities == set()
 
-    def test_idle_can_always_execute(
-            self,
-            idle_behavior,
-            mock_agent,
-            test_context):
+    def test_idle_can_always_execute(self, idle_behavior, mock_agent, test_context):
         """Test that idle behavior can always execute."""
         result = idle_behavior.can_execute(mock_agent, test_context)
         assert result is True
@@ -398,8 +363,7 @@ class TestWanderBehavior:
         assert wander_behavior.cooldown_time == timedelta(seconds=2)
         assert wander_behavior.max_wander_distance == 5.0
 
-    def test_wander_can_execute_valid_status(
-            self, wander_behavior, mock_agent, test_context):
+    def test_wander_can_execute_valid_status(self, wander_behavior, mock_agent, test_context):
         """Test wander can execute with valid status."""
         mock_agent.status = AgentStatus.IDLE
         result = wander_behavior._can_execute_custom(mock_agent, test_context)
@@ -409,18 +373,13 @@ class TestWanderBehavior:
         result = wander_behavior._can_execute_custom(mock_agent, test_context)
         assert result is True
 
-    def test_wander_cannot_execute_invalid_status(
-            self, wander_behavior, mock_agent, test_context):
+    def test_wander_cannot_execute_invalid_status(self, wander_behavior, mock_agent, test_context):
         """Test wander cannot execute with invalid status."""
         mock_agent.status = AgentStatus.INTERACTING
         result = wander_behavior._can_execute_custom(mock_agent, test_context)
         assert result is False
 
-    def test_wander_execute_success(
-            self,
-            wander_behavior,
-            mock_agent,
-            test_context):
+    def test_wander_execute_success(self, wander_behavior, mock_agent, test_context):
         """Test successful wander execution."""
         with patch("agents.base.behaviors.random.uniform") as mock_uniform:
             mock_uniform.side_effect = [math.pi / 4, 3.0]  # angle, distance
@@ -440,8 +399,7 @@ class TestWanderBehavior:
         distance = mock_agent.position.distance_to(target_pos)
         assert distance <= wander_behavior.max_wander_distance
 
-    def test_wander_execute_invalid_position(
-            self, wander_behavior, mock_agent, test_context):
+    def test_wander_execute_invalid_position(self, wander_behavior, mock_agent, test_context):
         """Test wander execution with invalid position."""
         # Mock world interface to reject movement
         test_context["world_interface"].can_move_to.return_value = False
@@ -451,8 +409,7 @@ class TestWanderBehavior:
         assert result["success"] is False
         assert result["reason"] == "invalid_position"
 
-    def test_wander_execute_without_world_interface(
-            self, wander_behavior, mock_agent):
+    def test_wander_execute_without_world_interface(self, wander_behavior, mock_agent):
         """Test wander execution without world interface."""
         context = {}  # No world interface
 
@@ -461,11 +418,7 @@ class TestWanderBehavior:
         # Should still succeed without world validation
         assert result["success"] is True
 
-    def test_wander_energy_cost(
-            self,
-            wander_behavior,
-            mock_agent,
-            test_context):
+    def test_wander_energy_cost(self, wander_behavior, mock_agent, test_context):
         """Test wander energy cost."""
         cost = wander_behavior.get_energy_cost(mock_agent, test_context)
         assert cost == 2.0
@@ -533,23 +486,19 @@ class TestGoalSeekingBehavior:
         assert AgentCapability.MOVEMENT in goal_behavior.required_capabilities
         assert AgentCapability.PLANNING in goal_behavior.required_capabilities
 
-    def test_goal_seeking_can_execute_with_goal(
-            self, goal_behavior, mock_agent_with_goal):
+    def test_goal_seeking_can_execute_with_goal(self, goal_behavior, mock_agent_with_goal):
         """Test can execute with active goal."""
         context = {}
-        result = goal_behavior._can_execute_custom(
-            mock_agent_with_goal, context)
+        result = goal_behavior._can_execute_custom(mock_agent_with_goal, context)
         assert result is True
 
-    def test_goal_seeking_cannot_execute_without_goal(
-            self, goal_behavior, mock_agent_no_goal):
+    def test_goal_seeking_cannot_execute_without_goal(self, goal_behavior, mock_agent_no_goal):
         """Test cannot execute without goal."""
         context = {}
         result = goal_behavior._can_execute_custom(mock_agent_no_goal, context)
         assert result is False
 
-    def test_goal_seeking_execute_with_goal(
-            self, goal_behavior, mock_agent_with_goal):
+    def test_goal_seeking_execute_with_goal(self, goal_behavior, mock_agent_with_goal):
         """Test execution with goal."""
         context = {}
 
@@ -558,14 +507,12 @@ class TestGoalSeekingBehavior:
             mock_action = Mock()
             mock_action_class.return_value = mock_action
 
-            result = goal_behavior._execute_custom(
-                mock_agent_with_goal, context)
+            result = goal_behavior._execute_custom(mock_agent_with_goal, context)
 
         assert result["success"] is True
         assert "action" in result
 
-    def test_goal_seeking_execute_without_goal(
-            self, goal_behavior, mock_agent_no_goal):
+    def test_goal_seeking_execute_without_goal(self, goal_behavior, mock_agent_no_goal):
         """Test execution without goal."""
         context = {}
         result = goal_behavior._execute_custom(mock_agent_no_goal, context)
@@ -601,15 +548,12 @@ class TestSocialInteractionBehavior:
         agent.personality = personality
 
         def has_capability(cap):
-            return cap in {
-                AgentCapability.COMMUNICATION,
-                AgentCapability.SOCIAL_INTERACTION}
+            return cap in {AgentCapability.COMMUNICATION, AgentCapability.SOCIAL_INTERACTION}
 
         agent.has_capability = has_capability
 
         # Add required social interaction methods
-        agent.get_relationship = Mock(
-            return_value=None)  # No existing relationship
+        agent.get_relationship = Mock(return_value=None)  # No existing relationship
         agent.add_relationship = Mock()
         agent.add_to_memory = Mock()
 
@@ -622,8 +566,7 @@ class TestSocialInteractionBehavior:
         assert AgentCapability.COMMUNICATION in social_behavior.required_capabilities
         assert AgentCapability.SOCIAL_INTERACTION in social_behavior.required_capabilities
 
-    def test_social_can_execute_with_nearby_agents(
-            self, social_behavior, mock_agent):
+    def test_social_can_execute_with_nearby_agents(self, social_behavior, mock_agent):
         """Test can execute with nearby agents."""
         world_interface = Mock()
         world_interface.get_nearby_objects.return_value = [
@@ -635,8 +578,7 @@ class TestSocialInteractionBehavior:
         result = social_behavior._can_execute_custom(mock_agent, context)
         assert result is True
 
-    def test_social_cannot_execute_without_nearby_agents(
-            self, social_behavior, mock_agent):
+    def test_social_cannot_execute_without_nearby_agents(self, social_behavior, mock_agent):
         """Test cannot execute without nearby agents."""
         world_interface = Mock()
         world_interface.get_nearby_objects.return_value = []  # No nearby agents
@@ -772,11 +714,7 @@ class TestBehaviorTreeManager:
         # Should have all behaviors
         assert len(behavior_manager.behaviors) >= len(sample_behaviors)
 
-    def test_execute_behavior_tree(
-            self,
-            behavior_manager,
-            sample_behaviors,
-            mock_agent):
+    def test_execute_behavior_tree(self, behavior_manager, sample_behaviors, mock_agent):
         """Test evaluating the behavior tree."""
         # Add behaviors
         for behavior in sample_behaviors:

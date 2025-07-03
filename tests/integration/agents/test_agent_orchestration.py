@@ -52,19 +52,16 @@ class TestAgentIntegration:
         collision_system = CollisionSystem()
         pathfinding_grid = PathfindingGrid(100, 100)  # Create a 100x100 grid
         # Create movement controller
-        movement_controller = MovementController(
-            state_manager, collision_system, pathfinding_grid)
+        movement_controller = MovementController(state_manager, collision_system, pathfinding_grid)
         movement_controller.register_agent(agent)
         # Create perception system
         perception_system = PerceptionSystem(state_manager)
         perception_system.register_agent(agent)
         # Create decision system with all required components
-        decision_system = DecisionSystem(
-            state_manager, perception_system, movement_controller)
+        decision_system = DecisionSystem(state_manager, perception_system, movement_controller)
         decision_system.register_agent(agent)
         # Create memory system
-        memory_system = MemorySystem(
-            agent.agent_id, agent.resources.memory_capacity)
+        memory_system = MemorySystem(agent.agent_id, agent.resources.memory_capacity)
         # Test status update
         state_manager.update_agent_status(agent.agent_id, AgentStatus.MOVING)
         assert agent.status == AgentStatus.MOVING
@@ -80,10 +77,7 @@ class TestAgentIntegration:
         stimulus = Stimulus(
             stimulus_id="object1",
             stimulus_type=StimulusType.OBJECT,
-            position=Position(
-                agent_position.x + 1.0,
-                agent_position.y + 1.0,
-                agent_position.z),
+            position=Position(agent_position.x + 1.0, agent_position.y + 1.0, agent_position.z),
             intensity=1.0,
             radius=10.0,  # Make it have a large radius
             metadata={"type": "resource", "is_resource": True},
@@ -148,20 +142,17 @@ class TestAgentIntegration:
         assert exchange_result.success
         # Test memory system
         memory_system = MemorySystem(agent1.agent_id)
-        memory_system.store_memory(
-            {"interaction_id": interaction_id}, MemoryType.EPISODIC)
+        memory_system.store_memory({"interaction_id": interaction_id}, MemoryType.EPISODIC)
         memory_system.consolidate_memories()
         # Test persistence
         persistence = AgentPersistence()
         _ = persistence._serialize_agent(agent1)
-        retrieved = memory_system.retrieve_memories(
-            {"memory_type": MemoryType.EPISODIC}, 10)
+        retrieved = memory_system.retrieve_memories({"memory_type": MemoryType.EPISODIC}, 10)
         assert len(retrieved) > 0
 
     def test_environment_simulation(self) -> None:
         """Test full environment simulation with multiple agents"""
-        environment = SimulationEnvironment(
-            bounds=(-50, -50, 50, 50), time_scale=1.0)
+        environment = SimulationEnvironment(bounds=(-50, -50, 50, 50), time_scale=1.0)
         # Create a state manager for the perception system
         state_manager = AgentStateManager()
         environment.perception_system = PerceptionSystem(state_manager)
@@ -192,15 +183,11 @@ class TestAgentIntegration:
             Position(3, 2, 0),
         ]
         for i, pos in enumerate(positions):
-            history.append({"timestamp": i *
-                            0.1, "position": pos, "action": "move"})
-        success, error = validator.validate(
-            "movement_coherence", agent, history)
+            history.append({"timestamp": i * 0.1, "position": pos, "action": "move"})
+        success, error = validator.validate("movement_coherence", agent, history)
         assert success
-        history.append({"timestamp": len(history) * 0.1,
-                       "position": Position(100, 100, 0)})
-        success, error = validator.validate(
-            "movement_coherence", agent, history)
+        history.append({"timestamp": len(history) * 0.1, "position": Position(100, 100, 0)})
+        success, error = validator.validate("movement_coherence", agent, history)
         assert not success
         assert "Impossible speed" in error
 
@@ -215,10 +202,8 @@ class TestAgentIntegration:
         state_manager.register_agent(agent)
         with benchmark.measure("state_update"):
             for _ in range(100):
-                state_manager.update_agent_status(
-                    agent.agent_id, AgentStatus.MOVING)
-                state_manager.update_agent_status(
-                    agent.agent_id, AgentStatus.IDLE)
+                state_manager.update_agent_status(agent.agent_id, AgentStatus.MOVING)
+                state_manager.update_agent_status(agent.agent_id, AgentStatus.IDLE)
         report = benchmark.get_report()
         assert "agent_creation" in report
         assert "state_update" in report
@@ -274,8 +259,7 @@ class TestAgentIntegration:
             importance=0.8,
         )
         # Verify memory was stored
-        memories = memory_system.retrieve_memories(
-            {"memory_type": MemoryType.EPISODIC}, 10)
+        memories = memory_system.retrieve_memories({"memory_type": MemoryType.EPISODIC}, 10)
         assert len(memories) > 0
         # Test persistence (simplified since we don't have a real database)
         memory_summary = memory_system.get_memory_summary()
@@ -295,26 +279,19 @@ class TestAgentIntegration:
         collision_system = CollisionSystem()
         pathfinding_grid = PathfindingGrid(100, 100)
         # Create movement controller
-        movement_controller = MovementController(
-            state_manager, collision_system, pathfinding_grid)
+        movement_controller = MovementController(state_manager, collision_system, pathfinding_grid)
         movement_controller.register_agent(agent)
         # Create decision system
-        decision_system = DecisionSystem(
-            state_manager, perception_system, movement_controller)
+        decision_system = DecisionSystem(state_manager, perception_system, movement_controller)
         decision_system.register_agent(agent)
         # Create a stimulus
         stimulus = Stimulus(
             stimulus_id="test_object",
             stimulus_type=StimulusType.OBJECT,
-            position=Position(
-                agent.position.x + 2.0,
-                agent.position.y + 2.0,
-                0),
+            position=Position(agent.position.x + 2.0, agent.position.y + 2.0, 0),
             intensity=1.0,
             radius=5.0,
-            metadata={
-                "type": "resource",
-                "is_resource": True},
+            metadata={"type": "resource", "is_resource": True},
         )
         # Add stimulus to perception system
         perception_system.add_stimulus(stimulus)
@@ -341,8 +318,7 @@ class TestAgentIntegration:
         obstacle_pos = Position(5, 5, 0)
         collision_system.add_static_obstacle(obstacle_pos, 2.0)
         # Create movement controller
-        movement_controller = MovementController(
-            state_manager, collision_system, pathfinding_grid)
+        movement_controller = MovementController(state_manager, collision_system, pathfinding_grid)
         movement_controller.register_agent(agent)
         # Set destination on other side of obstacle
         target = Position(10, 10, 0)
@@ -362,8 +338,7 @@ class TestAgentStressTests:
 
     def test_many_agents_simulation(self) -> None:
         """Test simulation with many agents"""
-        environment = SimulationEnvironment(
-            bounds=(-200, -200, 200, 200), time_scale=1.0)
+        environment = SimulationEnvironment(bounds=(-200, -200, 200, 200), time_scale=1.0)
         # Create a state manager for the perception system
         state_manager = AgentStateManager()
         environment.perception_system = PerceptionSystem(state_manager)
@@ -381,8 +356,7 @@ class TestAgentStressTests:
             state_manager.register_agent(agent)
             agents.append(agent)
         for i in range(50):
-            pos = Position(np.random.uniform(-190, 190),
-                           np.random.uniform(-190, 190), 0)
+            pos = Position(np.random.uniform(-190, 190), np.random.uniform(-190, 190), 0)
             environment.add_resource(pos, "energy", np.random.uniform(10, 100))
         start_time = time.time()
         for _ in range(10):
@@ -414,8 +388,7 @@ class TestAgentStressTests:
                 importance=float((i % 5) / 5),
             )
         # Test memory retrieval
-        memories = memory_system.retrieve_memories(
-            {"memory_type": MemoryType.EPISODIC}, 10)
+        memories = memory_system.retrieve_memories({"memory_type": MemoryType.EPISODIC}, 10)
         assert len(memories) > 0
         # Test memory statistics
         memory_summary = memory_system.get_memory_summary()

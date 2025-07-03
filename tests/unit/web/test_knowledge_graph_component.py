@@ -25,8 +25,9 @@ def test_knowledge_graph_component():
     assert test_path.exists(), f"Test file not found: {test_path}"
 
     # Run Jest test
-    result = subprocess.run(["npm", "run", "test", "--", test_file],
-                            cwd=web_dir, capture_output=True, text=True)
+    result = subprocess.run(
+        ["npm", "run", "test", "--", test_file], cwd=web_dir, capture_output=True, text=True
+    )
 
     # Check test passed
     assert result.returncode == 0, f"Component test failed:\n{result.stderr}"
@@ -38,15 +39,15 @@ def test_knowledge_graph_component():
         with open(coverage_file) as f:
             coverage = json.load(f)
             # Verify component coverage
-            component_coverage = coverage.get(
-                "components/KnowledgeGraph.tsx", {})
+            component_coverage = coverage.get("components/KnowledgeGraph.tsx", {})
             if component_coverage:
                 statements = component_coverage.get("s", {})
                 covered = sum(1 for v in statements.values() if v > 0)
                 total = len(statements)
                 coverage_pct = (covered / total * 100) if total > 0 else 0
                 assert (
-                    coverage_pct > 80), f"Component coverage {
+                    coverage_pct > 80
+                ), f"Component coverage {
                     coverage_pct:.1f}% below 80% threshold"
 
 
@@ -85,14 +86,16 @@ def test_websocket_hook():
 
     if result.returncode != 0:
         # Install if missing
-        subprocess.run(["npm", "install", "--save-dev",
-                       "jest-websocket-mock"], cwd=web_dir)
+        subprocess.run(["npm", "install", "--save-dev", "jest-websocket-mock"], cwd=web_dir)
 
     # Run test
-    result = subprocess.run(["npm", "run", "test", "--", test_file],
-                            cwd=web_dir, capture_output=True, text=True)
+    result = subprocess.run(
+        ["npm", "run", "test", "--", test_file], cwd=web_dir, capture_output=True, text=True
+    )
 
-    assert result.returncode == 0, f"WebSocket hook test failed:\n{
+    assert (
+        result.returncode == 0
+    ), f"WebSocket hook test failed:\n{
         result.stderr}"
 
 
@@ -128,8 +131,7 @@ def test_frontend_test_coverage_threshold():
     # Run coverage report with timeout to prevent hanging
     try:
         result = subprocess.run(
-            ["npm", "run", "test:coverage", "--",
-                "--passWithNoTests", "--watchAll=false"],
+            ["npm", "run", "test:coverage", "--", "--passWithNoTests", "--watchAll=false"],
             cwd=web_dir,
             capture_output=True,
             text=True,
@@ -159,7 +161,8 @@ def test_frontend_test_coverage_threshold():
 
                     # Log current coverage
                     print(
-                        f"Current coverage - Statements: {stmt_coverage}%, Branches: {branch_coverage}%, Functions: {func_coverage}%, Lines: {line_coverage}%")
+                        f"Current coverage - Statements: {stmt_coverage}%, Branches: {branch_coverage}%, Functions: {func_coverage}%, Lines: {line_coverage}%"
+                    )
 
                     # Note: We're adding tests incrementally, so we check improvement
                     # rather than absolute threshold for now

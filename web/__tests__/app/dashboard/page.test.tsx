@@ -50,28 +50,7 @@ jest.mock("@/app/dashboard/components/panels/MetricsPanel", () => {
 
 // Removed redundant mocks - using the corrected versions above
 
-// Mock layout components
-jest.mock("@/app/dashboard/layouts/BloombergLayout", () => ({
-  default: () => <div data-testid="bloomberg-layout">Bloomberg Layout</div>,
-}));
-
-jest.mock("@/app/dashboard/layouts/BloombergTerminalLayout", () => ({
-  default: () => (
-    <div data-testid="bloomberg-terminal-layout">Bloomberg Terminal Layout</div>
-  ),
-}));
-
-jest.mock("@/app/dashboard/layouts/ResizableLayout", () => ({
-  default: () => <div data-testid="resizable-layout">Resizable Layout</div>,
-}));
-
-jest.mock("@/app/dashboard/layouts/KnowledgeLayout", () => ({
-  default: () => <div data-testid="knowledge-layout">Knowledge Layout</div>,
-}));
-
-jest.mock("@/app/dashboard/layouts/CEODemoLayout", () => ({
-  default: () => <div data-testid="ceo-demo-layout">CEO Demo Layout</div>,
-}));
+// Layout components have been removed as technical debt
 
 jest.mock("@/components/dashboard/TilingWindowManager", () => ({
   default: () => (

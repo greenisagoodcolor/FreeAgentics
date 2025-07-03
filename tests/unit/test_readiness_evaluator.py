@@ -63,8 +63,7 @@ def mock_agent():
 
     # Mock knowledge graph
     agent.knowledge_graph = Mock()
-    agent.knowledge_graph.experiences = [
-        Mock() for _ in range(750)]  # 750 experiences
+    agent.knowledge_graph.experiences = [Mock() for _ in range(750)]  # 750 experiences
     agent.knowledge_graph.patterns = {
         f"pattern_{i}": Mock(confidence=0.85 + (i * 0.01)) for i in range(30)
     }
@@ -98,11 +97,11 @@ def mock_agent_poor():
 
     # Minimal knowledge graph
     agent.knowledge_graph = Mock()
-    agent.knowledge_graph.experiences = [
-        Mock() for _ in range(50)]  # Few experiences
+    agent.knowledge_graph.experiences = [Mock() for _ in range(50)]  # Few experiences
     agent.knowledge_graph.patterns = {
         # Low confidence
-        f"pattern_{i}": Mock(confidence=0.60) for i in range(5)
+        f"pattern_{i}": Mock(confidence=0.60)
+        for i in range(5)
     }
 
     # Poor stats
@@ -119,8 +118,7 @@ def mock_agent_poor():
     }
 
     # Unstable model
-    agent.model_update_history = [{"magnitude": 0.25}
-                                  for _ in range(100)]  # Large updates
+    agent.model_update_history = [{"magnitude": 0.25} for _ in range(100)]  # Large updates
 
     return agent
 
@@ -232,8 +230,7 @@ class TestReadinessMetrics:
         )
 
         assert metrics.overall_score == 0.85
-        assert metrics.component_scores == {
-            "model_trained": 1.0, "knowledge_graph": 0.8}
+        assert metrics.component_scores == {"model_trained": 1.0, "knowledge_graph": 0.8}
         assert metrics.missing_components == ["testing"]
         assert metrics.recommendations == ["Complete testing component"]
 
@@ -253,8 +250,7 @@ class TestReadinessEvaluator:
 
         assert readiness_evaluator.criteria == expected_criteria
 
-    def test_evaluate_readiness_all_components_present(
-            self, readiness_evaluator):
+    def test_evaluate_readiness_all_components_present(self, readiness_evaluator):
         """Test evaluation with all components present."""
         agent_data = {
             "model_trained": True,
@@ -351,12 +347,9 @@ class TestReadinessEvaluator:
 class TestAgentReadinessEvaluator:
     """Test AgentReadinessEvaluator functionality."""
 
-    def test_evaluator_initialization_default_thresholds(
-            self, agent_readiness_evaluator):
+    def test_evaluator_initialization_default_thresholds(self, agent_readiness_evaluator):
         """Test evaluator initialization with default thresholds."""
-        assert isinstance(
-            agent_readiness_evaluator.thresholds,
-            ReadinessThresholds)
+        assert isinstance(agent_readiness_evaluator.thresholds, ReadinessThresholds)
         assert agent_readiness_evaluator.thresholds.min_experiences == 1000
 
         expected_weights = {
@@ -368,15 +361,13 @@ class TestAgentReadinessEvaluator:
         }
         assert agent_readiness_evaluator.dimension_weights == expected_weights
 
-    def test_evaluator_initialization_custom_thresholds(
-            self, sample_readiness_thresholds):
+    def test_evaluator_initialization_custom_thresholds(self, sample_readiness_thresholds):
         """Test evaluator initialization with custom thresholds."""
         evaluator = AgentReadinessEvaluator(sample_readiness_thresholds)
         assert evaluator.thresholds == sample_readiness_thresholds
         assert evaluator.thresholds.min_experiences == 500
 
-    def test_evaluate_agent_high_performance(
-            self, agent_readiness_evaluator, mock_agent):
+    def test_evaluate_agent_high_performance(self, agent_readiness_evaluator, mock_agent):
         """Test evaluating a high-performance agent."""
         score = agent_readiness_evaluator.evaluate_agent(mock_agent)
 
@@ -391,8 +382,7 @@ class TestAgentReadinessEvaluator:
         assert score.resource_management > 0.8
         assert len(score.recommendations) >= 0
 
-    def test_evaluate_agent_poor_performance(
-            self, agent_readiness_evaluator, mock_agent_poor):
+    def test_evaluate_agent_poor_performance(self, agent_readiness_evaluator, mock_agent_poor):
         """Test evaluating a poor-performance agent."""
         score = agent_readiness_evaluator.evaluate_agent(mock_agent_poor)
 
@@ -404,12 +394,10 @@ class TestAgentReadinessEvaluator:
         assert score.model_stability < 0.7
         assert len(score.recommendations) > 0  # Should have recommendations
 
-    def test_evaluate_knowledge_dimension(
-            self, agent_readiness_evaluator, mock_agent):
+    def test_evaluate_knowledge_dimension(self, agent_readiness_evaluator, mock_agent):
         """Test knowledge dimension evaluation."""
         score = ReadinessScore(agent_id="test", timestamp=datetime.now())
-        knowledge_score = agent_readiness_evaluator._evaluate_knowledge(
-            mock_agent, score)
+        knowledge_score = agent_readiness_evaluator._evaluate_knowledge(mock_agent, score)
 
         assert 0.0 <= knowledge_score <= 1.0
         assert knowledge_score > 0.5  # Should be good with 750 experiences and 30 patterns
@@ -418,12 +406,10 @@ class TestAgentReadinessEvaluator:
         assert "pattern_count" in score.metrics["knowledge"]
         assert "avg_pattern_confidence" in score.metrics["knowledge"]
 
-    def test_evaluate_goals_dimension(
-            self, agent_readiness_evaluator, mock_agent):
+    def test_evaluate_goals_dimension(self, agent_readiness_evaluator, mock_agent):
         """Test goals dimension evaluation."""
         score = ReadinessScore(agent_id="test", timestamp=datetime.now())
-        goals_score = agent_readiness_evaluator._evaluate_goals(
-            mock_agent, score)
+        goals_score = agent_readiness_evaluator._evaluate_goals(mock_agent, score)
 
         assert 0.0 <= goals_score <= 1.0
         assert goals_score > 0.8  # Should be high with 90% success rate
@@ -431,24 +417,20 @@ class TestAgentReadinessEvaluator:
         assert "success_rate" in score.metrics["goals"]
         assert "complex_completed" in score.metrics["goals"]
 
-    def test_evaluate_model_stability(
-            self, agent_readiness_evaluator, mock_agent):
+    def test_evaluate_model_stability(self, agent_readiness_evaluator, mock_agent):
         """Test model stability evaluation."""
         score = ReadinessScore(agent_id="test", timestamp=datetime.now())
-        stability_score = agent_readiness_evaluator._evaluate_model_stability(
-            mock_agent, score)
+        stability_score = agent_readiness_evaluator._evaluate_model_stability(mock_agent, score)
 
         assert 0.0 <= stability_score <= 1.0
         assert "model_stability" in score.metrics
         assert "is_converged" in score.metrics["model_stability"]
         assert "stable_iterations" in score.metrics["model_stability"]
 
-    def test_evaluate_collaboration(
-            self, agent_readiness_evaluator, mock_agent):
+    def test_evaluate_collaboration(self, agent_readiness_evaluator, mock_agent):
         """Test collaboration evaluation."""
         score = ReadinessScore(agent_id="test", timestamp=datetime.now())
-        collab_score = agent_readiness_evaluator._evaluate_collaboration(
-            mock_agent, score)
+        collab_score = agent_readiness_evaluator._evaluate_collaboration(mock_agent, score)
 
         assert 0.0 <= collab_score <= 1.0
         assert collab_score > 0.7  # Should be high with good interaction rates
@@ -460,8 +442,7 @@ class TestAgentReadinessEvaluator:
     def test_evaluate_resources(self, agent_readiness_evaluator, mock_agent):
         """Test resource management evaluation."""
         score = ReadinessScore(agent_id="test", timestamp=datetime.now())
-        resource_score = agent_readiness_evaluator._evaluate_resources(
-            mock_agent, score)
+        resource_score = agent_readiness_evaluator._evaluate_resources(mock_agent, score)
 
         assert 0.0 <= resource_score <= 1.0
         assert resource_score > 0.8  # Should be high with good efficiency scores
@@ -469,8 +450,7 @@ class TestAgentReadinessEvaluator:
         assert "resource_efficiency" in score.metrics["resources"]
         assert "sustainability_score" in score.metrics["resources"]
 
-    def test_evaluation_with_missing_attributes(
-            self, agent_readiness_evaluator):
+    def test_evaluation_with_missing_attributes(self, agent_readiness_evaluator):
         """Test evaluation with agent missing attributes."""
         minimal_agent = Mock()
         minimal_agent.id = "minimal_agent"
@@ -481,10 +461,7 @@ class TestAgentReadinessEvaluator:
         assert score.overall_score >= 0.0  # Should handle gracefully
         assert score.is_ready is False
 
-    def test_recommendation_generation(
-            self,
-            agent_readiness_evaluator,
-            mock_agent_poor):
+    def test_recommendation_generation(self, agent_readiness_evaluator, mock_agent_poor):
         """Test recommendation generation for poor-performing agent."""
         score = agent_readiness_evaluator.evaluate_agent(mock_agent_poor)
 
@@ -507,15 +484,13 @@ class TestAgentReadinessEvaluator:
 class TestEvaluationHistory:
     """Test evaluation history and trend functionality."""
 
-    def test_evaluation_history_storage(
-            self, agent_readiness_evaluator, mock_agent):
+    def test_evaluation_history_storage(self, agent_readiness_evaluator, mock_agent):
         """Test that evaluation history is stored correctly."""
         # Perform multiple evaluations
         score1 = agent_readiness_evaluator.evaluate_agent(mock_agent)
         score2 = agent_readiness_evaluator.evaluate_agent(mock_agent)
 
-        history = agent_readiness_evaluator.get_readiness_history(
-            "test_agent_001")
+        history = agent_readiness_evaluator.get_readiness_history("test_agent_001")
 
         assert len(history) == 2
         assert history[0] == score1
@@ -523,8 +498,7 @@ class TestEvaluationHistory:
 
     def test_get_readiness_history_empty(self, agent_readiness_evaluator):
         """Test getting history for agent with no evaluations."""
-        history = agent_readiness_evaluator.get_readiness_history(
-            "nonexistent_agent")
+        history = agent_readiness_evaluator.get_readiness_history("nonexistent_agent")
         assert history == []
 
     def test_get_readiness_trend(self, agent_readiness_evaluator, mock_agent):
@@ -533,8 +507,7 @@ class TestEvaluationHistory:
         agent_readiness_evaluator.evaluate_agent(mock_agent)
         agent_readiness_evaluator.evaluate_agent(mock_agent)
 
-        trends = agent_readiness_evaluator.get_readiness_trend(
-            "test_agent_001")
+        trends = agent_readiness_evaluator.get_readiness_trend("test_agent_001")
 
         assert "timestamps" in trends
         assert "overall" in trends
@@ -549,15 +522,10 @@ class TestEvaluationHistory:
 
     def test_get_readiness_trend_empty(self, agent_readiness_evaluator):
         """Test getting trend for agent with no history."""
-        trends = agent_readiness_evaluator.get_readiness_trend(
-            "nonexistent_agent")
+        trends = agent_readiness_evaluator.get_readiness_trend("nonexistent_agent")
         assert trends == {}
 
-    def test_batch_evaluate(
-            self,
-            agent_readiness_evaluator,
-            mock_agent,
-            mock_agent_poor):
+    def test_batch_evaluate(self, agent_readiness_evaluator, mock_agent, mock_agent_poor):
         """Test batch evaluation of multiple agents."""
         agents = [mock_agent, mock_agent_poor]
 
@@ -569,8 +537,7 @@ class TestEvaluationHistory:
         assert isinstance(results["test_agent_001"], ReadinessScore)
         assert isinstance(results["poor_agent_001"], ReadinessScore)
 
-    def test_export_readiness_report(
-            self, agent_readiness_evaluator, mock_agent):
+    def test_export_readiness_report(self, agent_readiness_evaluator, mock_agent):
         """Test exporting readiness report to file."""
         # Perform evaluation
         agent_readiness_evaluator.evaluate_agent(mock_agent)
@@ -594,8 +561,7 @@ class TestEvaluationHistory:
             assert "trends" in report_data
             assert "recommendation_summary" in report_data
 
-    def test_export_readiness_report_no_history(
-            self, agent_readiness_evaluator):
+    def test_export_readiness_report_no_history(self, agent_readiness_evaluator):
         """Test exporting report for agent with no evaluation history."""
         with tempfile.TemporaryDirectory() as temp_dir:
             output_dir = Path(temp_dir)
@@ -620,9 +586,7 @@ class TestAgentReadinessChecker:
 
     def test_checker_initialization(self, agent_readiness_checker):
         """Test checker initialization."""
-        assert isinstance(
-            agent_readiness_checker.evaluator,
-            ReadinessEvaluator)
+        assert isinstance(agent_readiness_checker.evaluator, ReadinessEvaluator)
 
     def test_check_agent_readiness(self, agent_readiness_checker):
         """Test checking agent readiness."""
@@ -634,8 +598,7 @@ class TestAgentReadinessChecker:
             "testing": False,
         }
 
-        metrics = agent_readiness_checker.check_agent_readiness(
-            "test_agent", agent_config)
+        metrics = agent_readiness_checker.check_agent_readiness("test_agent", agent_config)
 
         assert isinstance(metrics, ReadinessMetrics)
         # Should have model_trained (0.3) + knowledge_graph (0.2) + dependencies
@@ -661,15 +624,13 @@ class TestEdgeCasesAndErrorHandling:
         assert score.overall_score == 0.0
         assert score.is_ready is False
 
-    def test_knowledge_evaluation_with_no_knowledge_graph(
-            self, agent_readiness_evaluator):
+    def test_knowledge_evaluation_with_no_knowledge_graph(self, agent_readiness_evaluator):
         """Test knowledge evaluation with missing knowledge graph."""
         agent = Mock()
         agent.knowledge_graph = None
 
         score = ReadinessScore(agent_id="test", timestamp=datetime.now())
-        knowledge_score = agent_readiness_evaluator._evaluate_knowledge(
-            agent, score)
+        knowledge_score = agent_readiness_evaluator._evaluate_knowledge(agent, score)
 
         assert knowledge_score == 0.0
 
@@ -683,15 +644,13 @@ class TestEdgeCasesAndErrorHandling:
 
         assert goals_score == 0.0
 
-    def test_model_stability_insufficient_history(
-            self, agent_readiness_evaluator):
+    def test_model_stability_insufficient_history(self, agent_readiness_evaluator):
         """Test model stability with insufficient update history."""
         agent = Mock()
         agent.model_update_history = [{"magnitude": 0.1}]  # Only 1 update
 
         score = ReadinessScore(agent_id="test", timestamp=datetime.now())
-        stability_score = agent_readiness_evaluator._evaluate_model_stability(
-            agent, score)
+        stability_score = agent_readiness_evaluator._evaluate_model_stability(agent, score)
 
         assert stability_score == 0.0
         assert score.metrics["model_stability"]["is_converged"] is False
@@ -707,15 +666,13 @@ class TestEdgeCasesAndErrorHandling:
         }
 
         score = ReadinessScore(agent_id="test", timestamp=datetime.now())
-        collab_score = agent_readiness_evaluator._evaluate_collaboration(
-            agent, score)
+        collab_score = agent_readiness_evaluator._evaluate_collaboration(agent, score)
 
         assert collab_score == 0.0
 
     def test_dimension_weights_sum_to_one(self, agent_readiness_evaluator):
         """Test that dimension weights sum to approximately 1.0."""
-        total_weight = sum(
-            agent_readiness_evaluator.dimension_weights.values())
+        total_weight = sum(agent_readiness_evaluator.dimension_weights.values())
         # Allow small floating point differences
         assert abs(total_weight - 1.0) < 0.01
 
@@ -733,11 +690,11 @@ class TestIntegrationScenarios:
 
         # Knowledge graph meeting custom thresholds
         agent.knowledge_graph = Mock()
-        agent.knowledge_graph.experiences = [
-            Mock() for _ in range(600)]  # > 500
+        agent.knowledge_graph.experiences = [Mock() for _ in range(600)]  # > 500
         agent.knowledge_graph.patterns = {
             # > 25, > 0.80 conf
-            f"pattern_{i}": Mock(confidence=0.82) for i in range(30)
+            f"pattern_{i}": Mock(confidence=0.82)
+            for i in range(30)
         }
 
         # Stats meeting custom thresholds
@@ -773,8 +730,7 @@ class TestIntegrationScenarios:
         # Test export
         with tempfile.TemporaryDirectory() as temp_dir:
             output_dir = Path(temp_dir)
-            report_file = evaluator.export_readiness_report(
-                "workflow_test_agent", output_dir)
+            report_file = evaluator.export_readiness_report("workflow_test_agent", output_dir)
             assert report_file.exists()
 
     def test_readiness_improvement_over_time(self, agent_readiness_evaluator):
@@ -786,9 +742,7 @@ class TestIntegrationScenarios:
         # Initial poor state
         agent.knowledge_graph = Mock()
         agent.knowledge_graph.experiences = [Mock() for _ in range(100)]
-        agent.knowledge_graph.patterns = {
-            f"pattern_{i}": Mock(
-                confidence=0.60) for i in range(10)}
+        agent.knowledge_graph.patterns = {f"pattern_{i}": Mock(confidence=0.60) for i in range(10)}
 
         agent.stats = {
             "total_goals_attempted": 20,
@@ -808,11 +762,8 @@ class TestIntegrationScenarios:
         score1 = agent_readiness_evaluator.evaluate_agent(agent)
 
         # Simulate improvement
-        agent.knowledge_graph.experiences = [
-            Mock() for _ in range(800)]  # More experience
-        agent.knowledge_graph.patterns = {
-            f"pattern_{i}": Mock(
-                confidence=0.85) for i in range(40)}
+        agent.knowledge_graph.experiences = [Mock() for _ in range(800)]  # More experience
+        agent.knowledge_graph.patterns = {f"pattern_{i}": Mock(confidence=0.85) for i in range(40)}
 
         agent.stats.update(
             {
@@ -827,8 +778,7 @@ class TestIntegrationScenarios:
             }
         )
 
-        agent.model_update_history = [{"magnitude": 0.005}
-                                      for _ in range(100)]  # Stable
+        agent.model_update_history = [{"magnitude": 0.005} for _ in range(100)]  # Stable
 
         # Second evaluation (improved)
         score2 = agent_readiness_evaluator.evaluate_agent(agent)
@@ -838,6 +788,5 @@ class TestIntegrationScenarios:
         assert len(score2.recommendations) < len(score1.recommendations)
 
         # Check trends show improvement
-        trends = agent_readiness_evaluator.get_readiness_trend(
-            "improving_agent")
+        trends = agent_readiness_evaluator.get_readiness_trend("improving_agent")
         assert trends["overall"][1] > trends["overall"][0]

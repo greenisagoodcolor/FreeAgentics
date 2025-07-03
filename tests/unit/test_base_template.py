@@ -37,13 +37,7 @@ except ImportError:
         GUARDIAN = "guardian"
 
     class BeliefState:
-        def __init__(
-                self,
-                beliefs,
-                policies,
-                preferences,
-                timestamp,
-                confidence):
+        def __init__(self, beliefs, policies, preferences, timestamp, confidence):
             self.beliefs = beliefs
             self.policies = policies
             self.preferences = preferences
@@ -51,12 +45,7 @@ except ImportError:
             self.confidence = confidence
 
         @classmethod
-        def create_uniform(
-                cls,
-                num_states,
-                num_policies,
-                preferences=None,
-                timestamp=None):
+        def create_uniform(cls, num_states, num_policies, preferences=None, timestamp=None):
             beliefs = np.ones(num_states) / num_states
             policies = np.ones(num_policies) / num_policies
             return cls(
@@ -82,13 +71,8 @@ except ImportError:
 
     class TemplateConfig:
         def __init__(
-                self,
-                template_id,
-                category,
-                num_states,
-                num_observations,
-                num_policies,
-                **kwargs):
+            self, template_id, category, num_states, num_observations, num_policies, **kwargs
+        ):
             self.template_id = template_id
             self.category = category
             self.num_states = num_states
@@ -168,10 +152,8 @@ class TestBeliefState:
         expected_beliefs = np.ones(4) / 4
         expected_policies = np.ones(3) / 3
 
-        np.testing.assert_array_almost_equal(
-            belief_state.beliefs, expected_beliefs)
-        np.testing.assert_array_almost_equal(
-            belief_state.policies, expected_policies)
+        np.testing.assert_array_almost_equal(belief_state.beliefs, expected_beliefs)
+        np.testing.assert_array_almost_equal(belief_state.policies, expected_policies)
 
     def test_belief_state_validation(self):
         """Test belief state mathematical validation."""
@@ -211,8 +193,7 @@ class TestBeliefState:
             )
 
             # New state has updated beliefs
-            np.testing.assert_array_almost_equal(
-                updated_state.beliefs, new_beliefs)
+            np.testing.assert_array_almost_equal(updated_state.beliefs, new_beliefs)
             assert updated_state.timestamp > valid_belief_state.timestamp
 
 
@@ -231,13 +212,8 @@ class TestGenerativeModelParams:
         D = np.array([0.6, 0.4])  # Prior
 
         return GenerativeModelParams(
-            A=A,
-            B=B,
-            C=C,
-            D=D,
-            precision_sensory=1.2,
-            precision_policy=0.8,
-            precision_state=1.0)
+            A=A, B=B, C=C, D=D, precision_sensory=1.2, precision_policy=0.8, precision_state=1.0
+        )
 
     def test_model_params_creation(self, valid_model_params):
         """Test model parameters can be created."""
@@ -335,10 +311,7 @@ class TestActiveInferenceTemplate:
                         np.ones((config.num_observations, config.num_states))
                         / config.num_observations
                     )
-                    B = np.zeros(
-                        (config.num_states,
-                         config.num_states,
-                         config.num_policies))
+                    B = np.zeros((config.num_states, config.num_states, config.num_policies))
                     for i in range(config.num_policies):
                         B[:, :, i] = np.eye(config.num_states)
                     C = np.zeros(config.num_observations)
@@ -346,8 +319,7 @@ class TestActiveInferenceTemplate:
                     return GenerativeModelParams(A=A, B=B, C=C, D=D)
 
                 def initialize_beliefs(self, config):
-                    return BeliefState.create_uniform(
-                        config.num_states, config.num_policies)
+                    return BeliefState.create_uniform(config.num_states, config.num_policies)
 
                 def compute_epistemic_value(self, beliefs, observations):
                     return float(np.sum(beliefs.beliefs))
@@ -423,8 +395,7 @@ class TestActiveInferenceTemplate:
         beliefs = base_template.initialize_beliefs(template_config)
         observation = np.array([1.0, 0.0, 0.0])  # One-hot observation
 
-        free_energy = base_template.compute_free_energy(
-            beliefs, observation, model)
+        free_energy = base_template.compute_free_energy(beliefs, observation, model)
 
         assert isinstance(free_energy, float)
         assert not np.isnan(free_energy)
@@ -508,10 +479,7 @@ class TestTemplateIntegration:
                 A = np.random.rand(config.num_observations, config.num_states)
                 A = A / np.sum(A, axis=0, keepdims=True)  # Normalize columns
 
-                B = np.zeros(
-                    (config.num_states,
-                     config.num_states,
-                     config.num_policies))
+                B = np.zeros((config.num_states, config.num_states, config.num_policies))
                 for i in range(config.num_policies):
                     B[:, :, i] = np.eye(config.num_states)
 
@@ -521,8 +489,7 @@ class TestTemplateIntegration:
                 return GenerativeModelParams(A=A, B=B, C=C, D=D)
 
             def initialize_beliefs(self, config):
-                return BeliefState.create_uniform(
-                    config.num_states, config.num_policies)
+                return BeliefState.create_uniform(config.num_states, config.num_policies)
 
             def compute_epistemic_value(self, beliefs, observations):
                 return entropy(beliefs.beliefs)
@@ -530,8 +497,7 @@ class TestTemplateIntegration:
             def get_behavioral_description(self):
                 return "Integration test template"
 
-        template = IntegrationTemplate(
-            "integration", TemplateCategory.EXPLORER)
+        template = IntegrationTemplate("integration", TemplateCategory.EXPLORER)
 
         # Test workflow
         model = template.create_generative_model(config)
@@ -572,8 +538,7 @@ class TestTemplateIntegration:
                 return GenerativeModelParams(A=A, B=B, C=C, D=D)
 
             def initialize_beliefs(self, config):
-                return BeliefState.create_uniform(
-                    config.num_states, config.num_policies)
+                return BeliefState.create_uniform(config.num_states, config.num_policies)
 
             def compute_epistemic_value(self, beliefs, observations):
                 return 0.0

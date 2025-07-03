@@ -149,26 +149,18 @@ class TestLayerConfig:
         activations = ["relu", "leaky_relu", "elu", "tanh", "sigmoid", None]
 
         for activation in activations:
-            config = LayerConfig(
-                in_channels=32,
-                out_channels=32,
-                activation=activation)
+            config = LayerConfig(in_channels=32, out_channels=32, activation=activation)
             assert config.activation == activation
 
 
-@pytest.mark.skipif(not TORCH_GEOMETRIC_AVAILABLE,
-                    reason="torch_geometric not available")
+@pytest.mark.skipif(not TORCH_GEOMETRIC_AVAILABLE, reason="torch_geometric not available")
 class TestGATLayer:
     """Test GAT (Graph Attention Network) layer."""
 
     @pytest.fixture
     def gat_config(self):
         """Create GAT layer configuration."""
-        return LayerConfig(
-            in_channels=32,
-            out_channels=64,
-            heads=4,
-            dropout=0.1)
+        return LayerConfig(in_channels=32, out_channels=64, heads=4, dropout=0.1)
 
     def test_gat_layer_creation(self, gat_config):
         """Test creating GAT layer."""
@@ -192,8 +184,9 @@ class TestGATLayer:
         # Create simple graph
         num_nodes = 10
         num_features = 32
-        edge_index = torch.tensor([[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [
-            1, 2, 3, 4, 5, 6, 7, 8, 9, 0]], dtype=torch.long)
+        edge_index = torch.tensor(
+            [[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]], dtype=torch.long
+        )
         x = torch.randn(num_nodes, num_features)
 
         # Create GAT layer
@@ -212,13 +205,11 @@ class TestGATLayer:
             return
 
         # Create GAT with attention output
-        conv = GATConv(32, 64, heads=4, concat=True,
-                       return_attention_weights=True)
+        conv = GATConv(32, 64, heads=4, concat=True, return_attention_weights=True)
 
         # Create graph
         x = torch.randn(5, 32)
-        edge_index = torch.tensor(
-            [[0, 1, 2, 3, 4], [1, 2, 3, 4, 0]], dtype=torch.long)
+        edge_index = torch.tensor([[0, 1, 2, 3, 4], [1, 2, 3, 4, 0]], dtype=torch.long)
 
         # Forward pass with attention weights
         out, (edge_index_out, attention_weights) = conv(
@@ -259,8 +250,7 @@ class TestGATLayer:
         assert torch.allclose(out_eval1, out_eval2)
 
 
-@pytest.mark.skipif(not TORCH_GEOMETRIC_AVAILABLE,
-                    reason="torch_geometric not available")
+@pytest.mark.skipif(not TORCH_GEOMETRIC_AVAILABLE, reason="torch_geometric not available")
 class TestGCNLayer:
     """Test GCN (Graph Convolutional Network) layer."""
 
@@ -334,8 +324,7 @@ class TestGCNLayer:
         assert out.shape == (5, 64)
 
 
-@pytest.mark.skipif(not TORCH_GEOMETRIC_AVAILABLE,
-                    reason="torch_geometric not available")
+@pytest.mark.skipif(not TORCH_GEOMETRIC_AVAILABLE, reason="torch_geometric not available")
 class TestSAGELayer:
     """Test GraphSAGE layer."""
 
@@ -385,8 +374,7 @@ class TestSAGELayer:
         assert out.shape == (100, 64)
 
 
-@pytest.mark.skipif(not TORCH_GEOMETRIC_AVAILABLE,
-                    reason="torch_geometric not available")
+@pytest.mark.skipif(not TORCH_GEOMETRIC_AVAILABLE, reason="torch_geometric not available")
 class TestCustomGNNLayer:
     """Test custom GNN layer implementations."""
 
@@ -422,14 +410,7 @@ class TestCustomGNNLayer:
             return
 
         # EdgeConv for edge feature handling
-        nn_model = nn.Sequential(
-            nn.Linear(
-                2 * 32,
-                64),
-            nn.ReLU(),
-            nn.Linear(
-                64,
-                64))
+        nn_model = nn.Sequential(nn.Linear(2 * 32, 64), nn.ReLU(), nn.Linear(64, 64))
         conv = EdgeConv(nn_model)
 
         x = torch.randn(10, 32)
@@ -450,10 +431,7 @@ class TestResidualGNNBlock:
         try:
             from inference.gnn.layers import ResidualGNNBlock
 
-            config = LayerConfig(
-                in_channels=64,
-                out_channels=64,
-                residual=True)
+            config = LayerConfig(in_channels=64, out_channels=64, residual=True)
 
             block = ResidualGNNBlock(config)
             assert hasattr(block, "conv")
@@ -495,11 +473,8 @@ class TestGNNModel:
             from inference.gnn.model import GNNModel, GNNModelConfig
 
             config = GNNModelConfig(
-                input_dim=32,
-                hidden_dim=64,
-                output_dim=10,
-                num_layers=3,
-                layer_type="gcn")
+                input_dim=32, hidden_dim=64, output_dim=10, num_layers=3, layer_type="gcn"
+            )
 
             model = GNNModel(config)
             assert hasattr(model, "layers")
@@ -514,10 +489,8 @@ class TestGNNModel:
 
         # Create simple model
         model = nn.Sequential(
-            GCNConv(
-                32, 64), nn.ReLU(), GCNConv(
-                64, 64), nn.ReLU(), GCNConv(
-                64, 10))
+            GCNConv(32, 64), nn.ReLU(), GCNConv(64, 64), nn.ReLU(), GCNConv(64, 10)
+        )
 
         # Create graph data
         x = torch.randn(20, 32)

@@ -52,9 +52,7 @@ class TestAgentPersistence:
         agent.resources = AgentResources(
             energy=80.0, health=90.0, memory_capacity=100.0, memory_used=10.0
         )
-        agent.capabilities = {
-            AgentCapability.MOVEMENT,
-            AgentCapability.PERCEPTION}
+        agent.capabilities = {AgentCapability.MOVEMENT, AgentCapability.PERCEPTION}
         agent.personality = AgentPersonality(
             openness=0.8,
             conscientiousness=0.7,
@@ -138,10 +136,10 @@ class TestAgentPersistence:
         # Mock existing database agent
         mock_db_agent = Mock()
         self.mock_session.query.return_value.filter_by.return_value.first.return_value = (
-            mock_db_agent)
+            mock_db_agent
+        )
 
-        result = self.persistence.save_agent(
-            self.test_agent, update_if_exists=True)
+        result = self.persistence.save_agent(self.test_agent, update_if_exists=True)
 
         assert result is True
 
@@ -159,10 +157,10 @@ class TestAgentPersistence:
         # Mock existing database agent
         mock_db_agent = Mock()
         self.mock_session.query.return_value.filter_by.return_value.first.return_value = (
-            mock_db_agent)
+            mock_db_agent
+        )
 
-        result = self.persistence.save_agent(
-            self.test_agent, update_if_exists=False)
+        result = self.persistence.save_agent(self.test_agent, update_if_exists=False)
 
         assert result is False
 
@@ -205,8 +203,7 @@ class TestAgentPersistence:
         """Test rollback on error with internal session."""
         mock_internal_session = Mock()
         mock_get_db.return_value = mock_internal_session
-        mock_internal_session.query.side_effect = SQLAlchemyError(
-            "Database error")
+        mock_internal_session.query.side_effect = SQLAlchemyError("Database error")
 
         persistence = AgentPersistence()
         result = persistence.save_agent(self.test_agent)
@@ -225,38 +222,19 @@ class TestAgentPersistence:
         mock_db_agent.created_at = datetime.now()
         mock_db_agent.updated_at = datetime.now()
         mock_db_agent.state = {
-            "position": {
-                "x": 10.0,
-                "y": 20.0,
-                "z": 5.0},
-            "orientation": {
-                "w": 1.0,
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0},
-            "velocity": [
-                1.0,
-                2.0,
-                0.0],
+            "position": {"x": 10.0, "y": 20.0, "z": 5.0},
+            "orientation": {"w": 1.0, "x": 0.0, "y": 0.0, "z": 0.0},
+            "velocity": [1.0, 2.0, 0.0],
             "status": "idle",
-            "resources": {
-                "energy": 80.0,
-                "health": 90.0,
-                "memory_capacity": 100,
-                "memory_used": 0},
+            "resources": {"energy": 80.0, "health": 90.0, "memory_capacity": 100, "memory_used": 0},
             "current_goal": {
                 "goal_id": "goal_1",
                 "description": "Explore unknown area",
                 "priority": 0.9,
-                "target_position": {
-                    "x": 100.0,
-                    "y": 100.0,
-                    "z": 0.0},
+                "target_position": {"x": 100.0, "y": 100.0, "z": 0.0},
                 "deadline": datetime.now().isoformat(),
             },
-            "short_term_memory": [
-                "event1",
-                "event2"],
+            "short_term_memory": ["event1", "event2"],
             "experience_count": 42,
         }
         mock_db_agent.config = {
@@ -278,7 +256,8 @@ class TestAgentPersistence:
         }
 
         self.mock_session.query.return_value.filter_by.return_value.first.return_value = (
-            mock_db_agent)
+            mock_db_agent
+        )
 
         agent = self.persistence.load_agent(self.test_agent.agent_id)
 
@@ -319,14 +298,8 @@ class TestAgentPersistence:
             mock_agent.created_at = datetime.now()
             mock_agent.updated_at = datetime.now()
             mock_agent.state = {"position": {"x": 0, "y": 0, "z": 0}}
-            mock_agent.config = {
-                "capabilities": [],
-                "personality": {},
-                "metadata": {}}
-            mock_agent.beliefs = {
-                "relationships": {},
-                "goals": [],
-                "long_term_memory": []}
+            mock_agent.config = {"capabilities": [], "personality": {}, "metadata": {}}
+            mock_agent.beliefs = {"relationships": {}, "goals": [], "long_term_memory": []}
             mock_agents.append(mock_agent)
 
         self.mock_session.query.return_value.all.return_value = mock_agents
@@ -345,8 +318,7 @@ class TestAgentPersistence:
         mock_query.filter_by.return_value = mock_query
         mock_query.all.return_value = []
 
-        _ = self.persistence.load_all_agents(
-            agent_type="explorer", status="idle")
+        _ = self.persistence.load_all_agents(agent_type="explorer", status="idle")
 
         # Verify filter_by was called twice
         assert mock_query.filter_by.call_count == 2
@@ -364,21 +336,14 @@ class TestAgentPersistence:
         valid_agent.created_at = datetime.now()
         valid_agent.updated_at = datetime.now()
         valid_agent.state = {"position": {"x": 0, "y": 0, "z": 0}}
-        valid_agent.config = {
-            "capabilities": [],
-            "personality": {},
-            "metadata": {}}
-        valid_agent.beliefs = {
-            "relationships": {},
-            "goals": [],
-            "long_term_memory": []}
+        valid_agent.config = {"capabilities": [], "personality": {}, "metadata": {}}
+        valid_agent.beliefs = {"relationships": {}, "goals": [], "long_term_memory": []}
 
         invalid_agent = Mock()
         invalid_agent.uuid = "invalid_agent"
         invalid_agent.state = None  # This will cause deserialization error
 
-        self.mock_session.query.return_value.all.return_value = [
-            valid_agent, invalid_agent]
+        self.mock_session.query.return_value.all.return_value = [valid_agent, invalid_agent]
 
         agents = self.persistence.load_all_agents()
 
@@ -390,7 +355,8 @@ class TestAgentPersistence:
         """Test successfully deleting an agent."""
         mock_db_agent = Mock()
         self.mock_session.query.return_value.filter_by.return_value.first.return_value = (
-            mock_db_agent)
+            mock_db_agent
+        )
 
         result = self.persistence.delete_agent(self.test_agent.agent_id)
 
@@ -410,7 +376,8 @@ class TestAgentPersistence:
         """Test handling database error during delete."""
         mock_db_agent = Mock()
         self.mock_session.query.return_value.filter_by.return_value.first.return_value = (
-            mock_db_agent)
+            mock_db_agent
+        )
         self.mock_session.delete.side_effect = SQLAlchemyError("Delete error")
 
         result = self.persistence.delete_agent(self.test_agent.agent_id)
@@ -548,9 +515,7 @@ class TestAgentPersistence:
         assert restored_agent.position.y == self.test_agent.position.y
         assert restored_agent.resources.energy == self.test_agent.resources.energy
         assert restored_agent.status == self.test_agent.status
-        assert len(
-            restored_agent.capabilities) == len(
-            self.test_agent.capabilities)
+        assert len(restored_agent.capabilities) == len(self.test_agent.capabilities)
         assert restored_agent.personality.openness == self.test_agent.personality.openness
 
     def test_serialize_goal(self):

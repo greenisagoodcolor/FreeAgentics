@@ -32,10 +32,7 @@ class CoalitionWebSocketManager:
         self.active_connections: Set[WebSocket] = set()
         self.connection_metadata: Dict[WebSocket, Dict] = {}
 
-    async def connect(
-            self,
-            websocket: WebSocket,
-            client_id: Optional[str] = None):
+    async def connect(self, websocket: WebSocket, client_id: Optional[str] = None):
         """Accept and register a new WebSocket connection."""
         await websocket.accept()
         self.active_connections.add(websocket)
@@ -117,9 +114,7 @@ ws_manager = CoalitionWebSocketManager()
 
 
 @router.websocket("/ws/coalitions")
-async def coalition_websocket_endpoint(
-        websocket: WebSocket,
-        client_id: Optional[str] = None):
+async def coalition_websocket_endpoint(websocket: WebSocket, client_id: Optional[str] = None):
     """
     WebSocket endpoint for real-time coalition formation monitoring.
 
@@ -237,9 +232,7 @@ async def handle_client_message(websocket: WebSocket, message: dict):
 
 
 # Function to trigger coalition formation (for testing/manual use)
-async def trigger_coalition_formation(
-        agents_data: List[dict],
-        strategy: str = "active_inference"):
+async def trigger_coalition_formation(agents_data: List[dict], strategy: str = "active_inference"):
     """
 
     Trigger a coalition formation process and broadcast events.
@@ -255,11 +248,7 @@ async def trigger_coalition_formation(
             "coalition_id": None,
             "timestamp": datetime.utcnow().isoformat(),
             "strategy_used": strategy,
-            "participants": [
-                agent.get(
-                    "id",
-                    f"agent_{i}") for i,
-                agent in enumerate(agents_data)],
+            "participants": [agent.get("id", f"agent_{i}") for i, agent in enumerate(agents_data)],
             "business_value": None,
             "metadata": {
                 "formation_id": f'test_formation_{
@@ -271,15 +260,12 @@ async def trigger_coalition_formation(
         await ws_manager.broadcast(formation_event)
         logger.info(
             f"Triggered coalition formation broadcast for {
-                len(agents_data)} agents")
+                len(agents_data)} agents"
+        )
 
     except Exception as e:
         logger.error(f"Error triggering coalition formation: {e}")
 
 
 # Export the router and manager for use in main application
-__all__ = [
-    "router",
-    "ws_manager",
-    "coalition_monitor",
-    "trigger_coalition_formation"]
+__all__ = ["router", "ws_manager", "coalition_monitor", "trigger_coalition_formation"]

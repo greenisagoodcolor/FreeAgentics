@@ -1,8 +1,10 @@
 "use client";
 
 import React from "react";
-import { DashboardView } from "../../../../page";
 import { Settings } from "lucide-react";
+
+// Define DashboardView locally or import from proper location
+type DashboardView = "overview" | "agents" | "knowledge" | "metrics";
 
 interface ControlPanelProps {
   view: DashboardView;

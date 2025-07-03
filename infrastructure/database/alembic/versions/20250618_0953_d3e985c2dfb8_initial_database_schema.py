@@ -24,10 +24,8 @@ def upgrade() -> None:
     """Create initial database schema"""
 
     # Create custom enums
-    op.execute(
-        "CREATE TYPE agentstatus AS ENUM ('active', 'inactive', 'suspended', 'terminated')")
-    op.execute(
-        "CREATE TYPE conversationtype AS ENUM ('direct', 'group', 'broadcast', 'system')")
+    op.execute("CREATE TYPE agentstatus AS ENUM ('active', 'inactive', 'suspended', 'terminated')")
+    op.execute("CREATE TYPE conversationtype AS ENUM ('direct', 'group', 'broadcast', 'system')")
 
     # Create agents table
     op.create_table(
@@ -76,11 +74,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(op.f("ix_conversations_id"), "conversations", ["id"], unique=False)
-    op.create_index(
-        op.f("ix_conversations_uuid"),
-        "conversations",
-        ["uuid"],
-        unique=True)
+    op.create_index(op.f("ix_conversations_uuid"), "conversations", ["uuid"], unique=True)
 
     # Create coalitions table
     op.create_table(
@@ -101,9 +95,7 @@ def upgrade() -> None:
     )
     op.create_index(op.f("ix_coalitions_id"), "coalitions", ["id"], unique=False)
     op.create_index(op.f("ix_coalitions_uuid"), "coalitions", ["uuid"], unique=True)
-    op.create_index(
-        "idx_coalition_status_type", "coalitions", [
-            "status", "type"], unique=False)
+    op.create_index("idx_coalition_status_type", "coalitions", ["status", "type"], unique=False)
 
     # Create system_logs table
     op.create_table(
@@ -124,19 +116,14 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(op.f("ix_system_logs_id"), "system_logs", ["id"], unique=False)
-    op.create_index(
-        op.f("ix_system_logs_timestamp"),
-        "system_logs",
-        ["timestamp"],
-        unique=False)
+    op.create_index(op.f("ix_system_logs_timestamp"), "system_logs", ["timestamp"], unique=False)
     op.create_index(
         "idx_log_component_timestamp",
         "system_logs",
         ["component", "timestamp"],
         unique=False,
     )
-    op.create_index("idx_log_timestamp_level", "system_logs",
-                    ["timestamp", "level"], unique=False)
+    op.create_index("idx_log_timestamp_level", "system_logs", ["timestamp", "level"], unique=False)
 
     # Create knowledge_graphs table
     op.create_table(
@@ -157,16 +144,8 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["owner_id"], ["agents.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        op.f("ix_knowledge_graphs_id"),
-        "knowledge_graphs",
-        ["id"],
-        unique=False)
-    op.create_index(
-        op.f("ix_knowledge_graphs_uuid"),
-        "knowledge_graphs",
-        ["uuid"],
-        unique=True)
+    op.create_index(op.f("ix_knowledge_graphs_id"), "knowledge_graphs", ["id"], unique=False)
+    op.create_index(op.f("ix_knowledge_graphs_uuid"), "knowledge_graphs", ["uuid"], unique=True)
     op.create_index(
         "idx_knowledge_owner_type",
         "knowledge_graphs",

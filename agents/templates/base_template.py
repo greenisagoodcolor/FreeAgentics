@@ -108,7 +108,8 @@ class BeliefState:
         if not (0 <= self.confidence <= max_entropy):
             raise ValueError(
                 f"Confidence must be in [0, {max_entropy}], got {
-                    self.confidence}")
+                    self.confidence}"
+            )
 
     @classmethod
     def create_uniform(
@@ -138,8 +139,7 @@ class BeliefState:
             confidence=confidence,
         )
 
-    def update_beliefs(self,
-                       new_beliefs: NDArray[np.float64]) -> "BeliefState":
+    def update_beliefs(self, new_beliefs: NDArray[np.float64]) -> "BeliefState":
         """Create new belief state with updated beliefs (immutable)"""
         import time
 
@@ -189,8 +189,7 @@ class GenerativeModelParams:
         """Validate generative model mathematical constraints"""
         # Validate A matrix (observation model)
         if not np.allclose(np.sum(self.A, axis=0), 1.0):
-            raise ValueError(
-                "A matrix columns must sum to 1 (stochastic observation model)")
+            raise ValueError("A matrix columns must sum to 1 (stochastic observation model)")
 
         # Validate B tensor (transition models)
         for policy_idx in range(self.B.shape[2]):
@@ -257,8 +256,7 @@ class TemplateInterface(ABC):
         """Return template category"""
 
     @abstractmethod
-    def create_generative_model(
-            self, config: TemplateConfig) -> GenerativeModelParams:
+    def create_generative_model(self, config: TemplateConfig) -> GenerativeModelParams:
         """
         Create template-specific generative model parameters.
 
@@ -333,8 +331,7 @@ class ActiveInferenceTemplate(TemplateInterface):
         if not PYMDP_AVAILABLE:
             import warnings
 
-            warnings.warn(
-                "pymdp library not available - using fallback implementations")
+            warnings.warn("pymdp library not available - using fallback implementations")
 
     def get_template_id(self) -> str:
         """Return template identifier"""
@@ -398,19 +395,25 @@ class ActiveInferenceTemplate(TemplateInterface):
         expected_obs, expected_states = model.A.shape
         if expected_obs != config.num_observations:
             raise ValueError(
-                f"A matrix observations ({expected_obs}) != " f"config ({
-                    config.num_observations})")
+                f"A matrix observations ({expected_obs}) != "
+                f"config ({
+                    config.num_observations})"
+            )
 
         if expected_states != config.num_states:
             raise ValueError(
-                f"A matrix states ({expected_states}) != " f"config ({
-                    config.num_states})")
+                f"A matrix states ({expected_states}) != "
+                f"config ({
+                    config.num_states})"
+            )
 
         if model.B.shape[2] != config.num_policies:
             raise ValueError(
                 f"B tensor policies ({
-                    model.B.shape[2]}) != " f"config ({
-                    config.num_policies})")
+                    model.B.shape[2]}) != "
+                f"config ({
+                    config.num_policies})"
+            )
 
         # Validate mathematical constraints
         model.validate_mathematical_constraints()
@@ -430,10 +433,9 @@ class ActiveInferenceTemplate(TemplateInterface):
         """
         pass  # Base implementation - no additional constraints
 
-    def compute_free_energy(self,
-                            beliefs: BeliefState,
-                            observations: NDArray[np.float64],
-                            model: GenerativeModelParams) -> float:
+    def compute_free_energy(
+        self, beliefs: BeliefState, observations: NDArray[np.float64], model: GenerativeModelParams
+    ) -> float:
         """
         Compute variational free energy F = D_KL[q(s)||P(s)] - E_q[ln P(o|s)].
 
@@ -452,13 +454,14 @@ class ActiveInferenceTemplate(TemplateInterface):
         # For discrete observations, this is the inner product
         if len(observations.shape) == 1:  # Single observation
             obs_idx = int(np.argmax(observations))
-            expected_ll = np.dot(beliefs.beliefs, np.log(
-                model.A[obs_idx, :] + 1e-16))
+            expected_ll = np.dot(beliefs.beliefs, np.log(model.A[obs_idx, :] + 1e-16))
         else:  # Observation distribution
-            expected_ll = np.sum([
-                observations[o] * np.dot(beliefs.beliefs, np.log(model.A[o, :] + 1e-16))
-                for o in range(len(observations))
-            ])
+            expected_ll = np.sum(
+                [
+                    observations[o] * np.dot(beliefs.beliefs, np.log(model.A[o, :] + 1e-16))
+                    for o in range(len(observations))
+                ]
+            )
 
         # Free energy = KL divergence - expected log-likelihood
         free_energy = kl_prior - expected_ll
@@ -466,8 +469,7 @@ class ActiveInferenceTemplate(TemplateInterface):
         return float(free_energy)
 
     @abstractmethod
-    def create_generative_model(
-            self, config: TemplateConfig) -> GenerativeModelParams:
+    def create_generative_model(self, config: TemplateConfig) -> GenerativeModelParams:
         """Create template-specific generative model (implemented by
         subclasses)"""
 

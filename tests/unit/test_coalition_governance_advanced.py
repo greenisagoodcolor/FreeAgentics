@@ -171,11 +171,8 @@ except ImportError:
 
         # Optimization parameters
         optimize_for: List[str] = field(
-            default_factory=lambda: [
-                "efficiency",
-                "fairness",
-                "transparency",
-                "accountability"])
+            default_factory=lambda: ["efficiency", "fairness", "transparency", "accountability"]
+        )
         adaptation_rate: float = 0.1
         learning_rate: float = 0.05
 
@@ -334,8 +331,7 @@ except ImportError:
             self.decisions[decision.decision_id] = decision
             return decision.decision_id
 
-        def cast_vote(self, decision_id: str, voter_id: str,
-                      vote: Dict[str, Any]) -> bool:
+        def cast_vote(self, decision_id: str, voter_id: str, vote: Dict[str, Any]) -> bool:
             if decision_id not in self.decisions:
                 return False
 
@@ -345,8 +341,7 @@ except ImportError:
             # Update participation rate
             total_eligible = len(self.members)
             if total_eligible > 0:
-                decision.participation_rate = len(
-                    decision.votes_cast) / total_eligible
+                decision.participation_rate = len(decision.votes_cast) / total_eligible
 
             return True
 
@@ -355,8 +350,9 @@ except ImportError:
                 return {"error": "Decision not found"}
 
             decision = self.decisions[decision_id]
-            votes_for = sum(1 for vote in decision.votes_cast.values()
-                            if vote.get("choice") == "approve")
+            votes_for = sum(
+                1 for vote in decision.votes_cast.values() if vote.get("choice") == "approve"
+            )
             total_votes = len(decision.votes_cast)
 
             if total_votes == 0:
@@ -390,8 +386,7 @@ except ImportError:
             self.conflicts[conflict.case_id] = conflict
             return conflict.case_id
 
-        def resolve_conflict(self, case_id: str,
-                             resolution: Dict[str, Any]) -> bool:
+        def resolve_conflict(self, case_id: str, resolution: Dict[str, Any]) -> bool:
             if case_id not in self.conflicts:
                 return False
 
@@ -423,10 +418,8 @@ except ImportError:
                     else 7.0
                 )
 
-                avg_participation = np.mean(
-                    [d.participation_rate for d in recent_decisions])
-                avg_consensus = np.mean(
-                    [d.consensus_level for d in recent_decisions])
+                avg_participation = np.mean([d.participation_rate for d in recent_decisions])
+                avg_consensus = np.mean([d.consensus_level for d in recent_decisions])
             else:
                 avg_decision_time = 7.0
                 avg_participation = 0.5
@@ -440,10 +433,8 @@ except ImportError:
             ]
 
             if recent_conflicts:
-                resolved_conflicts = [
-                    c for c in recent_conflicts if c.status == "resolved"]
-                resolution_rate = len(resolved_conflicts) / \
-                    len(recent_conflicts)
+                resolved_conflicts = [c for c in recent_conflicts if c.status == "resolved"]
+                resolution_rate = len(resolved_conflicts) / len(recent_conflicts)
 
                 avg_resolution_time = (
                     np.mean(
@@ -475,8 +466,9 @@ except ImportError:
             self.metrics_history.append(metrics)
             return metrics
 
-        def add_member(self, member_id: str, role: GovernanceRole,
-                       attributes: Dict[str, Any] = None):
+        def add_member(
+            self, member_id: str, role: GovernanceRole, attributes: Dict[str, Any] = None
+        ):
             self.members[member_id] = {
                 "role": role,
                 "attributes": attributes or {},
@@ -579,8 +571,7 @@ class TestAdvancedGovernanceEngine:
         """Test consensus building mechanism"""
         # Add members
         for i in range(5):
-            self.governance_engine.add_member(
-                f"member_{i + 1}", GovernanceRole.MEMBER)
+            self.governance_engine.add_member(f"member_{i + 1}", GovernanceRole.MEMBER)
 
         # Propose decision requiring consensus
         decision = GovernanceDecision(
@@ -597,11 +588,8 @@ class TestAdvancedGovernanceEngine:
 
         # Cast mostly positive votes for consensus
         for i in range(4):
-            self.governance_engine.cast_vote(
-                decision_id, f"member_{i + 1}", {"choice": "approve"})
-        self.governance_engine.cast_vote(
-            "member_5", "member_5", {
-                "choice": "abstain"})
+            self.governance_engine.cast_vote(decision_id, f"member_{i + 1}", {"choice": "approve"})
+        self.governance_engine.cast_vote("member_5", "member_5", {"choice": "abstain"})
 
         result = self.governance_engine.process_decision(decision_id)
 
@@ -671,8 +659,7 @@ class TestAdvancedGovernanceEngine:
         """Test governance metrics calculation"""
         # Add some members and simulate activity
         for i in range(4):
-            self.governance_engine.add_member(
-                f"member_{i + 1}", GovernanceRole.MEMBER)
+            self.governance_engine.add_member(f"member_{i + 1}", GovernanceRole.MEMBER)
 
         # Create some decisions and votes
         for i in range(3):
@@ -687,8 +674,7 @@ class TestAdvancedGovernanceEngine:
             # Cast some votes
             for j in range(3):
                 choice = "approve" if j < 2 else "reject"
-                self.governance_engine.cast_vote(
-                    decision_id, f"member_{j + 1}", {"choice": choice})
+                self.governance_engine.cast_vote(decision_id, f"member_{j + 1}", {"choice": choice})
 
             self.governance_engine.process_decision(decision_id)
 
@@ -721,15 +707,9 @@ class TestAdvancedGovernanceEngine:
         decision_id = self.governance_engine.propose_decision(decision)
 
         # Cast weighted votes (weights based on role hierarchy)
-        self.governance_engine.cast_vote(
-            decision_id, "leader", {
-                "choice": "approve", "weight": 10})
-        self.governance_engine.cast_vote(
-            decision_id, "delegate", {
-                "choice": "reject", "weight": 8})
-        self.governance_engine.cast_vote(
-            decision_id, "member", {
-                "choice": "approve", "weight": 5})
+        self.governance_engine.cast_vote(decision_id, "leader", {"choice": "approve", "weight": 10})
+        self.governance_engine.cast_vote(decision_id, "delegate", {"choice": "reject", "weight": 8})
+        self.governance_engine.cast_vote(decision_id, "member", {"choice": "approve", "weight": 5})
 
         # Process with consideration of weights
         result = self.governance_engine.process_decision(decision_id)
@@ -789,12 +769,10 @@ class TestDecisionMakingEngine:
         """Test quorum calculation for different decision types"""
         member_count = 10
 
-        quorum = self.decision_engine.calculate_quorum(
-            member_count, "constitutional")
+        quorum = self.decision_engine.calculate_quorum(member_count, "constitutional")
         assert quorum >= member_count * 0.6  # Higher quorum for constitutional decisions
 
-        quorum = self.decision_engine.calculate_quorum(
-            member_count, "operational")
+        quorum = self.decision_engine.calculate_quorum(member_count, "operational")
         assert quorum >= member_count * 0.5  # Standard quorum for operational decisions
 
     @pytest.mark.skipif(not IMPORT_SUCCESS, reason="Module not available")
@@ -807,8 +785,7 @@ class TestDecisionMakingEngine:
             "impact_scope": ["technical", "financial", "strategic"],
         }
 
-        optimized_params = self.decision_engine.optimize_decision_process(
-            decision_context)
+        optimized_params = self.decision_engine.optimize_decision_process(decision_context)
 
         assert isinstance(optimized_params, dict)
         assert "recommended_mechanism" in optimized_params
@@ -851,8 +828,7 @@ class TestConflictResolutionSystem:
         ]
 
         for conflict in conflicts:
-            classification = self.conflict_system.classify_conflict(
-                conflict["description"])
+            classification = self.conflict_system.classify_conflict(conflict["description"])
             assert isinstance(classification, dict)
             assert "type" in classification
             assert "severity" in classification
@@ -868,13 +844,10 @@ class TestConflictResolutionSystem:
         }
 
         available_mediators = [
-            {
-                "id": "mediator_1", "expertise": [
-                    "resource", "technical"], "availability": 0.8}, {
-                "id": "mediator_2", "expertise": [
-                    "strategic", "interpersonal"], "availability": 0.6}, {
-                        "id": "mediator_3", "expertise": [
-                            "resource", "financial"], "availability": 0.9}, ]
+            {"id": "mediator_1", "expertise": ["resource", "technical"], "availability": 0.8},
+            {"id": "mediator_2", "expertise": ["strategic", "interpersonal"], "availability": 0.6},
+            {"id": "mediator_3", "expertise": ["resource", "financial"], "availability": 0.9},
+        ]
 
         assigned_mediator = self.conflict_system.assign_mediator(
             conflict_profile, available_mediators
@@ -900,8 +873,7 @@ class TestConflictResolutionSystem:
             },
         ]
 
-        effectiveness = self.conflict_system.calculate_resolution_effectiveness(
-            resolution_history)
+        effectiveness = self.conflict_system.calculate_resolution_effectiveness(resolution_history)
 
         assert isinstance(effectiveness, dict)
         assert "average_resolution_time" in effectiveness
@@ -972,8 +944,7 @@ class TestVotingMechanism:
             {"voter": "member_4", "position": 0.6},  # Moderate support
         ]
 
-        consensus_result = self.voting_mechanism.build_consensus(
-            initial_positions, rounds=3)
+        consensus_result = self.voting_mechanism.build_consensus(initial_positions, rounds=3)
 
         assert isinstance(consensus_result, dict)
         assert "consensus_achieved" in consensus_result
@@ -1025,8 +996,7 @@ class TestPolicyEngine:
             created_by="member_1",
         )
 
-        conflicts = self.policy_engine.detect_policy_conflicts(
-            new_policy, existing_policies)
+        conflicts = self.policy_engine.detect_policy_conflicts(new_policy, existing_policies)
 
         assert isinstance(conflicts, list)
         # Should detect conflict between equal sharing and merit-based
@@ -1051,8 +1021,7 @@ class TestPolicyEngine:
             "routine_decision_percentage": 0.4,
         }
 
-        impact = self.policy_engine.assess_policy_impact(
-            policy, coalition_context)
+        impact = self.policy_engine.assess_policy_impact(policy, coalition_context)
 
         assert isinstance(impact, dict)
         assert "efficiency_improvement" in impact
@@ -1076,8 +1045,7 @@ class TestPolicyEngine:
             {"member": "member_3", "meetings_attended": 9, "meetings_scheduled": 10},
         ]
 
-        compliance = self.policy_engine.monitor_compliance(
-            policy, member_activities)
+        compliance = self.policy_engine.monitor_compliance(policy, member_activities)
 
         assert isinstance(compliance, dict)
         assert "overall_compliance_rate" in compliance
@@ -1132,25 +1100,26 @@ class TestGovernanceOptimization:
     @pytest.mark.skipif(not IMPORT_SUCCESS, reason="Module not available")
     def test_adaptive_governance_tuning(self):
         """Test adaptive governance parameter tuning"""
-        performance_history = [{"timestamp": datetime.now() - timedelta(days=30),
-                                "efficiency": 0.6,
-                                "satisfaction": 0.65,
-                                },
-                               {"timestamp": datetime.now() - timedelta(days=20),
-                                "efficiency": 0.65,
-                                "satisfaction": 0.7,
-                                },
-                               {"timestamp": datetime.now() - timedelta(days=10),
-                                "efficiency": 0.7,
-                                "satisfaction": 0.72,
-                                },
-                               {"timestamp": datetime.now(),
-                                "efficiency": 0.68,
-                                "satisfaction": 0.75},
-                               ]
+        performance_history = [
+            {
+                "timestamp": datetime.now() - timedelta(days=30),
+                "efficiency": 0.6,
+                "satisfaction": 0.65,
+            },
+            {
+                "timestamp": datetime.now() - timedelta(days=20),
+                "efficiency": 0.65,
+                "satisfaction": 0.7,
+            },
+            {
+                "timestamp": datetime.now() - timedelta(days=10),
+                "efficiency": 0.7,
+                "satisfaction": 0.72,
+            },
+            {"timestamp": datetime.now(), "efficiency": 0.68, "satisfaction": 0.75},
+        ]
 
-        tuned_params = self.optimizer.tune_governance_parameters(
-            performance_history)
+        tuned_params = self.optimizer.tune_governance_parameters(performance_history)
 
         assert isinstance(tuned_params, dict)
         assert "voting_threshold" in tuned_params
@@ -1217,8 +1186,7 @@ class TestIntegrationScenarios:
         ]
 
         for member_id, vote in vote_outcomes:
-            self.governance_engine.cast_vote(
-                decision_id, member_id, {"choice": vote})
+            self.governance_engine.cast_vote(decision_id, member_id, {"choice": vote})
 
         # 4. Process decision
         result = self.governance_engine.process_decision(decision_id)
@@ -1238,9 +1206,7 @@ class TestIntegrationScenarios:
             # Resolve through mediation
             resolution = {
                 "outcome": "Pilot program with review after 3 months",
-                "conditions": [
-                    "Transparency requirements",
-                    "Human oversight mandatory"],
+                "conditions": ["Transparency requirements", "Human oversight mandatory"],
             }
             self.governance_engine.resolve_conflict(case_id, resolution)
 
@@ -1257,10 +1223,8 @@ class TestIntegrationScenarios:
         """Test governance under crisis conditions"""
         # Set up crisis scenario
         for i in range(3):
-            self.governance_engine.add_member(
-                f"member_{i + 1}", GovernanceRole.MEMBER)
-        self.governance_engine.add_member(
-            "crisis_leader", GovernanceRole.LEADER)
+            self.governance_engine.add_member(f"member_{i + 1}", GovernanceRole.MEMBER)
+        self.governance_engine.add_member("crisis_leader", GovernanceRole.LEADER)
 
         # Crisis decision with high urgency
         crisis_decision = GovernanceDecision(
@@ -1278,8 +1242,8 @@ class TestIntegrationScenarios:
 
         # Executive decision process (limited voting)
         self.governance_engine.cast_vote(
-            decision_id, "crisis_leader", {
-                "choice": "approve", "authority": "executive"})
+            decision_id, "crisis_leader", {"choice": "approve", "authority": "executive"}
+        )
 
         result = self.governance_engine.process_decision(decision_id)
 
@@ -1292,8 +1256,7 @@ class TestIntegrationScenarios:
         # Start with basic configuration
         initial_members = 3
         for i in range(initial_members):
-            self.governance_engine.add_member(
-                f"founding_member_{i + 1}", GovernanceRole.MEMBER)
+            self.governance_engine.add_member(f"founding_member_{i + 1}", GovernanceRole.MEMBER)
 
         # Track initial metrics
         self.governance_engine.calculate_governance_metrics()
@@ -1326,11 +1289,9 @@ class TestIntegrationScenarios:
 
                 # Simulate voting
                 members = list(self.governance_engine.members.keys())
-                for member in members[: min(
-                        len(members), 5)]:  # Sample of voters
+                for member in members[: min(len(members), 5)]:  # Sample of voters
                     choice = "approve" if np.random.random() > 0.3 else "reject"
-                    self.governance_engine.cast_vote(
-                        decision_id, member, {"choice": choice})
+                    self.governance_engine.cast_vote(decision_id, member, {"choice": choice})
 
                 self.governance_engine.process_decision(decision_id)
 

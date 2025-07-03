@@ -121,8 +121,7 @@ class H3World:
         self.cells: Dict[str, HexCell] = {}
         # Generate the world
         self._generate_world()
-        logger.info(
-            f"Created H3World with {len(self.cells)} cells at " f"resolution {resolution}")
+        logger.info(f"Created H3World with {len(self.cells)} cells at " f"resolution {resolution}")
 
     def _generate_world(self):
         """Generate the hexagonal world with biomes and terrain"""
@@ -177,11 +176,7 @@ class H3World:
             movement_cost=movement_cost,
         )
 
-    def _calculate_biome(
-            self,
-            temperature: float,
-            moisture: float,
-            elevation: float) -> Biome:
+    def _calculate_biome(self, temperature: float, moisture: float, elevation: float) -> Biome:
         """Calculate biome based on environmental factors"""
         # High elevation = mountain
         if elevation > 800:
@@ -213,10 +208,7 @@ class H3World:
             else:
                 return Biome.DESERT
 
-    def _calculate_terrain(
-            self,
-            elevation: float,
-            biome: Biome) -> TerrainType:
+    def _calculate_terrain(self, elevation: float, biome: Biome) -> TerrainType:
         """Calculate terrain type based on elevation and biome"""
         if biome == Biome.OCEAN:
             return TerrainType.WATER
@@ -231,8 +223,7 @@ class H3World:
         else:
             return TerrainType.FLAT
 
-    def _generate_resources(
-            self, biome: Biome, terrain: TerrainType) -> Dict[str, float]:
+    def _generate_resources(self, biome: Biome, terrain: TerrainType) -> Dict[str, float]:
         """Generate resources based on biome and terrain"""
         resources = {
             "food": 0.0,
@@ -271,18 +262,14 @@ class H3World:
         elif biome == Biome.ARCTIC or biome == Biome.TUNDRA:
             resources["food"] = np.random.uniform(0, 15)
             resources["water"] = np.random.uniform(30, 60)  # Ice
-            resources["knowledge"] = np.random.uniform(
-                40, 60)  # Unique ecosystem
+            resources["knowledge"] = np.random.uniform(40, 60)  # Unique ecosystem
         # Add some randomness
         for resource in resources:
             resources[resource] *= np.random.uniform(0.8, 1.2)
             resources[resource] = max(0, min(100, resources[resource]))
         return resources
 
-    def _calculate_movement_cost(
-            self,
-            terrain: TerrainType,
-            elevation: float) -> float:
+    def _calculate_movement_cost(self, terrain: TerrainType, elevation: float) -> float:
         """Calculate movement cost based on terrain"""
         base_costs = {
             TerrainType.FLAT: 1.0,
@@ -297,10 +284,7 @@ class H3World:
         elevation_factor = 1.0 + (elevation / 1000) * 0.5
         return cost * elevation_factor
 
-    def _calculate_visibility(
-            self,
-            terrain: TerrainType,
-            elevation: float) -> int:
+    def _calculate_visibility(self, terrain: TerrainType, elevation: float) -> int:
         """Calculate visibility range from terrain and elevation"""
         base_visibility = {
             TerrainType.FLAT: 3,
@@ -348,8 +332,7 @@ class H3World:
             return []
         return self.get_cells_in_range(hex_id, cell.visibility_range)
 
-    def calculate_path(self, start_hex: str,
-                       end_hex: str) -> Optional[list[str]]:
+    def calculate_path(self, start_hex: str, end_hex: str) -> Optional[list[str]]:
         """Calculate optimal path between two hexes (A* pathfinding)"""
         if start_hex not in self.cells or end_hex not in self.cells:
             return None
@@ -378,11 +361,8 @@ class H3World:
             "resolution": self.resolution,
             "num_rings": self.num_rings,
             "seed": self.seed,
-            "num_cells": len(
-                self.cells),
-            "cells": {
-                hex_id: cell.to_dict() for hex_id,
-                cell in self.cells.items()},
+            "num_cells": len(self.cells),
+            "cells": {hex_id: cell.to_dict() for hex_id, cell in self.cells.items()},
         }
 
     def save_to_file(self, filepath: str) -> None:
@@ -419,11 +399,7 @@ class H3World:
             world.cells[hex_id] = cell
         return world
 
-    def add_resource(
-            self,
-            hex_id: str,
-            resource_type: str,
-            amount: float) -> bool:
+    def add_resource(self, hex_id: str, resource_type: str, amount: float) -> bool:
         """Add resources to a specific cell"""
         if hex_id not in self.cells:
             return False

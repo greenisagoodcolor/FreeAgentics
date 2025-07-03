@@ -251,8 +251,7 @@ class TestMemoryConsolidator:
 
     def test_consolidation_evaluation(self, sample_memory) -> None:
         """Test evaluation for consolidation"""
-        consolidator = MemoryConsolidator(
-            consolidation_threshold=0.7, constraints={})
+        consolidator = MemoryConsolidator(consolidation_threshold=0.7, constraints={})
         low_memory = Memory(
             memory_id="low_1",
             memory_type=MemoryType.EPISODIC,
@@ -335,10 +334,7 @@ class TestReinforcementLearner:
 
     def test_q_learning(self, sample_experience) -> None:
         """Test Q-learning updates"""
-        learner = ReinforcementLearner(
-            learning_rate=0.1,
-            discount_factor=0.9,
-            constraints={})
+        learner = ReinforcementLearner(learning_rate=0.1, discount_factor=0.9, constraints={})
         learner.learn(sample_experience)
         state_key = learner._state_to_key(sample_experience.state)
         action_key = learner._action_to_key(sample_experience.action)
@@ -392,8 +388,7 @@ class TestPatternRecognizer:
         experiences.append(exp_fail)
         patterns = recognizer.extract_patterns(experiences)
         assert len(patterns) > 0
-        gather_pattern = next(
-            (p for p in patterns if p.conditions.get("action") == "gather"), None)
+        gather_pattern = next((p for p in patterns if p.conditions.get("action") == "gather"), None)
         assert gather_pattern is not None
         assert gather_pattern.confidence > 0.6
 
@@ -421,8 +416,7 @@ class TestMemorySystem:
         )
         assert memory_system.total_memories == 1
         assert memory_system.memory_types_count[MemoryType.EPISODIC] == 1
-        retrieved = memory_system.retrieve_memories(
-            {"memory_type": MemoryType.EPISODIC})
+        retrieved = memory_system.retrieve_memories({"memory_type": MemoryType.EPISODIC})
         assert len(retrieved) == 1
         assert retrieved[0].content["event"] == "test"
 
@@ -468,29 +462,22 @@ class TestMemorySystem:
         )
         relevant = memory_system.get_relevant_memories(context)
         assert len(relevant) > 0
-        procedural_memories = [
-            m for m in relevant if m.memory_type == MemoryType.PROCEDURAL]
+        procedural_memories = [m for m in relevant if m.memory_type == MemoryType.PROCEDURAL]
         assert len(procedural_memories) > 0
 
     def test_memory_consolidation(self, memory_system) -> None:
         """Test memory consolidation process"""
         for i in range(5):
             memory_system.store_memory(
-                content={
-                    "action": "gather",
-                    "result": "success",
-                    "variant": i},
+                content={"action": "gather", "result": "success", "variant": i},
                 memory_type=MemoryType.EPISODIC,
                 importance=0.8,
-                context={
-                    "location": "forest",
-                    "resource": "food"},
+                context={"location": "forest", "resource": "food"},
                 constraints={},
             )
         initial_count = memory_system.total_memories
         memory_system.consolidate_memories()
-        _ = memory_system.retrieve_memories(
-            {"memory_type": MemoryType.SEMANTIC})
+        _ = memory_system.retrieve_memories({"memory_type": MemoryType.SEMANTIC})
         assert memory_system.total_memories >= initial_count
 
     def test_pattern_extraction(self, memory_system) -> None:
@@ -507,8 +494,7 @@ class TestMemorySystem:
             memory_system.store_experience(exp)
         patterns = memory_system.extract_patterns()
         assert len(patterns) > 0
-        procedural = memory_system.retrieve_memories(
-            {"memory_type": MemoryType.PROCEDURAL})
+        procedural = memory_system.retrieve_memories({"memory_type": MemoryType.PROCEDURAL})
         assert len(procedural) > 0
 
     def test_outcome_prediction(self, memory_system) -> None:
@@ -587,17 +573,11 @@ class TestMemorySystem:
     def test_memory_summary(self, memory_system) -> None:
         """Test getting memory system summary"""
         memory_system.store_memory(
-            content={
-                "test": 1},
-            memory_type=MemoryType.EPISODIC,
-            importance=0.5,
-            constraints={})
+            content={"test": 1}, memory_type=MemoryType.EPISODIC, importance=0.5, constraints={}
+        )
         memory_system.store_memory(
-            content={
-                "test": 2},
-            memory_type=MemoryType.SEMANTIC,
-            importance=0.8,
-            constraints={})
+            content={"test": 2}, memory_type=MemoryType.SEMANTIC, importance=0.8, constraints={}
+        )
         summary = memory_system.get_memory_summary()
         assert summary["total_memories"] == 2
         assert summary["memory_types"][MemoryType.EPISODIC] == 1

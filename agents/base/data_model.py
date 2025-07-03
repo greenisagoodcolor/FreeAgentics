@@ -158,11 +158,9 @@ class Orientation:
     def to_euler(self) -> Tuple[float, float, float]:
         """Convert quaternion to Euler angles (roll, pitch, yaw)"""
         # Conversion formula
-        roll = np.arctan2(2 * (self.w * self.x + self.y * self.z),
-                          1 - 2 * (self.x**2 + self.y**2))
+        roll = np.arctan2(2 * (self.w * self.x + self.y * self.z), 1 - 2 * (self.x**2 + self.y**2))
         pitch = np.arcsin(2 * (self.w * self.y - self.z * self.x))
-        yaw = np.arctan2(2 * (self.w * self.z + self.x * self.y),
-                         1 - 2 * (self.y**2 + self.z**2))
+        yaw = np.arctan2(2 * (self.w * self.z + self.x * self.y), 1 - 2 * (self.y**2 + self.z**2))
         return roll, pitch, yaw
 
 
@@ -283,8 +281,7 @@ class AgentBuilder:
         if "status" in data:
             self.agent.status = AgentStatus(data["status"])
         if "capabilities" in data:
-            self.agent.capabilities = {
-                AgentCapability(cap) for cap in data["capabilities"]}
+            self.agent.capabilities = {AgentCapability(cap) for cap in data["capabilities"]}
 
     def set_personality_and_resources(self, data: Dict[str, Any]) -> None:
         """Set personality and resources from data"""
@@ -304,8 +301,7 @@ class AgentBuilder:
         """Set relationships from data"""
         if "relationships" in data:
             for agent_id, rel_data in data["relationships"].items():
-                relationship = self.agent._create_relationship_from_data(
-                    rel_data)
+                relationship = self.agent._create_relationship_from_data(rel_data)
                 self.agent.relationships[agent_id] = relationship
 
     def set_metadata(self, data: Dict[str, Any]) -> None:
@@ -314,8 +310,7 @@ class AgentBuilder:
         if "created_at" in data:
             self.agent.created_at = datetime.fromisoformat(data["created_at"])
         if "last_updated" in data:
-            self.agent.last_updated = datetime.fromisoformat(
-                data["last_updated"])
+            self.agent.last_updated = datetime.fromisoformat(data["last_updated"])
         self.agent.metadata = data.get("metadata", {})
 
 
@@ -392,15 +387,13 @@ class Agent:
     def select_next_goal(self) -> Optional[AgentGoal]:
         """Select the next goal to pursue"""
         # Filter out completed and expired goals
-        active_goals = [
-            g for g in self.goals if not g.completed and not g.is_expired()]
+        active_goals = [g for g in self.goals if not g.completed and not g.is_expired()]
         if active_goals:
             self.current_goal = active_goals[0]
             return self.current_goal
         return None
 
-    def add_to_memory(self, experience: Dict[str, Any],
-                      is_important: bool = False) -> None:
+    def add_to_memory(self, experience: Dict[str, Any], is_important: bool = False) -> None:
         """Add an experience to memory"""
         timestamped_experience = {
             "timestamp": datetime.now(),
@@ -514,13 +507,11 @@ class Agent:
             progress=goal_data["progress"],
         )
 
-    def _create_relationship_from_data(
-            self, rel_data: Dict[str, Any]) -> SocialRelationship:
+    def _create_relationship_from_data(self, rel_data: Dict[str, Any]) -> SocialRelationship:
         """Create a relationship from relationship data dictionary"""
         last_interaction = None
         if rel_data.get("last_interaction"):
-            last_interaction = datetime.fromisoformat(
-                rel_data["last_interaction"])
+            last_interaction = datetime.fromisoformat(rel_data["last_interaction"])
 
         return SocialRelationship(
             target_agent_id=rel_data["target_agent_id"],

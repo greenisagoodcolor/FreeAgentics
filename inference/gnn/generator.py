@@ -49,9 +49,7 @@ class GMNGenerator:
                 "class": agent_class,
                 "created": datetime.now().isoformat(),
             },
-            "state_space": self._generate_state_space(
-                agent_class,
-                personality),
+            "state_space": self._generate_state_space(agent_class, personality),
             "connections": self._generate_connections(personality),
             "update_equations": self._generate_update_equations(personality),
             "metadata": {
@@ -97,8 +95,7 @@ class GMNGenerator:
         )
         is_valid, errors = self.validator.validate_model(refined_model)
         if not is_valid:
-            logger.warning(
-                f"Refined model validation failed: {errors}. Reverting changes.")
+            logger.warning(f"Refined model validation failed: {errors}. Reverting changes.")
             return current_model
         return refined_model
 
@@ -150,19 +147,16 @@ class GMNGenerator:
         """Generate state space based on class and personality using Strategy pattern"""
         state_space = self._create_base_state_space()
         template = self._get_class_template(agent_class)
-        
+
         self._add_class_specific_states(state_space, template)
         self._add_personality_driven_states(state_space, personality)
-        
+
         return state_space
 
     def _create_base_state_space(self) -> Dict[str, Any]:
         """Create basic state space common to all agents"""
         return {
-            "S_energy": {
-                "type": "Real[0, 100]",
-                "description": "Agent energy level"
-            },
+            "S_energy": {"type": "Real[0, 100]", "description": "Agent energy level"},
             "S_position": {
                 "type": "H3Cell[resolution=7]",
                 "description": "Current hex position",
@@ -174,15 +168,22 @@ class GMNGenerator:
             "A_actions": {
                 "type": "Categorical",
                 "options": [
-                    "move_north", "move_south", "move_east", "move_west",
-                    "explore", "exploit", "communicate", "rest"
+                    "move_north",
+                    "move_south",
+                    "move_east",
+                    "move_west",
+                    "explore",
+                    "exploit",
+                    "communicate",
+                    "rest",
                 ],
                 "description": "Available actions",
             },
         }
 
-    def _add_class_specific_states(self, state_space: Dict[str, Any], 
-                                 template: Dict[str, Any]) -> None:
+    def _add_class_specific_states(
+        self, state_space: Dict[str, Any], template: Dict[str, Any]
+    ) -> None:
         """Add states specific to agent class"""
         for state in template["key_states"]:
             if state not in state_space:
@@ -193,61 +194,47 @@ class GMNGenerator:
     def _generate_state_definition(self, state: str) -> Optional[Dict[str, str]]:
         """Generate state definition based on state name using Strategy pattern"""
         state_generators = {
-            "knowledge": lambda: {
-                "type": "Real[0, 100]",
-                "description": "Accumulated knowledge"
-            },
-            "inventory": lambda: {
-                "type": "List[Resource]",
-                "description": "Carried resources"
-            },
-            "wealth": lambda: {
-                "type": "Real[0, 1000]",
-                "description": "Accumulated wealth"
-            },
-            "territory": lambda: {
-                "type": "Set[H3Cell]",
-                "description": "Protected territory"
-            },
-            "alertness": lambda: {
-                "type": "Real[0, 1]",
-                "description": "Threat awareness level"
-            }
+            "knowledge": lambda: {"type": "Real[0, 100]", "description": "Accumulated knowledge"},
+            "inventory": lambda: {"type": "List[Resource]", "description": "Carried resources"},
+            "wealth": lambda: {"type": "Real[0, 1000]", "description": "Accumulated wealth"},
+            "territory": lambda: {"type": "Set[H3Cell]", "description": "Protected territory"},
+            "alertness": lambda: {"type": "Real[0, 1]", "description": "Threat awareness level"},
         }
-        
+
         for keyword, generator in state_generators.items():
             if keyword in state:
                 return generator()
-        
+
         if "position" in state:
             return None  # Position already handled in base
-        
-        # Default state definition
-        return {
-            "type": "Real[0, 100]",
-            "description": f"Level of {state.replace('S_', '')}"
-        }
 
-    def _add_personality_driven_states(self, state_space: Dict[str, Any], 
-                                     personality: Dict[str, float]) -> None:
+        # Default state definition
+        return {"type": "Real[0, 100]", "description": f"Level of {state.replace('S_', '')}"}
+
+    def _add_personality_driven_states(
+        self, state_space: Dict[str, Any], personality: Dict[str, float]
+    ) -> None:
         """Add states based on personality traits"""
         personality_states = [
-            ("curiosity", 0.7, "S_novelty_seeking", {
-                "type": "Real[0, 1]",
-                "description": "Drive to find new experiences"
-            }),
-            ("risk_tolerance", 0.7, "S_risk_assessment", {
-                "type": "Real[0, 1]",
-                "description": "Current risk evaluation"
-            })
+            (
+                "curiosity",
+                0.7,
+                "S_novelty_seeking",
+                {"type": "Real[0, 1]", "description": "Drive to find new experiences"},
+            ),
+            (
+                "risk_tolerance",
+                0.7,
+                "S_risk_assessment",
+                {"type": "Real[0, 1]", "description": "Current risk evaluation"},
+            ),
         ]
-        
+
         for trait, threshold, state_name, state_def in personality_states:
             if personality.get(trait, 0) > threshold:
                 state_space[state_name] = state_def
 
-    def _generate_connections(
-            self, personality: Dict[str, float]) -> Dict[str, Any]:
+    def _generate_connections(self, personality: Dict[str, float]) -> Dict[str, Any]:
         """Generate connections based on personality"""
         exploration_weight = personality.get("exploration", 0.5) / 100
         cooperation_weight = personality.get("cooperation", 0.5) / 100
@@ -264,15 +251,9 @@ class GMNGenerator:
                 "type": "observation -> Real[0, 1]",
                 "description": "Preference function mapping observations to utilities",
                 "preferences": {
-                    "Exploration": round(
-                        exploration_weight,
-                        2),
-                    "Resources": round(
-                        efficiency_weight,
-                        2),
-                    "Social": round(
-                        cooperation_weight,
-                        2),
+                    "Exploration": round(exploration_weight, 2),
+                    "Resources": round(efficiency_weight, 2),
+                    "Social": round(cooperation_weight, 2),
                 },
             },
             "C_likelihood": {
@@ -287,19 +268,14 @@ class GMNGenerator:
             }
         return connections
 
-    def _generate_update_equations(
-            self, personality: Dict[str, float]) -> Dict[str, Any]:
+    def _generate_update_equations(self, personality: Dict[str, float]) -> Dict[str, Any]:
         """Generate update equations based on personality"""
-        base_learning_rate = 0.1 + \
-            personality.get("curiosity", 0.5) / 100 * 0.1
+        base_learning_rate = 0.1 + personality.get("curiosity", 0.5) / 100 * 0.1
         equations = {
             "belief_update": {
                 "state": "S_beliefs",
                 "formula": "S_beliefs(t+1) = S_beliefs(t) + learning_rate * prediction_error",
-                "parameters": {
-                    "learning_rate": round(
-                        base_learning_rate,
-                        3)},
+                "parameters": {"learning_rate": round(base_learning_rate, 3)},
             },
             "energy_dynamics": {
                 "state": "S_energy",
@@ -311,7 +287,8 @@ class GMNGenerator:
                         "communicate": 1.0,
                         "rest": -3.0,
                         "move": 1.0,
-                    }},
+                    }
+                },
             },
         }
         if personality.get("efficiency", 0) > 0.7:
@@ -324,8 +301,7 @@ class GMNGenerator:
             equations["social_learning"] = {
                 "state": "S_beliefs",
                 "formula": "S_beliefs(t+1) = weighted_average(S_beliefs(t), shared_beliefs)",
-                "parameters": {
-                    "social_weight": 0.3},
+                "parameters": {"social_weight": 0.3},
             }
         return equations
 
@@ -335,9 +311,9 @@ class GMNGenerator:
         """Apply a learned pattern to the model using Strategy pattern"""
         change_record = self._initialize_change_record(pattern)
         pattern_type = pattern.get("type", "")
-        
+
         self._apply_pattern_by_type(model, pattern, pattern_type, change_record)
-        
+
         return change_record if change_record["changes"] else None
 
     def _initialize_change_record(self, pattern: Dict[str, Any]) -> Dict[str, Any]:
@@ -349,94 +325,102 @@ class GMNGenerator:
             "changes": [],
         }
 
-    def _apply_pattern_by_type(self, model: Dict[str, Any], pattern: Dict[str, Any], 
-                             pattern_type: str, change_record: Dict[str, Any]) -> None:
+    def _apply_pattern_by_type(
+        self,
+        model: Dict[str, Any],
+        pattern: Dict[str, Any],
+        pattern_type: str,
+        change_record: Dict[str, Any],
+    ) -> None:
         """Apply pattern based on its type using Strategy pattern"""
         pattern_handlers = {
             "successful_action_sequence": self._apply_action_sequence_pattern,
             "environmental_correlation": self._apply_correlation_pattern,
-            "preference_adjustment": self._apply_preference_pattern
+            "preference_adjustment": self._apply_preference_pattern,
         }
-        
+
         handler = pattern_handlers.get(pattern_type)
         if handler:
             handler(model, pattern, change_record)
 
-    def _apply_action_sequence_pattern(self, model: Dict[str, Any], 
-                                     pattern: Dict[str, Any], 
-                                     change_record: Dict[str, Any]) -> None:
+    def _apply_action_sequence_pattern(
+        self, model: Dict[str, Any], pattern: Dict[str, Any], change_record: Dict[str, Any]
+    ) -> None:
         """Apply successful action sequence pattern"""
         if "C_pref" not in model["connections"]:
             return
-        
+
         action = pattern.get("dominant_action", "")
         if not action:
             return
-        
+
         existing_biases = model["connections"]["C_pref"].get("action_biases", {})
         if action in existing_biases:
             return
-        
+
         if "action_biases" not in model["connections"]["C_pref"]:
             model["connections"]["C_pref"]["action_biases"] = {}
-        
+
         bias = pattern.get("success_rate", 0.5) * pattern.get("confidence", 0.8)
         model["connections"]["C_pref"]["action_biases"][action] = round(bias, 3)
-        
-        change_record["changes"].append({
-            "type": "add_action_bias",
-            "action": action,
-            "bias": round(bias, 3),
-        })
 
-    def _apply_correlation_pattern(self, model: Dict[str, Any], 
-                                 pattern: Dict[str, Any], 
-                                 change_record: Dict[str, Any]) -> None:
+        change_record["changes"].append(
+            {
+                "type": "add_action_bias",
+                "action": action,
+                "bias": round(bias, 3),
+            }
+        )
+
+    def _apply_correlation_pattern(
+        self, model: Dict[str, Any], pattern: Dict[str, Any], change_record: Dict[str, Any]
+    ) -> None:
         """Apply environmental correlation pattern"""
         if "C_likelihood" not in model["connections"]:
             return
-        
+
         correlation = pattern.get("correlation", {})
         if not correlation:
             return
-        
+
         if "correlations" not in model["connections"]["C_likelihood"]:
             model["connections"]["C_likelihood"]["correlations"] = []
-        
-        model["connections"]["C_likelihood"]["correlations"].append({
-            "observation": correlation.get("observation", ""),
-            "state": correlation.get("state", ""),
-            "strength": round(correlation.get("strength", 0.5), 3),
-        })
-        
-        change_record["changes"].append({
-            "type": "add_correlation", 
-            "details": correlation
-        })
 
-    def _apply_preference_pattern(self, model: Dict[str, Any], 
-                                pattern: Dict[str, Any], 
-                                change_record: Dict[str, Any]) -> None:
+        model["connections"]["C_likelihood"]["correlations"].append(
+            {
+                "observation": correlation.get("observation", ""),
+                "state": correlation.get("state", ""),
+                "strength": round(correlation.get("strength", 0.5), 3),
+            }
+        )
+
+        change_record["changes"].append({"type": "add_correlation", "details": correlation})
+
+    def _apply_preference_pattern(
+        self, model: Dict[str, Any], pattern: Dict[str, Any], change_record: Dict[str, Any]
+    ) -> None:
         """Apply preference adjustment pattern"""
         connections = model["connections"]
         if "C_pref" not in connections or "preferences" not in connections["C_pref"]:
             return
-        
+
         adjustments = pattern.get("adjustments", {})
         for pref, adjustment in adjustments.items():
             if pref not in connections["C_pref"]["preferences"]:
                 continue
-            
+
             old_value = connections["C_pref"]["preferences"][pref]
             new_value = max(0, min(1, old_value + adjustment))
             connections["C_pref"]["preferences"][pref] = round(new_value, 3)
-            
-            change_record["changes"].append({
-                "type": "adjust_preference",
-                "preference": pref,
-                "old_value": old_value,
-                "new_value": round(new_value, 3),
-            })
+
+            change_record["changes"].append(
+                {
+                    "type": "adjust_preference",
+                    "preference": pref,
+                    "old_value": old_value,
+                    "new_value": round(new_value, 3),
+                }
+            )
 
     def generate_from_experience(
         self, base_model: Dict[str, Any], experience_summary: Dict[str, Any]
@@ -475,19 +459,12 @@ class GMNGenerator:
                             "type": "successful_action_sequence",
                             "dominant_action": action,
                             "success_rate": success_rate,
-                            "confidence": min(
-                                0.95,
-                                0.5 +
-                                stats["count"] /
-                                100),
-                        })
+                            "confidence": min(0.95, 0.5 + stats["count"] / 100),
+                        }
+                    )
         correlations = experience_summary.get("observed_correlations", [])
         for corr in correlations:
-            if corr.get(
-                    "occurrences",
-                    0) > 5 and corr.get(
-                    "correlation",
-                    0) > 0.6:
+            if corr.get("occurrences", 0) > 5 and corr.get("correlation", 0) > 0.6:
                 patterns.append(
                     {
                         "type": "environmental_correlation",
@@ -551,9 +528,8 @@ if __name__ == "__main__":
         "risk_tolerance": 70,
     }
     model = generator.generate_base_model(
-        agent_name="Explorer-Alpha",
-        agent_class="Explorer",
-        personality=personality)
+        agent_name="Explorer-Alpha", agent_class="Explorer", personality=personality
+    )
     print("Generated GNN Model:")
     print(json.dumps(model, indent=2))
     patterns = [
@@ -570,9 +546,5 @@ if __name__ == "__main__":
         },
     ]
     refined = generator.refine_model(model, patterns)
-    print(
-        "\nRefined model changes:",
-        refined["metadata"].get(
-            "refinement_changes",
-            []))
+    print("\nRefined model changes:", refined["metadata"].get("refinement_changes", []))
     generator.export_to_gnn_format(refined, "example_agent.gnn.md")

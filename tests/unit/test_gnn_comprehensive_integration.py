@@ -118,8 +118,7 @@ except ImportError:
 
         def __post_init__(self):
             if self.model_types is None:
-                self.model_types = [
-                    "gcn", "gat", "sage", "transformer", "temporal"]
+                self.model_types = ["gcn", "gat", "sage", "transformer", "temporal"]
 
     class ComprehensiveGNNSystem:
         def __init__(self, config):
@@ -128,10 +127,7 @@ except ImportError:
             self.status = "initialized"
 
         def initialize(self):
-            return {
-                "status": "initialized",
-                "components": len(
-                    self.components)}
+            return {"status": "initialized", "components": len(self.components)}
 
         def start(self):
             self.status = "running"
@@ -169,8 +165,7 @@ class TestComprehensiveGNNConfig:
         assert config.deployment_target == DeploymentTarget.CLOUD
         assert config.scalability_mode == ScalabilityMode.AUTO_SCALING
         assert config.security_level == SecurityLevel.ENTERPRISE
-        assert config.model_types == [
-            "gcn", "gat", "sage", "transformer", "temporal"]
+        assert config.model_types == ["gcn", "gat", "sage", "transformer", "temporal"]
         assert config.enable_llm_integration is True
         assert config.enable_active_inference is True
         assert config.enable_monitoring is True
@@ -275,46 +270,48 @@ class TestComprehensiveGNNSystem:
             return
 
         # Define complex workflow
-        workflow_config = {"name": "multi_modal_analysis",
-                           "steps": [{"name": "data_ingestion",
-                                      "type": "data_loader",
-                                      "config": {"source": "multi_modal",
-                                                 "batch_size": 32},
-                                      },
-                                     {"name": "graph_preprocessing",
-                                      "type": "preprocessor",
-                                      "config": {"normalization": True,
-                                                 "augmentation": False},
-                                      },
-                                     {"name": "gnn_inference",
-                                      "type": "gnn_model",
-                                      "config": {"model_type": "transformer",
-                                                 "attention_heads": 8},
-                                      },
-                                     {"name": "llm_integration",
-                                      "type": "llm_processor",
-                                      "config": {"provider": "openai",
-                                                 "model": "gpt-4"},
-                                      },
-                                     {"name": "active_inference",
-                                      "type": "ai_engine",
-                                      "config": {"planning_horizon": 5,
-                                                 "belief_update": True},
-                                      },
-                                     {"name": "result_synthesis",
-                                      "type": "synthesizer",
-                                      "config": {"output_format": "structured",
-                                                 "confidence_scores": True},
-                                      },
-                                     ],
-                           "dependencies": {"graph_preprocessing": ["data_ingestion"],
-                                            "gnn_inference": ["graph_preprocessing"],
-                                            "llm_integration": ["gnn_inference"],
-                                            "active_inference": ["gnn_inference"],
-                                            "result_synthesis": ["llm_integration",
-                                                                 "active_inference"],
-                                            },
-                           }
+        workflow_config = {
+            "name": "multi_modal_analysis",
+            "steps": [
+                {
+                    "name": "data_ingestion",
+                    "type": "data_loader",
+                    "config": {"source": "multi_modal", "batch_size": 32},
+                },
+                {
+                    "name": "graph_preprocessing",
+                    "type": "preprocessor",
+                    "config": {"normalization": True, "augmentation": False},
+                },
+                {
+                    "name": "gnn_inference",
+                    "type": "gnn_model",
+                    "config": {"model_type": "transformer", "attention_heads": 8},
+                },
+                {
+                    "name": "llm_integration",
+                    "type": "llm_processor",
+                    "config": {"provider": "openai", "model": "gpt-4"},
+                },
+                {
+                    "name": "active_inference",
+                    "type": "ai_engine",
+                    "config": {"planning_horizon": 5, "belief_update": True},
+                },
+                {
+                    "name": "result_synthesis",
+                    "type": "synthesizer",
+                    "config": {"output_format": "structured", "confidence_scores": True},
+                },
+            ],
+            "dependencies": {
+                "graph_preprocessing": ["data_ingestion"],
+                "gnn_inference": ["graph_preprocessing"],
+                "llm_integration": ["gnn_inference"],
+                "active_inference": ["gnn_inference"],
+                "result_synthesis": ["llm_integration", "active_inference"],
+            },
+        }
 
         # Execute workflow
         workflow_result = gnn_system.execute_workflow(workflow_config)
@@ -360,8 +357,9 @@ class TestComprehensiveGNNSystem:
             # Higher loads should trigger scaling
             if i > 0:
                 current_resources = result["resource_allocation"]["total_resources"]
-                previous_resources = scaling_results[i -
-                                                     1]["resource_allocation"]["total_resources"]
+                previous_resources = scaling_results[i - 1]["resource_allocation"][
+                    "total_resources"
+                ]
 
                 # Resources should scale up with increased load
                 assert current_resources >= previous_resources
@@ -372,23 +370,21 @@ class TestComprehensiveGNNSystem:
             return
 
         # Simulate various failure scenarios
-        failure_scenarios = [{"type": "component_failure",
-                              "component": "gnn_engine",
-                              "severity": "high"},
-                             {"type": "network_partition",
-                              "affected_nodes": ["node_1",
-                                                 "node_2"],
-                              "severity": "medium",
-                              },
-                             {"type": "resource_exhaustion",
-                              "resource": "memory",
-                              "threshold": 0.95,
-                              "severity": "high",
-                              },
-                             {"type": "cascade_failure",
-                              "trigger": "database_timeout",
-                              "severity": "critical"},
-                             ]
+        failure_scenarios = [
+            {"type": "component_failure", "component": "gnn_engine", "severity": "high"},
+            {
+                "type": "network_partition",
+                "affected_nodes": ["node_1", "node_2"],
+                "severity": "medium",
+            },
+            {
+                "type": "resource_exhaustion",
+                "resource": "memory",
+                "threshold": 0.95,
+                "severity": "high",
+            },
+            {"type": "cascade_failure", "trigger": "database_timeout", "severity": "critical"},
+        ]
 
         recovery_results = []
 
@@ -397,8 +393,7 @@ class TestComprehensiveGNNSystem:
             failure_result = gnn_system.inject_failure(scenario)
 
             # Test recovery
-            recovery_result = gnn_system.recover_from_failure(
-                failure_result["failure_id"])
+            recovery_result = gnn_system.recover_from_failure(failure_result["failure_id"])
             recovery_results.append(recovery_result)
 
         # Verify recovery for each scenario
@@ -569,8 +564,7 @@ class TestGNNEcosystem:
         }
 
         # Execute disaster recovery
-        recovery_result = ecosystem.execute_disaster_recovery(
-            disaster_scenario)
+        recovery_result = ecosystem.execute_disaster_recovery(disaster_scenario)
 
         assert "failover_status" in recovery_result
         assert "recovery_time" in recovery_result
@@ -635,37 +629,41 @@ class TestGNNSecurity:
             return
 
         # Test various authentication scenarios
-        auth_scenarios = [{"user_type": "internal_user",
-                           "credentials": {"username": "john.doe",
-                                           "password": "secure_pass",
-                                           "mfa_token": "123456",
-                                           },
-                           "expected_result": "success",
-                           },
-                          {"user_type": "service_account",
-                           "credentials": {"client_id": "service_123",
-                                           "client_secret": "secret_key",
-                                           "scope": "gnn.read",
-                                           },
-                           "expected_result": "success",
-                           },
-                          {"user_type": "api_key",
-                           "credentials": {"api_key": "api_key_456",
-                                           "signature": "hmac_signature"},
-                           "expected_result": "success",
-                           },
-                          {"user_type": "malicious_user",
-                           "credentials": {"username": "attacker",
-                                           "password": "weak_pass"},
-                           "expected_result": "failure",
-                           },
-                          ]
+        auth_scenarios = [
+            {
+                "user_type": "internal_user",
+                "credentials": {
+                    "username": "john.doe",
+                    "password": "secure_pass",
+                    "mfa_token": "123456",
+                },
+                "expected_result": "success",
+            },
+            {
+                "user_type": "service_account",
+                "credentials": {
+                    "client_id": "service_123",
+                    "client_secret": "secret_key",
+                    "scope": "gnn.read",
+                },
+                "expected_result": "success",
+            },
+            {
+                "user_type": "api_key",
+                "credentials": {"api_key": "api_key_456", "signature": "hmac_signature"},
+                "expected_result": "success",
+            },
+            {
+                "user_type": "malicious_user",
+                "credentials": {"username": "attacker", "password": "weak_pass"},
+                "expected_result": "failure",
+            },
+        ]
 
         auth_results = []
 
         for scenario in auth_scenarios:
-            auth_result = security_framework.authenticate(
-                scenario["credentials"])
+            auth_result = security_framework.authenticate(scenario["credentials"])
             auth_results.append(auth_result)
 
         # Verify authentication results
@@ -786,8 +784,7 @@ class TestGNNSecurity:
 
         for test_data in privacy_test_data:
             # Apply privacy protection
-            privacy_result = security_framework.apply_privacy_protection(
-                test_data)
+            privacy_result = security_framework.apply_privacy_protection(test_data)
             privacy_results.append(privacy_result)
 
         # Verify privacy protection
@@ -811,8 +808,10 @@ class TestGNNSecurity:
                 )
 
             if "account_number" in original_content:
-                assert ("account_number" not in str(protected_data) or protected_data.get(
-                    "account_number") != original_content["account_number"])
+                assert (
+                    "account_number" not in str(protected_data)
+                    or protected_data.get("account_number") != original_content["account_number"]
+                )
 
 
 class TestGNNPerformanceOptimization:
@@ -855,10 +854,7 @@ class TestGNNPerformanceOptimization:
         else:
             return Mock()
 
-    def test_performance_profiling(
-            self,
-            performance_optimizer,
-            performance_config):
+    def test_performance_profiling(self, performance_optimizer, performance_config):
         """Test comprehensive performance profiling."""
         if not IMPORT_SUCCESS:
             return
@@ -932,13 +928,8 @@ class TestGNNPerformanceOptimization:
         # Define optimization targets
         optimization_targets = {
             "primary_objective": "latency",
-            "constraints": {
-                "max_memory_mb": 4096,
-                "min_accuracy": 0.95,
-                "max_model_size_mb": 100},
-            "optimization_budget": {
-                "time_minutes": 30,
-                "compute_units": 1000},
+            "constraints": {"max_memory_mb": 4096, "min_accuracy": 0.95, "max_model_size_mb": 100},
+            "optimization_budget": {"time_minutes": 30, "compute_units": 1000},
         }
 
         # Test model for optimization
@@ -1110,11 +1101,7 @@ class TestGNNQualityAssurance:
                 "scalability",
                 "usability",
             ],
-            "test_environments": [
-                "development",
-                "staging",
-                "pre_production",
-                "production"],
+            "test_environments": ["development", "staging", "pre_production", "production"],
             "test_data_sets": [
                 "synthetic_graphs",
                 "benchmark_graphs",
@@ -1125,8 +1112,7 @@ class TestGNNQualityAssurance:
         }
 
         # Execute comprehensive testing
-        testing_result = qa_framework.execute_comprehensive_tests(
-            test_suite_config)
+        testing_result = qa_framework.execute_comprehensive_tests(test_suite_config)
 
         assert "test_results" in testing_result
         assert "coverage_report" in testing_result
@@ -1146,10 +1132,8 @@ class TestGNNQualityAssurance:
             assert "coverage" in category_results
 
             # Most tests should pass
-            total_tests = category_results["passed"] + \
-                category_results["failed"]
-            pass_rate = category_results["passed"] / \
-                total_tests if total_tests > 0 else 0
+            total_tests = category_results["passed"] + category_results["failed"]
+            pass_rate = category_results["passed"] / total_tests if total_tests > 0 else 0
             assert pass_rate >= 0.9  # 90% pass rate
 
         # Overall quality score should be high
@@ -1247,8 +1231,7 @@ class TestGNNQualityAssurance:
         }
 
         # Assess production readiness
-        readiness_assessment = qa_framework.assess_production_readiness(
-            readiness_criteria)
+        readiness_assessment = qa_framework.assess_production_readiness(readiness_criteria)
 
         assert "overall_readiness_score" in readiness_assessment
         assert "category_scores" in readiness_assessment
@@ -1352,11 +1335,11 @@ class TestGNNIntegrationScenarios:
         # Setup federated research collaboration
         federated_system = GNNEcosystem(
             ComprehensiveGNNConfig(
-                architecture=SystemArchitecture.FEDERATED,
-                enable_federated_learning=True))
+                architecture=SystemArchitecture.FEDERATED, enable_federated_learning=True
+            )
+        )
 
-        collaboration_result = federated_system.setup_research_collaboration(
-            collaboration_config)
+        collaboration_result = federated_system.setup_research_collaboration(collaboration_config)
 
         assert "federation_topology" in collaboration_result
         assert "privacy_preservation" in collaboration_result
@@ -1402,11 +1385,7 @@ class TestGNNIntegrationScenarios:
             "peak_rps": 15000,
             "average_rps": 8000,
             "request_sizes": "variable",
-            "priority_distribution": {
-                "critical": 0.1,
-                "high": 0.2,
-                "normal": 0.6,
-                "low": 0.1},
+            "priority_distribution": {"critical": 0.1, "high": 0.2, "normal": 0.6, "low": 0.1},
         }
 
         # Execute real-time inference

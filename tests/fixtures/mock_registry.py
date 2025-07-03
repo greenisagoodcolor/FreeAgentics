@@ -100,11 +100,9 @@ class MockRegistry:
         cls.initialize()
 
     @classmethod
-    def create_agent_with_coalition(cls,
-                                    agent_id: Optional[str] = None,
-                                    coalition_id: Optional[str] = None,
-                                    **kwargs) -> tuple[Mock,
-                                                       Mock]:
+    def create_agent_with_coalition(
+        cls, agent_id: Optional[str] = None, coalition_id: Optional[str] = None, **kwargs
+    ) -> tuple[Mock, Mock]:
         """Create an agent and add it to a coalition.
 
         Args:
@@ -117,11 +115,7 @@ class MockRegistry:
         """
         agent = cls.create("agent", agent_id=agent_id, **kwargs)
 
-        coalition = cls.create(
-            "coalition",
-            coalition_id=coalition_id,
-            members=[
-                agent.agent_id])
+        coalition = cls.create("coalition", coalition_id=coalition_id, members=[agent.agent_id])
 
         # Set up bidirectional relationship
         agent.coalition_id = coalition.coalition_id
@@ -130,11 +124,9 @@ class MockRegistry:
         return agent, coalition
 
     @classmethod
-    def create_agent_network(cls,
-                             num_agents: int = 5,
-                             num_coalitions: int = 2,
-                             agent_type: str = "explorer") -> Dict[str,
-                                                                   Any]:
+    def create_agent_network(
+        cls, num_agents: int = 5, num_coalitions: int = 2, agent_type: str = "explorer"
+    ) -> Dict[str, Any]:
         """Create a network of agents and coalitions.
 
         Args:
@@ -151,8 +143,11 @@ class MockRegistry:
         # Create agents
         for i in range(num_agents):
             agent = cls.create(
-                "agent", agent_id=f"agent_{
-                    i:03d}", agent_type=agent_type)
+                "agent",
+                agent_id=f"agent_{
+                    i:03d}",
+                agent_type=agent_type,
+            )
             agents.append(agent)
 
         # Create coalitions and distribute agents
@@ -168,8 +163,11 @@ class MockRegistry:
                     agent_idx += 1
 
             coalition = cls.create(
-                "coalition", coalition_id=f"coalition_{
-                    i:03d}", members=coalition_members)
+                "coalition",
+                coalition_id=f"coalition_{
+                    i:03d}",
+                members=coalition_members,
+            )
             coalitions.append(coalition)
 
             # Update agent references
@@ -214,16 +212,12 @@ class MockRegistry:
         database = cls.create("database")
         api_response = cls.create("api_response")
 
-        return {
-            "agent": agent,
-            "database": database,
-            "api_response": api_response}
+        return {"agent": agent, "database": database, "api_response": api_response}
 
     @classmethod
     def _create_exploration_scenario(cls) -> Dict[str, Any]:
         """Create an exploration scenario."""
-        network = cls.create_agent_network(
-            num_agents=5, num_coalitions=1, agent_type="explorer")
+        network = cls.create_agent_network(num_agents=5, num_coalitions=1, agent_type="explorer")
 
         # Add exploration-specific data
         for agent in network["agents"]:
@@ -237,32 +231,18 @@ class MockRegistry:
         """Create a trading scenario."""
         # Create merchants
         merchants = [
-            cls.create(
-                "agent",
-                agent_type="merchant",
-                agent_id=f"merchant_{i}") for i in range(3)]
+            cls.create("agent", agent_type="merchant", agent_id=f"merchant_{i}") for i in range(3)
+        ]
 
         # Set up different resource profiles
-        merchants[0].resources = {
-            "energy": 100,
-            "materials": 20,
-            "information": 50}
-        merchants[1].resources = {
-            "energy": 20,
-            "materials": 100,
-            "information": 30}
-        merchants[2].resources = {
-            "energy": 50,
-            "materials": 50,
-            "information": 100}
+        merchants[0].resources = {"energy": 100, "materials": 20, "information": 50}
+        merchants[1].resources = {"energy": 20, "materials": 100, "information": 30}
+        merchants[2].resources = {"energy": 50, "materials": 50, "information": 100}
 
         return {
             "merchants": merchants,
             "trade_history": [],
-            "market_prices": {
-                "energy": 1.0,
-                "materials": 2.0,
-                "information": 1.5},
+            "market_prices": {"energy": 1.0, "materials": 2.0, "information": 1.5},
         }
 
     @classmethod
@@ -272,27 +252,24 @@ class MockRegistry:
         agents = []
         for agent_type in ["explorer", "guardian", "merchant", "scholar"]:
             for i in range(2):
-                agent = cls.create(
-                    "agent",
-                    agent_type=agent_type,
-                    agent_id=f"{agent_type}_{i}")
+                agent = cls.create("agent", agent_type=agent_type, agent_id=f"{agent_type}_{i}")
                 agents.append(agent)
 
         # Create formation proposals
-        proposals = [{"id": "proposal_1",
-                      "initiator": agents[0].agent_id,
-                      "members": [agents[0].agent_id,
-                                  agents[2].agent_id],
-                      "purpose": "resource_gathering",
-                      },
-                     {"id": "proposal_2",
-                      "initiator": agents[4].agent_id,
-                      "members": [agents[4].agent_id,
-                                  agents[5].agent_id,
-                                  agents[6].agent_id],
-                      "purpose": "knowledge_sharing",
-                      },
-                     ]
+        proposals = [
+            {
+                "id": "proposal_1",
+                "initiator": agents[0].agent_id,
+                "members": [agents[0].agent_id, agents[2].agent_id],
+                "purpose": "resource_gathering",
+            },
+            {
+                "id": "proposal_2",
+                "initiator": agents[4].agent_id,
+                "members": [agents[4].agent_id, agents[5].agent_id, agents[6].agent_id],
+                "purpose": "knowledge_sharing",
+            },
+        ]
 
         return {"agents": agents, "proposals": proposals, "coalitions": []}
 

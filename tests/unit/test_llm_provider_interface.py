@@ -86,14 +86,8 @@ except ImportError:
 
     class ModelInfo:
         def __init__(
-                self,
-                id,
-                name,
-                provider,
-                capabilities,
-                context_window,
-                max_output_tokens,
-                **kwargs):
+            self, id, name, provider, capabilities, context_window, max_output_tokens, **kwargs
+        ):
             self.id = id
             self.name = name
             self.provider = provider
@@ -117,13 +111,8 @@ except ImportError:
             self.error_counts = {}
 
         def update_request(
-                self,
-                success,
-                input_tokens,
-                output_tokens,
-                latency_ms,
-                cost,
-                error_type=None):
+            self, success, input_tokens, output_tokens, latency_ms, cost, error_type=None
+        ):
             pass
 
     class HealthCheckResult:
@@ -300,9 +289,7 @@ class TestModelInfo:
             id="gpt-4",
             name="GPT-4",
             provider=ProviderType.OPENAI,
-            capabilities=[
-                ModelCapability.TEXT_GENERATION,
-                ModelCapability.CHAT_COMPLETION],
+            capabilities=[ModelCapability.TEXT_GENERATION, ModelCapability.CHAT_COMPLETION],
             context_window=8192,
             max_output_tokens=4096,
             cost_per_1k_input_tokens=0.03,
@@ -439,12 +426,8 @@ class TestHealthCheckResult:
             status=ProviderStatus.HEALTHY,
             latency_ms=50.0,
             error_message=None,
-            model_availability={
-                "gpt-4": True,
-                "gpt-3.5": True},
-            rate_limit_info={
-                "requests_per_minute": 60,
-                "tokens_per_minute": 90000},
+            model_availability={"gpt-4": True, "gpt-3.5": True},
+            rate_limit_info={"requests_per_minute": 60, "tokens_per_minute": 90000},
         )
 
         assert result.status == ProviderStatus.HEALTHY
@@ -457,9 +440,8 @@ class TestHealthCheckResult:
     def test_health_check_with_error(self):
         """Test health check with error."""
         result = HealthCheckResult(
-            status=ProviderStatus.OFFLINE,
-            latency_ms=0.0,
-            error_message="Connection timeout")
+            status=ProviderStatus.OFFLINE, latency_ms=0.0, error_message="Connection timeout"
+        )
 
         assert result.status == ProviderStatus.OFFLINE
         assert result.error_message == "Connection timeout"
@@ -524,12 +506,8 @@ class TestGenerationResponse:
             cost=0.0012,
             latency_ms=350.0,
             finish_reason="stop",
-            function_call={
-                "name": "get_weather",
-                "arguments": '{"location": "NYC"}'},
-            usage_metadata={
-                "prompt_tokens": 20,
-                "completion_tokens": 10},
+            function_call={"name": "get_weather", "arguments": '{"location": "NYC"}'},
+            usage_metadata={"prompt_tokens": 20, "completion_tokens": 10},
         )
 
         assert response.text == "Hello! How can I help you?"
@@ -570,9 +548,8 @@ class TestBaseProvider:
 
         # Mock test_connection
         provider.test_connection = Mock(
-            return_value=HealthCheckResult(
-                status=ProviderStatus.HEALTHY,
-                latency_ms=100.0))
+            return_value=HealthCheckResult(status=ProviderStatus.HEALTHY, latency_ms=100.0)
+        )
 
         creds = ProviderCredentials(api_key="test-key")
         result = provider.configure(creds, timeout=30, retry_count=3)
@@ -792,8 +769,7 @@ class TestProviderRegistry:
         registry = ProviderRegistry()
 
         healthy_provider = MockProvider(ProviderType.OPENAI, is_healthy=True)
-        unhealthy_provider = MockProvider(
-            ProviderType.ANTHROPIC, is_healthy=False)
+        unhealthy_provider = MockProvider(ProviderType.ANTHROPIC, is_healthy=False)
 
         registry.register_provider(healthy_provider)
         registry.register_provider(unhealthy_provider)
@@ -818,10 +794,7 @@ class TestProviderRegistry:
         registry.register_provider(provider2)
         registry.register_provider(provider3)
 
-        new_order = [
-            ProviderType.COHERE,
-            ProviderType.OPENAI,
-            ProviderType.ANTHROPIC]
+        new_order = [ProviderType.COHERE, ProviderType.OPENAI, ProviderType.ANTHROPIC]
         registry.reorder_providers(new_order)
 
         assert registry._provider_priorities == new_order
@@ -1126,8 +1099,7 @@ class TestEdgeCases:
         provider_functions.supports_function_calling = Mock(return_value=True)
 
         provider_no_functions = MockProvider(ProviderType.OLLAMA)
-        provider_no_functions.supports_function_calling = Mock(
-            return_value=False)
+        provider_no_functions.supports_function_calling = Mock(return_value=False)
 
         assert provider_functions.supports_function_calling()
         assert not provider_no_functions.supports_function_calling()

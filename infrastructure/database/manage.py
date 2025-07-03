@@ -8,8 +8,6 @@ This script provides utilities for:
 - Database health checks
 """
 
-from .seed import seed_demo_data, seed_development_data
-from .connection import DATABASE_URL, engine
 import os
 import sys
 from pathlib import Path
@@ -20,6 +18,9 @@ from alembic import command
 from alembic.config import Config
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from sqlalchemy import text
+
+from .connection import DATABASE_URL, engine
+from .seed import seed_demo_data, seed_development_data
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
@@ -69,7 +70,8 @@ def create_db(force):
     except psycopg2.errors.DuplicateDatabase:
         click.echo(
             f"Database {
-                config['database']} already exists. Use --force to recreate.")
+                config['database']} already exists. Use --force to recreate."
+        )
     finally:
         cur.close()
         conn.close()
@@ -125,11 +127,7 @@ def status():
 
 
 @cli.command()
-@click.option("--env",
-              type=click.Choice(["development",
-                                 "demo",
-                                 "test"]),
-              default="development")
+@click.option("--env", type=click.Choice(["development", "demo", "test"]), default="development")
 def seed(env):
     """Seed the database with test data"""
     click.echo(f"Seeding database for {env} environment...")
@@ -164,7 +162,8 @@ def check():
             else:
                 click.echo("✗ No migrations applied yet. Run 'python manage.py migrate'")
             result = conn.execute(
-                text("SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public'"))
+                text("SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public'")
+            )
             table_count = result.scalar()
             click.echo(f"✓ Database has {table_count} tables")
     except Exception as e:

@@ -85,10 +85,7 @@ class AgentConversation:
     agents communicate to reduce uncertainty and achieve objectives.
     """
 
-    def __init__(
-            self,
-            conversation_id: Optional[str] = None,
-            max_turns: int = 10) -> None:
+    def __init__(self, conversation_id: Optional[str] = None, max_turns: int = 10) -> None:
         """
         Initialize a conversation.
 
@@ -111,8 +108,7 @@ class AgentConversation:
         self.conversation_goals: Dict[str, List[str]] = {}
         logger.info(f"Created conversation {self.conversation_id}")
 
-    def add_participant(self, agent_id: str,
-                        goals: Optional[List[str]] = None) -> None:
+    def add_participant(self, agent_id: str, goals: Optional[List[str]] = None) -> None:
         """Add an agent to the conversation with their goals"""
         if agent_id not in self.participants:
             self.participants.append(agent_id)
@@ -148,14 +144,10 @@ class AgentConversation:
         # Generate content based on intent
         if llm_client:
             content = self._generate_with_llm(
-                speaker_id,
-                speaker_state,
-                intent,
-                conversation_context,
-                llm_client)
+                speaker_id, speaker_state, intent, conversation_context, llm_client
+            )
         else:
-            content = self._generate_template_message(
-                speaker_id, speaker_state, intent)
+            content = self._generate_template_message(speaker_id, speaker_state, intent)
         # Create message
         message = ConversationMessage(
             id=str(uuid.uuid4()),
@@ -167,9 +159,7 @@ class AgentConversation:
         )
         return message
 
-    def _determine_intent(self,
-                          speaker_state: Dict[str,
-                                              Any]) -> ConversationIntent:
+    def _determine_intent(self, speaker_state: Dict[str, Any]) -> ConversationIntent:
         """Determine conversation intent based on agent state"""
         # Check for urgent needs
         if speaker_state.get("danger_detected", False):
@@ -192,10 +182,7 @@ class AgentConversation:
         # Default to casual
         return ConversationIntent.CASUAL_GREETING
 
-    def _select_recipient(
-            self,
-            speaker_id: str,
-            intent: ConversationIntent) -> Optional[str]:
+    def _select_recipient(self, speaker_id: str, intent: ConversationIntent) -> Optional[str]:
         """Select recipient based on intent"""
         other_participants = [p for p in self.participants if p != speaker_id]
         if not other_participants:
@@ -207,11 +194,9 @@ class AgentConversation:
         # In full implementation, would use more sophisticated selection
         return other_participants[0]
 
-    def _generate_template_message(self,
-                                   speaker_id: str,
-                                   speaker_state: Dict[str,
-                                                       Any],
-                                   intent: ConversationIntent) -> str:
+    def _generate_template_message(
+        self, speaker_id: str, speaker_state: Dict[str, Any], intent: ConversationIntent
+    ) -> str:
         """Generate message using templates"""
         templates = {
             ConversationIntent.SHARE_DISCOVERY: [
@@ -249,18 +234,15 @@ class AgentConversation:
         template = random.choice(templates.get(intent, ["Hello"]))
         # Fill in template
         if intent == ConversationIntent.SHARE_DISCOVERY:
-            discoveries = speaker_state.get(
-                "recent_discoveries", ["something"])
+            discoveries = speaker_state.get("recent_discoveries", ["something"])
             discovery = discoveries[0] if discoveries else "something"
             location = speaker_state.get("location", "nearby")
             return template.format(discovery=discovery, location=location)
         elif intent == ConversationIntent.PROPOSE_TRADE:
             resources = speaker_state.get("resources", {})
             # Find what's needed and what can be offered
-            need = min(resources.items(), key=lambda x: x[1])[
-                0] if resources else "resources"
-            offer = max(resources.items(), key=lambda x: x[1])[
-                0] if resources else "items"
+            need = min(resources.items(), key=lambda x: x[1])[0] if resources else "resources"
+            offer = max(resources.items(), key=lambda x: x[1])[0] if resources else "items"
             return template.format(need=need, offer=offer)
         elif intent == ConversationIntent.SEEK_INFORMATION:
             topic = speaker_state.get("uncertainty_topics", ["the area"])[0]
@@ -282,8 +264,7 @@ class AgentConversation:
     ) -> str:
         """Generate natural language using LLM"""
         # Build prompt
-        prompt = self._build_llm_prompt(
-            speaker_id, speaker_state, intent, conversation_context)
+        prompt = self._build_llm_prompt(speaker_id, speaker_state, intent, conversation_context)
         # Generate response
         try:
             response = llm_client.generate(prompt, max_tokens=100)
@@ -291,8 +272,7 @@ class AgentConversation:
         except Exception as e:
             logger.error(f"LLM generation failed: {e}")
             # Fall back to template
-            return self._generate_template_message(
-                speaker_id, speaker_state, intent)
+            return self._generate_template_message(speaker_id, speaker_state, intent)
 
     def _build_llm_prompt(
         self,
@@ -364,8 +344,7 @@ Response:"""
             self.end_conversation()
         return turn
 
-    def _determine_action(self, agent_id: str,
-                          agent_state: Dict[str, Any]) -> str:
+    def _determine_action(self, agent_id: str, agent_state: Dict[str, Any]) -> str:
         """Determine what action agent should take"""
         # Simple turn-taking logic
         # In full implementation, would use more sophisticated decision-making
@@ -384,8 +363,7 @@ Response:"""
     def add_message(self, message: ConversationMessage) -> None:
         """Add a message to the conversation"""
         self.messages.append(message)
-        logger.debug(
-            f"Added message from {message.sender_id}: {message.content[:50]}...")
+        logger.debug(f"Added message from {message.sender_id}: {message.content[:50]}...")
 
     def update_beliefs_from_message(
         self,
@@ -411,7 +389,8 @@ Response:"""
                 statement=(
                     f"Agent {
                         message.sender_id} discovered: {
-                        message.content}"),
+                        message.content}"
+                ),
                 confidence=0.7,  # Moderate confidence in shared info
                 supporting_patterns=[],
                 contradicting_patterns=[],
@@ -442,12 +421,12 @@ Response:"""
         elif message.intent == ConversationIntent.PROPOSE_TRADE:
             # Create belief about trade opportunity
             belief = BeliefNode(
-                id=str(
-                    uuid.uuid4()),
+                id=str(uuid.uuid4()),
                 statement=(
                     f"Trade opportunity with {
                         message.sender_id}: {
-                        message.content}"),
+                        message.content}"
+                ),
                 confidence=0.6,
                 supporting_patterns=[],
                 contradicting_patterns=[],
@@ -461,12 +440,12 @@ Response:"""
             updated_beliefs.append(belief)
         # Update trust/relationship beliefs
         trust_belief = BeliefNode(
-            id=str(
-                uuid.uuid4()),
+            id=str(uuid.uuid4()),
             statement=(
                 f"Agent {
                     message.sender_id} communicated with intent {
-                    message.intent.value}"),
+                    message.intent.value}"
+            ),
             confidence=0.8,
             supporting_patterns=[],
             contradicting_patterns=[],
@@ -492,12 +471,9 @@ Response:"""
         return {
             "conversation_id": self.conversation_id,
             "participants": self.participants,
-            "message_count": len(
-                self.messages),
+            "message_count": len(self.messages),
             "turn_count": self.turn_count,
-            "duration": (
-                (self.end_time or datetime.utcnow()) -
-                self.start_time).total_seconds(),
+            "duration": ((self.end_time or datetime.utcnow()) - self.start_time).total_seconds(),
             "active": self.active,
             "intent_distribution": intent_counts,
             "start_time": self.start_time.isoformat(),
@@ -526,8 +502,7 @@ class ConversationManager:
 
     def __init__(self) -> None:
         self.conversations: Dict[str, AgentConversation] = {}
-        self.agent_conversations: Dict[str,
-                                       List[str]] = {}  # agent_id -> conv_ids
+        self.agent_conversations: Dict[str, List[str]] = {}  # agent_id -> conv_ids
 
     def create_conversation(
         self, participants: List[str], goals: Optional[Dict[str, List[str]]] = None
@@ -547,17 +522,16 @@ class ConversationManager:
             # Track agent's conversations
             if agent_id not in self.agent_conversations:
                 self.agent_conversations[agent_id] = []
-            self.agent_conversations[agent_id].append(
-                conversation.conversation_id)
+            self.agent_conversations[agent_id].append(conversation.conversation_id)
         self.conversations[conversation.conversation_id] = conversation
         return conversation
 
-    def get_agent_communications(
-            self, agent_id: str) -> List[AgentConversation]:
+    def get_agent_communications(self, agent_id: str) -> List[AgentConversation]:
         """Get all conversations for an agent"""
         conv_ids = self.agent_conversations.get(agent_id, [])
-        return [self.conversations[conv_id]
-                for conv_id in conv_ids if conv_id in self.conversations]
+        return [
+            self.conversations[conv_id] for conv_id in conv_ids if conv_id in self.conversations
+        ]
 
     def get_active_conversations(self) -> List[AgentConversation]:
         """Get all active conversations"""

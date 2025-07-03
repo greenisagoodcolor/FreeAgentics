@@ -221,11 +221,7 @@ class HardwareDetector:
         """Detect Coral TPU availability"""
         try:
             # Check for Coral USB accelerator
-            result = subprocess.run(
-                ["lsusb"],
-                capture_output=True,
-                text=True,
-                check=True)
+            result = subprocess.run(["lsusb"], capture_output=True, text=True, check=True)
             if "Google" in result.stdout and "Coral" in result.stdout:
                 return True
 
@@ -273,9 +269,7 @@ class HardwareOptimizer:
             "generic_high": self._generic_high_profile(),
         }
 
-    def get_optimal_profile(
-            self,
-            capabilities: HardwareCapabilities) -> OptimizationProfile:
+    def get_optimal_profile(self, capabilities: HardwareCapabilities) -> OptimizationProfile:
         """Get optimal profile based on detected capabilities"""
         # Check for specific hardware
         if self._is_raspberry_pi_hardware(capabilities):
@@ -311,9 +305,7 @@ class HardwareOptimizer:
             batch_size=base_profile.batch_size,
             use_mixed_precision=base_profile.use_mixed_precision,
             quantization_bits=base_profile.quantization_bits,
-            inference_threads=min(
-                base_profile.inference_threads,
-                capabilities.cpu_threads // 2),
+            inference_threads=min(base_profile.inference_threads, capabilities.cpu_threads // 2),
             inference_timeout_ms=base_profile.inference_timeout_ms,
             power_mode=base_profile.power_mode,
         )
@@ -555,8 +547,7 @@ class RuntimeConfigurator:
         return config
 
     @staticmethod
-    def validate_config(config: Dict[str, Any],
-                        capabilities: HardwareCapabilities) -> List[str]:
+    def validate_config(config: Dict[str, Any], capabilities: HardwareCapabilities) -> List[str]:
         """Validate runtime configuration against hardware capabilities"""
         warnings = []
 

@@ -132,10 +132,8 @@ class TestResourceUnit:
     def test_get_effective_value(self):
         """Test effective value calculation."""
         unit = ResourceUnit(
-            resource_type=ResourceType.TOOLS,
-            quantity=10.0,
-            quality=0.8,
-            durability=0.5)
+            resource_type=ResourceType.TOOLS, quantity=10.0, quality=0.8, durability=0.5
+        )
 
         effective_value = unit.get_effective_value()
         assert effective_value == 10.0 * 0.8 * 0.5
@@ -144,10 +142,8 @@ class TestResourceUnit:
     def test_degrade_tools(self):
         """Test degradation for tools/weapons/shelter."""
         unit = ResourceUnit(
-            resource_type=ResourceType.TOOLS,
-            quantity=10.0,
-            quality=1.0,
-            durability=1.0)
+            resource_type=ResourceType.TOOLS, quantity=10.0, quality=1.0, durability=1.0
+        )
 
         # Test degradation
         unit.degrade(rate=0.1)
@@ -164,10 +160,8 @@ class TestResourceUnit:
     def test_degrade_other_resources(self):
         """Test degradation for non-durable resources."""
         unit = ResourceUnit(
-            resource_type=ResourceType.FOOD,
-            quantity=10.0,
-            quality=1.0,
-            durability=1.0)
+            resource_type=ResourceType.FOOD, quantity=10.0, quality=1.0, durability=1.0
+        )
 
         # Test degradation
         unit.degrade(rate=0.1)
@@ -178,10 +172,8 @@ class TestResourceUnit:
     def test_degrade_minimum_values(self):
         """Test degradation doesn't go below zero."""
         unit = ResourceUnit(
-            resource_type=ResourceType.TOOLS,
-            quantity=10.0,
-            quality=0.05,
-            durability=0.05)
+            resource_type=ResourceType.TOOLS, quantity=10.0, quality=0.05, durability=0.05
+        )
 
         # Degrade past zero
         unit.degrade(rate=0.1)
@@ -195,9 +187,8 @@ class TestMarketPrice:
     def setup_method(self):
         """Set up test market price."""
         self.price = MarketPrice(
-            resource_type=ResourceType.FOOD,
-            base_price=10.0,
-            current_price=10.0)
+            resource_type=ResourceType.FOOD, base_price=10.0, current_price=10.0
+        )
 
     def test_market_price_creation(self):
         """Test creating market price with all fields."""
@@ -333,11 +324,8 @@ class TestTradeOffer:
             offer_id="offer_123",
             from_agent="agent_1",
             to_agent="agent_2",
-            offered_resources={
-                ResourceType.FOOD: 10.0,
-                ResourceType.WATER: 5.0},
-            requested_resources={
-                ResourceType.ENERGY: 15.0},
+            offered_resources={ResourceType.FOOD: 10.0, ResourceType.WATER: 5.0},
+            requested_resources={ResourceType.ENERGY: 15.0},
             expiration=self.expiration,
         )
 
@@ -443,10 +431,7 @@ class TestTransaction:
     def test_transaction_creation(self):
         """Test creating transaction with all fields."""
         metadata = {"contract_id": "contract_123", "witness": "agent_w"}
-        resources = {
-            "agent_1": {
-                ResourceType.FOOD: 10.0}, "agent_2": {
-                ResourceType.ENERGY: 15.0}}
+        resources = {"agent_1": {ResourceType.FOOD: 10.0}, "agent_2": {ResourceType.ENERGY: 15.0}}
 
         transaction = Transaction(
             transaction_id="trans_123",
@@ -632,8 +617,7 @@ class TestResourceInventory:
         self.inventory.release_reservation(ResourceType.WEAPONS, 10.0)
 
         assert self.inventory.reserved[ResourceType.WEAPONS] == 10.0
-        assert self.inventory.get_available_amount(
-            ResourceType.WEAPONS) == 20.0
+        assert self.inventory.get_available_amount(ResourceType.WEAPONS) == 20.0
 
     def test_release_all_reservation(self):
         """Test releasing all reserved resources."""
@@ -643,8 +627,7 @@ class TestResourceInventory:
         self.inventory.release_reservation(ResourceType.SHELTER, 10.0)
 
         assert self.inventory.reserved[ResourceType.SHELTER] == 0.0
-        assert self.inventory.get_available_amount(
-            ResourceType.SHELTER) == 10.0
+        assert self.inventory.get_available_amount(ResourceType.SHELTER) == 10.0
 
     def test_degrade_resources(self):
         """Test degrading all resources in inventory."""
@@ -664,24 +647,15 @@ class TestResourceInventory:
 
     def test_get_inventory_summary(self):
         """Test getting inventory summary."""
-        self.inventory.add_resource(
-            ResourceUnit(
-                ResourceType.FOOD,
-                10.0,
-                quality=0.9))
-        self.inventory.add_resource(
-            ResourceUnit(
-                ResourceType.FOOD,
-                5.0,
-                quality=0.8))
+        self.inventory.add_resource(ResourceUnit(ResourceType.FOOD, 10.0, quality=0.9))
+        self.inventory.add_resource(ResourceUnit(ResourceType.FOOD, 5.0, quality=0.8))
         self.inventory.add_resource(ResourceUnit(ResourceType.WATER, 20.0))
 
         summary = self.inventory.get_inventory_summary()
 
         assert summary[ResourceType.FOOD]["quantity"] == 15.0
         assert summary[ResourceType.FOOD]["unit_count"] == 2
-        assert summary[ResourceType.FOOD]["avg_quality"] == pytest.approx(
-            0.867, rel=0.01)
+        assert summary[ResourceType.FOOD]["avg_quality"] == pytest.approx(0.867, rel=0.01)
         assert summary[ResourceType.WATER]["quantity"] == 20.0
         assert summary[ResourceType.WATER]["unit_count"] == 1
         assert summary[ResourceType.WATER]["avg_quality"] == 1.0

@@ -63,9 +63,7 @@ class Memory:
     context: Dict[str, Any] = field(default_factory=dict)
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-    def calculate_strength(
-            self,
-            current_time: Optional[datetime] = None) -> float:
+    def calculate_strength(self, current_time: Optional[datetime] = None) -> float:
         """Calculate current memory strength considering decay"""
         if current_time is None:
             current_time = datetime.now()
@@ -73,8 +71,7 @@ class Memory:
         base_strength = self.importance
         decay_factor = np.exp(-self.decay_rate * time_elapsed)
         access_boost = min(self.access_count * 0.1, 0.5)
-        recency_hours = (
-            current_time - self.last_accessed).total_seconds() / 3600
+        recency_hours = (current_time - self.last_accessed).total_seconds() / 3600
         recency_factor = np.exp(-0.1 * recency_hours)
         strength = base_strength * decay_factor + access_boost * recency_factor
         return float(min(max(strength, 0.0), 1.0))
@@ -160,10 +157,7 @@ class InMemoryStorage(MemoryStorage):
         """Store memory with indexing"""
         self.memories[memory.memory_id] = memory
         self.type_index[memory.memory_type].add(memory.memory_id)
-        heapq.heappush(
-            self.timestamp_index,
-            (memory.timestamp,
-             memory.memory_id))
+        heapq.heappush(self.timestamp_index, (memory.timestamp, memory.memory_id))
 
     def retrieve(self, memory_id: str) -> Optional[Memory]:
         """Retrieve memory by ID"""
@@ -188,8 +182,7 @@ class InMemoryStorage(MemoryStorage):
         else:
             return set(self.memories.keys())
 
-    def _passes_all_filters(self, memory: Memory,
-                            criteria: Dict[str, Any]) -> bool:
+    def _passes_all_filters(self, memory: Memory, criteria: Dict[str, Any]) -> bool:
         """Check if memory passes all filter criteria"""
         filter_checks = [
             self._check_importance_filter,
@@ -203,15 +196,13 @@ class InMemoryStorage(MemoryStorage):
 
         return True
 
-    def _check_importance_filter(
-            self, memory: Memory, criteria: Dict[str, Any]) -> bool:
+    def _check_importance_filter(self, memory: Memory, criteria: Dict[str, Any]) -> bool:
         """Check importance filter"""
         if "min_importance" in criteria:
             return memory.importance >= criteria["min_importance"]
         return True
 
-    def _check_time_range_filters(
-            self, memory: Memory, criteria: Dict[str, Any]) -> bool:
+    def _check_time_range_filters(self, memory: Memory, criteria: Dict[str, Any]) -> bool:
         """Check time range filters"""
         if "start_time" in criteria and memory.timestamp < criteria["start_time"]:
             return False
@@ -219,14 +210,11 @@ class InMemoryStorage(MemoryStorage):
             return False
         return True
 
-    def _check_context_match_filter(
-            self, memory: Memory, criteria: Dict[str, Any]) -> bool:
+    def _check_context_match_filter(self, memory: Memory, criteria: Dict[str, Any]) -> bool:
         """Check context match filter"""
         if "context_match" in criteria:
             context_match = criteria["context_match"]
-            return all(
-                memory.context.get(k) == v for k,
-                v in context_match.items())
+            return all(memory.context.get(k) == v for k, v in context_match.items())
         return True
 
     def remove(self, memory_id: str) -> bool:
@@ -267,8 +255,7 @@ class WorkingMemory:
         item_id = str(id(item))
         if item_id in self.attention_weights:
             self.attention_weights[item_id] += weight_delta
-            self.attention_weights[item_id] = max(
-                0.0, min(1.0, self.attention_weights[item_id]))
+            self.attention_weights[item_id] = max(0.0, min(1.0, self.attention_weights[item_id]))
 
     def clear(self) -> None:
         """Clear working memory"""
@@ -289,12 +276,8 @@ class MemoryConsolidator:
         access_factor = min(memory.access_count / 10, 1.0)
         association_factor = min(len(memory.associations) / 5, 1.0)
         consolidation_score = (
-            importance_factor *
-            0.5 +
-            access_factor *
-            0.3 +
-            association_factor *
-            0.2)
+            importance_factor * 0.5 + access_factor * 0.3 + association_factor * 0.2
+        )
         return consolidation_score >= self.consolidation_threshold
 
     def consolidate(self, memories: List[Memory]) -> List[Memory]:
@@ -310,8 +293,7 @@ class MemoryConsolidator:
                 consolidated.extend(group)
         return consolidated
 
-    def _group_similar_memories(self,
-                                memories: List[Memory]) -> List[List[Memory]]:
+    def _group_similar_memories(self, memories: List[Memory]) -> List[List[Memory]]:
         """Group memories by similarity"""
         groups = []
         used = set()
@@ -320,7 +302,7 @@ class MemoryConsolidator:
                 continue
             group = [memory1]
             used.add(i)
-            for j, memory2 in enumerate(memories[i + 1:], i + 1):
+            for j, memory2 in enumerate(memories[i + 1 :], i + 1):
                 if j in used:
                     continue
                 if self._are_similar(memory1, memory2):
@@ -336,12 +318,10 @@ class MemoryConsolidator:
         common_keys = set(memory1.context.keys()) & set(memory2.context.keys())
         if not common_keys:
             return False
-        matches = sum(
-            1 for k in common_keys if memory1.context[k] == memory2.context[k])
+        matches = sum(1 for k in common_keys if memory1.context[k] == memory2.context[k])
         return matches / len(common_keys) > 0.7
 
-    def _create_abstract_memory(
-            self, memories: List[Memory]) -> Optional[Memory]:
+    def _create_abstract_memory(self, memories: List[Memory]) -> Optional[Memory]:
         """Create abstract memory from group"""
         if not memories:
             return None
@@ -386,12 +366,10 @@ class LearningAlgorithm:
 class ReinforcementLearner(LearningAlgorithm):
     """Simple reinforcement learning implementation"""
 
-    def __init__(self, learning_rate: float = 0.1,
-                 discount_factor: float = 0.9) -> None:
+    def __init__(self, learning_rate: float = 0.1, discount_factor: float = 0.9) -> None:
         self.learning_rate = learning_rate
         self.discount_factor = discount_factor
-        self.q_table: Dict[str, Dict[str, float]] = defaultdict(
-            lambda: defaultdict(float))
+        self.q_table: Dict[str, Dict[str, float]] = defaultdict(lambda: defaultdict(float))
 
     def learn(self, experience: Experience) -> None:
         """Update Q-values based on experience"""
@@ -507,20 +485,15 @@ class PatternRecognizer:
 class MemorySystem:
     """Main memory system integrating all components"""
 
-    def __init__(
-            self,
-            agent_id: str,
-            storage: Optional[MemoryStorage] = None) -> None:
+    def __init__(self, agent_id: str, storage: Optional[MemoryStorage] = None) -> None:
         self.agent_id = agent_id
         self.storage = storage or InMemoryStorage()
         self.working_memory = WorkingMemory()
         self.consolidator = MemoryConsolidator()
         self.pattern_recognizer = PatternRecognizer()
-        self.learners: Dict[str, LearningAlgorithm] = {
-            "reinforcement": ReinforcementLearner()}
+        self.learners: Dict[str, LearningAlgorithm] = {"reinforcement": ReinforcementLearner()}
         self.total_memories = 0
-        self.memory_types_count: DefaultDict[MemoryType, int] = defaultdict(
-            int)
+        self.memory_types_count: DefaultDict[MemoryType, int] = defaultdict(int)
         self.experience_buffer: deque = deque(maxlen=1000)
 
     def store_memory(
@@ -561,8 +534,7 @@ class MemorySystem:
             },
         )
 
-    def retrieve_memories(
-            self, criteria: Dict[str, Any], limit: int = 10) -> List[Memory]:
+    def retrieve_memories(self, criteria: Dict[str, Any], limit: int = 10) -> List[Memory]:
         """Retrieve memories matching criteria"""
         memories = self.storage.search(criteria)
         for memory in memories:
@@ -570,8 +542,7 @@ class MemorySystem:
         memories.sort(key=lambda m: m.calculate_strength(), reverse=True)
         return memories[:limit]
 
-    def get_relevant_memories(self, context: DecisionContext,
-                              limit: int = 5) -> List[Memory]:
+    def get_relevant_memories(self, context: DecisionContext, limit: int = 5) -> List[Memory]:
         """Get memories relevant to current context"""
         criteria: Dict[str, Any] = {"min_importance": 0.3}
         # Don't filter by context in initial retrieval, let relevance calculation
@@ -585,18 +556,14 @@ class MemorySystem:
         relevant.sort(key=lambda x: x[0], reverse=True)
         return [m for _, m in relevant[:limit]]
 
-    def _calculate_relevance(
-            self,
-            memory: Memory,
-            context: DecisionContext) -> float:
+    def _calculate_relevance(self, memory: Memory, context: DecisionContext) -> float:
         """Calculate memory relevance to current context"""
         relevance = 0.0
         if memory.memory_type == MemoryType.PROCEDURAL:
             relevance += 0.3
         if memory.context:
             if "percept_types" in memory.context:
-                current_types = {
-                    p.stimulus.stimulus_type.value for p in context.percepts}
+                current_types = {p.stimulus.stimulus_type.value for p in context.percepts}
                 memory_types = set(memory.context["percept_types"])
                 overlap = len(current_types & memory_types)
                 if overlap > 0:
@@ -621,7 +588,8 @@ class MemorySystem:
             limit=50,
         )
         to_consolidate = [
-            m for m in recent_memories if self.consolidator.evaluate_for_consolidation(m)]
+            m for m in recent_memories if self.consolidator.evaluate_for_consolidation(m)
+        ]
         if len(to_consolidate) >= 3:
             consolidated = self.consolidator.consolidate(to_consolidate)
             for memory in consolidated:
@@ -632,8 +600,7 @@ class MemorySystem:
         """Extract patterns from recent experiences"""
         if len(self.experience_buffer) < 10:
             return []
-        patterns = self.pattern_recognizer.extract_patterns(
-            list(self.experience_buffer))
+        patterns = self.pattern_recognizer.extract_patterns(list(self.experience_buffer))
         for pattern in patterns:
             self.pattern_recognizer.patterns[pattern.pattern_id] = pattern
             self.store_memory(
@@ -647,8 +614,7 @@ class MemorySystem:
             )
         return patterns
 
-    def predict_outcome(self, state: Dict[str, Any],
-                        action: Action) -> Optional[Dict[str, Any]]:
+    def predict_outcome(self, state: Dict[str, Any], action: Action) -> Optional[Dict[str, Any]]:
         """Predict outcome of action based on learned patterns"""
         self.learners["reinforcement"].predict(state)
         conditions = {"action": action.action_type.value, **state}
@@ -661,8 +627,7 @@ class MemorySystem:
     def forget_old_memories(self, max_age_days: int = 30) -> int:
         """Remove old, unimportant memories"""
         cutoff_time = datetime.now() - timedelta(days=max_age_days)
-        old_memories = self.retrieve_memories(
-            {"end_time": cutoff_time}, limit=100)
+        old_memories = self.retrieve_memories({"end_time": cutoff_time}, limit=100)
         removed = 0
         for memory in old_memories:
             if memory.importance <= 0.3 and memory.calculate_strength() < 0.1:
@@ -699,8 +664,7 @@ class MemorySystem:
         for pattern in data["patterns"]:
             self.pattern_recognizer.patterns[pattern.pattern_id] = pattern
         self.total_memories = data["statistics"]["total_memories"]
-        self.memory_types_count = defaultdict(
-            int, data["statistics"]["memory_types_count"])
+        self.memory_types_count = defaultdict(int, data["statistics"]["memory_types_count"])
 
     def get_memory_summary(self) -> Dict[str, Any]:
         """Get summary of memory system state"""
@@ -730,11 +694,7 @@ class MessageSystem:
         self.messages: List[Dict[str, Any]] = []
         self.message_queue: deque = deque()
 
-    def send_message(
-            self,
-            sender_id: str,
-            recipient_id: str,
-            content: Any) -> None:
+    def send_message(self, sender_id: str, recipient_id: str, content: Any) -> None:
         """Send a message between agents"""
         message = {
             "id": str(uuid.uuid4()),

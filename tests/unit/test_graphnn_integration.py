@@ -162,8 +162,7 @@ class TestDirectGraphMapper:
 
     def test_direct_mapper_map_to_states(self):
         """Test mapping graph features to states."""
-        config = GraphNNIntegrationConfig(
-            output_dim=32, use_gpu=False, state_mapping="direct")
+        config = GraphNNIntegrationConfig(output_dim=32, use_gpu=False, state_mapping="direct")
         mapper = DirectGraphMapper(config, state_dim=32, observation_dim=32)
 
         graph_features = torch.randn(5, 32)
@@ -210,8 +209,7 @@ class TestLearnedGraphMapper:
 
     def test_learned_mapper_creation(self):
         """Test creating LearnedGraphMapper."""
-        config = GraphNNIntegrationConfig(
-            output_dim=32, hidden_dim=64, dropout=0.1, use_gpu=False)
+        config = GraphNNIntegrationConfig(output_dim=32, hidden_dim=64, dropout=0.1, use_gpu=False)
         mapper = LearnedGraphMapper(config, state_dim=16, observation_dim=24)
 
         assert mapper.state_dim == 16
@@ -223,8 +221,7 @@ class TestLearnedGraphMapper:
 
     def test_learned_mapper_map_to_states(self):
         """Test mapping graph features to states using learned mapping."""
-        config = GraphNNIntegrationConfig(
-            output_dim=32, hidden_dim=64, use_gpu=False)
+        config = GraphNNIntegrationConfig(output_dim=32, hidden_dim=64, use_gpu=False)
         mapper = LearnedGraphMapper(config, state_dim=16, observation_dim=24)
 
         graph_features = torch.randn(5, 32)
@@ -236,8 +233,7 @@ class TestLearnedGraphMapper:
 
     def test_learned_mapper_map_to_observations(self):
         """Test mapping graph features to observations using learned mapping."""
-        config = GraphNNIntegrationConfig(
-            output_dim=32, hidden_dim=64, use_gpu=False)
+        config = GraphNNIntegrationConfig(output_dim=32, hidden_dim=64, use_gpu=False)
         mapper = LearnedGraphMapper(config, state_dim=16, observation_dim=24)
 
         graph_features = torch.randn(5, 32)
@@ -247,8 +243,7 @@ class TestLearnedGraphMapper:
 
     def test_learned_mapper_with_node_indices(self):
         """Test learned mapper with node indices."""
-        config = GraphNNIntegrationConfig(
-            output_dim=32, hidden_dim=64, use_gpu=False)
+        config = GraphNNIntegrationConfig(output_dim=32, hidden_dim=64, use_gpu=False)
         mapper = LearnedGraphMapper(config, state_dim=16, observation_dim=24)
 
         graph_features = torch.randn(10, 32)
@@ -266,8 +261,7 @@ class TestGraphFeatureAggregator:
 
     def test_aggregator_creation_mean(self):
         """Test creating aggregator with mean aggregation."""
-        config = GraphNNIntegrationConfig(
-            aggregation_method="mean", output_dim=32, use_gpu=False)
+        config = GraphNNIntegrationConfig(aggregation_method="mean", output_dim=32, use_gpu=False)
         aggregator = GraphFeatureAggregator(config)
 
         assert aggregator.config.aggregation_method == "mean"
@@ -275,10 +269,8 @@ class TestGraphFeatureAggregator:
     def test_aggregator_creation_attention(self):
         """Test creating aggregator with attention aggregation."""
         config = GraphNNIntegrationConfig(
-            aggregation_method="attention",
-            output_dim=32,
-            hidden_dim=64,
-            use_gpu=False)
+            aggregation_method="attention", output_dim=32, hidden_dim=64, use_gpu=False
+        )
         aggregator = GraphFeatureAggregator(config)
 
         assert aggregator.config.aggregation_method == "attention"
@@ -286,8 +278,7 @@ class TestGraphFeatureAggregator:
 
     def test_aggregate_mean(self):
         """Test mean aggregation."""
-        config = GraphNNIntegrationConfig(
-            aggregation_method="mean", use_gpu=False)
+        config = GraphNNIntegrationConfig(aggregation_method="mean", use_gpu=False)
         aggregator = GraphFeatureAggregator(config)
 
         node_features = torch.randn(6, 32)
@@ -302,8 +293,7 @@ class TestGraphFeatureAggregator:
 
     def test_aggregate_max(self):
         """Test max aggregation."""
-        config = GraphNNIntegrationConfig(
-            aggregation_method="max", use_gpu=False)
+        config = GraphNNIntegrationConfig(aggregation_method="max", use_gpu=False)
         aggregator = GraphFeatureAggregator(config)
 
         node_features = torch.randn(4, 32)
@@ -318,8 +308,7 @@ class TestGraphFeatureAggregator:
 
     def test_aggregate_sum(self):
         """Test sum aggregation."""
-        config = GraphNNIntegrationConfig(
-            aggregation_method="sum", use_gpu=False)
+        config = GraphNNIntegrationConfig(aggregation_method="sum", use_gpu=False)
         aggregator = GraphFeatureAggregator(config)
 
         node_features = torch.randn(4, 32)
@@ -335,10 +324,8 @@ class TestGraphFeatureAggregator:
     def test_aggregate_attention(self):
         """Test attention aggregation."""
         config = GraphNNIntegrationConfig(
-            aggregation_method="attention",
-            output_dim=32,
-            hidden_dim=16,
-            use_gpu=False)
+            aggregation_method="attention", output_dim=32, hidden_dim=16, use_gpu=False
+        )
         aggregator = GraphFeatureAggregator(config)
 
         node_features = torch.randn(4, 32)
@@ -350,8 +337,7 @@ class TestGraphFeatureAggregator:
 
     def test_aggregate_single_mean(self):
         """Test single graph mean aggregation."""
-        config = GraphNNIntegrationConfig(
-            aggregation_method="mean", use_gpu=False)
+        config = GraphNNIntegrationConfig(aggregation_method="mean", use_gpu=False)
         aggregator = GraphFeatureAggregator(config)
 
         node_features = torch.randn(5, 32)
@@ -363,8 +349,7 @@ class TestGraphFeatureAggregator:
 
     def test_aggregate_single_max(self):
         """Test single graph max aggregation."""
-        config = GraphNNIntegrationConfig(
-            aggregation_method="max", use_gpu=False)
+        config = GraphNNIntegrationConfig(aggregation_method="max", use_gpu=False)
         aggregator = GraphFeatureAggregator(config)
 
         node_features = torch.randn(5, 32)
@@ -376,8 +361,7 @@ class TestGraphFeatureAggregator:
 
     def test_aggregate_single_sum(self):
         """Test single graph sum aggregation."""
-        config = GraphNNIntegrationConfig(
-            aggregation_method="sum", use_gpu=False)
+        config = GraphNNIntegrationConfig(aggregation_method="sum", use_gpu=False)
         aggregator = GraphFeatureAggregator(config)
 
         node_features = torch.randn(5, 32)

@@ -74,8 +74,7 @@ class TestResourceConstraints:
 
     def test_resource_constraints_defaults(self):
         """Test default values for optional fields."""
-        constraints = ResourceConstraints(
-            available_memory_mb=256.0, cpu_usage_percent=50.0)
+        constraints = ResourceConstraints(available_memory_mb=256.0, cpu_usage_percent=50.0)
 
         assert constraints.battery_level is None
         assert constraints.network_available is True
@@ -109,9 +108,8 @@ class TestFallbackResponse:
     def test_fallback_response_defaults(self):
         """Test default values for optional fields."""
         response = FallbackResponse(
-            text="Test response",
-            fallback_level=FallbackLevel.TEMPLATE,
-            confidence=0.7)
+            text="Test response", fallback_level=FallbackLevel.TEMPLATE, confidence=0.7
+        )
 
         assert response.metadata == {}
         assert response.cached is False
@@ -267,9 +265,8 @@ class TestResponseCache:
         for i in range(3):
             prompt = f"Test prompt {i}"
             response = FallbackResponse(
-                text=f"Response {i}",
-                fallback_level=FallbackLevel.TEMPLATE,
-                confidence=0.5)
+                text=f"Response {i}", fallback_level=FallbackLevel.TEMPLATE, confidence=0.5
+            )
             self.cache.put(prompt, response)
 
         # Memory cache should only contain 2 items (LRU eviction)
@@ -277,10 +274,9 @@ class TestResponseCache:
 
         # First item should be evicted
         assert (
-            "Test prompt 0" not in [
-                self.cache._generate_key(
-                    f"Test prompt {i}") for i in range(3)] or len(
-                self.cache.memory_cache) == 2)
+            "Test prompt 0" not in [self.cache._generate_key(f"Test prompt {i}") for i in range(3)]
+            or len(self.cache.memory_cache) == 2
+        )
 
     def test_get_stats(self):
         """Test cache statistics."""
@@ -288,9 +284,8 @@ class TestResponseCache:
         for i in range(3):
             prompt = f"Test prompt {i}"
             response = FallbackResponse(
-                text=f"Response {i}",
-                fallback_level=FallbackLevel.TEMPLATE,
-                confidence=0.7)
+                text=f"Response {i}", fallback_level=FallbackLevel.TEMPLATE, confidence=0.7
+            )
             self.cache.put(prompt, response)
 
         # Get some entries to generate hits
@@ -354,10 +349,8 @@ class TestTemplateEngine:
         # Check exploration templates
         exploration_templates = self.engine.templates["exploration"]
         assert len(exploration_templates) > 0
-        assert any(
-            "{direction}" in template for template in exploration_templates)
-        assert any(
-            "{resource}" in template for template in exploration_templates)
+        assert any("{direction}" in template for template in exploration_templates)
+        assert any("{resource}" in template for template in exploration_templates)
 
     def test_generate_greeting(self):
         """Test generating greeting response."""
@@ -370,10 +363,7 @@ class TestTemplateEngine:
 
     def test_generate_with_variables(self):
         """Test generating response with variables."""
-        variables = {
-            "direction": "north",
-            "resource": "gold",
-            "location": "cave"}
+        variables = {"direction": "north", "resource": "gold", "location": "cave"}
 
         response = self.engine.generate("exploration", variables)
 
@@ -623,8 +613,7 @@ class TestPrecomputedResponses:
         assert len(precomputed.responses["custom_category"]) == 1
 
         # Test using custom response
-        match = precomputed.find_best_match(
-            "custom_category", {"test": "context"})
+        match = precomputed.find_best_match("custom_category", {"test": "context"})
         assert match is not None
         assert match["response"] == "This is a test response."
 
@@ -656,40 +645,34 @@ class TestFallbackManager:
     def test_determine_fallback_level_memory_based(self):
         """Test fallback level determination based on memory."""
         # Very low memory
-        constraints = ResourceConstraints(
-            available_memory_mb=25, cpu_usage_percent=50)
+        constraints = ResourceConstraints(available_memory_mb=25, cpu_usage_percent=50)
         level = self.manager._determine_fallback_level(constraints)
         assert level == FallbackLevel.RANDOM
 
         # Low memory
-        constraints = ResourceConstraints(
-            available_memory_mb=75, cpu_usage_percent=50)
+        constraints = ResourceConstraints(available_memory_mb=75, cpu_usage_percent=50)
         level = self.manager._determine_fallback_level(constraints)
         assert level == FallbackLevel.RULE_BASED
 
         # Medium memory
-        constraints = ResourceConstraints(
-            available_memory_mb=150, cpu_usage_percent=50)
+        constraints = ResourceConstraints(available_memory_mb=150, cpu_usage_percent=50)
         level = self.manager._determine_fallback_level(constraints)
         assert level == FallbackLevel.PRECOMPUTED
 
         # High memory
-        constraints = ResourceConstraints(
-            available_memory_mb=300, cpu_usage_percent=50)
+        constraints = ResourceConstraints(available_memory_mb=300, cpu_usage_percent=50)
         level = self.manager._determine_fallback_level(constraints)
         assert level == FallbackLevel.TEMPLATE
 
     def test_determine_fallback_level_cpu_based(self):
         """Test fallback level determination based on CPU usage."""
         # High CPU usage
-        constraints = ResourceConstraints(
-            available_memory_mb=1000, cpu_usage_percent=95)
+        constraints = ResourceConstraints(available_memory_mb=1000, cpu_usage_percent=95)
         level = self.manager._determine_fallback_level(constraints)
         assert level == FallbackLevel.RULE_BASED
 
         # Medium CPU usage
-        constraints = ResourceConstraints(
-            available_memory_mb=1000, cpu_usage_percent=75)
+        constraints = ResourceConstraints(available_memory_mb=1000, cpu_usage_percent=75)
         level = self.manager._determine_fallback_level(constraints)
         assert level == FallbackLevel.TEMPLATE
 
@@ -706,9 +689,8 @@ class TestFallbackManager:
         """Test fallback level determination based on network availability."""
         # No network
         constraints = ResourceConstraints(
-            available_memory_mb=1000,
-            cpu_usage_percent=50,
-            network_available=False)
+            available_memory_mb=1000, cpu_usage_percent=50, network_available=False
+        )
         level = self.manager._determine_fallback_level(constraints)
         assert level == FallbackLevel.TEMPLATE
 
@@ -813,17 +795,14 @@ class TestFallbackManager:
         """Test response generation with cache hit."""
         prompt = "Test prompt"
         context = {"test": "context"}
-        constraints = ResourceConstraints(
-            available_memory_mb=1000, cpu_usage_percent=50)
+        constraints = ResourceConstraints(available_memory_mb=1000, cpu_usage_percent=50)
 
         # First call should miss cache and generate response
-        response1 = self.manager.generate_response(
-            prompt, context, constraints)
+        response1 = self.manager.generate_response(prompt, context, constraints)
         assert response1 is not None
 
         # Second call should hit cache if the response was cacheable
-        response2 = self.manager.generate_response(
-            prompt, context, constraints)
+        response2 = self.manager.generate_response(prompt, context, constraints)
         assert response2 is not None
 
         # Cache hit depends on response confidence being > 0.5
@@ -838,8 +817,7 @@ class TestFallbackManager:
         """Test complete response generation workflow."""
         prompt = "Hello, I need help with trading"
         context = {"user_id": "test123", "session": "abc"}
-        constraints = ResourceConstraints(
-            available_memory_mb=300, cpu_usage_percent=60)
+        constraints = ResourceConstraints(available_memory_mb=300, cpu_usage_percent=60)
 
         response = self.manager.generate_response(prompt, context, constraints)
 
@@ -859,8 +837,7 @@ class TestFallbackManager:
             confidence=0.7,
             computation_time_ms=100.0,
         )
-        constraints = ResourceConstraints(
-            available_memory_mb=512, cpu_usage_percent=75)
+        constraints = ResourceConstraints(available_memory_mb=512, cpu_usage_percent=75)
 
         initial_count = len(self.manager.performance_history)
         self.manager._record_performance(response, constraints)
@@ -880,38 +857,23 @@ class TestFallbackManager:
         response = FallbackResponse(
             text="Test", fallback_level=FallbackLevel.RANDOM, confidence=0.1
         )
-        constraints = ResourceConstraints(
-            available_memory_mb=100, cpu_usage_percent=50)
+        constraints = ResourceConstraints(available_memory_mb=100, cpu_usage_percent=50)
 
         # Add more than max_history entries
         for i in range(self.manager.max_history + 10):
             self.manager._record_performance(response, constraints)
 
-        assert len(
-            self.manager.performance_history) == self.manager.max_history
+        assert len(self.manager.performance_history) == self.manager.max_history
 
     def test_get_performance_stats(self):
         """Test performance statistics calculation."""
         # Add some performance data
         responses = [
-            FallbackResponse(
-                "Test1",
-                FallbackLevel.TEMPLATE,
-                0.8,
-                computation_time_ms=100),
-            FallbackResponse(
-                "Test2",
-                FallbackLevel.RULE_BASED,
-                0.6,
-                computation_time_ms=150),
-            FallbackResponse(
-                "Test3",
-                FallbackLevel.RANDOM,
-                0.2,
-                computation_time_ms=50),
+            FallbackResponse("Test1", FallbackLevel.TEMPLATE, 0.8, computation_time_ms=100),
+            FallbackResponse("Test2", FallbackLevel.RULE_BASED, 0.6, computation_time_ms=150),
+            FallbackResponse("Test3", FallbackLevel.RANDOM, 0.2, computation_time_ms=50),
         ]
-        constraints = ResourceConstraints(
-            available_memory_mb=512, cpu_usage_percent=60)
+        constraints = ResourceConstraints(available_memory_mb=512, cpu_usage_percent=60)
 
         for response in responses:
             self.manager._record_performance(response, constraints)
@@ -930,9 +892,7 @@ class TestFallbackManager:
         assert stats["avg_computation_time_ms"] == 100.0  # (100+150+50)/3
         assert stats["max_computation_time_ms"] == 150.0
         assert stats["min_computation_time_ms"] == 50.0
-        assert abs(
-            stats["avg_confidence"] -
-            0.533333) < 0.001  # (0.8+0.6+0.2)/3
+        assert abs(stats["avg_confidence"] - 0.533333) < 0.001  # (0.8+0.6+0.2)/3
 
     def test_get_performance_stats_empty(self):
         """Test performance statistics with no data."""
@@ -970,8 +930,7 @@ class TestIntegrationScenarios:
 
         assert response is not None
         # Should use low-level fallback due to severe constraints
-        assert response.fallback_level in [
-            FallbackLevel.RANDOM, FallbackLevel.RULE_BASED]
+        assert response.fallback_level in [FallbackLevel.RANDOM, FallbackLevel.RULE_BASED]
         assert response.computation_time_ms < 1000  # Should be fast
 
     def test_medium_resource_scenario(self):
@@ -1027,18 +986,15 @@ class TestIntegrationScenarios:
 
     def test_caching_across_multiple_requests(self):
         """Test caching behavior across multiple similar requests."""
-        constraints = ResourceConstraints(
-            available_memory_mb=500, cpu_usage_percent=50)
+        constraints = ResourceConstraints(available_memory_mb=500, cpu_usage_percent=50)
 
         # First request
         prompt = "How do I move north?"
         context = {"location": "start"}
-        response1 = self.manager.generate_response(
-            prompt, context, constraints)
+        response1 = self.manager.generate_response(prompt, context, constraints)
 
         # Second identical request should hit cache if response was cacheable
-        response2 = self.manager.generate_response(
-            prompt, context, constraints)
+        response2 = self.manager.generate_response(prompt, context, constraints)
 
         assert response1.text == response2.text
 
@@ -1078,8 +1034,7 @@ class TestIntegrationScenarios:
 
     def test_performance_monitoring(self):
         """Test performance monitoring across scenario."""
-        constraints = ResourceConstraints(
-            available_memory_mb=300, cpu_usage_percent=60)
+        constraints = ResourceConstraints(available_memory_mb=300, cpu_usage_percent=60)
 
         # Generate multiple responses
         test_prompts = [

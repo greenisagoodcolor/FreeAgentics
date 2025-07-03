@@ -112,13 +112,7 @@ def test_agent_data_model():
     from agents.base import Agent, Position
 
     # Create agent with minimal parameters
-    agent = Agent(
-        name="Test Agent",
-        agent_type="explorer",
-        position=Position(
-            0,
-            0,
-            0))
+    agent = Agent(name="Test Agent", agent_type="explorer", position=Position(0, 0, 0))
 
     assert agent.name == "Test Agent"
     assert agent.agent_type == "explorer"

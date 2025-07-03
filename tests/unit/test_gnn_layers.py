@@ -108,12 +108,8 @@ class TestGCNLayer:
     def test_gcn_layer_custom_params(self):
         """Test GCN layer with custom parameters."""
         layer = GCNLayer(
-            in_channels=32,
-            out_channels=64,
-            improved=True,
-            cached=True,
-            bias=False,
-            normalize=False)
+            in_channels=32, out_channels=64, improved=True, cached=True, bias=False, normalize=False
+        )
 
         assert layer.in_channels == 32
         assert layer.out_channels == 64
@@ -227,11 +223,7 @@ class TestGATLayer:
 
     def test_gat_layer_forward_no_concat(self):
         """Test GAT layer forward pass without concatenation."""
-        layer = GATLayer(
-            in_channels=10,
-            out_channels=20,
-            heads=4,
-            concat=False)
+        layer = GATLayer(in_channels=10, out_channels=20, heads=4, concat=False)
 
         x = torch.randn(100, 10)
         edge_index = torch.randint(0, 100, (2, 200))
@@ -278,11 +270,8 @@ class TestSAGELayer:
     def test_sage_layer_custom_params(self):
         """Test SAGE layer with custom parameters."""
         layer = SAGELayer(
-            in_channels=32,
-            out_channels=64,
-            aggregation="max",
-            bias=False,
-            normalize=True)
+            in_channels=32, out_channels=64, aggregation="max", bias=False, normalize=True
+        )
 
         assert layer.in_channels == 32
         assert layer.out_channels == 64
@@ -356,17 +345,11 @@ class TestGINLayer:
 
     def test_gin_layer_custom_neural_net(self):
         """Test GIN layer with custom neural network."""
-        custom_nn = nn.Sequential(
-            nn.Linear(
-                10, 15), nn.Tanh(), nn.Linear(
-                15, 20))
+        custom_nn = nn.Sequential(nn.Linear(10, 15), nn.Tanh(), nn.Linear(15, 20))
 
         layer = GINLayer(
-            in_channels=10,
-            out_channels=20,
-            neural_net=custom_nn,
-            eps=0.1,
-            train_eps=True)
+            in_channels=10, out_channels=20, neural_net=custom_nn, eps=0.1, train_eps=True
+        )
 
         assert layer.in_channels == 10
         assert layer.out_channels == 20
@@ -389,20 +372,12 @@ class TestGINLayer:
     def test_gin_layer_eps_handling(self):
         """Test GIN layer epsilon parameter handling."""
         # Non-trainable eps
-        layer1 = GINLayer(
-            in_channels=10,
-            out_channels=20,
-            eps=0.5,
-            train_eps=False)
+        layer1 = GINLayer(in_channels=10, out_channels=20, eps=0.5, train_eps=False)
         assert not isinstance(layer1.eps, nn.Parameter)
         assert layer1.eps.item() == 0.5
 
         # Trainable eps
-        layer2 = GINLayer(
-            in_channels=10,
-            out_channels=20,
-            eps=0.5,
-            train_eps=True)
+        layer2 = GINLayer(in_channels=10, out_channels=20, eps=0.5, train_eps=True)
         assert isinstance(layer2.eps, nn.Parameter)
         assert layer2.eps.item() == 0.5
 
@@ -449,11 +424,7 @@ class TestEdgeConvLayer:
             nn.Linear(30, 20),
         )
 
-        layer = EdgeConvLayer(
-            in_channels=10,
-            out_channels=20,
-            neural_net=custom_nn,
-            aggr="mean")
+        layer = EdgeConvLayer(in_channels=10, out_channels=20, neural_net=custom_nn, aggr="mean")
 
         assert layer.in_channels == 10
         assert layer.out_channels == 20
@@ -500,27 +471,18 @@ class TestResGNNLayer:
     def test_resgnn_layer_creation(self):
         """Test ResGNN layer creation."""
         base_layer = GCNLayer(in_channels=10, out_channels=20)
-        res_layer = ResGNNLayer(
-            layer=base_layer,
-            in_channels=10,
-            out_channels=20,
-            dropout=0.1)
+        res_layer = ResGNNLayer(layer=base_layer, in_channels=10, out_channels=20, dropout=0.1)
 
         assert res_layer.in_channels == 10
         assert res_layer.out_channels == 20
         assert res_layer.layer is base_layer
         assert isinstance(res_layer.dropout, nn.Dropout)
-        assert isinstance(
-            res_layer.residual,
-            nn.Linear)  # Different dimensions
+        assert isinstance(res_layer.residual, nn.Linear)  # Different dimensions
 
     def test_resgnn_layer_same_channels(self):
         """Test ResGNN layer with same input/output channels."""
         base_layer = GCNLayer(in_channels=20, out_channels=20)
-        res_layer = ResGNNLayer(
-            layer=base_layer,
-            in_channels=20,
-            out_channels=20)
+        res_layer = ResGNNLayer(layer=base_layer, in_channels=20, out_channels=20)
 
         # Should use Identity for residual connection
         assert isinstance(res_layer.residual, nn.Identity)
@@ -528,10 +490,7 @@ class TestResGNNLayer:
     def test_resgnn_layer_forward(self):
         """Test ResGNN layer forward pass."""
         base_layer = GCNLayer(in_channels=10, out_channels=20)
-        res_layer = ResGNNLayer(
-            layer=base_layer,
-            in_channels=10,
-            out_channels=20)
+        res_layer = ResGNNLayer(layer=base_layer, in_channels=10, out_channels=20)
 
         x = torch.randn(100, 10)
         edge_index = torch.randint(0, 100, (2, 200))
@@ -544,10 +503,7 @@ class TestResGNNLayer:
     def test_resgnn_layer_repr(self):
         """Test ResGNN layer string representation."""
         base_layer = GCNLayer(in_channels=10, out_channels=20)
-        res_layer = ResGNNLayer(
-            layer=base_layer,
-            in_channels=10,
-            out_channels=20)
+        res_layer = ResGNNLayer(layer=base_layer, in_channels=10, out_channels=20)
         repr_str = repr(res_layer)
 
         assert "ResGNNLayer" in repr_str

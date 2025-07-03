@@ -2,14 +2,14 @@
 Module for FreeAgentics Active Inference implementation.
 """
 
-from inference.gnn.testing_framework import GNNTestSuite, GNNValidator, create_test_graphs
-from inference.gnn.parser import GMNParser
-from inference.gnn.model_mapper import (
-    GraphTaskType,
-    GraphToModelMapper,
-    MappingConfig,
-    ModelArchitecture,
-)
+import json
+import os
+import tempfile
+
+import numpy as np
+import pytest
+import torch
+
 from inference.gnn.feature_extractor import (
     AggregationType,
     Edge,
@@ -24,17 +24,17 @@ from inference.gnn.feature_extractor import (
     NodeFeatureExtractor,
     StreamingBatchProcessor,
 )
-import json
-import os
-import tempfile
-
-import numpy as np
-import pytest
-import torch
+from inference.gnn.model_mapper import (
+    GraphTaskType,
+    GraphToModelMapper,
+    MappingConfig,
+    ModelArchitecture,
+)
+from inference.gnn.parser import GMNParser
+from inference.gnn.testing_framework import GNNTestSuite, GNNValidator, create_test_graphs
 
 # Mark all tests that require edge_weight attribute as xfail
-pytestmark_edge_weight = pytest.mark.xfail(
-    reason="GraphData missing edge_weight attribute")
+pytestmark_edge_weight = pytest.mark.xfail(reason="GraphData missing edge_weight attribute")
 
 
 class TestGNNPipelineIntegration:
@@ -71,7 +71,9 @@ training {
         parser = GMNParser()
         parsed_model = parser.parse(model_content)
         assert parsed_model is not None
-        assert not parsed_model.errors, f"Parsing errors: {
+        assert (
+            not parsed_model.errors
+        ), f"Parsing errors: {
             parsed_model.errors}"
         assert "architecture" in parsed_model.sections
         assert "training" in parsed_model.sections
@@ -91,8 +93,7 @@ training {
         ]
         feature_configs = [FeatureConfig(**fc) for fc in feature_config_dicts]
         extractor = NodeFeatureExtractor(feature_configs=feature_configs)
-        node_data = [{"feat1": 0.5, "feat2": "a"},
-                     {"feat1": 0.2, "feat2": "b"}]
+        node_data = [{"feat1": 0.5, "feat2": "a"}, {"feat1": 0.2, "feat2": "b"}]
         extracted_result = extractor.extract_features(node_data)
         assert isinstance(extracted_result.features, np.ndarray)
         # 1 (numerical) + 2 (one-hot categorical) = 3
@@ -115,14 +116,9 @@ training {
     def test_batch_processing_pipeline(self) -> None:
         """Test batch processing integration"""
         batch_processor = GraphBatchProcessor(
-            use_torch_geometric=False,
-            pad_node_features=True,
-            max_nodes_per_graph=50)
-        graphs = create_test_graphs(
-            num_graphs=5,
-            min_nodes=10,
-            max_nodes=30,
-            feature_dim=16)
+            use_torch_geometric=False, pad_node_features=True, max_nodes_per_graph=50
+        )
+        graphs = create_test_graphs(num_graphs=5, min_nodes=10, max_nodes=30, feature_dim=16)
         batch = batch_processor.create_batch(graphs)
         assert batch.num_graphs == 5
         assert batch.x.shape[1] == 16  # Feature dimension is in axis 1
@@ -151,13 +147,8 @@ training {
         assert model is not None
         model.eval()
         with torch.no_grad():
-            batch = torch.zeros(
-                graph_data.node_features.size(0),
-                dtype=torch.long)
-            output = model(
-                graph_data.node_features,
-                graph_data.edge_index,
-                batch)
+            batch = torch.zeros(graph_data.node_features.size(0), dtype=torch.long)
+            output = model(graph_data.node_features, graph_data.edge_index, batch)
             assert output.shape[0] == graph_data.node_features.size(0)
             assert output.shape[1] == 10
 
@@ -192,11 +183,7 @@ training {
             layer_type="GAT",
             global_pool="mean",
         )
-        graphs = create_test_graphs(
-            num_graphs=5,
-            min_nodes=10,
-            max_nodes=20,
-            feature_dim=32)
+        graphs = create_test_graphs(num_graphs=5, min_nodes=10, max_nodes=20, feature_dim=32)
         batch_processor = GraphBatchProcessor(use_torch_geometric=True)
         batch = batch_processor.create_batch(graphs)
         output = model(batch.x, batch.edge_index, batch.batch)
@@ -215,8 +202,7 @@ training {
             LayerConfig(in_channels=16, out_channels=3, activation=None),
         ]
         model = GNNStack(layer_configs=layer_configs, layer_type="gcn")
-        integration_results = test_suite.run_integration_tests(
-            model, create_test_graphs())
+        integration_results = test_suite.run_integration_tests(model, create_test_graphs())
         assert "passed" in integration_results
         assert "performance" in integration_results
         # Check total_time instead of inference_time
@@ -242,8 +228,7 @@ training {
             "medium": create_test_graphs(100, 20, 40, 32),
         }
         test_suite = GNNTestSuite()
-        results = test_suite.benchmark_model(
-            model, benchmark_datasets, num_runs=3)
+        results = test_suite.benchmark_model(model, benchmark_datasets, num_runs=3)
         assert len(results) == 3
         for result in results:
             assert result.num_graphs > 0
@@ -259,9 +244,8 @@ training {
             torch.nn.Linear(32, 64), torch.nn.ReLU(), torch.nn.Linear(64, 10)
         )
         test_graph = GraphData(
-            node_features=torch.randn(
-                10, 32), edge_index=torch.randint(
-                0, 10, (2, 20)))
+            node_features=torch.randn(10, 32), edge_index=torch.randint(0, 10, (2, 20))
+        )
         results = validator.validate_model_architecture(model, test_graph)
         assert len(results["errors"]) > 0 or len(results["warnings"]) > 0
 
@@ -278,15 +262,13 @@ training {
             )
             large_graphs.append(graph)
         base_processor = GraphBatchProcessor()
-        streaming_processor = StreamingBatchProcessor(
-            base_processor, buffer_size=5)
+        streaming_processor = StreamingBatchProcessor(base_processor, buffer_size=5)
 
         def graph_generator():
             yield from large_graphs
 
         batches_processed = 0
-        for batch in streaming_processor.process_stream(
-                graph_generator(), batch_size=3):
+        for batch in streaming_processor.process_stream(graph_generator(), batch_size=3):
             assert batch.num_graphs <= 3
             batches_processed += 1
         assert batches_processed == 4
@@ -343,24 +325,20 @@ architecture {
     def test_feature_extractor_batch_processor_interaction(self) -> None:
         """Test feature extractor with batch processor"""
         # Create simple feature configs for scalar features
-        feature_configs = [
-            FeatureConfig(
-                name="value",
-                type=FeatureType.NUMERICAL)]
+        feature_configs = [FeatureConfig(name="value", type=FeatureType.NUMERICAL)]
         extractor = NodeFeatureExtractor(feature_configs=feature_configs)
         graphs = []
         for i in range(5):
             # Create nodes with scalar numerical values
             num_nodes = np.random.randint(5, 15)
-            nodes = [{"id": j, "value": float(np.random.randn())}
-                     for j in range(num_nodes)]
+            nodes = [{"id": j, "value": float(np.random.randn())} for j in range(num_nodes)]
             result = extractor.extract_features(nodes)
             num_edges = np.random.randint(num_nodes, num_nodes * 3)
             # Create graph data
             graph = GraphData(
-                node_features=torch.tensor(
-                    result.features, dtype=torch.float32), edge_index=torch.randint(
-                    0, num_nodes, (2, num_edges)), )
+                node_features=torch.tensor(result.features, dtype=torch.float32),
+                edge_index=torch.randint(0, num_nodes, (2, num_edges)),
+            )
             graphs.append(graph)
         processor = GraphBatchProcessor()
         batch = processor.create_batch(graphs)
@@ -371,9 +349,8 @@ architecture {
     def test_model_mapper_validator_interaction(self) -> None:
         """Test model mapper with validator"""
         graph = GraphData(
-            node_features=torch.randn(
-                20, 32), edge_index=torch.randint(
-                0, 20, (2, 40)))
+            node_features=torch.randn(20, 32), edge_index=torch.randint(0, 20, (2, 40))
+        )
         config = MappingConfig(task_type=GraphTaskType.NODE_CLASSIFICATION)
         mapper = GraphToModelMapper(mapping_config=config)
         model, model_config = mapper.map_graph_to_model(
@@ -449,8 +426,7 @@ class TestGNNModelValidation:
             # Create test graphs
             test_graphs = create_test_graphs(num_graphs=3, feature_dim=32)
             # Validate model architecture
-            validation = validator.validate_model_architecture(
-                model, test_graphs[0])
+            validation = validator.validate_model_architecture(model, test_graphs[0])
             assert "valid" in validation
             # Write validation results to file
             with open(results_path, "w") as f:
@@ -462,15 +438,8 @@ class TestGNNModelValidation:
         """Test framework with custom model"""
         # Create layer configs for GNNStack with GAT layers
         layer_configs = [
-            LayerConfig(
-                in_channels=16,
-                out_channels=8,
-                heads=2),
-            LayerConfig(
-                in_channels=16,
-                out_channels=2,
-                heads=1,
-                activation=None),
+            LayerConfig(in_channels=16, out_channels=8, heads=2),
+            LayerConfig(in_channels=16, out_channels=2, heads=1, activation=None),
         ]
         custom_model = GNNStack(
             layer_configs=layer_configs,

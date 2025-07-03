@@ -29,9 +29,19 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import numpy as np
 
 try:
+    # Use numpy for entropy and KL divergence as fallback
+    import scipy.stats
     from pymdp import utils as pymdp_utils
     from pymdp.agent import Agent as PyMDPAgent
-    from pymdp.maths import entropy, kl_div, softmax
+    from pymdp.maths import softmax
+
+    def entropy(x):
+        """Entropy calculation using scipy"""
+        return scipy.stats.entropy(x + 1e-16)
+
+    def kl_div(p, q):
+        """KL divergence calculation using scipy"""
+        return scipy.stats.entropy(p + 1e-16, q + 1e-16)
 
     PYMDP_AVAILABLE = True
 except ImportError:
@@ -75,7 +85,8 @@ class MarkovBlanketConfig:
         if self.boundary_threshold > 1.0 or self.boundary_threshold < 0.0:
             raise ValueError(
                 f"boundary_threshold must be between 0.0 and 1.0, got {
-                    self.boundary_threshold}")
+                    self.boundary_threshold}"
+            )
 
         if self.num_internal_states < 0:
             raise ValueError(
@@ -100,7 +111,8 @@ class MarkovBlanketConfig:
         if self.monitoring_interval <= 0.0:
             raise ValueError(
                 f"monitoring_interval must be positive, got {
-                    self.monitoring_interval}")
+                    self.monitoring_interval}"
+            )
 
 
 @dataclass
@@ -320,15 +332,19 @@ class BoundaryMetrics:
                 beliefs_normalized = beliefs / np.sum(beliefs)
                 prior_normalized = prior / np.sum(prior)
                 self.kl_divergence = float(
-                    pymdp_utils.kl_divergence(
-                        beliefs_normalized, prior_normalized))
+                    pymdp_utils.kl_divergence(beliefs_normalized, prior_normalized)
+                )
         except Exception as e:
             logger.debug(f"Could not compute KL divergence: {e}")
 
     def _has_beliefs_and_prior(self, pymdp_agent: "PyMDPAgent") -> bool:
         """Check if agent has both beliefs and prior"""
-        return (hasattr(pymdp_agent, "qs") and hasattr(pymdp_agent, "D") and
-                pymdp_agent.qs is not None and pymdp_agent.D is not None)
+        return (
+            hasattr(pymdp_agent, "qs")
+            and hasattr(pymdp_agent, "D")
+            and pymdp_agent.qs is not None
+            and pymdp_agent.D is not None
+        )
 
     def _extract_beliefs_and_prior(self, pymdp_agent: "PyMDPAgent") -> tuple:
         """Extract beliefs and prior from pymdp agent"""
@@ -336,10 +352,7 @@ class BoundaryMetrics:
             return None, None
 
         beliefs = pymdp_agent.qs[0]  # First factor
-        prior = (
-            pymdp_agent.D[0] if isinstance(
-                pymdp_agent.D,
-                list) else pymdp_agent.D)
+        prior = pymdp_agent.D[0] if isinstance(pymdp_agent.D, list) else pymdp_agent.D
         return beliefs, prior
 
 
@@ -351,10 +364,7 @@ class MarkovBlanketInterface(ABC):
         """Get current Markov blanket dimensions"""
 
     @abstractmethod
-    def update_states(
-            self,
-            agent_state: AgentState,
-            environment_state: np.ndarray) -> None:
+    def update_states(self, agent_state: AgentState, environment_state: np.ndarray) -> None:
         """Update internal states based on agent and environment"""
 
     @abstractmethod
@@ -370,8 +380,7 @@ class MarkovBlanketInterface(ABC):
         """Get current boundary metrics from pymdp"""
 
     @abstractmethod
-    def set_violation_handler(
-            self, handler: Callable[[BoundaryViolationEvent], None]) -> None:
+    def set_violation_handler(self, handler: Callable[[BoundaryViolationEvent], None]) -> None:
         """Set handler for violation events"""
 
     @abstractmethod
@@ -418,8 +427,7 @@ class PyMDPMarkovBlanket(MarkovBlanketInterface):
             independence_threshold: Threshold for conditional independence
         """
         if not PYMDP_AVAILABLE:
-            raise ImportError(
-                "pymdp is required for PyMDPMarkovBlanket but not available")
+            raise ImportError("pymdp is required for PyMDPMarkovBlanket but not available")
 
         self.agent_id = agent_id
         self.independence_threshold = independence_threshold
@@ -435,19 +443,31 @@ class PyMDPMarkovBlanket(MarkovBlanketInterface):
             # Get pymdp matrices
             A, B, C, D = self.generative_model.get_pymdp_matrices()
         except Exception:
-            # Fallback: create simple placeholder matrices
+            # Fallback: create properly normalized PyMDP-compatible matrices
+            # A matrix: observation likelihood (must sum to 1 over observations)
             A = np.random.rand(num_observations, num_states)
+            A = A / A.sum(axis=0, keepdims=True)  # Normalize columns to sum to 1
+
+            # B matrix: state transition (must sum to 1 over next states)
             B = np.random.rand(num_states, num_states, num_actions)
-            C = np.ones(num_observations)  # Preferences
+            B = B / B.sum(axis=0, keepdims=True)  # Normalize over next states
+
+            # C matrix: preferences (can be any values, log preferences)
+            C = np.ones(num_observations)  # Neutral preferences
+
+            # D matrix: prior beliefs (must sum to 1)
             D = np.ones(num_states) / num_states  # Uniform prior
 
         # Create pymdp agent (if PyMDPAgent is available)
         if PyMDPAgent is not None:
-            self.pymdp_agent = PyMDPAgent(A=A, B=B, C=C, D=D)
+            try:
+                self.pymdp_agent = PyMDPAgent(A=A, B=B, C=C, D=D)
+            except Exception as e:
+                logger.warning(f"Failed to create PyMDPAgent: {e}, using fallback")
+                self.pymdp_agent = None
         else:
             self.pymdp_agent = None
-            logger.warning(
-                "PyMDPAgent not available, using fallback implementation")
+            logger.warning("PyMDPAgent not available, using fallback implementation")
 
         # Initialize dimensions
         self.dimensions = MarkovBlanketDimensions(
@@ -463,8 +483,7 @@ class PyMDPMarkovBlanket(MarkovBlanketInterface):
 
         # Violation tracking
         self.violation_events: List[BoundaryViolationEvent] = []
-        self.violation_handlers: List[Callable[[
-            BoundaryViolationEvent], None]] = []
+        self.violation_handlers: List[Callable[[BoundaryViolationEvent], None]] = []
 
         # Metrics
         self.metrics = BoundaryMetrics()
@@ -482,10 +501,7 @@ class PyMDPMarkovBlanket(MarkovBlanketInterface):
         """Get current Markov blanket dimensions"""
         return self.dimensions
 
-    def update_states(
-            self,
-            agent_state: AgentState,
-            environment_state: np.ndarray) -> None:
+    def update_states(self, agent_state: AgentState, environment_state: np.ndarray) -> None:
         """Update internal states using pymdp active inference using Template Method pattern"""
         try:
             self._update_environment_observations(environment_state)
@@ -495,25 +511,20 @@ class PyMDPMarkovBlanket(MarkovBlanketInterface):
         except Exception as e:
             logger.error(
                 f"Error updating states for agent {
-                    self.agent_id}: {e}")
+                    self.agent_id}: {e}"
+            )
 
-    def _update_environment_observations(
-            self, environment_state: np.ndarray) -> None:
+    def _update_environment_observations(self, environment_state: np.ndarray) -> None:
         """Update observations and external states from environment"""
         if environment_state.size == 0:
             return
 
-        obs_size = min(
-            len(environment_state),
-            self.dimensions.sensory_dimension)
+        obs_size = min(len(environment_state), self.dimensions.sensory_dimension)
         if obs_size > 0:
             self._process_observations(environment_state, obs_size)
             self._update_external_states(environment_state, obs_size)
 
-    def _process_observations(
-            self,
-            environment_state: np.ndarray,
-            obs_size: int) -> None:
+    def _process_observations(self, environment_state: np.ndarray, obs_size: int) -> None:
         """Process observations through PyMDP agent"""
         observations = environment_state[:obs_size]
         obs_indices = self._discretize_observations(observations)
@@ -526,34 +537,31 @@ class PyMDPMarkovBlanket(MarkovBlanketInterface):
 
     def _update_internal_states_from_pymdp(self) -> None:
         """Update internal states from PyMDP beliefs"""
-        if (hasattr(self.pymdp_agent, "qs") and
-            self.pymdp_agent.qs is not None and
-            isinstance(self.pymdp_agent.qs, list) and
-                len(self.pymdp_agent.qs) > 0):
+        if (
+            hasattr(self.pymdp_agent, "qs")
+            and self.pymdp_agent.qs is not None
+            and isinstance(self.pymdp_agent.qs, list)
+            and len(self.pymdp_agent.qs) > 0
+        ):
             self.dimensions.internal_states = self.pymdp_agent.qs[0].copy()
 
-    def _update_external_states(
-            self,
-            environment_state: np.ndarray,
-            obs_size: int) -> None:
+    def _update_external_states(self, environment_state: np.ndarray, obs_size: int) -> None:
         """Update external states from remaining environment state"""
         if environment_state.size > obs_size:
             external_size = min(
-                self.dimensions.external_dimension,
-                environment_state.size - obs_size)
+                self.dimensions.external_dimension, environment_state.size - obs_size
+            )
             if external_size > 0:
                 self.dimensions.external_states = environment_state[
-                    obs_size: obs_size + external_size]
+                    obs_size : obs_size + external_size
+                ]
 
-    def _update_active_states_from_agent(
-            self, agent_state: AgentState) -> None:
+    def _update_active_states_from_agent(self, agent_state: AgentState) -> None:
         """Update active states from agent's intended action"""
-        if (hasattr(agent_state, "intended_action") and
-                agent_state.intended_action is not None):
+        if hasattr(agent_state, "intended_action") and agent_state.intended_action is not None:
             action = np.array(agent_state.intended_action)
             if action.size > 0:
-                action_size = min(
-                    self.dimensions.active_dimension, action.size)
+                action_size = min(self.dimensions.active_dimension, action.size)
                 self.dimensions.active_states[:action_size] = action[:action_size]
 
     def _update_metrics_and_history(self) -> None:
@@ -592,8 +600,7 @@ class PyMDPMarkovBlanket(MarkovBlanketInterface):
             # Compute boundary integrity based on free energy
             # Lower free energy indicates better boundary integrity
             if self.metrics.free_energy > 0:
-                self.metrics.boundary_integrity = max(
-                    0.0, 1.0 - (self.metrics.free_energy / 10.0))
+                self.metrics.boundary_integrity = max(0.0, 1.0 - (self.metrics.free_energy / 10.0))
             else:
                 self.metrics.boundary_integrity = 1.0
 
@@ -601,8 +608,10 @@ class PyMDPMarkovBlanket(MarkovBlanketInterface):
 
         except Exception as e:
             logger.error(
-                f"Error verifying independence for agent " f"{
-                    self.agent_id}: {e}")
+                f"Error verifying independence for agent "
+                f"{
+                    self.agent_id}: {e}"
+            )
             return 1.0, {"error": str(e)}
 
     def detect_violations(self) -> List[BoundaryViolationEvent]:
@@ -649,8 +658,10 @@ class PyMDPMarkovBlanket(MarkovBlanketInterface):
 
         except Exception as e:
             logger.error(
-                f"Error detecting violations for agent " f"{
-                    self.agent_id}: {e}")
+                f"Error detecting violations for agent "
+                f"{
+                    self.agent_id}: {e}"
+            )
             return []
 
     def get_metrics(self) -> BoundaryMetrics:
@@ -661,13 +672,11 @@ class PyMDPMarkovBlanket(MarkovBlanketInterface):
         # Update time-based metrics
         if self.metrics.last_violation_time:
             time_since = datetime.now() - self.metrics.last_violation_time
-            self.metrics.stability_over_time = max(
-                0.0, 1.0 - (time_since.total_seconds() / 3600.0))
+            self.metrics.stability_over_time = max(0.0, 1.0 - (time_since.total_seconds() / 3600.0))
 
         return self.metrics
 
-    def set_violation_handler(
-            self, handler: Callable[[BoundaryViolationEvent], None]) -> None:
+    def set_violation_handler(self, handler: Callable[[BoundaryViolationEvent], None]) -> None:
         """Set handler for violation events"""
         self.violation_handlers.append(handler)
 
@@ -703,23 +712,15 @@ class PyMDPMarkovBlanket(MarkovBlanketInterface):
     def _get_pymdp_agent_state(self) -> Dict[str, Any]:
         """Extract current state from pymdp agent for logging"""
         try:
-            state = {
-                "agent_id": self.agent_id,
-                "timestamp": datetime.now().isoformat()}
+            state = {"agent_id": self.agent_id, "timestamp": datetime.now().isoformat()}
 
-            if hasattr(
-                    self.pymdp_agent,
-                    "qs") and self.pymdp_agent.qs is not None:
+            if hasattr(self.pymdp_agent, "qs") and self.pymdp_agent.qs is not None:
                 state["beliefs"] = [q.tolist() for q in self.pymdp_agent.qs]
 
-            if hasattr(
-                    self.pymdp_agent,
-                    "F") and self.pymdp_agent.F is not None:
+            if hasattr(self.pymdp_agent, "F") and self.pymdp_agent.F is not None:
                 state["free_energy"] = self.pymdp_agent.F
 
-            if hasattr(
-                    self.pymdp_agent,
-                    "G") and self.pymdp_agent.G is not None:
+            if hasattr(self.pymdp_agent, "G") and self.pymdp_agent.G is not None:
                 if isinstance(self.pymdp_agent.G, np.ndarray):
                     state["expected_free_energy"] = self.pymdp_agent.G.tolist()
                 else:
@@ -833,8 +834,7 @@ class ActiveInferenceMarkovBlanket(MarkovBlanketInterface):
         self.metrics = BoundaryMetrics()
 
         # Initialize violation handlers
-        self.violation_handlers: List[Callable[[
-            BoundaryViolationEvent], None]] = []
+        self.violation_handlers: List[Callable[[BoundaryViolationEvent], None]] = []
 
         # Create dimensions based on config
         self.dimensions = MarkovBlanketDimensions(
@@ -849,16 +849,14 @@ class ActiveInferenceMarkovBlanket(MarkovBlanketInterface):
                 getattr(
                     agent,
                     'id',
-                    'unknown')}")
+                    'unknown')}"
+        )
 
     def get_dimensions(self) -> MarkovBlanketDimensions:
         """Get current Markov blanket dimensions"""
         return self.dimensions
 
-    def update_states(
-            self,
-            agent_state: AgentState,
-            environment_state: np.ndarray) -> None:
+    def update_states(self, agent_state: AgentState, environment_state: np.ndarray) -> None:
         """Update internal states based on agent and environment"""
         self.current_state = agent_state
         # Update metrics
@@ -883,8 +881,7 @@ class ActiveInferenceMarkovBlanket(MarkovBlanketInterface):
         """Get current boundary metrics"""
         return self.metrics
 
-    def set_violation_handler(
-            self, handler: Callable[[BoundaryViolationEvent], None]) -> None:
+    def set_violation_handler(self, handler: Callable[[BoundaryViolationEvent], None]) -> None:
         """Set handler for violation events"""
         self.violation_handlers.append(handler)
 
@@ -894,21 +891,12 @@ class ActiveInferenceMarkovBlanket(MarkovBlanketInterface):
             self.current_state = new_state
 
             # Update internal states based on the new state
-            if hasattr(
-                    new_state,
-                    "internal_states") and new_state.internal_states is not None:
-                self.dimensions.internal_states = np.array(
-                    new_state.internal_states)
-            if hasattr(
-                    new_state,
-                    "sensory_states") and new_state.sensory_states is not None:
-                self.dimensions.sensory_states = np.array(
-                    new_state.sensory_states)
-            if hasattr(
-                    new_state,
-                    "active_states") and new_state.active_states is not None:
-                self.dimensions.active_states = np.array(
-                    new_state.active_states)
+            if hasattr(new_state, "internal_states") and new_state.internal_states is not None:
+                self.dimensions.internal_states = np.array(new_state.internal_states)
+            if hasattr(new_state, "sensory_states") and new_state.sensory_states is not None:
+                self.dimensions.sensory_states = np.array(new_state.sensory_states)
+            if hasattr(new_state, "active_states") and new_state.active_states is not None:
+                self.dimensions.active_states = np.array(new_state.active_states)
 
             # Update metrics
             self.metrics.last_update = datetime.now()
@@ -946,7 +934,7 @@ class ActiveInferenceMarkovBlanket(MarkovBlanketInterface):
                 BoundaryViolationType.BOUNDARY_BREACH,
                 severity=1.0 - confidence,
                 independence_measure=confidence,
-                threshold_violated=self.config.boundary_threshold
+                threshold_violated=self.config.boundary_threshold,
             )
             violations.append(violation)
 
@@ -974,7 +962,7 @@ class ActiveInferenceMarkovBlanket(MarkovBlanketInterface):
                 BoundaryViolationType.INTERNAL_INCONSISTENCY,
                 severity=max_state - 0.5,
                 independence_measure=max_state,
-                threshold_violated=0.9
+                threshold_violated=0.9,
             )
             violations.append(violation)
             self.boundary_intact = False
@@ -999,7 +987,7 @@ class ActiveInferenceMarkovBlanket(MarkovBlanketInterface):
                 BoundaryViolationType.SENSORY_OVERFLOW,
                 severity=max_sensory - 0.5,
                 independence_measure=max_sensory,
-                threshold_violated=0.9
+                threshold_violated=0.9,
             )
             violations.append(violation)
 
@@ -1023,15 +1011,19 @@ class ActiveInferenceMarkovBlanket(MarkovBlanketInterface):
                 BoundaryViolationType.ACTION_CONFLICT,
                 severity=min(1.0, high_activations / len(active_states)),
                 independence_measure=high_activations,
-                threshold_violated=1.0
+                threshold_violated=1.0,
             )
             violations.append(violation)
 
         return violations
 
-    def _create_violation(self, violation_type: BoundaryViolationType,
-                          severity: float, independence_measure: float,
-                          threshold_violated: float) -> BoundaryViolationEvent:
+    def _create_violation(
+        self,
+        violation_type: BoundaryViolationType,
+        severity: float,
+        independence_measure: float,
+        threshold_violated: float,
+    ) -> BoundaryViolationEvent:
         """Create a boundary violation event with common parameters"""
         return BoundaryViolationEvent(
             agent_id=self.current_state.agent_id,
@@ -1046,33 +1038,36 @@ class ActiveInferenceMarkovBlanket(MarkovBlanketInterface):
 
     def _has_internal_states(self) -> bool:
         """Check if current state has internal states"""
-        return (hasattr(self.current_state, "internal_states") and
-                self.current_state.internal_states is not None)
+        return (
+            hasattr(self.current_state, "internal_states")
+            and self.current_state.internal_states is not None
+        )
 
     def _has_sensory_states(self) -> bool:
         """Check if current state has sensory states"""
-        return (hasattr(self.current_state, "sensory_states") and
-                self.current_state.sensory_states is not None)
+        return (
+            hasattr(self.current_state, "sensory_states")
+            and self.current_state.sensory_states is not None
+        )
 
     def _has_active_states(self) -> bool:
         """Check if current state has active states"""
-        return (hasattr(self.current_state, "active_states") and
-                self.current_state.active_states is not None)
+        return (
+            hasattr(self.current_state, "active_states")
+            and self.current_state.active_states is not None
+        )
 
     def _normalize_states(self, states: np.ndarray) -> np.ndarray:
         """Normalize states array"""
-        return (states / np.sum(states) if np.sum(states) > 0 else states)
+        return states / np.sum(states) if np.sum(states) > 0 else states
 
-    def _process_violations(
-            self,
-            violations: List[BoundaryViolationEvent]) -> None:
+    def _process_violations(self, violations: List[BoundaryViolationEvent]) -> None:
         """Process all violations - add to history and trigger handlers"""
         for violation in violations:
             self.violation_history.append(violation)
             self._trigger_violation_handlers(violation)
 
-    def _trigger_violation_handlers(
-            self, violation: BoundaryViolationEvent) -> None:
+    def _trigger_violation_handlers(self, violation: BoundaryViolationEvent) -> None:
         """Trigger all violation handlers for a violation"""
         for handler in self.violation_handlers:
             try:
@@ -1097,12 +1092,9 @@ class ActiveInferenceMarkovBlanket(MarkovBlanketInterface):
         """Check if boundary is intact"""
         return self.boundary_intact
 
-    def get_recent_violations(
-            self,
-            limit: int = 10) -> List[BoundaryViolationEvent]:
+    def get_recent_violations(self, limit: int = 10) -> List[BoundaryViolationEvent]:
         """Get recent violations from history"""
-        return self.violation_history[-limit:
-                                      ] if self.violation_history else []
+        return self.violation_history[-limit:] if self.violation_history else []
 
     def _check_statistical_independence(
         self,
@@ -1151,8 +1143,7 @@ class BoundaryMonitor:
         """
         self.markov_blanket = markov_blanket
         self.is_monitoring = False
-        self.violation_callbacks: List[Callable[[
-            BoundaryViolationEvent], None]] = []
+        self.violation_callbacks: List[Callable[[BoundaryViolationEvent], None]] = []
         self._monitoring_thread = None
 
         logger.info("Initialized BoundaryMonitor")
@@ -1173,8 +1164,7 @@ class BoundaryMonitor:
         self.is_monitoring = False
         logger.info("Stopped boundary monitoring")
 
-    def _notify_violation_callbacks(
-            self, violation: BoundaryViolationEvent) -> None:
+    def _notify_violation_callbacks(self, violation: BoundaryViolationEvent) -> None:
         """Notify all registered callbacks of a violation"""
         for callback in self.violation_callbacks:
             try:
@@ -1188,10 +1178,8 @@ class MarkovBlanketFactory:
 
     @staticmethod
     def create_pymdp_blanket(
-            agent_id: str,
-            num_states: int = 4,
-            num_observations: int = 4,
-            num_actions: int = 4) -> PyMDPMarkovBlanket:
+        agent_id: str, num_states: int = 4, num_observations: int = 4, num_actions: int = 4
+    ) -> PyMDPMarkovBlanket:
         """Create a pymdp-based Markov blanket"""
         return PyMDPMarkovBlanket(
             agent_id=agent_id,
@@ -1209,7 +1197,5 @@ class MarkovBlanketFactory:
             num_states = max(4, len(agent.belief_state))
 
         return PyMDPMarkovBlanket(
-            agent_id=agent.agent_id,
-            num_states=num_states,
-            num_observations=4,
-            num_actions=4)
+            agent_id=agent.agent_id, num_states=num_states, num_observations=4, num_actions=4
+        )

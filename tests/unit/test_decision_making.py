@@ -147,13 +147,8 @@ class TestAction:
     def test_action_creation(self) -> None:
         """Test action creation and attributes"""
         action = Action(
-            action_type=ActionType.MOVE,
-            target=Position(
-                10.0,
-                10.0,
-                0.0),
-            cost=5.0,
-            duration=2.0)
+            action_type=ActionType.MOVE, target=Position(10.0, 10.0, 0.0), cost=5.0, duration=2.0
+        )
         assert action.action_type == ActionType.MOVE
         assert action.target.x == 10.0
         assert action.cost == 5.0
@@ -215,19 +210,15 @@ class TestUtilityFunctions:
     def test_goal_utility(self, decision_context) -> None:
         """Test goal utility calculation"""
         utility = GoalUtility()
-        move_to_goal = Action(
-            ActionType.MOVE, target=Position(
-                15.0, 15.0, 0.0))
+        move_to_goal = Action(ActionType.MOVE, target=Position(15.0, 15.0, 0.0))
         goal_utility = utility.calculate(move_to_goal, decision_context)
         assert goal_utility > 0
         move_away = Action(ActionType.MOVE, target=Position(0.0, 0.0, 0.0))
         away_utility = utility.calculate(move_away, decision_context)
         assert away_utility < 0
         no_goal_context = DecisionContext(
-            agent=decision_context.agent,
-            percepts=[],
-            current_goal=None,
-            available_actions=[])
+            agent=decision_context.agent, percepts=[], current_goal=None, available_actions=[]
+        )
         assert utility.calculate(move_to_goal, no_goal_context) == 0
 
     def test_resource_utility(self, sample_agent, decision_context) -> None:
@@ -238,13 +229,11 @@ class TestUtilityFunctions:
         gather_utility = utility.calculate(gather_action, decision_context)
         assert gather_utility > 0
         sample_agent.resources.energy = 90.0
-        high_energy_utility = utility.calculate(
-            gather_action, decision_context)
+        high_energy_utility = utility.calculate(gather_action, decision_context)
         assert high_energy_utility < gather_utility
         expensive_action = Action(ActionType.MOVE, cost=50.0)
         sample_agent.resources.energy = 10.0
-        expensive_utility = utility.calculate(
-            expensive_action, decision_context)
+        expensive_utility = utility.calculate(expensive_action, decision_context)
         assert expensive_utility < 0
 
     def test_social_utility(self, decision_context) -> None:
@@ -256,9 +245,8 @@ class TestUtilityFunctions:
         agent_target = Mock(agent_id="agent_2")
         interact_action = Action(ActionType.INTERACT, target=agent_target)
         relationship = SocialRelationship(
-            target_agent_id="agent_2",
-            relationship_type="friend",
-            trust_level=0.8)
+            target_agent_id="agent_2", relationship_type="friend", trust_level=0.8
+        )
         decision_context.agent.relationships["agent_2"] = relationship
         interact_utility = utility.calculate(interact_action, decision_context)
         assert interact_utility > 0
@@ -278,9 +266,7 @@ class TestDecisionMaker:
     def test_goal_oriented_decision(self, decision_context) -> None:
         """Test goal-oriented decision making"""
         maker = DecisionMaker(DecisionStrategy.GOAL_ORIENTED)
-        move_to_goal = Action(
-            ActionType.MOVE, target=Position(
-                15.0, 15.0, 0.0))
+        move_to_goal = Action(ActionType.MOVE, target=Position(15.0, 15.0, 0.0))
         decision_context.available_actions.append(move_to_goal)
         decision = maker.decide(decision_context)
         assert decision is not None
@@ -372,9 +358,8 @@ class TestBehaviorTree:
             return Action(ActionType.EXPLORE)
 
         condition = ConditionNode(
-            low_energy,
-            ActionNode(gather_generator),
-            ActionNode(explore_generator))
+            low_energy, ActionNode(gather_generator), ActionNode(explore_generator)
+        )
         decision_context.agent.resources.energy = 30
         result = condition.execute(decision_context)
         assert result.action_type == ActionType.GATHER
@@ -401,50 +386,40 @@ class TestBehaviorTree:
 class TestActionGenerator:
     """Test action generation"""
 
-    def test_generate_movement_actions(
-            self, sample_agent, sample_percepts) -> None:
+    def test_generate_movement_actions(self, sample_agent, sample_percepts) -> None:
         """Test movement action generation"""
         generator = ActionGenerator()
         actions = generator.generate_actions(sample_agent, sample_percepts)
-        movement_actions = [
-            a for a in actions if a.action_type == ActionType.MOVE]
+        movement_actions = [a for a in actions if a.action_type == ActionType.MOVE]
         assert len(movement_actions) > 0
-        explore_actions = [
-            a for a in actions if a.action_type == ActionType.EXPLORE]
+        explore_actions = [a for a in actions if a.action_type == ActionType.EXPLORE]
         assert len(explore_actions) == 1
         flee_actions = [a for a in actions if a.action_type == ActionType.FLEE]
         assert len(flee_actions) == 1
 
-    def test_generate_interaction_actions(
-            self, sample_agent, sample_percepts) -> None:
+    def test_generate_interaction_actions(self, sample_agent, sample_percepts) -> None:
         """Test interaction action generation"""
         generator = ActionGenerator()
         actions = generator.generate_actions(sample_agent, sample_percepts)
-        interact_actions = [
-            a for a in actions if a.action_type == ActionType.INTERACT]
+        interact_actions = [a for a in actions if a.action_type == ActionType.INTERACT]
         assert len(interact_actions) > 0
 
-    def test_generate_communication_actions(
-            self, sample_agent, sample_percepts) -> None:
+    def test_generate_communication_actions(self, sample_agent, sample_percepts) -> None:
         """Test communication action generation"""
         generator = ActionGenerator()
         actions = generator.generate_actions(sample_agent, sample_percepts)
-        comm_actions = [
-            a for a in actions if a.action_type == ActionType.COMMUNICATE]
+        comm_actions = [a for a in actions if a.action_type == ActionType.COMMUNICATE]
         assert len(comm_actions) > 0
 
-    def test_generate_resource_actions(
-            self, sample_agent, sample_percepts) -> None:
+    def test_generate_resource_actions(self, sample_agent, sample_percepts) -> None:
         """Test resource action generation"""
         generator = ActionGenerator()
         sample_percepts[2].distance = 1.5
         actions = generator.generate_actions(sample_agent, sample_percepts)
-        gather_actions = [
-            a for a in actions if a.action_type == ActionType.GATHER]
+        gather_actions = [a for a in actions if a.action_type == ActionType.GATHER]
         assert len(gather_actions) > 0
 
-    def test_capability_based_generation(
-            self, sample_agent, sample_percepts) -> None:
+    def test_capability_based_generation(self, sample_agent, sample_percepts) -> None:
         """Test that actions respect agent capabilities"""
         generator = ActionGenerator()
         sample_agent.remove_capability(AgentCapability.MOVEMENT)
@@ -468,10 +443,7 @@ class TestDecisionSystem:
         state_manager = Mock(spec=AgentStateManager)
         perception_system = Mock(spec=PerceptionSystem)
         movement_controller = Mock(spec=MovementController)
-        return DecisionSystem(
-            state_manager,
-            perception_system,
-            movement_controller)
+        return DecisionSystem(state_manager, perception_system, movement_controller)
 
     def test_register_agent(self, decision_system, sample_agent) -> None:
         """Test agent registration"""
@@ -479,11 +451,7 @@ class TestDecisionSystem:
         assert sample_agent.agent_id in decision_system.decision_makers
         assert sample_agent.agent_id in decision_system.behavior_trees
 
-    def test_make_decision(
-            self,
-            decision_system,
-            sample_agent,
-            sample_percepts) -> None:
+    def test_make_decision(self, decision_system, sample_agent, sample_percepts) -> None:
         """Test making a decision for an agent"""
         decision_system.state_manager.get_agent.return_value = sample_agent
         decision_system.perception_system.perceive.return_value = sample_percepts
@@ -498,40 +466,31 @@ class TestDecisionSystem:
         """Test executing a move action"""
         decision_system.state_manager.get_agent.return_value = sample_agent
         decision_system.movement_controller.set_destination.return_value = True
-        move_action = Action(
-            ActionType.MOVE, target=Position(
-                10.0, 10.0, 0.0), cost=5.0)
-        success = decision_system.execute_action(
-            sample_agent.agent_id, move_action)
+        move_action = Action(ActionType.MOVE, target=Position(10.0, 10.0, 0.0), cost=5.0)
+        success = decision_system.execute_action(sample_agent.agent_id, move_action)
         assert success
         decision_system.movement_controller.set_destination.assert_called_once()
         decision_system.state_manager.update_agent_resources.assert_called_with(
-            sample_agent.agent_id, energy_delta=-5.0)
+            sample_agent.agent_id, energy_delta=-5.0
+        )
 
     def test_execute_action_wait(self, decision_system, sample_agent) -> None:
         """Test executing a wait action"""
         decision_system.state_manager.get_agent.return_value = sample_agent
         wait_action = Action(ActionType.WAIT, cost=0.1)
-        success = decision_system.execute_action(
-            sample_agent.agent_id, wait_action)
+        success = decision_system.execute_action(sample_agent.agent_id, wait_action)
         assert success
         decision_system.state_manager.update_agent_status.assert_called_with(
             sample_agent.agent_id, AgentStatus.IDLE
         )
 
-    def test_execute_action_flee(
-            self,
-            decision_system,
-            sample_agent,
-            sample_percepts) -> None:
+    def test_execute_action_flee(self, decision_system, sample_agent, sample_percepts) -> None:
         """Test executing a flee action"""
         decision_system.state_manager.get_agent.return_value = sample_agent
-        decision_system.perception_system.perceive.return_value = [
-            sample_percepts[0]]
+        decision_system.perception_system.perceive.return_value = [sample_percepts[0]]
         decision_system.movement_controller.set_destination.return_value = True
         flee_action = Action(ActionType.FLEE, cost=10.0)
-        success = decision_system.execute_action(
-            sample_agent.agent_id, flee_action)
+        success = decision_system.execute_action(sample_agent.agent_id, flee_action)
         assert success
         decision_system.movement_controller.set_destination.assert_called_once()
         call_args = decision_system.movement_controller.set_destination.call_args
@@ -539,45 +498,34 @@ class TestDecisionSystem:
         assert flee_position.x < sample_agent.position.x
         assert flee_position.y < sample_agent.position.y
 
-    def test_execute_action_with_effects(
-            self, decision_system, sample_agent) -> None:
+    def test_execute_action_with_effects(self, decision_system, sample_agent) -> None:
         """Test executing action with effects"""
         decision_system.state_manager.get_agent.return_value = sample_agent
-        gather_action = Action(
-            ActionType.WAIT, cost=2.0, effects={
-                "energy": 20.0})
-        success = decision_system.execute_action(
-            sample_agent.agent_id, gather_action)
+        gather_action = Action(ActionType.WAIT, cost=2.0, effects={"energy": 20.0})
+        success = decision_system.execute_action(sample_agent.agent_id, gather_action)
         assert success
         calls = decision_system.state_manager.update_agent_resources.call_args_list
         assert len(calls) == 2
         assert calls[0][1]["energy_delta"] == -2.0
         assert calls[1][1]["energy_delta"] == 20.0
 
-    def test_execute_action_insufficient_energy(
-            self, decision_system, sample_agent) -> None:
+    def test_execute_action_insufficient_energy(self, decision_system, sample_agent) -> None:
         """Test executing action with insufficient energy"""
         sample_agent.resources.energy = 5.0
         decision_system.state_manager.get_agent.return_value = sample_agent
         expensive_action = Action(ActionType.MOVE, cost=10.0)
-        success = decision_system.execute_action(
-            sample_agent.agent_id, expensive_action)
+        success = decision_system.execute_action(sample_agent.agent_id, expensive_action)
         assert not success
         decision_system.state_manager.update_agent_resources.assert_not_called()
 
-    def test_set_decision_strategy(
-            self,
-            decision_system,
-            sample_agent) -> None:
+    def test_set_decision_strategy(self, decision_system, sample_agent) -> None:
         """Test changing decision strategy"""
         decision_system.register_agent(sample_agent)
-        decision_system.set_decision_strategy(
-            sample_agent.agent_id, DecisionStrategy.GOAL_ORIENTED)
+        decision_system.set_decision_strategy(sample_agent.agent_id, DecisionStrategy.GOAL_ORIENTED)
         maker = decision_system.decision_makers[sample_agent.agent_id]
         assert maker.strategy == DecisionStrategy.GOAL_ORIENTED
 
-    def test_time_pressure_calculation(
-            self, decision_system, sample_agent) -> None:
+    def test_time_pressure_calculation(self, decision_system, sample_agent) -> None:
         """Test time pressure calculation"""
         sample_agent.resources.energy = 20.0
         sample_agent.resources.health = 30.0

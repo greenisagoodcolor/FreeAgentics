@@ -1,92 +1,107 @@
 """
-Comprehensive test coverage for world/simulation/engine.py
-Core simulation engine - CRITICAL infrastructure component
-
-This test file provides complete coverage for the simulation engine
-following the systematic backend coverage improvement plan.
+Tests for World Simulation Engine
 """
 
+import asyncio
 import time
-from unittest.mock import Mock
+from dataclasses import dataclass
+from unittest.mock import AsyncMock, Mock, patch
 
+import numpy as np
 import pytest
 
-# Import the simulation engine components
-try:
-    from world.simulation.engine import SimulationConfig, SimulationEngine
-
-    IMPORT_SUCCESS = True
-except ImportError:
-    # Create minimal mock classes for testing if imports fail
-    IMPORT_SUCCESS = False
-
-    class SimulationEngine:
-        def __init__(self, config=None):
-            self.config = config or {}
-            self.state = "stopped"
-            self.agents = []
-            self.world = None
-            self.running = False
-
-        def start(self):
-            self.running = True
-            self.state = "running"
-
-        def stop(self):
-            self.running = False
-            self.state = "stopped"
-
-        def step(self):
-            pass
-
-        def reset(self):
-            self.state = "stopped"
-            self.running = False
-
-    class SimulationState:
-        STOPPED = "stopped"
-        RUNNING = "running"
-        PAUSED = "paused"
-
-    class SimulationConfig:
-        def __init__(self, **kwargs):
-            self.timestep = kwargs.get("timestep", 0.1)
-            self.max_steps = kwargs.get("max_steps", 1000)
+from world.simulation.engine import (
+    ActiveInferenceAgent,
+    EcosystemMetrics,
+    SimulationConfig,
+    SimulationEngine,
+    SocialNetwork,
+    SystemHealth,
+)
 
 
-class TestWorldSimulationEngine:
-    """Comprehensive test suite for simulation engine functionality."""
+class TestSimulationConfig:
+    """Test SimulationConfig dataclass"""
 
-    @pytest.fixture
-    def sample_config(self):
-        """Provide sample simulation configuration for testing."""
-        if IMPORT_SUCCESS:
-            try:
-                return SimulationConfig(
-                    timestep=0.1, max_steps=1000, world_size=(
-                        100, 100), agent_limit=50)
-            except Exception:
-                return {"timestep": 0.1, "max_steps": 1000}
-        return {"timestep": 0.1, "max_steps": 1000}
+    def test_config_creation(self):
+        """Test creating simulation config"""
+        config = SimulationConfig(
+            max_cycles=100, time_step=0.5, enable_logging=True, random_seed=42
+        )
 
-    @pytest.fixture
-    def mock_engine(self, sample_config):
-        """Create a mock simulation engine for testing."""
-        return SimulationEngine(config=sample_config)
+        assert config.max_cycles == 100
+        assert config.time_step == 0.5
+        assert config.enable_logging is True
+        assert config.random_seed == 42
 
-    def test_simulation_engine_initialization(self, sample_config):
-        """Test SimulationEngine initialization with various configurations."""
-        # Test basic initialization
-        engine = SimulationEngine(config=sample_config)
-        assert engine is not None
+    def test_config_defaults(self):
+        """Test default config values"""
+        config = SimulationConfig()
 
-        # Test initialization without config
-        engine_no_config = SimulationEngine()
-        assert engine_no_config is not None
+        assert config.max_cycles == 1000
+        assert config.time_step == 1.0
+        assert config.enable_logging is True
+        assert config.random_seed is None
+        assert isinstance(config.world, dict)
+        assert isinstance(config.agents, dict)
+        assert isinstance(config.performance, dict)
 
-        # Test with None config
-        engine_none_config = SimulationEngine(config=None)
-        assert engine_none_config is not None
+    def test_config_nested_values(self):
+        """Test nested configuration values"""
+        config = SimulationConfig()
+
+        # World config
+        assert config.world["resolution"] == 5
+        assert config.world["size"] == 100
+        assert config.world["resource_density"] == 1.0
+
+        # Agent config
+        assert config.agents["count"] == 10
+        assert isinstance(config.agents["distribution"], dict)
+        assert config.agents["communication_rate"] == 1.0
+
+        # Performance config
+        assert config.performance["max_memory_mb"] == 2048
+        assert config.performance["max_cycle_time"] == 5.0
+
+
+class TestSystemHealth:
+    """Test SystemHealth dataclass"""
+
+    def test_health_creation(self):
+        """Test creating system health"""
+        health = SystemHealth(
+            status="healthy",
+            agent_count=10,
+            message_queue_size=5,
+            memory_usage_mb=512.0,
+            cpu_usage_percent=25.0,
+            last_cycle_time=0.1,
+        )
+
+        assert health.status == "healthy"
+        assert health.agent_count == 10
+        assert health.message_queue_size == 5
+        assert health.memory_usage_mb == 512.0
+        assert health.cpu_usage_percent == 25.0
+        assert health.last_cycle_time == 0.1
+        assert health.errors == []
+
+    def test_health_with_errors(self):
+        """Test health with errors"""
+        errors = ["High memory usage", "Slow response time"]
+        health = SystemHealth(
+            status="degraded",
+            agent_count=8,
+            message_queue_size=100,
+            memory_usage_mb=1900.0,
+            cpu_usage_percent=80.0,
+            last_cycle_time=2.5,
+            errors=errors,
+        )
+
+        assert health.status == "degraded"
+        assert health.errors == errors
 
     def test_simulation_lifecycle(self, mock_engine):
         """Test simulation lifecycle methods (start, stop, pause, resume)."""
@@ -154,8 +169,7 @@ class TestWorldSimulationEngine:
                                     time.sleep(0.1)
                                     mock_engine.stop()
 
-                                thread = threading.Thread(
-                                    target=stop_after_delay)
+                                thread = threading.Thread(target=stop_after_delay)
                                 thread.start()
 
                                 result = method()
@@ -171,11 +185,7 @@ class TestWorldSimulationEngine:
 
     def test_agent_management(self, mock_engine):
         """Test agent management in simulation."""
-        agent_methods = [
-            "add_agent",
-            "remove_agent",
-            "get_agents",
-            "clear_agents"]
+        agent_methods = ["add_agent", "remove_agent", "get_agents", "clear_agents"]
 
         # Create mock agent
         mock_agent = Mock()
@@ -200,11 +210,7 @@ class TestWorldSimulationEngine:
     def test_world_integration(self, mock_engine):
         """Test world integration and management."""
         # Test world setup
-        world_methods = [
-            "set_world",
-            "get_world",
-            "create_world",
-            "initialize_world"]
+        world_methods = ["set_world", "get_world", "create_world", "initialize_world"]
 
         mock_world = Mock()
         mock_world.width = 100
@@ -248,11 +254,7 @@ class TestWorldSimulationEngine:
 
     def test_statistics_and_metrics(self, mock_engine):
         """Test simulation statistics and metrics collection."""
-        stats_methods = [
-            "get_stats",
-            "get_metrics",
-            "get_performance",
-            "collect_stats"]
+        stats_methods = ["get_stats", "get_metrics", "get_performance", "collect_stats"]
 
         for method_name in stats_methods:
             if hasattr(mock_engine, method_name):
@@ -269,11 +271,7 @@ class TestWorldSimulationEngine:
 
     def test_event_handling(self, mock_engine):
         """Test simulation event handling."""
-        event_methods = [
-            "on_event",
-            "trigger_event",
-            "register_handler",
-            "emit_event"]
+        event_methods = ["on_event", "trigger_event", "register_handler", "emit_event"]
 
         mock_event = {"type": "test_event", "data": {"value": 42}}
         mock_handler = Mock()
@@ -321,11 +319,7 @@ class TestWorldSimulationEngine:
 
     def test_state_persistence(self, mock_engine):
         """Test simulation state saving and loading."""
-        persistence_methods = [
-            "save_state",
-            "load_state",
-            "serialize",
-            "deserialize"]
+        persistence_methods = ["save_state", "load_state", "serialize", "deserialize"]
 
         mock_state = {"time": 100.0, "agents": [], "world": {}}
 
@@ -357,10 +351,7 @@ class TestWorldSimulationEngine:
                 pass
 
         # Test timing methods
-        timing_methods = [
-            "get_frame_time",
-            "get_avg_step_time",
-            "reset_timing"]
+        timing_methods = ["get_frame_time", "get_avg_step_time", "reset_timing"]
 
         for method_name in timing_methods:
             if hasattr(mock_engine, method_name):
@@ -438,7 +429,8 @@ class TestWorldSimulationEngine:
                     # Log unexpected exceptions but don't fail test
                     print(
                         f"Unexpected exception {
-                            type(e)} for method {method_name} with input {invalid_input}")
+                            type(e)} for method {method_name} with input {invalid_input}"
+                    )
 
     def test_memory_management(self, mock_engine):
         """Test simulation memory management."""

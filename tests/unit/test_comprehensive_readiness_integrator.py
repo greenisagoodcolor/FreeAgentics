@@ -5,6 +5,15 @@ Tests the unified system that integrates technical, business, and safety assessm
 into a comprehensive deployment readiness report with prioritized recommendations.
 """
 
+import json
+import sys
+import tempfile
+from datetime import datetime
+from pathlib import Path
+from unittest.mock import AsyncMock, MagicMock, Mock
+
+import pytest
+
 from coalitions.readiness.comprehensive_readiness_integrator import (
     ActionPriority,
     ComprehensiveReadinessIntegrator,
@@ -14,14 +23,6 @@ from coalitions.readiness.comprehensive_readiness_integrator import (
     RecommendedAction,
     RiskLevel,
 )
-import json
-import sys
-import tempfile
-from datetime import datetime
-from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, Mock
-
-import pytest
 
 # Mock the problematic hardware dependencies before importing
 mock_hardware = MagicMock()
@@ -204,8 +205,7 @@ class TestRecommendedAction:
         assert action.estimated_effort == "medium"
         assert action.estimated_timeline == "2 weeks"
         assert action.dependencies == ["database_analysis"]
-        assert action.success_criteria == [
-            "Query time < 100ms", "Index usage > 80%"]
+        assert action.success_criteria == ["Query time < 100ms", "Index usage > 80%"]
         assert action.risk_if_ignored == RiskLevel.HIGH
 
     def test_recommended_action_to_dict(self):
@@ -286,11 +286,14 @@ class TestComprehensiveReadinessIntegrator:
 
         # Mock the individual assessment methods
         readiness_integrator.technical_validator.assess_technical_readiness = AsyncMock(
-            return_value=mock_technical_report)
+            return_value=mock_technical_report
+        )
         readiness_integrator.business_assessor.assess_business_readiness = AsyncMock(
-            return_value=mock_business_report)
+            return_value=mock_business_report
+        )
         readiness_integrator.safety_verifier.verify_safety_compliance = AsyncMock(
-            return_value=mock_safety_report)
+            return_value=mock_safety_report
+        )
 
         # Perform assessment
         result = await readiness_integrator.assess_comprehensive_readiness(
@@ -304,17 +307,13 @@ class TestComprehensiveReadinessIntegrator:
         assert isinstance(result, ComprehensiveReadinessReport)
         assert result.coalition_id == "test_coalition"
         assert isinstance(result.assessment_timestamp, datetime)
-        assert isinstance(
-            result.overall_readiness_level,
-            OverallReadinessLevel)
+        assert isinstance(result.overall_readiness_level, OverallReadinessLevel)
         assert result.overall_score > 0
         assert result.assessment_duration >= 0
 
-    def test_generate_default_market_data(
-            self, readiness_integrator, sample_business_context):
+    def test_generate_default_market_data(self, readiness_integrator, sample_business_context):
         """Test default market data generation."""
-        market_data = readiness_integrator._generate_default_market_data(
-            sample_business_context)
+        market_data = readiness_integrator._generate_default_market_data(sample_business_context)
 
         assert "market_size" in market_data
         assert "competitive_landscape" in market_data
@@ -330,8 +329,7 @@ class TestComprehensiveReadinessIntegrator:
 class TestIntegrationMethods:
     """Test integration and analysis methods."""
 
-    def test_determine_overall_readiness_enterprise_ready(
-            self, readiness_integrator):
+    def test_determine_overall_readiness_enterprise_ready(self, readiness_integrator):
         """Test determination of enterprise-ready status."""
         # Mock high-quality reports
         mock_technical = Mock()
@@ -432,8 +430,7 @@ class TestIntegrationMethods:
 
         assert risk == "low"
 
-    def test_generate_integrated_recommendations_critical_safety(
-            self, readiness_integrator):
+    def test_generate_integrated_recommendations_critical_safety(self, readiness_integrator):
         """Test recommendation generation with critical safety issues."""
         mock_technical = Mock()
         mock_technical.deployment_ready = True
@@ -445,18 +442,17 @@ class TestIntegrationMethods:
 
         mock_safety = Mock()
         mock_safety.deployment_approval = False
-        mock_safety.recommendations = [
-            "Safety rec 1", "Safety rec 2", "Safety rec 3"]
+        mock_safety.recommendations = ["Safety rec 1", "Safety rec 2", "Safety rec 3"]
 
         recommendations = readiness_integrator._generate_integrated_recommendations(
-            mock_technical, mock_business, mock_safety)
+            mock_technical, mock_business, mock_safety
+        )
 
         assert len(recommendations) > 0
         assert any("CRITICAL" in rec for rec in recommendations)
         assert len(recommendations) <= 10
 
-    def test_generate_integrated_recommendations_no_issues(
-            self, readiness_integrator):
+    def test_generate_integrated_recommendations_no_issues(self, readiness_integrator):
         """Test recommendation generation with no critical issues."""
         mock_technical = Mock()
         mock_technical.deployment_ready = True
@@ -471,7 +467,8 @@ class TestIntegrationMethods:
         mock_safety.recommendations = []
 
         recommendations = readiness_integrator._generate_integrated_recommendations(
-            mock_technical, mock_business, mock_safety)
+            mock_technical, mock_business, mock_safety
+        )
 
         assert len(recommendations) > 0
         assert any("Optimize deployment" in rec for rec in recommendations)
@@ -559,13 +556,7 @@ class TestReportingAndSerialization:
         report.overall_score = 85.5
         report.deployment_ready = True
         report.critical_issues = ["Issue 1", "Issue 2"]
-        report.recommendations = [
-            "Rec 1",
-            "Rec 2",
-            "Rec 3",
-            "Rec 4",
-            "Rec 5",
-            "Rec 6"]
+        report.recommendations = ["Rec 1", "Rec 2", "Rec 3", "Rec 4", "Rec 5", "Rec 6"]
         report.risk_level = "medium"
         report.technical_score = 90.0
         report.business_score = 80.0
@@ -605,22 +596,22 @@ class TestEdgeCasesAndErrorHandling:
         # Mock individual assessments
         readiness_integrator.technical_validator.assess_technical_readiness = AsyncMock(
             return_value=Mock(
-                overall_score=85,
-                deployment_ready=True,
-                issues=[],
-                recommendations=[]))
+                overall_score=85, deployment_ready=True, issues=[], recommendations=[]
+            )
+        )
         readiness_integrator.business_assessor.assess_business_readiness = AsyncMock(
             return_value=Mock(
-                overall_score=80,
-                business_readiness_level=Mock(),
-                timeline_recommendations={}))
+                overall_score=80, business_readiness_level=Mock(), timeline_recommendations={}
+            )
+        )
         readiness_integrator.safety_verifier.verify_safety_compliance = AsyncMock(
             return_value=Mock(
                 overall_safety_score=90,
                 deployment_approval=True,
                 critical_issues=[],
                 recommendations=[],
-            ))
+            )
+        )
 
         # Should not raise exception and should generate default market data
         result = await readiness_integrator.assess_comprehensive_readiness(
@@ -633,21 +624,18 @@ class TestEdgeCasesAndErrorHandling:
 
         assert isinstance(result, ComprehensiveReadinessReport)
 
-    def test_integration_with_missing_business_context(
-            self, readiness_integrator):
+    def test_integration_with_missing_business_context(self, readiness_integrator):
         """Test default market data generation with minimal business context."""
         minimal_context = {}
 
-        market_data = readiness_integrator._generate_default_market_data(
-            minimal_context)
+        market_data = readiness_integrator._generate_default_market_data(minimal_context)
 
         # Should handle missing keys gracefully
         assert "market_size" in market_data
         # Default
         assert market_data["market_size"]["total_addressable_market"] == 10000000
 
-    def test_determine_overall_readiness_edge_scores(
-            self, readiness_integrator):
+    def test_determine_overall_readiness_edge_scores(self, readiness_integrator):
         """Test overall readiness determination with edge case scores."""
         # Create mocks for boundary testing
         mock_technical = Mock()
@@ -681,7 +669,8 @@ class TestEdgeCasesAndErrorHandling:
         mock_safety.recommendations = []
 
         recommendations = readiness_integrator._generate_integrated_recommendations(
-            mock_technical, mock_business, mock_safety)
+            mock_technical, mock_business, mock_safety
+        )
 
         # Should still generate optimization recommendations
         assert len(recommendations) > 0
@@ -706,18 +695,15 @@ class TestIntegrationScenarios:
         mock_technical.overall_score = 88.0
         mock_technical.deployment_ready = True
         mock_technical.issues = []
-        mock_technical.recommendations = [
-            "Optimize caching", "Improve monitoring"]
-        mock_technical.to_dict.return_value = {
-            "technical_data": "mock_technical"}
+        mock_technical.recommendations = ["Optimize caching", "Improve monitoring"]
+        mock_technical.to_dict.return_value = {"technical_data": "mock_technical"}
 
         mock_business = Mock()
         mock_business.overall_score = 82.0
         from coalitions.readiness.business_readiness_assessor import BusinessReadinessLevel
 
         mock_business.business_readiness_level = BusinessReadinessLevel.MARKET_READY
-        mock_business.timeline_recommendations = {
-            "Q1": "Beta launch", "Q2": "Full launch"}
+        mock_business.timeline_recommendations = {"Q1": "Beta launch", "Q2": "Full launch"}
         mock_business.to_dict.return_value = {"business_data": "mock_business"}
 
         mock_safety = Mock()
@@ -732,11 +718,14 @@ class TestIntegrationScenarios:
 
         # Mock individual assessment methods
         readiness_integrator.technical_validator.assess_technical_readiness = AsyncMock(
-            return_value=mock_technical)
+            return_value=mock_technical
+        )
         readiness_integrator.business_assessor.assess_business_readiness = AsyncMock(
-            return_value=mock_business)
+            return_value=mock_business
+        )
         readiness_integrator.safety_verifier.verify_safety_compliance = AsyncMock(
-            return_value=mock_safety)
+            return_value=mock_safety
+        )
 
         # Perform assessment
         result = await readiness_integrator.assess_comprehensive_readiness(

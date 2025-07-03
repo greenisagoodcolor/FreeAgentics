@@ -141,12 +141,7 @@ class TestConversationMessage:
 
     def test_message_with_metadata(self):
         """Test message with custom metadata."""
-        metadata = {
-            "priority": "high",
-            "location": {
-                "x": 10,
-                "y": 20},
-            "confidence": 0.95}
+        metadata = {"priority": "high", "location": {"x": 10, "y": 20}, "confidence": 0.95}
 
         message = ConversationMessage(
             id="msg_meta",
@@ -222,10 +217,7 @@ class TestConversationTurn:
             intent=ConversationIntent.CASUAL_GREETING,
         )
 
-        turn = ConversationTurn(
-            agent_id="agent_1",
-            action="speak",
-            message=message)
+        turn = ConversationTurn(agent_id="agent_1", action="speak", message=message)
 
         assert turn.agent_id == "agent_1"
         assert turn.action == "speak"
@@ -234,10 +226,7 @@ class TestConversationTurn:
 
     def test_turn_creation_listen(self):
         """Test creating a listening turn."""
-        turn = ConversationTurn(
-            agent_id="agent_2",
-            action="listen",
-            message=None)
+        turn = ConversationTurn(agent_id="agent_2", action="listen", message=None)
 
         assert turn.agent_id == "agent_2"
         assert turn.action == "listen"
@@ -246,16 +235,11 @@ class TestConversationTurn:
 
     def test_turn_creation_think(self):
         """Test creating a thinking turn with internal state."""
-        internal_state = {
-            "current_belief": 0.8,
-            "uncertainty": 0.2,
-            "expected_free_energy": -1.5}
+        internal_state = {"current_belief": 0.8, "uncertainty": 0.2, "expected_free_energy": -1.5}
 
         turn = ConversationTurn(
-            agent_id="agent_3",
-            action="think",
-            message=None,
-            internal_state=internal_state)
+            agent_id="agent_3", action="think", message=None, internal_state=internal_state
+        )
 
         assert turn.action == "think"
         assert turn.internal_state == internal_state
@@ -320,8 +304,7 @@ class TestConversationWorkflows:
         )
         conv.messages.append(greeting)
 
-        alice_turn1 = ConversationTurn(
-            agent_id="alice", action="speak", message=greeting)
+        alice_turn1 = ConversationTurn(agent_id="alice", action="speak", message=greeting)
         bob_turn1 = ConversationTurn(agent_id="bob", action="listen")
         conv.turns.extend([alice_turn1, bob_turn1])
 
@@ -335,8 +318,7 @@ class TestConversationWorkflows:
         )
         conv.messages.append(response)
 
-        bob_turn2 = ConversationTurn(
-            agent_id="bob", action="speak", message=response)
+        bob_turn2 = ConversationTurn(agent_id="bob", action="speak", message=response)
         alice_turn2 = ConversationTurn(agent_id="alice", action="listen")
         conv.turns.extend([bob_turn2, alice_turn2])
 
@@ -359,9 +341,7 @@ class TestConversationWorkflows:
             recipient_id="merchant",
             content="Do you know any good trade routes to the eastern markets?",
             intent=ConversationIntent.SEEK_INFORMATION,
-            metadata={
-                "topic": "trade_routes",
-                "region": "eastern"},
+            metadata={"topic": "trade_routes", "region": "eastern"},
         )
         conv.messages.append(info_request)
 
@@ -399,9 +379,7 @@ class TestActiveInferenceIntegration:
             intent=ConversationIntent.SHARE_DISCOVERY,
             metadata={
                 "belief_confidence": 0.95,
-                "supporting_evidence": [
-                    "geological_survey",
-                    "historical_records"],
+                "supporting_evidence": ["geological_survey", "historical_records"],
                 "expected_free_energy_reduction": -2.3,
             },
         )
@@ -477,12 +455,10 @@ class TestAgentConversationMethods:
         conversation = AgentConversation()
 
         conversation.add_participant("agent_1", ["goal1"])
-        conversation.add_participant(
-            "agent_1", ["goal2"])  # Should not duplicate
+        conversation.add_participant("agent_1", ["goal2"])  # Should not duplicate
 
         assert conversation.participants.count("agent_1") == 1
-        assert conversation.conversation_goals["agent_1"] == [
-            "goal1"]  # Original goals kept
+        assert conversation.conversation_goals["agent_1"] == ["goal1"]  # Original goals kept
 
     def test_determine_intent_danger(self):
         """Test intent determination for danger situations."""
@@ -544,8 +520,7 @@ class TestAgentConversationMethods:
         conversation.add_participant("agent_1")
         conversation.add_participant("agent_2")
 
-        recipient = conversation._select_recipient(
-            "agent_1", ConversationIntent.WARN_DANGER)
+        recipient = conversation._select_recipient("agent_1", ConversationIntent.WARN_DANGER)
 
         assert recipient is None  # Broadcast
 
@@ -555,8 +530,7 @@ class TestAgentConversationMethods:
         conversation.add_participant("agent_1")
         conversation.add_participant("agent_2")
 
-        recipient = conversation._select_recipient(
-            "agent_1", ConversationIntent.CASUAL_GREETING)
+        recipient = conversation._select_recipient("agent_1", ConversationIntent.CASUAL_GREETING)
 
         assert recipient == "agent_2"
 
@@ -565,17 +539,14 @@ class TestAgentConversationMethods:
         conversation = AgentConversation()
         conversation.add_participant("agent_1")
 
-        recipient = conversation._select_recipient(
-            "agent_1", ConversationIntent.CASUAL_GREETING)
+        recipient = conversation._select_recipient("agent_1", ConversationIntent.CASUAL_GREETING)
 
         assert recipient is None
 
     def test_generate_template_message_discovery(self):
         """Test template message generation for discovery sharing."""
         conversation = AgentConversation()
-        speaker_state = {
-            "recent_discoveries": ["water_source"],
-            "location": "hex_123"}
+        speaker_state = {"recent_discoveries": ["water_source"], "location": "hex_123"}
 
         message = conversation._generate_template_message(
             "agent_1", speaker_state, ConversationIntent.SHARE_DISCOVERY
@@ -610,9 +581,7 @@ class TestAgentConversationMethods:
     def test_generate_template_message_danger(self):
         """Test template message generation for danger warnings."""
         conversation = AgentConversation()
-        speaker_state = {
-            "danger_type": "predator",
-            "danger_location": "hex_456"}
+        speaker_state = {"danger_type": "predator", "danger_location": "hex_456"}
 
         message = conversation._generate_template_message(
             "agent_1", speaker_state, ConversationIntent.WARN_DANGER
@@ -632,10 +601,7 @@ class TestAgentConversationMethods:
         )
 
         assert len(message) > 0
-        assert message in [
-            "Hello there!",
-            "How's everyone doing?",
-            "Nice to meet you all"]
+        assert message in ["Hello there!", "How's everyone doing?", "Nice to meet you all"]
 
     def test_build_llm_prompt(self):
         """Test building LLM prompt for message generation."""
@@ -655,10 +621,8 @@ class TestAgentConversationMethods:
         ]
 
         prompt = conversation._build_llm_prompt(
-            "agent_1",
-            speaker_state,
-            ConversationIntent.SHARE_DISCOVERY,
-            context_messages)
+            "agent_1", speaker_state, ConversationIntent.SHARE_DISCOVERY, context_messages
+        )
 
         assert "agent_1" in prompt
         assert "openness: 0.8" in prompt
@@ -693,7 +657,8 @@ class TestAgentConversationMethods:
         speaker_state = {"recent_discoveries": ["water"]}
 
         result = conversation._generate_with_llm(
-            "agent_1", speaker_state, ConversationIntent.SHARE_DISCOVERY, [], mock_llm)
+            "agent_1", speaker_state, ConversationIntent.SHARE_DISCOVERY, [], mock_llm
+        )
 
         # Should fall back to template message
         assert "water" in result
@@ -710,8 +675,7 @@ class TestAgentConversationMethods:
 
         speaker_state = {"free_energy": 0.3, "confidence": 0.8}
 
-        message = conversation.generate_message(
-            "agent_1", speaker_state, [], mock_llm)
+        message = conversation.generate_message("agent_1", speaker_state, [], mock_llm)
 
         assert message.sender_id == "agent_1"
         assert message.content == "Hello there, friend!"
@@ -772,8 +736,7 @@ class TestAgentConversationMethods:
             )
         )
 
-        action = conversation._determine_action(
-            "agent_1", {"urgent_message": True})
+        action = conversation._determine_action("agent_1", {"urgent_message": True})
 
         assert action == "speak"
 
@@ -889,8 +852,7 @@ class TestAgentConversationMethods:
             intent=ConversationIntent.SHARE_DISCOVERY,
         )
 
-        beliefs = conversation.update_beliefs_from_message(
-            "agent_2", message, mock_kg)
+        beliefs = conversation.update_beliefs_from_message("agent_2", message, mock_kg)
 
         assert len(beliefs) == 2  # Discovery belief + trust belief
 
@@ -920,8 +882,7 @@ class TestAgentConversationMethods:
             intent=ConversationIntent.WARN_DANGER,
         )
 
-        beliefs = conversation.update_beliefs_from_message(
-            "agent_2", message, mock_kg)
+        beliefs = conversation.update_beliefs_from_message("agent_2", message, mock_kg)
 
         assert len(beliefs) == 2
 
@@ -944,8 +905,7 @@ class TestAgentConversationMethods:
             intent=ConversationIntent.PROPOSE_TRADE,
         )
 
-        beliefs = conversation.update_beliefs_from_message(
-            "agent_2", message, mock_kg)
+        beliefs = conversation.update_beliefs_from_message("agent_2", message, mock_kg)
 
         assert len(beliefs) == 2
 
@@ -1154,8 +1114,7 @@ class TestCommunicationCapability:
 
         mock_message_system = Mock()
 
-        capability = CommunicationCapability(
-            message_system=mock_message_system, agent_id="agent_1")
+        capability = CommunicationCapability(message_system=mock_message_system, agent_id="agent_1")
 
         assert capability.communication_range == 5.0
         assert capability.bandwidth == 10
@@ -1168,11 +1127,9 @@ class TestCommunicationCapability:
         mock_message_system = Mock()
         mock_message_system.register_agent = Mock()
 
-        capability = CommunicationCapability(
-            message_system=mock_message_system, agent_id="agent_1")
+        capability = CommunicationCapability(message_system=mock_message_system, agent_id="agent_1")
 
-        mock_message_system.register_agent.assert_called_once_with(
-            "agent_1", capability)
+        mock_message_system.register_agent.assert_called_once_with("agent_1", capability)
 
     def test_send_message_success(self):
         """Test successful message sending."""
@@ -1181,8 +1138,7 @@ class TestCommunicationCapability:
         mock_message_system = Mock()
         mock_message_system.send_message = Mock(return_value=True)
 
-        capability = CommunicationCapability(
-            message_system=mock_message_system, agent_id="agent_1")
+        capability = CommunicationCapability(message_system=mock_message_system, agent_id="agent_1")
 
         result = capability.send_message(
             recipient_id="agent_2",
@@ -1231,8 +1187,7 @@ class TestCommunicationCapability:
         # Message system without send_message method
         delattr(mock_message_system, "send_message")
 
-        capability = CommunicationCapability(
-            message_system=mock_message_system, agent_id="agent_1")
+        capability = CommunicationCapability(message_system=mock_message_system, agent_id="agent_1")
 
         result = capability.send_message("agent_2", "Hello!")
 
@@ -1248,8 +1203,7 @@ class TestCommunicationCapability:
         mock_message_system = Mock()
         mock_message_system.send_message = Mock(return_value=True)
 
-        capability = CommunicationCapability(
-            message_system=mock_message_system, agent_id="agent_1")
+        capability = CommunicationCapability(message_system=mock_message_system, agent_id="agent_1")
 
         result = capability.send_message(
             recipient_id=None,  # Broadcast
@@ -1269,8 +1223,7 @@ class TestCommunicationCapability:
 
         mock_message_system = Mock()
 
-        capability = CommunicationCapability(
-            message_system=mock_message_system, agent_id="agent_1")
+        capability = CommunicationCapability(message_system=mock_message_system, agent_id="agent_1")
 
         message = ConversationMessage(
             id="msg_1",
@@ -1302,17 +1255,14 @@ class TestCommunicationCapability:
 
         mock_message_system = Mock()
 
-        capability = CommunicationCapability(
-            message_system=mock_message_system, agent_id="agent_1")
+        capability = CommunicationCapability(message_system=mock_message_system, agent_id="agent_1")
 
-        conversation = capability.start_conversation(
-            "agent_2", ["explore", "trade"])
+        conversation = capability.start_conversation("agent_2", ["explore", "trade"])
 
         assert conversation is not None
         assert "agent_1" in conversation.participants
         assert "agent_2" in conversation.participants
-        assert conversation.conversation_goals["agent_1"] == [
-            "explore", "trade"]
+        assert conversation.conversation_goals["agent_1"] == ["explore", "trade"]
 
         conv_id = capability._get_conversation_id("agent_2")
         assert capability.active_conversations[conv_id] == conversation
@@ -1323,8 +1273,7 @@ class TestCommunicationCapability:
 
         mock_message_system = Mock()
 
-        capability = CommunicationCapability(
-            message_system=mock_message_system, agent_id="agent_1")
+        capability = CommunicationCapability(message_system=mock_message_system, agent_id="agent_1")
 
         # Start first conversation
         conv1 = capability.start_conversation("agent_2")
@@ -1340,8 +1289,7 @@ class TestCommunicationCapability:
 
         mock_message_system = Mock()
 
-        capability = CommunicationCapability(
-            message_system=mock_message_system, agent_id="agent_1")
+        capability = CommunicationCapability(message_system=mock_message_system, agent_id="agent_1")
 
         # Add some messages to queue
         msg1 = ConversationMessage(
@@ -1375,8 +1323,7 @@ class TestCommunicationCapability:
 
         mock_message_system = Mock()
 
-        capability = CommunicationCapability(
-            message_system=mock_message_system, agent_id="agent_1")
+        capability = CommunicationCapability(message_system=mock_message_system, agent_id="agent_1")
 
         conv1 = capability.start_conversation("agent_2")
         conv2 = capability.start_conversation("agent_3")
@@ -1393,8 +1340,7 @@ class TestCommunicationCapability:
 
         mock_message_system = Mock()
 
-        capability = CommunicationCapability(
-            message_system=mock_message_system, agent_id="agent_1")
+        capability = CommunicationCapability(message_system=mock_message_system, agent_id="agent_1")
 
         conversation = capability.start_conversation("agent_2")
         conv_id = capability._get_conversation_id("agent_2")
@@ -1411,8 +1357,7 @@ class TestCommunicationCapability:
 
         mock_message_system = Mock()
 
-        capability = CommunicationCapability(
-            message_system=mock_message_system, agent_id="agent_1")
+        capability = CommunicationCapability(message_system=mock_message_system, agent_id="agent_1")
 
         result = capability.end_conversation("nonexistent_conv")
 
@@ -1425,8 +1370,7 @@ class TestCommunicationCapability:
         mock_message_system = Mock()
         mock_message_system.send_message = Mock(return_value=True)
 
-        capability = CommunicationCapability(
-            message_system=mock_message_system, agent_id="agent_1")
+        capability = CommunicationCapability(message_system=mock_message_system, agent_id="agent_1")
 
         # Send and receive some messages
         capability.send_message("agent_2", "Hello")
@@ -1491,8 +1435,7 @@ class TestCommunicationCapability:
 
         mock_message_system = Mock()
 
-        capability = CommunicationCapability(
-            message_system=mock_message_system, agent_id="agent_1")
+        capability = CommunicationCapability(message_system=mock_message_system, agent_id="agent_1")
 
         conv_id1 = capability._get_conversation_id("agent_2")
         conv_id2 = capability._get_conversation_id("agent_2")
@@ -1518,9 +1461,8 @@ class TestCommunicationCapability:
         mock_message_system = Mock()
 
         capability = CommunicationCapability(
-            message_system=mock_message_system,
-            agent_id="agent_1",
-            communication_range=12.5)
+            message_system=mock_message_system, agent_id="agent_1", communication_range=12.5
+        )
 
         capability.start_conversation("agent_2")
 
@@ -1557,10 +1499,7 @@ class TestCommunicationIntegration:
         }
 
         # Agent 2 state (seeking allies)
-        agent2_state = {
-            "seeking_allies": True,
-            "free_energy": 0.5,
-            "confidence": 0.7}
+        agent2_state = {"seeking_allies": True, "free_energy": 0.5, "confidence": 0.7}
 
         # Process several turns
         turn1 = conversation.process_turn("agent_1", agent1_state)
@@ -1646,8 +1585,7 @@ class TestCommunicationIntegration:
         )
 
         # Update beliefs
-        beliefs = conversation.update_beliefs_from_message(
-            "agent_2", message, mock_kg)
+        beliefs = conversation.update_beliefs_from_message("agent_2", message, mock_kg)
 
         # Verify beliefs were created and added to knowledge graph
         assert len(beliefs) == 2
@@ -1848,8 +1786,7 @@ class TestCommunicationEdgeCases:
             intent=ConversationIntent.FORM_ALLIANCE,
         )
 
-        beliefs = conversation.update_beliefs_from_message(
-            "agent_2", message, mock_kg)
+        beliefs = conversation.update_beliefs_from_message("agent_2", message, mock_kg)
 
         # Should only create trust belief for non-covered intents
         assert len(beliefs) == 1
@@ -1870,8 +1807,7 @@ class TestCommunicationEdgeCases:
             intent=ConversationIntent.SEEK_INFORMATION,
         )
 
-        beliefs = conversation.update_beliefs_from_message(
-            "agent_2", message, mock_kg)
+        beliefs = conversation.update_beliefs_from_message("agent_2", message, mock_kg)
 
         # Should only create trust belief
         assert len(beliefs) == 1

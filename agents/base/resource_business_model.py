@@ -87,10 +87,7 @@ class ResourceUnit:
 
     def degrade(self, rate: float = 0.01) -> None:
         """Degrade resource over time"""
-        if self.resource_type in [
-                ResourceType.TOOLS,
-                ResourceType.WEAPONS,
-                ResourceType.SHELTER]:
+        if self.resource_type in [ResourceType.TOOLS, ResourceType.WEAPONS, ResourceType.SHELTER]:
             self.durability = max(0.0, self.durability - rate)
         else:
             self.quality = max(0.0, self.quality - rate * 0.1)
@@ -108,9 +105,7 @@ class MarketPrice:
     supply: float = 0.0
     demand: float = 0.0
     volatility: float = 0.1
-    last_updated: datetime = field(
-        default_factory=lambda: datetime.now(
-            timezone.utc))
+    last_updated: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
     def update_price(self, supply: float, demand: float) -> None:
         """Update price based on supply and demand"""
@@ -125,8 +120,7 @@ class MarketPrice:
         # Add some inertia to prevent wild swings
         self.current_price = (self.current_price * 0.7) + (new_price * 0.3)
         # Update history
-        self.price_history.append(
-            (datetime.now(timezone.utc), self.current_price))
+        self.price_history.append((datetime.now(timezone.utc), self.current_price))
         if len(self.price_history) > 100:  # Keep last 100 entries
             self.price_history.pop(0)
         # Update volatility
@@ -161,9 +155,7 @@ class TradeOffer:
     offered_resources: Dict[ResourceType, float]
     requested_resources: Dict[ResourceType, float]
     expiration: datetime
-    created_at: datetime = field(
-        default_factory=lambda: datetime.now(
-            timezone.utc))
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     is_public: bool = True
     minimum_reputation: float = 0.0
     max_distance: Optional[float] = None
@@ -173,9 +165,7 @@ class TradeOffer:
         """Check if offer is still valid"""
         return datetime.now(timezone.utc) < self.expiration
 
-    def calculate_value_ratio(self,
-                              market_prices: Dict[ResourceType,
-                                                  MarketPrice]) -> float:
+    def calculate_value_ratio(self, market_prices: Dict[ResourceType, MarketPrice]) -> float:
         """Calculate the value ratio of offered vs requested resources"""
         offered_value = sum(
             market_prices.get(rt, MarketPrice(rt, 1.0, 1.0)).current_price * amount
@@ -201,9 +191,7 @@ class Transaction:
     resources_exchanged: Dict[str, Dict[ResourceType, float]]
     total_value: float
     fee: float = 0.0
-    timestamp: datetime = field(
-        default_factory=lambda: datetime.now(
-            timezone.utc))
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     location: Optional[str] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
 
@@ -220,10 +208,7 @@ class IResourceProvider(ABC):
         """Check if can provide specified amount of resource"""
 
     @abstractmethod
-    def provide_resource(
-            self,
-            resource_type: ResourceType,
-            amount: float) -> bool:
+    def provide_resource(self, resource_type: ResourceType, amount: float) -> bool:
         """Provide specified amount of resource"""
 
 
@@ -239,20 +224,14 @@ class IResourceConsumer(ABC):
         """Check if can consume specified amount of resource"""
 
     @abstractmethod
-    def consume_resource(
-            self,
-            resource_type: ResourceType,
-            amount: float) -> bool:
+    def consume_resource(self, resource_type: ResourceType, amount: float) -> bool:
         """Consume specified amount of resource"""
 
 
 class ResourceInventory:
     """Manages an agent's resource inventory"""
 
-    def __init__(
-            self,
-            agent_id: str,
-            initial_capacity: float = 1000.0) -> None:
+    def __init__(self, agent_id: str, initial_capacity: float = 1000.0) -> None:
         self.agent_id = agent_id
         self.capacity = initial_capacity
         self.resources: Dict[ResourceType, List[ResourceUnit]] = {}
@@ -270,11 +249,11 @@ class ResourceInventory:
             f"Added {
                 resource_unit.quantity} {
                 resource_unit.resource_type.value} to {
-                self.agent_id}")
+                self.agent_id}"
+        )
         return True
 
-    def remove_resource(self, resource_type: ResourceType,
-                        amount: float) -> List[ResourceUnit]:
+    def remove_resource(self, resource_type: ResourceType, amount: float) -> List[ResourceUnit]:
         """Remove specified amount of resource, returns removed units"""
         if resource_type not in self.resources:
             return []
@@ -283,9 +262,8 @@ class ResourceInventory:
         units_to_remove = []
         # Sort by quality (use best quality first)
         sorted_units = sorted(
-            self.resources[resource_type],
-            key=lambda x: x.get_effective_value(),
-            reverse=True)
+            self.resources[resource_type], key=lambda x: x.get_effective_value(), reverse=True
+        )
         for unit in sorted_units:
             if remaining_amount <= 0:
                 break
@@ -325,21 +303,14 @@ class ResourceInventory:
         reserved = self.reserved.get(resource_type, 0.0)
         return max(0.0, total - reserved)
 
-    def reserve_resource(
-            self,
-            resource_type: ResourceType,
-            amount: float) -> bool:
+    def reserve_resource(self, resource_type: ResourceType, amount: float) -> bool:
         """Reserve resources for pending transactions"""
         if self.get_available_amount(resource_type) < amount:
             return False
-        self.reserved[resource_type] = self.reserved.get(
-            resource_type, 0.0) + amount
+        self.reserved[resource_type] = self.reserved.get(resource_type, 0.0) + amount
         return True
 
-    def release_reservation(
-            self,
-            resource_type: ResourceType,
-            amount: float) -> None:
+    def release_reservation(self, resource_type: ResourceType, amount: float) -> None:
         """Release reserved resources"""
         current_reserved = self.reserved.get(resource_type, 0.0)
         self.reserved[resource_type] = max(0.0, current_reserved - amount)
@@ -358,19 +329,24 @@ class ResourceInventory:
                 unit.degrade()
             # Remove completely degraded items
             self.resources[resource_type] = [
-                unit for unit in units if unit.durability > 0.0 and unit.quality > 0.0]
+                unit for unit in units if unit.durability > 0.0 and unit.quality > 0.0
+            ]
 
     def get_inventory_summary(self) -> Dict[ResourceType, Dict[str, float]]:
         """Get summary of inventory"""
         summary = {}
         for resource_type, units in self.resources.items():
             total_quantity = sum(unit.quantity for unit in units)
-            avg_quality = (sum(unit.quality *
-                               unit.quantity for unit in units) /
-                           total_quantity if total_quantity > 0 else 0)
-            avg_durability = (sum(unit.durability *
-                                  unit.quantity for unit in units) /
-                              total_quantity if total_quantity > 0 else 0)
+            avg_quality = (
+                sum(unit.quality * unit.quantity for unit in units) / total_quantity
+                if total_quantity > 0
+                else 0
+            )
+            avg_durability = (
+                sum(unit.durability * unit.quantity for unit in units) / total_quantity
+                if total_quantity > 0
+                else 0
+            )
             summary[resource_type] = {
                 "quantity": total_quantity,
                 "available": self.get_available_amount(resource_type),
@@ -418,9 +394,8 @@ class Market:
         }
         for resource_type, base_price in base_prices.items():
             self.prices[resource_type] = MarketPrice(
-                resource_type=resource_type,
-                base_price=base_price,
-                current_price=base_price)
+                resource_type=resource_type, base_price=base_price, current_price=base_price
+            )
 
     def submit_offer(self, offer: TradeOffer) -> bool:
         """Submit a trade offer to the market"""
@@ -430,7 +405,8 @@ class Market:
         logger.debug(
             f"Trade offer {
                 offer.offer_id} submitted to market {
-                self.market_id}")
+                self.market_id}"
+        )
         return True
 
     def cancel_offer(self, offer_id: str, agent_id: str) -> bool:
@@ -443,12 +419,9 @@ class Market:
         del self.active_offers[offer_id]
         return True
 
-    def find_matching_offers(self,
-                             agent_id: str,
-                             wanted: Dict[ResourceType,
-                                          float],
-                             offered: Dict[ResourceType,
-                                           float]) -> List[TradeOffer]:
+    def find_matching_offers(
+        self, agent_id: str, wanted: Dict[ResourceType, float], offered: Dict[ResourceType, float]
+    ) -> List[TradeOffer]:
         """Find offers that match agent's requirements"""
         matching_offers = []
         for offer in self.active_offers.values():
@@ -473,15 +446,10 @@ class Market:
             if can_provide:
                 matching_offers.append(offer)
         # Sort by value ratio (best deals first)
-        matching_offers.sort(
-            key=lambda x: x.calculate_value_ratio(
-                self.prices), reverse=True)
+        matching_offers.sort(key=lambda x: x.calculate_value_ratio(self.prices), reverse=True)
         return matching_offers
 
-    def execute_trade(
-            self,
-            offer_id: str,
-            buyer_id: str) -> Optional[Transaction]:
+    def execute_trade(self, offer_id: str, buyer_id: str) -> Optional[Transaction]:
         """Execute a trade between agents"""
         if offer_id not in self.active_offers:
             return None
@@ -498,19 +466,12 @@ class Market:
         fee = total_value * self.transaction_fee_rate
         # Create transaction record
         transaction = Transaction(
-            transaction_id=str(
-                uuid.uuid4()),
+            transaction_id=str(uuid.uuid4()),
             transaction_type=TransactionType.TRADE,
-            parties=[
-                offer.from_agent,
-                buyer_id],
+            parties=[offer.from_agent, buyer_id],
             resources_exchanged={
-                offer.from_agent: {
-                    rt: -amount for rt,
-                    amount in offer.offered_resources.items()},
-                buyer_id: {
-                    rt: amount for rt,
-                    amount in offer.offered_resources.items()},
+                offer.from_agent: {rt: -amount for rt, amount in offer.offered_resources.items()},
+                buyer_id: {rt: amount for rt, amount in offer.offered_resources.items()},
             },
             total_value=total_value,
             fee=fee,
@@ -523,8 +484,7 @@ class Market:
         logger.info(f"Trade executed: {transaction.transaction_id}")
         return transaction
 
-    def _update_prices_from_transaction(
-            self, transaction: Transaction) -> None:
+    def _update_prices_from_transaction(self, transaction: Transaction) -> None:
         """Update market prices based on completed transaction"""
         for agent_id, resources in transaction.resources_exchanged.items():
             for resource_type, amount in resources.items():
@@ -564,8 +524,8 @@ class Market:
     def clean_expired_offers(self) -> None:
         """Remove expired offers"""
         expired_offers = [
-            offer_id for offer_id,
-            offer in self.active_offers.items() if not offer.is_valid()]
+            offer_id for offer_id, offer in self.active_offers.items() if not offer.is_valid()
+        ]
         for offer_id in expired_offers:
             del self.active_offers[offer_id]
 
@@ -576,15 +536,11 @@ class ResourceBusinessManager:
     def __init__(self) -> None:
         self.markets: Dict[str, Market] = {}
         self.inventories: Dict[str, ResourceInventory] = {}
-        self.production_facilities: Dict[str,
-                                         Any] = {}  # Agent-owned facilities
+        self.production_facilities: Dict[str, Any] = {}  # Agent-owned facilities
         # Trust levels between agents
         self.trade_relationships: Dict[str, Dict[str, float]] = {}
 
-    def create_market(
-            self,
-            market_id: str,
-            location: Optional[str] = None) -> Market:
+    def create_market(self, market_id: str, location: Optional[str] = None) -> Market:
         """Create a new market"""
         market = Market(market_id, location)
         self.markets[market_id] = market
@@ -594,10 +550,7 @@ class ResourceBusinessManager:
         """Get market by ID"""
         return self.markets.get(market_id)
 
-    def create_inventory(
-            self,
-            agent_id: str,
-            capacity: float = 1000.0) -> ResourceInventory:
+    def create_inventory(self, agent_id: str, capacity: float = 1000.0) -> ResourceInventory:
         """Create inventory for an agent"""
         inventory = ResourceInventory(agent_id, capacity)
         self.inventories[agent_id] = inventory
@@ -629,16 +582,12 @@ class ResourceBusinessManager:
                     inventory.release_reservation(rt, amt)
                 return None
         offer = TradeOffer(
-            offer_id=str(
-                uuid.uuid4()),
+            offer_id=str(uuid.uuid4()),
             from_agent=agent_id,
             to_agent=target_agent,
             offered_resources=offered.copy(),
             requested_resources=requested.copy(),
-            expiration=datetime.now(
-                timezone.utc) +
-            timedelta(
-                hours=duration_hours),
+            expiration=datetime.now(timezone.utc) + timedelta(hours=duration_hours),
             is_public=target_agent is None,
         )
         return offer
@@ -671,11 +620,7 @@ class ResourceBusinessManager:
                     inventory.remove_resource(resource_type, abs(amount))
         return transaction
 
-    def update_trust_relationship(
-            self,
-            agent1: str,
-            agent2: str,
-            change: float) -> None:
+    def update_trust_relationship(self, agent1: str, agent2: str, change: float) -> None:
         """Update trust level between two agents"""
         if agent1 not in self.trade_relationships:
             self.trade_relationships[agent1] = {}
@@ -738,9 +683,7 @@ def create_basic_inventory(
     if starting_resources:
         for resource_type, amount in starting_resources.items():
             resource_unit = ResourceUnit(
-                resource_type=resource_type,
-                quantity=amount,
-                quality=1.0,
-                origin="initial")
+                resource_type=resource_type, quantity=amount, quality=1.0, origin="initial"
+            )
             inventory.add_resource(resource_unit)
     return inventory

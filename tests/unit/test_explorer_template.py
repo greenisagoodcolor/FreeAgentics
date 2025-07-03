@@ -134,8 +134,7 @@ class TestExplorerTemplate:
         assert model.precision_policy == 0.8  # Lower for more exploration
         assert model.precision_sensory == 1.2  # Higher sensory precision
 
-    def test_observation_model_properties(
-            self, explorer_template, explorer_config):
+    def test_observation_model_properties(self, explorer_template, explorer_config):
         """Test observation model encourages exploration."""
         if not IMPORT_SUCCESS:
             return
@@ -153,8 +152,7 @@ class TestExplorerTemplate:
             off_diagonal_sum = np.sum(model.A) - diagonal_sum
             assert diagonal_sum > off_diagonal_sum / model.A.shape[0]
 
-    def test_transition_model_exploration(
-            self, explorer_template, explorer_config):
+    def test_transition_model_exploration(self, explorer_template, explorer_config):
         """Test transition model supports exploration."""
         if not IMPORT_SUCCESS:
             return
@@ -209,8 +207,7 @@ class TestExplorerTemplate:
 
             # Should start with uniform beliefs (maximum uncertainty)
             expected_beliefs = np.ones(4) / 4
-            np.testing.assert_array_almost_equal(
-                beliefs.beliefs, expected_beliefs)
+            np.testing.assert_array_almost_equal(beliefs.beliefs, expected_beliefs)
 
             # Should have maximum entropy for uniform distribution
             expected_entropy = np.log(4)
@@ -218,8 +215,7 @@ class TestExplorerTemplate:
 
             # Policies should be uniform
             expected_policies = np.ones(3) / 3
-            np.testing.assert_array_almost_equal(
-                beliefs.policies, expected_policies)
+            np.testing.assert_array_almost_equal(beliefs.policies, expected_policies)
 
     def test_compute_epistemic_value(self, explorer_template, explorer_config):
         """Test epistemic value computation for exploration decisions."""
@@ -227,8 +223,7 @@ class TestExplorerTemplate:
             # Test mock implementation
             beliefs = Mock()
             observations = np.array([0.7, 0.2, 0.1])
-            value = explorer_template.compute_epistemic_value(
-                beliefs, observations)
+            value = explorer_template.compute_epistemic_value(beliefs, observations)
             assert isinstance(value, float)
             assert value == 1.5
             return
@@ -236,8 +231,7 @@ class TestExplorerTemplate:
         beliefs = explorer_template.initialize_beliefs(explorer_config)
         observations = np.array([0.7, 0.2, 0.1])  # Probable observations
 
-        epistemic_value = explorer_template.compute_epistemic_value(
-            beliefs, observations)
+        epistemic_value = explorer_template.compute_epistemic_value(beliefs, observations)
 
         # Should return a float
         assert isinstance(epistemic_value, float)
@@ -250,12 +244,10 @@ class TestExplorerTemplate:
 
         # Test with deterministic observations
         deterministic_obs = np.array([1.0, 0.0, 0.0])
-        det_value = explorer_template.compute_epistemic_value(
-            beliefs, deterministic_obs)
+        det_value = explorer_template.compute_epistemic_value(beliefs, deterministic_obs)
         assert isinstance(det_value, float)
 
-    def test_epistemic_value_bonus_application(
-            self, explorer_template, explorer_config):
+    def test_epistemic_value_bonus_application(self, explorer_template, explorer_config):
         """Test that epistemic bonus is properly applied."""
         if not IMPORT_SUCCESS:
             return
@@ -264,8 +256,7 @@ class TestExplorerTemplate:
         observations = np.array([0.5, 0.3, 0.2])
 
         # Compute epistemic value
-        epistemic_value = explorer_template.compute_epistemic_value(
-            beliefs, observations)
+        epistemic_value = explorer_template.compute_epistemic_value(beliefs, observations)
 
         # Should be scaled by epistemic bonus (0.8)
         # The exact value depends on entropy calculations, but should be
@@ -274,8 +265,7 @@ class TestExplorerTemplate:
 
         # Test with different observation distributions
         uniform_obs = np.array([1 / 3, 1 / 3, 1 / 3])
-        uniform_value = explorer_template.compute_epistemic_value(
-            beliefs, uniform_obs)
+        uniform_value = explorer_template.compute_epistemic_value(beliefs, uniform_obs)
 
         # Both should be positive
         assert uniform_value > 0
@@ -290,8 +280,7 @@ class TestExplorerTemplate:
         assert "information gain" in description or "epistemic" in description
         assert "exploration" in description or "curiosity" in description
 
-    def test_template_specific_validation(
-            self, explorer_template, explorer_config):
+    def test_template_specific_validation(self, explorer_template, explorer_config):
         """Test explorer-specific model validation."""
         if not IMPORT_SUCCESS:
             return
@@ -299,8 +288,7 @@ class TestExplorerTemplate:
         model = explorer_template.create_generative_model(explorer_config)
 
         # Should pass validation without raising
-        explorer_template._validate_template_specific_constraints(
-            model, explorer_config)
+        explorer_template._validate_template_specific_constraints(model, explorer_config)
 
         # Test with low-variance preferences (should warn)
         low_var_model = GenerativeModelParams(
@@ -336,16 +324,14 @@ class TestExplorerTemplate:
         assert isinstance(metrics["exploration_readiness"], (bool, np.bool_))
         assert metrics["epistemic_motivation"] >= 0
 
-    def test_exploration_readiness_threshold(
-            self, explorer_template, explorer_config):
+    def test_exploration_readiness_threshold(self, explorer_template, explorer_config):
         """Test exploration readiness based on uncertainty threshold."""
         if not IMPORT_SUCCESS:
             return
 
         # Test with high entropy beliefs (should be ready to explore)
         uniform_beliefs = explorer_template.initialize_beliefs(explorer_config)
-        metrics = explorer_template.compute_exploration_metrics(
-            uniform_beliefs)
+        metrics = explorer_template.compute_exploration_metrics(uniform_beliefs)
 
         # Uniform beliefs have high entropy, should exceed threshold
         assert bool(metrics["exploration_readiness"]) is True
@@ -360,8 +346,7 @@ class TestExplorerTemplate:
                 confidence=entropy(np.array([0.95, 0.03, 0.01, 0.01])),
             )
 
-            det_metrics = explorer_template.compute_exploration_metrics(
-                deterministic_beliefs)
+            det_metrics = explorer_template.compute_exploration_metrics(deterministic_beliefs)
 
             # Low entropy should result in lower readiness
             assert det_metrics["belief_entropy"] < metrics["belief_entropy"]
@@ -391,8 +376,7 @@ class TestExplorerTemplate:
 
         # Test epistemic value with deterministic system
         obs = np.array([1.0])
-        epistemic_value = explorer_template.compute_epistemic_value(
-            beliefs, obs)
+        epistemic_value = explorer_template.compute_epistemic_value(beliefs, obs)
         assert isinstance(epistemic_value, float)
         # Should be zero or very low for deterministic system
         assert epistemic_value >= 0
@@ -457,16 +441,14 @@ class TestExplorerTemplate:
         assert model2.A.shape == (4, 8)
         model2.validate_mathematical_constraints()
 
-    def test_integration_with_base_template(
-            self, explorer_template, explorer_config):
+    def test_integration_with_base_template(self, explorer_template, explorer_config):
         """Test integration with base template functionality."""
         if not IMPORT_SUCCESS:
             return
 
         # Test agent data creation
         position = Position(1.0, 2.0, 0.0)
-        agent_data = explorer_template.create_agent_data(
-            explorer_config, position)
+        agent_data = explorer_template.create_agent_data(explorer_config, position)
 
         assert agent_data.name == "Explorer Agent"
         assert agent_data.agent_type == "explorer"
@@ -481,8 +463,7 @@ class TestExplorerTemplate:
         behavioral_params = metadata["behavioral_params"]
         assert behavioral_params["exploration_bonus"] == 0.8
 
-    def test_mathematical_consistency(
-            self, explorer_template, explorer_config):
+    def test_mathematical_consistency(self, explorer_template, explorer_config):
         """Test mathematical consistency across operations."""
         if not IMPORT_SUCCESS:
             return
@@ -495,8 +476,7 @@ class TestExplorerTemplate:
 
         # Test free energy computation
         observation = np.array([1.0, 0.0, 0.0])
-        free_energy = explorer_template.compute_free_energy(
-            beliefs, observation, model)
+        free_energy = explorer_template.compute_free_energy(beliefs, observation, model)
 
         assert isinstance(free_energy, float)
         assert not np.isnan(free_energy)
@@ -510,8 +490,7 @@ class TestExplorerTemplate:
             assert isinstance(fe, float)
             assert not np.isnan(fe)
 
-    def test_exploration_parameter_effects(
-            self, explorer_template, explorer_config):
+    def test_exploration_parameter_effects(self, explorer_template, explorer_config):
         """Test how exploration parameters affect behavior."""
         if not IMPORT_SUCCESS:
             return
@@ -523,13 +502,11 @@ class TestExplorerTemplate:
         observations = np.array([0.6, 0.3, 0.1])
 
         # Compute with original bonus
-        value1 = explorer_template.compute_epistemic_value(
-            beliefs, observations)
+        value1 = explorer_template.compute_epistemic_value(beliefs, observations)
 
         # Increase bonus
         explorer_template.epistemic_bonus = 1.2
-        value2 = explorer_template.compute_epistemic_value(
-            beliefs, observations)
+        value2 = explorer_template.compute_epistemic_value(beliefs, observations)
 
         # Higher bonus should give higher epistemic value
         assert value2 > value1
@@ -553,8 +530,7 @@ class TestExplorerTemplate:
         model2 = explorer_template.create_generative_model(explorer_config)
 
         # Preferences should be different (scaled by factor)
-        preference_ratio = np.mean(np.abs(model2.C)) / \
-            np.mean(np.abs(model1.C))
+        preference_ratio = np.mean(np.abs(model2.C)) / np.mean(np.abs(model1.C))
         assert abs(preference_ratio - 2.0) < 0.1  # Should be roughly 2x
 
         # Restore original

@@ -39,11 +39,7 @@ class MockONNXRuntime:
         quantize_dynamic = staticmethod(mock_quantize_dynamic)
 
         @staticmethod
-        def quantize_static(
-                model_input,
-                model_output,
-                calibration_data_reader,
-                **kwargs):
+        def quantize_static(model_input, model_output, calibration_data_reader, **kwargs):
             """Mock for static quantization"""
             mock_quantize_dynamic(model_input, model_output)
 

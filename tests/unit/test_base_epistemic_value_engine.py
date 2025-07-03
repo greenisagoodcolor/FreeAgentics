@@ -6,6 +6,13 @@ information gain, knowledge propagation, collective intelligence metrics,
 and network-level epistemic efficiency measurements.
 """
 
+import os
+import sys
+from datetime import datetime
+
+import numpy as np
+import pytest
+
 from agents.base.epistemic_value_engine import (
     CollectiveIntelligenceMetrics,
     EpistemicState,
@@ -14,12 +21,6 @@ from agents.base.epistemic_value_engine import (
     KnowledgePropagationEvent,
     epistemic_engine,
 )
-import os
-import sys
-from datetime import datetime
-
-import numpy as np
-import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
@@ -168,8 +169,7 @@ class TestEpistemicValueCalculationEngine:
         belief_dist = np.array([0.2, 0.3, 0.5])
         observations = np.array([1, 0, 0])
 
-        state = self.engine.calculate_epistemic_value(
-            agent_id, belief_dist, observations)
+        state = self.engine.calculate_epistemic_value(agent_id, belief_dist, observations)
 
         assert state.agent_id == agent_id
         assert np.array_equal(state.belief_distribution, belief_dist)
@@ -202,8 +202,7 @@ class TestEpistemicValueCalculationEngine:
         """Test knowledge entropy calculation."""
         # Uniform distribution has maximum entropy
         uniform_dist = np.array([0.25, 0.25, 0.25, 0.25])
-        entropy_uniform = self.engine._calculate_knowledge_entropy(
-            uniform_dist)
+        entropy_uniform = self.engine._calculate_knowledge_entropy(uniform_dist)
 
         # Peaked distribution has lower entropy
         peaked_dist = np.array([0.1, 0.1, 0.7, 0.1])
@@ -228,13 +227,11 @@ class TestEpistemicValueCalculationEngine:
         """Test confidence level calculation."""
         # High entropy = low confidence
         uniform_dist = np.array([0.25, 0.25, 0.25, 0.25])
-        confidence_uniform = self.engine._calculate_confidence_level(
-            uniform_dist)
+        confidence_uniform = self.engine._calculate_confidence_level(uniform_dist)
 
         # Low entropy = high confidence
         peaked_dist = np.array([0.01, 0.01, 0.97, 0.01])
-        confidence_peaked = self.engine._calculate_confidence_level(
-            peaked_dist)
+        confidence_peaked = self.engine._calculate_confidence_level(peaked_dist)
 
         assert 0 <= confidence_uniform <= 1
         assert 0 <= confidence_peaked <= 1
@@ -244,13 +241,11 @@ class TestEpistemicValueCalculationEngine:
         """Test certainty measure calculation."""
         # Uniform distribution has low certainty
         uniform_dist = np.array([0.25, 0.25, 0.25, 0.25])
-        certainty_uniform = self.engine._calculate_certainty_measure(
-            uniform_dist)
+        certainty_uniform = self.engine._calculate_certainty_measure(uniform_dist)
 
         # Concentrated distribution has high certainty
         concentrated_dist = np.array([0.01, 0.02, 0.03, 0.94])
-        certainty_concentrated = self.engine._calculate_certainty_measure(
-            concentrated_dist)
+        certainty_concentrated = self.engine._calculate_certainty_measure(concentrated_dist)
 
         assert 0 <= certainty_uniform <= 1
         assert 0 <= certainty_concentrated <= 1
@@ -269,8 +264,7 @@ class TestEpistemicValueCalculationEngine:
         # Share information
         shared_info = np.array([0.6, 0.3, 0.1])
 
-        event = self.engine.calculate_knowledge_propagation(
-            "agent_1", "agent_2", shared_info)
+        event = self.engine.calculate_knowledge_propagation("agent_1", "agent_2", shared_info)
 
         assert event.source_agent == "agent_1"
         assert event.target_agent == "agent_2"
@@ -292,16 +286,13 @@ class TestEpistemicValueCalculationEngine:
             self.engine.calculate_knowledge_propagation(
                 "unknown_1", "unknown_2", np.array([0.5, 0.5])
             )
-        assert "Both agents must have existing epistemic states" in str(
-            excinfo.value)
+        assert "Both agents must have existing epistemic states" in str(excinfo.value)
 
     def test_calculate_knowledge_propagation_models(self):
         """Test different propagation models."""
         # Set up agents
-        self.engine.calculate_epistemic_value(
-            "agent_1", np.array([0.8, 0.2]), np.array([1, 0]))
-        self.engine.calculate_epistemic_value(
-            "agent_2", np.array([0.5, 0.5]), np.array([0, 1]))
+        self.engine.calculate_epistemic_value("agent_1", np.array([0.8, 0.2]), np.array([1, 0]))
+        self.engine.calculate_epistemic_value("agent_2", np.array([0.5, 0.5]), np.array([0, 1]))
 
         shared_info = np.array([0.7, 0.3])
 
@@ -311,8 +302,7 @@ class TestEpistemicValueCalculationEngine:
         )
 
         # Reset agent 2
-        self.engine.calculate_epistemic_value(
-            "agent_2", np.array([0.5, 0.5]), np.array([0, 1]))
+        self.engine.calculate_epistemic_value("agent_2", np.array([0.5, 0.5]), np.array([0, 1]))
 
         # Test default (weighted average) model
         event_default = self.engine.calculate_knowledge_propagation(
@@ -323,8 +313,7 @@ class TestEpistemicValueCalculationEngine:
         assert event_bayes.propagation_efficiency >= 0
         assert event_default.propagation_efficiency >= 0
 
-    def test_calculate_collective_intelligence_metrics_insufficient_agents(
-            self):
+    def test_calculate_collective_intelligence_metrics_insufficient_agents(self):
         """Test collective metrics with insufficient agents."""
         # No agents
         metrics = self.engine.calculate_collective_intelligence_metrics({})
@@ -332,11 +321,9 @@ class TestEpistemicValueCalculationEngine:
         assert metrics.information_diversity == 0.0
 
         # Only one agent
-        self.engine.calculate_epistemic_value(
-            "agent_1", np.array([0.5, 0.5]), np.array([1, 0]))
+        self.engine.calculate_epistemic_value("agent_1", np.array([0.5, 0.5]), np.array([1, 0]))
 
-        metrics = self.engine.calculate_collective_intelligence_metrics({
-                                                                        "agent_1": []})
+        metrics = self.engine.calculate_collective_intelligence_metrics({"agent_1": []})
         assert metrics.network_entropy == 0.0
         assert metrics.information_diversity == 0.0
 
@@ -359,8 +346,7 @@ class TestEpistemicValueCalculationEngine:
             "agent_3": ["agent_2"],
         }
 
-        metrics = self.engine.calculate_collective_intelligence_metrics(
-            network)
+        metrics = self.engine.calculate_collective_intelligence_metrics(network)
 
         assert metrics.network_entropy > 0
         assert metrics.information_diversity > 0
@@ -385,10 +371,8 @@ class TestEpistemicValueCalculationEngine:
 
         # Perform some propagations
         shared_info = np.array([0.4, 0.4, 0.2])
-        self.engine.calculate_knowledge_propagation(
-            "agent_0", "agent_1", shared_info)
-        self.engine.calculate_knowledge_propagation(
-            "agent_1", "agent_2", shared_info)
+        self.engine.calculate_knowledge_propagation("agent_0", "agent_1", shared_info)
+        self.engine.calculate_knowledge_propagation("agent_1", "agent_2", shared_info)
 
         network = {
             "agent_0": ["agent_1"],
@@ -397,8 +381,7 @@ class TestEpistemicValueCalculationEngine:
             "agent_3": ["agent_2"],
         }
 
-        metrics = self.engine.calculate_collective_intelligence_metrics(
-            network)
+        metrics = self.engine.calculate_collective_intelligence_metrics(network)
 
         # With propagation history, knowledge distribution should be > 0
         assert metrics.knowledge_distribution > 0
@@ -507,10 +490,8 @@ class TestEpistemicValueCalculationEngine:
     def test_consensus_calculation(self):
         """Test consensus level calculation."""
         # High diversity = low consensus
-        self.engine.calculate_epistemic_value(
-            "agent_1", np.array([0.9, 0.1]), np.array([1, 0]))
-        self.engine.calculate_epistemic_value(
-            "agent_2", np.array([0.1, 0.9]), np.array([0, 1]))
+        self.engine.calculate_epistemic_value("agent_1", np.array([0.9, 0.1]), np.array([1, 0]))
+        self.engine.calculate_epistemic_value("agent_2", np.array([0.1, 0.9]), np.array([0, 1]))
 
         consensus = self.engine._calculate_consensus_level()
         assert 0 <= consensus <= 1
@@ -567,13 +548,10 @@ class TestEpistemicValueCalculationEngine:
         assert analytics["average_epistemic_value"] == 0.0
 
         # Add agents and propagation
-        self.engine.calculate_epistemic_value(
-            "agent_1", np.array([0.7, 0.3]), np.array([1, 0]))
-        self.engine.calculate_epistemic_value(
-            "agent_2", np.array([0.4, 0.6]), np.array([0, 1]))
+        self.engine.calculate_epistemic_value("agent_1", np.array([0.7, 0.3]), np.array([1, 0]))
+        self.engine.calculate_epistemic_value("agent_2", np.array([0.4, 0.6]), np.array([0, 1]))
 
-        self.engine.calculate_knowledge_propagation(
-            "agent_1", "agent_2", np.array([0.6, 0.4]))
+        self.engine.calculate_knowledge_propagation("agent_1", "agent_2", np.array([0.6, 0.4]))
 
         # Calculate collective metrics
         self.engine.calculate_collective_intelligence_metrics(

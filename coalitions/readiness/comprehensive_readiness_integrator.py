@@ -212,8 +212,7 @@ class ComprehensiveReadinessIntegrator:
         Returns:
             Comprehensive readiness report
         """
-        logger.info(
-            f"Starting comprehensive readiness assessment for coalition {coalition_id}")
+        logger.info(f"Starting comprehensive readiness assessment for coalition {coalition_id}")
         start_time = time.time()
 
         try:
@@ -311,8 +310,7 @@ class ComprehensiveReadinessIntegrator:
         )
 
         # Assess integrated risk level
-        risk_level = self._assess_integrated_risk(
-            technical_report, business_report, safety_report)
+        risk_level = self._assess_integrated_risk(technical_report, business_report, safety_report)
 
         # Create comprehensive report
         return ComprehensiveReadinessReport(
@@ -357,19 +355,21 @@ class ComprehensiveReadinessIntegrator:
 
         # Assess based on scores and individual readiness levels
         if overall_score >= 85.0 and all(
-                [
-                    technical_report.readiness_level in [
-                        TechnicalReadinessLevel.PRODUCTION_READY,
-                        TechnicalReadinessLevel.ENTERPRISE_READY,
-                    ],
-                    business_report.business_readiness_level in [
-                        BusinessReadinessLevel.MARKET_READY,
-                        BusinessReadinessLevel.INVESTMENT_READY],
-                    safety_report.compliance_level in [
-                        SafetyComplianceLevel.FULLY_COMPLIANT,
-                        SafetyComplianceLevel.ENTERPRISE_COMPLIANT,
-                    ],
-                ]):
+            [
+                technical_report.readiness_level
+                in [
+                    TechnicalReadinessLevel.PRODUCTION_READY,
+                    TechnicalReadinessLevel.ENTERPRISE_READY,
+                ],
+                business_report.business_readiness_level
+                in [BusinessReadinessLevel.MARKET_READY, BusinessReadinessLevel.INVESTMENT_READY],
+                safety_report.compliance_level
+                in [
+                    SafetyComplianceLevel.FULLY_COMPLIANT,
+                    SafetyComplianceLevel.ENTERPRISE_COMPLIANT,
+                ],
+            ]
+        ):
             return OverallReadinessLevel.ENTERPRISE_READY
 
         elif overall_score >= 75.0 and all(
@@ -408,8 +408,7 @@ class ComprehensiveReadinessIntegrator:
 
         # Technical recommendations
         if not technical_report.deployment_ready:
-            recommendations.append(
-                "Address technical readiness gaps for production deployment")
+            recommendations.append("Address technical readiness gaps for production deployment")
             recommendations.extend(
                 technical_report.recommendations[:2]
             )  # Top 2 technical recommendations
@@ -421,14 +420,9 @@ class ComprehensiveReadinessIntegrator:
 
         # Integration recommendations
         if len(recommendations) == 0:  # If no critical issues
-            recommendations.append(
-                "Optimize deployment configuration for maximum performance")
-            recommendations.append(
-                "Implement comprehensive monitoring and "
-                "alerting systems")
-            recommendations.append(
-                "Develop detailed operational procedures and "
-                "runbooks")
+            recommendations.append("Optimize deployment configuration for maximum performance")
+            recommendations.append("Implement comprehensive monitoring and " "alerting systems")
+            recommendations.append("Develop detailed operational procedures and " "runbooks")
 
         # Prioritize and limit recommendations
         return recommendations[:10]  # Top 10 recommendations
@@ -466,8 +460,7 @@ class ComprehensiveReadinessIntegrator:
         # Low risk
         return "low"
 
-    def _generate_default_market_data(
-            self, business_context: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_default_market_data(self, business_context: Dict[str, Any]) -> Dict[str, Any]:
         """Generate default market data if not provided"""
         return {
             "market_size": {
@@ -480,10 +473,7 @@ class ComprehensiveReadinessIntegrator:
             "infrastructure": {"edge_readiness_score": 65},
         }
 
-    def save_report(
-            self,
-            report: ComprehensiveReadinessReport,
-            output_path: Path) -> None:
+    def save_report(self, report: ComprehensiveReadinessReport, output_path: Path) -> None:
         """Save comprehensive readiness report to file"""
         report_data = report.to_dict()
 
@@ -492,8 +482,7 @@ class ComprehensiveReadinessIntegrator:
 
         logger.info(f"Comprehensive readiness report saved to {output_path}")
 
-    def generate_executive_summary(
-            self, report: ComprehensiveReadinessReport) -> Dict[str, Any]:
+    def generate_executive_summary(self, report: ComprehensiveReadinessReport) -> Dict[str, Any]:
         """Generate executive summary of readiness assessment"""
 
         return {

@@ -486,10 +486,8 @@ class DeviceDiscovery:
                             "is_up": stat.isup,
                             "address": primary_addr,
                         },
-                        status=(
-                            DeviceStatus.AVAILABLE if stat.isup else DeviceStatus.OFFLINE),
-                        performance_score=stat.speed /
-                        1000 if stat.speed else 0,
+                        status=(DeviceStatus.AVAILABLE if stat.isup else DeviceStatus.OFFLINE),
+                        performance_score=stat.speed / 1000 if stat.speed else 0,
                     )
                     devices.append(device)
 
@@ -515,8 +513,7 @@ class DeviceDiscovery:
                                 bus = parts[1]
                                 device_num = parts[3].rstrip(":")
                                 vendor_device = parts[5]
-                                name = parts[6] if len(
-                                    parts) > 6 else "Unknown USB Device"
+                                name = parts[6] if len(parts) > 6 else "Unknown USB Device"
 
                                 device = DeviceInfo(
                                     device_id=f"usb_{bus}_{device_num}",

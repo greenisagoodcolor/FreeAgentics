@@ -92,20 +92,17 @@ class MemoryOptimizer:
     def _enable_gradient_checkpointing(self, model: nn.Module) -> None:
         """Enable gradient checkpointing for specific layers"""
 
-        def checkpoint_wrapper(
-                module: nn.Module,
-                *args: Any,
-                **kwargs: Any) -> Any:
+        def checkpoint_wrapper(module: nn.Module, *args: Any, **kwargs: Any) -> Any:
             if module.training:
                 return checkpoint(module._forward_impl, *args, **kwargs)
             else:
-                return module._forward_impl(
-                    *args, **kwargs)  # type: ignore[attr-defined]
+                return module._forward_impl(*args, **kwargs)  # type: ignore[attr-defined]
 
         for name, module in model.named_modules():
             if hasattr(module, "_forward_impl"):
                 module.forward = lambda *args, m=module, **kwargs: checkpoint_wrapper(
-                    m, *args, **kwargs)
+                    m, *args, **kwargs
+                )
 
     def _optimize_attention_layers(self, model: nn.Module) -> None:
         """Optimize attention layers for memory efficiency"""
@@ -132,11 +129,8 @@ class MemoryOptimizer:
         """
         bytes_per_float = 4
         memory_per_graph_mb = (
-            avg_nodes_per_graph *
-            node_features_dim *
-            bytes_per_float /
-            1024 /
-            1024)
+            avg_nodes_per_graph * node_features_dim * bytes_per_float / 1024 / 1024
+        )
         memory_per_graph_mb *= 3
         max_batch_size = int(available_memory_mb / memory_per_graph_mb)
         return min(batch_size, max(max_batch_size, 1))
@@ -191,12 +185,9 @@ class HardwareAccelerator:
         else:
             return torch.device("cpu")
 
-    def accelerate_forward(self,
-                           model: nn.Module,
-                           forward_fn: Callable[...,
-                                                Any],
-                           *args: Any,
-                           **kwargs: Any) -> Any:
+    def accelerate_forward(
+        self, model: nn.Module, forward_fn: Callable[..., Any], *args: Any, **kwargs: Any
+    ) -> Any:
         """
         Accelerate forward pass with mixed precision.
         Args:
@@ -214,10 +205,7 @@ class HardwareAccelerator:
         else:
             return forward_fn(*args, **kwargs)
 
-    def accelerate_backward(
-            self,
-            loss: torch.Tensor,
-            optimizer: torch.optim.Optimizer) -> None:
+    def accelerate_backward(self, loss: torch.Tensor, optimizer: torch.optim.Optimizer) -> None:
         """
         Accelerate backward pass with mixed precision.
         Args:
@@ -233,10 +221,7 @@ class HardwareAccelerator:
             loss.backward()
             optimizer.step()
 
-    def create_cuda_graph(
-            self,
-            model: nn.Module,
-            sample_input: torch.Tensor) -> Callable:
+    def create_cuda_graph(self, model: nn.Module, sample_input: torch.Tensor) -> Callable:
         """
         Create CUDA graph for faster inference.
         Args:
@@ -264,8 +249,7 @@ class HardwareAccelerator:
         """Setup distributed training"""
         if self.device.type == "cuda":
             torch.cuda.set_device(rank)
-            torch.distributed.init_process_group(
-                backend="nccl", rank=rank, world_size=world_size)
+            torch.distributed.init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
 
 class GraphCache:
@@ -453,10 +437,8 @@ class ParallelProcessor:
         )
 
     def parallel_graph_processing(
-            self,
-            graphs: List[Any],
-            process_fn: Callable,
-            chunk_size: Optional[int] = None) -> List[Any]:
+        self, graphs: List[Any], process_fn: Callable, chunk_size: Optional[int] = None
+    ) -> List[Any]:
         """
         Process multiple graphs in parallel chunks.
         Args:
@@ -468,13 +450,9 @@ class ParallelProcessor:
         """
         if chunk_size is None:
             chunk_size = max(1, len(graphs) // (self.num_workers * 4))
-        chunks = [graphs[i: i + chunk_size]
-                  for i in range(0, len(graphs), chunk_size)]
+        chunks = [graphs[i : i + chunk_size] for i in range(0, len(graphs), chunk_size)]
         with mp.Pool(processes=self.num_workers) as pool:
-            chunk_results = pool.map(
-                lambda chunk: [
-                    process_fn(g) for g in chunk],
-                chunks)
+            chunk_results = pool.map(lambda chunk: [process_fn(g) for g in chunk], chunks)
         results = []
         for chunk_result in chunk_results:
             results.extend(chunk_result)
@@ -528,8 +506,7 @@ class PerformanceProfiler:
         if self._profiler is None:
             return None
         self._profiler.__exit__(None, None, None)
-        report = self._profiler.key_averages().table(
-            sort_by="cpu_time_total", row_limit=20)
+        report = self._profiler.key_averages().table(sort_by="cpu_time_total", row_limit=20)
         trace_file = f"gnn_profile_{int(time.time())}.json"
         self._profiler.export_chrome_trace(trace_file)
         self._profiler = None
@@ -647,8 +624,11 @@ class PerformanceOptimizer:
             Optimized batch size
         """
         if self.hardware_accelerator.device.type == "cuda":
-            available_memory = ((torch.cuda.get_device_properties(
-                0).total_memory - torch.cuda.memory_allocated()) / 1024 / 1024)
+            available_memory = (
+                (torch.cuda.get_device_properties(0).total_memory - torch.cuda.memory_allocated())
+                / 1024
+                / 1024
+            )
         else:
             available_memory = psutil.virtual_memory().available / 1024 / 1024
         return self.memory_optimizer.optimize_batch_processing(
@@ -658,12 +638,7 @@ class PerformanceOptimizer:
             avg_nodes_per_graph,
         )
 
-    def cached_forward(
-            self,
-            graph_id: str,
-            forward_fn: Callable,
-            *args,
-            **kwargs) -> Any:
+    def cached_forward(self, graph_id: str, forward_fn: Callable, *args, **kwargs) -> Any:
         """
         Forward pass with caching.
         Args:
@@ -736,24 +711,14 @@ if __name__ == "__main__":
         num_workers=4,
     )
     optimizer = PerformanceOptimizer(config)
-    model = GNNStack(
-        input_dim=32,
-        hidden_dims=[
-            64,
-            64,
-            32],
-        output_dim=10,
-        architecture="gcn")
+    model = GNNStack(input_dim=32, hidden_dims=[64, 64, 32], output_dim=10, architecture="gcn")
     model = optimizer.optimize_model(model)
     print(f"Model device: {next(model.parameters()).device}")
     print(f"Optimization stats: {optimizer.get_optimization_stats()}")
     optimizer.profiler.start_profiling()
     x = torch.randn(100, 32).to(optimizer.hardware_accelerator.device)
-    edge_index = torch.randint(
-        0, 100, (2, 300)).to(
-        optimizer.hardware_accelerator.device)
-    output = optimizer.profiler.profile_operation(
-        "forward_pass", model, x, edge_index)
+    edge_index = torch.randint(0, 100, (2, 300)).to(optimizer.hardware_accelerator.device)
+    output = optimizer.profiler.profile_operation("forward_pass", model, x, edge_index)
     report = optimizer.profiler.stop_profiling()
     if report:
         print("\nProfiling Report:")

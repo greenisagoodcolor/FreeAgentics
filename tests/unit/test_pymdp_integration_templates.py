@@ -74,8 +74,9 @@ class TestPyMDPAgentWrapper:
         if IMPORT_SUCCESS:
             return GenerativeModelParams(A=A, B=B, C=C, D=D)
         else:
-            return Mock(A=A, B=B, C=C, D=D, precision_sensory=1.0,
-                        precision_policy=1.0, precision_state=1.0)
+            return Mock(
+                A=A, B=B, C=C, D=D, precision_sensory=1.0, precision_policy=1.0, precision_state=1.0
+            )
 
     @pytest.fixture
     def template_config(self):
@@ -104,11 +105,7 @@ class TestPyMDPAgentWrapper:
         """Create PyMDP agent wrapper."""
         return PyMDPAgentWrapper(model_params, template_config)
 
-    def test_wrapper_initialization(
-            self,
-            wrapper,
-            model_params,
-            template_config):
+    def test_wrapper_initialization(self, wrapper, model_params, template_config):
         """Test wrapper initialization."""
         assert wrapper.model_params == model_params
         assert wrapper.config == template_config
@@ -379,8 +376,7 @@ class TestPyMDPAgentWrapper:
         belief3 = wrapper.update_beliefs(zero_obs)
         assert belief3 is not None
 
-    def test_precision_parameter_integration(
-            self, model_params, template_config):
+    def test_precision_parameter_integration(self, model_params, template_config):
         """Test precision parameter integration."""
         if not IMPORT_SUCCESS:
             return
@@ -434,8 +430,7 @@ class TestPyMDPAgentWrapper:
         large_D = np.ones(10) / 10
 
         if IMPORT_SUCCESS:
-            large_params = GenerativeModelParams(
-                A=large_A, B=large_B, C=large_C, D=large_D)
+            large_params = GenerativeModelParams(A=large_A, B=large_B, C=large_C, D=large_D)
         else:
             large_params = Mock(A=large_A, B=large_B, C=large_C, D=large_D)
 
@@ -549,8 +544,9 @@ class TestCreatePyMDPAgent:
         # Create invalid parameters
         # Columns don't sum to 1
         invalid_A = np.array([[0.5, 0.3], [0.3, 0.5]])
-        invalid_params = GenerativeModelParams(A=invalid_A, B=np.zeros(
-            (2, 2, 2)), C=np.zeros(2), D=np.array([0.5, 0.5]))
+        invalid_params = GenerativeModelParams(
+            A=invalid_A, B=np.zeros((2, 2, 2)), C=np.zeros(2), D=np.array([0.5, 0.5])
+        )
 
         # Should raise validation error
         with pytest.raises(ValueError):
@@ -571,11 +567,7 @@ class TestPyMDPIntegration:
 
             # Should be able to create wrapper regardless of pymdp availability
             mock_params = Mock()
-            mock_config = Mock(
-                num_states=2,
-                num_observations=2,
-                num_policies=2,
-                planning_horizon=3)
+            mock_config = Mock(num_states=2, num_observations=2, num_policies=2, planning_horizon=3)
 
             wrapper = PyMDPAgentWrapper(mock_params, mock_config)
             assert wrapper is not None

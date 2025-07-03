@@ -125,39 +125,24 @@ class GraphBatchProcessor:
         return BatchedGraphData(
             x=batch.x,
             edge_index=batch.edge_index,
-            edge_attr=batch.edge_attr if hasattr(
-                batch,
-                "edge_attr") else None,
-            edge_weight=batch.edge_weight if hasattr(
-                batch,
-                "edge_weight") else None,
+            edge_attr=batch.edge_attr if hasattr(batch, "edge_attr") else None,
+            edge_weight=batch.edge_weight if hasattr(batch, "edge_weight") else None,
             batch=batch.batch,
             ptr=batch.ptr,
-            graph_attr=batch.graph_attr if hasattr(
-                batch,
-                "graph_attr") else None,
-            target=batch.y if hasattr(
-                batch,
-                "y") else None,
-            mask=batch.mask if hasattr(
-                batch,
-                "mask") else None,
+            graph_attr=batch.graph_attr if hasattr(batch, "graph_attr") else None,
+            target=batch.y if hasattr(batch, "y") else None,
+            mask=batch.mask if hasattr(batch, "mask") else None,
             num_graphs=batch.num_graphs,
-            num_nodes_per_graph=[
-                g.node_features.size(0) for g in graphs],
-            num_edges_per_graph=[
-                g.edge_index.size(1) for g in graphs],
+            num_nodes_per_graph=[g.node_features.size(0) for g in graphs],
+            num_edges_per_graph=[g.edge_index.size(1) for g in graphs],
         )
 
-    def _create_batch_manual(
-            self,
-            graphs: List[GraphData]) -> BatchedGraphData:
+    def _create_batch_manual(self, graphs: List[GraphData]) -> BatchedGraphData:
         """Manually create batch without PyTorch Geometric"""
         num_graphs = len(graphs)
         num_nodes_per_graph = [g.node_features.size(0) for g in graphs]
         num_edges_per_graph = [g.edge_index.size(1) for g in graphs]
-        node_offsets = torch.cumsum(torch.tensor(
-            [0] + num_nodes_per_graph[:-1]), dim=0)
+        node_offsets = torch.cumsum(torch.tensor([0] + num_nodes_per_graph[:-1]), dim=0)
         if self.pad_node_features and self.max_nodes_per_graph:
             x = self._pad_node_features(graphs)
             mask = self._create_node_masks(graphs)
@@ -197,21 +182,16 @@ class GraphBatchProcessor:
             )
         else:
             edge_weight = None
-        batch = torch.cat([torch.full((n,), i, dtype=torch.long)
-                           for i, n in enumerate(num_nodes_per_graph)])
-        ptr = torch.tensor(
-            [0] +
-            list(
-                torch.cumsum(
-                    torch.tensor(num_nodes_per_graph),
-                    dim=0)))
+        batch = torch.cat(
+            [torch.full((n,), i, dtype=torch.long) for i, n in enumerate(num_nodes_per_graph)]
+        )
+        ptr = torch.tensor([0] + list(torch.cumsum(torch.tensor(num_nodes_per_graph), dim=0)))
         if any(g.graph_attr is not None for g in graphs):
             graph_attr = self._batch_graph_attributes(graphs)
         else:
             graph_attr = None
         if any(g.target is not None for g in graphs):
-            targets = [
-                g.target if g.target is not None else torch.zeros(0) for g in graphs]
+            targets = [g.target if g.target is not None else torch.zeros(0) for g in graphs]
             target = pad_sequence(targets, batch_first=True, padding_value=-1)
         else:
             target = None
@@ -232,8 +212,7 @@ class GraphBatchProcessor:
 
     def _pad_node_features(self, graphs: List[GraphData]) -> torch.Tensor:
         """Pad node features to maximum size"""
-        max_nodes = self.max_nodes_per_graph or max(
-            g.node_features.size(0) for g in graphs)
+        max_nodes = self.max_nodes_per_graph or max(g.node_features.size(0) for g in graphs)
         feature_dim = graphs[0].node_features.size(1)
         padded_features = []
         for graph in graphs:
@@ -248,8 +227,7 @@ class GraphBatchProcessor:
 
     def _create_node_masks(self, graphs: List[GraphData]) -> torch.Tensor:
         """Create masks for padded nodes"""
-        max_nodes = self.max_nodes_per_graph or max(
-            g.node_features.size(0) for g in graphs)
+        max_nodes = self.max_nodes_per_graph or max(g.node_features.size(0) for g in graphs)
         masks = []
         for graph in graphs:
             num_nodes = min(graph.node_features.size(0), max_nodes)
@@ -261,8 +239,7 @@ class GraphBatchProcessor:
     def _batch_graph_attributes(self, graphs: List[GraphData]) -> torch.Tensor:
         """Batch graph-level attributes"""
         if self.pad_graph_features:
-            max_dim = max(g.graph_attr.size(-1)
-                          if g.graph_attr is not None else 0 for g in graphs)
+            max_dim = max(g.graph_attr.size(-1) if g.graph_attr is not None else 0 for g in graphs)
             attrs = []
             for g in graphs:
                 if g.graph_attr is not None:
@@ -304,14 +281,12 @@ class GraphBatchProcessor:
             else:
                 node_features = batched_data.x[node_indices]
             edge_mask = (
-                (batched_data.edge_index[0] >= node_indices[0]) & (
-                    batched_data.edge_index[0] < node_indices[0] +
-                    len(node_indices)) & (
-                    batched_data.edge_index[1] >= node_indices[0]) & (
-                    batched_data.edge_index[1] < node_indices[0] +
-                    len(node_indices)))
-            edge_index = batched_data.edge_index[:,
-                                                 edge_mask] - node_indices[0]
+                (batched_data.edge_index[0] >= node_indices[0])
+                & (batched_data.edge_index[0] < node_indices[0] + len(node_indices))
+                & (batched_data.edge_index[1] >= node_indices[0])
+                & (batched_data.edge_index[1] < node_indices[0] + len(node_indices))
+            )
+            edge_index = batched_data.edge_index[:, edge_mask] - node_indices[0]
             edge_attr = None
             if batched_data.edge_attr is not None:
                 edge_attr = batched_data.edge_attr[edge_mask]
@@ -418,14 +393,15 @@ class DynamicBatchSampler:
             if self.shuffle:
                 np.random.shuffle(indices)
             for i in range(0, len(indices), self.batch_size):
-                batch = indices[i: i + self.batch_size]
+                batch = indices[i : i + self.batch_size]
                 yield batch
 
     def __len__(self):
         """Total number of batches"""
 
-        return sum((len(group) + self.batch_size - 1) //
-                   self.batch_size for group in self.size_groups)
+        return sum(
+            (len(group) + self.batch_size - 1) // self.batch_size for group in self.size_groups
+        )
 
 
 class StreamingBatchProcessor:
@@ -506,7 +482,7 @@ def create_mini_batches(
     batches = []
     for i in range(0, len(indices), batch_size):
         if i + batch_size <= len(indices) or not drop_last:
-            batch_indices = indices[i: i + batch_size]
+            batch_indices = indices[i : i + batch_size]
             batch = [graphs[idx] for idx in batch_indices]
             batches.append(batch)
     return batches
@@ -526,9 +502,7 @@ if __name__ == "__main__":
             target=torch.tensor([i % 3]),
         )
         graphs.append(graph)
-    processor = GraphBatchProcessor(
-        pad_node_features=True,
-        max_nodes_per_graph=25)
+    processor = GraphBatchProcessor(pad_node_features=True, max_nodes_per_graph=25)
     batched = processor.create_batch(graphs)
     print(f"Batched {batched.num_graphs} graphs")
     print(f"Total nodes: {batched.x.size(0)}")

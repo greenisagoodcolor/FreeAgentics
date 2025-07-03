@@ -98,8 +98,7 @@ class OllamaManager:
                     check=True,
                 )
             elif system == "windows":
-                logger.error(
-                    "Windows installation not yet supported. Please install manually.")
+                logger.error("Windows installation not yet supported. Please install manually.")
                 return False
             # Start Ollama service
             logger.info("Starting Ollama service...")
@@ -143,7 +142,8 @@ class OllamaManager:
                     else:
                         logger.error(
                             f"Failed to list models: {
-                                response.status}")
+                                response.status}"
+                        )
                         return []
         except Exception as e:
             logger.error(f"Error listing models: {e}")
@@ -164,12 +164,12 @@ class OllamaManager:
             async with aiohttp.ClientSession() as session:
                 data = {"name": model_name}
                 async with session.post(f"{self.api_base}/pull", json=data) as response:
-                    
+
                     if not self._validate_pull_response(response):
                         return False
-                    
+
                     return await self._process_pull_stream(response, progress_callback)
-                    
+
         except Exception as e:
             logger.error(f"Error pulling model: {e}")
             return False
@@ -189,7 +189,9 @@ class OllamaManager:
                     return False
         return True
 
-    async def _handle_progress_line(self, line: bytes, progress_callback: Optional[callable]) -> bool:
+    async def _handle_progress_line(
+        self, line: bytes, progress_callback: Optional[callable]
+    ) -> bool:
         """Handle a single line from the progress stream"""
         try:
             progress = json.loads(line.decode())
@@ -201,15 +203,15 @@ class OllamaManager:
         """Process progress data and determine if operation should continue"""
         if progress_callback:
             progress_callback(progress)
-        
+
         if "error" in progress:
             logger.error(f"Pull error: {progress['error']}")
             return False
-        
+
         status = progress.get("status", "")
         if status:
             logger.info(f"Pull status: {status}")
-        
+
         return True
 
     async def delete_model(self, model_name: str) -> bool:
@@ -236,11 +238,7 @@ class OllamaManager:
         Yields:
             Response chunks if streaming, otherwise complete response
         """
-        data = {
-            "model": model,
-            "prompt": prompt,
-            "stream": stream,
-            "options": options}
+        data = {"model": model, "prompt": prompt, "stream": stream, "options": options}
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.post(f"{self.api_base}/generate", json=data) as response:
@@ -278,11 +276,7 @@ class OllamaManager:
             logger.error(f"Embedding error: {e}")
             raise
 
-    def recommend_model(
-            self,
-            ram_gb: float,
-            storage_gb: float,
-            use_case: str = "general") -> str:
+    def recommend_model(self, ram_gb: float, storage_gb: float, use_case: str = "general") -> str:
         """
         Recommend best model based on hardware constraints.
         Args:
@@ -406,10 +400,7 @@ Assistant: \"\"\"
             logger.error(f"Failed to create Modelfile: {e}")
             return False
 
-    async def create_custom_model(
-            self,
-            name: str,
-            modelfile_path: Path) -> bool:
+    async def create_custom_model(self, name: str, modelfile_path: Path) -> bool:
         """
         Create a custom model from a Modelfile.
         Args:
@@ -493,8 +484,7 @@ Be vigilant, protective, and responsive""",
             "seed": -1,  # Random seed
         }
         # Create Modelfile
-        modelfile_path = Path(
-            f"/tmp/freeagentics_{self.agent_class}.modelfile")
+        modelfile_path = Path(f"/tmp/freeagentics_{self.agent_class}.modelfile")
         success = await self.manager.create_modelfile(
             self.model_name, system_prompt, parameters, modelfile_path
         )
@@ -504,8 +494,7 @@ Be vigilant, protective, and responsive""",
             return await self.manager.create_custom_model(custom_name, modelfile_path)
         return False
 
-    async def think(self, context: str,
-                    options: Optional[Dict[str, Any]] = None) -> str:
+    async def think(self, context: str, options: Optional[Dict[str, Any]] = None) -> str:
         """
         Agent thinking process using Ollama.
         Args:

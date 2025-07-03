@@ -162,10 +162,7 @@ class DiscreteExpectedFreeEnergy(PolicySelector):
     - D vector: Initial state prior shape (num_states,)
     """
 
-    def __init__(
-            self,
-            config: PolicyConfig,
-            inference_algorithm: InferenceAlgorithm) -> None:
+    def __init__(self, config: PolicyConfig, inference_algorithm: InferenceAlgorithm) -> None:
         """Initialize discrete expected free energy selector."""
         super().__init__(config)
         self.inference = inference_algorithm
@@ -183,8 +180,7 @@ class DiscreteExpectedFreeEnergy(PolicySelector):
             # Sample random policies
             policies = []
             for _ in range(self.config.num_policies):
-                actions = torch.randint(
-                    0, num_actions, (self.config.policy_length,))
+                actions = torch.randint(0, num_actions, (self.config.policy_length,))
                 policies.append(Policy(actions, self.config.planning_horizon))
             return policies
         elif self.config.policy_length == 1:
@@ -192,10 +188,8 @@ class DiscreteExpectedFreeEnergy(PolicySelector):
             return [Policy([a]) for a in range(num_actions)]
         else:
             # Multi-step policies: all combinations
-            all_combos = itertools.product(
-                range(num_actions), repeat=self.config.policy_length)
-            return [Policy(list(combo), self.config.planning_horizon)
-                    for combo in all_combos]
+            all_combos = itertools.product(range(num_actions), repeat=self.config.policy_length)
+            return [Policy(list(combo), self.config.planning_horizon) for combo in all_combos]
 
     def select_policy(
         self,
@@ -237,8 +231,7 @@ class DiscreteExpectedFreeEnergy(PolicySelector):
             G_tensor = G_tensor - self.config.habit_strength * habit_prior
 
         # Calculate policy posterior: Q(π) ∝ exp(-βG(π))
-        policy_posteriors = F.softmax(-G_tensor *
-                                      self.precision_parameter, dim=0)
+        policy_posteriors = F.softmax(-G_tensor * self.precision_parameter, dim=0)
 
         # Policy pruning
         if self.config.enable_pruning:
@@ -288,10 +281,8 @@ class DiscreteExpectedFreeEnergy(PolicySelector):
         """
         # Initialize components
         G = torch.tensor(0.0, device=self.device, dtype=self.config.dtype)
-        total_epistemic = torch.tensor(
-            0.0, device=self.device, dtype=self.config.dtype)
-        total_pragmatic = torch.tensor(
-            0.0, device=self.device, dtype=self.config.dtype)
+        total_epistemic = torch.tensor(0.0, device=self.device, dtype=self.config.dtype)
+        total_pragmatic = torch.tensor(0.0, device=self.device, dtype=self.config.dtype)
 
         # Move beliefs to device
         current_beliefs = beliefs.to(self.device).type(self.config.dtype)
@@ -318,8 +309,7 @@ class DiscreteExpectedFreeEnergy(PolicySelector):
 
             # Pragmatic value (preference satisfaction)
             if self.use_utility:
-                pragmatic_value = self._calculate_pragmatic_value(
-                    predicted_observations, C, t)
+                pragmatic_value = self._calculate_pragmatic_value(predicted_observations, C, t)
                 total_pragmatic += pragmatic_value
 
             # Update beliefs for next timestep
@@ -354,11 +344,13 @@ class DiscreteExpectedFreeEnergy(PolicySelector):
             B = generative_model.B.to(self.device).type(self.config.dtype)
         else:
             # Fallback: identity transition model
-            B = (torch.eye(generative_model.dims.num_states,
-                           device=self.device,
-                           dtype=self.config.dtype) .unsqueeze(-1) .repeat(1,
-                                                                           1,
-                                                                           generative_model.dims.num_actions))
+            B = (
+                torch.eye(
+                    generative_model.dims.num_states, device=self.device, dtype=self.config.dtype
+                )
+                .unsqueeze(-1)
+                .repeat(1, 1, generative_model.dims.num_actions)
+            )
 
         # C matrix: Prior preferences
         if preferences is not None:
@@ -381,10 +373,10 @@ class DiscreteExpectedFreeEnergy(PolicySelector):
             # Fallback: uniform prior
             D = (
                 torch.ones(
-                    generative_model.dims.num_states,
-                    device=self.device,
-                    dtype=self.config.dtype) /
-                generative_model.dims.num_states)
+                    generative_model.dims.num_states, device=self.device, dtype=self.config.dtype
+                )
+                / generative_model.dims.num_states
+            )
 
         return A, B, C, D
 
@@ -399,8 +391,7 @@ class DiscreteExpectedFreeEnergy(PolicySelector):
 
         Implements: E[KL[Q(s|o,π)||Q(s|π)]]
         """
-        epistemic_value = torch.tensor(
-            0.0, device=self.device, dtype=self.config.dtype)
+        epistemic_value = torch.tensor(0.0, device=self.device, dtype=self.config.dtype)
 
         # For each possible observation
         for obs_idx in range(A.shape[0]):
@@ -424,10 +415,8 @@ class DiscreteExpectedFreeEnergy(PolicySelector):
         return epistemic_value
 
     def _calculate_pragmatic_value(
-            self,
-            predicted_observations: torch.Tensor,
-            C: torch.Tensor,
-            timestep: int) -> torch.Tensor:
+        self, predicted_observations: torch.Tensor, C: torch.Tensor, timestep: int
+    ) -> torch.Tensor:
         """Calculate pragmatic value (preference satisfaction) following PyMDP.
 
         Implements: -E_Q[ln P(o|C)]
@@ -439,17 +428,14 @@ class DiscreteExpectedFreeEnergy(PolicySelector):
             preferences_t = C[:, 0] if C.dim() > 1 else C
 
         # Expected log preference: E_Q[ln P(o|C)] = ∑_o Q(o|π) * ln P(o|C)
-        expected_log_preference = torch.sum(
-            predicted_observations * preferences_t)
+        expected_log_preference = torch.sum(predicted_observations * preferences_t)
 
         # Pragmatic value is negative expected log preference (cost)
         pragmatic_value = -expected_log_preference
 
         return pragmatic_value
 
-    def generate_policies(
-            self,
-            generative_model: GenerativeModel) -> List[Policy]:
+    def generate_policies(self, generative_model: GenerativeModel) -> List[Policy]:
         """Generate all policies for the given model."""
         return self.enumerate_policies(generative_model.dims.num_actions)
 
@@ -457,19 +443,13 @@ class DiscreteExpectedFreeEnergy(PolicySelector):
 class ContinuousExpectedFreeEnergy(PolicySelector):
     """Expected free energy for continuous state spaces using sampling approximation."""
 
-    def __init__(
-            self,
-            config: PolicyConfig,
-            inference_algorithm: InferenceAlgorithm) -> None:
+    def __init__(self, config: PolicyConfig, inference_algorithm: InferenceAlgorithm) -> None:
         """Initialize continuous expected free energy selector."""
         super().__init__(config)
         self.inference = inference_algorithm
         self.eps = config.eps
 
-    def sample_policies(
-            self,
-            action_dim: int,
-            num_policies: int) -> List[Policy]:
+    def sample_policies(self, action_dim: int, num_policies: int) -> List[Policy]:
         """Sample continuous action policies."""
         policies = []
         for _ in range(num_policies):
@@ -478,14 +458,10 @@ class ContinuousExpectedFreeEnergy(PolicySelector):
             actions = torch.clamp(actions, -1.0, 1.0)
 
             # Convert to discrete indices for compatibility
-            discrete_actions = torch.round(
-                (actions + 1.0) * (action_dim - 1) / 2.0).long()
+            discrete_actions = torch.round((actions + 1.0) * (action_dim - 1) / 2.0).long()
             discrete_actions = torch.clamp(discrete_actions, 0, action_dim - 1)
 
-            policies.append(
-                Policy(
-                    discrete_actions,
-                    self.config.planning_horizon))
+            policies.append(Policy(discrete_actions, self.config.planning_horizon))
         return policies
 
     def select_policy(
@@ -496,8 +472,7 @@ class ContinuousExpectedFreeEnergy(PolicySelector):
     ) -> Tuple[Policy, torch.Tensor]:
         """Select policy for continuous states using sampling."""
         num_policies = self.config.num_policies or 100
-        policies = self.sample_policies(
-            generative_model.dims.num_actions, num_policies)
+        policies = self.sample_policies(generative_model.dims.num_actions, num_policies)
 
         G_values = []
         for policy in policies:
@@ -510,8 +485,7 @@ class ContinuousExpectedFreeEnergy(PolicySelector):
         G_tensor = torch.stack(G_values)
 
         if self.config.use_sampling:
-            probs = F.softmax(-G_tensor /
-                              self.config.exploration_constant, dim=0)
+            probs = F.softmax(-G_tensor / self.config.exploration_constant, dim=0)
             policy_idx = int(torch.multinomial(probs, 1).item())
         else:
             policy_idx = int(torch.argmin(G_tensor).item())
@@ -550,8 +524,7 @@ class ContinuousExpectedFreeEnergy(PolicySelector):
                 action_idx = policy[t]
 
                 # Convert discrete action to continuous
-                action = torch.tensor(
-                    action_idx, dtype=torch.float32, device=self.device)
+                action = torch.tensor(action_idx, dtype=torch.float32, device=self.device)
 
                 # Forward dynamics
                 if hasattr(generative_model, "transition_model"):
@@ -567,8 +540,7 @@ class ContinuousExpectedFreeEnergy(PolicySelector):
 
                 # Observation model
                 if hasattr(generative_model, "observation_model"):
-                    obs_mean, obs_var = generative_model.observation_model(
-                        next_mean.unsqueeze(0))
+                    obs_mean, obs_var = generative_model.observation_model(next_mean.unsqueeze(0))
                     obs_mean = obs_mean.squeeze(0)
                     obs_var = obs_var.squeeze(0)
                 else:
@@ -577,8 +549,7 @@ class ContinuousExpectedFreeEnergy(PolicySelector):
 
                 # Epistemic value (information gain)
                 if self.config.epistemic_weight > 0:
-                    info_gain = 0.5 * \
-                        torch.sum(torch.log(var / (next_var + self.eps)))
+                    info_gain = 0.5 * torch.sum(torch.log(var / (next_var + self.eps)))
                     epistemic_value = self.config.epistemic_weight * info_gain
                     epistemic_total += epistemic_value
                     G -= epistemic_value
@@ -591,8 +562,7 @@ class ContinuousExpectedFreeEnergy(PolicySelector):
                         pref_t = preferences
 
                     # Squared error cost
-                    prag_value = -torch.sum((obs_mean - pref_t)
-                                            ** 2 / (obs_var + self.eps))
+                    prag_value = -torch.sum((obs_mean - pref_t) ** 2 / (obs_var + self.eps))
                     pragmatic_value = self.config.pragmatic_weight * prag_value
                     pragmatic_total += pragmatic_value
                     G -= pragmatic_value
@@ -601,13 +571,7 @@ class ContinuousExpectedFreeEnergy(PolicySelector):
                 current_state = next_mean
                 var = next_var
 
-        return (
-            G /
-            num_samples,
-            epistemic_total /
-            num_samples,
-            pragmatic_total /
-            num_samples)
+        return (G / num_samples, epistemic_total / num_samples, pragmatic_total / num_samples)
 
 
 class HierarchicalPolicySelector(PolicySelector):
@@ -638,8 +602,7 @@ class HierarchicalPolicySelector(PolicySelector):
     ) -> Policy:
         """Select policy at specific hierarchical level."""
         if level < len(self.level_selectors):
-            policy, _ = self.level_selectors[level].select_policy(
-                beliefs, model)
+            policy, _ = self.level_selectors[level].select_policy(beliefs, model)
             return policy
         else:
             # Fallback for invalid level
@@ -758,8 +721,7 @@ class SophisticatedInference(PolicySelector):
 
             # Predict future beliefs after this action
             if isinstance(generative_model, DiscreteGenerativeModel):
-                next_beliefs = generative_model.transition_model(
-                    current_beliefs, action)
+                next_beliefs = generative_model.transition_model(current_beliefs, action)
                 expected_obs = generative_model.observation_model(next_beliefs)
 
                 # Update beliefs using inference algorithm
@@ -787,10 +749,8 @@ class SophisticatedInference(PolicySelector):
         return Policy(refined_actions, initial_policy.horizon)
 
     def evaluate_counterfactual(
-            self,
-            observed_policy: Policy,
-            counterfactual_policy: Policy,
-            beliefs: torch.Tensor) -> torch.Tensor:
+        self, observed_policy: Policy, counterfactual_policy: Policy, beliefs: torch.Tensor
+    ) -> torch.Tensor:
         """Evaluate counterfactual policy value."""
         # Simplified counterfactual evaluation
         # In full implementation, would compare expected outcomes
@@ -855,8 +815,7 @@ def create_policy_selector(
     elif selector_type == "continuous":
         inference = kwargs.get("inference_algorithm")
         if inference is None:
-            raise ValueError(
-                "Continuous selector requires inference_algorithm")
+            raise ValueError("Continuous selector requires inference_algorithm")
         return ContinuousExpectedFreeEnergy(config, inference)
 
     elif selector_type == "hierarchical":
@@ -864,8 +823,7 @@ def create_policy_selector(
         level_horizons = kwargs.get("level_horizons", [5, 10, 20])
         if level_selectors is None:
             raise ValueError("Hierarchical selector requires level_selectors")
-        return HierarchicalPolicySelector(
-            config, level_selectors, level_horizons)
+        return HierarchicalPolicySelector(config, level_selectors, level_horizons)
 
     elif selector_type == "sophisticated":
         inference = kwargs.get("inference_algorithm")
@@ -881,8 +839,7 @@ def create_policy_selector(
 
 
 # GNN/GMN Integration Functions for LLM Model Generation
-def create_gnn_compatible_policy_config(
-        gnn_spec: Dict[str, Any]) -> PolicyConfig:
+def create_gnn_compatible_policy_config(gnn_spec: Dict[str, Any]) -> PolicyConfig:
     """Create policy configuration from GNN specification for LLM integration.
 
     Args:
@@ -904,8 +861,7 @@ def create_gnn_compatible_policy_config(
     return config
 
 
-def validate_gnn_policy_compatibility(
-        policy: Policy, gnn_spec: Dict[str, Any]) -> bool:
+def validate_gnn_policy_compatibility(policy: Policy, gnn_spec: Dict[str, Any]) -> bool:
     """Validate that policy is compatible with GNN specification.
 
     Args:
@@ -942,8 +898,7 @@ if __name__ == "__main__":
 
     # Set up PyMDP-style matrices
     model.A.data = torch.eye(3, 4)  # Identity observation model
-    model.B.data = torch.eye(4).unsqueeze(-1).repeat(1,
-                                                     1, 2)  # Identity transition
+    model.B.data = torch.eye(4).unsqueeze(-1).repeat(1, 1, 2)  # Identity transition
     model.C.data = torch.tensor([[-1.0], [0.0], [2.0]])  # Preferences
     model.D.data = torch.ones(4) / 4  # Uniform prior
 
@@ -972,4 +927,5 @@ if __name__ == "__main__":
             validate_gnn_policy_compatibility(
                 policy, {
                     'action_space': {
-                        'size': 2}})}")
+                        'size': 2}})}"
+    )

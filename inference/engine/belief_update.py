@@ -71,18 +71,11 @@ class DirectGraphObservationModel:
 class LearnedGraphObservationModel(nn.Module):
     """Learned mapping from graph features to observations"""
 
-    def __init__(
-            self,
-            config: BeliefUpdateConfig,
-            input_dim: int,
-            output_dim: int) -> None:
+    def __init__(self, config: BeliefUpdateConfig, input_dim: int, output_dim: int) -> None:
         """Initialize learned graph observation model"""
         super().__init__()
         self.config = config
-        self.network = nn.Sequential(
-            nn.Linear(
-                input_dim, 64), nn.ReLU(), nn.Linear(
-                64, output_dim))
+        self.network = nn.Sequential(nn.Linear(input_dim, 64), nn.ReLU(), nn.Linear(64, output_dim))
 
     def forward(self, graph_features: torch.Tensor) -> torch.Tensor:
         """Map graph features to observations"""
@@ -180,21 +173,17 @@ class DirectBeliefUpdater(BeliefUpdater):
         beliefs = beliefs / beliefs.sum()
 
         # Perform Bayesian update: P(s|o) ∝ P(o|s)P(s) (pymdp convention)
-        if hasattr(
-                generative_model,
-                "observation_model") and hasattr(
-                generative_model,
-                "A"):
+        if hasattr(generative_model, "observation_model") and hasattr(generative_model, "A"):
             try:
                 # Get observation matrix A (observations x states) - pymdp
                 # convention
                 A_matrix = generative_model.A
-                obs_idx = (observations.long() if observations.numel()
-                           == 1 else observations[0].long())
+                obs_idx = (
+                    observations.long() if observations.numel() == 1 else observations[0].long()
+                )
 
                 # Extract likelihood P(o|s) for the observed outcome
-                if obs_idx < A_matrix.shape[0] and A_matrix.shape[1] == len(
-                        beliefs):
+                if obs_idx < A_matrix.shape[0] and A_matrix.shape[1] == len(beliefs):
                     likelihood = A_matrix[obs_idx, :]  # P(o=obs_idx | s)
 
                     # Bayesian update: P(s|o) ∝ P(o|s)P(s)
@@ -213,9 +202,7 @@ class DirectBeliefUpdater(BeliefUpdater):
             return beliefs
 
 
-def create_belief_updater(
-        updater_type: str,
-        config: BeliefUpdateConfig) -> BeliefUpdater:
+def create_belief_updater(updater_type: str, config: BeliefUpdateConfig) -> BeliefUpdater:
     """Create belief updaters"""
     if updater_type == "direct":
         return DirectBeliefUpdater(config)

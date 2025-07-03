@@ -50,8 +50,7 @@ def get_used_names(tree: ast.AST) -> Set[str]:
     return used_names
 
 
-def get_imported_names(
-        tree: ast.AST) -> List[Tuple[str, ast.Import | ast.ImportFrom, str]]:
+def get_imported_names(tree: ast.AST) -> List[Tuple[str, ast.Import | ast.ImportFrom, str]]:
     """Extract all imported names with their import statements."""
     imports = []
 
@@ -163,8 +162,7 @@ def get_exports(tree: ast.AST) -> Set[str]:
                     if isinstance(node.value, ast.List):
                         for elt in node.value.elts:
                             if isinstance(elt, (ast.Str, ast.Constant)):
-                                value = elt.s if hasattr(
-                                    elt, "s") else elt.value
+                                value = elt.s if hasattr(elt, "s") else elt.value
                                 if isinstance(value, str):
                                     exports.add(value)
 
@@ -190,12 +188,7 @@ def fix_file(filepath: Path) -> int:
     # Track which imports to remove
     unused_imports = []
     for name, import_node, original_name in imports:
-        if not is_import_used(
-                name,
-                used_names,
-                annotation_names,
-                exports,
-                is_test_file):
+        if not is_import_used(name, used_names, annotation_names, exports, is_test_file):
             unused_imports.append((name, import_node, original_name))
 
     if not unused_imports:
@@ -218,8 +211,12 @@ def fix_file(filepath: Path) -> int:
                     elif f"as {name}" in line:  # With alias
                         should_keep = False
             elif isinstance(import_node, ast.ImportFrom):
-                if f"from {
-                        import_node.module}" in line and original_name in line:
+                if (
+                    f"from {
+                        import_node.module}"
+                    in line
+                    and original_name in line
+                ):
                     # Check if this is the only import on the line
                     if line.count(",") == 0:
                         should_keep = False
@@ -230,11 +227,9 @@ def fix_file(filepath: Path) -> int:
                         elif f"{original_name}, " in line:
                             line = line.replace(f"{original_name}, ", "")
                         elif f"{original_name} as {name}, " in line:
-                            line = line.replace(
-                                f"{original_name} as {name}, ", "")
+                            line = line.replace(f"{original_name} as {name}, ", "")
                         elif f", {original_name} as {name}" in line:
-                            line = line.replace(
-                                f", {original_name} as {name}", "")
+                            line = line.replace(f", {original_name} as {name}", "")
 
         if should_keep:
             new_lines.append(line)
@@ -280,8 +275,7 @@ def main():
             total_removed += removed
             files_fixed += 1
 
-    print(
-        f"\nSummary: Fixed {files_fixed} files, removed {total_removed} unused imports")
+    print(f"\nSummary: Fixed {files_fixed} files, removed {total_removed} unused imports")
 
     # Run flake8 to check remaining F401 issues
     print("\nRunning flake8 to check remaining unused imports...")
@@ -291,8 +285,7 @@ def main():
         text=True,
     )
 
-    remaining = len(result.stdout.strip().split("\n")
-                    ) if result.stdout.strip() else 0
+    remaining = len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
     print(f"Remaining F401 issues: {remaining}")
 
 

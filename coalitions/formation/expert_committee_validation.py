@@ -178,8 +178,7 @@ class ExpertCommitteeValidation:
             ),
         }
 
-    def _define_validation_criteria(
-            self) -> Dict[ExpertDomain, ValidationCriteria]:
+    def _define_validation_criteria(self) -> Dict[ExpertDomain, ValidationCriteria]:
         """Define validation criteria for each expert domain"""
         return {
             ExpertDomain.MULTI_AGENT_SYSTEMS: ValidationCriteria(
@@ -296,7 +295,8 @@ class ExpertCommitteeValidation:
         self.active_reviews[review_id] = review
 
         logger.info(
-            f"Submitted coalition {coalition_id} for {review_type} review. Review ID: {review_id}")
+            f"Submitted coalition {coalition_id} for {review_type} review. Review ID: {review_id}"
+        )
 
         # Auto-assign experts based on review type
         self._assign_experts_to_review(review_id, review_type)
@@ -308,8 +308,7 @@ class ExpertCommitteeValidation:
 
         if review_type == "full":
             # Assign all active experts for comprehensive review
-            assigned_experts = [
-                exp for exp in self.experts.values() if exp.active]
+            assigned_experts = [exp for exp in self.experts.values() if exp.active]
         elif review_type == "business_intelligence":
             # Assign business and architecture experts
             assigned_experts = [
@@ -344,7 +343,8 @@ class ExpertCommitteeValidation:
 
         logger.info(
             f"Assigned {
-                len(assigned_experts)} experts to review {review_id}")
+                len(assigned_experts)} experts to review {review_id}"
+        )
 
     def simulate_expert_validation(
         self,
@@ -374,8 +374,9 @@ class ExpertCommitteeValidation:
             review.expert_results.append(validation_result)
 
         # Calculate consensus and overall status
-        review.consensus_score = sum(
-            r.score for r in review.expert_results) / len(review.expert_results)
+        review.consensus_score = sum(r.score for r in review.expert_results) / len(
+            review.expert_results
+        )
 
         if review.consensus_score >= 0.85:
             review.overall_status = ValidationStatus.APPROVED
@@ -398,7 +399,8 @@ class ExpertCommitteeValidation:
 
         logger.info(
             f"Completed expert committee review {review_id}. Status: {
-                review.overall_status.value}")
+                review.overall_status.value}"
+        )
 
         return review
 
@@ -412,11 +414,9 @@ class ExpertCommitteeValidation:
 
         # Base score based on expert domain and artifact quality
         if expert.domain == ExpertDomain.MULTI_AGENT_SYSTEMS:
-            score = self._evaluate_multi_agent_aspects(
-                business_model, system_artifacts)
+            score = self._evaluate_multi_agent_aspects(business_model, system_artifacts)
         elif expert.domain == ExpertDomain.SOFTWARE_ARCHITECTURE:
-            score = self._evaluate_architecture_aspects(
-                business_model, system_artifacts)
+            score = self._evaluate_architecture_aspects(business_model, system_artifacts)
         elif expert.domain == ExpertDomain.BUSINESS_INTELLIGENCE:
             score = self._evaluate_business_intelligence(business_model)
         elif expert.domain == ExpertDomain.SAFETY_PROTOCOLS:
@@ -444,18 +444,11 @@ class ExpertCommitteeValidation:
             status=status,
             score=score,
             feedback=feedback,
-            recommendations=self._generate_expert_recommendations(
-                expert.domain,
-                score),
-            concerns=self._identify_expert_concerns(
-                expert.domain,
-                score),
+            recommendations=self._generate_expert_recommendations(expert.domain, score),
+            concerns=self._identify_expert_concerns(expert.domain, score),
         )
 
-    def _evaluate_multi_agent_aspects(
-            self,
-            business_model: Dict,
-            artifacts: Dict) -> float:
+    def _evaluate_multi_agent_aspects(self, business_model: Dict, artifacts: Dict) -> float:
         """Evaluate multi-agent system implementation quality"""
         score = 0.0
 
@@ -479,10 +472,7 @@ class ExpertCommitteeValidation:
 
         return min(1.0, score)
 
-    def _evaluate_architecture_aspects(
-            self,
-            business_model: Dict,
-            artifacts: Dict) -> float:
+    def _evaluate_architecture_aspects(self, business_model: Dict, artifacts: Dict) -> float:
         """Evaluate software architecture quality"""
         score = 0.8  # Assume good architecture based on ADR compliance
 
@@ -503,10 +493,9 @@ class ExpertCommitteeValidation:
         if "executive_summary" in business_model:
             exec_summary = business_model["executive_summary"]
             if all(
-                key in exec_summary for key in [
-                    "total_business_value",
-                    "confidence_level",
-                    "investment_readiness"]):
+                key in exec_summary
+                for key in ["total_business_value", "confidence_level", "investment_readiness"]
+            ):
                 score += 0.3
 
         # Check comprehensive metrics
@@ -527,10 +516,7 @@ class ExpertCommitteeValidation:
         """Evaluate safety protocol implementation"""
         return 0.85  # Assume good safety based on careful implementation
 
-    def _generate_expert_recommendations(
-            self,
-            domain: ExpertDomain,
-            score: float) -> List[str]:
+    def _generate_expert_recommendations(self, domain: ExpertDomain, score: float) -> List[str]:
         """Generate expert recommendations based on domain and score"""
         base_recommendations = {
             ExpertDomain.MULTI_AGENT_SYSTEMS: [
@@ -568,10 +554,7 @@ class ExpertCommitteeValidation:
 
         return recommendations[:3]  # Return top 3 recommendations
 
-    def _identify_expert_concerns(
-            self,
-            domain: ExpertDomain,
-            score: float) -> List[str]:
+    def _identify_expert_concerns(self, domain: ExpertDomain, score: float) -> List[str]:
         """Identify expert concerns based on domain and score"""
         if score >= 0.85:
             return []  # No major concerns
@@ -612,14 +595,13 @@ class ExpertCommitteeValidation:
     def get_validation_summary(self, coalition_id: str) -> Dict[str, Any]:
         """Get validation summary for a coalition"""
         relevant_reviews = [
-            review for review in self.review_history if review.coalition_id == coalition_id]
+            review for review in self.review_history if review.coalition_id == coalition_id
+        ]
 
         if not relevant_reviews:
             return {"status": "no_reviews", "coalition_id": coalition_id}
 
-        latest_review = max(
-            relevant_reviews,
-            key=lambda r: r.submission_timestamp)
+        latest_review = max(relevant_reviews, key=lambda r: r.submission_timestamp)
 
         return {
             "coalition_id": coalition_id,
@@ -655,15 +637,11 @@ class ExpertCommitteeValidation:
 
         if expert_assignments is None:
             expert_assignments = {
-                "active_inference_theory": [
-                    "conor_heins",
-                    "alexander_tschantz"],
+                "active_inference_theory": ["conor_heins", "alexander_tschantz"],
                 "mathematical_foundations": ["dmitry_bagaev"],
                 "statistical_methods": ["mathematical_foundations_experts"],
                 "numerical_stability": ["mathematical_foundations_experts"],
-                "safety_protocols": [
-                    "robert_martin",
-                    "kent_beck"],
+                "safety_protocols": ["robert_martin", "kent_beck"],
             }
 
         # Task 37 specific validation criteria
@@ -719,12 +697,7 @@ class ExpertCommitteeValidation:
             for criterion, required_score in criteria.items():
                 # Simulate validation score (in practice, would be actual
                 # validation)
-                actual_score = min(
-                    required_score +
-                    np.random.normal(
-                        0,
-                        0.02),
-                    1.0)
+                actual_score = min(required_score + np.random.normal(0, 0.02), 1.0)
                 actual_score = max(actual_score, 0.0)
 
                 passes = actual_score >= required_score
@@ -732,9 +705,7 @@ class ExpertCommitteeValidation:
                     "score": actual_score,
                     "required": required_score,
                     "passes": passes,
-                    "expert_assigned": self._get_assigned_expert(
-                        criterion,
-                        expert_assignments),
+                    "expert_assigned": self._get_assigned_expert(criterion, expert_assignments),
                 }
 
                 subtask_score += actual_score
@@ -750,25 +721,25 @@ class ExpertCommitteeValidation:
             total_score += subtask_score
             max_score += subtask_max
 
-        overall_score = min(1.0, max(0.0, total_score / max_score)
-                            )  # Clamp to [0.0, 1.0]
+        overall_score = min(1.0, max(0.0, total_score / max_score))  # Clamp to [0.0, 1.0]
         overall_passes = all(r["passes"] for r in detailed_results.values())
 
         # Generate expert review assignments
-        review_assignments = self._generate_task_37_review_assignments(
-            expert_assignments)
+        review_assignments = self._generate_task_37_review_assignments(expert_assignments)
 
         # Determine status based on overall score
         if overall_passes and overall_score >= 0.95:
             status = ValidationStatus.APPROVED
             feedback = (
                 "Task 37 mathematical rigor validation: Excellent implementation "
-                "meets all requirements")
+                "meets all requirements"
+            )
         elif overall_score >= 0.85:
             status = ValidationStatus.CONDITIONAL_APPROVAL
             feedback = (
                 "Task 37 mathematical rigor validation: Good implementation with "
-                "minor improvements needed")
+                "minor improvements needed"
+            )
         else:
             status = ValidationStatus.REQUIRES_REVISION
             feedback = "Task 37 mathematical rigor validation: Significant improvements required"
@@ -824,8 +795,7 @@ class ExpertCommitteeValidation:
 
         return validation_result
 
-    def _get_assigned_expert(self, criterion: str,
-                             assignments: Dict[str, List[str]]) -> str:
+    def _get_assigned_expert(self, criterion: str, assignments: Dict[str, List[str]]) -> str:
         """Get the assigned expert for a specific criterion"""
         criterion_mapping = {
             "bayesian_update_accuracy": "active_inference_theory",
@@ -945,8 +915,4 @@ class ExpertCommitteeValidation:
 expert_committee = ExpertCommitteeValidation()
 
 # Export for use by monitoring system
-__all__ = [
-    "ExpertCommitteeValidation",
-    "ValidationStatus",
-    "ExpertDomain",
-    "expert_committee"]
+__all__ = ["ExpertCommitteeValidation", "ValidationStatus", "ExpertDomain", "expert_committee"]

@@ -62,10 +62,7 @@ class ConversationWebSocketManager:
         # conversation_id -> agent_id -> timestamp
         self.typing_indicators: Dict[str, Dict[str, datetime]] = {}
 
-    async def connect(
-            self,
-            websocket: WebSocket,
-            client_id: Optional[str] = None):
+    async def connect(self, websocket: WebSocket, client_id: Optional[str] = None):
         """Accept and register a new WebSocket connection."""
         await websocket.accept()
         self.active_connections.add(websocket)
@@ -127,8 +124,7 @@ class ConversationWebSocketManager:
         for websocket in self.active_connections:
             try:
                 subscription = self.subscriptions.get(websocket)
-                if subscription and self._should_send_event(
-                        event, subscription):
+                if subscription and self._should_send_event(event, subscription):
                     await websocket.send_json(event_dict)
                     if websocket in self.connection_metadata:
                         self.connection_metadata[websocket]["message_count"] += 1
@@ -157,8 +153,7 @@ class ConversationWebSocketManager:
             return False
 
         # Check message type filter
-        message_type = event.data.get("type") or event.data.get(
-            "metadata", {}).get("type")
+        message_type = event.data.get("type") or event.data.get("metadata", {}).get("type")
         if subscription.message_types and message_type not in subscription.message_types:
             return False
 
@@ -170,18 +165,13 @@ class ConversationWebSocketManager:
             return False
 
         # Check system messages
-        is_system = event.data.get(
-            "metadata", {}).get(
-            "isSystemMessage", False)
+        is_system = event.data.get("metadata", {}).get("isSystemMessage", False)
         if is_system and not subscription.include_system_messages:
             return False
 
         return True
 
-    async def update_subscription(
-            self,
-            websocket: WebSocket,
-            subscription_data: dict):
+    async def update_subscription(self, websocket: WebSocket, subscription_data: dict):
         """Update client subscription preferences."""
         if websocket not in self.subscriptions:
             return
@@ -190,8 +180,7 @@ class ConversationWebSocketManager:
 
         # Update conversation IDs
         if "conversation_ids" in subscription_data:
-            subscription.conversation_ids = set(
-                subscription_data["conversation_ids"])
+            subscription.conversation_ids = set(subscription_data["conversation_ids"])
 
         # Update agent IDs
         if "agent_ids" in subscription_data:
@@ -199,8 +188,7 @@ class ConversationWebSocketManager:
 
         # Update message types
         if "message_types" in subscription_data:
-            subscription.message_types = set(
-                subscription_data["message_types"])
+            subscription.message_types = set(subscription_data["message_types"])
 
         # Update flags
         if "include_typing" in subscription_data:
@@ -212,18 +200,13 @@ class ConversationWebSocketManager:
         if "include_metadata" in subscription_data:
             subscription.include_metadata = subscription_data["include_metadata"]
 
-    def update_typing_indicator(
-            self,
-            conversation_id: str,
-            agent_id: str,
-            is_typing: bool) -> None:
+    def update_typing_indicator(self, conversation_id: str, agent_id: str, is_typing: bool) -> None:
         """Update typing indicator state and broadcast changes."""
         if conversation_id not in self.typing_indicators:
             self.typing_indicators[conversation_id] = {}
 
         if is_typing:
-            self.typing_indicators[conversation_id][agent_id] = datetime.utcnow(
-            )
+            self.typing_indicators[conversation_id][agent_id] = datetime.utcnow()
         else:
             self.typing_indicators[conversation_id].pop(agent_id, None)
 
@@ -236,8 +219,7 @@ class ConversationWebSocketManager:
         cutoff_time = datetime.utcnow()
         stale_agents = []
 
-        for agent_id, timestamp in self.typing_indicators[conversation_id].items(
-        ):
+        for agent_id, timestamp in self.typing_indicators[conversation_id].items():
             if (cutoff_time - timestamp).total_seconds() > 30:
                 stale_agents.append(agent_id)
 
@@ -248,9 +230,7 @@ class ConversationWebSocketManager:
 
     def get_connection_stats(self) -> dict:
         """Get statistics about current connections."""
-        active_typing = [
-            cid for cid,
-            agents in self.typing_indicators.items() if agents]
+        active_typing = [cid for cid, agents in self.typing_indicators.items() if agents]
 
         empty_sub = ConversationSubscription(set(), set(), set())
 
@@ -277,9 +257,7 @@ ws_manager = ConversationWebSocketManager()
 
 
 @router.websocket("/ws/conversations")
-async def conversation_websocket_endpoint(
-        websocket: WebSocket,
-        client_id: Optional[str] = None):
+async def conversation_websocket_endpoint(websocket: WebSocket, client_id: Optional[str] = None):
     """
     WebSocket endpoint for real-time conversation monitoring.
 
@@ -365,8 +343,7 @@ async def handle_client_message(websocket: WebSocket, message: dict):
 
         # Update last ping time
         if websocket in ws_manager.connection_metadata:
-            ws_manager.connection_metadata[websocket]["last_ping"] = datetime.utcnow(
-            )
+            ws_manager.connection_metadata[websocket]["last_ping"] = datetime.utcnow()
 
     elif message_type == "subscribe":
         await ws_manager.update_subscription(websocket, message.get("subscription", {}))
@@ -399,8 +376,7 @@ async def handle_client_message(websocket: WebSocket, message: dict):
         is_typing = message.get("is_typing", False)
 
         if conversation_id and agent_id:
-            ws_manager.update_typing_indicator(
-                conversation_id, agent_id, is_typing)
+            ws_manager.update_typing_indicator(conversation_id, agent_id, is_typing)
 
             # Broadcast typing change
             event = ConversationEvent(
@@ -472,9 +448,7 @@ async def broadcast_conversation_started(
     await ws_manager.broadcast_conversation_event(event)
 
 
-async def broadcast_conversation_ended(
-        conversation_id: str,
-        summary: dict = None):
+async def broadcast_conversation_ended(conversation_id: str, summary: dict = None):
     """Broadcast a conversation end event."""
     event = ConversationEvent(
         type="conversation_ended",
@@ -507,8 +481,7 @@ async def broadcast_agent_left(conversation_id: str, agent_id: str):
     await ws_manager.broadcast_conversation_event(event)
 
 
-async def broadcast_message_queue_updated(
-        conversation_id: str, queue_status: dict):
+async def broadcast_message_queue_updated(conversation_id: str, queue_status: dict):
     """Broadcast message queue status update."""
     event = ConversationEvent(
         type="message_queue_updated",

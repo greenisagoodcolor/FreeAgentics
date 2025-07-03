@@ -76,9 +76,7 @@ try:
     INFERENCE_MODULES_AVAILABLE = True
 except ImportError as e:
     INFERENCE_MODULES_AVAILABLE = False
-    pytest.skip(
-        f"Inference modules not available: {e}",
-        allow_module_level=True)
+    pytest.skip(f"Inference modules not available: {e}", allow_module_level=True)
 
 
 class TestPyMDPActiveInference:
@@ -87,11 +85,7 @@ class TestPyMDPActiveInference:
     @pytest.fixture
     def pymdp_model(self):
         """Create a pymdp-compatible discrete generative model."""
-        dims = ModelDimensions(
-            num_states=4,
-            num_observations=3,
-            num_actions=2,
-            time_horizon=1)
+        dims = ModelDimensions(num_states=4, num_observations=3, num_actions=2, time_horizon=1)
         params = ModelParameters(learning_rate=0.01, use_gpu=False)
         return DiscreteGenerativeModel(dims, params)
 
@@ -123,14 +117,12 @@ class TestPyMDPActiveInference:
         # Verify normalization (pymdp requirement)
         # A matrix columns should sum to 1
         for s in range(4):
-            assert torch.allclose(
-                model.A[:, s].sum(), torch.tensor(1.0), atol=1e-6)
+            assert torch.allclose(model.A[:, s].sum(), torch.tensor(1.0), atol=1e-6)
 
         # B matrix should be normalized along first dimension
         for a in range(2):
             for s in range(4):
-                assert torch.allclose(
-                    model.B[:, s, a].sum(), torch.tensor(1.0), atol=1e-6)
+                assert torch.allclose(model.B[:, s, a].sum(), torch.tensor(1.0), atol=1e-6)
 
         # D should sum to 1
         assert torch.allclose(model.D.sum(), torch.tensor(1.0), atol=1e-6)
@@ -150,10 +142,7 @@ class TestPyMDPActiveInference:
         prior = torch.tensor([0.4, 0.3, 0.2, 0.1])
         beliefs_with_prior = pymdp_agent.update_beliefs(obs, prior)
         assert beliefs_with_prior.shape == (4,)
-        assert torch.allclose(
-            beliefs_with_prior.sum(),
-            torch.tensor(1.0),
-            atol=1e-6)
+        assert torch.allclose(beliefs_with_prior.sum(), torch.tensor(1.0), atol=1e-6)
 
         # Test batch observations
         obs_batch = torch.tensor([0, 1, 2], dtype=torch.long)
@@ -162,10 +151,7 @@ class TestPyMDPActiveInference:
 
         # Each belief in batch should sum to 1
         for i in range(3):
-            assert torch.allclose(
-                beliefs_batch[i].sum(),
-                torch.tensor(1.0),
-                atol=1e-6)
+            assert torch.allclose(beliefs_batch[i].sum(), torch.tensor(1.0), atol=1e-6)
 
     def test_expected_free_energy_computation(self, pymdp_agent):
         """Test expected free energy follows pymdp formulation."""
@@ -178,8 +164,7 @@ class TestPyMDPActiveInference:
 
         # Test action sequence
         actions = torch.tensor([0, 1])
-        efe_sequence = pymdp_agent.compute_expected_free_energy(
-            beliefs, actions, time_horizon=2)
+        efe_sequence = pymdp_agent.compute_expected_free_energy(beliefs, actions, time_horizon=2)
         assert isinstance(efe_sequence, torch.Tensor)
 
         # Test that EFE is finite (no NaN or inf)
@@ -212,10 +197,7 @@ class TestPyMDPActiveInference:
 
             # Categorical distribution properties (pymdp requirement)
             assert torch.all(beliefs >= 0)  # Non-negative
-            assert torch.allclose(
-                beliefs.sum(),
-                torch.tensor(1.0),
-                atol=1e-6)  # Normalized
+            assert torch.allclose(beliefs.sum(), torch.tensor(1.0), atol=1e-6)  # Normalized
             assert beliefs.shape == (4,)  # Correct dimensionality
 
 
@@ -253,12 +235,9 @@ class TestGMNToPyMDPConverter:
         }
 
         # Generate models
-        explorer_model = converter.generate_pymdp_model_from_gmn(
-            explorer_config)
-        merchant_model = converter.generate_pymdp_model_from_gmn(
-            merchant_config)
-        guardian_model = converter.generate_pymdp_model_from_gmn(
-            guardian_config)
+        explorer_model = converter.generate_pymdp_model_from_gmn(explorer_config)
+        merchant_model = converter.generate_pymdp_model_from_gmn(merchant_config)
+        guardian_model = converter.generate_pymdp_model_from_gmn(guardian_config)
 
         # Check dimensions are appropriate for each class
         assert explorer_model.dims.num_states == 4
@@ -277,14 +256,12 @@ class TestGMNToPyMDPConverter:
         for model in [explorer_model, merchant_model, guardian_model]:
             # A matrix normalization
             for s in range(model.dims.num_states):
-                assert torch.allclose(
-                    model.A[:, s].sum(), torch.tensor(1.0), atol=1e-6)
+                assert torch.allclose(model.A[:, s].sum(), torch.tensor(1.0), atol=1e-6)
 
             # B matrix normalization
             for a in range(model.dims.num_actions):
                 for s in range(model.dims.num_states):
-                    assert torch.allclose(
-                        model.B[:, s, a].sum(), torch.tensor(1.0), atol=1e-6)
+                    assert torch.allclose(model.B[:, s, a].sum(), torch.tensor(1.0), atol=1e-6)
 
             # D normalization
             assert torch.allclose(model.D.sum(), torch.tensor(1.0), atol=1e-6)
@@ -303,10 +280,8 @@ class TestGMNToPyMDPConverter:
             "personality": {"exploration": 0.1, "curiosity": 0.2},
         }
 
-        high_model = converter.generate_pymdp_model_from_gmn(
-            high_exploration_config)
-        low_model = converter.generate_pymdp_model_from_gmn(
-            low_exploration_config)
+        high_model = converter.generate_pymdp_model_from_gmn(high_exploration_config)
+        low_model = converter.generate_pymdp_model_from_gmn(low_exploration_config)
 
         # Models should be different due to personality differences
         assert not torch.allclose(high_model.A, low_model.A, atol=1e-6)
@@ -325,10 +300,7 @@ class TestPyMDPAgentFactory:
         config = {
             "agent_name": "TestExplorer",
             "agent_class": "Explorer",
-            "personality": {
-                "exploration": 0.8,
-                "curiosity": 0.9,
-                "risk_tolerance": 0.6},
+            "personality": {"exploration": 0.8, "curiosity": 0.9, "risk_tolerance": 0.6},
         }
 
         agent = create_pymdp_agent(config)
@@ -409,10 +381,7 @@ class TestPyMDPCompatibility:
     def test_free_energy_formulation(self):
         """Test that free energy matches pymdp formulation."""
         # Create simple model
-        config = {
-            "agent_name": "TestAgent",
-            "agent_class": "Explorer",
-            "personality": {}}
+        config = {"agent_name": "TestAgent", "agent_class": "Explorer", "personality": {}}
 
         agent = create_pymdp_agent(config)
         beliefs = torch.tensor([0.6, 0.2, 0.1, 0.1])
@@ -423,8 +392,7 @@ class TestPyMDPCompatibility:
 
         # Manual calculation: F = KL[q(s)||p(s)] - E_q[ln p(o|s)]
         prior = model.D
-        complexity = torch.sum(
-            beliefs * (torch.log(beliefs + 1e-16) - torch.log(prior + 1e-16)))
+        complexity = torch.sum(beliefs * (torch.log(beliefs + 1e-16) - torch.log(prior + 1e-16)))
         accuracy = torch.sum(beliefs * torch.log(model.A[obs, :] + 1e-16))
         expected_fe = complexity - accuracy
 

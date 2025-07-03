@@ -145,8 +145,7 @@ except ImportError:
 
         def __post_init__(self):
             if self.regularization_types is None:
-                self.regularization_types = [
-                    RegularizationType.L2, RegularizationType.DROPOUT]
+                self.regularization_types = [RegularizationType.L2, RegularizationType.DROPOUT]
             if self.objectives is None:
                 self.objectives = [OptimizationObjective.LOSS_MINIMIZATION]
             if self.objective_weights is None:
@@ -192,8 +191,7 @@ class TestOptimizationConfig:
         assert config.weight_decay == 1e-4
         assert config.scheduler_type == SchedulerType.COSINE
         assert config.max_epochs == 100
-        assert config.regularization_types == [
-            RegularizationType.L2, RegularizationType.DROPOUT]
+        assert config.regularization_types == [RegularizationType.L2, RegularizationType.DROPOUT]
         assert config.early_stopping is True
         assert config.mixed_precision is False
         assert config.distributed is False
@@ -367,8 +365,7 @@ class TestGNNOptimizer:
                 grad_norms_after.append(param.grad.norm().item())
 
         # Gradients should be clipped if they were too large
-        if any(
-                norm > optimizer.config.gradient_clip_norm for norm in grad_norms_before):
+        if any(norm > optimizer.config.gradient_clip_norm for norm in grad_norms_before):
             assert clipped_norm <= optimizer.config.gradient_clip_norm
 
     def test_regularization_application(self, optimizer, model):
@@ -405,9 +402,7 @@ class TestSecondOrderOptimizer:
     @pytest.fixture
     def config(self):
         """Create second-order optimizer config."""
-        return OptimizationConfig(
-            use_second_order=True,
-            optimizer_type=OptimizerType.ADAHESSIAN)
+        return OptimizationConfig(use_second_order=True, optimizer_type=OptimizerType.ADAHESSIAN)
 
     @pytest.fixture
     def second_order_optimizer(self, model, config):
@@ -429,8 +424,7 @@ class TestSecondOrderOptimizer:
         target = torch.randn(num_nodes, 32)
 
         # Compute Hessian
-        hessian_result = second_order_optimizer.compute_hessian(
-            x, edge_index, target)
+        hessian_result = second_order_optimizer.compute_hessian(x, edge_index, target)
 
         assert "hessian_diagonal" in hessian_result
         assert "hessian_trace" in hessian_result
@@ -498,8 +492,7 @@ class TestSecondOrderOptimizer:
             batch_data.append((x, edge_index, target))
 
         # Estimate curvature
-        curvature_result = second_order_optimizer.estimate_curvature(
-            batch_data)
+        curvature_result = second_order_optimizer.estimate_curvature(batch_data)
 
         assert "eigenvalues" in curvature_result
         assert "eigenvectors" in curvature_result
@@ -527,9 +520,8 @@ class TestMetaOptimizer:
     def config(self):
         """Create meta-optimizer config."""
         return OptimizationConfig(
-            use_meta_learning=True,
-            learning_rate=0.001,
-            meta_learning_rate=0.0001)
+            use_meta_learning=True, learning_rate=0.001, meta_learning_rate=0.0001
+        )
 
     @pytest.fixture
     def meta_optimizer(self, model, config):
@@ -659,9 +651,7 @@ class TestBayesianOptimizer:
     @pytest.fixture
     def config(self):
         """Create Bayesian optimizer config."""
-        return OptimizationConfig(
-            use_bayesian_optimization=True,
-            max_epochs=20)
+        return OptimizationConfig(use_bayesian_optimization=True, max_epochs=20)
 
     @pytest.fixture
     def bayesian_optimizer(self, model, config):
@@ -733,8 +723,7 @@ class TestBayesianOptimizer:
         y_observed = torch.randn(15)  # Corresponding performance values
 
         # Fit GP surrogate
-        gp_result = bayesian_optimizer.fit_gaussian_process(
-            X_observed, y_observed)
+        gp_result = bayesian_optimizer.fit_gaussian_process(X_observed, y_observed)
 
         assert "gp_model" in gp_result
         assert "likelihood" in gp_result
@@ -769,7 +758,8 @@ class TestBayesianOptimizer:
 
         # Compute acquisition values
         acquisition_result = bayesian_optimizer.compute_acquisition(
-            X_candidates, X_observed, y_observed, acquisition_type="expected_improvement")
+            X_candidates, X_observed, y_observed, acquisition_type="expected_improvement"
+        )
 
         assert "acquisition_values" in acquisition_result
         assert "best_candidate" in acquisition_result
@@ -792,10 +782,7 @@ class TestEvolutionaryOptimizer:
     @pytest.fixture
     def config(self):
         """Create evolutionary optimizer config."""
-        return OptimizationConfig(
-            use_evolutionary=True,
-            population_size=20,
-            num_generations=10)
+        return OptimizationConfig(use_evolutionary=True, population_size=20, num_generations=10)
 
     @pytest.fixture
     def evolutionary_optimizer(self, model, config):
@@ -822,8 +809,7 @@ class TestEvolutionaryOptimizer:
 
         # Should have correct population size
         assert len(individuals) == evolutionary_optimizer.config.population_size
-        assert len(
-            fitness_scores) == evolutionary_optimizer.config.population_size
+        assert len(fitness_scores) == evolutionary_optimizer.config.population_size
 
         # Each individual should be a model with same architecture
         for individual in individuals:
@@ -855,13 +841,11 @@ class TestEvolutionaryOptimizer:
 
         # Offspring should be different from parents
         parent1_params = torch.cat([p.flatten() for p in parent1.parameters()])
-        offspring1_params = torch.cat([p.flatten()
-                                      for p in offspring1.parameters()])
+        offspring1_params = torch.cat([p.flatten() for p in offspring1.parameters()])
         assert not torch.allclose(parent1_params, offspring1_params)
 
         # Mutation
-        mutation_result = evolutionary_optimizer.mutate(
-            offspring1, mutation_rate=0.1)
+        mutation_result = evolutionary_optimizer.mutate(offspring1, mutation_rate=0.1)
 
         assert "mutated_individual" in mutation_result
         assert "mutation_mask" in mutation_result
@@ -870,8 +854,7 @@ class TestEvolutionaryOptimizer:
         mutated_individual = mutation_result["mutated_individual"]
 
         # Mutated individual should be different from original
-        mutated_params = torch.cat([p.flatten()
-                                   for p in mutated_individual.parameters()])
+        mutated_params = torch.cat([p.flatten() for p in mutated_individual.parameters()])
         assert not torch.allclose(offspring1_params, mutated_params)
 
     def test_selection_mechanisms(self, evolutionary_optimizer):
@@ -881,10 +864,8 @@ class TestEvolutionaryOptimizer:
 
         # Create population with known fitness scores
         population_size = 10
-        individuals = [copy.deepcopy(evolutionary_optimizer.model)
-                       for _ in range(population_size)]
-        fitness_scores = torch.tensor(
-            [0.1, 0.8, 0.3, 0.9, 0.2, 0.7, 0.5, 0.6, 0.4, 0.95])
+        individuals = [copy.deepcopy(evolutionary_optimizer.model) for _ in range(population_size)]
+        fitness_scores = torch.tensor([0.1, 0.8, 0.3, 0.9, 0.2, 0.7, 0.5, 0.6, 0.4, 0.95])
 
         # Tournament selection
         tournament_result = evolutionary_optimizer.tournament_selection(
@@ -923,8 +904,7 @@ class TestEvolutionaryOptimizer:
         }
 
         # Run evolutionary optimization
-        evolution_result = evolutionary_optimizer.evolve(
-            train_data, num_generations=5)
+        evolution_result = evolutionary_optimizer.evolve(train_data, num_generations=5)
 
         assert "best_individual" in evolution_result
         assert "best_fitness" in evolution_result
@@ -949,10 +929,7 @@ class TestNeuralArchitectureSearch:
     @pytest.fixture
     def config(self):
         """Create NAS config."""
-        return OptimizationConfig(
-            use_nas=True,
-            max_epochs=20,
-            search_space_size=50)
+        return OptimizationConfig(use_nas=True, max_epochs=20, search_space_size=50)
 
     @pytest.fixture
     def nas_optimizer(self, config):
@@ -1037,8 +1014,7 @@ class TestNeuralArchitectureSearch:
         }
 
         # Evaluate architecture
-        eval_result = nas_optimizer.evaluate_architecture(
-            architecture, eval_data)
+        eval_result = nas_optimizer.evaluate_architecture(architecture, eval_data)
 
         assert "performance" in eval_result
         assert "model_size" in eval_result
@@ -1072,8 +1048,7 @@ class TestNeuralArchitectureSearch:
         }
 
         # Run architecture search
-        search_result = nas_optimizer.search_architectures(
-            search_config, search_data)
+        search_result = nas_optimizer.search_architectures(search_config, search_data)
 
         assert "best_architecture" in search_result
         assert "best_performance" in search_result
@@ -1100,10 +1075,7 @@ class TestDistributedOptimizer:
     @pytest.fixture
     def config(self):
         """Create distributed optimizer config."""
-        return OptimizationConfig(
-            distributed=True,
-            num_workers=4,
-            sync_frequency=10)
+        return OptimizationConfig(distributed=True, num_workers=4, sync_frequency=10)
 
     @pytest.fixture
     def distributed_optimizer(self, model, config):
@@ -1130,8 +1102,7 @@ class TestDistributedOptimizer:
             worker_gradients.append(gradients)
 
         # Synchronize gradients
-        sync_result = distributed_optimizer.synchronize_gradients(
-            worker_gradients)
+        sync_result = distributed_optimizer.synchronize_gradients(worker_gradients)
 
         assert "synchronized_gradients" in sync_result
         assert "communication_time" in sync_result
@@ -1164,8 +1135,7 @@ class TestDistributedOptimizer:
             worker_updates.append(update)
 
         # Apply asynchronous updates
-        async_result = distributed_optimizer.apply_async_updates(
-            worker_updates)
+        async_result = distributed_optimizer.apply_async_updates(worker_updates)
 
         assert "updated_parameters" in async_result
         assert "staleness_weights" in async_result
@@ -1214,8 +1184,9 @@ class TestDistributedOptimizer:
             decompressed = decompressed_gradients[name]
 
             # Most values should be preserved (top-k compression)
-            correlation = torch.corrcoef(torch.stack(
-                [original.flatten(), decompressed.flatten()]))[0, 1]
+            correlation = torch.corrcoef(torch.stack([original.flatten(), decompressed.flatten()]))[
+                0, 1
+            ]
             assert correlation > 0.5  # Reasonable correlation
 
 
@@ -1275,9 +1246,8 @@ class TestAdvancedOptimizationScenarios:
             return
 
         config = OptimizationConfig(
-            use_adversarial_training=True,
-            adversarial_epsilon=0.1,
-            adversarial_steps=3)
+            use_adversarial_training=True, adversarial_epsilon=0.1, adversarial_steps=3
+        )
 
         # Model for adversarial training
         class RobustGNN(nn.Module):
@@ -1291,8 +1261,7 @@ class TestAdvancedOptimizationScenarios:
                 return self.conv2(x)
 
         model = RobustGNN()
-        adversarial_optimizer = AdversarialTraining(
-            model, config) if IMPORT_SUCCESS else Mock()
+        adversarial_optimizer = AdversarialTraining(model, config) if IMPORT_SUCCESS else Mock()
 
         # Training data
         data = {
@@ -1335,8 +1304,7 @@ class TestAdvancedOptimizationScenarios:
         )
 
         model = nn.Linear(64, 32)
-        curriculum_optimizer = CurriculumLearning(
-            model, config) if IMPORT_SUCCESS else Mock()
+        curriculum_optimizer = CurriculumLearning(model, config) if IMPORT_SUCCESS else Mock()
 
         # Create curriculum data with varying difficulty
         curriculum_data = []
@@ -1407,8 +1375,7 @@ class TestAdvancedOptimizationScenarios:
                     return self.classifier(encoded)
 
         model = SelfSupervisedGNN()
-        ssl_optimizer = SelfSupervisedOptimizer(
-            model, config) if IMPORT_SUCCESS else Mock()
+        ssl_optimizer = SelfSupervisedOptimizer(model, config) if IMPORT_SUCCESS else Mock()
 
         # Self-supervised training data
         ssl_data = {
@@ -1443,14 +1410,10 @@ class TestAdvancedOptimizationScenarios:
         if not IMPORT_SUCCESS:
             return
 
-        config = OptimizationConfig(
-            convergence_threshold=1e-6,
-            early_stopping=True,
-            patience=15)
+        config = OptimizationConfig(convergence_threshold=1e-6, early_stopping=True, patience=15)
 
         nn.Linear(64, 32)
-        convergence_analyzer = ConvergenceDetector(
-            config) if IMPORT_SUCCESS else Mock()
+        convergence_analyzer = ConvergenceDetector(config) if IMPORT_SUCCESS else Mock()
 
         # Simulate training history
         training_history = {
@@ -1462,8 +1425,7 @@ class TestAdvancedOptimizationScenarios:
 
         if IMPORT_SUCCESS:
             # Analyze convergence
-            convergence_result = convergence_analyzer.analyze_convergence(
-                training_history)
+            convergence_result = convergence_analyzer.analyze_convergence(training_history)
 
             assert "converged" in convergence_result
             assert "convergence_epoch" in convergence_result

@@ -139,18 +139,15 @@ class CoalitionGoal:
             "created_at": self.created_at.isoformat(),
             "deadline": self.deadline.isoformat() if self.deadline else None,
             "estimated_completion": (
-                self.estimated_completion.isoformat() if self.estimated_completion else None),
+                self.estimated_completion.isoformat() if self.estimated_completion else None
+            ),
             "status": self.status.value,
-            "assigned_members": list(
-                self.assigned_members),
-            "required_capabilities": list(
-                self.required_capabilities),
+            "assigned_members": list(self.assigned_members),
+            "required_capabilities": list(self.required_capabilities),
             "resource_requirements": self.resource_requirements,
             "allocated_resources": self.allocated_resources,
-            "votes_for": list(
-                self.votes_for),
-            "votes_against": list(
-                self.votes_against),
+            "votes_for": list(self.votes_for),
+            "votes_against": list(self.votes_against),
             "consensus_required": self.consensus_required,
             "progress_percentage": self.progress_percentage,
             "is_overdue": self.is_overdue,
@@ -295,7 +292,9 @@ class Coalition:
         """Check if coalition meets minimum viability requirements"""
         active_members = self.member_count
         return self.min_members <= active_members <= self.max_members and self.status in [
-            CoalitionStatus.FORMING, CoalitionStatus.ACTIVE, ]
+            CoalitionStatus.FORMING,
+            CoalitionStatus.ACTIVE,
+        ]
 
     @property
     def combined_capabilities(self) -> Set[str]:
@@ -346,7 +345,8 @@ class Coalition:
         logger.info(
             f"Added member {agent_id} with role {
                 role.value} to coalition {
-                self.coalition_id}")
+                self.coalition_id}"
+        )
         return True
 
     def remove_member(self, agent_id: str, reason: str = "voluntary") -> bool:
@@ -364,10 +364,12 @@ class Coalition:
             self.status = CoalitionStatus.DISSOLVING
             logger.warning(
                 f"Coalition {
-                    self.coalition_id} below minimum members, dissolving")
+                    self.coalition_id} below minimum members, dissolving"
+            )
         logger.info(
             f"Removed member {agent_id} from coalition {
-                self.coalition_id}: {reason}")
+                self.coalition_id}: {reason}"
+        )
         return True
 
     def add_goal(self, goal: CoalitionGoal) -> None:
@@ -413,9 +415,11 @@ class Coalition:
         for resource, amount in total_allocated.items():
             if amount > available.get(resource, 0):
                 logger.warning(
-                    f"Insufficient {resource}: need {amount}, " f"have {
+                    f"Insufficient {resource}: need {amount}, "
+                    f"have {
                         available.get(
-                            resource, 0)}")
+                            resource, 0)}"
+                )
                 return False
         self.resource_allocation = allocation
         return True
@@ -461,8 +465,7 @@ class Coalition:
             total_contribution = sum(contributions.values())
             if total_contribution > 0:
                 for member_id, contribution in contributions.items():
-                    distribution[member_id] = total_value * \
-                        (contribution / total_contribution)
+                    distribution[member_id] = total_value * (contribution / total_contribution)
             else:
                 # Fallback to equal distribution
                 per_member = total_value / len(active_members)
@@ -472,8 +475,7 @@ class Coalition:
             # Distribution based on resource commitments and voting weight
             total_weight = sum(m.voting_weight for m in active_members)
             for member in active_members:
-                distribution[member.agent_id] = total_value * \
-                    (member.voting_weight / total_weight)
+                distribution[member.agent_id] = total_value * (member.voting_weight / total_weight)
         return distribution
 
     def _elect_new_leader(self) -> None:
@@ -491,7 +493,8 @@ class Coalition:
             logger.info(
                 f"Elected {
                     new_leader.agent_id} as new leader of coalition {
-                    self.coalition_id}")
+                    self.coalition_id}"
+            )
         else:
             self.leader_id = None
 
@@ -501,8 +504,7 @@ class Coalition:
             return
         # Calculate success rate
         completed_goals = sum(1 for g in self.goals.values() if g.is_completed)
-        failed_goals = sum(1 for g in self.goals.values()
-                           if g.status == CoalitionGoalStatus.FAILED)
+        failed_goals = sum(1 for g in self.goals.values() if g.status == CoalitionGoalStatus.FAILED)
         total_finished = completed_goals + failed_goals
         if total_finished > 0:
             self.success_rate = completed_goals / total_finished
@@ -514,14 +516,16 @@ class Coalition:
         self.performance_metrics.update(
             {
                 "average_member_contribution": sum(
-                    m.contribution_score for m in self.members.values()) / len(
-                    self.members), "average_participation": sum(
-                    m.participation_rate for m in self.members.values()) / len(
-                        self.members), "resource_utilization": len(
-                            self.resource_allocation) / max(
-                                1, len(
-                                    self.total_resources)), "capability_coverage": len(
-                                        self.combined_capabilities), })
+                    m.contribution_score for m in self.members.values()
+                )
+                / len(self.members),
+                "average_participation": sum(m.participation_rate for m in self.members.values())
+                / len(self.members),
+                "resource_utilization": len(self.resource_allocation)
+                / max(1, len(self.total_resources)),
+                "capability_coverage": len(self.combined_capabilities),
+            }
+        )
 
     def get_status_summary(self) -> Dict[str, Any]:
         """Get comprehensive status summary"""
