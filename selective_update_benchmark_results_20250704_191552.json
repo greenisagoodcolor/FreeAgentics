@@ -1,0 +1,114 @@
+[
+  {
+    "name": "hierarchical_update_selective",
+    "configuration": {
+      "hierarchy_levels": 3,
+      "update_propagation": "selective"
+    },
+    "mean_time_ms": 0.2689806671696715,
+    "std_dev_ms": 0.05379174626343385,
+    "percentiles": {
+      "p50": 0.25198949879268184,
+      "p90": 0.34340870624873787,
+      "p95": 0.3472153046459425,
+      "p99": 0.3974875150015578
+    },
+    "memory_usage_mb": 0.3125,
+    "iterations": 30,
+    "timestamp": "2025-07-04T19:15:52.904532",
+    "additional_metrics": {
+      "full_update_time_ms": 0.16039899492170662,
+      "selective_update_time_ms": 0.05345199315343052,
+      "speedup_factor": 3.0008047494373424,
+      "computation_savings_percent": 33.333333333333336,
+      "levels_updated": 2,
+      "total_levels": 3,
+      "change_magnitude": 0.1463308531112837,
+      "propagation_efficiency": 0.6666666666666666
+    }
+  },
+  {
+    "name": "hierarchical_update_full",
+    "configuration": {
+      "hierarchy_levels": 3,
+      "update_propagation": "full"
+    },
+    "mean_time_ms": 0.16103490052046254,
+    "std_dev_ms": 0.012779280009694916,
+    "percentiles": {
+      "p50": 0.15709750732639804,
+      "p90": 0.17637880373513326,
+      "p95": 0.18530770030338314,
+      "p99": 0.1990990167541895
+    },
+    "memory_usage_mb": 0.0,
+    "iterations": 30,
+    "timestamp": "2025-07-04T19:15:52.911474",
+    "additional_metrics": {
+      "full_update_time_ms": 0.14509199536405504,
+      "selective_update_time_ms": 0.14509199536405504,
+      "speedup_factor": 1.0,
+      "computation_savings_percent": 0.0,
+      "levels_updated": 3,
+      "total_levels": 3,
+      "change_magnitude": 0.10480752840006327,
+      "propagation_efficiency": 1.0
+    }
+  },
+  {
+    "name": "hierarchical_update_selective",
+    "configuration": {
+      "hierarchy_levels": 5,
+      "update_propagation": "selective"
+    },
+    "mean_time_ms": 0.35931920137954876,
+    "std_dev_ms": 0.06135803292462663,
+    "percentiles": {
+      "p50": 0.33761750091798604,
+      "p90": 0.41038949711946776,
+      "p95": 0.4601884073053952,
+      "p99": 0.5580669906339609
+    },
+    "memory_usage_mb": 0.0,
+    "iterations": 30,
+    "timestamp": "2025-07-04T19:15:52.926156",
+    "additional_metrics": {
+      "full_update_time_ms": 0.2787120029097423,
+      "selective_update_time_ms": 0.05370398866944015,
+      "speedup_factor": 5.189782171027852,
+      "computation_savings_percent": 60.0,
+      "levels_updated": 2,
+      "total_levels": 5,
+      "change_magnitude": 0.1499300289471901,
+      "propagation_efficiency": 0.4
+    }
+  },
+  {
+    "name": "hierarchical_update_full",
+    "configuration": {
+      "hierarchy_levels": 5,
+      "update_propagation": "full"
+    },
+    "mean_time_ms": 0.27429636732752743,
+    "std_dev_ms": 0.010789855170333386,
+    "percentiles": {
+      "p50": 0.2677020020200871,
+      "p90": 0.2932292045443319,
+      "p95": 0.29622384754475206,
+      "p99": 0.2986833573959302
+    },
+    "memory_usage_mb": 0.0,
+    "iterations": 30,
+    "timestamp": "2025-07-04T19:15:52.937380",
+    "additional_metrics": {
+      "full_update_time_ms": 0.26452599558979273,
+      "selective_update_time_ms": 0.26452599558979273,
+      "speedup_factor": 1.0,
+      "computation_savings_percent": 0.0,
+      "levels_updated": 5,
+      "total_levels": 5,
+      "change_magnitude": 0.4666753827794581,
+      "propagation_efficiency": 1.0
+    }
+  }
+]

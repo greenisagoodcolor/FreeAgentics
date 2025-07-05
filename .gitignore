@@ -1,0 +1,211 @@
+# ==========================================
+# FreeAgentics .gitignore
+# ==========================================
+
+# ==========================================
+# Node.js & JavaScript
+# ==========================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+.pnp
+.pnp.js
+
+# Next.js build and cache files
+web/.next/
+web/out/
+web/build/
+web/dist/
+.next/
+out/
+build/
+dist/
+
+# ==========================================
+# Python
+# ==========================================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+.env
+
+# ==========================================
+# Testing & Coverage
+# ==========================================
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.cover
+*.py,cover
+.hypothesis/
+.tox/
+.nox/
+coverage/
+.nyc_output
+*.lcov
+cover/
+
+# ==========================================
+# Type Checking & Linting
+# ==========================================
+.mypy_cache/
+.dmypy.json
+dmypy.json
+mypy_reports/
+.ruff_cache/
+
+# Test outputs at root level (should be in tests/reports instead)
+/test-results/
+/playwright-report/
+/.test-reports/
+
+# ==========================================
+# Development & Temporary Files
+# ==========================================
+# Backup files
+*.bak
+*.backup
+*.old
+*.tmp
+*.orig
+*.rej
+
+# Logs
+logs/
+*.log
+dev-debug.log
+
+# ==========================================
+# IDE & Editor Files
+# ==========================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ==========================================
+# OS Specific
+# ==========================================
+# macOS
+.DS_Store
+*.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# ==========================================
+# Database Files
+# ==========================================
+*.db
+*.sqlite
+*.sqlite3
+
+# ==========================================
+# Security & Audit
+# ==========================================
+bandit-report.json
+*.bandit
+
+# ==========================================
+# Documentation
+# ==========================================
+site/
+docs/_build/
+
+# ==========================================
+# Jupyter Notebooks
+# ==========================================
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# ==========================================
+# Task Master (Commented out - user decision)
+# ==========================================
+
+# ==========================================
+# Repository Optimization Patterns
+# ==========================================
+# Test execution artifacts
+test-reports/
+coverage_output.txt
+*_test_output*.log
+isinstance_typeerror_traceback.txt
+freeagentics@*
+
+# Development artifacts
+web/fix-*.js
+web/suppress-*.js
+web/debug-*.js
+web/*-debug.log
+web/coverage-*/
+web/comprehensive-ux-test.js
+
+# Build system artifacts
+*.tsbuildinfo
+.jest-cache/
+
+# Additional coverage patterns
+htmlcov/
+coverage-massive/
+coverage.json
+.coverage.*
+
+# Release and test artifacts
+release-report-*/
+
+logs
+# Dependency directories
+# Environment variables
+# Editor directories and files
+.idea
+.vscode
+# OS specific
+
+# Task files
+# tasks.json
+# tasks/

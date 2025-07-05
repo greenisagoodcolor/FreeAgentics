@@ -1,0 +1,362 @@
+"""Agent manager for creating and coordinating agents."""
+
+import asyncio
+import logging
+import threading
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+from agents.agent_adapter import ActiveInferenceGridAdapter
+from agents.base_agent import ActiveInferenceAgent, BasicExplorerAgent
+from world.grid_world import CellType, GridWorld, GridWorldConfig, Position
+
+logger = logging.getLogger(__name__)
+
+
+class AgentManager:
+    """Manages the lifecycle and coordination of Active Inference agents."""
+
+    def __init__(self):
+        """Initialize the agent manager."""
+        self.agents: Dict[str, ActiveInferenceAgent] = {}
+        self.world: Optional[GridWorld] = None
+        self.adapter = ActiveInferenceGridAdapter()
+        self.running = False
+        self._agent_counter = 0
+        # Thread pool for async operations
+        self._executor = ThreadPoolExecutor(max_workers=2)
+        # Event queue for async broadcasts
+        self._event_queue: List[Dict[str, Any]] = []
+        self._event_lock = threading.Lock()
+
+        logger.info("Agent manager initialized")
+
+    def _find_free_position(self) -> Position:
+        """Find a free position in the world for a new agent."""
+        if not self.world:
+            return Position(0, 0)
+
+        # Try to find an unoccupied position
+        for y in range(self.world.height):
+            for x in range(self.world.width):
+                pos = Position(x, y)
+                if pos not in [agent.position for agent in self.world.agents.values()]:
+                    # Check if the cell is empty/walkable
+                    cell = self.world.get_cell(pos)
+                    if cell and cell.type in [CellType.EMPTY, CellType.RESOURCE]:
+                        return pos
+
+        # Fallback to (0,0) if no free position found
+        return Position(0, 0)
+
+    def create_world(self, size: int = 10) -> GridWorld:
+        """Create a world for agents to interact in.
+
+        Args:
+            size: Size of the grid world
+
+        Returns:
+            Created world
+        """
+        config = GridWorldConfig(width=size, height=size)
+        self.world = GridWorld(config)
+        logger.info(f"Created {size}x{size} world")
+        return self.world
+
+    def create_agent(self, agent_type: str, name: str, **kwargs) -> str:
+        """Create a new agent.
+
+        Args:
+            agent_type: Type of agent to create
+            name: Human-readable name for the agent
+            **kwargs: Additional configuration parameters
+
+        Returns:
+            Agent ID
+        """
+        self._agent_counter += 1
+        agent_id = f"agent_{self._agent_counter}"
+
+        # Create agent based on type
+        if agent_type == "explorer":
+            grid_size = self.world.width if self.world else 10
+            agent = BasicExplorerAgent(agent_id=agent_id, name=name, grid_size=grid_size)
+        else:
+            raise ValueError(f"Unknown agent type: {agent_type}")
+
+        self.agents[agent_id] = agent
+
+        # Add to world using adapter
+        if self.world:
+            # Choose starting position
+            if "position" in kwargs:
+                pos = kwargs["position"]
+                start_pos = Position(pos[0], pos[1])
+            else:
+                # Find an unoccupied position
+                start_pos = self._find_free_position()
+
+            # Register with adapter and add to world
+            grid_agent = self.adapter.register_agent(agent, start_pos)
+            self.world.add_agent(grid_agent)
+
+        logger.info(f"Created {agent_type} agent: {agent_id} ({name})")
+
+        # Queue event for async broadcast
+        self._queue_event(
+            agent_id,
+            "created",
+            {"agent_type": agent_type, "name": name, "timestamp": datetime.now().isoformat()},
+        )
+
+        return agent_id
+
+    def _queue_event(self, agent_id: str, event_type: str, data: dict):
+        """Queue an event for async broadcast."""
+        with self._event_lock:
+            self._event_queue.append({"agent_id": agent_id, "event_type": event_type, "data": data})
+
+        # Submit async broadcast task to thread pool
+        self._executor.submit(self._process_event_queue)
+
+    def _process_event_queue(self):
+        """Process queued events in a separate thread."""
+        events_to_process = []
+
+        with self._event_lock:
+            events_to_process = self._event_queue.copy()
+            self._event_queue.clear()
+
+        if events_to_process:
+            # Create new event loop for this thread if needed
+            try:
+                loop = asyncio.get_event_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+
+            # Process all events
+            for event in events_to_process:
+                loop.run_until_complete(
+                    self._broadcast_agent_event(
+                        event["agent_id"], event["event_type"], event["data"]
+                    )
+                )
+
+    async def _broadcast_agent_event(self, agent_id: str, event_type: str, data: dict):
+        """Broadcast agent event via WebSocket."""
+        try:
+            from api.v1.websocket import broadcast_agent_event
+
+            await broadcast_agent_event(agent_id, event_type, data)
+        except Exception as e:
+            logger.error(f"Failed to broadcast agent event: {e}")
+
+    def start_agent(self, agent_id: str) -> bool:
+        """Start an agent.
+
+        Args:
+            agent_id: Agent to start
+
+        Returns:
+            True if started successfully
+        """
+        if agent_id not in self.agents:
+            logger.error(f"Agent {agent_id} not found")
+            return False
+
+        agent = self.agents[agent_id]
+        agent.start()
+
+        # Queue agent start event
+        self._queue_event(agent_id, "started", {"timestamp": datetime.now().isoformat()})
+
+        return True
+
+    def stop_agent(self, agent_id: str) -> bool:
+        """Stop an agent.
+
+        Args:
+            agent_id: Agent to stop
+
+        Returns:
+            True if stopped successfully
+        """
+        if agent_id not in self.agents:
+            logger.error(f"Agent {agent_id} not found")
+            return False
+
+        agent = self.agents[agent_id]
+        agent.stop()
+
+        # Queue agent stop event
+        self._queue_event(agent_id, "stopped", {"timestamp": datetime.now().isoformat()})
+
+        return True
+
+    def remove_agent(self, agent_id: str) -> bool:
+        """Remove an agent (alias for delete_agent for compatibility)."""
+        return self.delete_agent(agent_id)
+
+    def delete_agent(self, agent_id: str) -> bool:
+        """Delete an agent.
+
+        Args:
+            agent_id: Agent to delete
+
+        Returns:
+            True if deleted successfully
+        """
+        if agent_id not in self.agents:
+            logger.error(f"Agent {agent_id} not found")
+            return False
+
+        # Stop agent if running
+        self.stop_agent(agent_id)
+
+        # Remove from world
+        if self.world:
+            self.world.remove_agent(agent_id)
+
+        # Unregister from adapter
+        self.adapter.unregister_agent(agent_id)
+
+        # Delete agent
+        del self.agents[agent_id]
+        logger.info(f"Deleted agent {agent_id}")
+        return True
+
+    def step_agent(self, agent_id: str) -> Dict[str, Any]:
+        """Execute one step for an agent.
+
+        Args:
+            agent_id: Agent to step
+
+        Returns:
+            Step result
+        """
+        if agent_id not in self.agents:
+            raise ValueError(f"Agent {agent_id} not found")
+
+        if not self.world:
+            raise RuntimeError("No world available")
+
+        agent = self.agents[agent_id]
+        grid_agent = self.adapter.get_grid_agent(agent_id)
+
+        if not grid_agent:
+            raise RuntimeError(f"No grid agent found for {agent_id}")
+
+        # Get observation from world
+        grid_observation = self.world.get_observation(agent_id)
+
+        # Convert observation to AI agent format
+        ai_observation = self.adapter.convert_observation(grid_observation)
+
+        # AI agent processes observation and selects action
+        action = agent.step(ai_observation)
+
+        # Convert action to new position
+        new_position = self.adapter.convert_action(action, grid_agent.position)
+
+        # Move agent in world
+        success = self.world.move_agent(agent_id, new_position)
+
+        # Sync agent states
+        self.adapter.sync_agent_state(agent_id)
+
+        return {
+            "agent_id": agent_id,
+            "action": action,
+            "new_position": {"x": new_position.x, "y": new_position.y},
+            "success": success,
+        }
+
+    def step_all(self) -> Dict[str, Dict[str, Any]]:
+        """Execute one step for all active agents.
+
+        Returns:
+            Results for each agent
+        """
+        results = {}
+
+        # Step world
+        if self.world:
+            self.world.step()
+
+        # Step each active agent
+        for agent_id, agent in self.agents.items():
+            if agent.is_active:
+                try:
+                    results[agent_id] = self.step_agent(agent_id)
+                except Exception as e:
+                    logger.error(f"Error stepping agent {agent_id}: {e}")
+                    results[agent_id] = {"error": str(e)}
+
+        return results
+
+    def get_agent_status(self, agent_id: str) -> Dict[str, Any]:
+        """Get status of an agent.
+
+        Args:
+            agent_id: Agent to query
+
+        Returns:
+            Agent status
+        """
+        if agent_id not in self.agents:
+            raise ValueError(f"Agent {agent_id} not found")
+
+        return self.agents[agent_id].get_status()
+
+    def get_all_agents_status(self) -> List[Dict[str, Any]]:
+        """Get status of all agents.
+
+        Returns:
+            List of agent statuses
+        """
+        return [agent.get_status() for agent in self.agents.values()]
+
+    def get_world_state(self) -> Optional[Dict[str, Any]]:
+        """Get current world state.
+
+        Returns:
+            World state or None if no world
+        """
+        if self.world:
+            return self.world.get_state()
+        return None
+
+    def render_world(self) -> Optional[str]:
+        """Render world as ASCII art.
+
+        Returns:
+            ASCII representation or None if no world
+        """
+        if self.world:
+            return self.world.render()
+        return None
+
+    def run_simulation(self, steps: int = 100) -> List[Dict[str, Dict[str, Any]]]:
+        """Run simulation for multiple steps.
+
+        Args:
+            steps: Number of steps to run
+
+        Returns:
+            History of results
+        """
+        history = []
+
+        logger.info(f"Starting simulation for {steps} steps")
+
+        for i in range(steps):
+            results = self.step_all()
+            history.append(results)
+
+            if i % 10 == 0:
+                logger.info(f"Simulation step {i}/{steps}")
+
+        logger.info("Simulation complete")
+        return history

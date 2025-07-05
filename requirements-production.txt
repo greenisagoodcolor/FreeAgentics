@@ -1,0 +1,53 @@
+# Production dependencies for FreeAgentics
+# Minimal dependencies for deployment
+
+# Core Framework
+fastapi==0.115.14
+uvicorn[standard]==0.35.0
+pydantic==2.9.2
+
+# Scientific Computing
+numpy==2.3.1
+torch==2.7.1
+scipy==1.16.0
+
+# Active Inference
+inferactively-pymdp==0.0.7.1
+
+# Graph Neural Networks
+torch-geometric==2.6.1
+networkx==3.5
+
+# Web and API
+httpx==0.28.1
+aiofiles==24.1.0
+python-multipart==0.0.20
+
+# Database
+sqlalchemy==2.0.41
+alembic==1.16.2
+psycopg2-binary==2.9.10
+
+# Configuration
+python-dotenv==1.1.1
+pyyaml==6.0.2
+
+# Logging
+structlog==24.4.0
+
+# Authentication and Security
+passlib[bcrypt]==1.7.4
+pyjwt==2.10.1
+cryptography==45.0.5
+
+# Data Processing
+pandas==2.3.0
+
+# System Monitoring
+psutil==6.1.1
+
+# Redis for caching/session management
+redis==6.2.0
+
+# Additional ASGI server options
+gunicorn==24.0.0

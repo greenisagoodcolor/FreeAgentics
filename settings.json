@@ -1,0 +1,17 @@
+{
+  "python.defaultInterpreterPath": "./venv/bin/python",
+  "jupyter.kernels.filter": [
+    {
+      "displayName": "Python (GPU)",
+      "kernelspec": {
+        "name": "python3",
+        "display_name": "Python (GPU)",
+        "language": "python"
+      }
+    }
+  ],
+  "terminal.integrated.env.linux": {
+    "CUDA_VISIBLE_DEVICES": "0",
+    "PYTORCH_CUDA_ALLOC_CONF": "max_split_size_mb:512"
+  }
+}

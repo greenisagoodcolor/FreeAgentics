@@ -1,0 +1,53 @@
+# Development dependencies for FreeAgentics
+# Include core requirements plus development tools
+
+-r requirements-core.txt
+
+# Development Tools
+ipython==9.4.0
+ipykernel==6.29.5
+jupyter_client==8.6.3
+jupyter_core==5.8.1
+
+# Testing Framework
+pytest-html==4.1.1
+pytest-mock==3.14.1
+pytest-timeout==2.4.0
+pytest-xdist==3.8.0
+pytest-bdd==8.1.0
+coverage==7.9.1
+hypothesis==6.135.24
+
+# Code Quality and Linting
+flake8-bugbear==24.12.12
+flake8-comprehensions==3.16.0
+flake8-docstrings==1.7.0
+pydocstyle==6.3.0
+mypy_extensions==1.1.0
+bandit==1.8.5
+
+# Performance Profiling
+memory-profiler==0.61.0
+line_profiler==4.2.0
+py-spy==0.4.0
+
+# Documentation
+sphinx==8.2.3
+sphinx-rtd-theme==3.0.2
+myst-parser==4.0.1
+
+# Git and Versioning
+pre_commit==4.2.0
+commitizen==4.8.3
+
+# Data Analysis and Visualization
+matplotlib==3.10.3
+seaborn==0.13.2
+plotly==6.2.0
+
+# Security
+safety==3.5.2
+pip_audit==2.9.0
+
+# Environment Management
+virtualenv==20.31.2

@@ -1,0 +1,135 @@
+version: "3.8"
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: freeagentics-postgres
+    environment:
+      POSTGRES_DB: freeagentics
+      POSTGRES_USER: freeagentics
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-freeagentics123}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U freeagentics"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: freeagentics-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FreeAgentics Backend (Development)
+  backend-dev:
+    build:
+      context: .
+      target: development
+    container_name: freeagentics-backend-dev
+    environment:
+      - DATABASE_URL=postgresql://freeagentics:${POSTGRES_PASSWORD:-freeagentics123}@postgres:5432/freeagentics
+      - REDIS_URL=redis://redis:6379
+      - ENVIRONMENT=development
+      - LOG_LEVEL=DEBUG
+    volumes:
+      - .:/app
+      - /app/venv
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles:
+      - dev
+
+  # FreeAgentics Backend (Production)
+  backend:
+    build:
+      context: .
+      target: production
+    container_name: freeagentics-backend
+    environment:
+      - DATABASE_URL=postgresql://freeagentics:${POSTGRES_PASSWORD:-freeagentics123}@postgres:5432/freeagentics
+      - REDIS_URL=redis://redis:6379
+      - ENVIRONMENT=production
+      - LOG_LEVEL=INFO
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles:
+      - prod
+
+  # Frontend (Next.js)
+  frontend:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: freeagentics-frontend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NODE_ENV=production
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    profiles:
+      - prod
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: freeagentics-nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+    profiles:
+      - prod
+
+  # Database Migration Service
+  migration:
+    build:
+      context: .
+      target: production
+    container_name: freeagentics-migration
+    environment:
+      - DATABASE_URL=postgresql://freeagentics:${POSTGRES_PASSWORD:-freeagentics123}@postgres:5432/freeagentics
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - migrate
+
+volumes:
+  postgres_data:
+  redis_data:

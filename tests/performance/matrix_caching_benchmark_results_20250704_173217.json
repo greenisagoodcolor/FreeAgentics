@@ -1,0 +1,282 @@
+[
+  {
+    "name": "observation_likelihood_caching_enabled",
+    "configuration": {
+      "state_size": 25,
+      "num_modalities": 2,
+      "cache_enabled": true
+    },
+    "mean_time_ms": 1.6975124250166118,
+    "std_dev_ms": 0.3234195210995425,
+    "percentiles": {
+      "p50": 1.5219745037029497,
+      "p90": 2.078755902766716,
+      "p95": 2.3254455016285647,
+      "p99": 2.521662250655936
+    },
+    "memory_usage_mb": 3.90625,
+    "iterations": 40,
+    "timestamp": "2025-07-04T17:32:10.522192",
+    "additional_metrics": {
+      "avg_computation_time_ms": 0.058879932233442865,
+      "total_likelihood_operations": 30,
+      "cache_hit_rate": 0.022,
+      "cache_hits": 33,
+      "cache_misses": 1467,
+      "cache_memory_mb": 4.76837158203125
+    }
+  },
+  {
+    "name": "observation_likelihood_caching_disabled",
+    "configuration": {
+      "state_size": 25,
+      "num_modalities": 2,
+      "cache_enabled": false
+    },
+    "mean_time_ms": 1.307536074455129,
+    "std_dev_ms": 0.11838206318001615,
+    "percentiles": {
+      "p50": 1.2787000014213845,
+      "p90": 1.4230664964998143,
+      "p95": 1.5235434999340212,
+      "p99": 1.732286655314965
+    },
+    "memory_usage_mb": 0.0,
+    "iterations": 40,
+    "timestamp": "2025-07-04T17:32:10.586932",
+    "additional_metrics": {
+      "avg_computation_time_ms": 0.04139953283205008,
+      "total_likelihood_operations": 30,
+      "cache_hit_rate": 0.0,
+      "cache_hits": 0,
+      "cache_misses": 30,
+      "cache_memory_mb": 0.0
+    }
+  },
+  {
+    "name": "observation_likelihood_caching_enabled",
+    "configuration": {
+      "state_size": 35,
+      "num_modalities": 3,
+      "cache_enabled": true
+    },
+    "mean_time_ms": 45.34810449986253,
+    "std_dev_ms": 2.0498965606194193,
+    "percentiles": {
+      "p50": 45.102408999809995,
+      "p90": 47.5469743978465,
+      "p95": 49.1663010121556,
+      "p99": 51.52466675135656
+    },
+    "memory_usage_mb": 229.53125,
+    "iterations": 40,
+    "timestamp": "2025-07-04T17:32:12.903663",
+    "additional_metrics": {
+      "avg_computation_time_ms": 1.4883063321273464,
+      "total_likelihood_operations": 30,
+      "cache_hit_rate": 0.0,
+      "cache_hits": 0,
+      "cache_misses": 1500,
+      "cache_memory_mb": 327.11029052734375
+    }
+  },
+  {
+    "name": "observation_likelihood_caching_disabled",
+    "configuration": {
+      "state_size": 35,
+      "num_modalities": 3,
+      "cache_enabled": false
+    },
+    "mean_time_ms": 42.24001325055724,
+    "std_dev_ms": 1.2875284898380364,
+    "percentiles": {
+      "p50": 42.013841499283444,
+      "p90": 43.82767609786242,
+      "p95": 44.4918509463605,
+      "p99": 45.52982227891334
+    },
+    "memory_usage_mb": 0.0,
+    "iterations": 40,
+    "timestamp": "2025-07-04T17:32:15.053550",
+    "additional_metrics": {
+      "avg_computation_time_ms": 1.4152723335428163,
+      "total_likelihood_operations": 30,
+      "cache_hit_rate": 0.0,
+      "cache_hits": 0,
+      "cache_misses": 30,
+      "cache_memory_mb": 0.0
+    }
+  },
+  {
+    "name": "intermediate_result_caching_enabled",
+    "configuration": {
+      "complexity_level": 2,
+      "cache_enabled": true
+    },
+    "mean_time_ms": 0.1311049494688632,
+    "std_dev_ms": 0.11062718750622515,
+    "percentiles": {
+      "p50": 0.07543851097580045,
+      "p90": 0.2671917085535825,
+      "p95": 0.43826463734148996,
+      "p99": 0.47542188796796836
+    },
+    "memory_usage_mb": 0.0,
+    "iterations": 40,
+    "timestamp": "2025-07-04T17:32:15.086270",
+    "additional_metrics": {
+      "avg_computation_time_ms": 0.00024329856387339532,
+      "total_operations": 20,
+      "cache_hit_rate": 0.875,
+      "cache_hits": 875,
+      "cache_misses": 125,
+      "cache_memory_mb": 0.019073486328125
+    }
+  },
+  {
+    "name": "intermediate_result_caching_disabled",
+    "configuration": {
+      "complexity_level": 2,
+      "cache_enabled": false
+    },
+    "mean_time_ms": 1.6837946001032833,
+    "std_dev_ms": 0.18507833244770222,
+    "percentiles": {
+      "p50": 1.6576445050304756,
+      "p90": 1.7599761878955178,
+      "p95": 1.9006227477802882,
+      "p99": 2.426762175746262
+    },
+    "memory_usage_mb": 0.0,
+    "iterations": 40,
+    "timestamp": "2025-07-04T17:32:15.171578",
+    "additional_metrics": {
+      "avg_computation_time_ms": 0.07269144989550114,
+      "total_operations": 20,
+      "cache_hit_rate": 0.0,
+      "cache_hits": 0,
+      "cache_misses": 20,
+      "cache_memory_mb": 0.0
+    }
+  },
+  {
+    "name": "intermediate_result_caching_enabled",
+    "configuration": {
+      "complexity_level": 4,
+      "cache_enabled": true
+    },
+    "mean_time_ms": 0.15675945032853633,
+    "std_dev_ms": 0.1380836953755262,
+    "percentiles": {
+      "p50": 0.08062300912570208,
+      "p90": 0.4193765038507991,
+      "p95": 0.48364594695158286,
+      "p99": 0.5622989840048831
+    },
+    "memory_usage_mb": 0.0,
+    "iterations": 40,
+    "timestamp": "2025-07-04T17:32:15.201181",
+    "additional_metrics": {
+      "avg_computation_time_ms": 0.00023459724616259336,
+      "total_operations": 20,
+      "cache_hit_rate": 0.875,
+      "cache_hits": 875,
+      "cache_misses": 125,
+      "cache_memory_mb": 0.0286102294921875
+    }
+  },
+  {
+    "name": "intermediate_result_caching_disabled",
+    "configuration": {
+      "complexity_level": 4,
+      "cache_enabled": false
+    },
+    "mean_time_ms": 1.9699825985298958,
+    "std_dev_ms": 0.1991798004183923,
+    "percentiles": {
+      "p50": 1.9339495047461241,
+      "p90": 2.1983894912409596,
+      "p95": 2.3531521968834563,
+      "p99": 2.6015355007257313
+    },
+    "memory_usage_mb": 0.0,
+    "iterations": 40,
+    "timestamp": "2025-07-04T17:32:15.299618",
+    "additional_metrics": {
+      "avg_computation_time_ms": 0.0820638975710608,
+      "total_operations": 20,
+      "cache_hit_rate": 0.0,
+      "cache_hits": 0,
+      "cache_misses": 20,
+      "cache_memory_mb": 0.0
+    }
+  },
+  {
+    "name": "cache_comparison_observation_heavy",
+    "configuration": {
+      "scenario": "observation_heavy",
+      "cached_config": {
+        "state_size": 25,
+        "num_modalities": 3,
+        "cache_enabled": true
+      },
+      "uncached_config": {
+        "state_size": 25,
+        "num_modalities": 3,
+        "cache_enabled": false
+      }
+    },
+    "mean_time_ms": 33.92385022598319,
+    "std_dev_ms": 1.178583401998449,
+    "percentiles": {
+      "p50": 33.79679900535848,
+      "p90": 35.27994069736451,
+      "p95": 35.58583985141013,
+      "p99": 37.36960291775176
+    },
+    "memory_usage_mb": 83.75,
+    "iterations": 40,
+    "timestamp": "2025-07-04T17:32:17.015277",
+    "additional_metrics": {
+      "cached_avg_time_ms": 0.5417650361778215,
+      "uncached_avg_time_ms": 0.5086739343823865,
+      "speedup_factor": 0.9389198276269464,
+      "cache_hit_rate": 0.002,
+      "cache_memory_mb": 119.20928955078125,
+      "efficiency_gain": 0
+    }
+  },
+  {
+    "name": "cache_comparison_mixed_workload",
+    "configuration": {
+      "scenario": "mixed_workload",
+      "cached_config": {
+        "complexity_level": 3,
+        "cache_enabled": true
+      },
+      "uncached_config": {
+        "complexity_level": 3,
+        "cache_enabled": false
+      }
+    },
+    "mean_time_ms": 2.4373129246669123,
+    "std_dev_ms": 0.1756322563408596,
+    "percentiles": {
+      "p50": 2.415363989712205,
+      "p90": 2.5747648061951622,
+      "p95": 2.6841557461011685,
+      "p99": 3.0115445336559787
+    },
+    "memory_usage_mb": 0.0,
+    "iterations": 40,
+    "timestamp": "2025-07-04T17:32:17.150321",
+    "additional_metrics": {
+      "cached_avg_time_ms": 0.00030109877116046846,
+      "uncached_avg_time_ms": 0.10628304953570478,
+      "speedup_factor": 352.98400297708946,
+      "cache_hit_rate": 0.875,
+      "cache_memory_mb": 0.02384185791015625,
+      "efficiency_gain": 99.71670104266313
+    }
+  }
+]
