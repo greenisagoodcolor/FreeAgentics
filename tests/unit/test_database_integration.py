@@ -22,7 +22,7 @@ class TestDatabaseIntegration:
     def test_db_engine(self):
         """Create a test database engine."""
         # Use the same database as the main app for integration testing
-        DATABASE_URL = "postgresql://freeagentics:freeagentics123@localhost:5432/freeagentics"
+        DATABASE_URL = os.getenv("TEST_DATABASE_URL", "sqlite:///./test_freeagentics.db")
         engine = create_engine(DATABASE_URL)
         # Create all tables
         Base.metadata.create_all(bind=engine)

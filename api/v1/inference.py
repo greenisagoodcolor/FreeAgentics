@@ -4,8 +4,11 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+
+# Security imports
+from auth.security_implementation import Permission, TokenData, get_current_user, require_permission
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +43,10 @@ class BeliefUpdate(BaseModel):
 
 
 @router.post("/inference", response_model=InferenceResponse)
-async def perform_inference(request: InferenceRequest) -> InferenceResponse:
+@require_permission(Permission.MODIFY_AGENT)
+async def perform_inference(
+    request: InferenceRequest, current_user: TokenData = Depends(get_current_user)
+) -> InferenceResponse:
     """Perform Active Inference for an agent.
 
     This endpoint processes an observation through an agent's Active Inference
@@ -73,7 +79,10 @@ async def perform_inference(request: InferenceRequest) -> InferenceResponse:
 
 
 @router.post("/inference/batch", response_model=List[InferenceResponse])
-async def perform_batch_inference(requests: List[InferenceRequest]) -> List[InferenceResponse]:
+@require_permission(Permission.MODIFY_AGENT)
+async def perform_batch_inference(
+    requests: List[InferenceRequest], current_user: TokenData = Depends(get_current_user)
+) -> List[InferenceResponse]:
     """Perform batch inference for multiple agents.
 
     This endpoint allows processing multiple observations simultaneously
@@ -95,7 +104,10 @@ async def perform_batch_inference(requests: List[InferenceRequest]) -> List[Infe
 
 
 @router.put("/beliefs/{agent_id}", response_model=BeliefUpdate)
-async def update_beliefs(agent_id: str, beliefs: Dict[str, Any]) -> BeliefUpdate:
+@require_permission(Permission.MODIFY_AGENT)
+async def update_beliefs(
+    agent_id: str, beliefs: Dict[str, Any], current_user: TokenData = Depends(get_current_user)
+) -> BeliefUpdate:
     """Manually update an agent's belief state.
 
     This endpoint allows direct manipulation of an agent's beliefs,
@@ -116,7 +128,10 @@ async def update_beliefs(agent_id: str, beliefs: Dict[str, Any]) -> BeliefUpdate
 
 
 @router.get("/beliefs/{agent_id}")
-async def get_beliefs(agent_id: str) -> Dict[str, Any]:
+@require_permission(Permission.VIEW_AGENTS)
+async def get_beliefs(
+    agent_id: str, current_user: TokenData = Depends(get_current_user)
+) -> Dict[str, Any]:
     """Get current belief state for an agent.
 
     Returns the agent's current beliefs about hidden states
@@ -142,7 +157,10 @@ async def get_beliefs(agent_id: str) -> Dict[str, Any]:
 
 
 @router.get("/inference/status")
-async def get_inference_status() -> Dict[str, Any]:
+@require_permission(Permission.VIEW_METRICS)
+async def get_inference_status(
+    current_user: TokenData = Depends(get_current_user),
+) -> Dict[str, Any]:
     """Get status of the inference system.
 
     Returns information about the current state of the inference engine,
@@ -160,7 +178,10 @@ async def get_inference_status() -> Dict[str, Any]:
 
 
 @router.get("/inference/capabilities")
-async def get_inference_capabilities() -> Dict[str, Any]:
+@require_permission(Permission.VIEW_AGENTS)
+async def get_inference_capabilities(
+    current_user: TokenData = Depends(get_current_user),
+) -> Dict[str, Any]:
     """Get capabilities of the inference system.
 
     Returns detailed information about what inference methods

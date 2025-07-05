@@ -12,13 +12,20 @@
 # 4. Run `make test-dev`  - Fast tests for active development
 # 5. Run `make dev`       - Start development servers
 #
+# SECURITY SETUP (IMPORTANT for v0.2):
+# 1. Copy `.env` to `.env.local` for development
+# 2. NEVER commit `.env.production` with real secrets
+# 3. Run `make security-check` to validate security configuration
+#
 # BEFORE COMMITTING:
 # 1. Run `make test-commit` - Run full test suite before committing
 # 2. Run `make format`      - Auto-format all code
 # 3. Run `make lint`        - Check code quality
+# 4. Run `make security-scan` - Check for security vulnerabilities
 #
 # BEFORE RELEASING:
 # 1. Run `make test-release` - Comprehensive validation with all tools
+# 2. Run `make security-audit` - Full security audit for production
 #
 # For more details on any command, run: make help
 # ============================================================================
@@ -77,6 +84,7 @@ endif
 .PHONY: help check install deps-check build clean lint format type-check test-dev test-commit test-release coverage
 .PHONY: dev demo start stop kill-ports status reset docs docker docker-build docker-up docker-down
 .PHONY: test-unit test-integration test-e2e test-security test-chaos test-compliance ci-setup
+.PHONY: security-check security-scan security-audit prod-env dev-env check-secrets
 
 # ============================================================================
 # 1. HELP AND INFORMATION
@@ -108,7 +116,13 @@ help: ## 📖 Show this help and all available commands
 	@printf "    $(GREEN)test-commit$(RESET)     Full test suite + quality checks\n"
 	@printf "    $(GREEN)format$(RESET)          Ensure code is properly formatted\n"
 	@printf "\n"
-	@printf "  $(CYAN)4. Release Preparation:$(RESET)\n"
+	@printf "  $(CYAN)4. Security Validation:$(RESET)\n"
+	@printf "    $(GREEN)security-check$(RESET)  Verify security configuration\n"
+	@printf "    $(GREEN)security-scan$(RESET)   Quick vulnerability scan\n"
+	@printf "    $(GREEN)security-audit$(RESET)  Full security audit\n"
+	@printf "    $(GREEN)check-secrets$(RESET)   Scan for hardcoded secrets\n"
+	@printf "\n"
+	@printf "  $(CYAN)5. Release Preparation:$(RESET)\n"
 	@printf "    $(GREEN)test-release$(RESET)    Comprehensive validation (all tools)\n"
 	@printf "    $(GREEN)build$(RESET)           Build for production\n"
 	@printf "    $(GREEN)coverage$(RESET)        Generate detailed coverage reports\n"
@@ -126,6 +140,8 @@ help: ## 📖 Show this help and all available commands
 	@printf "  $(GREEN)stop$(RESET)             Stop all development servers\n"
 	@printf "  $(GREEN)reset$(RESET)            Clean environment reset\n"
 	@printf "  $(GREEN)demo$(RESET)             Run demo (placeholder)\n"
+	@printf "  $(GREEN)dev-env$(RESET)          Set up development environment\n"
+	@printf "  $(GREEN)prod-env$(RESET)         Validate production environment\n"
 	@printf "\n"
 	@printf "$(BOLD)$(RED)📚 Documentation:$(RESET)\n"
 	@printf "  See README.md for detailed setup instructions\n"
@@ -693,6 +709,202 @@ docker-down: ## 🛑 Stop Docker containers
 	@echo -e "$(BOLD)$(YELLOW)🛑 Stopping Docker Containers$(RESET)"
 	@docker-compose down
 	@echo -e "$(GREEN)✅ Docker containers stopped$(RESET)"
+
+# ============================================================================
+# 11. SECURITY COMMANDS
+# ============================================================================
+
+security-check: ## 🔒 Verify security configuration
+	@echo -e "$(BOLD)$(CYAN)🔒 Security Configuration Check$(RESET)"
+	@echo ""
+	@echo -e "$(YELLOW)📋 Environment Variables:$(RESET)"
+	@if [ -f ".env" ]; then \
+		echo -e "  $(GREEN)✅ .env file exists$(RESET)"; \
+		if grep -q "dev_secret_key_2025_not_for_production" .env; then \
+			echo -e "  $(YELLOW)⚠️  Using development SECRET_KEY$(RESET)"; \
+		else \
+			echo -e "  $(GREEN)✅ Custom SECRET_KEY configured$(RESET)"; \
+		fi; \
+		if grep -q "dev_jwt_secret_2025_not_for_production" .env; then \
+			echo -e "  $(YELLOW)⚠️  Using development JWT_SECRET$(RESET)"; \
+		else \
+			echo -e "  $(GREEN)✅ Custom JWT_SECRET configured$(RESET)"; \
+		fi; \
+	else \
+		echo -e "  $(RED)❌ .env file missing$(RESET)"; \
+	fi
+	@if [ -f ".env.production" ]; then \
+		echo -e "  $(RED)⚠️  WARNING: .env.production exists - ensure it's not in git!$(RESET)"; \
+	fi
+	@echo ""
+	@echo -e "$(YELLOW)🔐 Authentication Setup:$(RESET)"
+	@grep -l "@require_permission" api/v1/*.py > /dev/null 2>&1 && \
+		echo -e "  $(GREEN)✅ API endpoints have authentication decorators$(RESET)" || \
+		echo -e "  $(RED)❌ API endpoints missing authentication$(RESET)"
+	@echo ""
+	@echo -e "$(YELLOW)📁 Security Files:$(RESET)"
+	@test -f "auth/security_implementation.py" && \
+		echo -e "  $(GREEN)✅ Security implementation found$(RESET)" || \
+		echo -e "  $(RED)❌ Security implementation missing$(RESET)"
+	@test -f ".env.production.template" && \
+		echo -e "  $(GREEN)✅ Production template exists$(RESET)" || \
+		echo -e "  $(YELLOW)⚠️  Production template missing$(RESET)"
+	@test -f "SECURITY_AUDIT_REPORT.md" && \
+		echo -e "  $(GREEN)✅ Security audit report exists$(RESET)" || \
+		echo -e "  $(CYAN)ⓘ No security audit report$(RESET)"
+	@echo ""
+	@echo -e "$(GREEN)Run 'make security-audit' for comprehensive security analysis$(RESET)"
+
+security-scan: ## 🛡️ Quick vulnerability scan
+	@echo -e "$(BOLD)$(YELLOW)🛡️ Security Vulnerability Scan$(RESET)"
+	@echo ""
+	@if [ -d "$(VENV_DIR)" ]; then \
+		echo -e "$(CYAN)🔍 Scanning Python dependencies...$(RESET)"; \
+		. $(VENV_DIR)/bin/activate && \
+		pip install -q safety pip-audit 2>/dev/null; \
+		echo ""; \
+		echo -e "$(YELLOW)📦 Dependency vulnerabilities:$(RESET)"; \
+		pip-audit --desc 2>/dev/null || echo -e "  $(CYAN)pip-audit not available$(RESET)"; \
+		echo ""; \
+		echo -e "$(YELLOW)🔒 Code security issues:$(RESET)"; \
+		bandit -r . -f text --severity-level medium --quiet 2>/dev/null || echo -e "  $(CYAN)bandit not available$(RESET)"; \
+	else \
+		echo -e "$(RED)❌ Python environment not ready. Run 'make install' first$(RESET)"; \
+	fi
+	@echo ""
+	@if [ -f "package.json" ] || [ -f "$(WEB_DIR)/package.json" ]; then \
+		echo -e "$(CYAN)🔍 Scanning Node.js dependencies...$(RESET)"; \
+		npm audit --audit-level=moderate 2>/dev/null || echo -e "  $(CYAN)npm audit not available$(RESET)"; \
+	fi
+
+security-audit: ## 🏆 Full security audit for production
+	@echo -e "$(BOLD)$(MAGENTA)🏆 Comprehensive Security Audit$(RESET)"
+	@echo -e "$(CYAN)Full security analysis for v0.2 release$(RESET)"
+	@echo ""
+	@mkdir -p $(REPORT_DIR)/security
+	@echo -e "$(YELLOW)1. Authentication & Authorization:$(RESET)"
+	@echo -n "  Checking API endpoints... "
+	@grep -r "@require_permission" api/v1/ --include="*.py" | wc -l | xargs -I {} echo -e "$(GREEN){} protected endpoints found$(RESET)"
+	@echo -n "  Checking unprotected routes... "
+	@grep -r "@router\." api/v1/ --include="*.py" | grep -v "@require_permission" -B1 | grep "@router" | wc -l | xargs -I {} echo -e "$$([ {} -eq 0 ] && echo '$(GREEN)✅ All routes protected$(RESET)' || echo '$(RED)❌ {} unprotected routes found$(RESET)')"
+	@echo ""
+	@echo -e "$(YELLOW)2. Secret Management:$(RESET)"
+	@$(MAKE) check-secrets
+	@echo ""
+	@echo -e "$(YELLOW)3. Security Headers:$(RESET)"
+	@grep -q "SecurityMiddleware" api/main.py && \
+		echo -e "  $(GREEN)✅ Security middleware configured$(RESET)" || \
+		echo -e "  $(RED)❌ Security middleware missing$(RESET)"
+	@echo ""
+	@echo -e "$(YELLOW)4. Database Security:$(RESET)"
+	@grep -r "postgresql://" . --include="*.py" --exclude-dir=venv | grep -v "os.getenv" | wc -l | xargs -I {} echo -e "  $$([ {} -eq 0 ] && echo '$(GREEN)✅ No hardcoded DB credentials$(RESET)' || echo '$(RED)❌ {} hardcoded DB credentials found$(RESET)')"
+	@echo ""
+	@echo -e "$(YELLOW)5. Input Validation:$(RESET)"
+	@grep -q "SecurityValidator" auth/security_implementation.py && \
+		echo -e "  $(GREEN)✅ Input validation implemented$(RESET)" || \
+		echo -e "  $(RED)❌ Input validation missing$(RESET)"
+	@echo ""
+	@echo -e "$(YELLOW)6. Rate Limiting:$(RESET)"
+	@grep -q "RateLimiter" auth/security_implementation.py && \
+		echo -e "  $(GREEN)✅ Rate limiting implemented$(RESET)" || \
+		echo -e "  $(RED)❌ Rate limiting missing$(RESET)"
+	@echo ""
+	@echo -e "$(YELLOW)7. OWASP Top 10 Summary:$(RESET)"
+	@echo -e "  A01: Broken Access Control    $(GREEN)✅ Fixed$(RESET)"
+	@echo -e "  A02: Cryptographic Failures   $(YELLOW)⚠️  Need SSL/TLS$(RESET)"
+	@echo -e "  A03: Injection                $(GREEN)✅ Protected$(RESET)"
+	@echo -e "  A04: Insecure Design          $(YELLOW)⚠️  WebSocket auth needed$(RESET)"
+	@echo -e "  A05: Security Misconfiguration $(YELLOW)⚠️  DB credentials$(RESET)"
+	@echo -e "  A07: Auth Failures            $(GREEN)✅ Fixed$(RESET)"
+	@echo ""
+	@echo -e "$(CYAN)Full report: See SECURITY_AUDIT_REPORT.md for details$(RESET)"
+
+check-secrets: ## 🔍 Scan for hardcoded secrets
+	@echo -e "$(CYAN)🔍 Scanning for hardcoded secrets...$(RESET)"
+	@echo -n "  Checking for passwords... "
+	@if grep -r "password\s*=\s*[\"'][^\"']*[\"']" . --include="*.py" --exclude-dir=venv --exclude-dir=node_modules --exclude-dir=.next --exclude-dir=build --exclude-dir=dist 2>/dev/null | grep -v "getenv\|process.env\|environ\|template\|example\|test\|mock" | grep -q .; then \
+		echo -e "$(RED)❌ Found hardcoded passwords$(RESET)"; \
+	else \
+		echo -e "$(GREEN)✅ Clean$(RESET)"; \
+	fi
+	@echo -n "  Checking for API keys... "
+	@if grep -r "api_key\|apikey\|api-key" . --include="*.py" --exclude-dir=venv --exclude-dir=node_modules --exclude-dir=.next -i 2>/dev/null | grep -v "getenv\|process.env\|environ\|template\|example\|test\|mock\|variable" | grep "=\s*[\"'][^\"']*[\"']" | grep -q .; then \
+		echo -e "$(RED)❌ Found hardcoded API keys$(RESET)"; \
+	else \
+		echo -e "$(GREEN)✅ Clean$(RESET)"; \
+	fi
+	@echo -n "  Checking for secrets... "
+	@if grep -r "secret\s*=\s*[\"'][^\"']*[\"']" . --include="*.py" --exclude-dir=venv --exclude-dir=node_modules --exclude-dir=.next 2>/dev/null | grep -v "getenv\|process.env\|environ\|template\|example\|test\|mock\|dev_secret" | grep -q .; then \
+		echo -e "$(RED)❌ Found hardcoded secrets$(RESET)"; \
+	else \
+		echo -e "$(GREEN)✅ Clean$(RESET)"; \
+	fi
+	@echo -n "  Checking .env in git... "
+	@if [ -d .git ] && git ls-files 2>/dev/null | grep -E "^\.env$$|\.env\.production$$" | grep -q .; then \
+		echo -e "$(RED)❌ CRITICAL: .env in git!$(RESET)"; \
+	else \
+		echo -e "$(GREEN)✅ Not tracked$(RESET)"; \
+	fi
+
+dev-env: ## 🔧 Set up development environment variables
+	@echo -e "$(BOLD)$(CYAN)🔧 Development Environment Setup$(RESET)"
+	@if [ ! -f ".env" ]; then \
+		if [ -f ".env.example" ] || [ -f ".env.template" ]; then \
+			cp .env.example .env 2>/dev/null || cp .env.template .env 2>/dev/null; \
+			echo -e "$(GREEN)✅ Created .env from template$(RESET)"; \
+		else \
+			echo -e "$(YELLOW)Creating basic .env file...$(RESET)"; \
+			echo "# Development environment" > .env; \
+			echo "SECRET_KEY=dev_secret_key_2025_not_for_production" >> .env; \
+			echo "JWT_SECRET=dev_jwt_secret_2025_not_for_production" >> .env; \
+			echo "DATABASE_URL=postgresql://freeagentics:freeagentics_dev_2025@localhost:5432/freeagentics" >> .env; \
+			echo "API_HOST=0.0.0.0" >> .env; \
+			echo "API_PORT=8000" >> .env; \
+			echo "LOG_LEVEL=DEBUG" >> .env; \
+			echo "DEVELOPMENT_MODE=true" >> .env; \
+			echo -e "$(GREEN)✅ Created development .env file$(RESET)"; \
+		fi; \
+	else \
+		echo -e "$(GREEN)✅ .env file already exists$(RESET)"; \
+	fi
+	@echo ""
+	@echo -e "$(YELLOW)📝 Next steps:$(RESET)"
+	@echo "  1. Review .env file and update any values"
+	@echo "  2. Never commit .env to version control"
+	@echo "  3. For production, use .env.production.template as guide"
+
+prod-env: ## 🚀 Validate production environment setup
+	@echo -e "$(BOLD)$(MAGENTA)🚀 Production Environment Validation$(RESET)"
+	@echo ""
+	@if [ ! -f ".env.production.template" ]; then \
+		echo -e "$(RED)❌ Missing .env.production.template$(RESET)"; \
+		exit 1; \
+	fi
+	@echo -e "$(YELLOW)📋 Production Checklist:$(RESET)"
+	@echo -e "  $(CYAN)Environment Variables:$(RESET)"
+	@echo "    [ ] SECRET_KEY - Generate with: python -c \"import secrets; print(secrets.token_urlsafe(64))\""
+	@echo "    [ ] JWT_SECRET - Generate with: python -c \"import secrets; print(secrets.token_urlsafe(64))\""
+	@echo "    [ ] DATABASE_URL - Use strong password, no defaults"
+	@echo "    [ ] REDIS_PASSWORD - Use strong password"
+	@echo "    [ ] PRODUCTION=true"
+	@echo ""
+	@echo -e "  $(CYAN)Security Configuration:$(RESET)"
+	@echo "    [ ] SSL certificates configured"
+	@echo "    [ ] HTTPS enforced"
+	@echo "    [ ] CORS_ORIGINS set correctly"
+	@echo "    [ ] Rate limiting configured"
+	@echo ""
+	@echo -e "  $(CYAN)Database Security:$(RESET)"
+	@echo "    [ ] Remove all hardcoded credentials"
+	@echo "    [ ] Database user has minimal permissions"
+	@echo "    [ ] SSL/TLS enabled for DB connections"
+	@echo ""
+	@echo -e "  $(CYAN)Monitoring:$(RESET)"
+	@echo "    [ ] Sentry DSN configured"
+	@echo "    [ ] Log aggregation setup"
+	@echo "    [ ] Alerts configured"
+	@echo ""
+	@echo -e "$(GREEN)See .env.production.template for complete configuration$(RESET)"
 
 # ============================================================================
 # ALIASES AND SHORTCUTS

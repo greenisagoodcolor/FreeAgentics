@@ -101,9 +101,7 @@ class DatabaseLoadTester:
     """Database load testing with realistic scenarios."""
 
     def __init__(self, test_db_url: str = None):
-        self.test_db_url = (
-            test_db_url or "postgresql://postgres:password@localhost:5432/freeagentics_test"
-        )
+        self.test_db_url = test_db_url or os.getenv("TEST_DATABASE_URL", "sqlite:///./test_perf.db")
         self.engine = None
         self.session_factory = None
         self.performance_metrics = {}

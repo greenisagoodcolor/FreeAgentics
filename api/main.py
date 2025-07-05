@@ -8,9 +8,17 @@ from fastapi.middleware.cors import CORSMiddleware
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+from api.middleware.security_monitoring import (
+    SecurityHeadersMiddleware,
+    SecurityMonitoringMiddleware,
+)
+
 # Import routers
-from api.v1 import agents, inference, monitoring, system, websocket
+from api.v1 import agents, auth, inference, monitoring, security, system, websocket
 from api.v1.graphql_schema import graphql_app
+
+# Import security middleware
+from auth.security_implementation import SecurityMiddleware
 
 
 # Lifespan manager for startup/shutdown events
@@ -40,12 +48,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Add security middleware
+app.add_middleware(SecurityMiddleware)
+app.add_middleware(SecurityMonitoringMiddleware)
+app.add_middleware(SecurityHeadersMiddleware)
+
 # Include routers
+app.include_router(auth.router, prefix="/api/v1", tags=["auth"])  # Auth must be first
 app.include_router(agents.router, prefix="/api/v1", tags=["agents"])
 app.include_router(inference.router, prefix="/api/v1", tags=["inference"])
 app.include_router(system.router, prefix="/api/v1", tags=["system"])
 app.include_router(websocket.router, prefix="/api/v1", tags=["websocket"])
 app.include_router(monitoring.router, prefix="/api/v1", tags=["monitoring"])
+app.include_router(security.router, prefix="/api/v1", tags=["security"])
 
 # Include GraphQL router
 app.include_router(graphql_app, prefix="/api/v1/graphql", tags=["graphql"])

@@ -167,7 +167,7 @@ repos:
     hooks:
       - id: radon-complexity
         name: radon - cyclomatic complexity analysis
-        entry: python -m radon
+        entry: python3 -m radon
         language: system
         args: [cc, --min, B, --show-complexity, --total-average, .]
         files: \.py$

@@ -13,18 +13,15 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
+# Import PyMDP - REQUIRED for inference benchmarks
+import pymdp
+from pymdp import utils
+from pymdp.agent import Agent as PyMDPAgent
+from pymdp.maths import log_stable, softmax, spm_dot
+
 from tests.performance.pymdp_benchmarks import BenchmarkResult, PyMDPBenchmark
 
-# Try to import PyMDP
-try:
-    import pymdp
-    from pymdp import utils
-    from pymdp.agent import Agent as PyMDPAgent
-    from pymdp.maths import log_stable, softmax, spm_dot
-
-    PYMDP_AVAILABLE = True
-except ImportError:
-    PYMDP_AVAILABLE = False
+PYMDP_AVAILABLE = True
 
 
 @contextmanager
@@ -55,9 +52,6 @@ class VariationalInferenceBenchmark(PyMDPBenchmark):
 
     def setup(self):
         """Initialize test environment for variational inference."""
-        if not PYMDP_AVAILABLE:
-            return
-
         # Initialize belief states (uniform)
         self.qs = utils.obj_array_uniform(self.state_dims)
 
@@ -70,9 +64,6 @@ class VariationalInferenceBenchmark(PyMDPBenchmark):
 
     def run_iteration(self) -> Dict[str, Any]:
         """Run variational inference iteration."""
-        if not PYMDP_AVAILABLE:
-            raise ImportError("PyMDP is required for this benchmark")
-
         # Perform variational inference
         start_vfe = self._calculate_vfe(self.qs, self.A, self.obs)
 

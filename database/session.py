@@ -12,20 +12,51 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from database.base import Base
 
-# Get database URL from environment
-DATABASE_URL = os.getenv(
-    "DATABASE_URL", "postgresql://freeagentics:freeagentics123@localhost:5432/freeagentics"
-)
+# Get database URL from environment - NO HARDCODED FALLBACK FOR SECURITY
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise ValueError(
+        "DATABASE_URL environment variable is required. "
+        "Please set it in your .env file or environment. "
+        "Format: postgresql://username:password@host:port/database"
+    )
 
-# Create engine with connection pooling
-engine = create_engine(
-    DATABASE_URL,
-    # Connection pool settings for production
-    pool_size=10,
-    max_overflow=20,
-    pool_pre_ping=True,  # Verify connections before using
-    echo=os.getenv("DEBUG_SQL", "false").lower() == "true",  # SQL logging
-)
+# Security validation for production
+if os.getenv("PRODUCTION", "false").lower() == "true":
+    # Ensure we're not using default dev credentials in production
+    if "freeagentics_dev_2025" in DATABASE_URL or "freeagentics123" in DATABASE_URL:
+        raise ValueError(
+            "Production environment detected but using development database credentials. "
+            "Please set secure DATABASE_URL in production."
+        )
+    # Require SSL/TLS in production
+    if "sslmode=" not in DATABASE_URL:
+        DATABASE_URL += "?sslmode=require"
+
+# Create engine with connection pooling and security settings
+engine_args = {
+    # Connection pool settings
+    "pool_size": int(os.getenv("DB_POOL_SIZE", "20")),
+    "max_overflow": int(os.getenv("DB_MAX_OVERFLOW", "40")),
+    "pool_timeout": int(os.getenv("DB_POOL_TIMEOUT", "30")),
+    "pool_pre_ping": True,  # Verify connections before using
+    "echo": os.getenv("DEBUG_SQL", "false").lower() == "true",  # SQL logging
+}
+
+# Additional production settings
+if os.getenv("PRODUCTION", "false").lower() == "true":
+    engine_args.update(
+        {
+            "pool_recycle": 3600,  # Recycle connections after 1 hour
+            "connect_args": {
+                "connect_timeout": 10,
+                "application_name": "freeagentics_api",
+                "options": "-c statement_timeout=30000",  # 30 second statement timeout
+            },
+        }
+    )
+
+engine = create_engine(DATABASE_URL, **engine_args)
 
 # Create session factory
 SessionLocal = sessionmaker(

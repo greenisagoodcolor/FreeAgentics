@@ -209,21 +209,21 @@ Actions:
 Taskmaster offers two primary ways to interact:
 
 1. **MCP Server (Recommended for Integrated Tools)**:
-    - For AI agents and integrated development environments (like VS Code), interacting via the **MCP server is the preferred method**.
-    - The MCP server exposes Taskmaster functionality through a set of tools (e.g., `get_tasks`, `add_subtask`).
-    - This method offers better performance, structured data exchange, and richer error handling compared to CLI parsing.
-    - Refer to @`mcp.md` for details on the MCP architecture and available tools.
-    - A comprehensive list and description of MCP tools and their corresponding CLI commands can be found in @`taskmaster.md`.
-    - **Restart the MCP server** if core logic in `scripts/modules` or MCP tool/direct function definitions change.
-    - **Note**: MCP tools fully support tagged task lists with complete tag management capabilities.
+   - For AI agents and integrated development environments (like VS Code), interacting via the **MCP server is the preferred method**.
+   - The MCP server exposes Taskmaster functionality through a set of tools (e.g., `get_tasks`, `add_subtask`).
+   - This method offers better performance, structured data exchange, and richer error handling compared to CLI parsing.
+   - Refer to @`mcp.md` for details on the MCP architecture and available tools.
+   - A comprehensive list and description of MCP tools and their corresponding CLI commands can be found in @`taskmaster.md`.
+   - **Restart the MCP server** if core logic in `scripts/modules` or MCP tool/direct function definitions change.
+   - **Note**: MCP tools fully support tagged task lists with complete tag management capabilities.
 
 2. **`task-master` CLI (For Users & Fallback)**:
-    - The global `task-master` command provides a user-friendly interface for direct terminal interaction.
-    - It can also serve as a fallback if the MCP server is inaccessible or a specific function isn't exposed via MCP.
-    - Install globally with `npm install -g task-master-ai` or use locally via `npx task-master-ai ...`.
-    - The CLI commands often mirror the MCP tools (e.g., `task-master list` corresponds to `get_tasks`).
-    - Refer to @`taskmaster.md` for a detailed command reference.
-    - **Tagged Task Lists**: CLI fully supports the new tagged system with seamless migration.
+   - The global `task-master` command provides a user-friendly interface for direct terminal interaction.
+   - It can also serve as a fallback if the MCP server is inaccessible or a specific function isn't exposed via MCP.
+   - Install globally with `npm install -g task-master-ai` or use locally via `npx task-master-ai ...`.
+   - The CLI commands often mirror the MCP tools (e.g., `task-master list` corresponds to `get_tasks`).
+   - Refer to @`taskmaster.md` for a detailed command reference.
+   - **Tagged Task Lists**: CLI fully supports the new tagged system with seamless migration.
 
 ## How the Tag System Works (For Your Reference)
 
@@ -289,23 +289,23 @@ Taskmaster offers two primary ways to interact:
 Taskmaster configuration is managed through two main mechanisms:
 
 1. **`.taskmaster/config.json` File (Primary):**
-    - Located in the project root directory.
-    - Stores most configuration settings: AI model selections (main, research, fallback), parameters (max tokens, temperature), logging level, default subtasks/priority, project name, etc.
-    - **Tagged System Settings**: Includes `global.defaultTag` (defaults to "master") and `tags` section for tag management configuration.
-    - **Managed via `task-master models --setup` command.** Do not edit manually unless you know what you are doing.
-    - **View/Set specific models via `task-master models` command or `models` MCP tool.**
-    - Created automatically when you run `task-master models --setup` for the first time or during tagged system migration.
+   - Located in the project root directory.
+   - Stores most configuration settings: AI model selections (main, research, fallback), parameters (max tokens, temperature), logging level, default subtasks/priority, project name, etc.
+   - **Tagged System Settings**: Includes `global.defaultTag` (defaults to "master") and `tags` section for tag management configuration.
+   - **Managed via `task-master models --setup` command.** Do not edit manually unless you know what you are doing.
+   - **View/Set specific models via `task-master models` command or `models` MCP tool.**
+   - Created automatically when you run `task-master models --setup` for the first time or during tagged system migration.
 
 2. **Environment Variables (`.env` / `mcp.json`):**
-    - Used **only** for sensitive API keys and specific endpoint URLs.
-    - Place API keys (one per provider) in a `.env` file in the project root for CLI usage.
-    - For MCP/VS Code integration, configure these keys in the `env` section of `.vscode/mcp.json`.
-    - Available keys/variables: See `assets/env.example` or the Configuration section in the command reference (previously linked to `taskmaster.md`).
+   - Used **only** for sensitive API keys and specific endpoint URLs.
+   - Place API keys (one per provider) in a `.env` file in the project root for CLI usage.
+   - For MCP/VS Code integration, configure these keys in the `env` section of `.vscode/mcp.json`.
+   - Available keys/variables: See `assets/env.example` or the Configuration section in the command reference (previously linked to `taskmaster.md`).
 
 3. **`.taskmaster/state.json` File (Tagged System State):**
-    - Tracks current tag context and migration status.
-    - Automatically created during tagged system migration.
-    - Contains: `currentTag`, `lastSwitched`, `migrationNoticeShown`.
+   - Tracks current tag context and migration status.
+   - Automatically created during tagged system migration.
+   - Contains: `currentTag`, `lastSwitched`, `migrationNoticeShown`.
 
 **Important:** Non-API key settings (like model selections, `MAX_TOKENS`, `TASKMASTER_LOG_LEVEL`) are **no longer configured via environment variables**. Use the `task-master models` command (or `--setup` for interactive configuration) or the `models` MCP tool.
 **If AI commands FAIL in MCP** verify that the API key for the selected provider is present in the `env` section of `.vscode/mcp.json`.
@@ -380,50 +380,50 @@ Taskmaster supports multiple AI coding assistant rule sets that can be configure
 Once a task has been broken down into subtasks using `expand_task` or similar methods, follow this iterative process for implementation:
 
 1. **Understand the Goal (Preparation):**
-    - Use `get_task` / `task-master show <subtaskId>` (see @`taskmaster.md`) to thoroughly understand the specific goals and requirements of the subtask.
+   - Use `get_task` / `task-master show <subtaskId>` (see @`taskmaster.md`) to thoroughly understand the specific goals and requirements of the subtask.
 
 2. **Initial Exploration & Planning (Iteration 1):**
-    - This is the first attempt at creating a concrete implementation plan.
-    - Explore the codebase to identify the precise files, functions, and even specific lines of code that will need modification.
-    - Determine the intended code changes (diffs) and their locations.
-    - Gather _all_ relevant details from this exploration phase.
+   - This is the first attempt at creating a concrete implementation plan.
+   - Explore the codebase to identify the precise files, functions, and even specific lines of code that will need modification.
+   - Determine the intended code changes (diffs) and their locations.
+   - Gather _all_ relevant details from this exploration phase.
 
 3. **Log the Plan:**
-    - Run `update_subtask` / `task-master update-subtask --id=<subtaskId> --prompt='<detailed plan>'`.
-    - Provide the _complete and detailed_ findings from the exploration phase in the prompt. Include file paths, line numbers, proposed diffs, reasoning, and any potential challenges identified. Do not omit details. The goal is to create a rich, timestamped log within the subtask's `details`.
+   - Run `update_subtask` / `task-master update-subtask --id=<subtaskId> --prompt='<detailed plan>'`.
+   - Provide the _complete and detailed_ findings from the exploration phase in the prompt. Include file paths, line numbers, proposed diffs, reasoning, and any potential challenges identified. Do not omit details. The goal is to create a rich, timestamped log within the subtask's `details`.
 
 4. **Verify the Plan:**
-    - Run `get_task` / `task-master show <subtaskId>` again to confirm that the detailed implementation plan has been successfully appended to the subtask's details.
+   - Run `get_task` / `task-master show <subtaskId>` again to confirm that the detailed implementation plan has been successfully appended to the subtask's details.
 
 5. **Begin Implementation:**
-    - Set the subtask status using `set_task_status` / `task-master set-status --id=<subtaskId> --status=in-progress`.
-    - Start coding based on the logged plan.
+   - Set the subtask status using `set_task_status` / `task-master set-status --id=<subtaskId> --status=in-progress`.
+   - Start coding based on the logged plan.
 
 6. **Refine and Log Progress (Iteration 2+):**
-    - As implementation progresses, you will encounter challenges, discover nuances, or confirm successful approaches.
-    - **Before appending new information**: Briefly review the _existing_ details logged in the subtask (using `get_task` or recalling from context) to ensure the update adds fresh insights and avoids redundancy.
-    - **Regularly** use `update_subtask` / `task-master update-subtask --id=<subtaskId> --prompt='<update details>\n- What worked...\n- What didn't work...'` to append new findings.
-    - **Crucially, log:**
-      - What worked ("fundamental truths" discovered).
-      - What didn't work and why (to avoid repeating mistakes).
-      - Specific code snippets or configurations that were successful.
-      - Decisions made, especially if confirmed with user input.
-      - Any deviations from the initial plan and the reasoning.
-    - The objective is to continuously enrich the subtask's details, creating a log of the implementation journey that helps the AI (and human developers) learn, adapt, and avoid repeating errors.
+   - As implementation progresses, you will encounter challenges, discover nuances, or confirm successful approaches.
+   - **Before appending new information**: Briefly review the _existing_ details logged in the subtask (using `get_task` or recalling from context) to ensure the update adds fresh insights and avoids redundancy.
+   - **Regularly** use `update_subtask` / `task-master update-subtask --id=<subtaskId> --prompt='<update details>\n- What worked...\n- What didn't work...'` to append new findings.
+   - **Crucially, log:**
+     - What worked ("fundamental truths" discovered).
+     - What didn't work and why (to avoid repeating mistakes).
+     - Specific code snippets or configurations that were successful.
+     - Decisions made, especially if confirmed with user input.
+     - Any deviations from the initial plan and the reasoning.
+   - The objective is to continuously enrich the subtask's details, creating a log of the implementation journey that helps the AI (and human developers) learn, adapt, and avoid repeating errors.
 
 7. **Review & Update Rules (Post-Implementation):**
-    - Once the implementation for the subtask is functionally complete, review all code changes and the relevant chat history.
-    - Identify any new or modified code patterns, conventions, or best practices established during the implementation.
-    - Create new or update existing rules following internal guidelines (previously linked to `cursor_rules.md` and `self_improve.md`).
+   - Once the implementation for the subtask is functionally complete, review all code changes and the relevant chat history.
+   - Identify any new or modified code patterns, conventions, or best practices established during the implementation.
+   - Create new or update existing rules following internal guidelines (previously linked to `cursor_rules.md` and `self_improve.md`).
 
 8. **Mark Task Complete:**
-    - After verifying the implementation and updating any necessary rules, mark the subtask as completed: `set_task_status` / `task-master set-status --id=<subtaskId> --status=done`.
+   - After verifying the implementation and updating any necessary rules, mark the subtask as completed: `set_task_status` / `task-master set-status --id=<subtaskId> --status=done`.
 
 9. **Commit Changes (If using Git):**
-    - Stage the relevant code changes and any updated/new rule files (`git add .`).
-    - Craft a comprehensive Git commit message summarizing the work done for the subtask, including both code implementation and any rule adjustments.
-    - Execute the commit command directly in the terminal (e.g., `git commit -m 'feat(module): Implement feature X for subtask <subtaskId>\n\n- Details about changes...\n- Updated rule Y for pattern Z'`).
-    - Consider if a Changeset is needed according to internal versioning guidelines (previously linked to `changeset.md`). If so, run `npm run changeset`, stage the generated file, and amend the commit or create a new one.
+   - Stage the relevant code changes and any updated/new rule files (`git add .`).
+   - Craft a comprehensive Git commit message summarizing the work done for the subtask, including both code implementation and any rule adjustments.
+   - Execute the commit command directly in the terminal (e.g., `git commit -m 'feat(module): Implement feature X for subtask <subtaskId>\n\n- Details about changes...\n- Updated rule Y for pattern Z'`).
+   - Consider if a Changeset is needed according to internal versioning guidelines (previously linked to `changeset.md`). If so, run `npm run changeset`, stage the generated file, and amend the commit or create a new one.
 
 10. **Proceed to Next Subtask:**
     - Identify the next subtask (e.g., using `next_task` / `task-master next`).

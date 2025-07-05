@@ -7,6 +7,13 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, EmailStr
 
 from auth import Permission, TokenData, User, UserRole, auth_manager, get_current_user, rate_limit
+from auth.security_logging import (
+    SecurityEventSeverity,
+    SecurityEventType,
+    log_login_failure,
+    log_login_success,
+    security_auditor,
+)
 
 router = APIRouter()
 
@@ -51,10 +58,29 @@ async def register_user(request: Request, user_data: UserRegistration):
         access_token = auth_manager.create_access_token(user)
         refresh_token = auth_manager.create_refresh_token(user)
 
+        # Log successful user registration
+        security_auditor.log_event(
+            SecurityEventType.USER_CREATED,
+            SecurityEventSeverity.INFO,
+            f"New user registered: {user.username}",
+            request=request,
+            user_id=user.user_id,
+            username=user.username,
+            details={"role": user.role, "email": user.email},
+        )
+
         return TokenResponse(
             access_token=access_token, refresh_token=refresh_token, user=user.dict()
         )
     except Exception as e:
+        # Log failed registration attempt
+        security_auditor.log_event(
+            SecurityEventType.USER_CREATED,
+            SecurityEventSeverity.WARNING,
+            f"Failed user registration attempt for {user_data.username}: {str(e)}",
+            request=request,
+            details={"username": user_data.username, "error": str(e)},
+        )
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
@@ -65,13 +91,20 @@ async def login_user(request: Request, login_data: UserLogin):
     user = auth_manager.authenticate_user(login_data.username, login_data.password)
 
     if not user:
+        # Log failed login attempt
+        log_login_failure(login_data.username, request, "Invalid credentials")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
     if not user.is_active:
+        # Log failed login due to disabled account
+        log_login_failure(login_data.username, request, "Account is disabled")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Account is disabled")
 
     access_token = auth_manager.create_access_token(user)
     refresh_token = auth_manager.create_refresh_token(user)
+
+    # Log successful login
+    log_login_success(user.username, user.user_id, request)
 
     return TokenResponse(access_token=access_token, refresh_token=refresh_token, user=user.dict())
 
@@ -89,11 +122,21 @@ async def get_current_user_info(current_user: TokenData = Depends(get_current_us
 
 
 @router.post("/logout")
-async def logout_user(current_user: TokenData = Depends(get_current_user)):
+async def logout_user(request: Request, current_user: TokenData = Depends(get_current_user)):
     """Logout user (invalidate refresh token)."""
     # Remove refresh token
     if current_user.user_id in auth_manager.refresh_tokens:
         del auth_manager.refresh_tokens[current_user.user_id]
+
+    # Log logout event
+    security_auditor.log_event(
+        SecurityEventType.LOGOUT,
+        SecurityEventSeverity.INFO,
+        f"User {current_user.username} logged out",
+        request=request,
+        user_id=current_user.user_id,
+        username=current_user.username,
+    )
 
     return {"message": "Successfully logged out"}
 

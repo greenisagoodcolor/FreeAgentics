@@ -55,7 +55,9 @@ class SimulationConfig:
     cooldown_period: float = 30.0  # Cooldown after main simulation
 
     # Database configuration
-    db_url: str = "postgresql://localhost/freeagentics_test"
+    db_url: str = Field(
+        default_factory=lambda: os.getenv("TEST_DATABASE_URL", "sqlite:///./test_simulation.db")
+    )
     db_pool_size: int = 20
     db_max_overflow: int = 10
 

@@ -61,6 +61,9 @@ env.bak/
 venv.bak/
 .venv/
 .env
+.env.local
+.env.production
+docker-compose.override.yml
 
 # ==========================================
 # Testing & Coverage
@@ -209,3 +212,7 @@ logs
 # Task files
 # tasks.json
 # tasks/
+
+# Security audit logs
+logs/*.log
+!logs/.gitkeep

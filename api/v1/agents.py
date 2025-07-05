@@ -7,6 +7,9 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
+# Security imports
+from auth.security_implementation import Permission, TokenData, get_current_user, require_permission
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
@@ -73,7 +76,12 @@ except ImportError:
 
 
 @router.post("/agents", response_model=Agent, status_code=201)
-async def create_agent(config: AgentConfig, db: Session = Depends(get_db)) -> Agent:
+@require_permission(Permission.CREATE_AGENT)
+async def create_agent(
+    config: AgentConfig,
+    current_user: TokenData = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> Agent:
     """Create a new active inference agent with optional GMN specification.
 
     This creates a real database record with support for:
@@ -119,9 +127,11 @@ async def create_agent(config: AgentConfig, db: Session = Depends(get_db)) -> Ag
 
 
 @router.get("/agents", response_model=List[Agent])
+@require_permission(Permission.VIEW_AGENTS)
 async def list_agents(
     status: Optional[str] = Query(None, description="Filter by status"),
     limit: int = Query(100, ge=1, le=1000),
+    current_user: TokenData = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> List[Agent]:
     """List all agents with optional filtering.
@@ -156,7 +166,12 @@ async def list_agents(
 
 
 @router.get("/agents/{agent_id}", response_model=Agent)
-async def get_agent(agent_id: str, db: Session = Depends(get_db)) -> Agent:
+@require_permission(Permission.VIEW_AGENTS)
+async def get_agent(
+    agent_id: str,
+    current_user: TokenData = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> Agent:
     """Get details of a specific agent.
 
     Fetches from database by UUID.
@@ -186,7 +201,13 @@ async def get_agent(agent_id: str, db: Session = Depends(get_db)) -> Agent:
 
 
 @router.patch("/agents/{agent_id}/status")
-async def update_agent_status(agent_id: str, status: str, db: Session = Depends(get_db)) -> dict:
+@require_permission(Permission.MODIFY_AGENT)
+async def update_agent_status(
+    agent_id: str,
+    status: str,
+    current_user: TokenData = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> dict:
     """Update agent status (start, stop, pause).
 
     Updates in database and optionally in agent manager.
@@ -230,7 +251,12 @@ async def update_agent_status(agent_id: str, status: str, db: Session = Depends(
 
 
 @router.delete("/agents/{agent_id}")
-async def delete_agent(agent_id: str, db: Session = Depends(get_db)) -> dict:
+@require_permission(Permission.DELETE_AGENT)
+async def delete_agent(
+    agent_id: str,
+    current_user: TokenData = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> dict:
     """Delete an agent.
 
     Removes from database and agent manager.
@@ -260,7 +286,12 @@ async def delete_agent(agent_id: str, db: Session = Depends(get_db)) -> dict:
 
 
 @router.get("/agents/{agent_id}/metrics", response_model=AgentMetrics)
-async def get_agent_metrics(agent_id: str, db: Session = Depends(get_db)) -> AgentMetrics:
+@require_permission(Permission.VIEW_METRICS)
+async def get_agent_metrics(
+    agent_id: str,
+    current_user: TokenData = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> AgentMetrics:
     """Get performance metrics for a specific agent.
 
     Fetches from database and computes real metrics.
@@ -301,7 +332,12 @@ class GMNAgentRequest(BaseModel):
 
 
 @router.post("/agents/from-gmn", response_model=Agent, status_code=201)
-async def create_agent_from_gmn(request: GMNAgentRequest, db: Session = Depends(get_db)) -> Agent:
+@require_permission(Permission.CREATE_AGENT)
+async def create_agent_from_gmn(
+    request: GMNAgentRequest,
+    current_user: TokenData = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> Agent:
     """Create an Active Inference agent from a GMN specification.
 
     This endpoint:
@@ -370,7 +406,12 @@ async def create_agent_from_gmn(request: GMNAgentRequest, db: Session = Depends(
 
 
 @router.get("/agents/{agent_id}/gmn", response_model=dict)
-async def get_agent_gmn_spec(agent_id: str, db: Session = Depends(get_db)) -> dict:
+@require_permission(Permission.VIEW_AGENTS)
+async def get_agent_gmn_spec(
+    agent_id: str,
+    current_user: TokenData = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> dict:
     """Get the GMN specification for an agent."""
     try:
         from uuid import UUID
@@ -395,8 +436,12 @@ async def get_agent_gmn_spec(agent_id: str, db: Session = Depends(get_db)) -> di
 
 
 @router.put("/agents/{agent_id}/gmn")
+@require_permission(Permission.MODIFY_AGENT)
 async def update_agent_gmn_spec(
-    agent_id: str, gmn_spec: str, db: Session = Depends(get_db)
+    agent_id: str,
+    gmn_spec: str,
+    current_user: TokenData = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ) -> dict:
     """Update the GMN specification for an existing agent."""
     try:
@@ -447,7 +492,8 @@ async def update_agent_gmn_spec(
 
 
 @router.get("/gmn/examples")
-async def get_gmn_examples() -> dict:
+@require_permission(Permission.VIEW_AGENTS)
+async def get_gmn_examples(current_user: TokenData = Depends(get_current_user)) -> dict:
     """Get example GMN specifications for different agent types."""
     from inference.active.gmn_parser import EXAMPLE_GMN_SPEC
 
@@ -507,7 +553,8 @@ strategy_planner -> coordination_action: updates
 
 # Agent template endpoints
 @router.get("/templates")
-async def list_agent_templates() -> List[dict]:
+@require_permission(Permission.VIEW_AGENTS)
+async def list_agent_templates(current_user: TokenData = Depends(get_current_user)) -> List[dict]:
     """List available agent templates."""
     templates = [
         {

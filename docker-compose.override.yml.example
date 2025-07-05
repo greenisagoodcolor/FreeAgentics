@@ -1,0 +1,37 @@
+# Docker Compose Override for Local Development
+# Copy this file to docker-compose.override.yml and update values
+# This file is automatically loaded by docker-compose and overrides settings
+
+version: "3.8"
+
+services:
+  postgres:
+    environment:
+      # Override with your local development password
+      POSTGRES_PASSWORD: your_local_dev_password_here
+    # Expose postgres for local development tools
+    ports:
+      - "5432:5432"
+
+  redis:
+    # Override Redis password for local development
+    command: redis-server --appendonly yes --requirepass your_local_redis_password_here
+    environment:
+      REDIS_PASSWORD: your_local_redis_password_here
+
+  backend-dev:
+    environment:
+      # Local development database URL
+      DATABASE_URL: postgresql://freeagentics:your_local_dev_password_here@postgres:5432/freeagentics
+      REDIS_PASSWORD: your_local_redis_password_here
+      # Development secrets (generate your own for better security)
+      SECRET_KEY: dev_secret_key_2025_not_for_production
+      JWT_SECRET: dev_jwt_secret_2025_not_for_production
+    # Mount local code for hot reload
+    volumes:
+      - .:/app
+      - /app/venv
+    # Remove user restriction for development
+    user: ""
+    # Remove read-only restriction for development
+    read_only: false

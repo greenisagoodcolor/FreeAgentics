@@ -15,24 +15,12 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import psutil
 
-# Try to import PyMDP (using inferactively-pymdp package)
-try:
-    import pymdp
-    from pymdp import utils
-    from pymdp.agent import Agent as PyMDPAgent
+# Import PyMDP (using inferactively-pymdp package) - REQUIRED for benchmarks
+import pymdp
+from pymdp import utils
+from pymdp.agent import Agent as PyMDPAgent
 
-    PYMDP_AVAILABLE = True
-except ImportError:
-    try:
-        # Alternative import path
-        import pymdp_rs as pymdp
-        from pymdp_rs import utils
-        from pymdp_rs.agent import Agent as PyMDPAgent
-
-        PYMDP_AVAILABLE = True
-    except ImportError:
-        PYMDP_AVAILABLE = False
-        print("Warning: PyMDP not available, using mock implementation")
+PYMDP_AVAILABLE = True
 
 
 @dataclass
@@ -207,17 +195,14 @@ class BeliefUpdateBenchmark(PyMDPBenchmark):
 
     def setup(self):
         """Initialize PyMDP agent and test data."""
-        if not PYMDP_AVAILABLE:
-            return
-
         # Create state space
         num_states = [self.state_size] * self.num_modalities
         num_observations = [self.state_size] * self.num_modalities
-        num_actions = 4  # Simple action space
+        num_controls = [4] * self.num_modalities  # Simple action space
 
         # Initialize generative model (A and B matrices)
         A = utils.random_A_matrix(num_observations, num_states)
-        B = utils.random_B_matrix(num_states, num_actions)
+        B = utils.random_B_matrix(num_states, num_controls)
 
         # Create agent
         self.agent = PyMDPAgent(A, B)
@@ -231,9 +216,6 @@ class BeliefUpdateBenchmark(PyMDPBenchmark):
 
     def run_iteration(self) -> Dict[str, Any]:
         """Run single belief update."""
-        if not PYMDP_AVAILABLE:
-            raise ImportError("PyMDP is required for this benchmark")
-
         # Get next observation
         obs = self.observations[self.obs_idx % len(self.observations)]
         self.obs_idx += 1
@@ -263,27 +245,21 @@ class ExpectedFreeEnergyBenchmark(PyMDPBenchmark):
 
     def setup(self):
         """Initialize agent with policies."""
-        if not PYMDP_AVAILABLE:
-            return
-
         # Create state space
         num_states = [self.state_size] * 2
         num_observations = [self.state_size] * 2
-        num_actions = 4
+        num_controls = [4] * 2
 
         # Initialize generative model
         A = utils.random_A_matrix(num_observations, num_states)
-        B = utils.random_B_matrix(num_states, num_actions)
+        B = utils.random_B_matrix(num_states, num_controls)
         C = utils.obj_array_uniform(num_observations)
 
         # Create agent
-        self.agent = PyMDPAgent(A, B, C=C, planning_horizon=self.policy_depth, inference_horizon=1)
+        self.agent = PyMDPAgent(A, B, C=C, policy_len=self.policy_depth, inference_horizon=1)
 
     def run_iteration(self) -> Dict[str, Any]:
         """Calculate EFE for policies."""
-        if not PYMDP_AVAILABLE:
-            raise ImportError("PyMDP is required for this benchmark")
-
         # Generate random initial observation
         obs = [np.random.randint(0, self.state_size) for _ in range(2)]
 
@@ -323,17 +299,14 @@ class MatrixCachingBenchmark(PyMDPBenchmark):
 
     def setup(self):
         """Initialize multiple agents to test caching."""
-        if not PYMDP_AVAILABLE:
-            return
-
         # Create 10 agents with same model structure
         num_states = [self.state_size] * 2
         num_observations = [self.state_size] * 2
-        num_actions = 4
+        num_controls = [4] * 2
 
         # Shared matrices (would benefit from caching)
         A = utils.random_A_matrix(num_observations, num_states)
-        B = utils.random_B_matrix(num_states, num_actions)
+        B = utils.random_B_matrix(num_states, num_controls)
 
         for i in range(10):
             agent = PyMDPAgent(A, B)
@@ -344,9 +317,6 @@ class MatrixCachingBenchmark(PyMDPBenchmark):
 
     def run_iteration(self) -> Dict[str, Any]:
         """Run inference on all agents."""
-        if not PYMDP_AVAILABLE:
-            raise ImportError("PyMDP is required for this benchmark")
-
         total_cache_hits = 0
         total_cache_misses = 0
 
@@ -391,24 +361,18 @@ class AgentScalingBenchmark(PyMDPBenchmark):
 
     def setup(self):
         """Initialize multiple agents."""
-        if not PYMDP_AVAILABLE:
-            return
-
         num_states = [self.state_size] * 2
         num_observations = [self.state_size] * 2
-        num_actions = 4
+        num_controls = [4] * 2
 
         for i in range(self.num_agents):
             A = utils.random_A_matrix(num_observations, num_states)
-            B = utils.random_B_matrix(num_states, num_actions)
+            B = utils.random_B_matrix(num_states, num_controls)
             agent = PyMDPAgent(A, B)
             self.agents.append(agent)
 
     def run_iteration(self) -> Dict[str, Any]:
         """Run inference on all agents."""
-        if not PYMDP_AVAILABLE:
-            raise ImportError("PyMDP is required for this benchmark")
-
         inference_times = []
 
         for agent in self.agents:

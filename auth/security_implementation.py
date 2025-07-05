@@ -8,6 +8,7 @@ import hashlib
 import hmac
 import json
 import logging
+import os
 import re
 import secrets
 from datetime import datetime, timedelta
@@ -25,11 +26,19 @@ from sqlalchemy.exc import SQLAlchemyError
 
 logger = logging.getLogger(__name__)
 
-# Security configuration
-SECRET_KEY = secrets.token_urlsafe(32)  # In production, use environment variable
+# Security configuration - Use environment variables in production
+SECRET_KEY = os.getenv("SECRET_KEY", "dev_secret_key_2025_not_for_production")
+JWT_SECRET = os.getenv("JWT_SECRET", "dev_jwt_secret_2025_not_for_production")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-REFRESH_TOKEN_EXPIRE_DAYS = 7
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
+
+# Validate that production keys are not using development defaults
+if os.getenv("PRODUCTION", "false").lower() == "true":
+    if SECRET_KEY == "dev_secret_key_2025_not_for_production":
+        raise ValueError("Production environment requires proper SECRET_KEY")
+    if JWT_SECRET == "dev_jwt_secret_2025_not_for_production":
+        raise ValueError("Production environment requires proper JWT_SECRET")
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -299,7 +308,7 @@ class AuthenticationManager:
             "type": "access",
         }
 
-        return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+        return jwt.encode(to_encode, JWT_SECRET, algorithm=ALGORITHM)
 
     def create_refresh_token(self, user: User) -> str:
         """Create JWT refresh token."""
@@ -307,14 +316,14 @@ class AuthenticationManager:
 
         to_encode = {"user_id": user.user_id, "exp": expire, "type": "refresh"}
 
-        token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+        token = jwt.encode(to_encode, JWT_SECRET, algorithm=ALGORITHM)
         self.refresh_tokens[user.user_id] = token
         return token
 
     def verify_token(self, token: str) -> TokenData:
         """Verify and decode JWT token."""
         try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
 
             if payload.get("type") != "access":
                 raise HTTPException(
