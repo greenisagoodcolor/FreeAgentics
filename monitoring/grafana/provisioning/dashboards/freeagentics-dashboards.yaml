@@ -1,0 +1,50 @@
+apiVersion: 1
+
+providers:
+  - name: 'freeagentics-dashboards'
+    orgId: 1
+    folder: 'FreeAgentics'
+    folderUid: 'freeagentics-folder'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards/freeagentics
+    updateIntervalSeconds: 300
+    allowUiUpdates: true
+    
+  - name: 'freeagentics-system'
+    orgId: 1
+    folder: 'FreeAgentics/System'
+    folderUid: 'freeagentics-system-folder'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards/freeagentics/system
+    updateIntervalSeconds: 300
+    allowUiUpdates: true
+    
+  - name: 'freeagentics-agents'
+    orgId: 1
+    folder: 'FreeAgentics/Agents'
+    folderUid: 'freeagentics-agents-folder'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards/freeagentics/agents
+    updateIntervalSeconds: 300
+    allowUiUpdates: true
+    
+  - name: 'freeagentics-performance'
+    orgId: 1
+    folder: 'FreeAgentics/Performance'
+    folderUid: 'freeagentics-performance-folder'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards/freeagentics/performance
+    updateIntervalSeconds: 300
+    allowUiUpdates: true

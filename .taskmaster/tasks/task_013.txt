@@ -1,0 +1,204 @@
+# Task ID: 13
+# Title: Fix All Pre-commit Quality Gates
+# Status: in-progress
+# Dependencies: None
+# Priority: high
+# Description: Resolve all disabled pre-commit hooks and fix underlying code quality issues to ensure proper CI/CD pipeline
+# Details:
+1. Fix JSON syntax errors including duplicate timezone keys and malformed bandit security reports. 2. Resolve YAML syntax errors in GitHub workflows, particularly template literal issues. 3. Address all flake8 violations without using ignore flags for critical checks. 4. Configure and fix radon complexity analysis to pass complexity thresholds. 5. Implement safety dependency scanning for known vulnerabilities. 6. Fix ESLint and Prettier configurations for frontend code quality. 7. Remove all SKIP environment variable overrides from pre-commit configuration. 8. Ensure all hooks pass or fail properly without workarounds.
+
+# Test Strategy:
+Run pre-commit hooks locally and in CI/CD pipeline without any SKIP overrides. Verify that all hooks pass consistently. Test by making intentional code quality violations to ensure hooks properly catch and prevent commits. Validate that the pipeline fails appropriately when code quality standards are not met.
+
+# Subtasks:
+## 1. Fix JSON syntax errors and malformed files [pending]
+### Dependencies: None
+### Description: Identify and fix all JSON syntax errors including duplicate timezone keys, malformed bandit security reports, and any other JSON validation issues across the codebase
+### Details:
+Scan all JSON files in the repository for syntax errors. Fix duplicate keys in timezone configurations, repair malformed bandit security report structures, validate all JSON files against their schemas where applicable. Remove any commented-out JSON content and ensure proper formatting. Clean up any backup or temporary JSON files that may be cluttering the repository.
+<info added on 2025-07-14T10:45:40.183Z>
+COMPREHENSIVE CLEANUP REQUIREMENTS ADDED:
+
+Investigation and continuous repository tidying through systematic scan and technical debt reduction focusing on JSON configuration infrastructure:
+
+1. Remove obsolete JSON files:
+   - Delete old JSON versions (config_v1.json, backup_configs/)
+   - Remove deprecated JSON schemas and outdated configuration templates
+   - Clean up unused JSON test files and legacy configuration archives
+   - Delete obsolete JSON validation reports and syntax error logs
+
+2. Consolidate JSON directories:
+   - Merge duplicate JSON configuration files into single authoritative versions
+   - Remove redundant config files across multiple directories
+   - Consolidate JSON documentation into unified configuration guide
+   - Delete obsolete JSON utilities and deprecated validation helper scripts
+
+3. Clean up JSON artifacts:
+   - Remove old JSON backup directories and temporary config files
+   - Delete obsolete JSON parsing logs and validation artifacts
+   - Clean up deprecated JSON test results and outdated syntax reports
+   - Remove obsolete JSON schema validation files
+
+4. Technical debt reduction:
+   - Delete unused JSON models and deprecated schema definitions
+   - Remove obsolete JSON validation scripts and legacy parsing code
+   - Clean up JSON artifacts that are no longer applicable
+   - Update JSON documentation to reflect current configuration standards only
+
+This cleanup ensures JSON configuration infrastructure remains clean and focused without legacy artifacts that could cause confusion during JSON syntax repair.
+</info added on 2025-07-14T10:45:40.183Z>
+
+## 2. Resolve YAML syntax errors in GitHub workflows [pending]
+### Dependencies: None
+### Description: Fix all YAML syntax errors in GitHub workflow files, particularly addressing template literal issues and ensuring proper YAML formatting
+### Details:
+Review all .yml and .yaml files in .github/workflows directory. Fix template literal syntax errors, ensure proper indentation, validate YAML structure, fix any string quotation issues. Remove deprecated workflow syntax and update to current GitHub Actions standards. Clean up any disabled or experimental workflow files that are no longer needed.
+<info added on 2025-07-14T10:46:11.555Z>
+I'll analyze the current subtask details and add the comprehensive cleanup requirements from the user request.
+</info added on 2025-07-14T10:46:11.555Z>
+
+## 3. Address all flake8 violations without ignore flags [pending]
+### Dependencies: None
+### Description: Fix all Python code quality issues flagged by flake8, removing any ignore flags for critical checks and ensuring full compliance with style guidelines
+### Details:
+Run flake8 across entire Python codebase without any ignore flags. Fix all E and W error codes including line length, import ordering, whitespace issues, and code complexity warnings. Refactor complex functions to reduce cyclomatic complexity. Remove any # noqa comments unless absolutely necessary with documented justification. Clean up unused imports, variables, and dead code identified by flake8.
+<info added on 2025-07-14T10:46:36.803Z>
+COMPREHENSIVE CLEANUP REQUIREMENTS ADDED:
+Investigation and continuous repository tidying through systematic scan and technical debt reduction focusing on flake8 compliance infrastructure:
+
+1. Remove obsolete flake8 files:
+   - Delete old flake8 config versions (.flake8.old, backup_linting/)
+   - Remove deprecated linting rule files and outdated ignore patterns
+   - Clean up unused flake8 plugin files and legacy violation reports
+   - Delete obsolete flake8 test reports and linting error archives
+
+2. Consolidate flake8 directories:
+   - Merge duplicate flake8 configuration files into single authoritative versions
+   - Remove redundant linting files across multiple directories
+   - Consolidate flake8 documentation into unified code style guide
+   - Delete obsolete flake8 utilities and deprecated linting helper scripts
+
+3. Clean up flake8 artifacts:
+   - Remove old flake8 cache directories and temporary violation files
+   - Delete obsolete linting logs and style check artifacts
+   - Clean up deprecated flake8 test results and outdated violation reports
+   - Remove obsolete flake8 configuration validation files
+
+4. Technical debt reduction:
+   - Delete unused flake8 plugins and deprecated rule definitions
+   - Remove obsolete flake8 scripts and legacy linting code
+   - Clean up flake8 artifacts that are no longer applicable
+   - Update flake8 documentation to reflect current style standards only
+
+This cleanup ensures flake8 compliance infrastructure remains clean and focused without legacy artifacts that could cause confusion during code style fixes.
+</info added on 2025-07-14T10:46:36.803Z>
+
+## 4. Configure and fix radon complexity analysis [pending]
+### Dependencies: 13.3
+### Description: Set up radon for cyclomatic complexity analysis and refactor code to meet acceptable complexity thresholds
+### Details:
+Install and configure radon for complexity analysis. Set appropriate complexity thresholds (e.g., max cyclomatic complexity of 10). Identify all functions and methods exceeding thresholds. Refactor complex code by extracting methods, simplifying conditionals, and improving code structure. Document any necessarily complex algorithms. Remove overly complex legacy code that can be simplified or is no longer used.
+<info added on 2025-07-14T10:47:00.604Z>
+Based on the complexity analysis task requirements, additional comprehensive cleanup activities are needed to ensure a clean radon infrastructure:
+
+**Obsolete File Removal:**
+- Delete old radon configuration versions (radon_v1.cfg, backup_complexity/ directory)
+- Remove deprecated complexity report files and outdated metric configurations
+- Clean up unused radon analysis files and legacy complexity reports
+- Delete obsolete radon test reports and complexity violation archives
+
+**Directory Consolidation:**
+- Merge duplicate radon configuration files into single authoritative versions
+- Remove redundant complexity files across multiple directories
+- Consolidate radon documentation into unified complexity guide
+- Delete obsolete radon utilities and deprecated analysis helper scripts
+
+**Artifact Cleanup:**
+- Remove old radon cache directories and temporary complexity files
+- Delete obsolete complexity logs and analysis tracking artifacts
+- Clean up deprecated radon test results and outdated metric reports
+- Remove obsolete radon configuration validation files
+
+**Technical Debt Reduction:**
+- Delete unused radon models and deprecated complexity definitions
+- Remove obsolete radon scripts and legacy analysis code
+- Clean up radon artifacts that are no longer applicable
+- Update radon documentation to reflect current complexity standards only
+
+This systematic cleanup ensures the code complexity analysis infrastructure remains focused and uncluttered, preventing confusion during complexity threshold configuration and maintaining a clean foundation for effective radon implementation.
+</info added on 2025-07-14T10:47:00.604Z>
+
+## 5. Implement safety dependency scanning [pending]
+### Dependencies: None
+### Description: Set up and configure safety tool for scanning Python dependencies for known security vulnerabilities and update/patch vulnerable packages
+### Details:
+Configure safety in pre-commit hooks to scan requirements files. Run initial scan to identify all vulnerable dependencies. Update packages with known vulnerabilities to secure versions. For packages that cannot be updated due to compatibility, document the risk and implement mitigations. Clean up unused dependencies from requirements files. Set up automated dependency update PRs using tools like Dependabot or Renovate.
+<info added on 2025-07-14T10:47:23.558Z>
+COMPREHENSIVE CLEANUP REQUIREMENTS ADDED:
+
+Investigation and continuous repository tidying through systematic scan and technical debt reduction focusing on dependency security scanning infrastructure:
+
+1. Remove obsolete safety files:
+   - Delete old safety config versions (safety_v1.yml, backup_security/)
+   - Remove deprecated vulnerability report files and outdated scan configurations
+   - Clean up unused safety database files and legacy vulnerability reports
+   - Delete obsolete safety test reports and security scan archives
+
+2. Consolidate safety directories:
+   - Merge duplicate safety configuration files into single authoritative versions
+   - Remove redundant security scan files across multiple directories
+   - Consolidate safety documentation into unified dependency security guide
+   - Delete obsolete safety utilities and deprecated scanning helper scripts
+
+3. Clean up safety artifacts:
+   - Remove old safety cache directories and temporary vulnerability files
+   - Delete obsolete security logs and dependency tracking artifacts
+   - Clean up deprecated safety test results and outdated vulnerability reports
+   - Remove obsolete safety configuration validation files
+
+4. Technical debt reduction:
+   - Delete unused safety models and deprecated vulnerability definitions
+   - Remove obsolete safety scripts and legacy scanning code
+   - Clean up safety artifacts that are no longer applicable
+   - Update safety documentation to reflect current security standards only
+
+This cleanup ensures dependency security scanning infrastructure remains clean and focused without legacy artifacts that could cause confusion during vulnerability assessment.
+</info added on 2025-07-14T10:47:23.558Z>
+
+## 6. Fix ESLint and Prettier configurations for frontend code [pending]
+### Dependencies: None
+### Description: Repair ESLint and Prettier configurations, fix all frontend code quality issues, and ensure consistent code formatting across JavaScript/TypeScript files
+### Details:
+Fix ESLint configuration files and resolve any rule conflicts. Configure Prettier for consistent code formatting. Fix all ESLint errors and warnings in JavaScript/TypeScript code. Ensure ESLint and Prettier work together without conflicts. Remove any eslint-disable comments unless absolutely necessary. Clean up any generated or build files that shouldn't be linted. Remove deprecated lint rules and update to modern standards.
+<info added on 2025-07-14T10:47:47.006Z>
+COMPREHENSIVE CLEANUP REQUIREMENTS ADDED:
+
+Investigation and continuous repository tidying through systematic scan and technical debt reduction focusing on frontend linting infrastructure:
+
+1. Remove obsolete frontend linting files:
+   - Delete old ESLint config versions (.eslintrc.old, backup_eslint/)
+   - Remove deprecated Prettier config files and outdated style configurations
+   - Clean up unused linting plugin files and legacy lint reports
+   - Delete obsolete frontend lint reports and style check archives
+
+2. Consolidate frontend linting directories:
+   - Merge duplicate ESLint/Prettier files into single authoritative versions
+   - Remove redundant linting configs across multiple frontend directories
+   - Consolidate frontend linting documentation into unified style guide
+   - Delete obsolete linting utilities and deprecated formatter helper scripts
+
+3. Clean up frontend linting artifacts:
+   - Remove old ESLint cache directories and temporary lint files
+   - Delete obsolete frontend logs and style check artifacts
+   - Clean up deprecated lint test results and outdated style reports
+   - Remove obsolete frontend linting configuration validation files
+
+4. Technical debt reduction:
+   - Delete unused ESLint plugins and deprecated rule definitions
+   - Remove obsolete Prettier scripts and legacy formatting code
+   - Clean up frontend linting artifacts that are no longer applicable
+   - Update frontend documentation to reflect current style standards only
+
+This cleanup ensures frontend linting infrastructure remains clean and focused without legacy artifacts that could cause confusion during frontend code quality improvements.
+</info added on 2025-07-14T10:47:47.006Z>
+

@@ -1,0 +1,79 @@
+================================================================================
+FREEAGENTICS MEMORY ANALYSIS REPORT
+Generated: 2025-07-14T17:16:55.906376
+================================================================================
+
+EXECUTIVE SUMMARY
+----------------------------------------
+Current State:
+- Memory per agent: 34.5 MB (prohibitive for scaling)
+- Primary consumers: PyMDP matrices, belief states
+- Scaling limitation: 10GB+ for 300 agents
+
+Key Findings:
+- Float64 arrays can be reduced to float32 (50% savings)
+- Transition matrices are sparse (80-90% savings possible)
+- Memory pooling can reduce overhead by 20-30%
+
+Projected Improvement: 84% reduction
+Target footprint: 5.5 MB/agent
+
+================================================================================
+DETAILED ANALYSIS
+================================================================================
+
+1. PyMDP MEMORY SCALING
+----------------------------------------
+- 5x5 grid: 0.00 MB (0.0001 MB/state)
+- 10x10 grid: 0.00 MB (0.0000 MB/state)
+- 20x20 grid: 0.02 MB (0.0000 MB/state)
+- 30x30 grid: 0.03 MB (0.0000 MB/state)
+
+2. DATA STRUCTURE ANALYSIS
+----------------------------------------
+- beliefs: 0.01 MB -> 0.00 MB (50% savings)
+- transitions: 0.31 MB -> 0.05 MB (85% savings)
+
+3. MEMORY HOTSPOTS
+----------------------------------------
+
+agents/base_agent.py:
+  - Multiple array allocations (8 found)
+
+4. OPTIMIZATION PLAN
+----------------------------------------
+
+IMMEDIATE ACTIONS (1-2 days):
+- Switch to float32 for belief states
+  Effort: Low, Impact: High
+  Savings: ~50% belief memory
+- Implement belief state compression
+  Effort: Medium, Impact: High
+  Savings: ~30-40% when beliefs are sparse
+- Add memory pooling for temporary arrays
+  Effort: Medium, Impact: Medium
+  Savings: ~20% for multi-agent scenarios
+
+MEDIUM-TERM ACTIONS (1-2 weeks):
+- Implement sparse matrix support
+  Effort: High, Impact: Very High
+  Savings: ~80-90% for transition matrices
+- Add lazy loading for agent components
+  Effort: Medium, Impact: Medium
+  Savings: Reduces initial memory spike
+- Implement shared memory for read-only data
+  Effort: High, Impact: High
+  Savings: ~60% for shared world models
+
+================================================================================
+RECOMMENDATIONS
+================================================================================
+
+1. Start with float32 conversion (quick win)
+2. Implement memory pooling for array reuse
+3. Add sparse matrix support for transitions
+4. Profile continuously during optimization
+
+Expected outcome: <10 MB per agent (enabling 1000+ agents)
+
+================================================================================

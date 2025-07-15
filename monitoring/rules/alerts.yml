@@ -1,0 +1,261 @@
+# FreeAgentics Production Alert Rules
+# Comprehensive alerting for production monitoring
+
+groups:
+  # Infrastructure Alerts
+  - name: infrastructure
+    rules:
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) < 0.1
+        for: 5m
+        labels:
+          severity: warning
+          category: infrastructure
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is above 90% for more than 5 minutes"
+
+      - alert: HighCPUUsage
+        expr: 100 - (avg(irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          category: infrastructure
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is above 80% for more than 5 minutes"
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) < 0.1
+        for: 2m
+        labels:
+          severity: critical
+          category: infrastructure
+        annotations:
+          summary: "Disk space critically low"
+          description: "Disk space is below 10% on {{ $labels.mountpoint }}"
+
+      - alert: ContainerDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: infrastructure
+        annotations:
+          summary: "Container is down"
+          description: "Container {{ $labels.job }} has been down for more than 1 minute"
+
+  # Application Alerts
+  - name: application
+    rules:
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          category: application
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is above 5% for {{ $labels.job }}"
+
+      - alert: SlowResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+          category: application
+        annotations:
+          summary: "Slow response times detected"
+          description: "95th percentile response time is above 5 seconds"
+
+      - alert: APIEndpointDown
+        expr: up{job="freeagentics-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: application
+        annotations:
+          summary: "FreeAgentics API is down"
+          description: "The main API endpoint has been unreachable for more than 1 minute"
+
+      - alert: WebSocketConnectionFailure
+        expr: increase(websocket_connection_failures_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          category: application
+        annotations:
+          summary: "High WebSocket connection failures"
+          description: "More than 10 WebSocket connections failed in the last 5 minutes"
+
+  # Database Alerts
+  - name: database
+    rules:
+      - alert: PostgreSQLDown
+        expr: up{job="postgres-exporter"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: database
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL database has been down for more than 1 minute"
+
+      - alert: PostgreSQLTooManyConnections
+        expr: pg_stat_activity_count > pg_settings_max_connections * 0.8
+        for: 5m
+        labels:
+          severity: warning
+          category: database
+        annotations:
+          summary: "PostgreSQL connection count high"
+          description: "PostgreSQL is using more than 80% of available connections"
+
+      - alert: PostgreSQLSlowQueries
+        expr: rate(pg_stat_activity_max_tx_duration[5m]) > 300
+        for: 2m
+        labels:
+          severity: warning
+          category: database
+        annotations:
+          summary: "PostgreSQL slow queries detected"
+          description: "Some queries are taking longer than 5 minutes to complete"
+
+      - alert: RedisDown
+        expr: up{job="redis-exporter"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: database
+        annotations:
+          summary: "Redis is down"
+          description: "Redis cache has been down for more than 1 minute"
+
+      - alert: RedisMemoryHigh
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          category: database
+        annotations:
+          summary: "Redis memory usage high"
+          description: "Redis is using more than 90% of allocated memory"
+
+  # FreeAgentics Specific Alerts
+  - name: freeagentics
+    rules:
+      - alert: AgentCreationFailure
+        expr: increase(freeagentics_agent_creation_failures_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+          category: freeagentics
+        annotations:
+          summary: "High agent creation failure rate"
+          description: "More than 5 agent creation failures in the last 5 minutes"
+
+      - alert: CoalitionFormationStalled
+        expr: freeagentics_coalition_formation_duration_seconds > 300
+        for: 5m
+        labels:
+          severity: warning
+          category: freeagentics
+        annotations:
+          summary: "Coalition formation taking too long"
+          description: "Coalition formation is taking longer than 5 minutes"
+
+      - alert: InferenceEngineOverloaded
+        expr: freeagentics_inference_queue_size > 100
+        for: 5m
+        labels:
+          severity: warning
+          category: freeagentics
+        annotations:
+          summary: "Inference engine queue overloaded"
+          description: "Inference queue has more than 100 pending requests"
+
+      - alert: KnowledgeGraphUpdateFailure
+        expr: increase(freeagentics_knowledge_graph_update_failures_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          category: freeagentics
+        annotations:
+          summary: "Knowledge graph update failures"
+          description: "More than 10 knowledge graph updates failed in the last 5 minutes"
+
+      - alert: ActiveInferenceEngineDown
+        expr: freeagentics_active_inference_engine_status == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: freeagentics
+        annotations:
+          summary: "Active inference engine is down"
+          description: "The active inference engine has stopped functioning"
+
+  # Security Alerts
+  - name: security
+    rules:
+      - alert: HighFailedLoginAttempts
+        expr: increase(freeagentics_failed_login_attempts_total[5m]) > 20
+        for: 1m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "High number of failed login attempts"
+          description: "More than 20 failed login attempts in the last 5 minutes"
+
+      - alert: SuspiciousAPIAccess
+        expr: increase(freeagentics_suspicious_requests_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "Suspicious API access patterns detected"
+          description: "Potential security threat detected in API access patterns"
+
+      - alert: SSLCertificateExpiring
+        expr: (ssl_certificate_expiry_seconds - time()) / 86400 < 30
+        for: 1h
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "SSL certificate expiring soon"
+          description: "SSL certificate will expire in less than 30 days"
+
+      - alert: UnauthorizedAccessAttempt
+        expr: increase(freeagentics_unauthorized_access_attempts_total[5m]) > 5
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "Unauthorized access attempts detected"
+          description: "Multiple unauthorized access attempts detected"
+
+  # Business Logic Alerts
+  - name: business
+    rules:
+      - alert: LowUserActivity
+        expr: rate(freeagentics_user_requests_total[1h]) < 0.1
+        for: 30m
+        labels:
+          severity: info
+          category: business
+        annotations:
+          summary: "Low user activity detected"
+          description: "User activity is unusually low for the past 30 minutes"
+
+      - alert: HighResourceConsumption
+        expr: freeagentics_resource_consumption_ratio > 0.9
+        for: 10m
+        labels:
+          severity: warning
+          category: business
+        annotations:
+          summary: "High resource consumption"
+          description: "System is consuming more than 90% of allocated resources"

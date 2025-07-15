@@ -1,0 +1,87 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    orgId: 1
+    url: http://prometheus:9090
+    basicAuth: false
+    isDefault: true
+    version: 1
+    editable: true
+    jsonData:
+      httpMethod: POST
+      manageAlerts: true
+      alertmanagerUid: alertmanager
+      prometheusType: Prometheus
+      prometheusVersion: 2.40.0
+      cacheLevel: 'High'
+      disableRecordingRules: false
+      incrementalQueryOverlapWindow: 10m
+      exemplarTraceIdDestinations:
+        - name: traceID
+          datasourceUid: jaeger
+          urlDisplayLabel: View in Jaeger
+      
+  - name: AlertManager
+    type: alertmanager
+    access: proxy
+    orgId: 1
+    url: http://alertmanager:9093
+    basicAuth: false
+    isDefault: false
+    version: 1
+    editable: true
+    uid: alertmanager
+    jsonData:
+      implementation: prometheus
+      handleGrafanaManagedAlerts: true
+      
+  - name: Jaeger
+    type: jaeger
+    access: proxy
+    orgId: 1
+    url: http://jaeger:14268
+    basicAuth: false
+    isDefault: false
+    version: 1
+    editable: true
+    uid: jaeger
+    jsonData:
+      tracesToLogs:
+        datasourceUid: loki
+        tags: [job, instance, pod, namespace]
+        mappedTags: [
+          { key: 'service.name', value: 'service' },
+          { key: 'service.namespace', value: 'namespace' }
+        ]
+        mapTagNamesEnabled: true
+        spanStartTimeShift: '1h'
+        spanEndTimeShift: '1h'
+        filterByTraceID: false
+        filterBySpanID: false
+        
+  - name: Loki
+    type: loki
+    access: proxy
+    orgId: 1
+    url: http://loki:3100
+    basicAuth: false
+    isDefault: false
+    version: 1
+    editable: true
+    uid: loki
+    jsonData:
+      derivedFields:
+        - name: TraceID
+          matcherRegex: "trace_id=(\\w+)"
+          url: "${__value.raw}"
+          datasourceUid: jaeger
+          urlDisplayLabel: View in Jaeger
+        - name: SpanID
+          matcherRegex: "span_id=(\\w+)"
+          url: "${__value.raw}"
+          datasourceUid: jaeger
+          urlDisplayLabel: View in Jaeger
+      alertmanagerUid: alertmanager

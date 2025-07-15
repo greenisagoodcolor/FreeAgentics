@@ -1,0 +1,317 @@
+groups:
+  - name: security_alerts
+    interval: 30s
+    rules:
+      # Authentication and Authorization Alerts
+      - alert: HighFailedLoginRate
+        expr: |
+          rate(auth_login_failures_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "High rate of failed login attempts"
+          description: "{{ $value }} failed login attempts per second (threshold: 10)"
+          runbook_url: "https://docs.freeagentics.com/runbooks/security/failed-logins"
+
+      - alert: BruteForceAttempt
+        expr: |
+          rate(auth_login_failures_by_ip[5m]) > 5
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "Possible brute force attack detected"
+          description: "IP {{ $labels.ip }} has {{ $value }} failed login attempts"
+          runbook_url: "https://docs.freeagentics.com/runbooks/security/brute-force"
+
+      - alert: SuspiciousJWTActivity
+        expr: |
+          rate(jwt_validation_failures_total[5m]) > 20
+        for: 2m
+        labels:
+          severity: high
+          category: security
+        annotations:
+          summary: "High rate of JWT validation failures"
+          description: "{{ $value }} JWT validation failures per second"
+          runbook_url: "https://docs.freeagentics.com/runbooks/security/jwt-failures"
+
+      - alert: UnauthorizedAccessAttempts
+        expr: |
+          rate(rbac_access_denied_total[5m]) > 50
+        for: 3m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "High rate of unauthorized access attempts"
+          description: "{{ $value }} unauthorized access attempts per second"
+
+      # API Security Alerts
+      - alert: APIRateLimitBypass
+        expr: |
+          rate(api_requests_total[1m]) > 1000 and 
+          rate(rate_limit_enforced_total[1m]) < 10
+        for: 2m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "Possible rate limit bypass detected"
+          description: "High API traffic without corresponding rate limiting"
+
+      - alert: SuspiciousAPIPattern
+        expr: |
+          rate(api_requests_by_pattern{pattern=~".*(\.\./|%2e%2e|UNION|SELECT|INSERT|UPDATE|DELETE|DROP).*"}[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "Suspicious API request pattern detected"
+          description: "Potential injection attack: {{ $labels.pattern }}"
+
+      - alert: APIAnomalousTraffic
+        expr: |
+          abs(rate(api_requests_total[5m]) - avg_over_time(rate(api_requests_total[5m])[1h:5m])) 
+          > 3 * stddev_over_time(rate(api_requests_total[5m])[1h:5m])
+        for: 5m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "Anomalous API traffic detected"
+          description: "API traffic deviates significantly from normal patterns"
+
+      # Data Security Alerts
+      - alert: SensitiveDataAccess
+        expr: |
+          increase(sensitive_data_access_total[5m]) > 100
+        for: 2m
+        labels:
+          severity: high
+          category: security
+        annotations:
+          summary: "High rate of sensitive data access"
+          description: "{{ $value }} sensitive data access events in 5 minutes"
+
+      - alert: DataExfiltrationRisk
+        expr: |
+          rate(data_export_bytes_total[5m]) > 1073741824  # 1GB
+        for: 3m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "Potential data exfiltration detected"
+          description: "{{ $value | humanize }}B/s data export rate detected"
+
+      - alert: UnencryptedDataTransmission
+        expr: |
+          increase(unencrypted_transmission_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "Unencrypted data transmission detected"
+          description: "{{ $value }} unencrypted transmissions detected"
+
+      # System Security Alerts
+      - alert: PrivilegeEscalation
+        expr: |
+          increase(privilege_escalation_attempts_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "Privilege escalation attempt detected"
+          description: "User {{ $labels.user }} attempted privilege escalation"
+
+      - alert: FileSystemTampering
+        expr: |
+          increase(file_integrity_violations_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "File system tampering detected"
+          description: "{{ $value }} file integrity violations detected"
+
+      - alert: SuspiciousProcessExecution
+        expr: |
+          increase(suspicious_process_executions_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "Suspicious process execution detected"
+          description: "Process: {{ $labels.process_name }}"
+
+      # Cryptographic Security Alerts
+      - alert: WeakCryptographyUsed
+        expr: |
+          increase(weak_crypto_usage_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: high
+          category: security
+        annotations:
+          summary: "Weak cryptography usage detected"
+          description: "{{ $labels.algorithm }} used in {{ $labels.component }}"
+
+      - alert: CertificateExpirySoon
+        expr: |
+          ssl_certificate_expiry_seconds < 7 * 24 * 60 * 60  # 7 days
+        for: 1h
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "SSL certificate expiring soon"
+          description: "Certificate {{ $labels.domain }} expires in {{ $value | humanizeDuration }}"
+
+      - alert: CertificateExpired
+        expr: |
+          ssl_certificate_expiry_seconds < 0
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "SSL certificate expired"
+          description: "Certificate {{ $labels.domain }} has expired"
+
+      # Session Security Alerts
+      - alert: SessionHijackingAttempt
+        expr: |
+          increase(session_hijacking_attempts_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "Session hijacking attempt detected"
+          description: "{{ $value }} session hijacking attempts"
+
+      - alert: AbnormalSessionBehavior
+        expr: |
+          increase(session_anomalies_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "Abnormal session behavior detected"
+          description: "{{ $value }} session anomalies detected"
+
+      # Infrastructure Security Alerts
+      - alert: ContainerEscape
+        expr: |
+          increase(container_escape_attempts_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "Container escape attempt detected"
+          description: "Container {{ $labels.container }} escape attempt"
+
+      - alert: KubernetesAPIAbuse
+        expr: |
+          rate(kubernetes_api_unauthorized_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: high
+          category: security
+        annotations:
+          summary: "Kubernetes API abuse detected"
+          description: "{{ $value }} unauthorized Kubernetes API calls per second"
+
+      # Web Security Alerts
+      - alert: XSSAttemptDetected
+        expr: |
+          increase(xss_attempts_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: high
+          category: security
+        annotations:
+          summary: "XSS attempt detected"
+          description: "XSS attempt from IP {{ $labels.source_ip }}"
+
+      - alert: CSRFAttemptDetected
+        expr: |
+          increase(csrf_attempts_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: high
+          category: security
+        annotations:
+          summary: "CSRF attempt detected"
+          description: "CSRF attempt from IP {{ $labels.source_ip }}"
+
+      - alert: SQLInjectionAttempt
+        expr: |
+          increase(sql_injection_attempts_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "SQL injection attempt detected"
+          description: "SQL injection attempt on endpoint {{ $labels.endpoint }}"
+
+      # Compliance and Audit Alerts
+      - alert: AuditLogTampering
+        expr: |
+          increase(audit_log_tampering_attempts_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "Audit log tampering detected"
+          description: "Attempt to tamper with audit logs"
+
+      - alert: ComplianceViolation
+        expr: |
+          compliance_score < 0.8
+        for: 10m
+        labels:
+          severity: high
+          category: security
+        annotations:
+          summary: "Compliance score below threshold"
+          description: "Compliance score: {{ $value }}, framework: {{ $labels.framework }}"
+
+      # Performance-related Security Alerts
+      - alert: DDoSAttackSuspected
+        expr: |
+          rate(http_requests_total[1m]) > 10000 and
+          increase(unique_source_ips[1m]) > 1000
+        for: 2m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "Possible DDoS attack"
+          description: "{{ $value }} requests/sec from multiple IPs"
+
+      - alert: ResourceExhaustionAttack
+        expr: |
+          (avg(rate(container_cpu_usage_seconds_total[5m])) > 0.9) and
+          (rate(http_requests_total[5m]) > 1000)
+        for: 3m
+        labels:
+          severity: high
+          category: security
+        annotations:
+          summary: "Resource exhaustion attack suspected"
+          description: "High CPU usage with high request rate"

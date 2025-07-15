@@ -1,0 +1,96 @@
+{
+  "results": [
+    {
+      "directory": "agents",
+      "before": 319,
+      "after": 287,
+      "fixed": 32,
+      "remaining": 287,
+      "stats": {
+        "E501": 218,
+        "F841": 3,
+        "E999": 3,
+        "W292": 4,
+        "F821": 54,
+        "E128": 4,
+        "F541": 1
+      }
+    },
+    {
+      "directory": "api",
+      "before": 281,
+      "after": 300,
+      "fixed": -19,
+      "remaining": 300,
+      "stats": {
+        "E402": 10,
+        "E501": 242,
+        "F811": 1,
+        "W292": 5,
+        "F821": 35,
+        "E999": 1,
+        "E722": 4,
+        "E302": 1,
+        "W391": 1
+      }
+    },
+    {
+      "directory": "database",
+      "before": 174,
+      "after": 192,
+      "fixed": -18,
+      "remaining": 192,
+      "stats": {
+        "E501": 151,
+        "F821": 35,
+        "W292": 4,
+        "E999": 1,
+        "F841": 1
+      }
+    },
+    {
+      "directory": "inference",
+      "before": 406,
+      "after": 426,
+      "fixed": -20,
+      "remaining": 426,
+      "stats": {
+        "E999": 1,
+        "E501": 282,
+        "E303": 39,
+        "E128": 57,
+        "F541": 6,
+        "E127": 4,
+        "E129": 1,
+        "F841": 4,
+        "E203": 2,
+        "F402": 3,
+        "F821": 26,
+        "E722": 1
+      }
+    },
+    {
+      "directory": "knowledge_graph",
+      "before": 176,
+      "after": 298,
+      "fixed": -122,
+      "remaining": 298,
+      "stats": {
+        "E501": 144,
+        "F821": 143,
+        "E203": 2,
+        "E722": 2,
+        "F841": 1,
+        "E731": 5,
+        "E999": 1
+      }
+    }
+  ],
+  "summary": {
+    "total_fixed": -147,
+    "total_remaining": 1503,
+    "fix_types": [
+      "unused"
+    ]
+  }
+}

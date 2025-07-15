@@ -1,0 +1,175 @@
+# Task ID: 12
+# Title: Validate PyMDP Active Inference Functionality
+# Status: in-progress
+# Dependencies: None
+# Priority: high
+# Description: Remove graceful fallback patterns and implement hard failure mode for missing PyMDP dependencies to validate actual Active Inference operations
+# Details:
+1. Audit current PyMDP integration code to identify all graceful fallback patterns. 2. Remove try/catch blocks that silently fail when PyMDP unavailable. 3. Implement hard failure with clear error messages when dependencies missing. 4. Create functional tests that verify: belief state updates work with real data, policy computation executes properly, action selection operates correctly. 5. Test with actual PyMDP library calls, not mocks. 6. Validate installation in production environment. 7. Create integration test suite that fails if Active Inference is not functional.
+
+# Test Strategy:
+Create comprehensive integration tests that make actual PyMDP calls and verify belief state updates, policy computation, and action selection. Tests must fail hard if PyMDP is not properly installed or functional. Include tests with real data scenarios and validate that all Active Inference operations complete successfully without fallbacks.
+
+# Subtasks:
+## 1. Audit and Remove Graceful Fallback Patterns [pending]
+### Dependencies: None
+### Description: Systematically identify and remove all try/catch blocks and conditional imports that allow the system to continue without PyMDP
+### Details:
+Search for patterns like 'try: import pymdp except:', 'if HAS_PYMDP:', and mock implementations. Document all fallback locations in agents/, inference/, and related modules. Remove unnecessary abstraction layers and simplify import structure. Clean up any orphaned mock objects or placeholder classes that were used as PyMDP substitutes.
+<info added on 2025-07-14T10:42:51.837Z>
+COMPREHENSIVE CLEANUP REQUIREMENTS ADDED:
+Investigation and continuous repository tidying through systematic scan and technical debt reduction focusing on fallback pattern infrastructure:
+
+1. Remove obsolete fallback files:
+   - Delete old graceful fallback versions (fallback_handlers_v1.py, backup_fallbacks/)
+   - Remove deprecated try-catch patterns and outdated fallback utilities
+   - Clean up unused default value handlers and legacy fallback mechanisms
+   - Delete obsolete fallback test reports and graceful degradation archives
+
+2. Consolidate fallback directories:
+   - Merge duplicate fallback handler files into single authoritative versions
+   - Remove redundant fallback pattern files across multiple directories
+   - Consolidate fallback documentation into unified error handling guide
+   - Delete obsolete fallback utilities and deprecated handler helper scripts
+
+3. Clean up fallback artifacts:
+   - Remove old fallback cache directories and temporary default files
+   - Delete obsolete fallback logs and graceful degradation artifacts
+   - Clean up deprecated fallback results and outdated handler reports
+   - Remove obsolete fallback configuration validation files
+
+4. Technical debt reduction:
+   - Delete unused fallback models and deprecated handler definitions
+   - Remove obsolete fallback scripts and legacy degradation code
+   - Clean up fallback artifacts that are no longer applicable
+   - Update fallback documentation to reflect hard failure standards only
+
+This cleanup ensures fallback pattern infrastructure is removed completely, leaving only hard failure modes without legacy graceful degradation artifacts.
+</info added on 2025-07-14T10:42:51.837Z>
+
+## 2. Implement Hard Failure Modes with Clear Error Messages [pending]
+### Dependencies: 12.1
+### Description: Replace all removed fallback patterns with explicit failure points that provide actionable error messages when PyMDP is missing
+### Details:
+Implement early validation checks at module initialization. Create custom exception classes like PyMDPNotInstalledError with messages indicating exact installation commands. Add startup validation in main entry points. Remove any configuration flags that toggle PyMDP usage. Clean up environment variable checks related to optional PyMDP features.
+<info added on 2025-07-14T10:43:13.510Z>
+Repository cleanup requirements for hard failure implementation:
+
+OBSOLETE FILE REMOVAL:
+- Delete soft_errors_v1.py and backup_handlers/ directory
+- Remove deprecated warning-only patterns and outdated soft error utilities
+- Clean up unused continue-on-error handlers and legacy warning mechanisms
+- Delete obsolete soft error reports and warning-only archives
+
+DIRECTORY CONSOLIDATION:
+- Merge duplicate error handler files into single authoritative versions
+- Remove redundant soft error files across multiple directories
+- Consolidate error documentation into unified hard failure guide
+- Delete obsolete error utilities and deprecated warning helper scripts
+
+ARTIFACT CLEANUP:
+- Remove old soft error cache directories and temporary warning files
+- Delete obsolete warning logs and soft failure tracking artifacts
+- Clean up deprecated error results and outdated warning reports
+- Remove obsolete error configuration validation files
+
+TECHNICAL DEBT REDUCTION:
+- Delete unused soft error models and deprecated warning definitions
+- Remove obsolete error scripts and legacy soft failure code
+- Clean up error artifacts that are no longer applicable
+- Update error documentation to reflect hard failure standards only
+
+This systematic cleanup ensures the error handling infrastructure enforces hard failures without any legacy soft error or warning-only artifacts remaining in the repository.
+</info added on 2025-07-14T10:43:13.510Z>
+
+## 3. Validate Belief State Updates with Real PyMDP Operations [pending]
+### Dependencies: 12.2
+### Description: Create comprehensive tests for belief state initialization, updates, and transformations using actual PyMDP library calls
+### Details:
+Test belief state updates with various observation types, validate posterior calculations, verify belief propagation across time steps. Remove any custom belief update implementations that duplicate PyMDP functionality. Clean up data structures that were created to work around missing PyMDP. Ensure proper numpy array handling and dimension compatibility.
+<info added on 2025-07-14T10:43:37.455Z>
+COMPREHENSIVE CLEANUP REQUIREMENTS - Remove obsolete belief state infrastructure and technical debt:
+
+Remove obsolete belief state files - Delete old belief test versions (belief_tests_v1.py, backup_beliefs/), deprecated belief mock utilities, outdated state test fixtures, unused belief update simulators, legacy state tracking scripts, obsolete belief test reports and state update archives.
+
+Consolidate belief state directories - Merge duplicate belief test files into single authoritative versions, remove redundant state test files across multiple directories, consolidate belief documentation into unified PyMDP testing guide, delete obsolete belief utilities and deprecated state helper scripts.
+
+Clean up belief state artifacts - Remove old belief test cache directories and temporary state files, delete obsolete belief logs and state update tracking artifacts, clean up deprecated belief test results and outdated state reports, remove obsolete belief configuration validation files.
+
+Technical debt reduction - Delete unused belief test models and deprecated state definitions, remove obsolete belief testing scripts and legacy state code, clean up belief test artifacts that are no longer applicable, update belief documentation to reflect current PyMDP standards only.
+
+This cleanup ensures belief state test infrastructure remains clean and focused without legacy artifacts that could cause confusion during PyMDP belief validation.
+</info added on 2025-07-14T10:43:37.455Z>
+
+## 4. Test Policy Computation and Free Energy Calculations [pending]
+### Dependencies: 12.2
+### Description: Validate that policy computation uses PyMDP's expected free energy calculations correctly and produces valid action policies
+### Details:
+Test policy selection under different preference settings, validate expected free energy calculations, verify policy pruning mechanisms. Remove any simplified policy computation code that bypassed PyMDP. Clean up hardcoded policies or rule-based systems that were fallback mechanisms. Ensure proper handling of multi-factor models and hierarchical policies.
+<info added on 2025-07-14T10:43:58.785Z>
+COMPREHENSIVE CLEANUP REQUIREMENTS ADDED:
+
+Investigation and continuous repository tidying through systematic scan and technical debt reduction focusing on policy computation test infrastructure:
+
+1. Remove obsolete policy test files:
+   - Delete old policy test versions (policy_tests_v1.py, backup_policies/)
+   - Remove deprecated policy mock utilities and outdated computation test fixtures
+   - Clean up unused policy simulators and legacy computation tracking scripts
+   - Delete obsolete policy test reports and computation result archives
+
+2. Consolidate policy test directories:
+   - Merge duplicate policy test files into single authoritative versions
+   - Remove redundant computation test files across multiple directories
+   - Consolidate policy documentation into unified PyMDP policy guide
+   - Delete obsolete policy utilities and deprecated computation helper scripts
+
+3. Clean up policy test artifacts:
+   - Remove old policy test cache directories and temporary computation files
+   - Delete obsolete policy logs and computation tracking artifacts
+   - Clean up deprecated policy test results and outdated computation reports
+   - Remove obsolete policy configuration validation files
+
+4. Technical debt reduction:
+   - Delete unused policy test models and deprecated computation definitions
+   - Remove obsolete policy testing scripts and legacy computation code
+   - Clean up policy test artifacts that are no longer applicable
+   - Update policy documentation to reflect current PyMDP standards only
+
+This cleanup ensures policy computation test infrastructure remains clean and focused without legacy artifacts that could cause confusion during PyMDP policy validation.
+</info added on 2025-07-14T10:43:58.785Z>
+
+## 5. Validate Action Selection and Production Environment [pending]
+### Dependencies: 12.3, 12.4
+### Description: Test complete action selection pipeline from observations to actions, and validate PyMDP installation in production environment
+### Details:
+Test full inference cycle: observation → belief update → policy computation → action selection. Validate action sampling from policies, test action execution feedback loop. Create production environment validation script. Remove any action selection code that doesn't use PyMDP. Clean up legacy action interfaces and standardize on PyMDP's action format. Document minimum PyMDP version requirements.
+<info added on 2025-07-14T10:44:23.379Z>
+Action Selection Test Infrastructure Cleanup Phase:
+
+1. Repository Scan for Obsolete Action Test Files:
+   - Locate and remove action_tests_v1.py and backup_actions/ directories
+   - Delete deprecated action mock utilities in test fixtures
+   - Remove unused action simulators and legacy selection tracking scripts
+   - Clean up obsolete action test reports and archived selection results
+
+2. Test Directory Consolidation:
+   - Merge duplicate action test files into single authoritative versions
+   - Eliminate redundant selection test files across multiple test directories
+   - Consolidate scattered action documentation into unified PyMDP action guide
+   - Remove obsolete action utilities and deprecated selection helper scripts
+
+3. Artifact Cleanup:
+   - Delete old action test cache directories and temporary selection files
+   - Remove obsolete action logs and selection tracking artifacts
+   - Clean up deprecated action test results and outdated selection reports
+   - Delete obsolete action configuration validation files
+
+4. Technical Debt Reduction:
+   - Remove unused action test models and deprecated selection definitions
+   - Delete obsolete action testing scripts and legacy selection code
+   - Clean up action test artifacts incompatible with current PyMDP standards
+   - Update action documentation to reflect only current PyMDP action selection patterns
+
+This systematic cleanup ensures the action selection test infrastructure remains streamlined and focused on PyMDP validation without legacy artifacts that could interfere with proper active inference testing.
+</info added on 2025-07-14T10:44:23.379Z>
+

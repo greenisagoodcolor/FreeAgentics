@@ -1,0 +1,695 @@
+{
+  "info": {
+    "name": "FreeAgentics API",
+    "description": "Complete API collection for FreeAgentics Multi-Agent AI Platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://api.freeagentics.com",
+      "type": "string"
+    },
+    {
+      "key": "api_version",
+      "value": "v1",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "agent_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has tokens\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('access_token');",
+                  "    pm.expect(jsonData).to.have.property('refresh_token');",
+                  "    ",
+                  "    // Store tokens",
+                  "    pm.collectionVariables.set(\"access_token\", jsonData.access_token);",
+                  "    pm.collectionVariables.set(\"refresh_token\", jsonData.refresh_token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"testuser@example.com\",\n  \"password\": \"SecurePassword123!\",\n  \"role\": \"CONTRIBUTOR\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has tokens\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('access_token');",
+                  "    pm.expect(jsonData).to.have.property('refresh_token');",
+                  "    ",
+                  "    // Store tokens",
+                  "    pm.collectionVariables.set(\"access_token\", jsonData.access_token);",
+                  "    pm.collectionVariables.set(\"refresh_token\", jsonData.refresh_token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"SecurePassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "login"]
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has new tokens\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('access_token');",
+                  "    pm.expect(jsonData).to.have.property('refresh_token');",
+                  "    ",
+                  "    // Update tokens",
+                  "    pm.collectionVariables.set(\"access_token\", jsonData.access_token);",
+                  "    pm.collectionVariables.set(\"refresh_token\", jsonData.refresh_token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Client-Fingerprint",
+                "value": "unique-client-id-12345",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/refresh",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "refresh"]
+            }
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "me"]
+            }
+          }
+        },
+        {
+          "name": "Get Permissions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/permissions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "permissions"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/logout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Agents",
+      "item": [
+        {
+          "name": "List Agents",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/agents?skip=0&limit=10&status=active",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "agents"],
+              "query": [
+                {
+                  "key": "skip",
+                  "value": "0"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "active"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Agent",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Agent created successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    ",
+                  "    // Store agent ID",
+                  "    pm.collectionVariables.set(\"agent_id\", jsonData.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Research Agent\",\n  \"template\": \"research_v2\",\n  \"parameters\": {\n    \"temperature\": 0.7,\n    \"max_tokens\": 2048\n  },\n  \"use_pymdp\": true,\n  \"planning_horizon\": 3\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/agents",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "agents"]
+            }
+          }
+        },
+        {
+          "name": "Get Agent Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/agents/{{agent_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "agents", "{{agent_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Agent",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"parameters\": {\n    \"temperature\": 0.8,\n    \"max_tokens\": 3000\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/agents/{{agent_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "agents", "{{agent_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Start Agent",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/agents/{{agent_id}}/start",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "agents", "{{agent_id}}", "start"]
+            }
+          }
+        },
+        {
+          "name": "Stop Agent",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/agents/{{agent_id}}/stop",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "agents", "{{agent_id}}", "stop"]
+            }
+          }
+        },
+        {
+          "name": "Get Agent Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/agents/{{agent_id}}/metrics",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "agents", "{{agent_id}}", "metrics"]
+            }
+          }
+        },
+        {
+          "name": "Delete Agent",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/agents/{{agent_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "agents", "{{agent_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Inference",
+      "item": [
+        {
+          "name": "Run Inference",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"agent_id\": \"{{agent_id}}\",\n  \"query\": \"Analyze the current trends in artificial intelligence\",\n  \"context\": {\n    \"focus_areas\": [\"machine learning\", \"natural language processing\"],\n    \"time_frame\": \"2024\"\n  },\n  \"parameters\": {\n    \"temperature\": 0.7,\n    \"max_tokens\": 1000\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/inference",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "inference"]
+            }
+          }
+        },
+        {
+          "name": "Get Inference Result",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/inference/inf_123456",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "inference", "inf_123456"]
+            }
+          }
+        },
+        {
+          "name": "Batch Inference",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"requests\": [\n    {\n      \"agent_id\": \"{{agent_id}}\",\n      \"query\": \"Analyze tech sector performance\"\n    },\n    {\n      \"agent_id\": \"{{agent_id}}\",\n      \"query\": \"Analyze healthcare sector trends\"\n    }\n  ],\n  \"parallel\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/batch-inference",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "batch-inference"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Knowledge Graph",
+      "item": [
+        {
+          "name": "Search Knowledge",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/knowledge/search?q=machine%20learning&limit=10&type=concept",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "knowledge", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "machine%20learning"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "type",
+                  "value": "concept"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Entity",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"concept\",\n  \"label\": \"Quantum Machine Learning\",\n  \"properties\": {\n    \"description\": \"Application of quantum computing to machine learning algorithms\",\n    \"category\": \"technology\",\n    \"importance\": \"high\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/knowledge/entities",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "knowledge", "entities"]
+            }
+          }
+        },
+        {
+          "name": "Update Entity",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"properties\": {\n    \"importance\": \"critical\",\n    \"last_updated\": \"2024-01-15\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/knowledge/entities/entity_123",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "knowledge", "entities", "entity_123"]
+            }
+          }
+        },
+        {
+          "name": "Create Relationship",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"source_id\": \"entity_123\",\n  \"target_id\": \"entity_456\",\n  \"relationship_type\": \"related_to\",\n  \"properties\": {\n    \"strength\": 0.85,\n    \"confidence\": 0.9\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/knowledge/relationships",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "knowledge", "relationships"]
+            }
+          }
+        },
+        {
+          "name": "Delete Entity",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/knowledge/entities/entity_123",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "knowledge", "entities", "entity_123"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "System Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/system/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "system", "status"]
+            }
+          }
+        },
+        {
+          "name": "System Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/system/metrics",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "system", "metrics"]
+            }
+          }
+        },
+        {
+          "name": "System Config",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/system/config",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "system", "config"]
+            },
+            "description": "Admin only - requires ADMIN_SYSTEM permission"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Monitoring",
+      "item": [
+        {
+          "name": "Get Metrics Stream",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/monitoring/metrics?metrics=cpu,memory&agents={{agent_id}}&interval=5",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "monitoring", "metrics"],
+              "query": [
+                {
+                  "key": "metrics",
+                  "value": "cpu,memory"
+                },
+                {
+                  "key": "agents",
+                  "value": "{{agent_id}}"
+                },
+                {
+                  "key": "interval",
+                  "value": "5"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Active Alerts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/monitoring/alerts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "monitoring", "alerts"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Security",
+      "item": [
+        {
+          "name": "Get Audit Log",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/security/audit-log?start_date=2024-01-01&end_date=2024-01-31&event_type=LOGIN_SUCCESS",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "security", "audit-log"],
+              "query": [
+                {
+                  "key": "start_date",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "end_date",
+                  "value": "2024-01-31"
+                },
+                {
+                  "key": "event_type",
+                  "value": "LOGIN_SUCCESS"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Active Sessions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/security/active-sessions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "security", "active-sessions"]
+            },
+            "description": "Admin only - requires ADMIN_SYSTEM permission"
+          }
+        },
+        {
+          "name": "Revoke Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": \"session_123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/security/revoke-session",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "security", "revoke-session"]
+            },
+            "description": "Admin only - requires ADMIN_SYSTEM permission"
+          }
+        }
+      ]
+    }
+  ]
+}

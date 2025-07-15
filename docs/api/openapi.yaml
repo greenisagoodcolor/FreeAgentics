@@ -1,0 +1,1787 @@
+openapi: 3.0.3
+info:
+  title: FreeAgentics API
+  description: |
+    The FreeAgentics API provides a comprehensive interface for managing multi-agent AI systems with Active Inference capabilities. 
+    
+    This API allows you to:
+    - Create and manage AI agents with different templates
+    - Run inference tasks with context-aware processing
+    - Build and query knowledge graphs
+    - Monitor system performance and agent metrics
+    - Implement real-time communication via WebSockets
+    
+    ## Authentication
+    
+    All API endpoints require authentication using JWT tokens. Obtain tokens by registering or logging in, then include the access token in the Authorization header:
+    
+    ```
+    Authorization: Bearer <access_token>
+    ```
+    
+    ## Rate Limiting
+    
+    The API implements rate limiting to ensure fair usage:
+    - Auth endpoints: 3 requests per minute
+    - API endpoints: 60 requests per minute
+    - WebSocket connections: 100 messages per minute
+    
+    Rate limit headers are included in all responses.
+    
+    ## Error Handling
+    
+    The API uses standard HTTP status codes and returns structured error responses:
+    
+    ```json
+    {
+      "error": {
+        "code": "INVALID_REQUEST",
+        "message": "The request was invalid",
+        "details": {
+          "field": "name",
+          "reason": "Required field missing"
+        }
+      },
+      "request_id": "req_12345"
+    }
+    ```
+  version: 0.1.0
+  contact:
+    name: FreeAgentics Support
+    email: support@freeagentics.com
+    url: https://freeagentics.com/support
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: https://freeagentics.com/terms
+
+servers:
+  - url: https://api.freeagentics.com/api/v1
+    description: Production server
+  - url: https://staging-api.freeagentics.com/api/v1
+    description: Staging server
+  - url: http://localhost:8000/api/v1
+    description: Local development server
+
+security:
+  - BearerAuth: []
+
+paths:
+  /register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      description: Create a new user account and receive authentication tokens
+      operationId: registerUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+            examples:
+              basic_user:
+                summary: Basic user registration
+                value:
+                  username: "johndoe"
+                  email: "john@example.com"
+                  password: "SecurePassword123!"
+                  role: "CONTRIBUTOR"
+      responses:
+        '200':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '400':
+          description: Registration failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /login:
+    post:
+      tags:
+        - Authentication
+      summary: Login user
+      description: Authenticate user and receive tokens
+      operationId: loginUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+            examples:
+              login_example:
+                summary: User login
+                value:
+                  username: "johndoe"
+                  password: "SecurePassword123!"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: Obtain a new access token using refresh token
+      operationId: refreshToken
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Invalid refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /me:
+    get:
+      tags:
+        - Authentication
+      summary: Get current user info
+      description: Retrieve information about the authenticated user
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: User information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfo'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /permissions:
+    get:
+      tags:
+        - Authentication
+      summary: Get user permissions
+      description: Retrieve permissions for the authenticated user
+      operationId: getUserPermissions
+      responses:
+        '200':
+          description: Permissions retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissions'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout user
+      description: Invalidate refresh token and logout user
+      operationId: logoutUser
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Successfully logged out"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /agents:
+    get:
+      tags:
+        - Agents
+      summary: List agents
+      description: Retrieve a list of agents accessible to the user
+      operationId: listAgents
+      parameters:
+        - name: skip
+          in: query
+          description: Number of agents to skip
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: limit
+          in: query
+          description: Maximum number of agents to return
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+        - name: status
+          in: query
+          description: Filter by agent status
+          required: false
+          schema:
+            type: string
+            enum: [pending, active, paused, stopped]
+        - name: template
+          in: query
+          description: Filter by agent template
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Agents retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentListResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      tags:
+        - Agents
+      summary: Create agent
+      description: Create a new AI agent
+      operationId: createAgent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentConfig'
+            examples:
+              research_agent:
+                summary: Research agent
+                value:
+                  name: "Research Assistant"
+                  template: "research_v2"
+                  parameters:
+                    temperature: 0.7
+                    max_tokens: 2048
+                  use_pymdp: true
+                  planning_horizon: 3
+      responses:
+        '200':
+          description: Agent created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '400':
+          description: Invalid agent configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /agents/{agent_id}:
+    get:
+      tags:
+        - Agents
+      summary: Get agent details
+      description: Retrieve detailed information about a specific agent
+      operationId: getAgent
+      parameters:
+        - name: agent_id
+          in: path
+          description: Agent ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Agent details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Agents
+      summary: Update agent
+      description: Update agent configuration
+      operationId: updateAgent
+      parameters:
+        - name: agent_id
+          in: path
+          description: Agent ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentUpdateConfig'
+      responses:
+        '200':
+          description: Agent updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Agents
+      summary: Delete agent
+      description: Delete an agent
+      operationId: deleteAgent
+      parameters:
+        - name: agent_id
+          in: path
+          description: Agent ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Agent deleted successfully
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /agents/{agent_id}/start:
+    post:
+      tags:
+        - Agents
+      summary: Start agent
+      description: Start or resume agent processing
+      operationId: startAgent
+      parameters:
+        - name: agent_id
+          in: path
+          description: Agent ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Agent started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /agents/{agent_id}/stop:
+    post:
+      tags:
+        - Agents
+      summary: Stop agent
+      description: Stop agent processing
+      operationId: stopAgent
+      parameters:
+        - name: agent_id
+          in: path
+          description: Agent ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Agent stopped successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /agents/{agent_id}/metrics:
+    get:
+      tags:
+        - Agents
+      summary: Get agent metrics
+      description: Retrieve performance metrics for a specific agent
+      operationId: getAgentMetrics
+      parameters:
+        - name: agent_id
+          in: path
+          description: Agent ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Agent metrics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentMetrics'
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /inference:
+    post:
+      tags:
+        - Inference
+      summary: Run inference
+      description: Submit an inference request to an agent
+      operationId: runInference
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InferenceRequest'
+            examples:
+              market_analysis:
+                summary: Market analysis request
+                value:
+                  agent_id: "agent_123"
+                  query: "Analyze current market trends in AI technology"
+                  context:
+                    focus_areas: ["machine learning", "natural language processing"]
+                    time_frame: "2024"
+                  parameters:
+                    temperature: 0.7
+                    max_tokens: 1000
+      responses:
+        '200':
+          description: Inference submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InferenceResponse'
+        '400':
+          description: Invalid inference request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /inference/{inference_id}:
+    get:
+      tags:
+        - Inference
+      summary: Get inference result
+      description: Retrieve the result of an inference request
+      operationId: getInferenceResult
+      parameters:
+        - name: inference_id
+          in: path
+          description: Inference ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Inference result retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InferenceResult'
+        '404':
+          description: Inference not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /batch-inference:
+    post:
+      tags:
+        - Inference
+      summary: Batch inference
+      description: Submit multiple inference requests
+      operationId: batchInference
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchInferenceRequest'
+      responses:
+        '200':
+          description: Batch inference submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchInferenceResponse'
+        '400':
+          description: Invalid batch request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /knowledge/search:
+    get:
+      tags:
+        - Knowledge Graph
+      summary: Search knowledge
+      description: Search the knowledge graph
+      operationId: searchKnowledge
+      parameters:
+        - name: q
+          in: query
+          description: Search query
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Maximum number of results
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: type
+          in: query
+          description: Entity type filter
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeSearchResponse'
+        '400':
+          description: Invalid search query
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /knowledge/entities:
+    post:
+      tags:
+        - Knowledge Graph
+      summary: Create entity
+      description: Create a new knowledge entity
+      operationId: createEntity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntityCreateRequest'
+      responses:
+        '201':
+          description: Entity created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeEntity'
+        '400':
+          description: Invalid entity data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /knowledge/entities/{entity_id}:
+    put:
+      tags:
+        - Knowledge Graph
+      summary: Update entity
+      description: Update a knowledge entity
+      operationId: updateEntity
+      parameters:
+        - name: entity_id
+          in: path
+          description: Entity ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntityUpdateRequest'
+      responses:
+        '200':
+          description: Entity updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeEntity'
+        '404':
+          description: Entity not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Knowledge Graph
+      summary: Delete entity
+      description: Delete a knowledge entity
+      operationId: deleteEntity
+      parameters:
+        - name: entity_id
+          in: path
+          description: Entity ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Entity deleted successfully
+        '404':
+          description: Entity not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /knowledge/relationships:
+    post:
+      tags:
+        - Knowledge Graph
+      summary: Create relationship
+      description: Create a relationship between entities
+      operationId: createRelationship
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RelationshipCreateRequest'
+      responses:
+        '201':
+          description: Relationship created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeRelationship'
+        '400':
+          description: Invalid relationship data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /system/status:
+    get:
+      tags:
+        - System
+      summary: System status
+      description: Get system health status
+      operationId: getSystemStatus
+      responses:
+        '200':
+          description: System status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemStatus'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /system/metrics:
+    get:
+      tags:
+        - System
+      summary: System metrics
+      description: Get system-wide metrics
+      operationId: getSystemMetrics
+      responses:
+        '200':
+          description: System metrics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemMetrics'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /monitoring/metrics:
+    get:
+      tags:
+        - Monitoring
+      summary: Get metrics stream
+      description: Get real-time metrics stream
+      operationId: getMetricsStream
+      parameters:
+        - name: metrics
+          in: query
+          description: Comma-separated metric types
+          required: false
+          schema:
+            type: string
+        - name: agents
+          in: query
+          description: Comma-separated agent IDs
+          required: false
+          schema:
+            type: string
+        - name: interval
+          in: query
+          description: Update interval in seconds
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 300
+            default: 5
+      responses:
+        '200':
+          description: Metrics stream started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsStream'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /monitoring/alerts:
+    get:
+      tags:
+        - Monitoring
+      summary: Get active alerts
+      description: Get active system alerts
+      operationId: getActiveAlerts
+      responses:
+        '200':
+          description: Active alerts retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /security/audit-log:
+    get:
+      tags:
+        - Security
+      summary: Get audit log
+      description: Get security audit log
+      operationId: getAuditLog
+      parameters:
+        - name: start_date
+          in: query
+          description: Start date (ISO 8601)
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: end_date
+          in: query
+          description: End date (ISO 8601)
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: event_type
+          in: query
+          description: Filter by event type
+          required: false
+          schema:
+            type: string
+        - name: user_id
+          in: query
+          description: Filter by user ID
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Audit log retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLogResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token obtained from login or registration
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              enum: [INVALID_REQUEST, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, RATE_LIMITED, INTERNAL_ERROR]
+            message:
+              type: string
+            details:
+              type: object
+              additionalProperties: true
+        request_id:
+          type: string
+          description: Unique request identifier for support
+
+    UserRegistration:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+          pattern: '^[a-zA-Z0-9_-]+$'
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+          description: Must contain at least one uppercase letter, one lowercase letter, one number, and one special character
+        role:
+          type: string
+          enum: [OBSERVER, CONTRIBUTOR, OPERATOR, ADMIN]
+          default: OBSERVER
+
+    UserLogin:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refresh_token
+      properties:
+        refresh_token:
+          type: string
+
+    TokenResponse:
+      type: object
+      required:
+        - access_token
+        - refresh_token
+        - token_type
+        - user
+      properties:
+        access_token:
+          type: string
+          description: JWT access token (expires in 15 minutes)
+        refresh_token:
+          type: string
+          description: JWT refresh token (expires in 7 days, rotates on use)
+        token_type:
+          type: string
+          enum: [bearer]
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      required:
+        - user_id
+        - username
+        - role
+        - permissions
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [OBSERVER, CONTRIBUTOR, OPERATOR, ADMIN]
+        permissions:
+          type: array
+          items:
+            type: string
+            enum: [VIEW_AGENTS, CREATE_AGENT, UPDATE_AGENT, DELETE_AGENT, CONTROL_AGENT, VIEW_METRICS, ADMIN_SYSTEM, VIEW_AUDIT_LOG]
+
+    UserInfo:
+      type: object
+      required:
+        - user_id
+        - username
+        - role
+        - permissions
+        - exp
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        role:
+          type: string
+          enum: [OBSERVER, CONTRIBUTOR, OPERATOR, ADMIN]
+        permissions:
+          type: array
+          items:
+            type: string
+        exp:
+          type: string
+          format: date-time
+          description: Token expiration time
+
+    UserPermissions:
+      type: object
+      required:
+        - permissions
+        - role
+        - can_create_agents
+        - can_delete_agents
+        - can_view_metrics
+        - can_admin_system
+      properties:
+        permissions:
+          type: array
+          items:
+            type: string
+        role:
+          type: string
+          enum: [OBSERVER, CONTRIBUTOR, OPERATOR, ADMIN]
+        can_create_agents:
+          type: boolean
+        can_delete_agents:
+          type: boolean
+        can_view_metrics:
+          type: boolean
+        can_admin_system:
+          type: boolean
+
+    AgentConfig:
+      type: object
+      required:
+        - name
+        - template
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        template:
+          type: string
+          description: Agent template ID
+        parameters:
+          type: object
+          additionalProperties: true
+          default: {}
+        gmn_spec:
+          type: string
+          description: GMN specification for Active Inference model
+        use_pymdp:
+          type: boolean
+          default: true
+          description: Whether to use PyMDP for Active Inference
+        planning_horizon:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 3
+          description: Planning horizon for Active Inference
+
+    AgentUpdateConfig:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        parameters:
+          type: object
+          additionalProperties: true
+        gmn_spec:
+          type: string
+        use_pymdp:
+          type: boolean
+        planning_horizon:
+          type: integer
+          minimum: 1
+          maximum: 10
+
+    Agent:
+      type: object
+      required:
+        - id
+        - name
+        - template
+        - status
+        - created_at
+        - inference_count
+        - parameters
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        template:
+          type: string
+        status:
+          type: string
+          enum: [pending, active, paused, stopped]
+        created_at:
+          type: string
+          format: date-time
+        last_active:
+          type: string
+          format: date-time
+        inference_count:
+          type: integer
+          minimum: 0
+        parameters:
+          type: object
+          additionalProperties: true
+
+    AgentListResponse:
+      type: object
+      required:
+        - agents
+        - total
+        - skip
+        - limit
+      properties:
+        agents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Agent'
+        total:
+          type: integer
+          minimum: 0
+        skip:
+          type: integer
+          minimum: 0
+        limit:
+          type: integer
+          minimum: 1
+
+    AgentMetrics:
+      type: object
+      required:
+        - agent_id
+        - total_inferences
+        - avg_response_time
+        - success_rate
+        - error_count
+      properties:
+        agent_id:
+          type: string
+        total_inferences:
+          type: integer
+          minimum: 0
+        avg_response_time:
+          type: number
+          format: float
+          minimum: 0
+          description: Average response time in seconds
+        success_rate:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: Success rate (0-1)
+        error_count:
+          type: integer
+          minimum: 0
+        last_24h:
+          type: object
+          properties:
+            inferences:
+              type: integer
+              minimum: 0
+            avg_response_time:
+              type: number
+              format: float
+              minimum: 0
+
+    InferenceRequest:
+      type: object
+      required:
+        - agent_id
+        - query
+      properties:
+        agent_id:
+          type: string
+        query:
+          type: string
+          minLength: 1
+          maxLength: 10000
+        context:
+          type: object
+          additionalProperties: true
+          default: {}
+        parameters:
+          type: object
+          additionalProperties: true
+          default: {}
+
+    InferenceResponse:
+      type: object
+      required:
+        - inference_id
+        - agent_id
+        - status
+        - created_at
+      properties:
+        inference_id:
+          type: string
+        agent_id:
+          type: string
+        status:
+          type: string
+          enum: [processing, completed, failed]
+        created_at:
+          type: string
+          format: date-time
+        estimated_completion:
+          type: string
+          format: date-time
+
+    InferenceResult:
+      type: object
+      required:
+        - inference_id
+        - status
+      properties:
+        inference_id:
+          type: string
+        status:
+          type: string
+          enum: [processing, completed, failed]
+        result:
+          type: object
+          properties:
+            analysis:
+              type: string
+            confidence:
+              type: number
+              format: float
+              minimum: 0
+              maximum: 1
+            metadata:
+              type: object
+              additionalProperties: true
+        processing_time:
+          type: number
+          format: float
+          minimum: 0
+          description: Processing time in seconds
+        completed_at:
+          type: string
+          format: date-time
+        error:
+          type: string
+          description: Error message if status is failed
+
+    BatchInferenceRequest:
+      type: object
+      required:
+        - requests
+      properties:
+        requests:
+          type: array
+          items:
+            $ref: '#/components/schemas/InferenceRequest'
+          minItems: 1
+          maxItems: 100
+        parallel:
+          type: boolean
+          default: false
+          description: Whether to process requests in parallel
+
+    BatchInferenceResponse:
+      type: object
+      required:
+        - batch_id
+        - status
+        - total_requests
+        - submitted_at
+      properties:
+        batch_id:
+          type: string
+        status:
+          type: string
+          enum: [processing, completed, failed]
+        total_requests:
+          type: integer
+          minimum: 1
+        submitted_at:
+          type: string
+          format: date-time
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/InferenceResult'
+
+    KnowledgeEntity:
+      type: object
+      required:
+        - id
+        - type
+        - label
+        - properties
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        label:
+          type: string
+        properties:
+          type: object
+          additionalProperties: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    EntityCreateRequest:
+      type: object
+      required:
+        - type
+        - label
+        - properties
+      properties:
+        type:
+          type: string
+        label:
+          type: string
+        properties:
+          type: object
+          additionalProperties: true
+
+    EntityUpdateRequest:
+      type: object
+      properties:
+        label:
+          type: string
+        properties:
+          type: object
+          additionalProperties: true
+
+    KnowledgeRelationship:
+      type: object
+      required:
+        - id
+        - source_id
+        - target_id
+        - relationship_type
+        - properties
+      properties:
+        id:
+          type: string
+        source_id:
+          type: string
+        target_id:
+          type: string
+        relationship_type:
+          type: string
+        properties:
+          type: object
+          additionalProperties: true
+        created_at:
+          type: string
+          format: date-time
+
+    RelationshipCreateRequest:
+      type: object
+      required:
+        - source_id
+        - target_id
+        - relationship_type
+      properties:
+        source_id:
+          type: string
+        target_id:
+          type: string
+        relationship_type:
+          type: string
+        properties:
+          type: object
+          additionalProperties: true
+          default: {}
+
+    KnowledgeSearchResponse:
+      type: object
+      required:
+        - results
+        - total
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - type
+              - label
+              - score
+            properties:
+              id:
+                type: string
+              type:
+                type: string
+              label:
+                type: string
+              properties:
+                type: object
+                additionalProperties: true
+              score:
+                type: number
+                format: float
+                minimum: 0
+                maximum: 1
+        total:
+          type: integer
+          minimum: 0
+
+    SystemStatus:
+      type: object
+      required:
+        - status
+        - version
+        - components
+        - uptime
+        - last_check
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        version:
+          type: string
+        components:
+          type: object
+          properties:
+            database:
+              type: string
+              enum: [healthy, degraded, unhealthy]
+            redis:
+              type: string
+              enum: [healthy, degraded, unhealthy]
+            inference_engine:
+              type: string
+              enum: [healthy, degraded, unhealthy]
+        uptime:
+          type: integer
+          minimum: 0
+          description: Uptime in seconds
+        last_check:
+          type: string
+          format: date-time
+
+    SystemMetrics:
+      type: object
+      required:
+        - cpu_usage
+        - memory_usage
+        - active_agents
+        - total_inferences_24h
+        - avg_response_time
+        - queue_length
+      properties:
+        cpu_usage:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          description: CPU usage percentage
+        memory_usage:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          description: Memory usage percentage
+        active_agents:
+          type: integer
+          minimum: 0
+        total_inferences_24h:
+          type: integer
+          minimum: 0
+        avg_response_time:
+          type: number
+          format: float
+          minimum: 0
+          description: Average response time in seconds
+        queue_length:
+          type: integer
+          minimum: 0
+
+    MetricsStream:
+      type: object
+      required:
+        - session_id
+        - status
+        - metrics
+      properties:
+        session_id:
+          type: string
+        status:
+          type: string
+          enum: [active, stopped]
+        metrics:
+          type: array
+          items:
+            type: string
+        agents:
+          type: array
+          items:
+            type: string
+        interval:
+          type: integer
+          minimum: 1
+
+    Alert:
+      type: object
+      required:
+        - id
+        - severity
+        - type
+        - message
+        - timestamp
+      properties:
+        id:
+          type: string
+        severity:
+          type: string
+          enum: [info, warning, error, critical]
+        type:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        affected_components:
+          type: array
+          items:
+            type: string
+
+    AlertsResponse:
+      type: object
+      required:
+        - alerts
+      properties:
+        alerts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Alert'
+
+    AuditLogEvent:
+      type: object
+      required:
+        - id
+        - type
+        - severity
+        - timestamp
+        - user_id
+        - ip_address
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [LOGIN_SUCCESS, LOGIN_FAILURE, LOGOUT, USER_CREATED, TOKEN_REFRESH, TOKEN_INVALID, AGENT_CREATED, AGENT_DELETED, PERMISSION_DENIED]
+        severity:
+          type: string
+          enum: [INFO, WARNING, ERROR, CRITICAL]
+        timestamp:
+          type: string
+          format: date-time
+        user_id:
+          type: string
+        username:
+          type: string
+        ip_address:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+
+    AuditLogResponse:
+      type: object
+      required:
+        - events
+        - total
+        - page
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditLogEvent'
+        total:
+          type: integer
+          minimum: 0
+        page:
+          type: integer
+          minimum: 1

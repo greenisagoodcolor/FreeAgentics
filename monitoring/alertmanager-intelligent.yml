@@ -1,0 +1,934 @@
+# Enhanced AlertManager Configuration for FreeAgentics
+# Intelligent alert routing with severity-based escalation and component correlation
+
+global:
+  # SMTP configuration for email alerts
+  smtp_smarthost: '{{ env "ALERTMANAGER_SMTP_HOST" | default "localhost:587" }}'
+  smtp_from: '{{ env "ALERTMANAGER_SMTP_FROM" | default "alerts@freeagentics.com" }}'
+  smtp_auth_username: '{{ env "ALERTMANAGER_SMTP_USER" | default "alerts@freeagentics.com" }}'
+  smtp_auth_password: '{{ env "ALERTMANAGER_SMTP_PASSWORD" | default "change-me" }}'
+  smtp_require_tls: true
+  
+  # Slack configuration
+  slack_api_url: '{{ env "ALERTMANAGER_SLACK_WEBHOOK" | default "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK" }}'
+  
+  # PagerDuty configuration
+  pagerduty_url: 'https://events.pagerduty.com/v2/enqueue'
+  
+  # Resolve timeout for alerts
+  resolve_timeout: 5m
+
+# Alert templates
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# ===================================================================
+# INTELLIGENT ROUTING CONFIGURATION
+# ===================================================================
+route:
+  # Default grouping and timing
+  group_by: ['alertname', 'severity', 'category', 'component']
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 4h
+  receiver: 'default-receiver'
+  
+  routes:
+    # ================================================================
+    # CRITICAL ALERTS - IMMEDIATE ESCALATION
+    # ================================================================
+    - match:
+        severity: critical
+      receiver: 'critical-escalation'
+      group_wait: 0s
+      group_interval: 30s
+      repeat_interval: 15m
+      continue: true
+      routes:
+        # System down - immediate pager alert
+        - match:
+            alertname: 'FreeAgenticsSystemDown'
+          receiver: 'system-down-escalation'
+          group_wait: 0s
+          repeat_interval: 5m
+        
+        # Security anomalies - immediate security team alert
+        - match:
+            category: security
+          receiver: 'security-critical'
+          group_wait: 0s
+          repeat_interval: 10m
+        
+        # Agent coordination failures - agents team
+        - match:
+            category: coordination
+          receiver: 'agents-critical'
+          group_wait: 0s
+          repeat_interval: 15m
+        
+        # Memory/performance critical
+        - match:
+            component: memory
+          receiver: 'sre-critical'
+          group_wait: 0s
+          repeat_interval: 15m
+    
+    # ================================================================
+    # HIGH SEVERITY ALERTS - ESCALATED ROUTING
+    # ================================================================
+    - match:
+        severity: high
+      receiver: 'high-severity'
+      group_wait: 15s
+      group_interval: 1m
+      repeat_interval: 1h
+      routes:
+        # API performance issues
+        - match:
+            component: api
+          receiver: 'backend-high'
+          group_interval: 2m
+        
+        # Database issues
+        - match:
+            component: postgresql
+          receiver: 'database-high'
+          group_interval: 2m
+        
+        # Agent errors
+        - match:
+            category: agents
+          receiver: 'agents-high'
+          group_interval: 2m
+        
+        # Security violations
+        - match:
+            category: security
+          receiver: 'security-high'
+          group_interval: 1m
+        
+        # Infrastructure issues
+        - match:
+            category: infrastructure
+          receiver: 'sre-high'
+          group_interval: 3m
+    
+    # ================================================================
+    # MEDIUM SEVERITY ALERTS - STANDARD ROUTING
+    # ================================================================
+    - match:
+        severity: medium
+      receiver: 'medium-severity'
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 2h
+      routes:
+        # Performance warnings
+        - match:
+            category: performance
+          receiver: 'performance-team'
+          group_interval: 10m
+        
+        # Business logic issues
+        - match:
+            category: business
+          receiver: 'product-team'
+          group_interval: 15m
+        
+        # Coordination warnings
+        - match:
+            category: coordination
+          receiver: 'agents-medium'
+          group_interval: 10m
+        
+        # Knowledge graph issues
+        - match:
+            category: knowledge_graph
+          receiver: 'backend-medium'
+          group_interval: 10m
+    
+    # ================================================================
+    # TEAM-SPECIFIC ROUTING
+    # ================================================================
+    - match:
+        team: sre
+      receiver: 'sre-team'
+      group_interval: 5m
+      repeat_interval: 2h
+    
+    - match:
+        team: backend
+      receiver: 'backend-team'
+      group_interval: 5m
+      repeat_interval: 2h
+    
+    - match:
+        team: agents
+      receiver: 'agents-team'
+      group_interval: 5m
+      repeat_interval: 2h
+    
+    - match:
+        team: security
+      receiver: 'security-team'
+      group_interval: 2m
+      repeat_interval: 1h
+    
+    - match:
+        team: database
+      receiver: 'database-team'
+      group_interval: 5m
+      repeat_interval: 2h
+    
+    - match:
+        team: product
+      receiver: 'product-team'
+      group_interval: 15m
+      repeat_interval: 4h
+    
+    # ================================================================
+    # COMPONENT-SPECIFIC ROUTING
+    # ================================================================
+    - match:
+        component: belief_system
+      receiver: 'belief-system-alerts'
+      group_interval: 5m
+      repeat_interval: 2h
+    
+    - match:
+        component: inference
+      receiver: 'inference-alerts'
+      group_interval: 5m
+      repeat_interval: 2h
+    
+    - match:
+        component: coalitions
+      receiver: 'coalition-alerts'
+      group_interval: 5m
+      repeat_interval: 2h
+
+# ===================================================================
+# INHIBITION RULES - INTELLIGENT ALERT SUPPRESSION
+# ===================================================================
+inhibit_rules:
+  # System down inhibits all other alerts
+  - source_match:
+      alertname: 'FreeAgenticsSystemDown'
+    target_match_re:
+      alertname: '.*'
+    equal: ['job']
+  
+  # Critical alerts inhibit lower severity alerts for same component
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'high'
+    equal: ['component']
+  
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'medium'
+    equal: ['component']
+  
+  - source_match:
+      severity: 'high'
+    target_match:
+      severity: 'medium'
+    equal: ['component']
+  
+  # Agent coordination failures inhibit individual agent alerts
+  - source_match:
+      alertname: 'AgentCoordinationFailure'
+    target_match_re:
+      alertname: '.*Agent.*'
+    equal: ['job']
+  
+  # Memory critical inhibits memory warnings
+  - source_match:
+      alertname: 'SystemMemoryUsageCritical'
+    target_match:
+      alertname: 'AgentMemoryUsageWarning'
+    equal: ['job']
+  
+  # API down inhibits response time alerts
+  - source_match:
+      alertname: 'HighSystemErrorRate'
+    target_match:
+      alertname: 'HighAPIResponseTime'
+    equal: ['job']
+
+# ===================================================================
+# NOTIFICATION RECEIVERS
+# ===================================================================
+receivers:
+  # Default receiver
+  - name: 'default-receiver'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#alerts'
+        title: 'FreeAgentics Alert'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Severity:* {{ .Labels.severity }}
+          *Component:* {{ .Labels.component }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}*Runbook:* {{ .Annotations.runbook_url }}{{ end }}
+          {{ end }}
+        send_resolved: true
+  
+  # ================================================================
+  # CRITICAL ESCALATION RECEIVERS
+  # ================================================================
+  - name: 'critical-escalation'
+    pagerduty_configs:
+      - routing_key: '{{ env "PAGERDUTY_CRITICAL_KEY" | default "YOUR_PAGERDUTY_KEY" }}'
+        description: 'CRITICAL: {{ .GroupLabels.alertname }}'
+        severity: 'critical'
+        client: 'FreeAgentics AlertManager'
+        client_url: '{{ env "ALERTMANAGER_URL" | default "http://localhost:9093" }}'
+        details:
+          summary: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+          component: '{{ .GroupLabels.component }}'
+          category: '{{ .GroupLabels.category }}'
+          runbook: '{{ range .Alerts }}{{ .Annotations.runbook_url }}{{ end }}'
+    
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#critical-alerts'
+        color: 'danger'
+        title: '🚨 CRITICAL ALERT: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *CRITICAL ALERT TRIGGERED*
+          
+          *Summary:* {{ .Annotations.summary }}
+          *Component:* {{ .Labels.component }}
+          *Category:* {{ .Labels.category }}
+          *Team:* {{ .Labels.team }}
+          *Time:* {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+          
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* <{{ .Annotations.runbook_url }}|View Runbook>
+          {{ end }}
+          {{ if .Annotations.dashboard_url }}
+          *Dashboard:* <{{ .Annotations.dashboard_url }}|View Dashboard>
+          {{ end }}
+          {{ end }}
+        send_resolved: true
+    
+    email_configs:
+      - to: '{{ env "CRITICAL_EMAIL_LIST" | default "oncall@freeagentics.com,sre@freeagentics.com" }}'
+        subject: '🚨 CRITICAL: FreeAgentics Alert - {{ .GroupLabels.alertname }}'
+        body: |
+          CRITICAL ALERT TRIGGERED
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Component: {{ .Labels.component }}
+          Category: {{ .Labels.category }}
+          Team: {{ .Labels.team }}
+          Severity: {{ .Labels.severity }}
+          Time: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+          
+          Description: {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+          {{ if .Annotations.dashboard_url }}
+          Dashboard: {{ .Annotations.dashboard_url }}
+          {{ end }}
+          
+          {{ end }}
+  
+  # System down escalation
+  - name: 'system-down-escalation'
+    pagerduty_configs:
+      - routing_key: '{{ env "PAGERDUTY_SYSTEM_DOWN_KEY" | default "YOUR_PAGERDUTY_KEY" }}'
+        description: 'SYSTEM DOWN: FreeAgentics Backend'
+        severity: 'critical'
+        client: 'FreeAgentics AlertManager'
+        details:
+          summary: 'FreeAgentics backend system is completely down'
+          impact: 'All users affected'
+          urgency: 'immediate'
+    
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#incidents'
+        color: 'danger'
+        title: '🚨 SYSTEM DOWN - IMMEDIATE ACTION REQUIRED'
+        text: |
+          @here @channel
+          
+          **SYSTEM DOWN ALERT**
+          
+          The FreeAgentics backend system is completely down.
+          
+          **Immediate Actions Required:**
+          1. Check system status
+          2. Investigate root cause
+          3. Initiate incident response
+          
+          **Escalation Path:**
+          - Primary: SRE Team
+          - Secondary: Backend Team
+          - Emergency: CTO
+        send_resolved: true
+    
+    email_configs:
+      - to: '{{ env "SYSTEM_DOWN_EMAIL_LIST" | default "oncall@freeagentics.com,engineering@freeagentics.com,cto@freeagentics.com" }}'
+        subject: '🚨 SYSTEM DOWN: FreeAgentics Backend - IMMEDIATE ACTION REQUIRED'
+        body: |
+          SYSTEM DOWN ALERT
+          
+          The FreeAgentics backend system is completely down.
+          All users are affected.
+          
+          This requires immediate attention and incident response.
+          
+          Please check the system status and investigate the root cause immediately.
+  
+  # ================================================================
+  # SECURITY ALERT RECEIVERS
+  # ================================================================
+  - name: 'security-critical'
+    pagerduty_configs:
+      - routing_key: '{{ env "PAGERDUTY_SECURITY_KEY" | default "YOUR_PAGERDUTY_KEY" }}'
+        description: 'SECURITY INCIDENT: {{ .GroupLabels.alertname }}'
+        severity: 'critical'
+        client: 'FreeAgentics AlertManager'
+        details:
+          summary: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+          security_type: '{{ .GroupLabels.component }}'
+          category: 'security'
+    
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#security-incidents'
+        color: 'danger'
+        title: '🔒 SECURITY ALERT: {{ .GroupLabels.alertname }}'
+        text: |
+          @security-team @here
+          
+          **SECURITY ALERT TRIGGERED**
+          
+          {{ range .Alerts }}
+          *Type:* {{ .Labels.component }}
+          *Summary:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Time:* {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* <{{ .Annotations.runbook_url }}|Security Response Guide>
+          {{ end }}
+          {{ end }}
+          
+          **Immediate Actions:**
+          1. Assess threat level
+          2. Implement containment measures
+          3. Document incident
+          4. Escalate if necessary
+        send_resolved: true
+    
+    email_configs:
+      - to: '{{ env "SECURITY_EMAIL_LIST" | default "security@freeagentics.com,ciso@freeagentics.com" }}'
+        subject: '🔒 SECURITY ALERT: {{ .GroupLabels.alertname }}'
+        body: |
+          SECURITY ALERT
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Type: {{ .Labels.component }}
+          Description: {{ .Annotations.description }}
+          Time: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+          {{ if .Annotations.runbook_url }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+          {{ end }}
+  
+  # ================================================================
+  # TEAM-SPECIFIC RECEIVERS
+  # ================================================================
+  - name: 'agents-critical'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#agents-alerts'
+        color: 'danger'
+        title: '🤖 CRITICAL AGENT ALERT: {{ .GroupLabels.alertname }}'
+        text: |
+          @agents-team
+          
+          **CRITICAL AGENT SYSTEM ALERT**
+          
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Component:* {{ .Labels.component }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* <{{ .Annotations.runbook_url }}|Agent Response Guide>
+          {{ end }}
+          {{ end }}
+        send_resolved: true
+  
+  - name: 'sre-critical'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#sre-alerts'
+        color: 'danger'
+        title: '⚡ SRE CRITICAL: {{ .GroupLabels.alertname }}'
+        text: |
+          @sre-team
+          
+          **CRITICAL INFRASTRUCTURE ALERT**
+          
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Component:* {{ .Labels.component }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* <{{ .Annotations.runbook_url }}|SRE Response Guide>
+          {{ end }}
+          {{ end }}
+        send_resolved: true
+  
+  # ================================================================
+  # HIGH SEVERITY RECEIVERS
+  # ================================================================
+  - name: 'high-severity'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#high-priority-alerts'
+        color: 'warning'
+        title: '⚠️ HIGH PRIORITY: {{ .GroupLabels.alertname }}'
+        text: |
+          **HIGH PRIORITY ALERT**
+          
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Component:* {{ .Labels.component }}
+          *Team:* {{ .Labels.team }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* <{{ .Annotations.runbook_url }}|Response Guide>
+          {{ end }}
+          {{ end }}
+        send_resolved: true
+    
+    email_configs:
+      - to: '{{ env "HIGH_SEVERITY_EMAIL_LIST" | default "alerts@freeagentics.com" }}'
+        subject: '⚠️ HIGH PRIORITY: {{ .GroupLabels.alertname }}'
+        body: |
+          HIGH PRIORITY ALERT
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Component: {{ .Labels.component }}
+          Team: {{ .Labels.team }}
+          Description: {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+          {{ end }}
+  
+  # ================================================================
+  # MEDIUM SEVERITY AND STANDARD RECEIVERS
+  # ================================================================
+  - name: 'medium-severity'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#alerts'
+        color: 'warning'
+        title: '⚠️ Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Component:* {{ .Labels.component }}
+          *Team:* {{ .Labels.team }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* <{{ .Annotations.runbook_url }}|Response Guide>
+          {{ end }}
+          {{ end }}
+        send_resolved: true
+  
+  # Team-specific receivers
+  - name: 'sre-team'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#sre'
+        title: '🔧 SRE Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Component:* {{ .Labels.component }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* <{{ .Annotations.runbook_url }}|SRE Runbook>
+          {{ end }}
+          {{ end }}
+        send_resolved: true
+  
+  - name: 'backend-team'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#backend'
+        title: '🔧 Backend Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Component:* {{ .Labels.component }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* <{{ .Annotations.runbook_url }}|Backend Runbook>
+          {{ end }}
+          {{ end }}
+        send_resolved: true
+  
+  - name: 'agents-team'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#agents'
+        title: '🤖 Agents Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Component:* {{ .Labels.component }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* <{{ .Annotations.runbook_url }}|Agents Runbook>
+          {{ end }}
+          {{ end }}
+        send_resolved: true
+  
+  - name: 'security-team'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#security'
+        title: '🔒 Security Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Component:* {{ .Labels.component }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* <{{ .Annotations.runbook_url }}|Security Runbook>
+          {{ end }}
+          {{ end }}
+        send_resolved: true
+  
+  - name: 'database-team'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#database'
+        title: '🗄️ Database Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Component:* {{ .Labels.component }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* <{{ .Annotations.runbook_url }}|Database Runbook>
+          {{ end }}
+          {{ end }}
+        send_resolved: true
+  
+  - name: 'product-team'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#product'
+        title: '📊 Product Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Component:* {{ .Labels.component }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* <{{ .Annotations.runbook_url }}|Product Runbook>
+          {{ end }}
+          {{ end }}
+        send_resolved: true
+  
+  # Component-specific receivers
+  - name: 'belief-system-alerts'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#belief-system'
+        title: '🧠 Belief System Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Component:* {{ .Labels.component }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* <{{ .Annotations.runbook_url }}|Belief System Guide>
+          {{ end }}
+          {{ end }}
+        send_resolved: true
+  
+  - name: 'inference-alerts'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#inference'
+        title: '🔮 Inference Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Component:* {{ .Labels.component }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* <{{ .Annotations.runbook_url }}|Inference Guide>
+          {{ end }}
+          {{ end }}
+        send_resolved: true
+  
+  - name: 'coalition-alerts'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#coalitions'
+        title: '🤝 Coalition Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Component:* {{ .Labels.component }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* <{{ .Annotations.runbook_url }}|Coalition Guide>
+          {{ end }}
+          {{ end }}
+        send_resolved: true
+  
+  # ================================================================
+  # HIGH SEVERITY TEAM-SPECIFIC RECEIVERS
+  # ================================================================
+  - name: 'backend-high'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#backend-high-alerts'
+        color: 'warning'
+        title: '🔧 HIGH PRIORITY Backend: {{ .GroupLabels.alertname }}'
+        text: |
+          @backend-team
+          
+          **HIGH PRIORITY BACKEND ALERT**
+          
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Component:* {{ .Labels.component }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* <{{ .Annotations.runbook_url }}|Backend Response Guide>
+          {{ end }}
+          {{ end }}
+        send_resolved: true
+    
+    email_configs:
+      - to: '{{ env "BACKEND_HIGH_EMAIL_LIST" | default "backend-lead@freeagentics.com" }}'
+        subject: '🔧 HIGH PRIORITY Backend: {{ .GroupLabels.alertname }}'
+        body: |
+          HIGH PRIORITY BACKEND ALERT
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Component: {{ .Labels.component }}
+          Description: {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+          {{ end }}
+  
+  - name: 'database-high'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#database-high-alerts'
+        color: 'warning'
+        title: '🗄️ HIGH PRIORITY Database: {{ .GroupLabels.alertname }}'
+        text: |
+          @database-team
+          
+          **HIGH PRIORITY DATABASE ALERT**
+          
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Component:* {{ .Labels.component }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* <{{ .Annotations.runbook_url }}|Database Response Guide>
+          {{ end }}
+          {{ end }}
+        send_resolved: true
+    
+    email_configs:
+      - to: '{{ env "DATABASE_HIGH_EMAIL_LIST" | default "database-lead@freeagentics.com" }}'
+        subject: '🗄️ HIGH PRIORITY Database: {{ .GroupLabels.alertname }}'
+        body: |
+          HIGH PRIORITY DATABASE ALERT
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Component: {{ .Labels.component }}
+          Description: {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+          {{ end }}
+  
+  - name: 'agents-high'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#agents-high-alerts'
+        color: 'warning'
+        title: '🤖 HIGH PRIORITY Agents: {{ .GroupLabels.alertname }}'
+        text: |
+          @agents-team
+          
+          **HIGH PRIORITY AGENTS ALERT**
+          
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Component:* {{ .Labels.component }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* <{{ .Annotations.runbook_url }}|Agents Response Guide>
+          {{ end }}
+          {{ end }}
+        send_resolved: true
+    
+    email_configs:
+      - to: '{{ env "AGENTS_HIGH_EMAIL_LIST" | default "agents-lead@freeagentics.com" }}'
+        subject: '🤖 HIGH PRIORITY Agents: {{ .GroupLabels.alertname }}'
+        body: |
+          HIGH PRIORITY AGENTS ALERT
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Component: {{ .Labels.component }}
+          Description: {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+          {{ end }}
+  
+  - name: 'security-high'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#security-high-alerts'
+        color: 'warning'
+        title: '🔒 HIGH PRIORITY Security: {{ .GroupLabels.alertname }}'
+        text: |
+          @security-team
+          
+          **HIGH PRIORITY SECURITY ALERT**
+          
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Component:* {{ .Labels.component }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* <{{ .Annotations.runbook_url }}|Security Response Guide>
+          {{ end }}
+          {{ end }}
+        send_resolved: true
+    
+    email_configs:
+      - to: '{{ env "SECURITY_HIGH_EMAIL_LIST" | default "security-lead@freeagentics.com" }}'
+        subject: '🔒 HIGH PRIORITY Security: {{ .GroupLabels.alertname }}'
+        body: |
+          HIGH PRIORITY SECURITY ALERT
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Component: {{ .Labels.component }}
+          Description: {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+          {{ end }}
+  
+  - name: 'sre-high'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#sre-high-alerts'
+        color: 'warning'
+        title: '⚡ HIGH PRIORITY SRE: {{ .GroupLabels.alertname }}'
+        text: |
+          @sre-team
+          
+          **HIGH PRIORITY SRE ALERT**
+          
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Component:* {{ .Labels.component }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* <{{ .Annotations.runbook_url }}|SRE Response Guide>
+          {{ end }}
+          {{ end }}
+        send_resolved: true
+    
+    email_configs:
+      - to: '{{ env "SRE_HIGH_EMAIL_LIST" | default "sre-lead@freeagentics.com" }}'
+        subject: '⚡ HIGH PRIORITY SRE: {{ .GroupLabels.alertname }}'
+        body: |
+          HIGH PRIORITY SRE ALERT
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Component: {{ .Labels.component }}
+          Description: {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          Runbook: {{ .Annotations.runbook_url }}
+          {{ end }}
+          {{ end }}
+  
+  # ================================================================
+  # MEDIUM SEVERITY TEAM-SPECIFIC RECEIVERS
+  # ================================================================
+  - name: 'performance-team'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#performance'
+        title: '📊 Performance Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Component:* {{ .Labels.component }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* <{{ .Annotations.runbook_url }}|Performance Guide>
+          {{ end }}
+          {{ end }}
+        send_resolved: true
+  
+  - name: 'agents-medium'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#agents-medium-alerts'
+        title: '🤖 Agents Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Component:* {{ .Labels.component }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* <{{ .Annotations.runbook_url }}|Agents Guide>
+          {{ end }}
+          {{ end }}
+        send_resolved: true
+  
+  - name: 'backend-medium'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#backend-medium-alerts'
+        title: '🔧 Backend Alert: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Component:* {{ .Labels.component }}
+          *Description:* {{ .Annotations.description }}
+          {{ if .Annotations.runbook_url }}
+          *Runbook:* <{{ .Annotations.runbook_url }}|Backend Guide>
+          {{ end }}
+          {{ end }}
+        send_resolved: true

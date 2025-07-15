@@ -1,0 +1,214 @@
+{
+  "errors": [],
+  "generated_at": "2025-07-05T11:10:27Z",
+  "metrics": {
+    "_totals": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 2,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 2,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 1076,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "api/v1/agents.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 450,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "api/v1/auth.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 114,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "auth/security_implementation.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 2,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 2,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 442,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "database/session.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 70,
+      "nosec": 0,
+      "skipped_tests": 0
+    }
+  },
+  "results": [
+    {
+      "code": "37 if os.getenv(\"PRODUCTION\", \"false\").lower() == \"true\":\n38     if SECRET_KEY == \"dev_secret_key_2025_not_for_production\":\n39         raise ValueError(\"Production environment requires proper SECRET_KEY\")\n",
+      "col_offset": 21,
+      "end_col_offset": 61,
+      "filename": "auth/security_implementation.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 259,
+        "link": "https://cwe.mitre.org/data/definitions/259.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Possible hardcoded password: 'dev_secret_key_2025_not_for_production'",
+      "line_number": 38,
+      "line_range": [
+        38
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b105_hardcoded_password_string.html",
+      "test_id": "B105",
+      "test_name": "hardcoded_password_string"
+    },
+    {
+      "code": "39         raise ValueError(\"Production environment requires proper SECRET_KEY\")\n40     if JWT_SECRET == \"dev_jwt_secret_2025_not_for_production\":\n41         raise ValueError(\"Production environment requires proper JWT_SECRET\")\n",
+      "col_offset": 21,
+      "end_col_offset": 61,
+      "filename": "auth/security_implementation.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 259,
+        "link": "https://cwe.mitre.org/data/definitions/259.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Possible hardcoded password: 'dev_jwt_secret_2025_not_for_production'",
+      "line_number": 40,
+      "line_range": [
+        40
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b105_hardcoded_password_string.html",
+      "test_id": "B105",
+      "test_name": "hardcoded_password_string"
+    }
+  ]
+}y",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 259,
+        "link": "https://cwe.mitre.org/data/definitions/259.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Possible hardcoded password: 'password_changed'",
+      "line_number": 71,
+      "line_range": [
+        71
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b105_hardcoded_password_string.html",
+      "test_id": "B105",
+      "test_name": "hardcoded_password_string"
+    },
+    {
+      "code": "231                 self.endpoints_tested += 1\n232             except:\n233                 pass\n234 \n",
+      "col_offset": 12,
+      "end_col_offset": 20,
+      "filename": "security/owasp_assessment.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 703,
+        "link": "https://cwe.mitre.org/data/definitions/703.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Try, Except, Pass detected.",
+      "line_number": 232,
+      "line_range": [
+        232,
+        233
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b110_try_except_pass.html",
+      "test_id": "B110",
+      "test_name": "try_except_pass"
+    },
+    {
+      "code": "317 \n318             except:\n319                 pass\n320 \n",
+      "col_offset": 12,
+      "end_col_offset": 20,
+      "filename": "security/owasp_assessment.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 703,
+        "link": "https://cwe.mitre.org/data/definitions/703.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Try, Except, Pass detected.",
+      "line_number": 318,
+      "line_range": [
+        318,
+        319
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b110_try_except_pass.html",
+      "test_id": "B110",
+      "test_name": "try_except_pass"
+    },
+    {
+      "code": "364 \n365             except:\n366                 pass\n367 \n",
+      "col_offset": 12,
+      "end_col_offset": 20,
+      "filename": "security/owasp_assessment.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 703,
+        "link": "https://cwe.mitre.org/data/definitions/703.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Try, Except, Pass detected.",
+      "line_number": 365,
+      "line_range": [
+        365,
+        366
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b110_try_except_pass.html",
+      "test_id": "B110",
+      "test_name": "try_except_pass"
+    },
+    {
+      "code": "407                     )\n408             except:\n409                 pass\n410 \n",
+      "col_offset": 12,
+      "end_col_offset": 20,
+      "filename": "security/owasp_assessment.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 703,
+        "link": "https://cwe.mitre.org/data/definitions/703.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Try, Except, Pass detected.",
+      "line_number": 408,
+      "line_range": [
+        408,
+        409
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/0.0.0/plugins/b110_try_except_pass.html",
+      "test_id": "B110",
+      "test_name": "try_except_pass"
+    }
+  ]
+}

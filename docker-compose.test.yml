@@ -1,0 +1,197 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database for integration testing
+  test-postgres:
+    image: postgres:15-alpine
+    container_name: freeagentics-test-postgres
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: freeagentics_test
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5433:5432"  # Different port to avoid conflicts
+    volumes:
+      - test-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d freeagentics_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - test-network
+
+  # Redis for caching and rate limiting in tests
+  test-redis:
+    image: redis:7-alpine
+    container_name: freeagentics-test-redis
+    ports:
+      - "6380:6379"  # Different port to avoid conflicts
+    volumes:
+      - test-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - test-network
+
+  # RabbitMQ for message queue testing
+  test-rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: freeagentics-test-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: test_user
+      RABBITMQ_DEFAULT_PASS: test_password
+      RABBITMQ_DEFAULT_VHOST: test_vhost
+    ports:
+      - "5673:5672"  # AMQP port
+      - "15673:15672"  # Management UI
+    volumes:
+      - test-rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - test-network
+
+  # Elasticsearch for knowledge graph testing
+  test-elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: freeagentics-test-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.name=test-cluster
+    ports:
+      - "9201:9200"  # Different port to avoid conflicts
+      - "9301:9300"
+    volumes:
+      - test-elasticsearch-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - test-network
+
+  # MinIO for S3-compatible storage testing
+  test-minio:
+    image: minio/minio:latest
+    container_name: freeagentics-test-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: test_access_key
+      MINIO_ROOT_PASSWORD: test_secret_key
+    ports:
+      - "9002:9000"  # S3 API
+      - "9003:9001"  # Console
+    volumes:
+      - test-minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - test-network
+
+  # Test runner container with wait-for-it
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    container_name: freeagentics-test-runner
+    depends_on:
+      test-postgres:
+        condition: service_healthy
+      test-redis:
+        condition: service_healthy
+      test-rabbitmq:
+        condition: service_healthy
+      test-elasticsearch:
+        condition: service_healthy
+      test-minio:
+        condition: service_healthy
+    environment:
+      # Database configuration
+      DATABASE_URL: postgresql://test_user:test_password@test-postgres:5432/freeagentics_test
+      TEST_DATABASE_URL: postgresql://test_user:test_password@test-postgres:5432/freeagentics_test
+      
+      # Redis configuration
+      REDIS_URL: redis://test-redis:6379/0
+      TEST_REDIS_URL: redis://test-redis:6379/1
+      
+      # RabbitMQ configuration
+      RABBITMQ_URL: amqp://test_user:test_password@test-rabbitmq:5672/test_vhost
+      
+      # Elasticsearch configuration
+      ELASTICSEARCH_URL: http://test-elasticsearch:9200
+      
+      # MinIO/S3 configuration
+      S3_ENDPOINT_URL: http://test-minio:9000
+      S3_ACCESS_KEY: test_access_key
+      S3_SECRET_KEY: test_secret_key
+      S3_BUCKET: test-bucket
+      
+      # Test environment flags
+      TESTING: "true"
+      ENVIRONMENT: test
+      LOG_LEVEL: INFO
+      
+      # PyMDP and other dependencies
+      PYMDP_AVAILABLE: "true"
+      
+    volumes:
+      - .:/app
+      - test-cache:/app/.pytest_cache
+      - test-coverage:/app/htmlcov
+    networks:
+      - test-network
+    command: |
+      bash -c "
+        echo 'Waiting for all services to be ready...'
+        sleep 10
+        
+        echo 'Creating test S3 bucket...'
+        python -c \"
+        import boto3
+        from botocore.client import Config
+        
+        s3 = boto3.client(
+            's3',
+            endpoint_url='http://test-minio:9000',
+            aws_access_key_id='test_access_key',
+            aws_secret_access_key='test_secret_key',
+            config=Config(signature_version='s3v4')
+        )
+        
+        try:
+            s3.create_bucket(Bucket='test-bucket')
+            print('Test bucket created successfully')
+        except Exception as e:
+            print(f'Bucket might already exist: {e}')
+        \"
+        
+        echo 'Running integration tests...'
+        pytest tests/integration/ -v --tb=short --cov=. --cov-report=html --cov-report=term
+      "
+
+networks:
+  test-network:
+    driver: bridge
+
+volumes:
+  test-postgres-data:
+  test-redis-data:
+  test-rabbitmq-data:
+  test-elasticsearch-data:
+  test-minio-data:
+  test-cache:
+  test-coverage:

@@ -1,0 +1,160 @@
+{
+  "measurements": [
+    {
+      "label": "Small (5x5 grid) agent created",
+      "rss_mb": 153.1796875,
+      "delta_mb": 124.9375,
+      "percent": 0.5458390525055855,
+      "timestamp": "2025-07-14T17:15:09.617935"
+    },
+    {
+      "label": "Medium (10x10 grid) agent created",
+      "rss_mb": 153.1796875,
+      "delta_mb": 124.9375,
+      "percent": 0.5458390525055855,
+      "timestamp": "2025-07-14T17:15:09.658408"
+    },
+    {
+      "label": "Large (20x20 grid) agent created",
+      "rss_mb": 153.1796875,
+      "delta_mb": 124.9375,
+      "percent": 0.5458390525055855,
+      "timestamp": "2025-07-14T17:15:09.698527"
+    },
+    {
+      "label": "Extra Large (50x50 grid) agent created",
+      "rss_mb": 153.3359375,
+      "delta_mb": 125.09375,
+      "percent": 0.5463958322806716,
+      "timestamp": "2025-07-14T17:15:09.735356"
+    },
+    {
+      "label": "Observation model (10x10)",
+      "rss_mb": 153.3359375,
+      "delta_mb": 0.0,
+      "percent": 0.5463958322806716,
+      "timestamp": "2025-07-14T17:15:09.789702"
+    },
+    {
+      "label": "Transition model (10x10)",
+      "rss_mb": 153.3359375,
+      "delta_mb": 0.0,
+      "percent": 0.5463958322806716,
+      "timestamp": "2025-07-14T17:15:09.807475"
+    },
+    {
+      "label": "Observation model (50x50)",
+      "rss_mb": 153.3359375,
+      "delta_mb": 0.0,
+      "percent": 0.5463958322806716,
+      "timestamp": "2025-07-14T17:15:09.825626"
+    },
+    {
+      "label": "Transition model (50x50)",
+      "rss_mb": 153.3359375,
+      "delta_mb": 0.0,
+      "percent": 0.5463958322806716,
+      "timestamp": "2025-07-14T17:15:09.844788"
+    },
+    {
+      "label": "100 matrix multiplications (100x100)",
+      "rss_mb": 153.8046875,
+      "delta_mb": 0.46875,
+      "percent": 0.5480661716059296,
+      "timestamp": "2025-07-14T17:15:09.906705"
+    },
+    {
+      "label": "100 belief normalizations",
+      "rss_mb": 153.8046875,
+      "delta_mb": 0.46875,
+      "percent": 0.5480661716059296,
+      "timestamp": "2025-07-14T17:15:09.925614"
+    },
+    {
+      "label": "1 agents created",
+      "rss_mb": 153.8046875,
+      "delta_mb": 0.0,
+      "percent": 0.5480661716059296,
+      "timestamp": "2025-07-14T17:15:09.966585"
+    },
+    {
+      "label": "5 agents created",
+      "rss_mb": 153.8046875,
+      "delta_mb": 0.0,
+      "percent": 0.5480661716059296,
+      "timestamp": "2025-07-14T17:15:10.008206"
+    },
+    {
+      "label": "10 agents created",
+      "rss_mb": 153.8046875,
+      "delta_mb": 0.0,
+      "percent": 0.5480661716059296,
+      "timestamp": "2025-07-14T17:15:10.045052"
+    },
+    {
+      "label": "20 agents created",
+      "rss_mb": 153.8046875,
+      "delta_mb": 0.0,
+      "percent": 0.5480661716059296,
+      "timestamp": "2025-07-14T17:15:10.087917"
+    },
+    {
+      "label": "50 agents created",
+      "rss_mb": 153.9609375,
+      "delta_mb": 0.15625,
+      "percent": 0.5486229513810157,
+      "timestamp": "2025-07-14T17:15:10.125222"
+    }
+  ],
+  "component_memory": {
+    "Small (5x5 grid)": 124.9375,
+    "Medium (10x10 grid)": 124.9375,
+    "Large (20x20 grid)": 124.9375,
+    "Extra Large (50x50 grid)": 125.09375,
+    "observation_model_10x10": 0.0,
+    "transition_model_10x10": 0.0,
+    "observation_model_50x50": -499.90625,
+    "transition_model_50x50": 0.0
+  },
+  "operation_memory": {
+    "matrix_mult_100x100": 0.46875,
+    "belief_normalization": 0.0
+  },
+  "agent_footprint": {
+    "memory_per_agent_mb": 0.003313291957589862,
+    "memory_points": [
+      {
+        "count": 1,
+        "total_mb": 0.0,
+        "per_agent_mb": 0.0
+      },
+      {
+        "count": 5,
+        "total_mb": 0.0,
+        "per_agent_mb": 0.0
+      },
+      {
+        "count": 10,
+        "total_mb": 0.0,
+        "per_agent_mb": 0.0
+      },
+      {
+        "count": 20,
+        "total_mb": 0.0,
+        "per_agent_mb": 0.0
+      },
+      {
+        "count": 50,
+        "total_mb": 0.15625,
+        "per_agent_mb": 0.003125
+      }
+    ],
+    "extrapolated_100_agents_mb": 0.3313291957589862,
+    "extrapolated_1000_agents_mb": 3.313291957589862
+  },
+  "hotspots": {
+    "large_arrays": [],
+    "recommendations": []
+  },
+  "recommendations": []
+}

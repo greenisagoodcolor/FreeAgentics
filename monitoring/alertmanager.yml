@@ -1,0 +1,226 @@
+# Alertmanager Configuration for FreeAgentics Production
+# Handles alert routing, grouping, and notifications
+
+global:
+  smtp_smarthost: 'localhost:587'
+  smtp_from: 'alerts@freeagentics.local'
+  smtp_auth_username: 'alerts@freeagentics.local'
+  smtp_auth_password: 'CHANGE_ME_SMTP_PASSWORD'
+  
+  # Slack webhook URL (replace with actual webhook)
+  slack_api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+
+# Templates for notifications
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Routing configuration
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  receiver: 'default'
+  
+  routes:
+    # Critical alerts go to multiple channels
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 10s
+      repeat_interval: 1h
+    
+    # Infrastructure alerts
+    - match:
+        category: infrastructure
+      receiver: 'infrastructure-team'
+      group_interval: 10m
+    
+    # Application alerts
+    - match:
+        category: application
+      receiver: 'dev-team'
+      group_interval: 5m
+    
+    # Database alerts
+    - match:
+        category: database
+      receiver: 'db-team'
+      group_interval: 10m
+    
+    # Security alerts (highest priority)
+    - match:
+        category: security
+      receiver: 'security-team'
+      group_wait: 0s
+      repeat_interval: 30m
+    
+    # FreeAgentics specific alerts
+    - match:
+        category: freeagentics
+      receiver: 'freeagentics-team'
+      group_interval: 5m
+    
+    # Business alerts
+    - match:
+        category: business
+      receiver: 'business-team'
+      group_interval: 1h
+      repeat_interval: 24h
+
+# Inhibition rules (suppress certain alerts when others are firing)
+inhibit_rules:
+  # If container is down, don't alert on application metrics
+  - source_match:
+      alertname: 'ContainerDown'
+    target_match:
+      category: 'application'
+    equal: ['job']
+  
+  # If API is down, don't alert on slow response times
+  - source_match:
+      alertname: 'APIEndpointDown'
+    target_match:
+      alertname: 'SlowResponseTime'
+    equal: ['job']
+
+# Notification receivers
+receivers:
+  # Default receiver (catch-all)
+  - name: 'default'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#alerts'
+        title: 'FreeAgentics Alert'
+        text: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          {{ end }}
+  
+  # Critical alerts (multiple channels)
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'oncall@freeagentics.local,admin@freeagentics.local'
+        subject: '🚨 CRITICAL: FreeAgentics Alert'
+        body: |
+          CRITICAL ALERT FIRED:
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Time: {{ .StartsAt }}
+          Labels: {{ range .Labels.SortedPairs }}{{ .Name }}: {{ .Value }} {{ end }}
+          {{ end }}
+    
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#critical-alerts'
+        color: 'danger'
+        title: '🚨 CRITICAL: FreeAgentics Production Alert'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Severity:* {{ .Labels.severity }}
+          *Time:* {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+          {{ end }}
+        send_resolved: true
+  
+  # Infrastructure team alerts
+  - name: 'infrastructure-team'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#infrastructure'
+        color: 'warning'
+        title: '⚠️ Infrastructure Alert'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          {{ end }}
+        send_resolved: true
+  
+  # Development team alerts
+  - name: 'dev-team'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#development'
+        color: 'warning'
+        title: '🔧 Application Alert'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          {{ end }}
+        send_resolved: true
+  
+  # Database team alerts
+  - name: 'db-team'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#database'
+        color: 'warning'
+        title: '🗄️ Database Alert'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          {{ end }}
+        send_resolved: true
+  
+  # Security team alerts
+  - name: 'security-team'
+    email_configs:
+      - to: 'security@freeagentics.local'
+        subject: '🔒 SECURITY ALERT: FreeAgentics'
+        body: |
+          SECURITY ALERT:
+          
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Time: {{ .StartsAt }}
+          {{ end }}
+    
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#security'
+        color: 'danger'
+        title: '🔒 Security Alert'
+        text: |
+          {{ range .Alerts }}
+          *SECURITY ALERT:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Time:* {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+          {{ end }}
+        send_resolved: true
+  
+  # FreeAgentics team alerts
+  - name: 'freeagentics-team'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#freeagentics-alerts'
+        color: 'warning'
+        title: '🤖 FreeAgentics System Alert'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          {{ end }}
+        send_resolved: true
+  
+  # Business team alerts
+  - name: 'business-team'
+    slack_configs:
+      - api_url: '{{ .SlackAPIURL }}'
+        channel: '#business-metrics'
+        color: 'good'
+        title: '📊 Business Metrics Alert'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          {{ end }}
+        send_resolved: true

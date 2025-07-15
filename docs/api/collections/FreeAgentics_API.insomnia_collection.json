@@ -1,0 +1,506 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2024-01-15T10:00:00.000Z",
+  "__export_source": "insomnia.desktop.app:v2023.5.8",
+  "resources": [
+    {
+      "_id": "req_register",
+      "authentication": {},
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"testuser\",\n  \"email\": \"testuser@example.com\",\n  \"password\": \"SecurePassword123!\",\n  \"role\": \"CONTRIBUTOR\"\n}"
+      },
+      "created": 1705309200000,
+      "description": "Register a new user account",
+      "headers": [
+        {
+          "id": "pair_content_type",
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "isPrivate": false,
+      "metaSortKey": -1705309200000,
+      "method": "POST",
+      "modified": 1705309200000,
+      "name": "Register User",
+      "parameters": [],
+      "parentId": "fld_auth",
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingSendCookies": true,
+      "settingStoreCookies": true,
+      "url": "{{ _.base_url }}/api/{{ _.api_version }}/register",
+      "_type": "request"
+    },
+    {
+      "_id": "req_login",
+      "authentication": {},
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"testuser\",\n  \"password\": \"SecurePassword123!\"\n}"
+      },
+      "created": 1705309200000,
+      "description": "Login and obtain access tokens",
+      "headers": [
+        {
+          "id": "pair_content_type",
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "isPrivate": false,
+      "metaSortKey": -1705309200000,
+      "method": "POST",
+      "modified": 1705309200000,
+      "name": "Login",
+      "parameters": [],
+      "parentId": "fld_auth",
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingSendCookies": true,
+      "settingStoreCookies": true,
+      "url": "{{ _.base_url }}/api/{{ _.api_version }}/login",
+      "_type": "request"
+    },
+    {
+      "_id": "req_refresh",
+      "authentication": {},
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"refresh_token\": \"{{ _.refresh_token }}\"\n}"
+      },
+      "created": 1705309200000,
+      "description": "Refresh access token",
+      "headers": [
+        {
+          "id": "pair_content_type",
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "id": "pair_client_fingerprint",
+          "name": "X-Client-Fingerprint",
+          "value": "unique-client-id-12345"
+        }
+      ],
+      "isPrivate": false,
+      "metaSortKey": -1705309200000,
+      "method": "POST",
+      "modified": 1705309200000,
+      "name": "Refresh Token",
+      "parameters": [],
+      "parentId": "fld_auth",
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingSendCookies": true,
+      "settingStoreCookies": true,
+      "url": "{{ _.base_url }}/api/{{ _.api_version }}/refresh",
+      "_type": "request"
+    },
+    {
+      "_id": "req_me",
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}"
+      },
+      "body": {},
+      "created": 1705309200000,
+      "description": "Get current user information",
+      "headers": [],
+      "isPrivate": false,
+      "metaSortKey": -1705309200000,
+      "method": "GET",
+      "modified": 1705309200000,
+      "name": "Get Current User",
+      "parameters": [],
+      "parentId": "fld_auth",
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingSendCookies": true,
+      "settingStoreCookies": true,
+      "url": "{{ _.base_url }}/api/{{ _.api_version }}/me",
+      "_type": "request"
+    },
+    {
+      "_id": "req_permissions",
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}"
+      },
+      "body": {},
+      "created": 1705309200000,
+      "description": "Get user permissions",
+      "headers": [],
+      "isPrivate": false,
+      "metaSortKey": -1705309200000,
+      "method": "GET",
+      "modified": 1705309200000,
+      "name": "Get Permissions",
+      "parameters": [],
+      "parentId": "fld_auth",
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingSendCookies": true,
+      "settingStoreCookies": true,
+      "url": "{{ _.base_url }}/api/{{ _.api_version }}/permissions",
+      "_type": "request"
+    },
+    {
+      "_id": "req_logout",
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}"
+      },
+      "body": {},
+      "created": 1705309200000,
+      "description": "Logout user",
+      "headers": [],
+      "isPrivate": false,
+      "metaSortKey": -1705309200000,
+      "method": "POST",
+      "modified": 1705309200000,
+      "name": "Logout",
+      "parameters": [],
+      "parentId": "fld_auth",
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingSendCookies": true,
+      "settingStoreCookies": true,
+      "url": "{{ _.base_url }}/api/{{ _.api_version }}/logout",
+      "_type": "request"
+    },
+    {
+      "_id": "req_list_agents",
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}"
+      },
+      "body": {},
+      "created": 1705309200000,
+      "description": "List all agents",
+      "headers": [],
+      "isPrivate": false,
+      "metaSortKey": -1705309200000,
+      "method": "GET",
+      "modified": 1705309200000,
+      "name": "List Agents",
+      "parameters": [
+        {
+          "id": "pair_skip",
+          "name": "skip",
+          "value": "0"
+        },
+        {
+          "id": "pair_limit",
+          "name": "limit",
+          "value": "10"
+        },
+        {
+          "id": "pair_status",
+          "name": "status",
+          "value": "active"
+        }
+      ],
+      "parentId": "fld_agents",
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingSendCookies": true,
+      "settingStoreCookies": true,
+      "url": "{{ _.base_url }}/api/{{ _.api_version }}/agents",
+      "_type": "request"
+    },
+    {
+      "_id": "req_create_agent",
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}"
+      },
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Test Research Agent\",\n  \"template\": \"research_v2\",\n  \"parameters\": {\n    \"temperature\": 0.7,\n    \"max_tokens\": 2048\n  },\n  \"use_pymdp\": true,\n  \"planning_horizon\": 3\n}"
+      },
+      "created": 1705309200000,
+      "description": "Create a new agent",
+      "headers": [
+        {
+          "id": "pair_content_type",
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "isPrivate": false,
+      "metaSortKey": -1705309200000,
+      "method": "POST",
+      "modified": 1705309200000,
+      "name": "Create Agent",
+      "parameters": [],
+      "parentId": "fld_agents",
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingSendCookies": true,
+      "settingStoreCookies": true,
+      "url": "{{ _.base_url }}/api/{{ _.api_version }}/agents",
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_agent",
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}"
+      },
+      "body": {},
+      "created": 1705309200000,
+      "description": "Get agent details",
+      "headers": [],
+      "isPrivate": false,
+      "metaSortKey": -1705309200000,
+      "method": "GET",
+      "modified": 1705309200000,
+      "name": "Get Agent Details",
+      "parameters": [],
+      "parentId": "fld_agents",
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingSendCookies": true,
+      "settingStoreCookies": true,
+      "url": "{{ _.base_url }}/api/{{ _.api_version }}/agents/{{ _.agent_id }}",
+      "_type": "request"
+    },
+    {
+      "_id": "req_update_agent",
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}"
+      },
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"parameters\": {\n    \"temperature\": 0.8,\n    \"max_tokens\": 3000\n  }\n}"
+      },
+      "created": 1705309200000,
+      "description": "Update agent configuration",
+      "headers": [
+        {
+          "id": "pair_content_type",
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "isPrivate": false,
+      "metaSortKey": -1705309200000,
+      "method": "PUT",
+      "modified": 1705309200000,
+      "name": "Update Agent",
+      "parameters": [],
+      "parentId": "fld_agents",
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingSendCookies": true,
+      "settingStoreCookies": true,
+      "url": "{{ _.base_url }}/api/{{ _.api_version }}/agents/{{ _.agent_id }}",
+      "_type": "request"
+    },
+    {
+      "_id": "req_run_inference",
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}"
+      },
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"agent_id\": \"{{ _.agent_id }}\",\n  \"query\": \"Analyze the current trends in artificial intelligence\",\n  \"context\": {\n    \"focus_areas\": [\"machine learning\", \"natural language processing\"],\n    \"time_frame\": \"2024\"\n  },\n  \"parameters\": {\n    \"temperature\": 0.7,\n    \"max_tokens\": 1000\n  }\n}"
+      },
+      "created": 1705309200000,
+      "description": "Run inference with agent",
+      "headers": [
+        {
+          "id": "pair_content_type",
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "isPrivate": false,
+      "metaSortKey": -1705309200000,
+      "method": "POST",
+      "modified": 1705309200000,
+      "name": "Run Inference",
+      "parameters": [],
+      "parentId": "fld_inference",
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingSendCookies": true,
+      "settingStoreCookies": true,
+      "url": "{{ _.base_url }}/api/{{ _.api_version }}/inference",
+      "_type": "request"
+    },
+    {
+      "_id": "req_search_knowledge",
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}"
+      },
+      "body": {},
+      "created": 1705309200000,
+      "description": "Search knowledge graph",
+      "headers": [],
+      "isPrivate": false,
+      "metaSortKey": -1705309200000,
+      "method": "GET",
+      "modified": 1705309200000,
+      "name": "Search Knowledge",
+      "parameters": [
+        {
+          "id": "pair_q",
+          "name": "q",
+          "value": "machine learning"
+        },
+        {
+          "id": "pair_limit",
+          "name": "limit",
+          "value": "10"
+        },
+        {
+          "id": "pair_type",
+          "name": "type",
+          "value": "concept"
+        }
+      ],
+      "parentId": "fld_knowledge",
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingSendCookies": true,
+      "settingStoreCookies": true,
+      "url": "{{ _.base_url }}/api/{{ _.api_version }}/knowledge/search",
+      "_type": "request"
+    },
+    {
+      "_id": "req_system_status",
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}"
+      },
+      "body": {},
+      "created": 1705309200000,
+      "description": "Get system status",
+      "headers": [],
+      "isPrivate": false,
+      "metaSortKey": -1705309200000,
+      "method": "GET",
+      "modified": 1705309200000,
+      "name": "System Status",
+      "parameters": [],
+      "parentId": "fld_system",
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingSendCookies": true,
+      "settingStoreCookies": true,
+      "url": "{{ _.base_url }}/api/{{ _.api_version }}/system/status",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_auth",
+      "created": 1705309200000,
+      "description": "Authentication endpoints",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1705309200000,
+      "modified": 1705309200000,
+      "name": "Authentication",
+      "parentId": "wrk_main",
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_agents",
+      "created": 1705309200000,
+      "description": "Agent management endpoints",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1705309200000,
+      "modified": 1705309200000,
+      "name": "Agents",
+      "parentId": "wrk_main",
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_inference",
+      "created": 1705309200000,
+      "description": "Inference endpoints",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1705309200000,
+      "modified": 1705309200000,
+      "name": "Inference",
+      "parentId": "wrk_main",
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_knowledge",
+      "created": 1705309200000,
+      "description": "Knowledge graph endpoints",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1705309200000,
+      "modified": 1705309200000,
+      "name": "Knowledge Graph",
+      "parentId": "wrk_main",
+      "_type": "request_group"
+    },
+    {
+      "_id": "fld_system",
+      "created": 1705309200000,
+      "description": "System endpoints",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1705309200000,
+      "modified": 1705309200000,
+      "name": "System",
+      "parentId": "wrk_main",
+      "_type": "request_group"
+    },
+    {
+      "_id": "wrk_main",
+      "created": 1705309200000,
+      "description": "FreeAgentics Multi-Agent AI Platform API",
+      "modified": 1705309200000,
+      "name": "FreeAgentics API",
+      "parentId": null,
+      "scope": "collection",
+      "_type": "workspace"
+    },
+    {
+      "_id": "env_base",
+      "color": null,
+      "created": 1705309200000,
+      "data": {
+        "base_url": "https://api.freeagentics.com",
+        "api_version": "v1",
+        "access_token": "",
+        "refresh_token": "",
+        "agent_id": ""
+      },
+      "dataPropertyOrder": {
+        "&": ["base_url", "api_version", "access_token", "refresh_token", "agent_id"]
+      },
+      "isPrivate": false,
+      "metaSortKey": 1705309200000,
+      "modified": 1705309200000,
+      "name": "Base Environment",
+      "parentId": "wrk_main",
+      "_type": "environment"
+    }
+  ]
+}

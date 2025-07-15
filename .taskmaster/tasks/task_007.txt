@@ -1,0 +1,173 @@
+# Task ID: 7
+# Title: Integrate Observability with Agent Operations
+# Status: done
+# Dependencies: 1, 4
+# Priority: medium
+# Description: Connect monitoring code with actual agent operations for production visibility
+# Details:
+Wire observability code into agent inference operations. Implement real-time belief state monitoring. Connect performance metrics to actual agent coordination. Create alerting for agent failures and performance degradation.
+
+# Test Strategy:
+Verify metrics collection during agent operations. Test alerting thresholds. Validate monitoring dashboard accuracy.
+
+# Subtasks:
+## 1. Wire metrics collection into agent inference pipeline [done]
+### Dependencies: None
+### Description: Integrate metrics collection hooks into the agent inference pipeline to capture key performance indicators and operational metrics
+### Details:
+Add instrumentation to capture inference latency, token usage, success rates, and error patterns. Implement non-blocking metrics collection to avoid performance impact on agent operations.
+<info added on 2025-07-14T10:25:26.468Z>
+Repository cleanup requirements for agent inference metrics infrastructure:
+
+Remove obsolete metrics collection files including old inference metrics versions (inference-metrics-v1.py, backup_metrics.py), deprecated instrumentation files, unused metrics configuration files, and outdated test reports and monitoring result archives.
+
+Consolidate metrics collection directories by merging duplicate metrics setup scripts into single authoritative versions, removing redundant instrumentation files across multiple directories, consolidating metrics documentation into unified inference monitoring guide, and deleting obsolete metrics utilities and deprecated collection helper scripts.
+
+Clean up metrics collection artifacts including old inference metrics logs, token usage tracking artifacts, obsolete latency reports, success rate analysis files, deprecated metrics results, outdated error pattern logs, and obsolete metrics configuration validation files.
+
+Reduce technical debt by deleting unused metrics models and deprecated instrumentation definitions, removing obsolete metrics collection managers and legacy monitoring code, cleaning up metrics artifacts that are no longer applicable, and updating metrics documentation to reflect current inference monitoring only.
+
+This cleanup ensures the agent inference metrics infrastructure remains clean and focused without legacy artifacts that could cause confusion during observability integration development.
+</info added on 2025-07-14T10:25:26.468Z>
+
+## 2. Implement belief state monitoring hooks [done]
+### Dependencies: 7.1
+### Description: Create monitoring hooks to track agent belief state changes and decision-making processes
+### Details:
+Monitor belief state transitions, confidence levels, and decision points. Track how agent beliefs evolve over time and identify patterns in belief updates.
+<info added on 2025-07-14T10:25:48.996Z>
+Investigation and continuous repository tidying through systematic scan and technical debt reduction focusing on belief state monitoring infrastructure:
+
+**File Cleanup Requirements:**
+- Remove obsolete belief state files: belief-monitor-v1.py, backup_belief.py, deprecated belief tracking files, outdated state monitoring utilities
+- Delete unused belief configuration files and confidence tracking parameters
+- Remove obsolete belief test reports and state transition result archives
+
+**Directory Consolidation:**
+- Merge duplicate belief monitoring setup scripts into single authoritative versions
+- Remove redundant belief tracking files across multiple directories
+- Consolidate belief documentation into unified state monitoring guide
+- Delete obsolete belief utilities and deprecated transition helper scripts
+
+**Artifact Cleanup:**
+- Remove old belief state logs and confidence level tracking artifacts
+- Delete obsolete transition reports and decision point analysis files
+- Clean up deprecated belief results and outdated evolution pattern logs
+- Remove obsolete belief configuration validation files
+
+**Technical Debt Reduction:**
+- Delete unused belief models and deprecated state monitoring definitions
+- Remove obsolete belief tracking managers and legacy monitoring code
+- Clean up belief artifacts that are no longer applicable
+- Update belief documentation to reflect current state monitoring only
+
+This cleanup ensures belief state monitoring infrastructure remains clean and focused without legacy artifacts that could cause confusion during agent decision tracking development.
+</info added on 2025-07-14T10:25:48.996Z>
+
+## 3. Add performance metrics to agent coordination [done]
+### Dependencies: 7.1
+### Description: Implement metrics collection for agent coordination activities including communication and collaboration patterns
+### Details:
+Track inter-agent communication frequency, coordination success rates, resource sharing patterns, and collaborative task completion metrics.
+<info added on 2025-07-14T10:26:12.996Z>
+Repository cleanup and technical debt reduction requirements for agent coordination metrics infrastructure:
+
+OBSOLETE FILE REMOVAL:
+- Delete deprecated coordination metrics versions (coord-metrics-v1.py, backup_coord.py)
+- Remove outdated communication tracking files and collaboration utilities
+- Clean up unused coordination configuration files and resource sharing parameters
+- Delete obsolete coordination test reports and collaboration result archives
+
+DIRECTORY CONSOLIDATION:
+- Merge duplicate coordination setup scripts into single authoritative versions
+- Remove redundant communication tracking files across multiple directories
+- Consolidate coordination documentation into unified collaboration guide
+- Delete obsolete coordination utilities and deprecated sharing helper scripts
+
+ARTIFACT CLEANUP:
+- Remove old coordination logs and communication frequency tracking artifacts
+- Delete obsolete collaboration reports and resource sharing pattern analysis files
+- Clean up deprecated coordination results and outdated task completion logs
+- Remove obsolete coordination configuration validation files
+
+TECHNICAL DEBT REDUCTION:
+- Delete unused coordination models and deprecated collaboration definitions
+- Remove obsolete coordination managers and legacy communication code
+- Clean up coordination artifacts no longer applicable to current implementation
+- Update coordination documentation to reflect current collaboration metrics only
+
+This systematic cleanup ensures the agent coordination metrics infrastructure remains clean and focused without legacy artifacts that could interfere with multi-agent performance monitoring development.
+</info added on 2025-07-14T10:26:12.996Z>
+
+## 4. Create real-time monitoring dashboards [done]
+### Dependencies: 7.1, 7.2, 7.3
+### Description: Build dashboards to visualize agent performance metrics and system health in real-time
+### Details:
+Create interactive dashboards showing agent performance trends, belief state visualizations, coordination metrics, and system health indicators with real-time updates.
+<info added on 2025-07-14T10:26:37.148Z>
+Implementation includes comprehensive cleanup requirements for dashboard infrastructure:
+
+CLEANUP SCOPE:
+- Remove obsolete dashboard files (dashboard-v1.js, backup_dashboard.py, deprecated visualization files)
+- Delete unused dashboard configuration files and outdated chart parameters
+- Clean up dashboard test reports and visualization result archives
+- Consolidate duplicate dashboard setup scripts into single authoritative versions
+- Merge redundant visualization files across multiple directories
+- Unify dashboard documentation into single monitoring guide
+- Remove old dashboard logs and visualization rendering artifacts
+- Delete obsolete performance trend reports and belief state visualization files
+- Clean up deprecated dashboard results and outdated real-time update logs
+- Remove obsolete dashboard configuration validation files
+
+TECHNICAL DEBT REDUCTION:
+- Delete unused dashboard models and deprecated visualization definitions
+- Remove obsolete dashboard managers and legacy rendering code
+- Clean up dashboard artifacts no longer applicable to current implementation
+- Update documentation to reflect only current monitoring implementation
+
+This systematic cleanup ensures the real-time monitoring dashboard infrastructure remains clean and focused without legacy artifacts that could interfere with observability dashboard development.
+</info added on 2025-07-14T10:26:37.148Z>
+
+## 5. Set up alerting for agent failures [done]
+### Dependencies: 7.1, 7.2, 7.3
+### Description: Configure alerting system to detect and notify on agent failures and performance degradation
+### Details:
+Define alert thresholds for critical metrics, implement escalation policies, and create notification channels for different failure types and severity levels.
+<info added on 2025-07-14T10:27:04.180Z>
+**COMPREHENSIVE CLEANUP REQUIREMENTS ADDED:**
+
+**Investigation and continuous repository tidying through systematic scan and technical debt reduction focusing on agent failure alerting infrastructure:**
+
+**1. Remove obsolete alerting files:**
+- Delete old alerting versions (alerting-v1.py, backup_alerts.py)
+- Remove deprecated notification files and outdated alert threshold utilities
+- Clean up unused alerting configuration files and escalation parameters
+- Delete obsolete alerting test reports and notification result archives
+
+**2. Consolidate alerting directories:**
+- Merge duplicate alerting setup scripts into single authoritative versions
+- Remove redundant notification files across multiple directories
+- Consolidate alerting documentation into unified failure detection guide
+- Delete obsolete alerting utilities and deprecated escalation helper scripts
+
+**3. Clean up alerting artifacts:**
+- Remove old alerting logs and failure detection artifacts
+- Delete obsolete threshold reports and performance degradation analysis files
+- Clean up deprecated alerting results and outdated notification channel logs
+- Remove obsolete alerting configuration validation files
+
+**4. Technical debt reduction:**
+- Delete unused alerting models and deprecated threshold definitions
+- Remove obsolete alerting managers and legacy notification code
+- Clean up alerting artifacts that are no longer applicable
+- Update alerting documentation to reflect current failure detection only
+
+This cleanup ensures agent failure alerting infrastructure remains clean and focused without legacy artifacts that could cause confusion during production monitoring development.
+</info added on 2025-07-14T10:27:04.180Z>
+
+## 6. Test monitoring under load conditions [done]
+### Dependencies: 7.4, 7.5
+### Description: Validate monitoring system performance and accuracy under various load conditions and failure scenarios
+### Details:
+Execute load tests to verify monitoring system scales properly, test alert accuracy under stress, and validate dashboard responsiveness during high-throughput operations.
+

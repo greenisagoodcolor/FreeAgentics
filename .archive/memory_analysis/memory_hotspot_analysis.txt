@@ -1,0 +1,48 @@
+================================================================================
+MEMORY HOTSPOT ANALYSIS REPORT
+Generated: 2025-07-14T17:19:45.510265
+================================================================================
+
+EXECUTIVE SUMMARY
+----------------------------------------
+Key Memory Hotspots Identified:
+
+DETAILED ANALYSIS
+================================================================================
+
+1. PYMDP OPERATION PROFILES
+----------------------------------------
+
+BELIEF_UPDATE:
+  Peak memory: 0.01 MB
+  Total allocated: 17.7 KB
+  Top allocations:
+    - maths.py:53 - 8.5 KB
+    - maths.py:260 - 8.0 KB
+    - maths.py:46 - 0.7 KB
+
+UTILS_OPERATIONS:
+  Peak memory: 0.96 MB
+
+2. PERSISTENT MEMORY ALLOCATIONS
+----------------------------------------
+
+3. OPTIMIZATION RECOMMENDATIONS
+----------------------------------------
+- Use sparse matrices for transition models (80-90% savings)
+- Implement belief compression for sparse beliefs
+- Pool temporary arrays during inference
+- Convert float64 to float32 throughout
+- Lazy-load large matrices on demand
+
+================================================================================
+PRIORITY HOTSPOTS TO ADDRESS
+================================================================================
+
+1. Belief update operations (spm_dot, spm_norm)
+2. Free energy calculations (matrix multiplications)
+3. Action selection (planning tree expansion)
+4. Transition matrix storage (dense -> sparse)
+5. Temporary array allocations in loops
+
+================================================================================

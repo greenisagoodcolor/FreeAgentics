@@ -1,0 +1,40 @@
+# Test runner Dockerfile for FreeAgentics integration tests
+FROM python:3.12-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    make \
+    libpq-dev \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements files
+COPY requirements*.txt ./
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir -r requirements-test.txt && \
+    pip install --no-cache-dir pytest-docker pytest-xdist pytest-timeout
+
+# Copy wait-for-it script for service readiness
+RUN curl -o /usr/local/bin/wait-for-it.sh \
+    https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh && \
+    chmod +x /usr/local/bin/wait-for-it.sh
+
+# Copy application code
+COPY . .
+
+# Create directories for test artifacts
+RUN mkdir -p /app/.pytest_cache /app/htmlcov /app/test-results
+
+# Set Python path
+ENV PYTHONPATH=/app:$PYTHONPATH
+
+# Default command runs integration tests
+CMD ["pytest", "tests/integration/", "-v", "--tb=short"]

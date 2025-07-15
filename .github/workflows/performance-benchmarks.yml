@@ -1,0 +1,352 @@
+name: Performance Benchmarks
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main, develop ]
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      detailed_profiling:
+        description: 'Run detailed profiling (slower)'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  performance-benchmarks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+      fail-fast: false
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Need full history for performance comparison
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+        pip install psutil memory-profiler
+    
+    - name: Setup test environment
+      run: |
+        mkdir -p tests/performance/ci_results
+        mkdir -p performance_artifacts
+        export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+    
+    - name: Run performance benchmarks
+      id: benchmarks
+      run: |
+        cd ${{ github.workspace }}
+        export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+        
+        # Run the CI benchmark suite
+        python tests/performance/ci_performance_benchmarks.py \
+          --output-dir tests/performance/ci_results \
+          --verbose
+      continue-on-error: true
+    
+    - name: Parse benchmark results
+      id: parse_results
+      run: |
+        cd ${{ github.workspace }}
+        
+        # Check if results exist
+        if [ -f "tests/performance/ci_results/latest_results.json" ]; then
+          # Parse results using jq
+          overall_status=$(cat tests/performance/ci_results/latest_results.json | jq -r '.overall_status')
+          total_benchmarks=$(cat tests/performance/ci_results/latest_results.json | jq -r '.summary.total_benchmarks')
+          passed=$(cat tests/performance/ci_results/latest_results.json | jq -r '.summary.passed')
+          warnings=$(cat tests/performance/ci_results/latest_results.json | jq -r '.summary.warnings')
+          failed=$(cat tests/performance/ci_results/latest_results.json | jq -r '.summary.failed')
+          total_regressions=$(cat tests/performance/ci_results/latest_results.json | jq -r '.summary.total_regressions')
+          total_improvements=$(cat tests/performance/ci_results/latest_results.json | jq -r '.summary.total_improvements')
+          
+          echo "overall_status=$overall_status" >> $GITHUB_OUTPUT
+          echo "total_benchmarks=$total_benchmarks" >> $GITHUB_OUTPUT
+          echo "passed=$passed" >> $GITHUB_OUTPUT
+          echo "warnings=$warnings" >> $GITHUB_OUTPUT
+          echo "failed=$failed" >> $GITHUB_OUTPUT
+          echo "total_regressions=$total_regressions" >> $GITHUB_OUTPUT
+          echo "total_improvements=$total_improvements" >> $GITHUB_OUTPUT
+          
+          # Create summary for GitHub
+          echo "## Performance Benchmark Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Overall Status**: $overall_status" >> $GITHUB_STEP_SUMMARY
+          echo "**Benchmarks**: $passed/$total_benchmarks passed" >> $GITHUB_STEP_SUMMARY
+          echo "**Regressions**: $total_regressions" >> $GITHUB_STEP_SUMMARY
+          echo "**Improvements**: $total_improvements" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Add detailed results if any regressions
+          if [ "$total_regressions" -gt 0 ]; then
+            echo "### Regressions Detected" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            cat tests/performance/ci_results/latest_results.json | jq -r '
+              .benchmarks | to_entries[] | 
+              select(.value.validation.regressions | length > 0) | 
+              "**" + .key + "**:\n" + 
+              (.value.validation.regressions[] | 
+                "- " + .metric + ": " + (.regression_percent | tostring) + "% regression (" + .severity + ")"
+              ) + "\n"
+            ' >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Add improvements if any
+          if [ "$total_improvements" -gt 0 ]; then
+            echo "### Improvements Detected" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            cat tests/performance/ci_results/latest_results.json | jq -r '
+              .benchmarks | to_entries[] | 
+              select(.value.validation.improvements | length > 0) | 
+              "**" + .key + "**:\n" + 
+              (.value.validation.improvements[] | 
+                "- " + .metric + ": " + (.improvement_percent | tostring) + "% improvement"
+              ) + "\n"
+            ' >> $GITHUB_STEP_SUMMARY
+          fi
+        else
+          echo "overall_status=error" >> $GITHUB_OUTPUT
+          echo "No benchmark results found!" >> $GITHUB_STEP_SUMMARY
+        fi
+    
+    - name: Upload benchmark results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: performance-results-${{ matrix.python-version }}
+        path: |
+          tests/performance/ci_results/
+          performance_artifacts/
+        retention-days: 30
+    
+    - name: Comment on PR (if applicable)
+      uses: actions/github-script@v6
+      if: github.event_name == 'pull_request' && steps.parse_results.outputs.total_regressions > 0
+      with:
+        script: |
+          const fs = require('fs');
+          
+          // Read the latest results
+          const resultsPath = 'tests/performance/ci_results/latest_results.json';
+          if (!fs.existsSync(resultsPath)) {
+            console.log('No results file found');
+            return;
+          }
+          
+          const results = JSON.parse(fs.readFileSync(resultsPath, 'utf8'));
+          
+          // Create comment body
+          let commentBody = `## Performance Benchmark Results\n\n`;
+          commentBody += `**Status**: ${results.overall_status}\n`;
+          commentBody += `**Benchmarks**: ${results.summary.passed}/${results.summary.total_benchmarks} passed\n`;
+          commentBody += `**Regressions**: ${results.summary.total_regressions}\n`;
+          commentBody += `**Improvements**: ${results.summary.total_improvements}\n\n`;
+          
+          // Add regression details
+          if (results.summary.total_regressions > 0) {
+            commentBody += `### Performance Regressions Detected\n\n`;
+            
+            for (const [benchName, benchData] of Object.entries(results.benchmarks)) {
+              if (benchData.validation.regressions.length > 0) {
+                commentBody += `**${benchName}**:\n`;
+                for (const reg of benchData.validation.regressions) {
+                  commentBody += `- ${reg.metric}: ${reg.regression_percent.toFixed(1)}% regression (${reg.severity})\n`;
+                }
+                commentBody += '\n';
+              }
+            }
+            
+            commentBody += `\n⚠️ **Please review these performance regressions before merging.**\n`;
+          }
+          
+          // Add improvements
+          if (results.summary.total_improvements > 0) {
+            commentBody += `### Performance Improvements\n\n`;
+            
+            for (const [benchName, benchData] of Object.entries(results.benchmarks)) {
+              if (benchData.validation.improvements.length > 0) {
+                commentBody += `**${benchName}**:\n`;
+                for (const imp of benchData.validation.improvements) {
+                  commentBody += `- ${imp.metric}: ${imp.improvement_percent.toFixed(1)}% improvement\n`;
+                }
+                commentBody += '\n';
+              }
+            }
+            
+            commentBody += `\n🎉 **Great work on these performance improvements!**\n`;
+          }
+          
+          // Post comment
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: commentBody
+          });
+    
+    - name: Fail on critical regressions
+      if: steps.parse_results.outputs.overall_status == 'fail'
+      run: |
+        echo "Critical performance regressions detected!"
+        echo "Overall status: ${{ steps.parse_results.outputs.overall_status }}"
+        echo "Failed benchmarks: ${{ steps.parse_results.outputs.failed }}"
+        echo "Total regressions: ${{ steps.parse_results.outputs.total_regressions }}"
+        exit 1
+    
+    - name: Warn on minor regressions
+      if: steps.parse_results.outputs.overall_status == 'warning'
+      run: |
+        echo "Performance warnings detected!"
+        echo "Overall status: ${{ steps.parse_results.outputs.overall_status }}"
+        echo "Warnings: ${{ steps.parse_results.outputs.warnings }}"
+        echo "Total regressions: ${{ steps.parse_results.outputs.total_regressions }}"
+        echo "::warning::Performance regressions detected - please review"
+        exit 0  # Don't fail the build on warnings
+  
+  historical-comparison:
+    runs-on: ubuntu-latest
+    needs: performance-benchmarks
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 100  # Get more history for comparison
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.12"
+    
+    - name: Download benchmark results
+      uses: actions/download-artifact@v3
+      with:
+        name: performance-results-3.12
+        path: current_results/
+    
+    - name: Generate historical comparison
+      run: |
+        cd ${{ github.workspace }}
+        
+        # Create historical comparison script
+        cat > generate_historical_comparison.py << 'EOF'
+        import json
+        import os
+        import subprocess
+        from pathlib import Path
+        from datetime import datetime, timedelta
+        
+        def get_git_commits(days_back=30):
+            """Get commits from the last N days."""
+            since_date = (datetime.now() - timedelta(days=days_back)).strftime('%Y-%m-%d')
+            result = subprocess.run(
+                ['git', 'log', '--since', since_date, '--format=%H %cd', '--date=short'],
+                capture_output=True, text=True
+            )
+            commits = []
+            for line in result.stdout.strip().split('\n'):
+                if line:
+                    commit_hash, date = line.split(' ', 1)
+                    commits.append({'hash': commit_hash, 'date': date})
+            return commits
+        
+        def generate_comparison_report():
+            """Generate historical performance comparison."""
+            results_dir = Path('current_results/tests/performance/ci_results')
+            if not results_dir.exists():
+                print("No current results found")
+                return
+            
+            # Load current results
+            latest_file = results_dir / 'latest_results.json'
+            if not latest_file.exists():
+                print("No latest results file found")
+                return
+            
+            with open(latest_file) as f:
+                current_results = json.load(f)
+            
+            # Generate report
+            report_path = results_dir / 'historical_comparison.md'
+            with open(report_path, 'w') as f:
+                f.write("# Historical Performance Comparison\n\n")
+                f.write(f"Generated: {datetime.now().isoformat()}\n\n")
+                
+                f.write("## Current Performance Summary\n\n")
+                f.write(f"- **Overall Status**: {current_results['overall_status']}\n")
+                f.write(f"- **Total Benchmarks**: {current_results['summary']['total_benchmarks']}\n")
+                f.write(f"- **Passed**: {current_results['summary']['passed']}\n")
+                f.write(f"- **Warnings**: {current_results['summary']['warnings']}\n")
+                f.write(f"- **Failed**: {current_results['summary']['failed']}\n")
+                f.write(f"- **Regressions**: {current_results['summary']['total_regressions']}\n")
+                f.write(f"- **Improvements**: {current_results['summary']['total_improvements']}\n\n")
+                
+                f.write("## Key Metrics\n\n")
+                for bench_name, bench_data in current_results['benchmarks'].items():
+                    if 'result' in bench_data:
+                        f.write(f"### {bench_name}\n\n")
+                        result = bench_data['result']
+                        for key, value in result.items():
+                            if isinstance(value, (int, float)) and not isinstance(value, bool):
+                                f.write(f"- **{key}**: {value:.2f}\n")
+                        f.write("\n")
+                
+                f.write("## Recommendations\n\n")
+                if current_results['summary']['total_regressions'] > 0:
+                    f.write("⚠️ **Performance regressions detected:**\n")
+                    f.write("- Review recent changes for performance impact\n")
+                    f.write("- Consider reverting problematic commits\n")
+                    f.write("- Implement performance optimizations\n\n")
+                
+                if current_results['summary']['total_improvements'] > 0:
+                    f.write("🎉 **Performance improvements detected:**\n")
+                    f.write("- Document optimization techniques used\n")
+                    f.write("- Consider applying similar optimizations elsewhere\n")
+                    f.write("- Update performance baselines\n\n")
+            
+            print(f"Historical comparison report generated: {report_path}")
+        
+        if __name__ == "__main__":
+            generate_comparison_report()
+        EOF
+        
+        python generate_historical_comparison.py
+    
+    - name: Upload historical comparison
+      uses: actions/upload-artifact@v3
+      with:
+        name: historical-comparison
+        path: current_results/tests/performance/ci_results/historical_comparison.md
+        retention-days: 90

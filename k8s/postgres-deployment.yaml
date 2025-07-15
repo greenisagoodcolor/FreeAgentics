@@ -1,0 +1,217 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: postgres
+    tier: database
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: freeagentics
+      component: postgres
+  template:
+    metadata:
+      labels:
+        app: freeagentics
+        component: postgres
+        tier: database
+    spec:
+      securityContext:
+        fsGroup: 999
+      containers:
+      - name: postgres
+        image: postgres:15
+        env:
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: freeagentics-config
+              key: postgres-db
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: freeagentics-config
+              key: postgres-user
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: freeagentics-secrets
+              key: postgres-password
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        ports:
+        - containerPort: 5432
+          name: postgres
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        - name: postgres-config
+          mountPath: /etc/postgresql/postgresql.conf
+          subPath: postgresql.conf
+          readOnly: true
+        - name: postgres-init
+          mountPath: /docker-entrypoint-initdb.d
+          readOnly: true
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -c
+            - pg_isready -U freeagentics -d freeagentics
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -c
+            - pg_isready -U freeagentics -d freeagentics
+          initialDelaySeconds: 15
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        securityContext:
+          runAsUser: 999
+          runAsGroup: 999
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+      - name: postgres-config
+        configMap:
+          name: postgres-config
+      - name: postgres-init
+        configMap:
+          name: postgres-init
+      nodeSelector:
+        workload: database
+      tolerations:
+      - key: "database"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: postgres
+    tier: database
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5432
+    targetPort: 5432
+    name: postgres
+  selector:
+    app: freeagentics
+    component: postgres
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: postgres
+data:
+  postgresql.conf: |
+    # PostgreSQL Production Configuration
+    max_connections = 200
+    shared_buffers = 256MB
+    effective_cache_size = 1GB
+    maintenance_work_mem = 64MB
+    checkpoint_completion_target = 0.9
+    wal_buffers = 16MB
+    default_statistics_target = 100
+    random_page_cost = 1.1
+    effective_io_concurrency = 200
+    work_mem = 4MB
+    min_wal_size = 1GB
+    max_wal_size = 4GB
+    
+    # Logging
+    log_destination = 'stderr'
+    logging_collector = on
+    log_directory = 'log'
+    log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'
+    log_truncate_on_rotation = on
+    log_rotation_age = 1d
+    log_rotation_size = 10MB
+    log_min_duration_statement = 1000
+    log_statement = 'all'
+    log_line_prefix = '%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
+    
+    # Security
+    ssl = on
+    ssl_cert_file = '/etc/ssl/certs/server.crt'
+    ssl_key_file = '/etc/ssl/private/server.key'
+    
+    # Performance
+    fsync = on
+    synchronous_commit = on
+    full_page_writes = on
+    
+    # Monitoring
+    track_activities = on
+    track_counts = on
+    track_io_timing = on
+    track_functions = all
+    stats_temp_directory = '/tmp'
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: postgres
+data:
+  01-init.sql: |
+    -- Create extensions
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+    CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
+    CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+    
+    -- Create monitoring user
+    CREATE USER monitoring WITH PASSWORD 'monitoring_password';
+    GRANT SELECT ON pg_stat_database TO monitoring;
+    GRANT SELECT ON pg_stat_user_tables TO monitoring;
+    GRANT SELECT ON pg_stat_user_indexes TO monitoring;
+    
+    -- Create backup user
+    CREATE USER backup WITH PASSWORD 'backup_password';
+    GRANT SELECT ON ALL TABLES IN SCHEMA public TO backup;
+    
+    -- Performance optimization
+    ALTER DATABASE freeagentics SET shared_preload_libraries = 'pg_stat_statements';
+    ALTER DATABASE freeagentics SET log_statement = 'all';
+    ALTER DATABASE freeagentics SET log_min_duration_statement = 1000;

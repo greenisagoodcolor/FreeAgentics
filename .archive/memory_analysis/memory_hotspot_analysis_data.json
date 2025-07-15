@@ -1,0 +1,122 @@
+{
+  "matrix_analysis": {
+    "matrix_sizes": {
+      "5x5": {
+        "A_matrices_mb": 0.0011739730834960938,
+        "B_matrices_mb": 0.0033750534057617188,
+        "total_mb": 0.0045490264892578125
+      },
+      "10x10": {
+        "A_matrices_mb": 0.0022897720336914062,
+        "B_matrices_mb": 0.004551887512207031,
+        "total_mb": 0.0068416595458984375
+      },
+      "20x20": {
+        "A_matrices_mb": 0.006859779357910156,
+        "B_matrices_mb": 0.01599597930908203,
+        "total_mb": 0.022855758666992188
+      },
+      "50x50": {
+        "A_matrices_mb": 0.039208412170410156,
+        "B_matrices_mb": 0.09610462188720703,
+        "total_mb": 0.1353130340576172
+      }
+    },
+    "memory_per_operation": {},
+    "inefficiencies": [
+      {
+        "type": "sparse_matrix_stored_dense",
+        "matrix": "A (observation)",
+        "size": "20x20",
+        "sparsity": 0.05,
+        "potential_savings_mb": 0.006516790390014648
+      },
+      {
+        "type": "sparse_matrix_stored_dense",
+        "matrix": "B (transition)",
+        "size": "20x20",
+        "sparsity": 0.05,
+        "potential_savings_mb": 0.015196180343627928
+      },
+      {
+        "type": "sparse_matrix_stored_dense",
+        "matrix": "A (observation)",
+        "size": "50x50",
+        "sparsity": 0.02,
+        "potential_savings_mb": 0.03842424392700195
+      },
+      {
+        "type": "sparse_matrix_stored_dense",
+        "matrix": "B (transition)",
+        "size": "50x50",
+        "sparsity": 0.02,
+        "potential_savings_mb": 0.09418252944946288
+      }
+    ]
+  },
+  "belief_operations": {
+    "belief_sizes": {},
+    "operation_costs": {
+      "belief_updates_0": 0.0025472640991210938,
+      "belief_updates_20": 0.011753082275390625,
+      "belief_updates_40": 0.016088485717773438,
+      "belief_updates_60": 0.01842498779296875,
+      "belief_updates_80": 0.020532608032226562
+    },
+    "memory_leaks": []
+  },
+  "agent_lifecycle": {
+    "creation_cost": {
+      "10_agents_mb": 2.1470680236816406,
+      "per_agent_mb": 0.21470680236816406
+    },
+    "operation_cost": {
+      "100_operations_mb": 0.2526369094848633,
+      "per_operation_kb": 0.2587001953125
+    },
+    "cleanup_efficiency": {
+      "efficiency_percent": 88.23020177989876,
+      "leaked_mb": 0.25270557403564453
+    }
+  },
+  "optimization_opportunities": {
+    "matrix_optimizations": [],
+    "belief_optimizations": [
+      {
+        "type": "belief_compression",
+        "description": "Use compressed representations for belief states",
+        "potential_savings": "60-80% for sparse beliefs"
+      },
+      {
+        "type": "belief_sharing",
+        "description": "Share common belief components across agents",
+        "potential_savings": "30-50% for similar agents"
+      }
+    ],
+    "memory_pooling": [
+      {
+        "type": "matrix_pool",
+        "description": "Reuse matrix buffers for temporary calculations",
+        "potential_savings": "20-40% reduction in allocations"
+      },
+      {
+        "type": "belief_pool",
+        "description": "Pool belief state arrays to reduce allocation overhead",
+        "potential_savings": "15-25% reduction in GC pressure"
+      }
+    ],
+    "data_structure_improvements": [
+      {
+        "type": "lazy_evaluation",
+        "description": "Defer matrix computations until needed",
+        "impact": "Reduce peak memory usage by 30-50%"
+      },
+      {
+        "type": "incremental_updates",
+        "description": "Update beliefs incrementally instead of full recomputation",
+        "impact": "Reduce computation memory by 40-60%"
+      }
+    ]
+  },
+  "timestamp": "2025-07-14T17:27:57.614778"
+}

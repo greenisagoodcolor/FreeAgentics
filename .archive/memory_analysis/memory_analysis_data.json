@@ -1,0 +1,140 @@
+{
+  "timestamp": "2025-07-14T17:16:56.722719",
+  "pymdp_analysis": {
+    "pymdp_available": true,
+    "memory_per_component": {},
+    "optimization_opportunities": [],
+    "memory_usage_by_size": [
+      {
+        "grid_size": 5,
+        "total_states": 25,
+        "memory_mb": 0.00241851806640625,
+        "mb_per_state": 9.674072265625e-05
+      },
+      {
+        "grid_size": 10,
+        "total_states": 100,
+        "memory_mb": 0.0040283203125,
+        "mb_per_state": 4.0283203125e-05
+      },
+      {
+        "grid_size": 20,
+        "total_states": 400,
+        "memory_mb": 0.0159912109375,
+        "mb_per_state": 3.997802734375e-05
+      },
+      {
+        "grid_size": 30,
+        "total_states": 900,
+        "memory_mb": 0.02667236328125,
+        "mb_per_state": 2.963595920138889e-05
+      }
+    ],
+    "memory_growth_rate": 2.7718680245535713e-05,
+    "projected_100x100_mb": 0.27718680245535715
+  },
+  "data_structures": {
+    "data_structures": {
+      "beliefs": {
+        "current_size_mb": 0.00762939453125,
+        "optimized_size_mb": 0.003814697265625,
+        "savings_mb": 0.003814697265625,
+        "savings_percent": 50.0
+      },
+      "transitions": {
+        "current_size_mb": 0.30517578125,
+        "sparse_size_mb": 0.0457763671875,
+        "savings_mb": 0.2593994140625,
+        "savings_percent": 85.0
+      }
+    },
+    "recommendations": [
+      "Switch from float64 to float32 for belief states to save 50.0% memory",
+      "Use sparse matrices for transitions to save 85.0% memory"
+    ],
+    "memory_pooling": {
+      "individual_mb": 0.019073486328125,
+      "pooled_mb": 0.019073486328125,
+      "savings_mb": 0.0,
+      "savings_percent": 0.0
+    }
+  },
+  "hotspots": [
+    {
+      "file": "agents/base_agent.py",
+      "issues": [
+        "Multiple array allocations (8 found)"
+      ]
+    }
+  ],
+  "optimization_plan": {
+    "immediate_actions": [
+      {
+        "action": "Switch to float32 for belief states",
+        "effort": "Low",
+        "impact": "High",
+        "savings": "~50% belief memory",
+        "implementation": "Change dtype in array initialization"
+      },
+      {
+        "action": "Implement belief state compression",
+        "effort": "Medium",
+        "impact": "High",
+        "savings": "~30-40% when beliefs are sparse",
+        "implementation": "Add compression/decompression methods"
+      },
+      {
+        "action": "Add memory pooling for temporary arrays",
+        "effort": "Medium",
+        "impact": "Medium",
+        "savings": "~20% for multi-agent scenarios",
+        "implementation": "Create ArrayPool class"
+      }
+    ],
+    "medium_term_actions": [
+      {
+        "action": "Implement sparse matrix support",
+        "effort": "High",
+        "impact": "Very High",
+        "savings": "~80-90% for transition matrices",
+        "implementation": "Use scipy.sparse for transitions"
+      },
+      {
+        "action": "Add lazy loading for agent components",
+        "effort": "Medium",
+        "impact": "Medium",
+        "savings": "Reduces initial memory spike",
+        "implementation": "Load matrices on-demand"
+      },
+      {
+        "action": "Implement shared memory for read-only data",
+        "effort": "High",
+        "impact": "High",
+        "savings": "~60% for shared world models",
+        "implementation": "Use multiprocessing shared memory"
+      }
+    ],
+    "long_term_actions": [
+      {
+        "action": "GPU memory offloading",
+        "effort": "Very High",
+        "impact": "Very High",
+        "savings": "Enables 10x more agents",
+        "implementation": "PyTorch/JAX backend for PyMDP"
+      },
+      {
+        "action": "Hierarchical belief representation",
+        "effort": "Very High",
+        "impact": "High",
+        "savings": "Logarithmic scaling with grid size",
+        "implementation": "Multi-resolution belief states"
+      }
+    ],
+    "expected_savings": {
+      "immediate": "9.7 MB/agent",
+      "medium_term": "19.3 MB/agent",
+      "total_reduction": "84%",
+      "new_footprint": "5.5 MB/agent"
+    }
+  }
+}

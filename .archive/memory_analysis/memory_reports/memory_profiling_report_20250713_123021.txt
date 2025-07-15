@@ -1,0 +1,7 @@
+FreeAgentics Standalone Memory Profiling Report
+============================================================
+Generated: 2025-07-13 12:30:21
+Total Snapshots: 16
+
+Memory Usage Summary:
+  Basic memory information available

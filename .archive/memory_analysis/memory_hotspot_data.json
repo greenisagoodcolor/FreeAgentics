@@ -1,0 +1,62 @@
+{
+  "timestamp": "2025-07-14T17:19:46.333799",
+  "pymdp_operations": {
+    "operations": {
+      "belief_update": {
+        "total_memory_kb": 16.21875,
+        "peak_memory_mb": 0.00777435302734375,
+        "top_allocations": [
+          {
+            "file": "maths.py",
+            "line": 53,
+            "size_kb": 7.9609375
+          },
+          {
+            "file": "maths.py",
+            "line": 260,
+            "size_kb": 7.90625
+          },
+          {
+            "file": "fromnumeric.py",
+            "line": 86,
+            "size_kb": 0.421875
+          },
+          {
+            "file": "tracemalloc.py",
+            "line": 560,
+            "size_kb": 0.2421875
+          },
+          {
+            "file": "tracemalloc.py",
+            "line": 423,
+            "size_kb": 0.2421875
+          }
+        ],
+        "num_iterations": 10
+      },
+      "action_selection": {
+        "error": "'list' object cannot be interpreted as an integer"
+      },
+      "free_energy_calc": {
+        "error": "cannot import name 'calc_expected_utility' from 'pymdp.maths' (/home/green/.local/lib/python3.12/site-packages/pymdp/maths.py)"
+      },
+      "matrix_multiplication": {
+        "error": "operand has more dimensions than subscripts given in einstein sum, but no '...' ellipsis provided to broadcast the extra dimensions."
+      },
+      "utils_operations": {
+        "operations": {
+          "obj_array_creation": 980.5625,
+          "normalization": 19.65625
+        },
+        "peak_memory_mb": 0.95758056640625
+      }
+    },
+    "hotspots": [],
+    "recommendations": []
+  },
+  "allocation_patterns": {
+    "persistent_allocations": [],
+    "temporary_allocations": [],
+    "leak_candidates": []
+  }
+}

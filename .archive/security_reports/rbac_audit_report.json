@@ -1,0 +1,277 @@
+{
+  "audit_metadata": {
+    "generated_at": "2025-07-14T16:50:09.004275",
+    "total_access_attempts": 6,
+    "audit_period_start": "2025-07-14T16:50:08.985387",
+    "audit_period_end": "2025-07-14T16:50:08.997184"
+  },
+  "permission_matrix": {
+    "metadata": {
+      "generated_at": "2025-07-14T16:50:09.004283",
+      "version": "1.0",
+      "total_roles": 4,
+      "total_permissions": 7
+    },
+    "roles": {
+      "admin": {
+        "permissions": [
+          "create_agent",
+          "delete_agent",
+          "view_agents",
+          "modify_agent",
+          "create_coalition",
+          "view_metrics",
+          "admin_system"
+        ],
+        "permission_count": 7,
+        "description": "Full system access with administrative privileges"
+      },
+      "researcher": {
+        "permissions": [
+          "create_agent",
+          "view_agents",
+          "modify_agent",
+          "create_coalition",
+          "view_metrics"
+        ],
+        "permission_count": 5,
+        "description": "Create and manage agents, view metrics, research-focused access"
+      },
+      "observer": {
+        "permissions": [
+          "view_agents",
+          "view_metrics"
+        ],
+        "permission_count": 2,
+        "description": "Read-only access to agents and basic metrics"
+      },
+      "agent_manager": {
+        "permissions": [
+          "create_agent",
+          "view_agents",
+          "modify_agent",
+          "view_metrics"
+        ],
+        "permission_count": 4,
+        "description": "Manage agents within scope, view operational metrics"
+      }
+    },
+    "permissions": {
+      "create_agent": {
+        "authorized_roles": [
+          "admin",
+          "researcher",
+          "agent_manager"
+        ],
+        "description": "Create new agents in the system"
+      },
+      "delete_agent": {
+        "authorized_roles": [
+          "admin"
+        ],
+        "description": "Delete existing agents from the system"
+      },
+      "view_agents": {
+        "authorized_roles": [
+          "admin",
+          "researcher",
+          "agent_manager",
+          "observer"
+        ],
+        "description": "View agent information and status"
+      },
+      "modify_agent": {
+        "authorized_roles": [
+          "admin",
+          "researcher",
+          "agent_manager"
+        ],
+        "description": "Modify agent configuration and parameters"
+      },
+      "create_coalition": {
+        "authorized_roles": [
+          "admin",
+          "researcher"
+        ],
+        "description": "Create new coalitions of agents"
+      },
+      "view_metrics": {
+        "authorized_roles": [
+          "admin",
+          "researcher",
+          "agent_manager",
+          "observer"
+        ],
+        "description": "View system and agent performance metrics"
+      },
+      "admin_system": {
+        "authorized_roles": [
+          "admin"
+        ],
+        "description": "Perform system administration tasks"
+      }
+    },
+    "role_hierarchy": {
+      "admin": {
+        "level": 4,
+        "inherits_from": []
+      },
+      "researcher": {
+        "level": 3,
+        "inherits_from": []
+      },
+      "agent_manager": {
+        "level": 2,
+        "inherits_from": []
+      },
+      "observer": {
+        "level": 1,
+        "inherits_from": []
+      }
+    },
+    "permission_matrix": {
+      "admin": {
+        "create_agent": true,
+        "delete_agent": true,
+        "view_agents": true,
+        "modify_agent": true,
+        "create_coalition": true,
+        "view_metrics": true,
+        "admin_system": true
+      },
+      "researcher": {
+        "create_agent": true,
+        "delete_agent": false,
+        "view_agents": true,
+        "modify_agent": true,
+        "create_coalition": true,
+        "view_metrics": true,
+        "admin_system": false
+      },
+      "observer": {
+        "create_agent": false,
+        "delete_agent": false,
+        "view_agents": true,
+        "modify_agent": false,
+        "create_coalition": false,
+        "view_metrics": true,
+        "admin_system": false
+      },
+      "agent_manager": {
+        "create_agent": true,
+        "delete_agent": false,
+        "view_agents": true,
+        "modify_agent": true,
+        "create_coalition": false,
+        "view_metrics": true,
+        "admin_system": false
+      }
+    },
+    "access_patterns": {
+      "most_accessed_resources": {
+        "agents": 4,
+        "system": 2
+      },
+      "most_active_users": {
+        "researcher": 2,
+        "observer": 2,
+        "admin": 1,
+        "agent_manager": 1
+      },
+      "peak_access_times": {},
+      "denied_access_summary": {
+        "Insufficient permissions": 1,
+        "Role does not permit admin access": 1,
+        "Delete permission not granted to agent managers": 1
+      },
+      "permission_usage": {
+        "admin_system": 2,
+        "create_agent": 2,
+        "view_agents": 1,
+        "delete_agent": 1
+      }
+    },
+    "security_policies": {
+      "principle_of_least_privilege": true,
+      "role_separation": true,
+      "abac_enabled": true,
+      "audit_logging": true
+    }
+  },
+  "access_review": {
+    "review_date": "2025-07-14T16:50:09.004343",
+    "findings": [
+      "Unused permissions found: ['modify_agent', 'create_coalition', 'view_metrics']"
+    ],
+    "recommendations": [
+      "Consider removing or consolidating unused permissions"
+    ],
+    "metrics": {
+      "total_access_attempts": 6,
+      "denied_access_attempts": 3,
+      "granted_access_attempts": 3,
+      "privilege_escalation_attempts": 3,
+      "policy_violations": 0
+    },
+    "risk_assessment": {
+      "access_failure_rate": 0.5,
+      "privilege_escalation_rate": 0.5,
+      "risk_level": "high"
+    }
+  },
+  "cleanup_recommendations": {
+    "timestamp": "2025-07-14T16:50:09.004355",
+    "actions_taken": [
+      "Preserved critical permissions from cleanup"
+    ],
+    "recommendations": [
+      "Consider reviewing these unused permissions: ['modify_agent', 'create_coalition', 'view_metrics']"
+    ],
+    "preserved_items": [
+      "view_agents",
+      "admin_system"
+    ]
+  },
+  "metrics": {
+    "total_access_attempts": 6,
+    "denied_access_attempts": 3,
+    "granted_access_attempts": 3,
+    "privilege_escalation_attempts": 3,
+    "policy_violations": 0
+  },
+  "abac_rules": [
+    {
+      "name": "time_based_admin_access",
+      "description": "Restrict admin access to business hours",
+      "resource_type": "system",
+      "action": "admin",
+      "effect": "allow",
+      "priority": 100
+    },
+    {
+      "name": "ip_whitelist_admin",
+      "description": "Admin access only from trusted IPs",
+      "resource_type": "system",
+      "action": "admin",
+      "effect": "allow",
+      "priority": 90
+    },
+    {
+      "name": "resource_ownership",
+      "description": "Users can only modify their own resources",
+      "resource_type": "agent",
+      "action": "modify",
+      "effect": "allow",
+      "priority": 80
+    },
+    {
+      "name": "department_isolation",
+      "description": "Department-based resource isolation",
+      "resource_type": "agent",
+      "action": "view",
+      "effect": "allow",
+      "priority": 70
+    }
+  ],
+  "pending_role_requests": 0
+}

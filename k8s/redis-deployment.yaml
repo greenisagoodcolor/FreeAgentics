@@ -1,0 +1,205 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: redis
+    tier: cache
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: freeagentics
+      component: redis
+  template:
+    metadata:
+      labels:
+        app: freeagentics
+        component: redis
+        tier: cache
+    spec:
+      securityContext:
+        fsGroup: 999
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        command:
+        - redis-server
+        - /etc/redis/redis.conf
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: freeagentics-secrets
+              key: redis-password
+        ports:
+        - containerPort: 6379
+          name: redis
+        volumeMounts:
+        - name: redis-storage
+          mountPath: /data
+        - name: redis-config
+          mountPath: /etc/redis/redis.conf
+          subPath: redis.conf
+          readOnly: true
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          exec:
+            command:
+            - redis-cli
+            - ping
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+            - redis-cli
+            - ping
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        securityContext:
+          runAsUser: 999
+          runAsGroup: 999
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: redis-storage
+        persistentVolumeClaim:
+          claimName: redis-pvc
+      - name: redis-config
+        configMap:
+          name: redis-config
+      nodeSelector:
+        workload: cache
+      tolerations:
+      - key: "cache"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: redis
+    tier: cache
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6379
+    targetPort: 6379
+    name: redis
+  selector:
+    app: freeagentics
+    component: redis
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: redis
+data:
+  redis.conf: |
+    # Redis Production Configuration
+    
+    # Network
+    bind 0.0.0.0
+    port 6379
+    
+    # Security
+    requirepass ${REDIS_PASSWORD}
+    
+    # Persistence
+    save 900 1
+    save 300 10
+    save 60 10000
+    
+    # AOF
+    appendonly yes
+    appendfsync everysec
+    no-appendfsync-on-rewrite no
+    auto-aof-rewrite-percentage 100
+    auto-aof-rewrite-min-size 64mb
+    
+    # Memory management
+    maxmemory-policy allkeys-lru
+    maxmemory 256mb
+    
+    # Logging
+    loglevel notice
+    logfile ""
+    
+    # Slow log
+    slowlog-log-slower-than 10000
+    slowlog-max-len 128
+    
+    # Latency monitoring
+    latency-monitor-threshold 100
+    
+    # Client output buffer limits
+    client-output-buffer-limit normal 0 0 0
+    client-output-buffer-limit replica 256mb 64mb 60
+    client-output-buffer-limit pubsub 32mb 8mb 60
+    
+    # TCP keepalive
+    tcp-keepalive 300
+    
+    # Timeouts
+    timeout 0
+    
+    # Database
+    databases 16
+    
+    # Performance
+    hz 10
+    
+    # Security
+    protected-mode no
+    
+    # Replication
+    repl-diskless-sync no
+    repl-diskless-sync-delay 5
+    
+    # Keyspace notifications
+    notify-keyspace-events ""
+    
+    # Advanced config
+    hash-max-ziplist-entries 512
+    hash-max-ziplist-value 64
+    list-max-ziplist-size -2
+    list-compress-depth 0
+    set-max-intset-entries 512
+    zset-max-ziplist-entries 128
+    zset-max-ziplist-value 64
+    hll-sparse-max-bytes 3000
+    stream-node-max-bytes 4096
+    stream-node-max-entries 100
+    activerehashing yes
+    
+    # Jemalloc
+    jemalloc-bg-thread yes

@@ -1,0 +1,30 @@
+{
+  "timestamp": "2025-07-14T13:50:27.304796",
+  "cleanup_summary": {
+    "total_operations": 4,
+    "successful_operations": 4,
+    "failed_operations": 0
+  },
+  "operations": [
+    {
+      "component": "test_database",
+      "action": "cleanup_attempted",
+      "details": "Would clean up agents matching patterns: ['Test Agent', 'Admin Agent', 'User1 Agent', 'User2 Agent', 'Tenant1 Agent', 'Tenant2 Agent', 'Escalation Agent', 'Attack', 'Concurrent Agent', 'Performance Agent', 'Hierarchy Test', 'Delete Test', 'GMN Test Agent']"
+    },
+    {
+      "component": "temporary_files",
+      "action": "cleaned",
+      "details": "Removed 3 files: ['__pycache__', 'tests/__pycache__', '.pytest_cache']"
+    },
+    {
+      "component": "test_reports",
+      "action": "cleaned",
+      "details": "Removed 1 reports: ['rbac_test_report.json']"
+    },
+    {
+      "component": "log_files",
+      "action": "cleaned",
+      "details": "Removed 0 logs: []"
+    }
+  ]
+}

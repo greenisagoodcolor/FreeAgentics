@@ -1,0 +1,430 @@
+# FreeAgentics Production Alert Rules
+# Comprehensive alerting for multi-agent system monitoring
+
+groups:
+  # ===================================================================
+  # CRITICAL SYSTEM ALERTS
+  # ===================================================================
+  - name: freeagentics.critical
+    rules:
+      # System down detection
+      - alert: FreeAgenticsSystemDown
+        expr: up{job="freeagentics-backend"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          category: system
+          component: backend
+          team: sre
+        annotations:
+          summary: "FreeAgentics backend system is down"
+          description: "The FreeAgentics backend service has been down for more than 30 seconds"
+          runbook_url: "https://docs.freeagentics.com/runbooks/system-down"
+          dashboard_url: "https://grafana.freeagentics.com/d/system-overview"
+
+      # High error rate across system
+      - alert: HighSystemErrorRate
+        expr: |
+          (
+            rate(http_requests_total{job="freeagentics-backend",status=~"5.."}[5m]) /
+            rate(http_requests_total{job="freeagentics-backend"}[5m])
+          ) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          category: system
+          component: api
+          team: backend
+        annotations:
+          summary: "High error rate detected in FreeAgentics API"
+          description: "Error rate is {{ $value | humanizePercentage }} over the last 5 minutes"
+          runbook_url: "https://docs.freeagentics.com/runbooks/high-error-rate"
+
+      # Memory usage critical
+      - alert: SystemMemoryUsageCritical
+        expr: freeagentics_system_memory_usage_bytes / (1024*1024*1024) > 2
+        for: 5m
+        labels:
+          severity: critical
+          category: system
+          component: memory
+          team: sre
+        annotations:
+          summary: "Critical memory usage in FreeAgentics system"
+          description: "System memory usage is {{ $value | humanize }}GB (threshold: 2GB)"
+          runbook_url: "https://docs.freeagentics.com/runbooks/memory-usage"
+
+      # Agent coordination failure
+      - alert: AgentCoordinationFailure
+        expr: freeagentics_system_active_agents_total > 50
+        for: 1m
+        labels:
+          severity: critical
+          category: coordination
+          component: agents
+          team: agents
+        annotations:
+          summary: "Agent coordination limit exceeded"
+          description: "Active agents: {{ $value }} (limit: 50). System performance will degrade."
+          runbook_url: "https://docs.freeagentics.com/runbooks/agent-coordination"
+
+  # ===================================================================
+  # HIGH SEVERITY ALERTS
+  # ===================================================================
+  - name: freeagentics.high
+    rules:
+      # API response time high
+      - alert: HighAPIResponseTime
+        expr: |
+          histogram_quantile(0.95, 
+            rate(http_request_duration_seconds_bucket{job="freeagentics-backend"}[5m])
+          ) > 0.5
+        for: 3m
+        labels:
+          severity: high
+          category: performance
+          component: api
+          team: backend
+        annotations:
+          summary: "High API response time detected"
+          description: "95th percentile response time is {{ $value | humanizeDuration }}"
+          runbook_url: "https://docs.freeagentics.com/runbooks/api-performance"
+
+      # Agent error rate high
+      - alert: HighAgentErrorRate
+        expr: |
+          rate(freeagentics_agent_errors_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: high
+          category: agents
+          component: agent_errors
+          team: agents
+        annotations:
+          summary: "High agent error rate"
+          description: "Agent error rate: {{ $value | humanizePercentage }} over last 5 minutes"
+          runbook_url: "https://docs.freeagentics.com/runbooks/agent-errors"
+
+      # Database connections high
+      - alert: HighDatabaseConnections
+        expr: pg_stat_activity_count > 80
+        for: 5m
+        labels:
+          severity: high
+          category: database
+          component: postgresql
+          team: database
+        annotations:
+          summary: "High database connection count"
+          description: "Database connections: {{ $value }} (warning at 80)"
+          runbook_url: "https://docs.freeagentics.com/runbooks/database-connections"
+
+      # Free energy anomaly
+      - alert: FreeEnergyAnomaly
+        expr: |
+          (
+            freeagentics_belief_free_energy_current > 10
+          ) or (
+            freeagentics_belief_free_energy_current < 0.1
+          )
+        for: 5m
+        labels:
+          severity: high
+          category: inference
+          component: belief_system
+          team: agents
+        annotations:
+          summary: "Belief system free energy anomaly"
+          description: "Free energy value: {{ $value }} (normal range: 0.1-10)"
+          runbook_url: "https://docs.freeagentics.com/runbooks/belief-system"
+
+  # ===================================================================
+  # MEDIUM SEVERITY ALERTS
+  # ===================================================================
+  - name: freeagentics.medium
+    rules:
+      # Memory usage per agent warning
+      - alert: AgentMemoryUsageWarning
+        expr: freeagentics_agent_memory_usage_bytes / (1024*1024) > 30
+        for: 10m
+        labels:
+          severity: medium
+          category: performance
+          component: agents
+          team: agents
+        annotations:
+          summary: "Agent memory usage warning"
+          description: "Agent {{ $labels.agent_id }} memory usage: {{ $value | humanize }}MB (threshold: 30MB)"
+          runbook_url: "https://docs.freeagentics.com/runbooks/agent-memory"
+
+      # Coalition formation slow
+      - alert: SlowCoalitionFormation
+        expr: |
+          histogram_quantile(0.90,
+            rate(freeagentics_agent_coordination_duration_seconds_bucket[5m])
+          ) > 2
+        for: 5m
+        labels:
+          severity: medium
+          category: coordination
+          component: coalitions
+          team: agents
+        annotations:
+          summary: "Slow coalition formation detected"
+          description: "90th percentile coordination time: {{ $value | humanizeDuration }}"
+          runbook_url: "https://docs.freeagentics.com/runbooks/coalition-formation"
+
+      # Knowledge graph growth rate
+      - alert: KnowledgeGraphGrowthRate
+        expr: |
+          rate(freeagentics_system_knowledge_graph_nodes_total[1h]) > 1000
+        for: 15m
+        labels:
+          severity: medium
+          category: knowledge_graph
+          component: graph_engine
+          team: backend
+        annotations:
+          summary: "High knowledge graph growth rate"
+          description: "Graph nodes growing at {{ $value | humanize }} nodes/hour"
+          runbook_url: "https://docs.freeagentics.com/runbooks/knowledge-graph"
+
+      # Inference operation rate
+      - alert: LowInferenceOperationRate
+        expr: |
+          rate(freeagentics_business_inference_operations_total[5m]) < 0.1
+        for: 10m
+        labels:
+          severity: medium
+          category: business
+          component: inference
+          team: backend
+        annotations:
+          summary: "Low inference operation rate"
+          description: "Inference rate: {{ $value | humanize }} ops/sec (expected: >0.1)"
+          runbook_url: "https://docs.freeagentics.com/runbooks/inference-operations"
+
+  # ===================================================================
+  # SECURITY ALERTS
+  # ===================================================================
+  - name: freeagentics.security
+    rules:
+      # Failed authentication attempts
+      - alert: HighAuthenticationFailures
+        expr: |
+          rate(freeagentics_security_authentication_attempts_total{outcome="failure"}[5m]) > 0.5
+        for: 1m
+        labels:
+          severity: high
+          category: security
+          component: authentication
+          team: security
+        annotations:
+          summary: "High authentication failure rate"
+          description: "Authentication failures: {{ $value | humanize }}/sec over last 5 minutes"
+          runbook_url: "https://docs.freeagentics.com/runbooks/authentication-failures"
+
+      # Security anomaly detection
+      - alert: SecurityAnomalyDetected
+        expr: |
+          rate(freeagentics_security_anomaly_detections_total[5m]) > 0
+        for: 0s
+        labels:
+          severity: critical
+          category: security
+          component: anomaly_detection
+          team: security
+        annotations:
+          summary: "Security anomaly detected"
+          description: "Security anomaly of type {{ $labels.anomaly_type }} detected"
+          runbook_url: "https://docs.freeagentics.com/runbooks/security-anomaly"
+
+      # Access violations
+      - alert: AccessViolationDetected
+        expr: |
+          rate(freeagentics_security_access_violations_total[5m]) > 0
+        for: 0s
+        labels:
+          severity: high
+          category: security
+          component: access_control
+          team: security
+        annotations:
+          summary: "Access violation detected"
+          description: "Access violation for resource {{ $labels.resource }}"
+          runbook_url: "https://docs.freeagentics.com/runbooks/access-violations"
+
+  # ===================================================================
+  # BUSINESS LOGIC ALERTS
+  # ===================================================================
+  - name: freeagentics.business
+    rules:
+      # User interaction rate
+      - alert: LowUserInteractionRate
+        expr: |
+          rate(freeagentics_business_user_interactions_total[1h]) < 0.01
+        for: 30m
+        labels:
+          severity: medium
+          category: business
+          component: user_interactions
+          team: product
+        annotations:
+          summary: "Low user interaction rate"
+          description: "User interactions: {{ $value | humanize }}/hour (expected: >0.01)"
+          runbook_url: "https://docs.freeagentics.com/runbooks/user-interactions"
+
+      # Response quality degradation
+      - alert: ResponseQualityDegradation
+        expr: freeagentics_business_response_quality_score < 0.7
+        for: 10m
+        labels:
+          severity: medium
+          category: business
+          component: response_quality
+          team: product
+        annotations:
+          summary: "Response quality degradation"
+          description: "Response quality score: {{ $value | humanizePercentage }} (threshold: 70%)"
+          runbook_url: "https://docs.freeagentics.com/runbooks/response-quality"
+
+  # ===================================================================
+  # INFRASTRUCTURE ALERTS
+  # ===================================================================
+  - name: freeagentics.infrastructure
+    rules:
+      # Container restart rate
+      - alert: HighContainerRestartRate
+        expr: |
+          rate(container_spec_memory_limit_bytes{name=~"freeagentics.*"}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: medium
+          category: infrastructure
+          component: containers
+          team: sre
+        annotations:
+          summary: "High container restart rate"
+          description: "Container {{ $labels.name }} restart rate: {{ $value | humanize }}/sec"
+          runbook_url: "https://docs.freeagentics.com/runbooks/container-restarts"
+
+      # Disk usage
+      - alert: HighDiskUsage
+        expr: |
+          (
+            node_filesystem_avail_bytes{mountpoint="/"} / 
+            node_filesystem_size_bytes{mountpoint="/"}
+          ) < 0.1
+        for: 5m
+        labels:
+          severity: high
+          category: infrastructure
+          component: filesystem
+          team: sre
+        annotations:
+          summary: "High disk usage"
+          description: "Disk usage: {{ $value | humanizePercentage }} free space remaining"
+          runbook_url: "https://docs.freeagentics.com/runbooks/disk-usage"
+
+      # Network latency
+      - alert: HighNetworkLatency
+        expr: |
+          histogram_quantile(0.95,
+            rate(prometheus_http_request_duration_seconds_bucket[5m])
+          ) > 1
+        for: 5m
+        labels:
+          severity: medium
+          category: infrastructure
+          component: network
+          team: sre
+        annotations:
+          summary: "High network latency"
+          description: "95th percentile network latency: {{ $value | humanizeDuration }}"
+          runbook_url: "https://docs.freeagentics.com/runbooks/network-latency"
+
+  # ===================================================================
+  # MULTI-AGENT COORDINATION ALERTS
+  # ===================================================================
+  - name: freeagentics.coordination
+    rules:
+      # Agent coordination timeout
+      - alert: AgentCoordinationTimeout
+        expr: |
+          rate(freeagentics_agent_coordination_errors_total{error_type="timeout"}[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: high
+          category: coordination
+          component: timeouts
+          team: agents
+        annotations:
+          summary: "Agent coordination timeouts detected"
+          description: "Coordination timeout rate: {{ $value | humanizePercentage }} over last 5 minutes"
+          runbook_url: "https://docs.freeagentics.com/runbooks/coordination-timeouts"
+
+      # Concurrent session limit
+      - alert: HighConcurrentSessions
+        expr: |
+          freeagentics_agent_coordination_concurrent_sessions > 100
+        for: 5m
+        labels:
+          severity: medium
+          category: coordination
+          component: sessions
+          team: agents
+        annotations:
+          summary: "High concurrent coordination sessions"
+          description: "Concurrent sessions: {{ $value }} (warning at 100)"
+          runbook_url: "https://docs.freeagentics.com/runbooks/concurrent-sessions"
+
+      # Belief convergence time
+      - alert: SlowBeliefConvergence
+        expr: |
+          histogram_quantile(0.90,
+            rate(freeagentics_belief_convergence_time_seconds_bucket[5m])
+          ) > 5
+        for: 5m
+        labels:
+          severity: medium
+          category: coordination
+          component: belief_system
+          team: agents
+        annotations:
+          summary: "Slow belief convergence detected"
+          description: "90th percentile convergence time: {{ $value | humanizeDuration }}"
+          runbook_url: "https://docs.freeagentics.com/runbooks/belief-convergence"
+
+  # ===================================================================
+  # PREDICTION ERROR ALERTS
+  # ===================================================================
+  - name: freeagentics.prediction
+    rules:
+      # High prediction error rate
+      - alert: HighPredictionErrorRate
+        expr: |
+          rate(freeagentics_belief_prediction_errors_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: medium
+          category: prediction
+          component: belief_system
+          team: agents
+        annotations:
+          summary: "High prediction error rate"
+          description: "Prediction error rate: {{ $value | humanizePercentage }} over last 5 minutes"
+          runbook_url: "https://docs.freeagentics.com/runbooks/prediction-errors"
+
+      # Belief accuracy degradation
+      - alert: BeliefAccuracyDegradation
+        expr: freeagentics_belief_accuracy_ratio < 0.8
+        for: 10m
+        labels:
+          severity: medium
+          category: prediction
+          component: belief_system
+          team: agents
+        annotations:
+          summary: "Belief accuracy degradation"
+          description: "Belief accuracy: {{ $value | humanizePercentage }} (threshold: 80%)"
+          runbook_url: "https://docs.freeagentics.com/runbooks/belief-accuracy"

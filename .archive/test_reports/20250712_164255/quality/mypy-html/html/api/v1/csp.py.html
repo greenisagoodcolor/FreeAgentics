@@ -1,0 +1,540 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="../../../mypy-html.css">
+</head>
+<body>
+<h2>api.v1.csp</h2>
+<table>
+<caption>api/v1/csp.py</caption>
+<tbody><tr>
+<td class="table-lines"><pre><span id="L1" class="lineno"><a class="lineno" href="#L1">1</a></span>
+<span id="L2" class="lineno"><a class="lineno" href="#L2">2</a></span>
+<span id="L3" class="lineno"><a class="lineno" href="#L3">3</a></span>
+<span id="L4" class="lineno"><a class="lineno" href="#L4">4</a></span>
+<span id="L5" class="lineno"><a class="lineno" href="#L5">5</a></span>
+<span id="L6" class="lineno"><a class="lineno" href="#L6">6</a></span>
+<span id="L7" class="lineno"><a class="lineno" href="#L7">7</a></span>
+<span id="L8" class="lineno"><a class="lineno" href="#L8">8</a></span>
+<span id="L9" class="lineno"><a class="lineno" href="#L9">9</a></span>
+<span id="L10" class="lineno"><a class="lineno" href="#L10">10</a></span>
+<span id="L11" class="lineno"><a class="lineno" href="#L11">11</a></span>
+<span id="L12" class="lineno"><a class="lineno" href="#L12">12</a></span>
+<span id="L13" class="lineno"><a class="lineno" href="#L13">13</a></span>
+<span id="L14" class="lineno"><a class="lineno" href="#L14">14</a></span>
+<span id="L15" class="lineno"><a class="lineno" href="#L15">15</a></span>
+<span id="L16" class="lineno"><a class="lineno" href="#L16">16</a></span>
+<span id="L17" class="lineno"><a class="lineno" href="#L17">17</a></span>
+<span id="L18" class="lineno"><a class="lineno" href="#L18">18</a></span>
+<span id="L19" class="lineno"><a class="lineno" href="#L19">19</a></span>
+<span id="L20" class="lineno"><a class="lineno" href="#L20">20</a></span>
+<span id="L21" class="lineno"><a class="lineno" href="#L21">21</a></span>
+<span id="L22" class="lineno"><a class="lineno" href="#L22">22</a></span>
+<span id="L23" class="lineno"><a class="lineno" href="#L23">23</a></span>
+<span id="L24" class="lineno"><a class="lineno" href="#L24">24</a></span>
+<span id="L25" class="lineno"><a class="lineno" href="#L25">25</a></span>
+<span id="L26" class="lineno"><a class="lineno" href="#L26">26</a></span>
+<span id="L27" class="lineno"><a class="lineno" href="#L27">27</a></span>
+<span id="L28" class="lineno"><a class="lineno" href="#L28">28</a></span>
+<span id="L29" class="lineno"><a class="lineno" href="#L29">29</a></span>
+<span id="L30" class="lineno"><a class="lineno" href="#L30">30</a></span>
+<span id="L31" class="lineno"><a class="lineno" href="#L31">31</a></span>
+<span id="L32" class="lineno"><a class="lineno" href="#L32">32</a></span>
+<span id="L33" class="lineno"><a class="lineno" href="#L33">33</a></span>
+<span id="L34" class="lineno"><a class="lineno" href="#L34">34</a></span>
+<span id="L35" class="lineno"><a class="lineno" href="#L35">35</a></span>
+<span id="L36" class="lineno"><a class="lineno" href="#L36">36</a></span>
+<span id="L37" class="lineno"><a class="lineno" href="#L37">37</a></span>
+<span id="L38" class="lineno"><a class="lineno" href="#L38">38</a></span>
+<span id="L39" class="lineno"><a class="lineno" href="#L39">39</a></span>
+<span id="L40" class="lineno"><a class="lineno" href="#L40">40</a></span>
+<span id="L41" class="lineno"><a class="lineno" href="#L41">41</a></span>
+<span id="L42" class="lineno"><a class="lineno" href="#L42">42</a></span>
+<span id="L43" class="lineno"><a class="lineno" href="#L43">43</a></span>
+<span id="L44" class="lineno"><a class="lineno" href="#L44">44</a></span>
+<span id="L45" class="lineno"><a class="lineno" href="#L45">45</a></span>
+<span id="L46" class="lineno"><a class="lineno" href="#L46">46</a></span>
+<span id="L47" class="lineno"><a class="lineno" href="#L47">47</a></span>
+<span id="L48" class="lineno"><a class="lineno" href="#L48">48</a></span>
+<span id="L49" class="lineno"><a class="lineno" href="#L49">49</a></span>
+<span id="L50" class="lineno"><a class="lineno" href="#L50">50</a></span>
+<span id="L51" class="lineno"><a class="lineno" href="#L51">51</a></span>
+<span id="L52" class="lineno"><a class="lineno" href="#L52">52</a></span>
+<span id="L53" class="lineno"><a class="lineno" href="#L53">53</a></span>
+<span id="L54" class="lineno"><a class="lineno" href="#L54">54</a></span>
+<span id="L55" class="lineno"><a class="lineno" href="#L55">55</a></span>
+<span id="L56" class="lineno"><a class="lineno" href="#L56">56</a></span>
+<span id="L57" class="lineno"><a class="lineno" href="#L57">57</a></span>
+<span id="L58" class="lineno"><a class="lineno" href="#L58">58</a></span>
+<span id="L59" class="lineno"><a class="lineno" href="#L59">59</a></span>
+<span id="L60" class="lineno"><a class="lineno" href="#L60">60</a></span>
+<span id="L61" class="lineno"><a class="lineno" href="#L61">61</a></span>
+<span id="L62" class="lineno"><a class="lineno" href="#L62">62</a></span>
+<span id="L63" class="lineno"><a class="lineno" href="#L63">63</a></span>
+<span id="L64" class="lineno"><a class="lineno" href="#L64">64</a></span>
+<span id="L65" class="lineno"><a class="lineno" href="#L65">65</a></span>
+<span id="L66" class="lineno"><a class="lineno" href="#L66">66</a></span>
+<span id="L67" class="lineno"><a class="lineno" href="#L67">67</a></span>
+<span id="L68" class="lineno"><a class="lineno" href="#L68">68</a></span>
+<span id="L69" class="lineno"><a class="lineno" href="#L69">69</a></span>
+<span id="L70" class="lineno"><a class="lineno" href="#L70">70</a></span>
+<span id="L71" class="lineno"><a class="lineno" href="#L71">71</a></span>
+<span id="L72" class="lineno"><a class="lineno" href="#L72">72</a></span>
+<span id="L73" class="lineno"><a class="lineno" href="#L73">73</a></span>
+<span id="L74" class="lineno"><a class="lineno" href="#L74">74</a></span>
+<span id="L75" class="lineno"><a class="lineno" href="#L75">75</a></span>
+<span id="L76" class="lineno"><a class="lineno" href="#L76">76</a></span>
+<span id="L77" class="lineno"><a class="lineno" href="#L77">77</a></span>
+<span id="L78" class="lineno"><a class="lineno" href="#L78">78</a></span>
+<span id="L79" class="lineno"><a class="lineno" href="#L79">79</a></span>
+<span id="L80" class="lineno"><a class="lineno" href="#L80">80</a></span>
+<span id="L81" class="lineno"><a class="lineno" href="#L81">81</a></span>
+<span id="L82" class="lineno"><a class="lineno" href="#L82">82</a></span>
+<span id="L83" class="lineno"><a class="lineno" href="#L83">83</a></span>
+<span id="L84" class="lineno"><a class="lineno" href="#L84">84</a></span>
+<span id="L85" class="lineno"><a class="lineno" href="#L85">85</a></span>
+<span id="L86" class="lineno"><a class="lineno" href="#L86">86</a></span>
+<span id="L87" class="lineno"><a class="lineno" href="#L87">87</a></span>
+<span id="L88" class="lineno"><a class="lineno" href="#L88">88</a></span>
+<span id="L89" class="lineno"><a class="lineno" href="#L89">89</a></span>
+<span id="L90" class="lineno"><a class="lineno" href="#L90">90</a></span>
+<span id="L91" class="lineno"><a class="lineno" href="#L91">91</a></span>
+<span id="L92" class="lineno"><a class="lineno" href="#L92">92</a></span>
+<span id="L93" class="lineno"><a class="lineno" href="#L93">93</a></span>
+<span id="L94" class="lineno"><a class="lineno" href="#L94">94</a></span>
+<span id="L95" class="lineno"><a class="lineno" href="#L95">95</a></span>
+<span id="L96" class="lineno"><a class="lineno" href="#L96">96</a></span>
+<span id="L97" class="lineno"><a class="lineno" href="#L97">97</a></span>
+<span id="L98" class="lineno"><a class="lineno" href="#L98">98</a></span>
+<span id="L99" class="lineno"><a class="lineno" href="#L99">99</a></span>
+<span id="L100" class="lineno"><a class="lineno" href="#L100">100</a></span>
+<span id="L101" class="lineno"><a class="lineno" href="#L101">101</a></span>
+<span id="L102" class="lineno"><a class="lineno" href="#L102">102</a></span>
+<span id="L103" class="lineno"><a class="lineno" href="#L103">103</a></span>
+<span id="L104" class="lineno"><a class="lineno" href="#L104">104</a></span>
+<span id="L105" class="lineno"><a class="lineno" href="#L105">105</a></span>
+<span id="L106" class="lineno"><a class="lineno" href="#L106">106</a></span>
+<span id="L107" class="lineno"><a class="lineno" href="#L107">107</a></span>
+<span id="L108" class="lineno"><a class="lineno" href="#L108">108</a></span>
+<span id="L109" class="lineno"><a class="lineno" href="#L109">109</a></span>
+<span id="L110" class="lineno"><a class="lineno" href="#L110">110</a></span>
+<span id="L111" class="lineno"><a class="lineno" href="#L111">111</a></span>
+<span id="L112" class="lineno"><a class="lineno" href="#L112">112</a></span>
+<span id="L113" class="lineno"><a class="lineno" href="#L113">113</a></span>
+<span id="L114" class="lineno"><a class="lineno" href="#L114">114</a></span>
+<span id="L115" class="lineno"><a class="lineno" href="#L115">115</a></span>
+<span id="L116" class="lineno"><a class="lineno" href="#L116">116</a></span>
+<span id="L117" class="lineno"><a class="lineno" href="#L117">117</a></span>
+<span id="L118" class="lineno"><a class="lineno" href="#L118">118</a></span>
+<span id="L119" class="lineno"><a class="lineno" href="#L119">119</a></span>
+<span id="L120" class="lineno"><a class="lineno" href="#L120">120</a></span>
+<span id="L121" class="lineno"><a class="lineno" href="#L121">121</a></span>
+<span id="L122" class="lineno"><a class="lineno" href="#L122">122</a></span>
+<span id="L123" class="lineno"><a class="lineno" href="#L123">123</a></span>
+<span id="L124" class="lineno"><a class="lineno" href="#L124">124</a></span>
+<span id="L125" class="lineno"><a class="lineno" href="#L125">125</a></span>
+<span id="L126" class="lineno"><a class="lineno" href="#L126">126</a></span>
+<span id="L127" class="lineno"><a class="lineno" href="#L127">127</a></span>
+<span id="L128" class="lineno"><a class="lineno" href="#L128">128</a></span>
+<span id="L129" class="lineno"><a class="lineno" href="#L129">129</a></span>
+<span id="L130" class="lineno"><a class="lineno" href="#L130">130</a></span>
+<span id="L131" class="lineno"><a class="lineno" href="#L131">131</a></span>
+<span id="L132" class="lineno"><a class="lineno" href="#L132">132</a></span>
+<span id="L133" class="lineno"><a class="lineno" href="#L133">133</a></span>
+<span id="L134" class="lineno"><a class="lineno" href="#L134">134</a></span>
+<span id="L135" class="lineno"><a class="lineno" href="#L135">135</a></span>
+<span id="L136" class="lineno"><a class="lineno" href="#L136">136</a></span>
+<span id="L137" class="lineno"><a class="lineno" href="#L137">137</a></span>
+<span id="L138" class="lineno"><a class="lineno" href="#L138">138</a></span>
+<span id="L139" class="lineno"><a class="lineno" href="#L139">139</a></span>
+<span id="L140" class="lineno"><a class="lineno" href="#L140">140</a></span>
+<span id="L141" class="lineno"><a class="lineno" href="#L141">141</a></span>
+<span id="L142" class="lineno"><a class="lineno" href="#L142">142</a></span>
+<span id="L143" class="lineno"><a class="lineno" href="#L143">143</a></span>
+<span id="L144" class="lineno"><a class="lineno" href="#L144">144</a></span>
+<span id="L145" class="lineno"><a class="lineno" href="#L145">145</a></span>
+<span id="L146" class="lineno"><a class="lineno" href="#L146">146</a></span>
+<span id="L147" class="lineno"><a class="lineno" href="#L147">147</a></span>
+<span id="L148" class="lineno"><a class="lineno" href="#L148">148</a></span>
+<span id="L149" class="lineno"><a class="lineno" href="#L149">149</a></span>
+<span id="L150" class="lineno"><a class="lineno" href="#L150">150</a></span>
+<span id="L151" class="lineno"><a class="lineno" href="#L151">151</a></span>
+<span id="L152" class="lineno"><a class="lineno" href="#L152">152</a></span>
+<span id="L153" class="lineno"><a class="lineno" href="#L153">153</a></span>
+<span id="L154" class="lineno"><a class="lineno" href="#L154">154</a></span>
+<span id="L155" class="lineno"><a class="lineno" href="#L155">155</a></span>
+<span id="L156" class="lineno"><a class="lineno" href="#L156">156</a></span>
+<span id="L157" class="lineno"><a class="lineno" href="#L157">157</a></span>
+<span id="L158" class="lineno"><a class="lineno" href="#L158">158</a></span>
+<span id="L159" class="lineno"><a class="lineno" href="#L159">159</a></span>
+<span id="L160" class="lineno"><a class="lineno" href="#L160">160</a></span>
+<span id="L161" class="lineno"><a class="lineno" href="#L161">161</a></span>
+<span id="L162" class="lineno"><a class="lineno" href="#L162">162</a></span>
+<span id="L163" class="lineno"><a class="lineno" href="#L163">163</a></span>
+<span id="L164" class="lineno"><a class="lineno" href="#L164">164</a></span>
+<span id="L165" class="lineno"><a class="lineno" href="#L165">165</a></span>
+<span id="L166" class="lineno"><a class="lineno" href="#L166">166</a></span>
+<span id="L167" class="lineno"><a class="lineno" href="#L167">167</a></span>
+<span id="L168" class="lineno"><a class="lineno" href="#L168">168</a></span>
+<span id="L169" class="lineno"><a class="lineno" href="#L169">169</a></span>
+<span id="L170" class="lineno"><a class="lineno" href="#L170">170</a></span>
+<span id="L171" class="lineno"><a class="lineno" href="#L171">171</a></span>
+<span id="L172" class="lineno"><a class="lineno" href="#L172">172</a></span>
+<span id="L173" class="lineno"><a class="lineno" href="#L173">173</a></span>
+<span id="L174" class="lineno"><a class="lineno" href="#L174">174</a></span>
+<span id="L175" class="lineno"><a class="lineno" href="#L175">175</a></span>
+<span id="L176" class="lineno"><a class="lineno" href="#L176">176</a></span>
+<span id="L177" class="lineno"><a class="lineno" href="#L177">177</a></span>
+<span id="L178" class="lineno"><a class="lineno" href="#L178">178</a></span>
+<span id="L179" class="lineno"><a class="lineno" href="#L179">179</a></span>
+<span id="L180" class="lineno"><a class="lineno" href="#L180">180</a></span>
+<span id="L181" class="lineno"><a class="lineno" href="#L181">181</a></span>
+<span id="L182" class="lineno"><a class="lineno" href="#L182">182</a></span>
+<span id="L183" class="lineno"><a class="lineno" href="#L183">183</a></span>
+<span id="L184" class="lineno"><a class="lineno" href="#L184">184</a></span>
+<span id="L185" class="lineno"><a class="lineno" href="#L185">185</a></span>
+<span id="L186" class="lineno"><a class="lineno" href="#L186">186</a></span>
+<span id="L187" class="lineno"><a class="lineno" href="#L187">187</a></span>
+<span id="L188" class="lineno"><a class="lineno" href="#L188">188</a></span>
+<span id="L189" class="lineno"><a class="lineno" href="#L189">189</a></span>
+<span id="L190" class="lineno"><a class="lineno" href="#L190">190</a></span>
+<span id="L191" class="lineno"><a class="lineno" href="#L191">191</a></span>
+<span id="L192" class="lineno"><a class="lineno" href="#L192">192</a></span>
+<span id="L193" class="lineno"><a class="lineno" href="#L193">193</a></span>
+<span id="L194" class="lineno"><a class="lineno" href="#L194">194</a></span>
+<span id="L195" class="lineno"><a class="lineno" href="#L195">195</a></span>
+<span id="L196" class="lineno"><a class="lineno" href="#L196">196</a></span>
+<span id="L197" class="lineno"><a class="lineno" href="#L197">197</a></span>
+<span id="L198" class="lineno"><a class="lineno" href="#L198">198</a></span>
+<span id="L199" class="lineno"><a class="lineno" href="#L199">199</a></span>
+<span id="L200" class="lineno"><a class="lineno" href="#L200">200</a></span>
+<span id="L201" class="lineno"><a class="lineno" href="#L201">201</a></span>
+<span id="L202" class="lineno"><a class="lineno" href="#L202">202</a></span>
+<span id="L203" class="lineno"><a class="lineno" href="#L203">203</a></span>
+<span id="L204" class="lineno"><a class="lineno" href="#L204">204</a></span>
+<span id="L205" class="lineno"><a class="lineno" href="#L205">205</a></span>
+<span id="L206" class="lineno"><a class="lineno" href="#L206">206</a></span>
+<span id="L207" class="lineno"><a class="lineno" href="#L207">207</a></span>
+<span id="L208" class="lineno"><a class="lineno" href="#L208">208</a></span>
+<span id="L209" class="lineno"><a class="lineno" href="#L209">209</a></span>
+<span id="L210" class="lineno"><a class="lineno" href="#L210">210</a></span>
+<span id="L211" class="lineno"><a class="lineno" href="#L211">211</a></span>
+<span id="L212" class="lineno"><a class="lineno" href="#L212">212</a></span>
+<span id="L213" class="lineno"><a class="lineno" href="#L213">213</a></span>
+<span id="L214" class="lineno"><a class="lineno" href="#L214">214</a></span>
+<span id="L215" class="lineno"><a class="lineno" href="#L215">215</a></span>
+<span id="L216" class="lineno"><a class="lineno" href="#L216">216</a></span>
+<span id="L217" class="lineno"><a class="lineno" href="#L217">217</a></span>
+<span id="L218" class="lineno"><a class="lineno" href="#L218">218</a></span>
+<span id="L219" class="lineno"><a class="lineno" href="#L219">219</a></span>
+<span id="L220" class="lineno"><a class="lineno" href="#L220">220</a></span>
+<span id="L221" class="lineno"><a class="lineno" href="#L221">221</a></span>
+<span id="L222" class="lineno"><a class="lineno" href="#L222">222</a></span>
+</pre></td>
+<td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!">Content Security Policy (CSP) violation reporting endpoint.</span>
+<span class="line-empty" title="No Anys on this line!">"""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">import json</span>
+<span class="line-precise" title="No Anys on this line!">import logging</span>
+<span class="line-precise" title="No Anys on this line!">from datetime import datetime</span>
+<span class="line-precise" title="No Anys on this line!">from typing import Any, Dict, List</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">from fastapi import APIRouter, Request, Response, status</span>
+<span class="line-precise" title="No Anys on this line!">from pydantic import BaseModel</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">from api.v1.headers import rate_limit</span>
+<span class="line-precise" title="No Anys on this line!">from auth.security_logging import SecurityEventSeverity, SecurityEventType, security_auditor</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">logger = logging.getLogger(__name__)</span>
+<span class="line-empty" title="No Anys on this line!">router = APIRouter()</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">class CSPReport(BaseModel):</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x6)">    """</span>
+<span class="line-empty" title="No Anys on this line!">        CSP violation report model.</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">    blocked_uri: str = ""</span>
+<span class="line-empty" title="No Anys on this line!">    document_uri: str = ""</span>
+<span class="line-empty" title="No Anys on this line!">    violated_directive: str = ""</span>
+<span class="line-empty" title="No Anys on this line!">    effective_directive: str = ""</span>
+<span class="line-empty" title="No Anys on this line!">    original_policy: str = ""</span>
+<span class="line-empty" title="No Anys on this line!">    disposition: str = "enforce"</span>
+<span class="line-empty" title="No Anys on this line!">    referrer: str = ""</span>
+<span class="line-empty" title="No Anys on this line!">    status_code: int = 0</span>
+<span class="line-empty" title="No Anys on this line!">    script_sample: str = ""</span>
+<span class="line-empty" title="No Anys on this line!">    line_number: int = 0</span>
+<span class="line-empty" title="No Anys on this line!">    column_number: int = 0</span>
+<span class="line-empty" title="No Anys on this line!">    source_file: str = ""</span>
+<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">class CSPReportWrapper(BaseModel):</span>
+<span class="line-empty" title="No Anys on this line!">    """Wrapper for CSP violation reports."""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">    csp_report: Dict[str, Any] = {}</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x4)"></span>
+<span class="line-empty" title="No Anys on this line!">    class Config:</span>
+<span class="line-empty" title="No Anys on this line!">        schema_extra = {</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">            "example": {</span>
+<span class="line-empty" title="No Anys on this line!">                "csp-report": {</span>
+<span class="line-precise" title="No Anys on this line!">                    "blocked-uri": "https://evil.com/script.js",</span>
+<span class="line-precise" title="No Anys on this line!">                    "document-uri": "https://example.com/page",</span>
+<span class="line-precise" title="No Anys on this line!">                    "violated-directive": "script-src",</span>
+<span class="line-precise" title="No Anys on this line!">                    "effective-directive": "script-src",</span>
+<span class="line-precise" title="No Anys on this line!">                    "original-policy": "default-src 'sel'; script-src 'self'",</span>
+<span class="line-precise" title="No Anys on this line!">                    "disposition": "enforce",</span>
+<span class="line-precise" title="No Anys on this line!">                    "referrer": "",</span>
+<span class="line-precise" title="No Anys on this line!">                    "status-code": 0,</span>
+<span class="line-precise" title="No Anys on this line!">                    "script-sample": "",</span>
+<span class="line-precise" title="No Anys on this line!">                }</span>
+<span class="line-precise" title="No Anys on this line!">            }</span>
+<span class="line-precise" title="No Anys on this line!">        }</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!"># In-memory storage for recent violations (for monitoring)</span>
+<span class="line-empty" title="No Anys on this line!">recent_violations: List[Dict[str, Any]] = []</span>
+<span class="line-empty" title="No Anys on this line!">MAX_STORED_VIOLATIONS = 1000</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">@router.post("/csp-report", status_code=status.HTTP_204_NO_CONTENT)</span>
+<span class="line-precise" title="No Anys on this line!">@rate_limit(endpoint_type="public", max_requests=100, window_minutes=1)</span>
+<span class="line-empty" title="No Anys on this line!">async def report_csp_violation(request: Request):</span>
+<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x15)
+Omitted Generics (x4)">    Handle CSP violation reports.</span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x2)">    """</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Unannotated (x1)">    try:</span>
+<span class="line-empty" title="No Anys on this line!">        # Get request body</span>
+<span class="line-empty" title="No Anys on this line!">        body = await request.body()</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        # Parse JSON</span>
+<span class="line-empty" title="No Anys on this line!">        try:</span>
+<span class="line-precise" title="No Anys on this line!">            report_data = json.loads(body)</span>
+<span class="line-empty" title="No Anys on this line!">            violation = report_data.get("csp-report", report_data)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        except json.JSONDecodeError:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x13)">            logger.warning(f"Invalid CSP report format: {body[:200]}")</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x5)">            return Response(status_code=status.HTTP_204_NO_CONTENT)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        # Extract key information</span>
+<span class="line-precise" title="No Anys on this line!">        blocked_uri = violation.get("blocked-uri", "unknown")</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">        document_uri = violation.get("document-uri", "unknown")</span>
+<span class="line-empty" title="No Anys on this line!">        violated_directive = violation.get("violated-directive", "unknown")</span>
+<span class="line-empty" title="No Anys on this line!">        effective_directive = violation.get("effective-directive", violated_directive)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">        # Get client information</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">        client_ip = request.client.host if request.client else "unknown"</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x5)">        user_agent = request.headers.get("User-Agent", "unknown")</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        # Log the violation for security monitoring</span>
+<span class="line-precise" title="No Anys on this line!">        severity = SecurityEventSeverity.WARNING</span>
+<span class="line-precise" title="Any Types on this line: 
+Omitted Generics (x2)"></span>
+<span class="line-empty" title="No Anys on this line!">        # Elevate severity for certain violations</span>
+<span class="line-empty" title="No Anys on this line!">        if "eval" in blocked_uri or "inline" in blocked_uri:</span>
+<span class="line-precise" title="No Anys on this line!">            severity = SecurityEventSeverity.HIGH</span>
+<span class="line-empty" title="No Anys on this line!">        elif any(domain in blocked_uri for domain in ["javascript:", "data:", "blob:"]):</span>
+<span class="line-empty" title="No Anys on this line!">            severity = SecurityEventSeverity.HIGH</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)"></span>
+<span class="line-any" title="Any Types on this line: 
+Error (x1)">        # Log to security audit</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">        await security_auditor.log_security_event(</span>
+<span class="line-any" title="Any Types on this line: 
+Error (x1)">            event_type=SecurityEventType.SUSPICIOUS_ACTIVITY,</span>
+<span class="line-empty" title="No Anys on this line!">            severity=severity,</span>
+<span class="line-empty" title="No Anys on this line!">            details={</span>
+<span class="line-any" title="Any Types on this line: 
+Error (x2)">                "violation_type": "csp_violation",</span>
+<span class="line-any" title="Any Types on this line: 
+Error (x1)">                "blocked_uri": blocked_uri,</span>
+<span class="line-precise" title="No Anys on this line!">                "document_uri": document_uri,</span>
+<span class="line-empty" title="No Anys on this line!">                "violated_directive": violated_directive,</span>
+<span class="line-precise" title="No Anys on this line!">                "effective_directive": effective_directive,</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">                "source_file": violation.get("source-file", ""),</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">                "line_number": violation.get("line-number", 0),</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">                "script_sample": violation.get("script-sample", "")[:100],  # Limit sample size</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">                "disposition": violation.get("disposition", "enforce"),</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">                "client_ip": client_ip,</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">                "user_agent": user_agent,</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">                "timestamp": datetime.utcnow().isoformat(),</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">            },</span>
+<span class="line-precise" title="No Anys on this line!">        )</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        # Store recent violations for monitoring</span>
+<span class="line-empty" title="No Anys on this line!">        violation_summary = {</span>
+<span class="line-empty" title="No Anys on this line!">            "timestamp": datetime.utcnow().isoformat(),</span>
+<span class="line-empty" title="No Anys on this line!">            "blocked_uri": blocked_uri,</span>
+<span class="line-empty" title="No Anys on this line!">            "document_uri": document_uri,</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">            "directive": effective_directive,</span>
+<span class="line-precise" title="No Anys on this line!">            "client_ip": client_ip,</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">        }</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">        recent_violations.append(violation_summary)</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        # Limit stored violations</span>
+<span class="line-empty" title="No Anys on this line!">        if len(recent_violations) &gt; MAX_STORED_VIOLATIONS:</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x3)">            recent_violations.pop(0)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        # Log for debugging</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">        logger.info(</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x3)">            f"CSP violation: {effective_directive} blocked {blocked_uri} " f"on {document_uri}"</span>
+<span class="line-empty" title="No Anys on this line!">        )</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        # Return 204 No Content as per CSP reporting spec</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">        return Response(status_code=status.HTTP_204_NO_CONTENT)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">    except Exception as e:</span>
+<span class="line-empty" title="No Anys on this line!">        logger.error(f"Error processing CSP report: {e}")</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">        # Still return 204 to prevent browser retries</span>
+<span class="line-empty" title="No Anys on this line!">        return Response(status_code=status.HTTP_204_NO_CONTENT)</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">@router.get("/csp-violations")</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">@rate_limit(endpoint_type="admin")</span>
+<span class="line-empty" title="No Anys on this line!">async def get_recent_csp_violations(</span>
+<span class="line-empty" title="No Anys on this line!">    limit: int = 100,</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x15)
+Omitted Generics (x4)">) -&gt; Dict[str, Any]:</span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x2)">    """</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">    Get recent CSP violations for monitoring.</span>
+<span class="line-precise" title="No Anys on this line!">    """</span>
+<span class="line-empty" title="No Anys on this line!">    # Prepare summary statistics</span>
+<span class="line-empty" title="No Anys on this line!">    directive_counts = {}</span>
+<span class="line-empty" title="No Anys on this line!">    blocked_uri_counts = {}</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">    # Process violations</span>
+<span class="line-precise" title="No Anys on this line!">    for violation in recent_violations[-limit:]:</span>
+<span class="line-precise" title="No Anys on this line!">        directive = violation.get("directive", "unknown")</span>
+<span class="line-empty" title="No Anys on this line!">        blocked_uri = violation.get("blocked_uri", "unknown")</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x3)">        directive_counts[directive] = directive_counts.get(directive, 0) + 1</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x7)
+Omitted Generics (x2)"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x7)
+Omitted Generics (x2)">        # Normalize blocked URIs for counting</span>
+<span class="line-empty" title="No Anys on this line!">        if blocked_uri.startswith("data:"):</span>
+<span class="line-any" title="Any Types on this line: 
+Unannotated (x8)
+Explicit (x7)
+Omitted Generics (x2)">            blocked_uri = "data:"</span>
+<span class="line-empty" title="No Anys on this line!">        elif blocked_uri.startswith("blob:"):</span>
+<span class="line-empty" title="No Anys on this line!">            blocked_uri = "blob:"</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">        elif blocked_uri == "eval":</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">            blocked_uri = "eval"</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">        elif blocked_uri == "inline":</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">            blocked_uri = "inline"</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">        blocked_uri_counts[blocked_uri] = blocked_uri_counts.get(blocked_uri, 0) + 1</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">    # Get limited list of recent violations</span>
+<span class="line-empty" title="No Anys on this line!">    violations = recent_violations[-limit:] if recent_violations else []</span>
+<span class="line-any" title="Any Types on this line: 
+Unannotated (x8)
+Explicit (x7)
+Omitted Generics (x2)"></span>
+<span class="line-empty" title="No Anys on this line!">    return {</span>
+<span class="line-empty" title="No Anys on this line!">        "total_violations": len(recent_violations),</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x4)">        "recent_violations": violations,</span>
+<span class="line-empty" title="No Anys on this line!">        "statistics": {</span>
+<span class="line-empty" title="No Anys on this line!">            "by_directive": directive_counts,</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">            "by_blocked_uri": dict(</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">                sorted(blocked_uri_counts.items(), key=lambda x: x[1], reverse=True)[:10]  # Top 10</span>
+<span class="line-precise" title="No Anys on this line!">            ),</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)
+Unannotated (x1)">            "time_range": {</span>
+<span class="line-precise" title="Any Types on this line: 
+Omitted Generics (x18)">                "oldest": (recent_violations[0]["timestamp"] if recent_violations else None),</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x6)
+Unannotated (x7)
+Omitted Generics (x5)">                "newest": (recent_violations[-1]["timestamp"] if recent_violations else None),</span>
+<span class="line-empty" title="No Anys on this line!">            },</span>
+<span class="line-precise" title="No Anys on this line!">        },</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">    }</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)"></span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">@router.post("/csp-report-only", status_code=status.HTTP_204_NO_CONTENT)</span>
+<span class="line-empty" title="No Anys on this line!">@rate_limit(endpoint_type="public", max_requests=200, window_minutes=1)</span>
+<span class="line-empty" title="No Anys on this line!">async def report_csp_violation_report_only(request: Request):</span>
+<span class="line-empty" title="No Anys on this line!">    """</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x15)
+Omitted Generics (x4)">    Handle CSP Report-Only violations (policy testing).</span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x2)">    """</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Unannotated (x1)">    try:</span>
+<span class="line-empty" title="No Anys on this line!">        # Get request body for debug logging</span>
+<span class="line-empty" title="No Anys on this line!">        body = await request.body()</span>
+<span class="line-empty" title="No Anys on this line!">        logger.debug(f"CSP Report-Only violation: {body[:500]}")</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        # You can process these separately for policy tuning</span>
+<span class="line-precise" title="No Anys on this line!">        # For now, we just acknowledge receipt</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        return Response(status_code=status.HTTP_204_NO_CONTENT)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">    except Exception as e:</span>
+<span class="line-empty" title="No Anys on this line!">        logger.error(f"Error processing CSP report-only: {e}")</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x1)">        return Response(status_code=status.HTTP_204_NO_CONTENT)</span>
+</pre></td>
+</tr></tbody>
+</table>
+</body>
+</html>

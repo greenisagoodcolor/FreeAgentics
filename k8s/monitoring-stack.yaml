@@ -1,0 +1,502 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: prometheus
+    tier: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: freeagentics
+      component: prometheus
+  template:
+    metadata:
+      labels:
+        app: freeagentics
+        component: prometheus
+        tier: monitoring
+    spec:
+      serviceAccountName: prometheus
+      containers:
+      - name: prometheus
+        image: prom/prometheus:latest
+        args:
+        - --config.file=/etc/prometheus/prometheus.yml
+        - --storage.tsdb.path=/prometheus
+        - --web.console.libraries=/usr/share/prometheus/console_libraries
+        - --web.console.templates=/usr/share/prometheus/consoles
+        - --storage.tsdb.retention.time=15d
+        - --web.enable-lifecycle
+        ports:
+        - containerPort: 9090
+          name: web
+        volumeMounts:
+        - name: prometheus-config
+          mountPath: /etc/prometheus
+        - name: prometheus-storage
+          mountPath: /prometheus
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+      volumes:
+      - name: prometheus-config
+        configMap:
+          name: prometheus-config
+      - name: prometheus-storage
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: prometheus
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9090
+    targetPort: 9090
+    name: web
+  selector:
+    app: freeagentics
+    component: prometheus
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: prometheus
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+    
+    rule_files:
+      - "/etc/prometheus/rules/*.yml"
+    
+    alerting:
+      alertmanagers:
+      - static_configs:
+        - targets: ['alertmanager:9093']
+    
+    scrape_configs:
+    - job_name: 'kubernetes-pods'
+      kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names:
+          - freeagentics-prod
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: kubernetes_namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        action: replace
+        target_label: kubernetes_pod_name
+    
+    - job_name: 'freeagentics-backend'
+      static_configs:
+      - targets: ['backend:8000']
+      metrics_path: '/metrics'
+      scrape_interval: 5s
+      
+    - job_name: 'freeagentics-frontend'
+      static_configs:
+      - targets: ['frontend:3000']
+      metrics_path: '/api/metrics'
+      scrape_interval: 10s
+      
+    - job_name: 'postgres'
+      static_configs:
+      - targets: ['postgres:5432']
+      
+    - job_name: 'redis'
+      static_configs:
+      - targets: ['redis:6379']
+      
+    - job_name: 'nginx-ingress'
+      static_configs:
+      - targets: ['nginx-ingress-controller-metrics:10254']
+      
+    - job_name: 'kubernetes-apiservers'
+      kubernetes_sd_configs:
+      - role: endpoints
+        namespaces:
+          names:
+          - default
+      scheme: https
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+        action: keep
+        regex: default;kubernetes;https
+      
+    - job_name: 'kubernetes-nodes'
+      kubernetes_sd_configs:
+      - role: node
+      scheme: https
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - target_label: __address__
+        replacement: kubernetes.default.svc:443
+      - source_labels: [__meta_kubernetes_node_name]
+        regex: (.+)
+        target_label: __metrics_path__
+        replacement: /api/v1/nodes/${1}/proxy/metrics
+      
+    - job_name: 'kubernetes-cadvisor'
+      kubernetes_sd_configs:
+      - role: node
+      scheme: https
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - target_label: __address__
+        replacement: kubernetes.default.svc:443
+      - source_labels: [__meta_kubernetes_node_name]
+        regex: (.+)
+        target_label: __metrics_path__
+        replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: grafana
+    tier: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: freeagentics
+      component: grafana
+  template:
+    metadata:
+      labels:
+        app: freeagentics
+        component: grafana
+        tier: monitoring
+    spec:
+      containers:
+      - name: grafana
+        image: grafana/grafana:latest
+        env:
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: grafana-secrets
+              key: admin-password
+        - name: GF_SECURITY_ADMIN_USER
+          value: admin
+        - name: GF_INSTALL_PLUGINS
+          value: grafana-piechart-panel,grafana-worldmap-panel
+        ports:
+        - containerPort: 3000
+          name: web
+        volumeMounts:
+        - name: grafana-storage
+          mountPath: /var/lib/grafana
+        - name: grafana-config
+          mountPath: /etc/grafana/provisioning
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: grafana-storage
+        emptyDir: {}
+      - name: grafana-config
+        configMap:
+          name: grafana-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: grafana
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3000
+    targetPort: 3000
+    name: web
+  selector:
+    app: freeagentics
+    component: grafana
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: grafana-secrets
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: grafana
+type: Opaque
+stringData:
+  admin-password: "REPLACE_WITH_SECURE_GRAFANA_PASSWORD"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-config
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: grafana
+data:
+  datasources.yml: |
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      url: http://prometheus:9090
+      isDefault: true
+      access: proxy
+      editable: true
+  dashboards.yml: |
+    apiVersion: 1
+    providers:
+    - name: 'default'
+      orgId: 1
+      folder: ''
+      type: file
+      disableDeletion: false
+      editable: true
+      options:
+        path: /var/lib/grafana/dashboards
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: alertmanager
+    tier: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: freeagentics
+      component: alertmanager
+  template:
+    metadata:
+      labels:
+        app: freeagentics
+        component: alertmanager
+        tier: monitoring
+    spec:
+      containers:
+      - name: alertmanager
+        image: prom/alertmanager:latest
+        args:
+        - --config.file=/etc/alertmanager/alertmanager.yml
+        - --storage.path=/alertmanager
+        - --web.external-url=https://yourdomain.com/alertmanager
+        ports:
+        - containerPort: 9093
+          name: web
+        volumeMounts:
+        - name: alertmanager-config
+          mountPath: /etc/alertmanager
+        - name: alertmanager-storage
+          mountPath: /alertmanager
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+      volumes:
+      - name: alertmanager-config
+        configMap:
+          name: alertmanager-config
+      - name: alertmanager-storage
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: alertmanager
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9093
+    targetPort: 9093
+    name: web
+  selector:
+    app: freeagentics
+    component: alertmanager
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: alertmanager
+data:
+  alertmanager.yml: |
+    global:
+      smtp_smarthost: 'localhost:587'
+      smtp_from: 'alerts@yourdomain.com'
+      slack_api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+    
+    route:
+      group_by: ['alertname']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 12h
+      receiver: 'web.hook'
+      routes:
+      - match:
+          severity: critical
+        receiver: 'critical-alerts'
+      - match:
+          severity: warning
+        receiver: 'warning-alerts'
+    
+    receivers:
+    - name: 'web.hook'
+      webhook_configs:
+      - url: 'http://localhost:5001/'
+    
+    - name: 'critical-alerts'
+      slack_configs:
+      - channel: '#alerts-critical'
+        title: 'Critical Alert - FreeAgentics Production'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+        send_resolved: true
+      email_configs:
+      - to: 'ops-team@yourdomain.com'
+        subject: 'Critical Alert - FreeAgentics Production'
+        body: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+    
+    - name: 'warning-alerts'
+      slack_configs:
+      - channel: '#alerts-warning'
+        title: 'Warning Alert - FreeAgentics Production'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+        send_resolved: true
+    
+    inhibit_rules:
+    - source_match:
+        severity: 'critical'
+      target_match:
+        severity: 'warning'
+      equal: ['alertname', 'dev', 'instance']
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: prometheus
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: prometheus
+  labels:
+    app: freeagentics
+    component: prometheus
+rules:
+- apiGroups: [""]
+  resources:
+  - nodes
+  - nodes/proxy
+  - services
+  - endpoints
+  - pods
+  verbs: ["get", "list", "watch"]
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs: ["get", "list", "watch"]
+- nonResourceURLs: ["/metrics"]
+  verbs: ["get"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus
+  labels:
+    app: freeagentics
+    component: prometheus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus
+subjects:
+- kind: ServiceAccount
+  name: prometheus
+  namespace: freeagentics-prod

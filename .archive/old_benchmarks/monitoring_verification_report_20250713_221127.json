@@ -1,0 +1,8 @@
+{
+  "timestamp": "2025-07-13T22:11:27.423136",
+  "status": "NEEDS_ATTENTION",
+  "success_rate": 70.0,
+  "total_checks": 10,
+  "passed_checks": 7,
+  "failed_checks": 3
+}

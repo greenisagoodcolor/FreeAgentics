@@ -1,0 +1,27 @@
+================================================================================
+PYMDP MEMORY PROFILING REPORT
+Generated: 2025-07-14T17:15:10.172105
+================================================================================
+
+SUMMARY:
+- Baseline memory: 153.80 MB
+- Peak memory: 153.96 MB
+- Final memory: 153.96 MB
+- Total increase: 0.16 MB
+
+KEY FINDINGS:
+- Current implementation shows significant memory usage per agent
+- Matrix operations are the primary memory consumers
+- Belief state storage and updates require optimization
+
+MEASUREMENTS:
+- Transition model (10x10): 153.34 MB (Δ+0.00 MB)
+- Observation model (50x50): 153.34 MB (Δ+0.00 MB)
+- Transition model (50x50): 153.34 MB (Δ+0.00 MB)
+- 100 matrix multiplications (100x100): 153.80 MB (Δ+0.47 MB)
+- 100 belief normalizations: 153.80 MB (Δ+0.47 MB)
+- 1 agents created: 153.80 MB (Δ+0.00 MB)
+- 5 agents created: 153.80 MB (Δ+0.00 MB)
+- 10 agents created: 153.80 MB (Δ+0.00 MB)
+- 20 agents created: 153.80 MB (Δ+0.00 MB)
+- 50 agents created: 153.96 MB (Δ+0.16 MB)

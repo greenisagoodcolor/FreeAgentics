@@ -1,0 +1,2192 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="../../mypy-html.css">
+</head>
+<body>
+<h2>agents.base_agent</h2>
+<table>
+<caption>agents/base_agent.py</caption>
+<tbody><tr>
+<td class="table-lines"><pre><span id="L1" class="lineno"><a class="lineno" href="#L1">1</a></span>
+<span id="L2" class="lineno"><a class="lineno" href="#L2">2</a></span>
+<span id="L3" class="lineno"><a class="lineno" href="#L3">3</a></span>
+<span id="L4" class="lineno"><a class="lineno" href="#L4">4</a></span>
+<span id="L5" class="lineno"><a class="lineno" href="#L5">5</a></span>
+<span id="L6" class="lineno"><a class="lineno" href="#L6">6</a></span>
+<span id="L7" class="lineno"><a class="lineno" href="#L7">7</a></span>
+<span id="L8" class="lineno"><a class="lineno" href="#L8">8</a></span>
+<span id="L9" class="lineno"><a class="lineno" href="#L9">9</a></span>
+<span id="L10" class="lineno"><a class="lineno" href="#L10">10</a></span>
+<span id="L11" class="lineno"><a class="lineno" href="#L11">11</a></span>
+<span id="L12" class="lineno"><a class="lineno" href="#L12">12</a></span>
+<span id="L13" class="lineno"><a class="lineno" href="#L13">13</a></span>
+<span id="L14" class="lineno"><a class="lineno" href="#L14">14</a></span>
+<span id="L15" class="lineno"><a class="lineno" href="#L15">15</a></span>
+<span id="L16" class="lineno"><a class="lineno" href="#L16">16</a></span>
+<span id="L17" class="lineno"><a class="lineno" href="#L17">17</a></span>
+<span id="L18" class="lineno"><a class="lineno" href="#L18">18</a></span>
+<span id="L19" class="lineno"><a class="lineno" href="#L19">19</a></span>
+<span id="L20" class="lineno"><a class="lineno" href="#L20">20</a></span>
+<span id="L21" class="lineno"><a class="lineno" href="#L21">21</a></span>
+<span id="L22" class="lineno"><a class="lineno" href="#L22">22</a></span>
+<span id="L23" class="lineno"><a class="lineno" href="#L23">23</a></span>
+<span id="L24" class="lineno"><a class="lineno" href="#L24">24</a></span>
+<span id="L25" class="lineno"><a class="lineno" href="#L25">25</a></span>
+<span id="L26" class="lineno"><a class="lineno" href="#L26">26</a></span>
+<span id="L27" class="lineno"><a class="lineno" href="#L27">27</a></span>
+<span id="L28" class="lineno"><a class="lineno" href="#L28">28</a></span>
+<span id="L29" class="lineno"><a class="lineno" href="#L29">29</a></span>
+<span id="L30" class="lineno"><a class="lineno" href="#L30">30</a></span>
+<span id="L31" class="lineno"><a class="lineno" href="#L31">31</a></span>
+<span id="L32" class="lineno"><a class="lineno" href="#L32">32</a></span>
+<span id="L33" class="lineno"><a class="lineno" href="#L33">33</a></span>
+<span id="L34" class="lineno"><a class="lineno" href="#L34">34</a></span>
+<span id="L35" class="lineno"><a class="lineno" href="#L35">35</a></span>
+<span id="L36" class="lineno"><a class="lineno" href="#L36">36</a></span>
+<span id="L37" class="lineno"><a class="lineno" href="#L37">37</a></span>
+<span id="L38" class="lineno"><a class="lineno" href="#L38">38</a></span>
+<span id="L39" class="lineno"><a class="lineno" href="#L39">39</a></span>
+<span id="L40" class="lineno"><a class="lineno" href="#L40">40</a></span>
+<span id="L41" class="lineno"><a class="lineno" href="#L41">41</a></span>
+<span id="L42" class="lineno"><a class="lineno" href="#L42">42</a></span>
+<span id="L43" class="lineno"><a class="lineno" href="#L43">43</a></span>
+<span id="L44" class="lineno"><a class="lineno" href="#L44">44</a></span>
+<span id="L45" class="lineno"><a class="lineno" href="#L45">45</a></span>
+<span id="L46" class="lineno"><a class="lineno" href="#L46">46</a></span>
+<span id="L47" class="lineno"><a class="lineno" href="#L47">47</a></span>
+<span id="L48" class="lineno"><a class="lineno" href="#L48">48</a></span>
+<span id="L49" class="lineno"><a class="lineno" href="#L49">49</a></span>
+<span id="L50" class="lineno"><a class="lineno" href="#L50">50</a></span>
+<span id="L51" class="lineno"><a class="lineno" href="#L51">51</a></span>
+<span id="L52" class="lineno"><a class="lineno" href="#L52">52</a></span>
+<span id="L53" class="lineno"><a class="lineno" href="#L53">53</a></span>
+<span id="L54" class="lineno"><a class="lineno" href="#L54">54</a></span>
+<span id="L55" class="lineno"><a class="lineno" href="#L55">55</a></span>
+<span id="L56" class="lineno"><a class="lineno" href="#L56">56</a></span>
+<span id="L57" class="lineno"><a class="lineno" href="#L57">57</a></span>
+<span id="L58" class="lineno"><a class="lineno" href="#L58">58</a></span>
+<span id="L59" class="lineno"><a class="lineno" href="#L59">59</a></span>
+<span id="L60" class="lineno"><a class="lineno" href="#L60">60</a></span>
+<span id="L61" class="lineno"><a class="lineno" href="#L61">61</a></span>
+<span id="L62" class="lineno"><a class="lineno" href="#L62">62</a></span>
+<span id="L63" class="lineno"><a class="lineno" href="#L63">63</a></span>
+<span id="L64" class="lineno"><a class="lineno" href="#L64">64</a></span>
+<span id="L65" class="lineno"><a class="lineno" href="#L65">65</a></span>
+<span id="L66" class="lineno"><a class="lineno" href="#L66">66</a></span>
+<span id="L67" class="lineno"><a class="lineno" href="#L67">67</a></span>
+<span id="L68" class="lineno"><a class="lineno" href="#L68">68</a></span>
+<span id="L69" class="lineno"><a class="lineno" href="#L69">69</a></span>
+<span id="L70" class="lineno"><a class="lineno" href="#L70">70</a></span>
+<span id="L71" class="lineno"><a class="lineno" href="#L71">71</a></span>
+<span id="L72" class="lineno"><a class="lineno" href="#L72">72</a></span>
+<span id="L73" class="lineno"><a class="lineno" href="#L73">73</a></span>
+<span id="L74" class="lineno"><a class="lineno" href="#L74">74</a></span>
+<span id="L75" class="lineno"><a class="lineno" href="#L75">75</a></span>
+<span id="L76" class="lineno"><a class="lineno" href="#L76">76</a></span>
+<span id="L77" class="lineno"><a class="lineno" href="#L77">77</a></span>
+<span id="L78" class="lineno"><a class="lineno" href="#L78">78</a></span>
+<span id="L79" class="lineno"><a class="lineno" href="#L79">79</a></span>
+<span id="L80" class="lineno"><a class="lineno" href="#L80">80</a></span>
+<span id="L81" class="lineno"><a class="lineno" href="#L81">81</a></span>
+<span id="L82" class="lineno"><a class="lineno" href="#L82">82</a></span>
+<span id="L83" class="lineno"><a class="lineno" href="#L83">83</a></span>
+<span id="L84" class="lineno"><a class="lineno" href="#L84">84</a></span>
+<span id="L85" class="lineno"><a class="lineno" href="#L85">85</a></span>
+<span id="L86" class="lineno"><a class="lineno" href="#L86">86</a></span>
+<span id="L87" class="lineno"><a class="lineno" href="#L87">87</a></span>
+<span id="L88" class="lineno"><a class="lineno" href="#L88">88</a></span>
+<span id="L89" class="lineno"><a class="lineno" href="#L89">89</a></span>
+<span id="L90" class="lineno"><a class="lineno" href="#L90">90</a></span>
+<span id="L91" class="lineno"><a class="lineno" href="#L91">91</a></span>
+<span id="L92" class="lineno"><a class="lineno" href="#L92">92</a></span>
+<span id="L93" class="lineno"><a class="lineno" href="#L93">93</a></span>
+<span id="L94" class="lineno"><a class="lineno" href="#L94">94</a></span>
+<span id="L95" class="lineno"><a class="lineno" href="#L95">95</a></span>
+<span id="L96" class="lineno"><a class="lineno" href="#L96">96</a></span>
+<span id="L97" class="lineno"><a class="lineno" href="#L97">97</a></span>
+<span id="L98" class="lineno"><a class="lineno" href="#L98">98</a></span>
+<span id="L99" class="lineno"><a class="lineno" href="#L99">99</a></span>
+<span id="L100" class="lineno"><a class="lineno" href="#L100">100</a></span>
+<span id="L101" class="lineno"><a class="lineno" href="#L101">101</a></span>
+<span id="L102" class="lineno"><a class="lineno" href="#L102">102</a></span>
+<span id="L103" class="lineno"><a class="lineno" href="#L103">103</a></span>
+<span id="L104" class="lineno"><a class="lineno" href="#L104">104</a></span>
+<span id="L105" class="lineno"><a class="lineno" href="#L105">105</a></span>
+<span id="L106" class="lineno"><a class="lineno" href="#L106">106</a></span>
+<span id="L107" class="lineno"><a class="lineno" href="#L107">107</a></span>
+<span id="L108" class="lineno"><a class="lineno" href="#L108">108</a></span>
+<span id="L109" class="lineno"><a class="lineno" href="#L109">109</a></span>
+<span id="L110" class="lineno"><a class="lineno" href="#L110">110</a></span>
+<span id="L111" class="lineno"><a class="lineno" href="#L111">111</a></span>
+<span id="L112" class="lineno"><a class="lineno" href="#L112">112</a></span>
+<span id="L113" class="lineno"><a class="lineno" href="#L113">113</a></span>
+<span id="L114" class="lineno"><a class="lineno" href="#L114">114</a></span>
+<span id="L115" class="lineno"><a class="lineno" href="#L115">115</a></span>
+<span id="L116" class="lineno"><a class="lineno" href="#L116">116</a></span>
+<span id="L117" class="lineno"><a class="lineno" href="#L117">117</a></span>
+<span id="L118" class="lineno"><a class="lineno" href="#L118">118</a></span>
+<span id="L119" class="lineno"><a class="lineno" href="#L119">119</a></span>
+<span id="L120" class="lineno"><a class="lineno" href="#L120">120</a></span>
+<span id="L121" class="lineno"><a class="lineno" href="#L121">121</a></span>
+<span id="L122" class="lineno"><a class="lineno" href="#L122">122</a></span>
+<span id="L123" class="lineno"><a class="lineno" href="#L123">123</a></span>
+<span id="L124" class="lineno"><a class="lineno" href="#L124">124</a></span>
+<span id="L125" class="lineno"><a class="lineno" href="#L125">125</a></span>
+<span id="L126" class="lineno"><a class="lineno" href="#L126">126</a></span>
+<span id="L127" class="lineno"><a class="lineno" href="#L127">127</a></span>
+<span id="L128" class="lineno"><a class="lineno" href="#L128">128</a></span>
+<span id="L129" class="lineno"><a class="lineno" href="#L129">129</a></span>
+<span id="L130" class="lineno"><a class="lineno" href="#L130">130</a></span>
+<span id="L131" class="lineno"><a class="lineno" href="#L131">131</a></span>
+<span id="L132" class="lineno"><a class="lineno" href="#L132">132</a></span>
+<span id="L133" class="lineno"><a class="lineno" href="#L133">133</a></span>
+<span id="L134" class="lineno"><a class="lineno" href="#L134">134</a></span>
+<span id="L135" class="lineno"><a class="lineno" href="#L135">135</a></span>
+<span id="L136" class="lineno"><a class="lineno" href="#L136">136</a></span>
+<span id="L137" class="lineno"><a class="lineno" href="#L137">137</a></span>
+<span id="L138" class="lineno"><a class="lineno" href="#L138">138</a></span>
+<span id="L139" class="lineno"><a class="lineno" href="#L139">139</a></span>
+<span id="L140" class="lineno"><a class="lineno" href="#L140">140</a></span>
+<span id="L141" class="lineno"><a class="lineno" href="#L141">141</a></span>
+<span id="L142" class="lineno"><a class="lineno" href="#L142">142</a></span>
+<span id="L143" class="lineno"><a class="lineno" href="#L143">143</a></span>
+<span id="L144" class="lineno"><a class="lineno" href="#L144">144</a></span>
+<span id="L145" class="lineno"><a class="lineno" href="#L145">145</a></span>
+<span id="L146" class="lineno"><a class="lineno" href="#L146">146</a></span>
+<span id="L147" class="lineno"><a class="lineno" href="#L147">147</a></span>
+<span id="L148" class="lineno"><a class="lineno" href="#L148">148</a></span>
+<span id="L149" class="lineno"><a class="lineno" href="#L149">149</a></span>
+<span id="L150" class="lineno"><a class="lineno" href="#L150">150</a></span>
+<span id="L151" class="lineno"><a class="lineno" href="#L151">151</a></span>
+<span id="L152" class="lineno"><a class="lineno" href="#L152">152</a></span>
+<span id="L153" class="lineno"><a class="lineno" href="#L153">153</a></span>
+<span id="L154" class="lineno"><a class="lineno" href="#L154">154</a></span>
+<span id="L155" class="lineno"><a class="lineno" href="#L155">155</a></span>
+<span id="L156" class="lineno"><a class="lineno" href="#L156">156</a></span>
+<span id="L157" class="lineno"><a class="lineno" href="#L157">157</a></span>
+<span id="L158" class="lineno"><a class="lineno" href="#L158">158</a></span>
+<span id="L159" class="lineno"><a class="lineno" href="#L159">159</a></span>
+<span id="L160" class="lineno"><a class="lineno" href="#L160">160</a></span>
+<span id="L161" class="lineno"><a class="lineno" href="#L161">161</a></span>
+<span id="L162" class="lineno"><a class="lineno" href="#L162">162</a></span>
+<span id="L163" class="lineno"><a class="lineno" href="#L163">163</a></span>
+<span id="L164" class="lineno"><a class="lineno" href="#L164">164</a></span>
+<span id="L165" class="lineno"><a class="lineno" href="#L165">165</a></span>
+<span id="L166" class="lineno"><a class="lineno" href="#L166">166</a></span>
+<span id="L167" class="lineno"><a class="lineno" href="#L167">167</a></span>
+<span id="L168" class="lineno"><a class="lineno" href="#L168">168</a></span>
+<span id="L169" class="lineno"><a class="lineno" href="#L169">169</a></span>
+<span id="L170" class="lineno"><a class="lineno" href="#L170">170</a></span>
+<span id="L171" class="lineno"><a class="lineno" href="#L171">171</a></span>
+<span id="L172" class="lineno"><a class="lineno" href="#L172">172</a></span>
+<span id="L173" class="lineno"><a class="lineno" href="#L173">173</a></span>
+<span id="L174" class="lineno"><a class="lineno" href="#L174">174</a></span>
+<span id="L175" class="lineno"><a class="lineno" href="#L175">175</a></span>
+<span id="L176" class="lineno"><a class="lineno" href="#L176">176</a></span>
+<span id="L177" class="lineno"><a class="lineno" href="#L177">177</a></span>
+<span id="L178" class="lineno"><a class="lineno" href="#L178">178</a></span>
+<span id="L179" class="lineno"><a class="lineno" href="#L179">179</a></span>
+<span id="L180" class="lineno"><a class="lineno" href="#L180">180</a></span>
+<span id="L181" class="lineno"><a class="lineno" href="#L181">181</a></span>
+<span id="L182" class="lineno"><a class="lineno" href="#L182">182</a></span>
+<span id="L183" class="lineno"><a class="lineno" href="#L183">183</a></span>
+<span id="L184" class="lineno"><a class="lineno" href="#L184">184</a></span>
+<span id="L185" class="lineno"><a class="lineno" href="#L185">185</a></span>
+<span id="L186" class="lineno"><a class="lineno" href="#L186">186</a></span>
+<span id="L187" class="lineno"><a class="lineno" href="#L187">187</a></span>
+<span id="L188" class="lineno"><a class="lineno" href="#L188">188</a></span>
+<span id="L189" class="lineno"><a class="lineno" href="#L189">189</a></span>
+<span id="L190" class="lineno"><a class="lineno" href="#L190">190</a></span>
+<span id="L191" class="lineno"><a class="lineno" href="#L191">191</a></span>
+<span id="L192" class="lineno"><a class="lineno" href="#L192">192</a></span>
+<span id="L193" class="lineno"><a class="lineno" href="#L193">193</a></span>
+<span id="L194" class="lineno"><a class="lineno" href="#L194">194</a></span>
+<span id="L195" class="lineno"><a class="lineno" href="#L195">195</a></span>
+<span id="L196" class="lineno"><a class="lineno" href="#L196">196</a></span>
+<span id="L197" class="lineno"><a class="lineno" href="#L197">197</a></span>
+<span id="L198" class="lineno"><a class="lineno" href="#L198">198</a></span>
+<span id="L199" class="lineno"><a class="lineno" href="#L199">199</a></span>
+<span id="L200" class="lineno"><a class="lineno" href="#L200">200</a></span>
+<span id="L201" class="lineno"><a class="lineno" href="#L201">201</a></span>
+<span id="L202" class="lineno"><a class="lineno" href="#L202">202</a></span>
+<span id="L203" class="lineno"><a class="lineno" href="#L203">203</a></span>
+<span id="L204" class="lineno"><a class="lineno" href="#L204">204</a></span>
+<span id="L205" class="lineno"><a class="lineno" href="#L205">205</a></span>
+<span id="L206" class="lineno"><a class="lineno" href="#L206">206</a></span>
+<span id="L207" class="lineno"><a class="lineno" href="#L207">207</a></span>
+<span id="L208" class="lineno"><a class="lineno" href="#L208">208</a></span>
+<span id="L209" class="lineno"><a class="lineno" href="#L209">209</a></span>
+<span id="L210" class="lineno"><a class="lineno" href="#L210">210</a></span>
+<span id="L211" class="lineno"><a class="lineno" href="#L211">211</a></span>
+<span id="L212" class="lineno"><a class="lineno" href="#L212">212</a></span>
+<span id="L213" class="lineno"><a class="lineno" href="#L213">213</a></span>
+<span id="L214" class="lineno"><a class="lineno" href="#L214">214</a></span>
+<span id="L215" class="lineno"><a class="lineno" href="#L215">215</a></span>
+<span id="L216" class="lineno"><a class="lineno" href="#L216">216</a></span>
+<span id="L217" class="lineno"><a class="lineno" href="#L217">217</a></span>
+<span id="L218" class="lineno"><a class="lineno" href="#L218">218</a></span>
+<span id="L219" class="lineno"><a class="lineno" href="#L219">219</a></span>
+<span id="L220" class="lineno"><a class="lineno" href="#L220">220</a></span>
+<span id="L221" class="lineno"><a class="lineno" href="#L221">221</a></span>
+<span id="L222" class="lineno"><a class="lineno" href="#L222">222</a></span>
+<span id="L223" class="lineno"><a class="lineno" href="#L223">223</a></span>
+<span id="L224" class="lineno"><a class="lineno" href="#L224">224</a></span>
+<span id="L225" class="lineno"><a class="lineno" href="#L225">225</a></span>
+<span id="L226" class="lineno"><a class="lineno" href="#L226">226</a></span>
+<span id="L227" class="lineno"><a class="lineno" href="#L227">227</a></span>
+<span id="L228" class="lineno"><a class="lineno" href="#L228">228</a></span>
+<span id="L229" class="lineno"><a class="lineno" href="#L229">229</a></span>
+<span id="L230" class="lineno"><a class="lineno" href="#L230">230</a></span>
+<span id="L231" class="lineno"><a class="lineno" href="#L231">231</a></span>
+<span id="L232" class="lineno"><a class="lineno" href="#L232">232</a></span>
+<span id="L233" class="lineno"><a class="lineno" href="#L233">233</a></span>
+<span id="L234" class="lineno"><a class="lineno" href="#L234">234</a></span>
+<span id="L235" class="lineno"><a class="lineno" href="#L235">235</a></span>
+<span id="L236" class="lineno"><a class="lineno" href="#L236">236</a></span>
+<span id="L237" class="lineno"><a class="lineno" href="#L237">237</a></span>
+<span id="L238" class="lineno"><a class="lineno" href="#L238">238</a></span>
+<span id="L239" class="lineno"><a class="lineno" href="#L239">239</a></span>
+<span id="L240" class="lineno"><a class="lineno" href="#L240">240</a></span>
+<span id="L241" class="lineno"><a class="lineno" href="#L241">241</a></span>
+<span id="L242" class="lineno"><a class="lineno" href="#L242">242</a></span>
+<span id="L243" class="lineno"><a class="lineno" href="#L243">243</a></span>
+<span id="L244" class="lineno"><a class="lineno" href="#L244">244</a></span>
+<span id="L245" class="lineno"><a class="lineno" href="#L245">245</a></span>
+<span id="L246" class="lineno"><a class="lineno" href="#L246">246</a></span>
+<span id="L247" class="lineno"><a class="lineno" href="#L247">247</a></span>
+<span id="L248" class="lineno"><a class="lineno" href="#L248">248</a></span>
+<span id="L249" class="lineno"><a class="lineno" href="#L249">249</a></span>
+<span id="L250" class="lineno"><a class="lineno" href="#L250">250</a></span>
+<span id="L251" class="lineno"><a class="lineno" href="#L251">251</a></span>
+<span id="L252" class="lineno"><a class="lineno" href="#L252">252</a></span>
+<span id="L253" class="lineno"><a class="lineno" href="#L253">253</a></span>
+<span id="L254" class="lineno"><a class="lineno" href="#L254">254</a></span>
+<span id="L255" class="lineno"><a class="lineno" href="#L255">255</a></span>
+<span id="L256" class="lineno"><a class="lineno" href="#L256">256</a></span>
+<span id="L257" class="lineno"><a class="lineno" href="#L257">257</a></span>
+<span id="L258" class="lineno"><a class="lineno" href="#L258">258</a></span>
+<span id="L259" class="lineno"><a class="lineno" href="#L259">259</a></span>
+<span id="L260" class="lineno"><a class="lineno" href="#L260">260</a></span>
+<span id="L261" class="lineno"><a class="lineno" href="#L261">261</a></span>
+<span id="L262" class="lineno"><a class="lineno" href="#L262">262</a></span>
+<span id="L263" class="lineno"><a class="lineno" href="#L263">263</a></span>
+<span id="L264" class="lineno"><a class="lineno" href="#L264">264</a></span>
+<span id="L265" class="lineno"><a class="lineno" href="#L265">265</a></span>
+<span id="L266" class="lineno"><a class="lineno" href="#L266">266</a></span>
+<span id="L267" class="lineno"><a class="lineno" href="#L267">267</a></span>
+<span id="L268" class="lineno"><a class="lineno" href="#L268">268</a></span>
+<span id="L269" class="lineno"><a class="lineno" href="#L269">269</a></span>
+<span id="L270" class="lineno"><a class="lineno" href="#L270">270</a></span>
+<span id="L271" class="lineno"><a class="lineno" href="#L271">271</a></span>
+<span id="L272" class="lineno"><a class="lineno" href="#L272">272</a></span>
+<span id="L273" class="lineno"><a class="lineno" href="#L273">273</a></span>
+<span id="L274" class="lineno"><a class="lineno" href="#L274">274</a></span>
+<span id="L275" class="lineno"><a class="lineno" href="#L275">275</a></span>
+<span id="L276" class="lineno"><a class="lineno" href="#L276">276</a></span>
+<span id="L277" class="lineno"><a class="lineno" href="#L277">277</a></span>
+<span id="L278" class="lineno"><a class="lineno" href="#L278">278</a></span>
+<span id="L279" class="lineno"><a class="lineno" href="#L279">279</a></span>
+<span id="L280" class="lineno"><a class="lineno" href="#L280">280</a></span>
+<span id="L281" class="lineno"><a class="lineno" href="#L281">281</a></span>
+<span id="L282" class="lineno"><a class="lineno" href="#L282">282</a></span>
+<span id="L283" class="lineno"><a class="lineno" href="#L283">283</a></span>
+<span id="L284" class="lineno"><a class="lineno" href="#L284">284</a></span>
+<span id="L285" class="lineno"><a class="lineno" href="#L285">285</a></span>
+<span id="L286" class="lineno"><a class="lineno" href="#L286">286</a></span>
+<span id="L287" class="lineno"><a class="lineno" href="#L287">287</a></span>
+<span id="L288" class="lineno"><a class="lineno" href="#L288">288</a></span>
+<span id="L289" class="lineno"><a class="lineno" href="#L289">289</a></span>
+<span id="L290" class="lineno"><a class="lineno" href="#L290">290</a></span>
+<span id="L291" class="lineno"><a class="lineno" href="#L291">291</a></span>
+<span id="L292" class="lineno"><a class="lineno" href="#L292">292</a></span>
+<span id="L293" class="lineno"><a class="lineno" href="#L293">293</a></span>
+<span id="L294" class="lineno"><a class="lineno" href="#L294">294</a></span>
+<span id="L295" class="lineno"><a class="lineno" href="#L295">295</a></span>
+<span id="L296" class="lineno"><a class="lineno" href="#L296">296</a></span>
+<span id="L297" class="lineno"><a class="lineno" href="#L297">297</a></span>
+<span id="L298" class="lineno"><a class="lineno" href="#L298">298</a></span>
+<span id="L299" class="lineno"><a class="lineno" href="#L299">299</a></span>
+<span id="L300" class="lineno"><a class="lineno" href="#L300">300</a></span>
+<span id="L301" class="lineno"><a class="lineno" href="#L301">301</a></span>
+<span id="L302" class="lineno"><a class="lineno" href="#L302">302</a></span>
+<span id="L303" class="lineno"><a class="lineno" href="#L303">303</a></span>
+<span id="L304" class="lineno"><a class="lineno" href="#L304">304</a></span>
+<span id="L305" class="lineno"><a class="lineno" href="#L305">305</a></span>
+<span id="L306" class="lineno"><a class="lineno" href="#L306">306</a></span>
+<span id="L307" class="lineno"><a class="lineno" href="#L307">307</a></span>
+<span id="L308" class="lineno"><a class="lineno" href="#L308">308</a></span>
+<span id="L309" class="lineno"><a class="lineno" href="#L309">309</a></span>
+<span id="L310" class="lineno"><a class="lineno" href="#L310">310</a></span>
+<span id="L311" class="lineno"><a class="lineno" href="#L311">311</a></span>
+<span id="L312" class="lineno"><a class="lineno" href="#L312">312</a></span>
+<span id="L313" class="lineno"><a class="lineno" href="#L313">313</a></span>
+<span id="L314" class="lineno"><a class="lineno" href="#L314">314</a></span>
+<span id="L315" class="lineno"><a class="lineno" href="#L315">315</a></span>
+<span id="L316" class="lineno"><a class="lineno" href="#L316">316</a></span>
+<span id="L317" class="lineno"><a class="lineno" href="#L317">317</a></span>
+<span id="L318" class="lineno"><a class="lineno" href="#L318">318</a></span>
+<span id="L319" class="lineno"><a class="lineno" href="#L319">319</a></span>
+<span id="L320" class="lineno"><a class="lineno" href="#L320">320</a></span>
+<span id="L321" class="lineno"><a class="lineno" href="#L321">321</a></span>
+<span id="L322" class="lineno"><a class="lineno" href="#L322">322</a></span>
+<span id="L323" class="lineno"><a class="lineno" href="#L323">323</a></span>
+<span id="L324" class="lineno"><a class="lineno" href="#L324">324</a></span>
+<span id="L325" class="lineno"><a class="lineno" href="#L325">325</a></span>
+<span id="L326" class="lineno"><a class="lineno" href="#L326">326</a></span>
+<span id="L327" class="lineno"><a class="lineno" href="#L327">327</a></span>
+<span id="L328" class="lineno"><a class="lineno" href="#L328">328</a></span>
+<span id="L329" class="lineno"><a class="lineno" href="#L329">329</a></span>
+<span id="L330" class="lineno"><a class="lineno" href="#L330">330</a></span>
+<span id="L331" class="lineno"><a class="lineno" href="#L331">331</a></span>
+<span id="L332" class="lineno"><a class="lineno" href="#L332">332</a></span>
+<span id="L333" class="lineno"><a class="lineno" href="#L333">333</a></span>
+<span id="L334" class="lineno"><a class="lineno" href="#L334">334</a></span>
+<span id="L335" class="lineno"><a class="lineno" href="#L335">335</a></span>
+<span id="L336" class="lineno"><a class="lineno" href="#L336">336</a></span>
+<span id="L337" class="lineno"><a class="lineno" href="#L337">337</a></span>
+<span id="L338" class="lineno"><a class="lineno" href="#L338">338</a></span>
+<span id="L339" class="lineno"><a class="lineno" href="#L339">339</a></span>
+<span id="L340" class="lineno"><a class="lineno" href="#L340">340</a></span>
+<span id="L341" class="lineno"><a class="lineno" href="#L341">341</a></span>
+<span id="L342" class="lineno"><a class="lineno" href="#L342">342</a></span>
+<span id="L343" class="lineno"><a class="lineno" href="#L343">343</a></span>
+<span id="L344" class="lineno"><a class="lineno" href="#L344">344</a></span>
+<span id="L345" class="lineno"><a class="lineno" href="#L345">345</a></span>
+<span id="L346" class="lineno"><a class="lineno" href="#L346">346</a></span>
+<span id="L347" class="lineno"><a class="lineno" href="#L347">347</a></span>
+<span id="L348" class="lineno"><a class="lineno" href="#L348">348</a></span>
+<span id="L349" class="lineno"><a class="lineno" href="#L349">349</a></span>
+<span id="L350" class="lineno"><a class="lineno" href="#L350">350</a></span>
+<span id="L351" class="lineno"><a class="lineno" href="#L351">351</a></span>
+<span id="L352" class="lineno"><a class="lineno" href="#L352">352</a></span>
+<span id="L353" class="lineno"><a class="lineno" href="#L353">353</a></span>
+<span id="L354" class="lineno"><a class="lineno" href="#L354">354</a></span>
+<span id="L355" class="lineno"><a class="lineno" href="#L355">355</a></span>
+<span id="L356" class="lineno"><a class="lineno" href="#L356">356</a></span>
+<span id="L357" class="lineno"><a class="lineno" href="#L357">357</a></span>
+<span id="L358" class="lineno"><a class="lineno" href="#L358">358</a></span>
+<span id="L359" class="lineno"><a class="lineno" href="#L359">359</a></span>
+<span id="L360" class="lineno"><a class="lineno" href="#L360">360</a></span>
+<span id="L361" class="lineno"><a class="lineno" href="#L361">361</a></span>
+<span id="L362" class="lineno"><a class="lineno" href="#L362">362</a></span>
+<span id="L363" class="lineno"><a class="lineno" href="#L363">363</a></span>
+<span id="L364" class="lineno"><a class="lineno" href="#L364">364</a></span>
+<span id="L365" class="lineno"><a class="lineno" href="#L365">365</a></span>
+<span id="L366" class="lineno"><a class="lineno" href="#L366">366</a></span>
+<span id="L367" class="lineno"><a class="lineno" href="#L367">367</a></span>
+<span id="L368" class="lineno"><a class="lineno" href="#L368">368</a></span>
+<span id="L369" class="lineno"><a class="lineno" href="#L369">369</a></span>
+<span id="L370" class="lineno"><a class="lineno" href="#L370">370</a></span>
+<span id="L371" class="lineno"><a class="lineno" href="#L371">371</a></span>
+<span id="L372" class="lineno"><a class="lineno" href="#L372">372</a></span>
+<span id="L373" class="lineno"><a class="lineno" href="#L373">373</a></span>
+<span id="L374" class="lineno"><a class="lineno" href="#L374">374</a></span>
+<span id="L375" class="lineno"><a class="lineno" href="#L375">375</a></span>
+<span id="L376" class="lineno"><a class="lineno" href="#L376">376</a></span>
+<span id="L377" class="lineno"><a class="lineno" href="#L377">377</a></span>
+<span id="L378" class="lineno"><a class="lineno" href="#L378">378</a></span>
+<span id="L379" class="lineno"><a class="lineno" href="#L379">379</a></span>
+<span id="L380" class="lineno"><a class="lineno" href="#L380">380</a></span>
+<span id="L381" class="lineno"><a class="lineno" href="#L381">381</a></span>
+<span id="L382" class="lineno"><a class="lineno" href="#L382">382</a></span>
+<span id="L383" class="lineno"><a class="lineno" href="#L383">383</a></span>
+<span id="L384" class="lineno"><a class="lineno" href="#L384">384</a></span>
+<span id="L385" class="lineno"><a class="lineno" href="#L385">385</a></span>
+<span id="L386" class="lineno"><a class="lineno" href="#L386">386</a></span>
+<span id="L387" class="lineno"><a class="lineno" href="#L387">387</a></span>
+<span id="L388" class="lineno"><a class="lineno" href="#L388">388</a></span>
+<span id="L389" class="lineno"><a class="lineno" href="#L389">389</a></span>
+<span id="L390" class="lineno"><a class="lineno" href="#L390">390</a></span>
+<span id="L391" class="lineno"><a class="lineno" href="#L391">391</a></span>
+<span id="L392" class="lineno"><a class="lineno" href="#L392">392</a></span>
+<span id="L393" class="lineno"><a class="lineno" href="#L393">393</a></span>
+<span id="L394" class="lineno"><a class="lineno" href="#L394">394</a></span>
+<span id="L395" class="lineno"><a class="lineno" href="#L395">395</a></span>
+<span id="L396" class="lineno"><a class="lineno" href="#L396">396</a></span>
+<span id="L397" class="lineno"><a class="lineno" href="#L397">397</a></span>
+<span id="L398" class="lineno"><a class="lineno" href="#L398">398</a></span>
+<span id="L399" class="lineno"><a class="lineno" href="#L399">399</a></span>
+<span id="L400" class="lineno"><a class="lineno" href="#L400">400</a></span>
+<span id="L401" class="lineno"><a class="lineno" href="#L401">401</a></span>
+<span id="L402" class="lineno"><a class="lineno" href="#L402">402</a></span>
+<span id="L403" class="lineno"><a class="lineno" href="#L403">403</a></span>
+<span id="L404" class="lineno"><a class="lineno" href="#L404">404</a></span>
+<span id="L405" class="lineno"><a class="lineno" href="#L405">405</a></span>
+<span id="L406" class="lineno"><a class="lineno" href="#L406">406</a></span>
+<span id="L407" class="lineno"><a class="lineno" href="#L407">407</a></span>
+<span id="L408" class="lineno"><a class="lineno" href="#L408">408</a></span>
+<span id="L409" class="lineno"><a class="lineno" href="#L409">409</a></span>
+<span id="L410" class="lineno"><a class="lineno" href="#L410">410</a></span>
+<span id="L411" class="lineno"><a class="lineno" href="#L411">411</a></span>
+<span id="L412" class="lineno"><a class="lineno" href="#L412">412</a></span>
+<span id="L413" class="lineno"><a class="lineno" href="#L413">413</a></span>
+<span id="L414" class="lineno"><a class="lineno" href="#L414">414</a></span>
+<span id="L415" class="lineno"><a class="lineno" href="#L415">415</a></span>
+<span id="L416" class="lineno"><a class="lineno" href="#L416">416</a></span>
+<span id="L417" class="lineno"><a class="lineno" href="#L417">417</a></span>
+<span id="L418" class="lineno"><a class="lineno" href="#L418">418</a></span>
+<span id="L419" class="lineno"><a class="lineno" href="#L419">419</a></span>
+<span id="L420" class="lineno"><a class="lineno" href="#L420">420</a></span>
+<span id="L421" class="lineno"><a class="lineno" href="#L421">421</a></span>
+<span id="L422" class="lineno"><a class="lineno" href="#L422">422</a></span>
+<span id="L423" class="lineno"><a class="lineno" href="#L423">423</a></span>
+<span id="L424" class="lineno"><a class="lineno" href="#L424">424</a></span>
+<span id="L425" class="lineno"><a class="lineno" href="#L425">425</a></span>
+<span id="L426" class="lineno"><a class="lineno" href="#L426">426</a></span>
+<span id="L427" class="lineno"><a class="lineno" href="#L427">427</a></span>
+<span id="L428" class="lineno"><a class="lineno" href="#L428">428</a></span>
+<span id="L429" class="lineno"><a class="lineno" href="#L429">429</a></span>
+<span id="L430" class="lineno"><a class="lineno" href="#L430">430</a></span>
+<span id="L431" class="lineno"><a class="lineno" href="#L431">431</a></span>
+<span id="L432" class="lineno"><a class="lineno" href="#L432">432</a></span>
+<span id="L433" class="lineno"><a class="lineno" href="#L433">433</a></span>
+<span id="L434" class="lineno"><a class="lineno" href="#L434">434</a></span>
+<span id="L435" class="lineno"><a class="lineno" href="#L435">435</a></span>
+<span id="L436" class="lineno"><a class="lineno" href="#L436">436</a></span>
+<span id="L437" class="lineno"><a class="lineno" href="#L437">437</a></span>
+<span id="L438" class="lineno"><a class="lineno" href="#L438">438</a></span>
+<span id="L439" class="lineno"><a class="lineno" href="#L439">439</a></span>
+<span id="L440" class="lineno"><a class="lineno" href="#L440">440</a></span>
+<span id="L441" class="lineno"><a class="lineno" href="#L441">441</a></span>
+<span id="L442" class="lineno"><a class="lineno" href="#L442">442</a></span>
+<span id="L443" class="lineno"><a class="lineno" href="#L443">443</a></span>
+<span id="L444" class="lineno"><a class="lineno" href="#L444">444</a></span>
+<span id="L445" class="lineno"><a class="lineno" href="#L445">445</a></span>
+<span id="L446" class="lineno"><a class="lineno" href="#L446">446</a></span>
+<span id="L447" class="lineno"><a class="lineno" href="#L447">447</a></span>
+<span id="L448" class="lineno"><a class="lineno" href="#L448">448</a></span>
+<span id="L449" class="lineno"><a class="lineno" href="#L449">449</a></span>
+<span id="L450" class="lineno"><a class="lineno" href="#L450">450</a></span>
+<span id="L451" class="lineno"><a class="lineno" href="#L451">451</a></span>
+<span id="L452" class="lineno"><a class="lineno" href="#L452">452</a></span>
+<span id="L453" class="lineno"><a class="lineno" href="#L453">453</a></span>
+<span id="L454" class="lineno"><a class="lineno" href="#L454">454</a></span>
+<span id="L455" class="lineno"><a class="lineno" href="#L455">455</a></span>
+<span id="L456" class="lineno"><a class="lineno" href="#L456">456</a></span>
+<span id="L457" class="lineno"><a class="lineno" href="#L457">457</a></span>
+<span id="L458" class="lineno"><a class="lineno" href="#L458">458</a></span>
+<span id="L459" class="lineno"><a class="lineno" href="#L459">459</a></span>
+<span id="L460" class="lineno"><a class="lineno" href="#L460">460</a></span>
+<span id="L461" class="lineno"><a class="lineno" href="#L461">461</a></span>
+<span id="L462" class="lineno"><a class="lineno" href="#L462">462</a></span>
+<span id="L463" class="lineno"><a class="lineno" href="#L463">463</a></span>
+<span id="L464" class="lineno"><a class="lineno" href="#L464">464</a></span>
+<span id="L465" class="lineno"><a class="lineno" href="#L465">465</a></span>
+<span id="L466" class="lineno"><a class="lineno" href="#L466">466</a></span>
+<span id="L467" class="lineno"><a class="lineno" href="#L467">467</a></span>
+<span id="L468" class="lineno"><a class="lineno" href="#L468">468</a></span>
+<span id="L469" class="lineno"><a class="lineno" href="#L469">469</a></span>
+<span id="L470" class="lineno"><a class="lineno" href="#L470">470</a></span>
+<span id="L471" class="lineno"><a class="lineno" href="#L471">471</a></span>
+<span id="L472" class="lineno"><a class="lineno" href="#L472">472</a></span>
+<span id="L473" class="lineno"><a class="lineno" href="#L473">473</a></span>
+<span id="L474" class="lineno"><a class="lineno" href="#L474">474</a></span>
+<span id="L475" class="lineno"><a class="lineno" href="#L475">475</a></span>
+<span id="L476" class="lineno"><a class="lineno" href="#L476">476</a></span>
+<span id="L477" class="lineno"><a class="lineno" href="#L477">477</a></span>
+<span id="L478" class="lineno"><a class="lineno" href="#L478">478</a></span>
+<span id="L479" class="lineno"><a class="lineno" href="#L479">479</a></span>
+<span id="L480" class="lineno"><a class="lineno" href="#L480">480</a></span>
+<span id="L481" class="lineno"><a class="lineno" href="#L481">481</a></span>
+<span id="L482" class="lineno"><a class="lineno" href="#L482">482</a></span>
+<span id="L483" class="lineno"><a class="lineno" href="#L483">483</a></span>
+<span id="L484" class="lineno"><a class="lineno" href="#L484">484</a></span>
+<span id="L485" class="lineno"><a class="lineno" href="#L485">485</a></span>
+<span id="L486" class="lineno"><a class="lineno" href="#L486">486</a></span>
+<span id="L487" class="lineno"><a class="lineno" href="#L487">487</a></span>
+<span id="L488" class="lineno"><a class="lineno" href="#L488">488</a></span>
+<span id="L489" class="lineno"><a class="lineno" href="#L489">489</a></span>
+<span id="L490" class="lineno"><a class="lineno" href="#L490">490</a></span>
+<span id="L491" class="lineno"><a class="lineno" href="#L491">491</a></span>
+<span id="L492" class="lineno"><a class="lineno" href="#L492">492</a></span>
+<span id="L493" class="lineno"><a class="lineno" href="#L493">493</a></span>
+<span id="L494" class="lineno"><a class="lineno" href="#L494">494</a></span>
+<span id="L495" class="lineno"><a class="lineno" href="#L495">495</a></span>
+<span id="L496" class="lineno"><a class="lineno" href="#L496">496</a></span>
+<span id="L497" class="lineno"><a class="lineno" href="#L497">497</a></span>
+<span id="L498" class="lineno"><a class="lineno" href="#L498">498</a></span>
+<span id="L499" class="lineno"><a class="lineno" href="#L499">499</a></span>
+<span id="L500" class="lineno"><a class="lineno" href="#L500">500</a></span>
+<span id="L501" class="lineno"><a class="lineno" href="#L501">501</a></span>
+<span id="L502" class="lineno"><a class="lineno" href="#L502">502</a></span>
+<span id="L503" class="lineno"><a class="lineno" href="#L503">503</a></span>
+<span id="L504" class="lineno"><a class="lineno" href="#L504">504</a></span>
+<span id="L505" class="lineno"><a class="lineno" href="#L505">505</a></span>
+<span id="L506" class="lineno"><a class="lineno" href="#L506">506</a></span>
+<span id="L507" class="lineno"><a class="lineno" href="#L507">507</a></span>
+<span id="L508" class="lineno"><a class="lineno" href="#L508">508</a></span>
+<span id="L509" class="lineno"><a class="lineno" href="#L509">509</a></span>
+<span id="L510" class="lineno"><a class="lineno" href="#L510">510</a></span>
+<span id="L511" class="lineno"><a class="lineno" href="#L511">511</a></span>
+<span id="L512" class="lineno"><a class="lineno" href="#L512">512</a></span>
+<span id="L513" class="lineno"><a class="lineno" href="#L513">513</a></span>
+<span id="L514" class="lineno"><a class="lineno" href="#L514">514</a></span>
+<span id="L515" class="lineno"><a class="lineno" href="#L515">515</a></span>
+<span id="L516" class="lineno"><a class="lineno" href="#L516">516</a></span>
+<span id="L517" class="lineno"><a class="lineno" href="#L517">517</a></span>
+<span id="L518" class="lineno"><a class="lineno" href="#L518">518</a></span>
+<span id="L519" class="lineno"><a class="lineno" href="#L519">519</a></span>
+<span id="L520" class="lineno"><a class="lineno" href="#L520">520</a></span>
+<span id="L521" class="lineno"><a class="lineno" href="#L521">521</a></span>
+<span id="L522" class="lineno"><a class="lineno" href="#L522">522</a></span>
+<span id="L523" class="lineno"><a class="lineno" href="#L523">523</a></span>
+<span id="L524" class="lineno"><a class="lineno" href="#L524">524</a></span>
+<span id="L525" class="lineno"><a class="lineno" href="#L525">525</a></span>
+<span id="L526" class="lineno"><a class="lineno" href="#L526">526</a></span>
+<span id="L527" class="lineno"><a class="lineno" href="#L527">527</a></span>
+<span id="L528" class="lineno"><a class="lineno" href="#L528">528</a></span>
+<span id="L529" class="lineno"><a class="lineno" href="#L529">529</a></span>
+<span id="L530" class="lineno"><a class="lineno" href="#L530">530</a></span>
+<span id="L531" class="lineno"><a class="lineno" href="#L531">531</a></span>
+<span id="L532" class="lineno"><a class="lineno" href="#L532">532</a></span>
+<span id="L533" class="lineno"><a class="lineno" href="#L533">533</a></span>
+<span id="L534" class="lineno"><a class="lineno" href="#L534">534</a></span>
+<span id="L535" class="lineno"><a class="lineno" href="#L535">535</a></span>
+<span id="L536" class="lineno"><a class="lineno" href="#L536">536</a></span>
+<span id="L537" class="lineno"><a class="lineno" href="#L537">537</a></span>
+<span id="L538" class="lineno"><a class="lineno" href="#L538">538</a></span>
+<span id="L539" class="lineno"><a class="lineno" href="#L539">539</a></span>
+<span id="L540" class="lineno"><a class="lineno" href="#L540">540</a></span>
+<span id="L541" class="lineno"><a class="lineno" href="#L541">541</a></span>
+<span id="L542" class="lineno"><a class="lineno" href="#L542">542</a></span>
+<span id="L543" class="lineno"><a class="lineno" href="#L543">543</a></span>
+<span id="L544" class="lineno"><a class="lineno" href="#L544">544</a></span>
+<span id="L545" class="lineno"><a class="lineno" href="#L545">545</a></span>
+<span id="L546" class="lineno"><a class="lineno" href="#L546">546</a></span>
+<span id="L547" class="lineno"><a class="lineno" href="#L547">547</a></span>
+<span id="L548" class="lineno"><a class="lineno" href="#L548">548</a></span>
+<span id="L549" class="lineno"><a class="lineno" href="#L549">549</a></span>
+<span id="L550" class="lineno"><a class="lineno" href="#L550">550</a></span>
+<span id="L551" class="lineno"><a class="lineno" href="#L551">551</a></span>
+<span id="L552" class="lineno"><a class="lineno" href="#L552">552</a></span>
+<span id="L553" class="lineno"><a class="lineno" href="#L553">553</a></span>
+<span id="L554" class="lineno"><a class="lineno" href="#L554">554</a></span>
+<span id="L555" class="lineno"><a class="lineno" href="#L555">555</a></span>
+<span id="L556" class="lineno"><a class="lineno" href="#L556">556</a></span>
+<span id="L557" class="lineno"><a class="lineno" href="#L557">557</a></span>
+<span id="L558" class="lineno"><a class="lineno" href="#L558">558</a></span>
+<span id="L559" class="lineno"><a class="lineno" href="#L559">559</a></span>
+<span id="L560" class="lineno"><a class="lineno" href="#L560">560</a></span>
+<span id="L561" class="lineno"><a class="lineno" href="#L561">561</a></span>
+<span id="L562" class="lineno"><a class="lineno" href="#L562">562</a></span>
+<span id="L563" class="lineno"><a class="lineno" href="#L563">563</a></span>
+<span id="L564" class="lineno"><a class="lineno" href="#L564">564</a></span>
+<span id="L565" class="lineno"><a class="lineno" href="#L565">565</a></span>
+<span id="L566" class="lineno"><a class="lineno" href="#L566">566</a></span>
+<span id="L567" class="lineno"><a class="lineno" href="#L567">567</a></span>
+<span id="L568" class="lineno"><a class="lineno" href="#L568">568</a></span>
+<span id="L569" class="lineno"><a class="lineno" href="#L569">569</a></span>
+<span id="L570" class="lineno"><a class="lineno" href="#L570">570</a></span>
+<span id="L571" class="lineno"><a class="lineno" href="#L571">571</a></span>
+<span id="L572" class="lineno"><a class="lineno" href="#L572">572</a></span>
+<span id="L573" class="lineno"><a class="lineno" href="#L573">573</a></span>
+<span id="L574" class="lineno"><a class="lineno" href="#L574">574</a></span>
+<span id="L575" class="lineno"><a class="lineno" href="#L575">575</a></span>
+<span id="L576" class="lineno"><a class="lineno" href="#L576">576</a></span>
+<span id="L577" class="lineno"><a class="lineno" href="#L577">577</a></span>
+<span id="L578" class="lineno"><a class="lineno" href="#L578">578</a></span>
+<span id="L579" class="lineno"><a class="lineno" href="#L579">579</a></span>
+<span id="L580" class="lineno"><a class="lineno" href="#L580">580</a></span>
+<span id="L581" class="lineno"><a class="lineno" href="#L581">581</a></span>
+<span id="L582" class="lineno"><a class="lineno" href="#L582">582</a></span>
+<span id="L583" class="lineno"><a class="lineno" href="#L583">583</a></span>
+<span id="L584" class="lineno"><a class="lineno" href="#L584">584</a></span>
+<span id="L585" class="lineno"><a class="lineno" href="#L585">585</a></span>
+<span id="L586" class="lineno"><a class="lineno" href="#L586">586</a></span>
+<span id="L587" class="lineno"><a class="lineno" href="#L587">587</a></span>
+<span id="L588" class="lineno"><a class="lineno" href="#L588">588</a></span>
+<span id="L589" class="lineno"><a class="lineno" href="#L589">589</a></span>
+<span id="L590" class="lineno"><a class="lineno" href="#L590">590</a></span>
+<span id="L591" class="lineno"><a class="lineno" href="#L591">591</a></span>
+<span id="L592" class="lineno"><a class="lineno" href="#L592">592</a></span>
+<span id="L593" class="lineno"><a class="lineno" href="#L593">593</a></span>
+<span id="L594" class="lineno"><a class="lineno" href="#L594">594</a></span>
+<span id="L595" class="lineno"><a class="lineno" href="#L595">595</a></span>
+<span id="L596" class="lineno"><a class="lineno" href="#L596">596</a></span>
+<span id="L597" class="lineno"><a class="lineno" href="#L597">597</a></span>
+<span id="L598" class="lineno"><a class="lineno" href="#L598">598</a></span>
+<span id="L599" class="lineno"><a class="lineno" href="#L599">599</a></span>
+<span id="L600" class="lineno"><a class="lineno" href="#L600">600</a></span>
+<span id="L601" class="lineno"><a class="lineno" href="#L601">601</a></span>
+<span id="L602" class="lineno"><a class="lineno" href="#L602">602</a></span>
+<span id="L603" class="lineno"><a class="lineno" href="#L603">603</a></span>
+<span id="L604" class="lineno"><a class="lineno" href="#L604">604</a></span>
+<span id="L605" class="lineno"><a class="lineno" href="#L605">605</a></span>
+<span id="L606" class="lineno"><a class="lineno" href="#L606">606</a></span>
+<span id="L607" class="lineno"><a class="lineno" href="#L607">607</a></span>
+<span id="L608" class="lineno"><a class="lineno" href="#L608">608</a></span>
+<span id="L609" class="lineno"><a class="lineno" href="#L609">609</a></span>
+<span id="L610" class="lineno"><a class="lineno" href="#L610">610</a></span>
+<span id="L611" class="lineno"><a class="lineno" href="#L611">611</a></span>
+<span id="L612" class="lineno"><a class="lineno" href="#L612">612</a></span>
+<span id="L613" class="lineno"><a class="lineno" href="#L613">613</a></span>
+<span id="L614" class="lineno"><a class="lineno" href="#L614">614</a></span>
+<span id="L615" class="lineno"><a class="lineno" href="#L615">615</a></span>
+<span id="L616" class="lineno"><a class="lineno" href="#L616">616</a></span>
+<span id="L617" class="lineno"><a class="lineno" href="#L617">617</a></span>
+<span id="L618" class="lineno"><a class="lineno" href="#L618">618</a></span>
+<span id="L619" class="lineno"><a class="lineno" href="#L619">619</a></span>
+<span id="L620" class="lineno"><a class="lineno" href="#L620">620</a></span>
+<span id="L621" class="lineno"><a class="lineno" href="#L621">621</a></span>
+<span id="L622" class="lineno"><a class="lineno" href="#L622">622</a></span>
+<span id="L623" class="lineno"><a class="lineno" href="#L623">623</a></span>
+<span id="L624" class="lineno"><a class="lineno" href="#L624">624</a></span>
+<span id="L625" class="lineno"><a class="lineno" href="#L625">625</a></span>
+<span id="L626" class="lineno"><a class="lineno" href="#L626">626</a></span>
+<span id="L627" class="lineno"><a class="lineno" href="#L627">627</a></span>
+<span id="L628" class="lineno"><a class="lineno" href="#L628">628</a></span>
+<span id="L629" class="lineno"><a class="lineno" href="#L629">629</a></span>
+<span id="L630" class="lineno"><a class="lineno" href="#L630">630</a></span>
+<span id="L631" class="lineno"><a class="lineno" href="#L631">631</a></span>
+<span id="L632" class="lineno"><a class="lineno" href="#L632">632</a></span>
+<span id="L633" class="lineno"><a class="lineno" href="#L633">633</a></span>
+<span id="L634" class="lineno"><a class="lineno" href="#L634">634</a></span>
+<span id="L635" class="lineno"><a class="lineno" href="#L635">635</a></span>
+<span id="L636" class="lineno"><a class="lineno" href="#L636">636</a></span>
+<span id="L637" class="lineno"><a class="lineno" href="#L637">637</a></span>
+<span id="L638" class="lineno"><a class="lineno" href="#L638">638</a></span>
+<span id="L639" class="lineno"><a class="lineno" href="#L639">639</a></span>
+<span id="L640" class="lineno"><a class="lineno" href="#L640">640</a></span>
+<span id="L641" class="lineno"><a class="lineno" href="#L641">641</a></span>
+<span id="L642" class="lineno"><a class="lineno" href="#L642">642</a></span>
+<span id="L643" class="lineno"><a class="lineno" href="#L643">643</a></span>
+<span id="L644" class="lineno"><a class="lineno" href="#L644">644</a></span>
+<span id="L645" class="lineno"><a class="lineno" href="#L645">645</a></span>
+<span id="L646" class="lineno"><a class="lineno" href="#L646">646</a></span>
+<span id="L647" class="lineno"><a class="lineno" href="#L647">647</a></span>
+<span id="L648" class="lineno"><a class="lineno" href="#L648">648</a></span>
+<span id="L649" class="lineno"><a class="lineno" href="#L649">649</a></span>
+<span id="L650" class="lineno"><a class="lineno" href="#L650">650</a></span>
+<span id="L651" class="lineno"><a class="lineno" href="#L651">651</a></span>
+<span id="L652" class="lineno"><a class="lineno" href="#L652">652</a></span>
+<span id="L653" class="lineno"><a class="lineno" href="#L653">653</a></span>
+<span id="L654" class="lineno"><a class="lineno" href="#L654">654</a></span>
+<span id="L655" class="lineno"><a class="lineno" href="#L655">655</a></span>
+<span id="L656" class="lineno"><a class="lineno" href="#L656">656</a></span>
+<span id="L657" class="lineno"><a class="lineno" href="#L657">657</a></span>
+<span id="L658" class="lineno"><a class="lineno" href="#L658">658</a></span>
+<span id="L659" class="lineno"><a class="lineno" href="#L659">659</a></span>
+<span id="L660" class="lineno"><a class="lineno" href="#L660">660</a></span>
+<span id="L661" class="lineno"><a class="lineno" href="#L661">661</a></span>
+<span id="L662" class="lineno"><a class="lineno" href="#L662">662</a></span>
+<span id="L663" class="lineno"><a class="lineno" href="#L663">663</a></span>
+<span id="L664" class="lineno"><a class="lineno" href="#L664">664</a></span>
+<span id="L665" class="lineno"><a class="lineno" href="#L665">665</a></span>
+<span id="L666" class="lineno"><a class="lineno" href="#L666">666</a></span>
+<span id="L667" class="lineno"><a class="lineno" href="#L667">667</a></span>
+<span id="L668" class="lineno"><a class="lineno" href="#L668">668</a></span>
+<span id="L669" class="lineno"><a class="lineno" href="#L669">669</a></span>
+<span id="L670" class="lineno"><a class="lineno" href="#L670">670</a></span>
+<span id="L671" class="lineno"><a class="lineno" href="#L671">671</a></span>
+<span id="L672" class="lineno"><a class="lineno" href="#L672">672</a></span>
+<span id="L673" class="lineno"><a class="lineno" href="#L673">673</a></span>
+<span id="L674" class="lineno"><a class="lineno" href="#L674">674</a></span>
+<span id="L675" class="lineno"><a class="lineno" href="#L675">675</a></span>
+<span id="L676" class="lineno"><a class="lineno" href="#L676">676</a></span>
+<span id="L677" class="lineno"><a class="lineno" href="#L677">677</a></span>
+<span id="L678" class="lineno"><a class="lineno" href="#L678">678</a></span>
+<span id="L679" class="lineno"><a class="lineno" href="#L679">679</a></span>
+<span id="L680" class="lineno"><a class="lineno" href="#L680">680</a></span>
+<span id="L681" class="lineno"><a class="lineno" href="#L681">681</a></span>
+<span id="L682" class="lineno"><a class="lineno" href="#L682">682</a></span>
+<span id="L683" class="lineno"><a class="lineno" href="#L683">683</a></span>
+<span id="L684" class="lineno"><a class="lineno" href="#L684">684</a></span>
+<span id="L685" class="lineno"><a class="lineno" href="#L685">685</a></span>
+<span id="L686" class="lineno"><a class="lineno" href="#L686">686</a></span>
+<span id="L687" class="lineno"><a class="lineno" href="#L687">687</a></span>
+<span id="L688" class="lineno"><a class="lineno" href="#L688">688</a></span>
+<span id="L689" class="lineno"><a class="lineno" href="#L689">689</a></span>
+<span id="L690" class="lineno"><a class="lineno" href="#L690">690</a></span>
+<span id="L691" class="lineno"><a class="lineno" href="#L691">691</a></span>
+<span id="L692" class="lineno"><a class="lineno" href="#L692">692</a></span>
+<span id="L693" class="lineno"><a class="lineno" href="#L693">693</a></span>
+<span id="L694" class="lineno"><a class="lineno" href="#L694">694</a></span>
+<span id="L695" class="lineno"><a class="lineno" href="#L695">695</a></span>
+<span id="L696" class="lineno"><a class="lineno" href="#L696">696</a></span>
+<span id="L697" class="lineno"><a class="lineno" href="#L697">697</a></span>
+<span id="L698" class="lineno"><a class="lineno" href="#L698">698</a></span>
+<span id="L699" class="lineno"><a class="lineno" href="#L699">699</a></span>
+<span id="L700" class="lineno"><a class="lineno" href="#L700">700</a></span>
+<span id="L701" class="lineno"><a class="lineno" href="#L701">701</a></span>
+<span id="L702" class="lineno"><a class="lineno" href="#L702">702</a></span>
+<span id="L703" class="lineno"><a class="lineno" href="#L703">703</a></span>
+<span id="L704" class="lineno"><a class="lineno" href="#L704">704</a></span>
+<span id="L705" class="lineno"><a class="lineno" href="#L705">705</a></span>
+<span id="L706" class="lineno"><a class="lineno" href="#L706">706</a></span>
+<span id="L707" class="lineno"><a class="lineno" href="#L707">707</a></span>
+<span id="L708" class="lineno"><a class="lineno" href="#L708">708</a></span>
+<span id="L709" class="lineno"><a class="lineno" href="#L709">709</a></span>
+<span id="L710" class="lineno"><a class="lineno" href="#L710">710</a></span>
+<span id="L711" class="lineno"><a class="lineno" href="#L711">711</a></span>
+<span id="L712" class="lineno"><a class="lineno" href="#L712">712</a></span>
+<span id="L713" class="lineno"><a class="lineno" href="#L713">713</a></span>
+<span id="L714" class="lineno"><a class="lineno" href="#L714">714</a></span>
+<span id="L715" class="lineno"><a class="lineno" href="#L715">715</a></span>
+<span id="L716" class="lineno"><a class="lineno" href="#L716">716</a></span>
+<span id="L717" class="lineno"><a class="lineno" href="#L717">717</a></span>
+<span id="L718" class="lineno"><a class="lineno" href="#L718">718</a></span>
+<span id="L719" class="lineno"><a class="lineno" href="#L719">719</a></span>
+<span id="L720" class="lineno"><a class="lineno" href="#L720">720</a></span>
+<span id="L721" class="lineno"><a class="lineno" href="#L721">721</a></span>
+<span id="L722" class="lineno"><a class="lineno" href="#L722">722</a></span>
+<span id="L723" class="lineno"><a class="lineno" href="#L723">723</a></span>
+<span id="L724" class="lineno"><a class="lineno" href="#L724">724</a></span>
+<span id="L725" class="lineno"><a class="lineno" href="#L725">725</a></span>
+<span id="L726" class="lineno"><a class="lineno" href="#L726">726</a></span>
+<span id="L727" class="lineno"><a class="lineno" href="#L727">727</a></span>
+<span id="L728" class="lineno"><a class="lineno" href="#L728">728</a></span>
+<span id="L729" class="lineno"><a class="lineno" href="#L729">729</a></span>
+<span id="L730" class="lineno"><a class="lineno" href="#L730">730</a></span>
+<span id="L731" class="lineno"><a class="lineno" href="#L731">731</a></span>
+<span id="L732" class="lineno"><a class="lineno" href="#L732">732</a></span>
+<span id="L733" class="lineno"><a class="lineno" href="#L733">733</a></span>
+<span id="L734" class="lineno"><a class="lineno" href="#L734">734</a></span>
+<span id="L735" class="lineno"><a class="lineno" href="#L735">735</a></span>
+<span id="L736" class="lineno"><a class="lineno" href="#L736">736</a></span>
+<span id="L737" class="lineno"><a class="lineno" href="#L737">737</a></span>
+<span id="L738" class="lineno"><a class="lineno" href="#L738">738</a></span>
+<span id="L739" class="lineno"><a class="lineno" href="#L739">739</a></span>
+<span id="L740" class="lineno"><a class="lineno" href="#L740">740</a></span>
+<span id="L741" class="lineno"><a class="lineno" href="#L741">741</a></span>
+<span id="L742" class="lineno"><a class="lineno" href="#L742">742</a></span>
+<span id="L743" class="lineno"><a class="lineno" href="#L743">743</a></span>
+<span id="L744" class="lineno"><a class="lineno" href="#L744">744</a></span>
+<span id="L745" class="lineno"><a class="lineno" href="#L745">745</a></span>
+<span id="L746" class="lineno"><a class="lineno" href="#L746">746</a></span>
+<span id="L747" class="lineno"><a class="lineno" href="#L747">747</a></span>
+<span id="L748" class="lineno"><a class="lineno" href="#L748">748</a></span>
+<span id="L749" class="lineno"><a class="lineno" href="#L749">749</a></span>
+<span id="L750" class="lineno"><a class="lineno" href="#L750">750</a></span>
+<span id="L751" class="lineno"><a class="lineno" href="#L751">751</a></span>
+<span id="L752" class="lineno"><a class="lineno" href="#L752">752</a></span>
+<span id="L753" class="lineno"><a class="lineno" href="#L753">753</a></span>
+<span id="L754" class="lineno"><a class="lineno" href="#L754">754</a></span>
+<span id="L755" class="lineno"><a class="lineno" href="#L755">755</a></span>
+<span id="L756" class="lineno"><a class="lineno" href="#L756">756</a></span>
+<span id="L757" class="lineno"><a class="lineno" href="#L757">757</a></span>
+<span id="L758" class="lineno"><a class="lineno" href="#L758">758</a></span>
+<span id="L759" class="lineno"><a class="lineno" href="#L759">759</a></span>
+<span id="L760" class="lineno"><a class="lineno" href="#L760">760</a></span>
+<span id="L761" class="lineno"><a class="lineno" href="#L761">761</a></span>
+<span id="L762" class="lineno"><a class="lineno" href="#L762">762</a></span>
+<span id="L763" class="lineno"><a class="lineno" href="#L763">763</a></span>
+<span id="L764" class="lineno"><a class="lineno" href="#L764">764</a></span>
+<span id="L765" class="lineno"><a class="lineno" href="#L765">765</a></span>
+<span id="L766" class="lineno"><a class="lineno" href="#L766">766</a></span>
+<span id="L767" class="lineno"><a class="lineno" href="#L767">767</a></span>
+<span id="L768" class="lineno"><a class="lineno" href="#L768">768</a></span>
+<span id="L769" class="lineno"><a class="lineno" href="#L769">769</a></span>
+<span id="L770" class="lineno"><a class="lineno" href="#L770">770</a></span>
+<span id="L771" class="lineno"><a class="lineno" href="#L771">771</a></span>
+<span id="L772" class="lineno"><a class="lineno" href="#L772">772</a></span>
+<span id="L773" class="lineno"><a class="lineno" href="#L773">773</a></span>
+<span id="L774" class="lineno"><a class="lineno" href="#L774">774</a></span>
+<span id="L775" class="lineno"><a class="lineno" href="#L775">775</a></span>
+<span id="L776" class="lineno"><a class="lineno" href="#L776">776</a></span>
+<span id="L777" class="lineno"><a class="lineno" href="#L777">777</a></span>
+<span id="L778" class="lineno"><a class="lineno" href="#L778">778</a></span>
+<span id="L779" class="lineno"><a class="lineno" href="#L779">779</a></span>
+<span id="L780" class="lineno"><a class="lineno" href="#L780">780</a></span>
+<span id="L781" class="lineno"><a class="lineno" href="#L781">781</a></span>
+<span id="L782" class="lineno"><a class="lineno" href="#L782">782</a></span>
+<span id="L783" class="lineno"><a class="lineno" href="#L783">783</a></span>
+<span id="L784" class="lineno"><a class="lineno" href="#L784">784</a></span>
+<span id="L785" class="lineno"><a class="lineno" href="#L785">785</a></span>
+<span id="L786" class="lineno"><a class="lineno" href="#L786">786</a></span>
+<span id="L787" class="lineno"><a class="lineno" href="#L787">787</a></span>
+<span id="L788" class="lineno"><a class="lineno" href="#L788">788</a></span>
+<span id="L789" class="lineno"><a class="lineno" href="#L789">789</a></span>
+<span id="L790" class="lineno"><a class="lineno" href="#L790">790</a></span>
+<span id="L791" class="lineno"><a class="lineno" href="#L791">791</a></span>
+<span id="L792" class="lineno"><a class="lineno" href="#L792">792</a></span>
+<span id="L793" class="lineno"><a class="lineno" href="#L793">793</a></span>
+<span id="L794" class="lineno"><a class="lineno" href="#L794">794</a></span>
+<span id="L795" class="lineno"><a class="lineno" href="#L795">795</a></span>
+<span id="L796" class="lineno"><a class="lineno" href="#L796">796</a></span>
+<span id="L797" class="lineno"><a class="lineno" href="#L797">797</a></span>
+<span id="L798" class="lineno"><a class="lineno" href="#L798">798</a></span>
+<span id="L799" class="lineno"><a class="lineno" href="#L799">799</a></span>
+<span id="L800" class="lineno"><a class="lineno" href="#L800">800</a></span>
+<span id="L801" class="lineno"><a class="lineno" href="#L801">801</a></span>
+<span id="L802" class="lineno"><a class="lineno" href="#L802">802</a></span>
+<span id="L803" class="lineno"><a class="lineno" href="#L803">803</a></span>
+<span id="L804" class="lineno"><a class="lineno" href="#L804">804</a></span>
+<span id="L805" class="lineno"><a class="lineno" href="#L805">805</a></span>
+<span id="L806" class="lineno"><a class="lineno" href="#L806">806</a></span>
+<span id="L807" class="lineno"><a class="lineno" href="#L807">807</a></span>
+<span id="L808" class="lineno"><a class="lineno" href="#L808">808</a></span>
+<span id="L809" class="lineno"><a class="lineno" href="#L809">809</a></span>
+<span id="L810" class="lineno"><a class="lineno" href="#L810">810</a></span>
+<span id="L811" class="lineno"><a class="lineno" href="#L811">811</a></span>
+<span id="L812" class="lineno"><a class="lineno" href="#L812">812</a></span>
+<span id="L813" class="lineno"><a class="lineno" href="#L813">813</a></span>
+<span id="L814" class="lineno"><a class="lineno" href="#L814">814</a></span>
+<span id="L815" class="lineno"><a class="lineno" href="#L815">815</a></span>
+<span id="L816" class="lineno"><a class="lineno" href="#L816">816</a></span>
+<span id="L817" class="lineno"><a class="lineno" href="#L817">817</a></span>
+<span id="L818" class="lineno"><a class="lineno" href="#L818">818</a></span>
+<span id="L819" class="lineno"><a class="lineno" href="#L819">819</a></span>
+<span id="L820" class="lineno"><a class="lineno" href="#L820">820</a></span>
+<span id="L821" class="lineno"><a class="lineno" href="#L821">821</a></span>
+<span id="L822" class="lineno"><a class="lineno" href="#L822">822</a></span>
+<span id="L823" class="lineno"><a class="lineno" href="#L823">823</a></span>
+<span id="L824" class="lineno"><a class="lineno" href="#L824">824</a></span>
+<span id="L825" class="lineno"><a class="lineno" href="#L825">825</a></span>
+<span id="L826" class="lineno"><a class="lineno" href="#L826">826</a></span>
+<span id="L827" class="lineno"><a class="lineno" href="#L827">827</a></span>
+<span id="L828" class="lineno"><a class="lineno" href="#L828">828</a></span>
+<span id="L829" class="lineno"><a class="lineno" href="#L829">829</a></span>
+<span id="L830" class="lineno"><a class="lineno" href="#L830">830</a></span>
+<span id="L831" class="lineno"><a class="lineno" href="#L831">831</a></span>
+<span id="L832" class="lineno"><a class="lineno" href="#L832">832</a></span>
+<span id="L833" class="lineno"><a class="lineno" href="#L833">833</a></span>
+<span id="L834" class="lineno"><a class="lineno" href="#L834">834</a></span>
+<span id="L835" class="lineno"><a class="lineno" href="#L835">835</a></span>
+<span id="L836" class="lineno"><a class="lineno" href="#L836">836</a></span>
+<span id="L837" class="lineno"><a class="lineno" href="#L837">837</a></span>
+<span id="L838" class="lineno"><a class="lineno" href="#L838">838</a></span>
+<span id="L839" class="lineno"><a class="lineno" href="#L839">839</a></span>
+<span id="L840" class="lineno"><a class="lineno" href="#L840">840</a></span>
+<span id="L841" class="lineno"><a class="lineno" href="#L841">841</a></span>
+<span id="L842" class="lineno"><a class="lineno" href="#L842">842</a></span>
+<span id="L843" class="lineno"><a class="lineno" href="#L843">843</a></span>
+<span id="L844" class="lineno"><a class="lineno" href="#L844">844</a></span>
+<span id="L845" class="lineno"><a class="lineno" href="#L845">845</a></span>
+<span id="L846" class="lineno"><a class="lineno" href="#L846">846</a></span>
+<span id="L847" class="lineno"><a class="lineno" href="#L847">847</a></span>
+<span id="L848" class="lineno"><a class="lineno" href="#L848">848</a></span>
+<span id="L849" class="lineno"><a class="lineno" href="#L849">849</a></span>
+<span id="L850" class="lineno"><a class="lineno" href="#L850">850</a></span>
+<span id="L851" class="lineno"><a class="lineno" href="#L851">851</a></span>
+<span id="L852" class="lineno"><a class="lineno" href="#L852">852</a></span>
+<span id="L853" class="lineno"><a class="lineno" href="#L853">853</a></span>
+<span id="L854" class="lineno"><a class="lineno" href="#L854">854</a></span>
+<span id="L855" class="lineno"><a class="lineno" href="#L855">855</a></span>
+<span id="L856" class="lineno"><a class="lineno" href="#L856">856</a></span>
+<span id="L857" class="lineno"><a class="lineno" href="#L857">857</a></span>
+<span id="L858" class="lineno"><a class="lineno" href="#L858">858</a></span>
+<span id="L859" class="lineno"><a class="lineno" href="#L859">859</a></span>
+<span id="L860" class="lineno"><a class="lineno" href="#L860">860</a></span>
+<span id="L861" class="lineno"><a class="lineno" href="#L861">861</a></span>
+<span id="L862" class="lineno"><a class="lineno" href="#L862">862</a></span>
+<span id="L863" class="lineno"><a class="lineno" href="#L863">863</a></span>
+<span id="L864" class="lineno"><a class="lineno" href="#L864">864</a></span>
+<span id="L865" class="lineno"><a class="lineno" href="#L865">865</a></span>
+<span id="L866" class="lineno"><a class="lineno" href="#L866">866</a></span>
+<span id="L867" class="lineno"><a class="lineno" href="#L867">867</a></span>
+<span id="L868" class="lineno"><a class="lineno" href="#L868">868</a></span>
+<span id="L869" class="lineno"><a class="lineno" href="#L869">869</a></span>
+<span id="L870" class="lineno"><a class="lineno" href="#L870">870</a></span>
+<span id="L871" class="lineno"><a class="lineno" href="#L871">871</a></span>
+<span id="L872" class="lineno"><a class="lineno" href="#L872">872</a></span>
+<span id="L873" class="lineno"><a class="lineno" href="#L873">873</a></span>
+<span id="L874" class="lineno"><a class="lineno" href="#L874">874</a></span>
+<span id="L875" class="lineno"><a class="lineno" href="#L875">875</a></span>
+<span id="L876" class="lineno"><a class="lineno" href="#L876">876</a></span>
+<span id="L877" class="lineno"><a class="lineno" href="#L877">877</a></span>
+<span id="L878" class="lineno"><a class="lineno" href="#L878">878</a></span>
+<span id="L879" class="lineno"><a class="lineno" href="#L879">879</a></span>
+<span id="L880" class="lineno"><a class="lineno" href="#L880">880</a></span>
+<span id="L881" class="lineno"><a class="lineno" href="#L881">881</a></span>
+<span id="L882" class="lineno"><a class="lineno" href="#L882">882</a></span>
+<span id="L883" class="lineno"><a class="lineno" href="#L883">883</a></span>
+<span id="L884" class="lineno"><a class="lineno" href="#L884">884</a></span>
+<span id="L885" class="lineno"><a class="lineno" href="#L885">885</a></span>
+<span id="L886" class="lineno"><a class="lineno" href="#L886">886</a></span>
+<span id="L887" class="lineno"><a class="lineno" href="#L887">887</a></span>
+<span id="L888" class="lineno"><a class="lineno" href="#L888">888</a></span>
+<span id="L889" class="lineno"><a class="lineno" href="#L889">889</a></span>
+<span id="L890" class="lineno"><a class="lineno" href="#L890">890</a></span>
+<span id="L891" class="lineno"><a class="lineno" href="#L891">891</a></span>
+<span id="L892" class="lineno"><a class="lineno" href="#L892">892</a></span>
+<span id="L893" class="lineno"><a class="lineno" href="#L893">893</a></span>
+<span id="L894" class="lineno"><a class="lineno" href="#L894">894</a></span>
+<span id="L895" class="lineno"><a class="lineno" href="#L895">895</a></span>
+<span id="L896" class="lineno"><a class="lineno" href="#L896">896</a></span>
+<span id="L897" class="lineno"><a class="lineno" href="#L897">897</a></span>
+<span id="L898" class="lineno"><a class="lineno" href="#L898">898</a></span>
+<span id="L899" class="lineno"><a class="lineno" href="#L899">899</a></span>
+<span id="L900" class="lineno"><a class="lineno" href="#L900">900</a></span>
+<span id="L901" class="lineno"><a class="lineno" href="#L901">901</a></span>
+<span id="L902" class="lineno"><a class="lineno" href="#L902">902</a></span>
+<span id="L903" class="lineno"><a class="lineno" href="#L903">903</a></span>
+<span id="L904" class="lineno"><a class="lineno" href="#L904">904</a></span>
+<span id="L905" class="lineno"><a class="lineno" href="#L905">905</a></span>
+<span id="L906" class="lineno"><a class="lineno" href="#L906">906</a></span>
+<span id="L907" class="lineno"><a class="lineno" href="#L907">907</a></span>
+<span id="L908" class="lineno"><a class="lineno" href="#L908">908</a></span>
+<span id="L909" class="lineno"><a class="lineno" href="#L909">909</a></span>
+<span id="L910" class="lineno"><a class="lineno" href="#L910">910</a></span>
+<span id="L911" class="lineno"><a class="lineno" href="#L911">911</a></span>
+<span id="L912" class="lineno"><a class="lineno" href="#L912">912</a></span>
+<span id="L913" class="lineno"><a class="lineno" href="#L913">913</a></span>
+<span id="L914" class="lineno"><a class="lineno" href="#L914">914</a></span>
+<span id="L915" class="lineno"><a class="lineno" href="#L915">915</a></span>
+<span id="L916" class="lineno"><a class="lineno" href="#L916">916</a></span>
+<span id="L917" class="lineno"><a class="lineno" href="#L917">917</a></span>
+<span id="L918" class="lineno"><a class="lineno" href="#L918">918</a></span>
+<span id="L919" class="lineno"><a class="lineno" href="#L919">919</a></span>
+<span id="L920" class="lineno"><a class="lineno" href="#L920">920</a></span>
+<span id="L921" class="lineno"><a class="lineno" href="#L921">921</a></span>
+<span id="L922" class="lineno"><a class="lineno" href="#L922">922</a></span>
+<span id="L923" class="lineno"><a class="lineno" href="#L923">923</a></span>
+<span id="L924" class="lineno"><a class="lineno" href="#L924">924</a></span>
+<span id="L925" class="lineno"><a class="lineno" href="#L925">925</a></span>
+<span id="L926" class="lineno"><a class="lineno" href="#L926">926</a></span>
+<span id="L927" class="lineno"><a class="lineno" href="#L927">927</a></span>
+<span id="L928" class="lineno"><a class="lineno" href="#L928">928</a></span>
+<span id="L929" class="lineno"><a class="lineno" href="#L929">929</a></span>
+<span id="L930" class="lineno"><a class="lineno" href="#L930">930</a></span>
+<span id="L931" class="lineno"><a class="lineno" href="#L931">931</a></span>
+<span id="L932" class="lineno"><a class="lineno" href="#L932">932</a></span>
+<span id="L933" class="lineno"><a class="lineno" href="#L933">933</a></span>
+<span id="L934" class="lineno"><a class="lineno" href="#L934">934</a></span>
+<span id="L935" class="lineno"><a class="lineno" href="#L935">935</a></span>
+<span id="L936" class="lineno"><a class="lineno" href="#L936">936</a></span>
+<span id="L937" class="lineno"><a class="lineno" href="#L937">937</a></span>
+<span id="L938" class="lineno"><a class="lineno" href="#L938">938</a></span>
+<span id="L939" class="lineno"><a class="lineno" href="#L939">939</a></span>
+<span id="L940" class="lineno"><a class="lineno" href="#L940">940</a></span>
+<span id="L941" class="lineno"><a class="lineno" href="#L941">941</a></span>
+<span id="L942" class="lineno"><a class="lineno" href="#L942">942</a></span>
+<span id="L943" class="lineno"><a class="lineno" href="#L943">943</a></span>
+<span id="L944" class="lineno"><a class="lineno" href="#L944">944</a></span>
+<span id="L945" class="lineno"><a class="lineno" href="#L945">945</a></span>
+</pre></td>
+<td class="table-code"><pre><span class="line-empty" title="No Anys on this line!">"""Base Active Inference Agent implementation using PyMDP."""</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">import logging</span>
+<span class="line-precise" title="No Anys on this line!">from abc import ABC, abstractmethod</span>
+<span class="line-precise" title="No Anys on this line!">from dataclasses import dataclass</span>
+<span class="line-precise" title="No Anys on this line!">from datetime import datetime</span>
+<span class="line-precise" title="No Anys on this line!">from typing import Any, Dict, List, Optional, Tuple, Callable</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">import numpy as np</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!"># PyMDP imports with error handling</span>
+<span class="line-empty" title="No Anys on this line!">try:</span>
+<span class="line-any" title="No Anys on this line!">    from pymdp import utils</span>
+<span class="line-any" title="No Anys on this line!">    from pymdp.agent import Agent as PyMDPAgent</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    PYMDP_AVAILABLE = True</span>
+<span class="line-precise" title="No Anys on this line!">except ImportError:</span>
+<span class="line-precise" title="No Anys on this line!">    PYMDP_AVAILABLE = False</span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x1)">    PyMDPAgent = None</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    class MockUtils:</span>
+<span class="line-empty" title="No Anys on this line!">        @staticmethod</span>
+<span class="line-any" title="No Anys on this line!">        def norm_dist(arr):</span>
+<span class="line-any" title="Any Types on this line: 
+Unannotated (x3)
+Explicit (x23)
+Omitted Generics (x16)">            return arr / np.sum(arr, axis=0, keepdims=True)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x1)">    utils = MockUtils()</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!"># Observability imports</span>
+<span class="line-empty" title="No Anys on this line!">try:</span>
+<span class="line-precise" title="No Anys on this line!">    from observability.performance_metrics import performance_monitor</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    OBSERVABILITY_AVAILABLE = True</span>
+<span class="line-precise" title="No Anys on this line!">except ImportError:</span>
+<span class="line-precise" title="No Anys on this line!">    OBSERVABILITY_AVAILABLE = False</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x6)">    def performance_monitor(name: str) -&gt; Callable[[Callable[..., Any]], Callable[..., Any]]:</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x6)">        def decorator(func: Callable[..., Any]) -&gt; Callable[..., Any]:</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x3)">            return func</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x6)">        return decorator</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!"># Error handling imports</span>
+<span class="line-empty" title="No Anys on this line!">try:</span>
+<span class="line-precise" title="No Anys on this line!">    from agents.error_handling import ErrorHandler</span>
+<span class="line-precise" title="No Anys on this line!">    from agents.pymdp_error_handling import (</span>
+<span class="line-empty" title="No Anys on this line!">        ActionSelectionError,</span>
+<span class="line-empty" title="No Anys on this line!">        InferenceError,</span>
+<span class="line-empty" title="No Anys on this line!">        PyMDPErrorHandler,</span>
+<span class="line-empty" title="No Anys on this line!">        safe_array_index,</span>
+<span class="line-empty" title="No Anys on this line!">        safe_pymdp_operation,</span>
+<span class="line-empty" title="No Anys on this line!">        validate_observation,</span>
+<span class="line-empty" title="No Anys on this line!">        validate_pymdp_matrices,</span>
+<span class="line-empty" title="No Anys on this line!">        with_error_handling,</span>
+<span class="line-empty" title="No Anys on this line!">    )</span>
+<span class="line-precise" title="No Anys on this line!">except ImportError:</span>
+<span class="line-empty" title="No Anys on this line!">    # Fallback error handling implementations</span>
+<span class="line-precise" title="No Anys on this line!">    class ErrorHandler:</span>
+<span class="line-precise" title="No Anys on this line!">        def __init__(self, agent_id: str) -&gt; None:</span>
+<span class="line-precise" title="No Anys on this line!">            self.agent_id = agent_id</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        def handle_error(self, error: Exception, context: str) -&gt; None:</span>
+<span class="line-precise" title="No Anys on this line!">            logging.error(f"Agent {self.agent_id} error in {context}: {error}")</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        def get_error_summary(self) -&gt; Dict[str, int]:</span>
+<span class="line-precise" title="No Anys on this line!">            return {"total_errors": 0}</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    class PyMDPErrorHandler:</span>
+<span class="line-precise" title="No Anys on this line!">        def __init__(self, agent_id: str) -&gt; None:</span>
+<span class="line-precise" title="No Anys on this line!">            self.agent_id = agent_id</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x3)">        def safe_execute(self, operation_name: str, operation: Callable[[], Any], fallback: Callable[[], Any]) -&gt; Tuple[bool, Any, Optional[str]]:</span>
+<span class="line-empty" title="No Anys on this line!">            try:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">                return True, operation(), None</span>
+<span class="line-precise" title="No Anys on this line!">            except Exception as e:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">                return False, fallback(), str(e)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        def get_error_report(self) -&gt; Dict[str, int]:</span>
+<span class="line-precise" title="No Anys on this line!">            return {"total_errors": 0}</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    class InferenceError(Exception):</span>
+<span class="line-precise" title="No Anys on this line!">        pass</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    class ActionSelectionError(Exception):</span>
+<span class="line-precise" title="No Anys on this line!">        pass</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">    # Fallback utility functions</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">    def validate_observation(obs: Any) -&gt; Any:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">        return obs</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">    def validate_action(action: Any, valid_actions: List[Any] = None) -&gt; Any:</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">        if valid_actions is None:</span>
+<span class="line-unanalyzed" title="No Anys on this line!">            return action</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x7)">        return action if action in valid_actions else (valid_actions[0] if valid_actions else action)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">    def validate_pymdp_matrices(A: Any, B: Any, C: Any, D: Any) -&gt; Tuple[bool, str]:</span>
+<span class="line-precise" title="No Anys on this line!">        return True, "Mock validation"</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">    def safe_numpy_conversion(value: Any, target_type: type = int, default: Any = None) -&gt; Any:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">        if default is None:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">            default = target_type()</span>
+<span class="line-empty" title="No Anys on this line!">        try:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">            return target_type(value)</span>
+<span class="line-precise" title="No Anys on this line!">        except (ValueError, TypeError):</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">            return default</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">    def safe_array_index(array: Any, index: Any, default: Any) -&gt; Any:</span>
+<span class="line-empty" title="No Anys on this line!">        try:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">            return array[index]</span>
+<span class="line-precise" title="No Anys on this line!">        except (IndexError, KeyError, TypeError):</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">            return default</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)
+Unannotated (x1)">    def safe_pymdp_operation(operation_name: str, default_value: Any = None):</span>
+<span class="line-empty" title="No Anys on this line!">        """Decorator for safe PyMDP operations."""</span>
+<span class="line-any" title="No Anys on this line!">        def decorator(func):</span>
+<span class="line-any" title="No Anys on this line!">            def wrapper(*args, **kwargs):</span>
+<span class="line-empty" title="No Anys on this line!">                try:</span>
+<span class="line-any" title="Any Types on this line: 
+Unannotated (x4)">                    return func(*args, **kwargs)</span>
+<span class="line-precise" title="No Anys on this line!">                except Exception as e:</span>
+<span class="line-any" title="No Anys on this line!">                    logging.error(f"PyMDP operation {operation_name} failed: {e}")</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">                    return default_value</span>
+<span class="line-precise" title="Any Types on this line: 
+Unannotated (x3)">            return wrapper</span>
+<span class="line-precise" title="Any Types on this line: 
+Unannotated (x2)">        return decorator</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)
+Unannotated (x1)">    def with_error_handling(operation_name: str, fallback_result: Any = None):</span>
+<span class="line-empty" title="No Anys on this line!">        """Decorator for error handling with fallback result."""</span>
+<span class="line-any" title="No Anys on this line!">        def decorator(func):</span>
+<span class="line-any" title="No Anys on this line!">            def wrapper(*args, **kwargs):</span>
+<span class="line-empty" title="No Anys on this line!">                try:</span>
+<span class="line-any" title="Any Types on this line: 
+Unannotated (x4)">                    return func(*args, **kwargs)</span>
+<span class="line-precise" title="No Anys on this line!">                except Exception as e:</span>
+<span class="line-any" title="No Anys on this line!">                    logging.error(f"Operation {operation_name} failed: {e}")</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">                    return fallback_result</span>
+<span class="line-precise" title="Any Types on this line: 
+Unannotated (x3)">            return wrapper</span>
+<span class="line-precise" title="Any Types on this line: 
+Unannotated (x2)">        return decorator</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!"># Performance optimization imports</span>
+<span class="line-empty" title="No Anys on this line!">try:</span>
+<span class="line-empty" title="No Anys on this line!">    from agents.performance_optimizer import PerformanceOptimizer</span>
+<span class="line-empty" title="No Anys on this line!">except ImportError:</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    class PerformanceOptimizer:</span>
+<span class="line-empty" title="No Anys on this line!">        def __init__(self) -&gt; None:</span>
+<span class="line-precise" title="No Anys on this line!">            pass</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!"># GMN parser imports</span>
+<span class="line-empty" title="No Anys on this line!">try:</span>
+<span class="line-empty" title="No Anys on this line!">    from inference.active.gmn_parser import parse_gmn_spec</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    GMN_AVAILABLE = True</span>
+<span class="line-empty" title="No Anys on this line!">except ImportError:</span>
+<span class="line-precise" title="No Anys on this line!">    GMN_AVAILABLE = False</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    def parse_gmn_spec(spec: str) -&gt; Dict[str, Any]:</span>
+<span class="line-empty" title="No Anys on this line!">        return {}</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)"></span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!"># LLM manager imports</span>
+<span class="line-empty" title="No Anys on this line!">try:</span>
+<span class="line-empty" title="No Anys on this line!">    from inference.llm.local_llm_manager import LocalLLMConfig, LocalLLMManager</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    LLM_AVAILABLE = True</span>
+<span class="line-empty" title="No Anys on this line!">except ImportError:</span>
+<span class="line-precise" title="No Anys on this line!">    LLM_AVAILABLE = False</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">logger = logging.getLogger(__name__)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">def safe_array_to_int(value: Any, default: int = 0) -&gt; int:</span>
+<span class="line-empty" title="No Anys on this line!">    """Safely convert array or scalar value to integer."""</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">    try:</span>
+<span class="line-empty" title="No Anys on this line!">        if hasattr(value, "ndim"):</span>
+<span class="line-empty" title="No Anys on this line!">            # This is a numpy array</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">            if value.ndim == 0:</span>
+<span class="line-empty" title="No Anys on this line!">                # 0-dimensional array (scalar)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">                return int(value.item())</span>
+<span class="line-empty" title="No Anys on this line!">            elif value.size == 0:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">                raise ValueError("Empty array cannot be converted to integer")</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">            elif value.size == 1:</span>
+<span class="line-precise" title="No Anys on this line!">                # Single element array</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">                return int(value.item())</span>
+<span class="line-empty" title="No Anys on this line!">            else:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">                # Multi-element array - take first element</span>
+<span class="line-empty" title="No Anys on this line!">                return int(value.flat[0])  # Use flat to handle any shape</span>
+<span class="line-empty" title="No Anys on this line!">        elif hasattr(value, "__len__") and hasattr(value, "__getitem__"):</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">            # Other array-like objects (lists, tuples, etc.)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">            if len(value) == 0:</span>
+<span class="line-empty" title="No Anys on this line!">                raise ValueError("Empty array cannot be converted to integer")</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">            else:</span>
+<span class="line-precise" title="No Anys on this line!">                return int(value[0])</span>
+<span class="line-empty" title="No Anys on this line!">        elif hasattr(value, "item"):</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">            # numpy scalar</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">            return int(value.item())</span>
+<span class="line-empty" title="No Anys on this line!">        else:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">            # regular scalar</span>
+<span class="line-empty" title="No Anys on this line!">            return int(value)</span>
+<span class="line-empty" title="No Anys on this line!">    except (TypeError, ValueError, IndexError) as e:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">        logger.warning(</span>
+<span class="line-precise" title="No Anys on this line!">            f"Cannot convert {type(value)} value {value} to integer: {e}, "</span>
+<span class="line-precise" title="No Anys on this line!">            f"using default {default}"</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">        )</span>
+<span class="line-precise" title="No Anys on this line!">        return default</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">@dataclass</span>
+<span class="line-empty" title="No Anys on this line!">class AgentConfig:</span>
+<span class="line-precise" title="Any Types on this line: 
+Omitted Generics (x6)">    """Configuration for an Active Inference agent."""</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">    agent_id: str</span>
+<span class="line-empty" title="No Anys on this line!">    name: str</span>
+<span class="line-precise" title="No Anys on this line!">    use_pymdp: bool = True</span>
+<span class="line-precise" title="No Anys on this line!">    use_llm: bool = False</span>
+<span class="line-precise" title="No Anys on this line!">    performance_mode: str = "balanced"  # "fast", "balanced", "accurate"</span>
+<span class="line-precise" title="No Anys on this line!">    selective_update_interval: int = 1</span>
+<span class="line-precise" title="No Anys on this line!">    planning_horizon: int = 3</span>
+<span class="line-precise" title="No Anys on this line!">    enable_observability: bool = True</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">class ActiveInferenceAgent(ABC):</span>
+<span class="line-empty" title="No Anys on this line!">    """Base class for Active Inference agents using PyMDP."""</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">    def __init__(self, agent_id: str, name: str, config: Dict[str, Any]):</span>
+<span class="line-empty" title="No Anys on this line!">        """Initialize the Active Inference agent."""</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">        self.agent_id = agent_id</span>
+<span class="line-empty" title="No Anys on this line!">        self.name = name</span>
+<span class="line-precise" title="No Anys on this line!">        self.config = config</span>
+<span class="line-precise" title="No Anys on this line!">        self.is_active = False</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">        self.created_at = datetime.now()</span>
+<span class="line-precise" title="No Anys on this line!">        self.last_action_at: Optional[datetime] = None</span>
+<span class="line-precise" title="No Anys on this line!">        self.total_steps = 0</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        # Performance configuration</span>
+<span class="line-empty" title="No Anys on this line!">        self.performance_mode = config.get("performance_mode", "balanced")</span>
+<span class="line-empty" title="No Anys on this line!">        self.selective_update_interval = config.get("selective_update_interval", 1)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x7)
+Omitted Generics (x2)">        self.matrix_cache: Dict[str, Any] = {}  # Cache for normalized matrices</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x7)
+Omitted Generics (x2)"></span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">        # Active Inference components</span>
+<span class="line-empty" title="No Anys on this line!">        self.pymdp_agent: Optional[Any] = None  # PyMDP agent instance</span>
+<span class="line-empty" title="No Anys on this line!">        self.beliefs: Dict[str, Any] = {}  # Beliefs about hidden states</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">        self.preferences: Dict[str, Any] = {}  # Preferred observations</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">        self.policies: List[Any] = []  # Available action policies</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">        self.current_observation: Optional[Any] = None</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)"></span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">        # GMN and LLM integration</span>
+<span class="line-empty" title="No Anys on this line!">        self.gmn_spec: Optional[Dict[str, Any]] = None</span>
+<span class="line-empty" title="No Anys on this line!">        if LLM_AVAILABLE and config.get("use_llm", False):</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">            llm_config_dict = config.get("llm_config", {})</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x7)
+Omitted Generics (x2)">            llm_config = LocalLLMConfig()</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x7)
+Omitted Generics (x2)">            for key, value in llm_config_dict.items():</span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x3)">                if hasattr(llm_config, key):</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x5)">                    setattr(llm_config, key, value)</span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x1)
+Explicit (x1)">            self.llm_manager = LocalLLMManager(llm_config)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)
+Unimported (x1)">        else:</span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x1)">            self.llm_manager: Optional[Any] = None</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">        # Initialize PyMDP if available:</span>
+<span class="line-empty" title="No Anys on this line!">        if PYMDP_AVAILABLE and config.get("use_pymdp", True):</span>
+<span class="line-empty" title="No Anys on this line!">            self._initialize_pymdp()</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x7)
+Omitted Generics (x2)"></span>
+<span class="line-precise" title="No Anys on this line!">        # Metrics</span>
+<span class="line-empty" title="No Anys on this line!">        self.metrics = {</span>
+<span class="line-empty" title="No Anys on this line!">            "total_observations": 0,</span>
+<span class="line-precise" title="No Anys on this line!">            "total_actions": 0,</span>
+<span class="line-precise" title="No Anys on this line!">            "avg_free_energy": 0.0,</span>
+<span class="line-precise" title="No Anys on this line!">            "belief_entropy": 0.0,</span>
+<span class="line-precise" title="No Anys on this line!">        }</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        # Observability integration</span>
+<span class="line-empty" title="No Anys on this line!">        self.observability_enabled = OBSERVABILITY_AVAILABLE and config.get(</span>
+<span class="line-empty" title="No Anys on this line!">            "enable_observability", True</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x8)
+Omitted Generics (x2)">        )</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        # Error handling</span>
+<span class="line-empty" title="No Anys on this line!">        self.error_handler = ErrorHandler(self.agent_id)</span>
+<span class="line-empty" title="No Anys on this line!">        self.pymdp_error_handler = PyMDPErrorHandler(self.agent_id)</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        # Performance optimization</span>
+<span class="line-empty" title="No Anys on this line!">        self.performance_optimizer = PerformanceOptimizer()</span>
+<span class="line-empty" title="No Anys on this line!">        self.performance_metrics: Dict[str, Any] = {}</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">        logger.info(</span>
+<span class="line-empty" title="No Anys on this line!">            f"Created agent {self.agent_id} ({self.name}) - PyMDP: {PYMDP_AVAILABLE}, "</span>
+<span class="line-precise" title="No Anys on this line!">            f"Performance Mode: {self.performance_mode}"</span>
+<span class="line-precise" title="No Anys on this line!">        )</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)"></span>
+<span class="line-empty" title="No Anys on this line!">    def _initialize_pymdp(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Initialize PyMDP agent with default configuration."""</span>
+<span class="line-precise" title="No Anys on this line!">        if not PYMDP_AVAILABLE:</span>
+<span class="line-empty" title="No Anys on this line!">            logger.warning("PyMDP not available, skipping initialization")</span>
+<span class="line-precise" title="No Anys on this line!">            return</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        try:</span>
+<span class="line-empty" title="No Anys on this line!">            # Default grid world setup</span>
+<span class="line-empty" title="No Anys on this line!">            num_states = 16  # 4x4 grid</span>
+<span class="line-empty" title="No Anys on this line!">            num_obs = 5  # empty, obstacle, goal, agent, out_of_bounds</span>
+<span class="line-precise" title="No Anys on this line!">            num_actions = 5  # up, down, left, right, stay</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">            # Create default observation model (A matrix)</span>
+<span class="line-empty" title="No Anys on this line!">            A = np.eye(num_obs, num_states)</span>
+<span class="line-empty" title="No Anys on this line!">            A = utils.norm_dist(A)</span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x6)
+Omitted Generics (x4)"></span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x3)">            # Create default transition model (B matrix)</span>
+<span class="line-empty" title="No Anys on this line!">            B = np.zeros((num_states, num_states, num_actions))</span>
+<span class="line-empty" title="No Anys on this line!">            for action in range(num_actions):</span>
+<span class="line-precise" title="No Anys on this line!">                B[:, :, action] = np.eye(num_states)</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x6)
+Omitted Generics (x4)">            # Create default preferences (C vector)</span>
+<span class="line-empty" title="No Anys on this line!">            C = np.zeros(num_obs)</span>
+<span class="line-empty" title="No Anys on this line!">            C[0] = 1.0  # Prefer empty spaces</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">            # Create default prior (D vector)</span>
+<span class="line-empty" title="No Anys on this line!">            D = utils.norm_dist(np.ones(num_states))</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x4)">            # Create PyMDP agent</span>
+<span class="line-empty" title="No Anys on this line!">            self.pymdp_agent = PyMDPAgent(</span>
+<span class="line-empty" title="No Anys on this line!">                A=A,</span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x2)
+Explicit (x1)">                B=B,</span>
+<span class="line-precise" title="No Anys on this line!">                C=C,</span>
+<span class="line-precise" title="No Anys on this line!">                D=D,</span>
+<span class="line-precise" title="No Anys on this line!">                policy_len=self._get_policy_length(),</span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x1)">                inference_algo="VANILLA",</span>
+<span class="line-precise" title="No Anys on this line!">                use_states_info_gain=True,</span>
+<span class="line-precise" title="No Anys on this line!">                use_param_info_gain=self._get_param_info_gain(),</span>
+<span class="line-precise" title="No Anys on this line!">                use_utility=True,</span>
+<span class="line-precise" title="No Anys on this line!">                gamma=self._get_gamma(),</span>
+<span class="line-precise" title="No Anys on this line!">                alpha=self._get_alpha(),</span>
+<span class="line-precise" title="No Anys on this line!">                inference_horizon=1,</span>
+<span class="line-precise" title="No Anys on this line!">                save_belief_hist=False,</span>
+<span class="line-precise" title="No Anys on this line!">            )</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">            logger.info(f"Initialized default PyMDP agent for {self.agent_id}")</span>
+<span class="line-empty" title="No Anys on this line!">        except Exception as e:</span>
+<span class="line-precise" title="No Anys on this line!">            logger.error(f"Failed to initialize PyMDP: {e}")</span>
+<span class="line-precise" title="No Anys on this line!">            self.pymdp_agent = None</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">    def _get_policy_length(self) -&gt; int:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get adaptive policy length based on performance mode."""</span>
+<span class="line-precise" title="No Anys on this line!">        if self.performance_mode == "fast":</span>
+<span class="line-empty" title="No Anys on this line!">            return 1</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">        elif self.performance_mode == "balanced":</span>
+<span class="line-precise" title="No Anys on this line!">            return 2</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">        else:  # "accurate"</span>
+<span class="line-precise" title="No Anys on this line!">            return 3</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    def _get_param_info_gain(self) -&gt; bool:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get parameter info gain setting based on performance mode."""</span>
+<span class="line-precise" title="No Anys on this line!">        return self.performance_mode != "fast"</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">    def _get_gamma(self) -&gt; float:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get adaptive gamma (policy precision) based on performance mode."""</span>
+<span class="line-precise" title="No Anys on this line!">        if self.performance_mode == "fast":</span>
+<span class="line-empty" title="No Anys on this line!">            return 8.0</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">        elif self.performance_mode == "balanced":</span>
+<span class="line-precise" title="No Anys on this line!">            return 12.0</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">        else:  # "accurate"</span>
+<span class="line-precise" title="No Anys on this line!">            return 16.0</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    def _get_alpha(self) -&gt; float:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get adaptive alpha (action precision) based on performance mode."""</span>
+<span class="line-precise" title="No Anys on this line!">        if self.performance_mode == "fast":</span>
+<span class="line-empty" title="No Anys on this line!">            return 8.0</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">        elif self.performance_mode == "balanced":</span>
+<span class="line-precise" title="No Anys on this line!">            return 12.0</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">        else:  # "accurate"</span>
+<span class="line-precise" title="No Anys on this line!">            return 16.0</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    def _should_update_beliefs(self) -&gt; bool:</span>
+<span class="line-empty" title="No Anys on this line!">        """Determine if beliefs should be updated this step."""</span>
+<span class="line-precise" title="No Anys on this line!">        if self.selective_update_interval &lt;= 1:</span>
+<span class="line-empty" title="No Anys on this line!">            return True</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">        return (self.total_steps % self.selective_update_interval) == 0</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">    def _get_cached_matrix(</span>
+<span class="line-empty" title="No Anys on this line!">        self, matrix_name: str, matrix_data: Any, normalization_func: Callable[[Any], Any]</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">    ) -&gt; Any:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get cached normalized matrix or compute and cache it."""</span>
+<span class="line-empty" title="No Anys on this line!">        if not hasattr(self, "matrix_cache"):</span>
+<span class="line-empty" title="No Anys on this line!">            self.matrix_cache: Dict[str, Any] = {}</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">        cache_key = f"{matrix_name}_{hash(str(matrix_data))}"</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">        if cache_key not in self.matrix_cache:</span>
+<span class="line-empty" title="No Anys on this line!">            self.matrix_cache[cache_key] = normalization_func(matrix_data)</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">            logger.debug(f"Cached matrix {matrix_name} for agent {self.agent_id}")</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x5)"></span>
+<span class="line-precise" title="No Anys on this line!">        return self.matrix_cache[cache_key]</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">    def load_gmn_spec(self, gmn_spec: str) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Load GMN specification for the agent."""</span>
+<span class="line-precise" title="No Anys on this line!">        if not GMN_AVAILABLE:</span>
+<span class="line-empty" title="No Anys on this line!">            logger.error("GMN parser not available")</span>
+<span class="line-precise" title="No Anys on this line!">            return</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        try:</span>
+<span class="line-empty" title="No Anys on this line!">            self.gmn_spec = parse_gmn_spec(gmn_spec)</span>
+<span class="line-empty" title="No Anys on this line!">            logger.info(f"Loaded GMN spec for agent {self.agent_id}")</span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x2)
+Explicit (x1)"></span>
+<span class="line-precise" title="No Anys on this line!">            # Reinitialize PyMDP with new spec</span>
+<span class="line-empty" title="No Anys on this line!">            if PYMDP_AVAILABLE:</span>
+<span class="line-empty" title="No Anys on this line!">                self._initialize_pymdp_from_gmn()</span>
+<span class="line-precise" title="No Anys on this line!">        except Exception as e:</span>
+<span class="line-precise" title="No Anys on this line!">            logger.error(f"Failed to parse GMN spec: {e}")</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    def _initialize_pymdp_from_gmn(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Initialize PyMDP agent from GMN specification."""</span>
+<span class="line-precise" title="No Anys on this line!">        if not self.gmn_spec:</span>
+<span class="line-empty" title="No Anys on this line!">            return</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)"></span>
+<span class="line-empty" title="No Anys on this line!">        try:</span>
+<span class="line-empty" title="No Anys on this line!">            num_states = self.gmn_spec.get("num_states", [4])</span>
+<span class="line-empty" title="No Anys on this line!">            num_obs = self.gmn_spec.get("num_obs", [4])</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x7)
+Omitted Generics (x2)">            num_actions = self.gmn_spec.get("num_actions", [4])</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x7)
+Omitted Generics (x2)"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x7)
+Omitted Generics (x2)">            # Get matrices from GMN spec or use defaults</span>
+<span class="line-empty" title="No Anys on this line!">            A_matrices = self.gmn_spec.get("A", [])</span>
+<span class="line-empty" title="No Anys on this line!">            B_matrices = self.gmn_spec.get("B", [])</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x7)
+Omitted Generics (x2)">            C_vectors = self.gmn_spec.get("C", [])</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x7)
+Omitted Generics (x2)">            D_vectors = self.gmn_spec.get("D", [])</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x7)
+Omitted Generics (x2)"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x7)
+Omitted Generics (x2)">            # Create default matrices if not provided:</span>
+<span class="line-empty" title="No Anys on this line!">            if not A_matrices:</span>
+<span class="line-empty" title="No Anys on this line!">                A = np.eye(num_obs[0], num_states[0])</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">                A_matrices = [A]</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x10)
+Omitted Generics (x4)"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">            if not B_matrices:</span>
+<span class="line-empty" title="No Anys on this line!">                B = np.zeros((num_states[0], num_states[0], num_actions[0]))</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">                for a in range(num_actions[0]):</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x6)">                    B[:, :, a] = np.eye(num_states[0])</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">                B_matrices = [B]</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x8)
+Omitted Generics (x4)"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">            if not C_vectors:</span>
+<span class="line-empty" title="No Anys on this line!">                C = np.zeros(num_obs[0])</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">                C[0] = 1.0</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">                C_vectors = [C]</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">            if not D_vectors:</span>
+<span class="line-empty" title="No Anys on this line!">                D = utils.norm_dist(np.ones(num_states[0]))</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">                D_vectors = [D]</span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x4)
+Explicit (x2)"></span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x1)
+Explicit (x1)">            # Create PyMDP agent with GMN-specified model</span>
+<span class="line-empty" title="No Anys on this line!">            self.pymdp_agent = PyMDPAgent(</span>
+<span class="line-empty" title="No Anys on this line!">                A=A_matrices,</span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x2)
+Explicit (x1)">                B=B_matrices,</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">                C=C_vectors,</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">                D=D_vectors,</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">                use_utility=True,</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">                use_states_info_gain=True,</span>
+<span class="line-precise" title="No Anys on this line!">                use_param_info_gain=False,</span>
+<span class="line-precise" title="No Anys on this line!">                inference_horizon=self.config.get("planning_horizon", 3),</span>
+<span class="line-precise" title="No Anys on this line!">            )</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x6)
+Omitted Generics (x2)"></span>
+<span class="line-empty" title="No Anys on this line!">            logger.info(f"Successfully initialized PyMDP agent from GMN spec for {self.agent_id}")</span>
+<span class="line-empty" title="No Anys on this line!">        except Exception as e:</span>
+<span class="line-precise" title="No Anys on this line!">            logger.error(f"Failed to initialize PyMDP from GMN: {e}")</span>
+<span class="line-precise" title="No Anys on this line!">            self.pymdp_agent = None</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">    def _process_observation_with_llm(self, observation: Any) -&gt; Any:</span>
+<span class="line-empty" title="No Anys on this line!">        """Process observation with LLM if available."""</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">        if not self.llm_manager:</span>
+<span class="line-empty" title="No Anys on this line!">            return observation</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">        try:</span>
+<span class="line-empty" title="No Anys on this line!">            prompt = (</span>
+<span class="line-empty" title="No Anys on this line!">                f"Analyze this observation for an active inference agent: "</span>
+<span class="line-precise" title="No Anys on this line!">                f"{observation}\n"</span>
+<span class="line-precise" title="No Anys on this line!">                "Provide structured analysis for belief updating."</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">            )</span>
+<span class="line-empty" title="No Anys on this line!">            response = self.llm_manager.generate_response(prompt)</span>
+<span class="line-empty" title="No Anys on this line!">            logger.debug(f"LLM interpretation: {response}")</span>
+<span class="line-any" title="Any Types on this line: 
+Error (x3)"></span>
+<span class="line-any" title="Any Types on this line: 
+Error (x1)">            # Add LLM interpretation to observation</span>
+<span class="line-empty" title="No Anys on this line!">            if isinstance(observation, dict):</span>
+<span class="line-empty" title="No Anys on this line!">                observation["llm_interpretation"] = response</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)
+Omitted Generics (x18)"></span>
+<span class="line-any" title="Any Types on this line: 
+Error (x1)">        except Exception as e:</span>
+<span class="line-empty" title="No Anys on this line!">            logger.error(f"LLM processing failed: {e}")</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        return observation</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">    @abstractmethod</span>
+<span class="line-empty" title="No Anys on this line!">    def perceive(self, observation: Any) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Process incoming observation."""</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)"></span>
+<span class="line-empty" title="No Anys on this line!">    @abstractmethod</span>
+<span class="line-empty" title="No Anys on this line!">    def update_beliefs(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Update beliefs about hidden states using Active Inference."""</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">    @abstractmethod</span>
+<span class="line-empty" title="No Anys on this line!">    def select_action(self) -&gt; Any:</span>
+<span class="line-empty" title="No Anys on this line!">        """Select action based on current beliefs and preferences."""</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)"></span>
+<span class="line-empty" title="No Anys on this line!">    @with_error_handling("agent_step", fallback_result="stay")</span>
+<span class="line-empty" title="No Anys on this line!">    def step(self, observation: Any) -&gt; Any:</span>
+<span class="line-any" title="Any Types on this line: 
+Unannotated (x2)
+Explicit (x1)">        """Execute one step of the agent's Active Inference loop."""</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">        if not self.is_active:</span>
+<span class="line-empty" title="No Anys on this line!">            raise RuntimeError(f"Agent {self.agent_id} is not active")</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        try:</span>
+<span class="line-empty" title="No Anys on this line!">            # Validate and sanitize observation</span>
+<span class="line-empty" title="No Anys on this line!">            observation = validate_observation(observation)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x5)">            # Use LLM to process observation if available:</span>
+<span class="line-empty" title="No Anys on this line!">            if self.llm_manager and self.config.get("use_llm", False):</span>
+<span class="line-empty" title="No Anys on this line!">                observation = self._process_observation_with_llm(observation)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x7)
+Omitted Generics (x2)"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x5)">            # Active Inference loop</span>
+<span class="line-empty" title="No Anys on this line!">            self.perceive(observation)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">            if self._should_update_beliefs():</span>
+<span class="line-empty" title="No Anys on this line!">                self.update_beliefs()</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">            action = self.select_action()</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">            # Update metrics</span>
+<span class="line-empty" title="No Anys on this line!">            self.total_steps += 1</span>
+<span class="line-empty" title="No Anys on this line!">            self.last_action_at = datetime.now()</span>
+<span class="line-precise" title="No Anys on this line!">            self.metrics["total_observations"] += 1</span>
+<span class="line-precise" title="No Anys on this line!">            self.metrics["total_actions"] += 1</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">            # Compute and store free energy</span>
+<span class="line-empty" title="No Anys on this line!">            if self.pymdp_agent and PYMDP_AVAILABLE:</span>
+<span class="line-empty" title="No Anys on this line!">                fe_components = self.compute_free_energy()</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">                if fe_components and "total_free_energy" in fe_components:</span>
+<span class="line-precise" title="No Anys on this line!">                    self.metrics.update(fe_components)</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">            logger.debug(f"Agent {self.agent_id} step {self.total_steps}: {action}")</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">            return action</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">        except Exception as e:</span>
+<span class="line-empty" title="No Anys on this line!">            logger.error(f"Agent {self.agent_id} step failed: {e}")</span>
+<span class="line-precise" title="No Anys on this line!">            self.error_handler.handle_error(e, "agent_step")</span>
+<span class="line-precise" title="No Anys on this line!">            return "stay"</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)"></span>
+<span class="line-precise" title="No Anys on this line!">    def start(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Start the agent."""</span>
+<span class="line-precise" title="No Anys on this line!">        if hasattr(self, "_initialize_pymdp") and self.pymdp_agent is None:</span>
+<span class="line-empty" title="No Anys on this line!">            self._initialize_pymdp()</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">        self.is_active = True</span>
+<span class="line-precise" title="No Anys on this line!">        logger.info(f"Agent {self.agent_id} started")</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    def stop(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Stop the agent."""</span>
+<span class="line-precise" title="No Anys on this line!">        self.is_active = False</span>
+<span class="line-empty" title="No Anys on this line!">        logger.info(f"Agent {self.agent_id} stopped")</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    def get_status(self) -&gt; Dict[str, Any]:</span>
+<span class="line-empty" title="No Anys on this line!">        """Get current agent status."""</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">        status = {</span>
+<span class="line-empty" title="No Anys on this line!">            "agent_id": self.agent_id,</span>
+<span class="line-precise" title="No Anys on this line!">            "name": self.name,</span>
+<span class="line-precise" title="No Anys on this line!">            "is_active": self.is_active,</span>
+<span class="line-precise" title="No Anys on this line!">            "created_at": self.created_at.isoformat(),</span>
+<span class="line-precise" title="No Anys on this line!">            "last_action_at": (self.last_action_at.isoformat() if self.last_action_at else None),</span>
+<span class="line-precise" title="No Anys on this line!">            "total_steps": self.total_steps,</span>
+<span class="line-precise" title="No Anys on this line!">            "metrics": self.metrics,</span>
+<span class="line-precise" title="No Anys on this line!">        }</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        # Add error handling status</span>
+<span class="line-empty" title="No Anys on this line!">        if hasattr(self, "error_handler"):</span>
+<span class="line-empty" title="No Anys on this line!">            status["error_summary"] = self.error_handler.get_error_summary()</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Error (x2)">        # Add PyMDP-specific error handling status</span>
+<span class="line-empty" title="No Anys on this line!">        if hasattr(self, "pymdp_error_handler"):</span>
+<span class="line-empty" title="No Anys on this line!">            status["pymdp_error_report"] = self.pymdp_error_handler.get_error_report()</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">        return status</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    def compute_free_energy(self) -&gt; Dict[str, float]:</span>
+<span class="line-empty" title="No Anys on this line!">        """Compute free energy components."""</span>
+<span class="line-precise" title="No Anys on this line!">        if not self.pymdp_agent or not PYMDP_AVAILABLE:</span>
+<span class="line-empty" title="No Anys on this line!">            return {"error": "PyMDP not available"}</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)"></span>
+<span class="line-precise" title="No Anys on this line!">        if not hasattr(self.pymdp_agent, "qs") or self.pymdp_agent.qs is None:</span>
+<span class="line-empty" title="No Anys on this line!">            return {"error": "No beliefs available"}</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)"></span>
+<span class="line-precise" title="No Anys on this line!">        try:</span>
+<span class="line-empty" title="No Anys on this line!">            # Get current beliefs</span>
+<span class="line-empty" title="No Anys on this line!">            qs = self.pymdp_agent.qs[0]  # Single factor for simplicity</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">            # Get observation model and current observation</span>
+<span class="line-empty" title="No Anys on this line!">            A = self.pymdp_agent.A[0]</span>
+<span class="line-empty" title="No Anys on this line!">            obs_idx = self.current_observation[0] if self.current_observation else 0</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">            # Compute accuracy term</span>
+<span class="line-empty" title="No Anys on this line!">            likelihood = A[obs_idx, :]</span>
+<span class="line-empty" title="No Anys on this line!">            epsilon = 1e-10</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">            accuracy = np.sum(qs * np.log(likelihood + epsilon))</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x26)
+Omitted Generics (x16)">            # Get prior beliefs</span>
+<span class="line-empty" title="No Anys on this line!">            prior = (</span>
+<span class="line-empty" title="No Anys on this line!">                self.pymdp_agent.D[0]</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">                if hasattr(self.pymdp_agent, "D")</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">                else np.ones_like(qs) / len(qs)</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">            )</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x16)
+Omitted Generics (x8)"></span>
+<span class="line-empty" title="No Anys on this line!">            # Compute complexity term</span>
+<span class="line-empty" title="No Anys on this line!">            complexity = np.sum(qs * (np.log(qs + epsilon) - np.log(prior + epsilon)))</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x28)
+Omitted Generics (x16)">            # Total variational free energy</span>
+<span class="line-empty" title="No Anys on this line!">            free_energy = complexity - accuracy</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">            return {</span>
+<span class="line-empty" title="No Anys on this line!">                "total_free_energy": float(free_energy),</span>
+<span class="line-empty" title="No Anys on this line!">                "accuracy": float(accuracy),</span>
+<span class="line-precise" title="No Anys on this line!">                "complexity": float(complexity),</span>
+<span class="line-precise" title="No Anys on this line!">                "surprise": float(-np.log(likelihood[np.argmax(qs)] + epsilon)),</span>
+<span class="line-precise" title="No Anys on this line!">            }</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x9)
+Omitted Generics (x4)"></span>
+<span class="line-empty" title="No Anys on this line!">        except Exception as e:</span>
+<span class="line-empty" title="No Anys on this line!">            logger.error(f"Failed to compute free energy: {e}")</span>
+<span class="line-precise" title="No Anys on this line!">            return {"error": str(e)}</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">class BasicExplorerAgent(ActiveInferenceAgent):</span>
+<span class="line-empty" title="No Anys on this line!">    """Basic explorer agent for grid world environments."""</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">    def __init__(</span>
+<span class="line-empty" title="No Anys on this line!">        self,</span>
+<span class="line-precise" title="No Anys on this line!">        agent_id: str,</span>
+<span class="line-empty" title="No Anys on this line!">        name: str = "BasicExplorer",</span>
+<span class="line-empty" title="No Anys on this line!">        grid_size: int = 4,</span>
+<span class="line-precise" title="No Anys on this line!">        position: Tuple[int, int] = (0, 0),</span>
+<span class="line-precise" title="No Anys on this line!">    ):</span>
+<span class="line-precise" title="No Anys on this line!">        """Initialize the BasicExplorerAgent."""</span>
+<span class="line-empty" title="No Anys on this line!">        self.grid_size = grid_size</span>
+<span class="line-empty" title="No Anys on this line!">        self.position = position</span>
+<span class="line-precise" title="No Anys on this line!">        self.num_states = grid_size * grid_size</span>
+<span class="line-precise" title="No Anys on this line!">        self.num_obs = 5  # empty, obstacle, goal, agent, out_of_bounds</span>
+<span class="line-precise" title="No Anys on this line!">        self.num_actions = 5  # up, down, left, right, stay</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        self.action_map = {0: "up", 1: "down", 2: "left", 3: "right", 4: "stay"}</span>
+<span class="line-empty" title="No Anys on this line!">        self.actions = list(self.action_map.values())</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="Any Types on this line: 
+Omitted Generics (x3)">        # Configuration</span>
+<span class="line-empty" title="No Anys on this line!">        config = {</span>
+<span class="line-empty" title="No Anys on this line!">            "use_pymdp": PYMDP_AVAILABLE,</span>
+<span class="line-precise" title="No Anys on this line!">            "use_llm": False,</span>
+<span class="line-precise" title="No Anys on this line!">            "grid_size": grid_size,</span>
+<span class="line-precise" title="No Anys on this line!">            "performance_mode": "fast",</span>
+<span class="line-precise" title="No Anys on this line!">            "selective_update_interval": 2,</span>
+<span class="line-precise" title="No Anys on this line!">        }</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        # Initialize parent</span>
+<span class="line-empty" title="No Anys on this line!">        super().__init__(agent_id, name, config)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-imprecise" title="No Anys on this line!">        # Simplified belief state (fallback)</span>
+<span class="line-empty" title="No Anys on this line!">        self.uncertainty_map = np.ones((grid_size, grid_size))</span>
+<span class="line-empty" title="No Anys on this line!">        self.uncertainty_map[self.position[0], self.position[1]] = 0</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        # Preferences</span>
+<span class="line-empty" title="No Anys on this line!">        self.exploration_rate = 0.3</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    def _initialize_pymdp(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Initialize PyMDP agent for grid world exploration."""</span>
+<span class="line-precise" title="No Anys on this line!">        if not PYMDP_AVAILABLE:</span>
+<span class="line-empty" title="No Anys on this line!">            logger.warning("PyMDP not available, using fallback behavior")</span>
+<span class="line-precise" title="No Anys on this line!">            return</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">        try:</span>
+<span class="line-empty" title="No Anys on this line!">            # A matrix: P(observation|state) - observation model</span>
+<span class="line-empty" title="No Anys on this line!">            A = np.zeros((self.num_obs, self.num_states))</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">            # Most states observe "empty"</span>
+<span class="line-empty" title="No Anys on this line!">            for state in range(self.num_states):</span>
+<span class="line-empty" title="No Anys on this line!">                A[0, state] = 0.8  # Empty</span>
+<span class="line-precise" title="No Anys on this line!">                A[1, state] = 0.05  # Obstacle</span>
+<span class="line-precise" title="No Anys on this line!">                A[2, state] = 0.05  # Goal</span>
+<span class="line-precise" title="No Anys on this line!">                A[3, state] = 0.05  # Agent</span>
+<span class="line-precise" title="No Anys on this line!">                A[4, state] = 0.05  # Out of bounds</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">            # Add noise for robustness</span>
+<span class="line-empty" title="No Anys on this line!">            A = A + 0.01</span>
+<span class="line-empty" title="No Anys on this line!">            A = self._get_cached_matrix("A_observation", A, utils.norm_dist)</span>
+<span class="line-precise" title="No Anys on this line!">            # B matrix: P(next_state|state,action) - transition dynamics</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x5)
+Unimported (x2)">            B = np.zeros((self.num_states, self.num_states, self.num_actions), dtype=np.float32)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">            # Action deltas</span>
+<span class="line-empty" title="No Anys on this line!">            action_deltas = {</span>
+<span class="line-empty" title="No Anys on this line!">                0: (-1, 0),  # up</span>
+<span class="line-precise" title="No Anys on this line!">                1: (1, 0),  # down</span>
+<span class="line-precise" title="No Anys on this line!">                2: (0, -1),  # left</span>
+<span class="line-precise" title="No Anys on this line!">                3: (0, 1),  # right</span>
+<span class="line-precise" title="No Anys on this line!">                4: (0, 0),  # stay</span>
+<span class="line-precise" title="No Anys on this line!">            }</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">            # Build transition matrix</span>
+<span class="line-empty" title="No Anys on this line!">            for state in range(self.num_states):</span>
+<span class="line-empty" title="No Anys on this line!">                x, y = state // self.grid_size, state % self.grid_size</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">                for action_idx, (dx, dy) in action_deltas.items():</span>
+<span class="line-empty" title="No Anys on this line!">                    next_x, next_y = x + dx, y + dy</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">                    # Check bounds</span>
+<span class="line-empty" title="No Anys on this line!">                    if 0 &lt;= next_x &lt; self.grid_size and 0 &lt;= next_y &lt; self.grid_size:</span>
+<span class="line-empty" title="No Anys on this line!">                        next_state = next_x * self.grid_size + next_y</span>
+<span class="line-precise" title="No Anys on this line!">                        B[next_state, state, action_idx] = 0.9</span>
+<span class="line-precise" title="No Anys on this line!">                        B[state, state, action_idx] = 0.1</span>
+<span class="line-precise" title="No Anys on this line!">                    else:</span>
+<span class="line-precise" title="No Anys on this line!">                        B[state, state, action_idx] = 1.0</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">            # Normalize B matrix</span>
+<span class="line-empty" title="No Anys on this line!">            col_sums = np.sum(B, axis=0, keepdims=True)</span>
+<span class="line-empty" title="No Anys on this line!">            col_sums[col_sums == 0] = 1.0</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x24)
+Omitted Generics (x16)">            B = B / col_sums</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">            # C matrix: Observation preferences</span>
+<span class="line-empty" title="No Anys on this line!">            C = np.zeros(self.num_obs)</span>
+<span class="line-empty" title="No Anys on this line!">            C[0] = 2.0  # Prefer empty spaces</span>
+<span class="line-precise" title="No Anys on this line!">            C[1] = -4.0  # Avoid obstacles</span>
+<span class="line-precise" title="No Anys on this line!">            C[2] = 8.0  # Prefer goals</span>
+<span class="line-precise" title="No Anys on this line!">            C[3] = 0.0  # Neutral about agents</span>
+<span class="line-precise" title="No Anys on this line!">            C[4] = -4.0  # Avoid out-of-bounds</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">            # D matrix: Initial state distribution</span>
+<span class="line-empty" title="No Anys on this line!">            D = np.ones(self.num_states) / self.num_states</span>
+<span class="line-empty" title="No Anys on this line!">            current_state = self.position[0] * self.grid_size + self.position[1]</span>
+<span class="line-precise" title="No Anys on this line!">            D[current_state] *= 2.0</span>
+<span class="line-precise" title="No Anys on this line!">            D = D / D.sum()</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x8)
+Omitted Generics (x4)">            # Validate matrices</span>
+<span class="line-empty" title="No Anys on this line!">            is_valid, validation_msg = validate_pymdp_matrices(A, B, C, D)</span>
+<span class="line-empty" title="No Anys on this line!">            if not is_valid:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">                raise ValueError(f"PyMDP matrix validation failed: {validation_msg}")</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">            # Create PyMDP agent</span>
+<span class="line-empty" title="No Anys on this line!">            self.pymdp_agent = PyMDPAgent(</span>
+<span class="line-empty" title="No Anys on this line!">                A=A,</span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x2)
+Explicit (x1)">                B=B,</span>
+<span class="line-precise" title="No Anys on this line!">                C=C,</span>
+<span class="line-precise" title="No Anys on this line!">                D=D,</span>
+<span class="line-precise" title="No Anys on this line!">                policy_len=self._get_policy_length(),</span>
+<span class="line-precise" title="No Anys on this line!">                inference_algo="VANILLA",</span>
+<span class="line-precise" title="No Anys on this line!">                use_states_info_gain=True,</span>
+<span class="line-precise" title="No Anys on this line!">                use_param_info_gain=self._get_param_info_gain(),</span>
+<span class="line-precise" title="No Anys on this line!">                use_utility=True,</span>
+<span class="line-precise" title="No Anys on this line!">                gamma=self._get_gamma(),</span>
+<span class="line-precise" title="No Anys on this line!">                alpha=self._get_alpha(),</span>
+<span class="line-precise" title="No Anys on this line!">                inference_horizon=1,</span>
+<span class="line-precise" title="No Anys on this line!">                save_belief_hist=False,</span>
+<span class="line-precise" title="No Anys on this line!">            )</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">            logger.info(f"Initialized PyMDP agent for {self.agent_id}")</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        except Exception as e:</span>
+<span class="line-empty" title="No Anys on this line!">            logger.error(f"Failed to initialize PyMDP: {e}")</span>
+<span class="line-precise" title="No Anys on this line!">            self.pymdp_agent = None</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">    def perceive(self, observation: Dict[str, Any]) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Process incoming observation."""</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">        if "position" in observation:</span>
+<span class="line-empty" title="No Anys on this line!">            self.position = observation["position"]</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">        # Convert observation to PyMDP format</span>
+<span class="line-empty" title="No Anys on this line!">        if self.pymdp_agent and PYMDP_AVAILABLE:</span>
+<span class="line-empty" title="No Anys on this line!">            surroundings = np.array(observation.get("surroundings", []))</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x26)
+Omitted Generics (x12)">            if surroundings.size &gt; 0:</span>
+<span class="line-empty" title="No Anys on this line!">                center_val = surroundings[1, 1] if surroundings.shape == (3, 3) else 0</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">                # Map to observation categories:</span>
+<span class="line-empty" title="No Anys on this line!">                if center_val == -2:  # Out of bounds</span>
+<span class="line-empty" title="No Anys on this line!">                    obs_idx = 4</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">                elif center_val == -1:  # Obstacle</span>
+<span class="line-precise" title="No Anys on this line!">                    obs_idx = 1</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">                elif center_val == 1:  # Goal</span>
+<span class="line-precise" title="No Anys on this line!">                    obs_idx = 2</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">                elif center_val == 2:  # Other agent</span>
+<span class="line-precise" title="No Anys on this line!">                    obs_idx = 3</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">                else:  # Empty</span>
+<span class="line-precise" title="No Anys on this line!">                    obs_idx = 0</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">                self.current_observation = [obs_idx]</span>
+<span class="line-empty" title="No Anys on this line!">                self.metrics["last_observation"] = obs_idx</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">        else:</span>
+<span class="line-precise" title="No Anys on this line!">            # Fallback: update uncertainty map</span>
+<span class="line-empty" title="No Anys on this line!">            x, y = self.position</span>
+<span class="line-empty" title="No Anys on this line!">            self.uncertainty_map[x, y] = 0</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">            # Reduce uncertainty in neighboring cells</span>
+<span class="line-empty" title="No Anys on this line!">            for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:</span>
+<span class="line-empty" title="No Anys on this line!">                nx, ny = x + dx, y + dy</span>
+<span class="line-precise" title="No Anys on this line!">                if 0 &lt;= nx &lt; self.grid_size and 0 &lt;= ny &lt; self.grid_size:</span>
+<span class="line-precise" title="No Anys on this line!">                    self.uncertainty_map[nx, ny] *= 0.8</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">    @performance_monitor("belief_update")</span>
+<span class="line-empty" title="No Anys on this line!">    @safe_pymdp_operation("belief_update", default_value=None)</span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x2)">    def update_beliefs(self) -&gt; None:</span>
+<span class="line-any" title="Any Types on this line: 
+Unannotated (x2)
+Explicit (x1)">        """Update beliefs about hidden states."""</span>
+<span class="line-precise" title="No Anys on this line!">        if self._should_use_pymdp_beliefs():</span>
+<span class="line-empty" title="No Anys on this line!">            self._update_beliefs_with_pymdp()</span>
+<span class="line-precise" title="No Anys on this line!">        else:</span>
+<span class="line-precise" title="No Anys on this line!">            self._fallback_update_beliefs()</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    def _should_use_pymdp_beliefs(self) -&gt; bool:</span>
+<span class="line-empty" title="No Anys on this line!">        """Check if PyMDP belief update should be used."""</span>
+<span class="line-precise" title="No Anys on this line!">        return (</span>
+<span class="line-empty" title="No Anys on this line!">            self.pymdp_agent is not None</span>
+<span class="line-empty" title="No Anys on this line!">            and PYMDP_AVAILABLE</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">            and hasattr(self, "current_observation")</span>
+<span class="line-precise" title="No Anys on this line!">        )</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">    def _update_beliefs_with_pymdp(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Update beliefs using PyMDP inference."""</span>
+<span class="line-precise" title="No Anys on this line!">        try:</span>
+<span class="line-empty" title="No Anys on this line!">            # Perform state inference</span>
+<span class="line-empty" title="No Anys on this line!">            success, _, error = self.pymdp_error_handler.safe_execute(</span>
+<span class="line-empty" title="No Anys on this line!">                "state_inference",</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x3)
+Omitted Generics (x6)">                lambda: self.pymdp_agent.infer_states(self.current_observation),</span>
+<span class="line-precise" title="No Anys on this line!">                lambda: None,</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">            )</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-empty" title="No Anys on this line!">            if not success and error:</span>
+<span class="line-empty" title="No Anys on this line!">                logger.warning(f"State inference failed: {error}")</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">            # Update metrics based on beliefs</span>
+<span class="line-empty" title="No Anys on this line!">            self._update_belief_metrics()</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        except Exception as e:</span>
+<span class="line-empty" title="No Anys on this line!">            logger.warning(f"PyMDP belief update failed: {e}")</span>
+<span class="line-precise" title="No Anys on this line!">            self._fallback_update_beliefs()</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    def _update_belief_metrics(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Update metrics based on current belief state."""</span>
+<span class="line-precise" title="No Anys on this line!">        if not (hasattr(self.pymdp_agent, "qs") and self.pymdp_agent.qs is not None):</span>
+<span class="line-empty" title="No Anys on this line!">            return</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)"></span>
+<span class="line-empty" title="No Anys on this line!">        qs = self.pymdp_agent.qs</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">        # Calculate and store entropy</span>
+<span class="line-empty" title="No Anys on this line!">        entropy = self._calculate_belief_entropy(qs)</span>
+<span class="line-empty" title="No Anys on this line!">        self.metrics["belief_entropy"] = float(entropy)</span>
+<span class="line-any" title="Any Types on this line: 
+Unannotated (x1)
+Explicit (x1)"></span>
+<span class="line-precise" title="No Anys on this line!">        # Store beliefs for debugging if needed</span>
+<span class="line-empty" title="No Anys on this line!">        self._store_debug_beliefs(qs)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Unannotated (x1)
+Explicit (x1)">        # Update free energy periodically</span>
+<span class="line-empty" title="No Anys on this line!">        self._update_free_energy_metrics()</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    def _calculate_belief_entropy(self, qs) -&gt; float:</span>
+<span class="line-empty" title="No Anys on this line!">        """Calculate entropy of belief distribution."""</span>
+<span class="line-any" title="Any Types on this line: 
+Unannotated (x1)">        epsilon = 1e-10</span>
+<span class="line-empty" title="No Anys on this line!">        if len(qs) == 1:</span>
+<span class="line-precise" title="No Anys on this line!">            factor = qs[0]</span>
+<span class="line-any" title="Any Types on this line: 
+Unannotated (x1)">            return -np.sum(factor * np.log(factor + epsilon))</span>
+<span class="line-any" title="Any Types on this line: 
+Unannotated (x3)">        else:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x22)
+Omitted Generics (x16)
+Unannotated (x4)">            return sum(-np.sum(factor * np.log(factor + epsilon)) for factor in qs)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Omitted Generics (x22)
+Explicit (x30)
+Unannotated (x6)">    def _store_debug_beliefs(self, qs) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Store beliefs for debugging if debug mode is enabled."""</span>
+<span class="line-any" title="Any Types on this line: 
+Unannotated (x1)">        if self.config.get("debug_mode", False):</span>
+<span class="line-empty" title="No Anys on this line!">            self.beliefs["state_posterior"] = [q.tolist() for q in qs]</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x6)
+Omitted Generics (x2)"></span>
+<span class="line-any" title="Any Types on this line: 
+Unannotated (x5)
+Explicit (x1)">    def _update_free_energy_metrics(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Update free energy metrics periodically."""</span>
+<span class="line-precise" title="No Anys on this line!">        if self.total_steps % 10 == 0:</span>
+<span class="line-empty" title="No Anys on this line!">            if hasattr(self.pymdp_agent, "F") and self.pymdp_agent.F is not None:</span>
+<span class="line-precise" title="No Anys on this line!">                self.metrics["avg_free_energy"] = float(np.mean(self.pymdp_agent.F))</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x22)
+Omitted Generics (x12)">    def _fallback_update_beliefs(self) -&gt; None:</span>
+<span class="line-empty" title="No Anys on this line!">        """Fallback belief update when PyMDP fails."""</span>
+<span class="line-precise" title="No Anys on this line!">        self.metrics["belief_entropy"] = np.mean(self.uncertainty_map)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x20)
+Omitted Generics (x12)">        # Increase uncertainty over time</span>
+<span class="line-empty" title="No Anys on this line!">        self.uncertainty_map *= 1.01</span>
+<span class="line-empty" title="No Anys on this line!">        self.uncertainty_map = np.clip(self.uncertainty_map, 0, 1)</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="Any Types on this line: 
+Explicit (x13)
+Omitted Generics (x7)">    @performance_monitor("action_selection")</span>
+<span class="line-empty" title="No Anys on this line!">    @safe_pymdp_operation("action_selection", default_value="stay")</span>
+<span class="line-any" title="Any Types on this line: 
+Unimported (x2)">    def select_action(self) -&gt; str:</span>
+<span class="line-any" title="Any Types on this line: 
+Unannotated (x2)
+Explicit (x1)">        """Select action based on current beliefs."""</span>
+<span class="line-precise" title="No Anys on this line!">        if self.pymdp_agent and PYMDP_AVAILABLE:</span>
+<span class="line-empty" title="No Anys on this line!">            try:</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x2)">                # Perform action inference</span>
+<span class="line-empty" title="No Anys on this line!">                success, _, error = self.pymdp_error_handler.safe_execute(</span>
+<span class="line-empty" title="No Anys on this line!">                    "action_inference", lambda: self.pymdp_agent.infer_policies(), lambda: None</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x3)
+Omitted Generics (x6)">                )</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)"></span>
+<span class="line-empty" title="No Anys on this line!">                if not success and error:</span>
+<span class="line-empty" title="No Anys on this line!">                    logger.warning(f"Action inference failed: {error}")</span>
+<span class="line-precise" title="No Anys on this line!">                    return self._fallback_select_action()</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">                # Get action and policy information</span>
+<span class="line-empty" title="No Anys on this line!">                action_idx = self.pymdp_agent.sample_action()</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x4)">                # Convert to safe integer</span>
+<span class="line-empty" title="No Anys on this line!">                action_idx_converted, error = self.pymdp_error_handler.safe_execute(</span>
+<span class="line-empty" title="No Anys on this line!">                    "action_index_conversion", lambda: safe_array_to_int(action_idx, 4), lambda: 4</span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x3)
+Omitted Generics (x6)">                )</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)"></span>
+<span class="line-empty" title="No Anys on this line!">                if error:</span>
+<span class="line-empty" title="No Anys on this line!">                    logger.warning(f"Action index conversion failed: {error}")</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">                # Convert to action string</span>
+<span class="line-empty" title="No Anys on this line!">                selected_action = safe_array_index(self.action_map, action_idx_converted, "stay")</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x6)
+Error (x1)">                # Store metrics</span>
+<span class="line-empty" title="No Anys on this line!">                if hasattr(self.pymdp_agent, "G") and self.pymdp_agent.G is not None:</span>
+<span class="line-empty" title="No Anys on this line!">                    self.metrics["expected_free_energy"] = float(np.min(self.pymdp_agent.G))</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x15)
+Omitted Generics (x7)">                return selected_action</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x1)">            except Exception as e:</span>
+<span class="line-empty" title="No Anys on this line!">                logger.warning(f"PyMDP action selection failed: {e}")</span>
+<span class="line-precise" title="No Anys on this line!">                return self._fallback_select_action()</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        return self._fallback_select_action()</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">    def _fallback_select_action(self) -&gt; str:</span>
+<span class="line-empty" title="No Anys on this line!">        """Fallback action selection when PyMDP fails."""</span>
+<span class="line-precise" title="No Anys on this line!">        # Simple exploration strategy</span>
+<span class="line-empty" title="No Anys on this line!">        x, y = self.position</span>
+<span class="line-empty" title="No Anys on this line!">        action_values = {}</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">        for action in self.actions:</span>
+<span class="line-empty" title="No Anys on this line!">            new_x, new_y = self._simulate_action(x, y, action)</span>
+<span class="line-precise" title="No Anys on this line!"></span>
+<span class="line-precise" title="No Anys on this line!">            if 0 &lt;= new_x &lt; self.grid_size and 0 &lt;= new_y &lt; self.grid_size:</span>
+<span class="line-empty" title="No Anys on this line!">                # Value based on uncertainty reduction</span>
+<span class="line-precise" title="No Anys on this line!">                uncertainty_reduction = self.uncertainty_map[new_x, new_y]</span>
+<span class="line-empty" title="No Anys on this line!">                action_values[action] = uncertainty_reduction</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">            else:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x2)">                action_values[action] = -1  # Invalid action</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-imprecise" title="Any Types on this line: 
+Explicit (x1)">        # Add exploration noise</span>
+<span class="line-empty" title="No Anys on this line!">        if np.random.random() &lt; self.exploration_rate:</span>
+<span class="line-empty" title="No Anys on this line!">            valid_actions = [a for a, v in action_values.items() if v &gt;= 0]</span>
+<span class="line-precise" title="No Anys on this line!">            return np.random.choice(valid_actions) if valid_actions else "stay"</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x6)">        else:</span>
+<span class="line-any" title="Any Types on this line: 
+Explicit (x3)">            return max(action_values, key=action_values.get)</span>
+<span class="line-empty" title="No Anys on this line!"></span>
+<span class="line-imprecise" title="Any Types on this line: 
+Omitted Generics (x25)
+Explicit (x6)">    def _simulate_action(self, x: int, y: int, action: str) -&gt; Tuple[int, int]:</span>
+<span class="line-empty" title="No Anys on this line!">        """Simulate the result of taking an action."""</span>
+<span class="line-precise" title="No Anys on this line!">        if action == "up":</span>
+<span class="line-empty" title="No Anys on this line!">            return x - 1, y</span>
+<span class="line-precise" title="No Anys on this line!">        elif action == "down":</span>
+<span class="line-precise" title="No Anys on this line!">            return x + 1, y</span>
+<span class="line-precise" title="No Anys on this line!">        elif action == "left":</span>
+<span class="line-precise" title="No Anys on this line!">            return x, y - 1</span>
+<span class="line-precise" title="No Anys on this line!">        elif action == "right":</span>
+<span class="line-precise" title="No Anys on this line!">            return x, y + 1</span>
+<span class="line-precise" title="No Anys on this line!">        else:</span>
+<span class="line-precise" title="No Anys on this line!">            return x, y</span>
+</pre></td>
+</tr></tbody>
+</table>
+</body>
+</html>

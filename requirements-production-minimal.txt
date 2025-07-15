@@ -1,0 +1,39 @@
+# Ultra-minimal production dependencies for FreeAgentics
+# Optimized for smallest Docker image size
+
+# Core Framework
+fastapi==0.115.14
+uvicorn[standard]==0.35.0
+pydantic==2.9.2
+
+# CPU-only PyTorch (much smaller than full PyTorch)
+torch==2.2.0+cpu --index-url https://download.pytorch.org/whl/cpu
+
+# Essential scientific computing (without CUDA)
+numpy==1.26.4
+
+# Active Inference (minimal)
+# inferactively-pymdp==0.0.7.1  # Comment out if not essential for demo
+
+# Database (minimal)
+sqlalchemy==2.0.41
+psycopg2-binary==2.9.10
+
+# Authentication (essential only)
+passlib[bcrypt]==1.7.4
+python-jose[cryptography]==3.3.0
+
+# Configuration
+python-dotenv==1.1.1
+
+# Production server
+gunicorn==23.0.0
+
+# Redis (essential for caching)
+redis==6.2.0
+
+# Observability (minimal)
+prometheus_client==0.21.1
+
+# System monitoring (lightweight)
+psutil==6.1.1

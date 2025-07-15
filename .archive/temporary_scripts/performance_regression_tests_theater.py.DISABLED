@@ -1,0 +1,392 @@
+"""
+Performance regression tests for the FreeAgentics system.
+"""
+
+import asyncio
+import logging
+import sys
+import time
+from typing import Dict
+
+import pytest
+
+logger = logging.getLogger(__name__)
+
+
+class PerformanceRegressionTests:
+    """Test suite for performance regression detection."""
+
+    def __init__(self):
+        """Initialize performance regression tests."""
+        self.baseline_metrics = {}
+        self.tolerance = 0.2  # 20% tolerance for regressions
+
+    def setup_method(self):
+        """Set up each test method."""
+        logger.info("Setting up performance regression test")
+
+    def teardown_method(self):
+        """Clean up after each test method."""
+        logger.info("Cleaning up performance regression test")
+
+    @pytest.mark.performance
+    def test_agent_creation_performance(self):
+        """Test agent creation performance against baseline."""
+        start_time = time.time()
+
+        # Simulate agent creation
+        num_agents = 50
+        for i in range(num_agents):
+            # Mock agent creation
+
+            time.sleep(0.001)  # Simulate creation overhead
+
+        total_time = time.time() - start_time
+        time_per_agent = total_time / num_agents
+
+        # Assert performance requirement
+        assert (
+            time_per_agent < 0.01
+        ), f"Agent creation too slow: {time_per_agent:.3f}s per agent"
+
+        logger.info(f"Agent creation: {time_per_agent:.3f}s per agent")
+
+    @pytest.mark.performance
+    def test_database_query_performance(self):
+        """Test database query performance."""
+        start_time = time.time()
+
+        # Simulate database queries
+        num_queries = 100
+        for i in range(num_queries):
+            # Mock database query
+            time.sleep(0.002)  # Simulate query time
+
+        total_time = time.time() - start_time
+        time_per_query = total_time / num_queries
+
+        # Assert performance requirement
+        assert (
+            time_per_query < 0.005
+        ), f"Database queries too slow: {time_per_query:.3f}s per query"
+
+        logger.info(f"Database queries: {time_per_query:.3f}s per query")
+
+    @pytest.mark.performance
+    def test_inference_performance(self):
+        """Test inference performance."""
+        start_time = time.time()
+
+        # Simulate inference operations
+        num_inferences = 20
+        for i in range(num_inferences):
+            # Mock inference computation
+
+            time.sleep(0.01)  # Simulate inference time
+
+        total_time = time.time() - start_time
+        time_per_inference = total_time / num_inferences
+
+        # Assert performance requirement
+        assert (
+            time_per_inference < 0.05
+        ), f"Inference too slow: {time_per_inference:.3f}s per inference"
+
+        logger.info(f"Inference: {time_per_inference:.3f}s per inference")
+
+    @pytest.mark.performance
+    @pytest.mark.asyncio
+    async def test_coordination_performance(self):
+        """Test agent coordination performance."""
+        start_time = time.time()
+
+        # Simulate coordination operations
+        coordination_tasks = []
+        num_operations = 30
+
+        async def mock_coordination_operation(op_id):
+            """Mock coordination operation."""
+            await asyncio.sleep(0.005)  # Simulate coordination time
+            return f"result_{op_id}"
+
+        for i in range(num_operations):
+            task = asyncio.create_task(mock_coordination_operation(i))
+            coordination_tasks.append(task)
+
+        results = await asyncio.gather(*coordination_tasks)
+
+        total_time = time.time() - start_time
+        time_per_operation = total_time / num_operations
+
+        # Assert performance requirement
+        assert (
+            time_per_operation < 0.02
+        ), f"Coordination too slow: {time_per_operation:.3f}s per operation"
+
+        logger.info(f"Coordination: {time_per_operation:.3f}s per operation")
+        assert len(results) == num_operations
+
+    @pytest.mark.performance
+    def test_memory_optimization_performance(self):
+        """Test that memory optimization itself is performant."""
+        start_time = time.time()
+
+        # Simulate memory optimization operations
+        num_agents = 25
+        for i in range(num_agents):
+            # Mock memory optimization
+            data = list(range(1000))  # Create some data
+            del data  # Simulate cleanup
+            time.sleep(0.001)  # Simulation overhead
+
+        total_time = time.time() - start_time
+        time_per_agent = total_time / num_agents
+
+        # Assert performance requirement
+        assert (
+            time_per_agent < 0.01
+        ), f"Memory optimization too slow: {time_per_agent:.3f}s per agent"
+
+        logger.info(f"Memory optimization: {time_per_agent:.3f}s per agent")
+
+    @pytest.mark.performance
+    @pytest.mark.asyncio
+    async def test_websocket_pool_performance(self):
+        """Test WebSocket pool performance under load."""
+
+        class MockWebSocket:
+            """Mock WebSocket for testing."""
+
+            def __init__(self):
+                self.closed = False
+
+            async def close(self):
+                self.closed = True
+
+        class MockWebSocketPool:
+            """Mock WebSocket pool for testing."""
+
+            def __init__(self):
+                self.connections = {}
+
+            async def add_connection(self, ws, agent_id, session_id):
+                await asyncio.sleep(0.001)  # Simulate connection setup
+                self.connections[agent_id] = ws
+
+            async def stop(self):
+                for ws in self.connections.values():
+                    await ws.close()
+                self.connections.clear()
+
+        pool = MockWebSocketPool()
+
+        try:
+            start_time = time.time()
+
+            # Simulate adding connections
+            connection_tasks = []
+            num_connections = 100
+
+            for i in range(num_connections):
+                mock_ws = MockWebSocket()
+                task = asyncio.create_task(
+                    pool.add_connection(mock_ws, f"agent_{i}", "test")
+                )
+                connection_tasks.append(task)
+
+            await asyncio.gather(*connection_tasks)
+
+            connection_time = time.time() - start_time
+            time_per_connection = connection_time / num_connections
+
+            # Connection setup should be fast
+            assert (
+                time_per_connection < 0.01
+            ), f"WebSocket connection setup too slow: {time_per_connection:.3f}s per connection"
+
+            logger.info(f"WebSocket pool: {time_per_connection:.3f}s per connection")
+
+        finally:
+            await pool.stop()
+
+    @pytest.mark.performance
+    def test_knowledge_graph_update_performance(self):
+        """Test knowledge graph update performance."""
+        start_time = time.time()
+
+        # Simulate knowledge graph updates
+        num_updates = 50
+        for i in range(num_updates):
+            # Mock knowledge graph update - simulate creating data without storing
+            # This would normally create a graph update with nodes and edges
+            time.sleep(0.003)  # Simulate update processing
+
+        total_time = time.time() - start_time
+        time_per_update = total_time / num_updates
+
+        # Assert performance requirement
+        assert (
+            time_per_update < 0.01
+        ), f"Knowledge graph updates too slow: {time_per_update:.3f}s per update"
+
+        logger.info(f"Knowledge graph updates: {time_per_update:.3f}s per update")
+
+    @pytest.mark.performance
+    def test_batch_processing_performance(self):
+        """Test batch processing performance."""
+        start_time = time.time()
+
+        # Simulate batch processing
+        batch_size = 100
+        num_batches = 10
+
+        for batch_num in range(num_batches):
+            # Process a batch
+            batch_data = [f"item_{i}" for i in range(batch_size)]
+
+            # Mock batch processing
+            processed = []
+            for item in batch_data:
+                processed.append(f"processed_{item}")
+
+            time.sleep(0.005)  # Simulate batch processing overhead
+
+        total_time = time.time() - start_time
+        total_items = batch_size * num_batches
+        time_per_item = total_time / total_items
+
+        # Assert performance requirement
+        assert (
+            time_per_item < 0.001
+        ), f"Batch processing too slow: {time_per_item:.4f}s per item"
+
+        logger.info(f"Batch processing: {time_per_item:.4f}s per item")
+
+    def measure_baseline_performance(self) -> Dict[str, float]:
+        """Measure baseline performance for comparison."""
+        baselines = {}
+
+        # Agent creation baseline
+        start = time.time()
+        for i in range(10):
+            time.sleep(0.001)
+        baselines["agent_creation"] = (time.time() - start) / 10
+
+        # Database query baseline
+        start = time.time()
+        for i in range(20):
+            time.sleep(0.002)
+        baselines["database_query"] = (time.time() - start) / 20
+
+        # Inference baseline
+        start = time.time()
+        for i in range(5):
+            sum(range(5000))
+            time.sleep(0.01)
+        baselines["inference"] = (time.time() - start) / 5
+
+        return baselines
+
+    def check_regression(
+        self, current_metric: float, baseline_metric: float, metric_name: str
+    ) -> bool:
+        """Check if current metric represents a regression."""
+        if baseline_metric == 0:
+            return False
+
+        regression_ratio = (current_metric - baseline_metric) / baseline_metric
+
+        if regression_ratio > self.tolerance:
+            logger.warning(
+                f"Performance regression detected in {metric_name}: "
+                f"{regression_ratio:.1%} slower than baseline"
+            )
+            return True
+
+        return False
+
+
+def test_performance_regression_suite():
+    """Run the complete performance regression test suite."""
+    test_suite = PerformanceRegressionTests()
+
+    # Measure baselines
+    baselines = test_suite.measure_baseline_performance()
+    logger.info(f"Performance baselines: {baselines}")
+
+    # Check for any obvious regressions
+    for metric_name, baseline_value in baselines.items():
+        assert (
+            baseline_value > 0
+        ), f"Invalid baseline for {metric_name}: {baseline_value}"
+        assert (
+            baseline_value < 1.0
+        ), f"Baseline too slow for {metric_name}: {baseline_value}s"
+
+
+@pytest.mark.performance
+def test_system_load_handling():
+    """Test system performance under simulated load."""
+    start_time = time.time()
+
+    # Simulate system load
+    load_operations = []
+    num_operations = 200
+
+    for i in range(num_operations):
+        # Simulate various system operations
+        operation_type = i % 4
+
+        if operation_type == 0:
+            # CPU operation
+            sum(range(1000))
+        elif operation_type == 1:
+            # Memory operation - simulate allocation and deallocation
+            # Create and immediately discard to simulate memory churn
+            [i] * 100
+        elif operation_type == 2:
+            # I/O simulation
+            time.sleep(0.001)
+        else:
+            # Mixed operation
+            sum(range(500))
+            time.sleep(0.0005)
+
+        load_operations.append(f"op_{i}")
+
+    total_time = time.time() - start_time
+    time_per_operation = total_time / num_operations
+
+    # System should handle load efficiently
+    assert (
+        time_per_operation < 0.005
+    ), f"System load handling too slow: {time_per_operation:.4f}s per operation"
+
+    logger.info(f"System load handling: {time_per_operation:.4f}s per operation")
+
+
+if __name__ == "__main__":
+    # Run specific performance tests
+    logging.basicConfig(level=logging.INFO)
+
+    if len(sys.argv) > 1 and sys.argv[1] == "memory":
+        # Run only memory tests
+        pytest.main(
+            [
+                __file__
+                + "::PerformanceRegressionTests::test_memory_optimization_performance",
+                "-v",
+            ]
+        )
+    elif len(sys.argv) > 1 and sys.argv[1] == "websocket":
+        # Run only websocket tests
+        pytest.main(
+            [
+                __file__
+                + "::PerformanceRegressionTests::test_websocket_pool_performance",
+                "-v",
+            ]
+        )
+    else:
+        # Run all performance tests
+        pytest.main([__file__, "-v", "-m", "performance"])

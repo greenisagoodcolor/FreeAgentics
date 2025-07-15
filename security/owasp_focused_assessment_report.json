@@ -1,0 +1,369 @@
+{
+  "assessment_date": "2025-07-14T15:10:52.838454",
+  "assessment_type": "focused_application_analysis",
+  "project_root": ".",
+  "files_analyzed": 22,
+  "total_findings": 31,
+  "severity_summary": {
+    "CRITICAL": 0,
+    "HIGH": 31,
+    "MEDIUM": 0,
+    "LOW": 0
+  },
+  "category_summary": {
+    "A01: Broken Access Control": 29,
+    "A02: Cryptographic Failures": 2
+  },
+  "file_summary": {
+    "api/main.py": 1,
+    "api/v1/system.py": 5,
+    "api/v1/websocket.py": 2,
+    "api/v1/monitoring.py": 3,
+    "api/v1/auth.py": 2,
+    "api/v1/knowledge.py": 16,
+    "agents/error_handling.py": 2
+  },
+  "findings": [
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/main.py",
+      "line_number": 75,
+      "evidence": "@app.get(\"/\")",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179950"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/system.py",
+      "line_number": 37,
+      "evidence": "@router.get(\"/metrics\", response_model=SystemMetrics)",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179961"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/system.py",
+      "line_number": 116,
+      "evidence": "@router.get(\"/info\")",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179963"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/system.py",
+      "line_number": 150,
+      "evidence": "@router.get(\"/logs/recent\")",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179964"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/system.py",
+      "line_number": 178,
+      "evidence": "@router.post(\"/cleanup\")",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179965"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/system.py",
+      "line_number": 237,
+      "evidence": "@router.get(\"/cleanup/status\")",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179966"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/websocket.py",
+      "line_number": 277,
+      "evidence": "@router.get(\"/ws/connections\")",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179967"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/websocket.py",
+      "line_number": 297,
+      "evidence": "@router.get(\"/ws/subscriptions\")",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179969"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/monitoring.py",
+      "line_number": 321,
+      "evidence": "@router.get(\"/metrics/{metric_type}\")",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179970"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/monitoring.py",
+      "line_number": 338,
+      "evidence": "@router.get(\"/metrics/types\")",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179971"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/monitoring.py",
+      "line_number": 347,
+      "evidence": "@router.get(\"/metrics/counters\")",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179972"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/auth.py",
+      "line_number": 46,
+      "evidence": "@router.post(\"/register\", response_model=TokenResponse)",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179973"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/auth.py",
+      "line_number": 87,
+      "evidence": "@router.post(\"/login\", response_model=TokenResponse)",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179974"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/knowledge.py",
+      "line_number": 155,
+      "evidence": "@router.post(\"/graphs\", response_model=GraphResponse)",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179975"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/knowledge.py",
+      "line_number": 181,
+      "evidence": "@router.get(\"/graphs\", response_model=List[GraphResponse])",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179975"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/knowledge.py",
+      "line_number": 202,
+      "evidence": "@router.get(\"/graphs/{graph_id}\", response_model=GraphResponse)",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179976"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/knowledge.py",
+      "line_number": 218,
+      "evidence": "@router.delete(\"/graphs/{graph_id}\")",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179977"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/knowledge.py",
+      "line_number": 243,
+      "evidence": "@router.post(\"/graphs/{graph_id}/nodes\", response_model=NodeResponse)",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179978"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/knowledge.py",
+      "line_number": 298,
+      "evidence": "@router.get(\"/graphs/{graph_id}/nodes\", response_model=List[NodeResponse])",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179979"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/knowledge.py",
+      "line_number": 346,
+      "evidence": "@router.get(\"/graphs/{graph_id}/nodes/{node_id}\", response_model=NodeResponse)",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179980"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/knowledge.py",
+      "line_number": 370,
+      "evidence": "@router.put(\"/graphs/{graph_id}/nodes/{node_id}\")",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179980"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/knowledge.py",
+      "line_number": 386,
+      "evidence": "@router.delete(\"/graphs/{graph_id}/nodes/{node_id}\")",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179981"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/knowledge.py",
+      "line_number": 402,
+      "evidence": "@router.post(\"/graphs/{graph_id}/edges\", response_model=EdgeResponse)",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179982"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/knowledge.py",
+      "line_number": 444,
+      "evidence": "@router.get(\"/graphs/{graph_id}/edges\", response_model=List[EdgeResponse])",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179983"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/knowledge.py",
+      "line_number": 494,
+      "evidence": "@router.post(\"/graphs/{graph_id}/query\", response_model=QueryResultResponse)",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179984"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/knowledge.py",
+      "line_number": 589,
+      "evidence": "@router.post(\"/graphs/{graph_id}/evolve\")",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179985"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/knowledge.py",
+      "line_number": 644,
+      "evidence": "@router.get(\"/graphs/{graph_id}/neighbors/{node_id}\")",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179987"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/knowledge.py",
+      "line_number": 687,
+      "evidence": "@router.get(\"/graphs/{graph_id}/importance\")",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179987"
+    },
+    {
+      "category": "A01: Broken Access Control",
+      "severity": "HIGH",
+      "title": "Unprotected API endpoint",
+      "description": "API endpoint lacks authentication protection",
+      "file_path": "api/v1/knowledge.py",
+      "line_number": 697,
+      "evidence": "@router.get(\"/graphs/{graph_id}/communities\")",
+      "remediation": "Add authentication decorator or dependency",
+      "timestamp": "2025-07-14T15:10:51.179988"
+    },
+    {
+      "category": "A02: Cryptographic Failures",
+      "severity": "HIGH",
+      "title": "Hardcoded key",
+      "description": "Hardcoded secret detected in error_handling.py",
+      "file_path": "agents/error_handling.py",
+      "line_number": 134,
+      "evidence": "key = \"inference_failure\"",
+      "remediation": "Use environment variables or secure secret management",
+      "timestamp": "2025-07-14T15:10:51.188857"
+    },
+    {
+      "category": "A02: Cryptographic Failures",
+      "severity": "HIGH",
+      "title": "Hardcoded key",
+      "description": "Hardcoded secret detected in error_handling.py",
+      "file_path": "agents/error_handling.py",
+      "line_number": 137,
+      "evidence": "key = \"action_selection_failure\"",
+      "remediation": "Use environment variables or secure secret management",
+      "timestamp": "2025-07-14T15:10:51.188872"
+    }
+  ]
+}

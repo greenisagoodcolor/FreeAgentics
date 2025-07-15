@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: postgres
+    tier: database
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: fast-ssd
+  selector:
+    matchLabels:
+      app: freeagentics
+      component: postgres
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-pvc
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: redis
+    tier: cache
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: fast-ssd
+  selector:
+    matchLabels:
+      app: freeagentics
+      component: redis
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nginx-cache-pvc
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: nginx
+    tier: web
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: fast-ssd
+  selector:
+    matchLabels:
+      app: freeagentics
+      component: nginx
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backup-pvc
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: backup
+    tier: storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: standard
+  selector:
+    matchLabels:
+      app: freeagentics
+      component: backup

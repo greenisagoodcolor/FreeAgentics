@@ -1,0 +1,229 @@
+name: Performance Regression Check
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  schedule:
+    # Run performance checks daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  performance-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Cache virtual environment
+      uses: actions/cache@v3
+      with:
+        path: venv
+        key: venv-${{ runner.os }}-${{ hashFiles('requirements*.txt') }}
+        
+    - name: Install dependencies
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-core.txt
+        
+    - name: Run enhanced performance benchmarks
+      run: |
+        source venv/bin/activate
+        mkdir -p tests/performance/enhanced_ci_results
+        python tests/performance/enhanced_ci_benchmarks.py --quick --output-dir tests/performance/enhanced_ci_results
+        
+    - name: Upload benchmark results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: performance-results-${{ github.sha }}
+        path: tests/performance/enhanced_ci_results/
+        
+    - name: Performance validation
+      run: |
+        source venv/bin/activate
+        python -c "
+        import json
+        import sys
+        from pathlib import Path
+        
+        # Load latest results
+        results_file = Path('tests/performance/enhanced_ci_results/latest_enhanced_results.json')
+        if results_file.exists():
+            with open(results_file) as f:
+                results = json.load(f)
+            
+            status = results.get('overall_status', 'unknown')
+            critical_regressions = results.get('summary', {}).get('critical_regressions', 0)
+            
+            print(f'Performance Status: {status}')
+            print(f'Critical Regressions: {critical_regressions}')
+            
+            # Exit with appropriate code
+            if status == 'fail':
+                print('❌ Performance validation failed!')
+                sys.exit(1)
+            elif status == 'warning':
+                print('⚠️ Performance validation has warnings')
+                sys.exit(2)
+            else:
+                print('✅ Performance validation passed')
+                sys.exit(0)
+        else:
+            print('❌ No benchmark results found')
+            sys.exit(1)
+        "
+        
+    - name: Comment PR with performance results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          const resultsFile = 'tests/performance/enhanced_ci_results/latest_enhanced_results.json';
+          
+          if (fs.existsSync(resultsFile)) {
+            const results = JSON.parse(fs.readFileSync(resultsFile, 'utf8'));
+            const status = results.overall_status;
+            const summary = results.summary;
+            
+            let statusIcon = '✅';
+            if (status === 'fail') statusIcon = '❌';
+            else if (status === 'warning') statusIcon = '⚠️';
+            
+            const comment = `## ${statusIcon} Performance Regression Check
+            
+            **Status**: ${status.toUpperCase()}
+            **Benchmarks**: ${summary.passed}/${summary.total_benchmarks} passed
+            **Critical Regressions**: ${summary.critical_regressions}
+            **Warnings**: ${summary.warnings}
+            
+            ### Performance Summary
+            - **Total Benchmarks**: ${summary.total_benchmarks}
+            - **Passed**: ${summary.passed}
+            - **Failed**: ${summary.failed}
+            - **Warnings**: ${summary.warnings}
+            - **Total Regressions**: ${summary.total_regressions}
+            - **Improvements**: ${summary.total_improvements}
+            
+            ### Performance Analysis
+            ${results.performance_analysis ? `
+            - **Overall Health**: ${results.performance_analysis.overall_health}
+            - **Production Readiness**: ${results.performance_analysis.production_readiness}
+            - **Critical Issues**: ${results.performance_analysis.critical_issues?.length || 0}
+            ` : ''}
+            
+            ${summary.critical_regressions > 0 ? `
+            ### ❌ Critical Issues Found
+            Critical performance regressions detected. Please review the detailed results.
+            ` : ''}
+            
+            ${summary.total_improvements > 0 ? `
+            ### ✅ Performance Improvements
+            ${summary.total_improvements} performance improvements detected!
+            ` : ''}
+            
+            <details>
+            <summary>View detailed results</summary>
+            
+            \`\`\`json
+            ${JSON.stringify(results, null, 2)}
+            \`\`\`
+            </details>
+            
+            ---
+            *Performance check completed at ${new Date().toISOString()}*`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+          }
+          
+    - name: Create performance baseline (on main branch)
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      run: |
+        source venv/bin/activate
+        mkdir -p tests/performance/baselines
+        cp tests/performance/enhanced_ci_results/latest_enhanced_results.json tests/performance/baselines/baseline_$(date +%Y%m%d_%H%M%S).json
+        cp tests/performance/enhanced_ci_results/latest_enhanced_results.json tests/performance/baselines/current_baseline.json
+        
+    - name: Store baseline artifact
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-baseline-${{ github.sha }}
+        path: tests/performance/baselines/
+        
+    - name: Notify on performance degradation
+      if: failure()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          
+          const resultsFile = 'tests/performance/enhanced_ci_results/latest_enhanced_results.json';
+          
+          if (fs.existsSync(resultsFile)) {
+            const results = JSON.parse(fs.readFileSync(resultsFile, 'utf8'));
+            const criticalRegressions = results.summary?.critical_regressions || 0;
+            
+            if (criticalRegressions > 0) {
+              console.log(`🚨 Performance Alert: ${criticalRegressions} critical regressions detected`);
+              
+              // In a real setup, you might want to send notifications to Slack, email, etc.
+              // For now, we'll just log the alert
+              console.log('Performance degradation detected. Manual review required.');
+            }
+          }
+
+  performance-comparison:
+    runs-on: ubuntu-latest
+    needs: performance-regression
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download current results
+      uses: actions/download-artifact@v3
+      with:
+        name: performance-results-${{ github.sha }}
+        path: current-results/
+        
+    - name: Compare with baseline
+      run: |
+        echo "Performance comparison functionality would be implemented here"
+        echo "This would compare current results with baseline from main branch"
+        echo "And provide detailed regression analysis"
+        
+        # Create a simple comparison summary
+        if [ -f "current-results/latest_enhanced_results.json" ]; then
+          echo "Performance results found for comparison"
+          cat current-results/latest_enhanced_results.json | python -c "
+          import json
+          import sys
+          data = json.load(sys.stdin)
+          print(f'Status: {data.get(\"overall_status\", \"unknown\")}')
+          print(f'Benchmarks: {data.get(\"summary\", {}).get(\"total_benchmarks\", 0)}')
+          print(f'Critical Regressions: {data.get(\"summary\", {}).get(\"critical_regressions\", 0)}')
+          "
+        else
+          echo "No performance results found"
+        fi

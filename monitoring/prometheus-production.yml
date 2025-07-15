@@ -1,0 +1,137 @@
+# Prometheus Production Configuration for FreeAgentics
+# Optimized for production monitoring with comprehensive metrics collection
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'freeagentics-production'
+    environment: 'production'
+
+# Rule files for alerting
+rule_files:
+  - "rules/*.yml"
+
+# Alerting configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+# Scrape configurations
+scrape_configs:
+  # FreeAgentics Backend Application
+  - job_name: 'freeagentics-backend'
+    static_configs:
+      - targets: ['backend:8000']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    honor_labels: true
+    params:
+      format: ['prometheus']
+
+  # FreeAgentics Frontend Application
+  - job_name: 'freeagentics-frontend'
+    static_configs:
+      - targets: ['frontend:3000']
+    metrics_path: '/api/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # System Metrics (Node Exporter)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 15s
+
+  # Container Metrics (cAdvisor)
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 15s
+    honor_labels: true
+
+  # PostgreSQL Database Metrics
+  - job_name: 'postgres-exporter'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  # Redis Metrics
+  - job_name: 'redis-exporter'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+    scrape_interval: 10s
+
+  # Nginx Metrics
+  - job_name: 'nginx-exporter'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+    scrape_interval: 15s
+
+  # Prometheus Self-Monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 15s
+
+  # Alertmanager Monitoring
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+    scrape_interval: 15s
+
+  # Custom Application Metrics
+  - job_name: 'freeagentics-agents'
+    static_configs:
+      - targets: ['backend:8000']
+    metrics_path: '/api/v1/monitoring/agents'
+    scrape_interval: 30s
+
+  - job_name: 'freeagentics-coalitions'
+    static_configs:
+      - targets: ['backend:8000']
+    metrics_path: '/api/v1/monitoring/coalitions'
+    scrape_interval: 30s
+
+  - job_name: 'freeagentics-knowledge-graph'
+    static_configs:
+      - targets: ['backend:8000']
+    metrics_path: '/api/v1/monitoring/knowledge-graph'
+    scrape_interval: 30s
+
+  # Business Logic Metrics
+  - job_name: 'freeagentics-inference'
+    static_configs:
+      - targets: ['backend:8000']
+    metrics_path: '/api/v1/monitoring/inference'
+    scrape_interval: 60s
+
+  # Security Metrics
+  - job_name: 'freeagentics-security'
+    static_configs:
+      - targets: ['backend:8000']
+    metrics_path: '/api/v1/monitoring/security'
+    scrape_interval: 30s
+
+# Storage configuration
+storage:
+  tsdb:
+    path: /prometheus/data
+    retention.time: 30d
+    retention.size: 10GB
+    wal-compression: true
+
+# Remote write for long-term storage (optional)
+# remote_write:
+#   - url: "https://your-remote-storage/api/v1/write"
+#     write_relabel_configs:
+#       - source_labels: [__name__]
+#         regex: 'freeagentics_.*'
+#         action: keep
+
+# Query logging for debugging
+# query_log_file: /prometheus/logs/query.log

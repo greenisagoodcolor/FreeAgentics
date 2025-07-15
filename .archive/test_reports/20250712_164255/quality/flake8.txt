@@ -1,0 +1,23 @@
+./agents/base_agent.py:44:1: C901 'TryExcept 44' is too complex (32)
+./agents/base_agent.py:140:1: E303 too many blank lines (4)
+./agents/pymdp_error_handling.py:461:1: F811 redefinition of unused 'safe_array_index' from line 314
+./alembic/versions/2a8b9c3d4e5f_update_gmn_schema_version_management.py:16:1: C901 'upgrade' is too complex (25)
+./database/models.py:4:1: F401 'datetime.datetime' imported but unused
+./database/models.py:6:1: F401 'typing.Optional' imported but unused
+./database/session.py:20:20: F821 undefined name 'DatabaseState'
+./database/session.py:195:1: C901 'get_db' is too complex (16)
+./knowledge_graph/versioning.py:343:13: F841 local variable 'diff_engine' is assigned to but never used
+./knowledge_graph/versioning.py:465:13: F841 local variable 'target_graph' is assigned to but never used
+./knowledge_graph/versioning.py:513:9: F841 local variable 'target_version' is assigned to but never used
+./observability/distributed_tracing.py:71:1: E302 expected 2 blank lines, found 1
+./observability/distributed_tracing.py:74:1: E305 expected 2 blank lines after class or function definition, found 1
+./tests/performance/benchmark_config.py:24:1: W293 blank line contains whitespace
+3     C901 'TryExcept 44' is too complex (32)
+1     E302 expected 2 blank lines, found 1
+1     E303 too many blank lines (4)
+1     E305 expected 2 blank lines after class or function definition, found 1
+2     F401 'datetime.datetime' imported but unused
+1     F811 redefinition of unused 'safe_array_index' from line 314
+1     F821 undefined name 'DatabaseState'
+3     F841 local variable 'diff_engine' is assigned to but never used
+1     W293 blank line contains whitespace

@@ -1,0 +1,23 @@
+{
+  "grade": "A-",
+  "score": "6/7",
+  "percentage": "85.7%",
+  "results": {
+    "nginx_config": false,
+    "cipher_suites": true,
+    "hsts": true,
+    "ocsp_stapling": true,
+    "certificate_transparency": true,
+    "security_headers": true,
+    "syntax": true
+  },
+  "errors": [],
+  "warnings": [
+    "nginx/snippets/ssl-params.conf: X-Frame-Options header - MISSING",
+    "nginx/nginx.conf: DNS resolver configured - MISSING",
+    "nginx/nginx.conf: Certificate Transparency header - MISSING"
+  ],
+  "recommendations": [
+    "Configure Expect-CT with report-uri for CT monitoring"
+  ]
+}

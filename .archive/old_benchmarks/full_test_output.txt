@@ -1,0 +1,70 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.4.1, pluggy-1.6.0
+rootdir: /home/green/FreeAgentics
+configfile: pyproject.toml
+testpaths: tests
+plugins: xdist-3.8.0, anyio-4.9.0, mock-3.14.1, cov-6.2.1, bdd-8.1.0, metadata-3.1.1, hypothesis-6.135.24, Faker-37.4.0, html-4.1.1, timeout-2.4.0, asyncio-1.0.0
+asyncio: mode=Mode.STRICT, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 405 items / 5 errors
+
+==================================== ERRORS ====================================
+_____ ERROR collecting tests/integration/test_multi_agent_coordination.py ______
+ImportError while importing test module '/home/green/FreeAgentics/tests/integration/test_multi_agent_coordination.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_multi_agent_coordination.py:13: in <module>
+    from knowledge_graph.graph_engine import KnowledgeGraph
+E   ModuleNotFoundError: No module named 'knowledge_graph'
+________________ ERROR collecting tests/unit/test_api_agents.py ________________
+ImportError while importing test module '/home/green/FreeAgentics/tests/unit/test_api_agents.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/unit/test_api_agents.py:17: in <module>
+    from api.v1.agents import router
+api/v1/agents.py:54: in <module>
+    from database.session import get_db
+E   ModuleNotFoundError: No module named 'database'
+________________ ERROR collecting tests/unit/test_api_system.py ________________
+ImportError while importing test module '/home/green/FreeAgentics/tests/unit/test_api_system.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/unit/test_api_system.py:13: in <module>
+    from main import app
+E   ModuleNotFoundError: No module named 'main'
+___________ ERROR collecting tests/unit/test_database_integration.py ___________
+ImportError while importing test module '/home/green/FreeAgentics/tests/unit/test_database_integration.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/unit/test_database_integration.py:12: in <module>
+    from database.base import Base
+E   ModuleNotFoundError: No module named 'database'
+_____________ ERROR collecting tests/unit/test_knowledge_graph.py ______________
+ImportError while importing test module '/home/green/FreeAgentics/tests/unit/test_knowledge_graph.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/unit/test_knowledge_graph.py:15: in <module>
+    from knowledge_graph.evolution import (
+E   ModuleNotFoundError: No module named 'knowledge_graph'
+=========================== short test summary info ============================
+ERROR tests/integration/test_multi_agent_coordination.py
+ERROR tests/unit/test_api_agents.py
+ERROR tests/unit/test_api_system.py
+ERROR tests/unit/test_database_integration.py
+ERROR tests/unit/test_knowledge_graph.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 5 errors during collection !!!!!!!!!!!!!!!!!!!!
+============================== 5 errors in 2.78s ===============================

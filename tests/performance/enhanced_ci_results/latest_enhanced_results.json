@@ -1,0 +1,667 @@
+{
+  "suite_info": {
+    "timestamp": "2025-07-15T18:06:59.618735",
+    "suite_version": "2.0",
+    "quick_mode": true,
+    "platform": {
+      "system": "Linux",
+      "python_version": "3.12.3 (main, Jun 18 2025, 17:59:45) [GCC 13.3.0]",
+      "cpu_count": 20,
+      "memory_total_gb": 27.40542984008789,
+      "cpu_freq_max": 0.0
+    },
+    "baselines": {
+      "single_agent_inference_ms": 50.0,
+      "single_agent_p95_ms": 85.0,
+      "single_agent_p99_ms": 120.0,
+      "single_agent_memory_mb": 34.5,
+      "single_agent_throughput_ops_sec": 20.0,
+      "coordination_efficiency_10_agents": 70.0,
+      "coordination_efficiency_50_agents": 28.4,
+      "coordination_overhead_percent": 72.0,
+      "cache_hit_rate_percent": 22.1,
+      "cache_memory_overhead_percent": 23.0,
+      "cache_speedup_factor": 3.2,
+      "memory_growth_per_cycle_mb": 0.5,
+      "memory_leak_threshold_mb": 1.0,
+      "gc_frequency_per_minute": 5.0,
+      "cpu_utilization_percent": 40.0,
+      "memory_utilization_percent": 60.0,
+      "disk_io_mb_per_sec": 10.0
+    },
+    "thresholds": {
+      "critical": 25.0,
+      "warning": 10.0,
+      "minor": 5.0
+    },
+    "duration_seconds": 11.20454478263855
+  },
+  "benchmarks": {
+    "comprehensive_single_agent": {
+      "description": "Comprehensive single agent performance analysis",
+      "category": "agent",
+      "duration_seconds": 7.6331727504730225,
+      "result": {
+        "total_operations": 225,
+        "avg_inference_time_ms": 5.597321192423503,
+        "median_inference_time_ms": 5.485296249389648,
+        "p95_inference_time_ms": 6.355571746826171,
+        "p99_inference_time_ms": 8.180694580078107,
+        "std_inference_time_ms": 0.5643877424888327,
+        "min_inference_time_ms": 4.629373550415039,
+        "max_inference_time_ms": 10.122299194335938,
+        "simple_avg_ms": 5.543713569641113,
+        "simple_median_ms": 5.452990531921387,
+        "simple_std_ms": 0.44609927633031526,
+        "simple_min_ms": 4.629373550415039,
+        "simple_max_ms": 8.638858795166016,
+        "complex_avg_ms": 5.537433624267578,
+        "complex_median_ms": 5.493640899658203,
+        "complex_std_ms": 0.33915295018363356,
+        "complex_min_ms": 4.845142364501953,
+        "complex_max_ms": 6.454706192016602,
+        "varied_avg_ms": 5.708723068237305,
+        "varied_median_ms": 5.533456802368164,
+        "varied_std_ms": 0.7713267197742779,
+        "varied_min_ms": 4.941701889038086,
+        "varied_max_ms": 10.122299194335938,
+        "memory_per_agent_mb": 0.46875,
+        "memory_growth_slope_mb": 2.226763004469156e-15,
+        "memory_variance": 0.0,
+        "peak_memory_mb": 181.05859375,
+        "memory_samples": [
+          181.05859375,
+          181.05859375,
+          181.05859375,
+          181.05859375,
+          181.05859375,
+          181.05859375,
+          181.05859375,
+          181.05859375,
+          181.05859375,
+          181.05859375
+        ],
+        "sustained_operations": 889,
+        "sustained_duration_s": 5.004448175430298,
+        "sustained_throughput_ops_sec": 177.64196347653476,
+        "start_timestamp": "2025-07-15T18:06:59.619368",
+        "initial_cpu_percent": 0.0,
+        "initial_memory_mb": 177.46484375,
+        "end_timestamp": "2025-07-15T18:07:07.251897",
+        "duration_seconds": 7.632526636123657,
+        "final_cpu_percent": 0.0,
+        "final_memory_mb": 182.15234375,
+        "memory_delta_mb": 4.6875
+      },
+      "validation": {
+        "benchmark": "comprehensive_single_agent",
+        "category": "agent",
+        "timestamp": "2025-07-15T18:07:07.252528",
+        "status": "pass",
+        "regressions": [],
+        "improvements": [
+          {
+            "metric": "avg_inference_time_ms",
+            "improvement_percent": 88.805357615153,
+            "baseline": 50.0,
+            "actual": 5.597321192423503
+          },
+          {
+            "metric": "p95_inference_time_ms",
+            "improvement_percent": 92.5228567684398,
+            "baseline": 85.0,
+            "actual": 6.355571746826171
+          },
+          {
+            "metric": "p99_inference_time_ms",
+            "improvement_percent": 93.18275451660158,
+            "baseline": 120.0,
+            "actual": 8.180694580078107
+          },
+          {
+            "metric": "memory_per_agent_mb",
+            "improvement_percent": 98.6413043478261,
+            "baseline": 34.5,
+            "actual": 0.46875
+          },
+          {
+            "metric": "sustained_throughput_ops_sec",
+            "improvement_percent": 788.2098173826738,
+            "baseline": 20.0,
+            "actual": 177.64196347653476
+          }
+        ],
+        "warnings": [],
+        "metrics": {
+          "total_operations": 225,
+          "avg_inference_time_ms": 5.597321192423503,
+          "median_inference_time_ms": 5.485296249389648,
+          "p95_inference_time_ms": 6.355571746826171,
+          "p99_inference_time_ms": 8.180694580078107,
+          "std_inference_time_ms": 0.5643877424888327,
+          "min_inference_time_ms": 4.629373550415039,
+          "max_inference_time_ms": 10.122299194335938,
+          "simple_avg_ms": 5.543713569641113,
+          "simple_median_ms": 5.452990531921387,
+          "simple_std_ms": 0.44609927633031526,
+          "simple_min_ms": 4.629373550415039,
+          "simple_max_ms": 8.638858795166016,
+          "complex_avg_ms": 5.537433624267578,
+          "complex_median_ms": 5.493640899658203,
+          "complex_std_ms": 0.33915295018363356,
+          "complex_min_ms": 4.845142364501953,
+          "complex_max_ms": 6.454706192016602,
+          "varied_avg_ms": 5.708723068237305,
+          "varied_median_ms": 5.533456802368164,
+          "varied_std_ms": 0.7713267197742779,
+          "varied_min_ms": 4.941701889038086,
+          "varied_max_ms": 10.122299194335938,
+          "memory_per_agent_mb": 0.46875,
+          "memory_growth_slope_mb": 2.226763004469156e-15,
+          "memory_variance": 0.0,
+          "peak_memory_mb": 181.05859375,
+          "memory_samples": [
+            181.05859375,
+            181.05859375,
+            181.05859375,
+            181.05859375,
+            181.05859375,
+            181.05859375,
+            181.05859375,
+            181.05859375,
+            181.05859375,
+            181.05859375
+          ],
+          "sustained_operations": 889,
+          "sustained_duration_s": 5.004448175430298,
+          "sustained_throughput_ops_sec": 177.64196347653476,
+          "start_timestamp": "2025-07-15T18:06:59.619368",
+          "initial_cpu_percent": 0.0,
+          "initial_memory_mb": 177.46484375,
+          "end_timestamp": "2025-07-15T18:07:07.251897",
+          "duration_seconds": 7.632526636123657,
+          "final_cpu_percent": 0.0,
+          "final_memory_mb": 182.15234375,
+          "memory_delta_mb": 4.6875
+        }
+      }
+    },
+    "scalability_analysis": {
+      "description": "Comprehensive multi-agent scalability analysis",
+      "category": "coordination",
+      "duration_seconds": 3.57051682472229,
+      "result": {
+        "agent_counts_tested": [
+          1,
+          2,
+          5,
+          10,
+          15,
+          20
+        ],
+        "scalability_data": [
+          {
+            "num_agents": 1,
+            "operations_per_agent": 10,
+            "total_operations": 10,
+            "coordination_duration_s": 0.016887664794921875,
+            "coordination_efficiency_percent": 98.71668172577365,
+            "total_throughput_ops_sec": 592.1481816128304,
+            "theoretical_throughput_ops_sec": 599.8461164423724,
+            "scaling_factor": 0.9871668172577366,
+            "avg_operation_time_ms": 1.6167879104614258,
+            "baseline_time_ms": 1.6670942306518555,
+            "total_memory_mb": 0.0,
+            "overhead_percent": 1.283318274226346
+          },
+          {
+            "num_agents": 2,
+            "operations_per_agent": 10,
+            "total_operations": 20,
+            "coordination_duration_s": 0.07733464241027832,
+            "coordination_efficiency_percent": 21.09845390223976,
+            "total_throughput_ops_sec": 258.6163118708862,
+            "theoretical_throughput_ops_sec": 1225.7595417616458,
+            "scaling_factor": 0.4219690780447953,
+            "avg_operation_time_ms": 7.247984409332275,
+            "baseline_time_ms": 1.6316413879394531,
+            "total_memory_mb": 0.0,
+            "overhead_percent": 78.90154609776025
+          },
+          {
+            "num_agents": 5,
+            "operations_per_agent": 10,
+            "total_operations": 50,
+            "coordination_duration_s": 0.2438676357269287,
+            "coordination_efficiency_percent": 10.765357748654502,
+            "total_throughput_ops_sec": 205.02925634620743,
+            "theoretical_throughput_ops_sec": 1904.528034582342,
+            "scaling_factor": 0.538267887432725,
+            "avg_operation_time_ms": 22.250518798828125,
+            "baseline_time_ms": 2.6253223419189453,
+            "total_memory_mb": 0.0,
+            "overhead_percent": 89.23464225134549
+          },
+          {
+            "num_agents": 10,
+            "operations_per_agent": 10,
+            "total_operations": 100,
+            "coordination_duration_s": 0.5002880096435547,
+            "coordination_efficiency_percent": 3.1915877161211617,
+            "total_throughput_ops_sec": 199.88486246401953,
+            "theoretical_throughput_ops_sec": 6262.866016634065,
+            "scaling_factor": 0.3191587716121162,
+            "avg_operation_time_ms": 42.7462363243103,
+            "baseline_time_ms": 1.5967130661010742,
+            "total_memory_mb": 0.0,
+            "overhead_percent": 96.80841228387884
+          },
+          {
+            "num_agents": 15,
+            "operations_per_agent": 10,
+            "total_operations": 150,
+            "coordination_duration_s": 0.7437713146209717,
+            "coordination_efficiency_percent": 2.291926248307878,
+            "total_throughput_ops_sec": 201.67489260652718,
+            "theoretical_throughput_ops_sec": 8799.362228842361,
+            "scaling_factor": 0.34378893724618165,
+            "avg_operation_time_ms": 68.48713874816895,
+            "baseline_time_ms": 1.7046689987182617,
+            "total_memory_mb": 0.3125,
+            "overhead_percent": 97.70807375169213
+          },
+          {
+            "num_agents": 20,
+            "operations_per_agent": 10,
+            "total_operations": 200,
+            "coordination_duration_s": 0.9805908203125,
+            "coordination_efficiency_percent": 1.588151025457488,
+            "total_throughput_ops_sec": 203.95867048425245,
+            "theoretical_throughput_ops_sec": 12842.523614874694,
+            "scaling_factor": 0.31763020509149753,
+            "avg_operation_time_ms": 91.5934693813324,
+            "baseline_time_ms": 1.557326316833496,
+            "total_memory_mb": 0.46875,
+            "overhead_percent": 98.41184897454251
+          }
+        ],
+        "efficiency_curve": [
+          {
+            "agents": 1,
+            "efficiency": 98.71668172577365
+          },
+          {
+            "agents": 2,
+            "efficiency": 21.09845390223976
+          },
+          {
+            "agents": 5,
+            "efficiency": 10.765357748654502
+          },
+          {
+            "agents": 10,
+            "efficiency": 3.1915877161211617
+          },
+          {
+            "agents": 15,
+            "efficiency": 2.291926248307878
+          },
+          {
+            "agents": 20,
+            "efficiency": 1.588151025457488
+          }
+        ],
+        "throughput_curve": [
+          {
+            "agents": 1,
+            "throughput": 592.1481816128304
+          },
+          {
+            "agents": 2,
+            "throughput": 258.6163118708862
+          },
+          {
+            "agents": 5,
+            "throughput": 205.02925634620743
+          },
+          {
+            "agents": 10,
+            "throughput": 199.88486246401953
+          },
+          {
+            "agents": 15,
+            "throughput": 201.67489260652718
+          },
+          {
+            "agents": 20,
+            "throughput": 203.95867048425245
+          }
+        ],
+        "memory_scaling": [
+          {
+            "agents": 1,
+            "total_memory": 0.0,
+            "memory_per_agent": 0.0
+          },
+          {
+            "agents": 2,
+            "total_memory": 0.0,
+            "memory_per_agent": 0.0
+          },
+          {
+            "agents": 5,
+            "total_memory": 0.0,
+            "memory_per_agent": 0.0
+          },
+          {
+            "agents": 10,
+            "total_memory": 0.0,
+            "memory_per_agent": 0.0
+          },
+          {
+            "agents": 15,
+            "total_memory": 0.3125,
+            "memory_per_agent": 0.020833333333333332
+          },
+          {
+            "agents": 20,
+            "total_memory": 0.46875,
+            "memory_per_agent": 0.0234375
+          }
+        ],
+        "efficiency_at_10_agents": 3.1915877161211617,
+        "efficiency_at_20_agents": 1.588151025457488,
+        "efficiency_degradation_per_agent": 3.218347109480741,
+        "memory_per_agent_avg_mb": 0.007378472222222221,
+        "memory_scaling_variance": 0.00010944884500385802,
+        "avg_throughput_scaling_factor": 0.49081459303054836,
+        "max_efficient_agents": 1,
+        "scalability_rating": "excellent",
+        "start_timestamp": "2025-07-15T18:07:07.252675",
+        "initial_cpu_percent": 0.0,
+        "initial_memory_mb": 182.15234375,
+        "efficiency_1_agents": 98.71668172577365,
+        "throughput_1_agents": 592.1481816128304,
+        "memory_total_1_agents": 0.0,
+        "efficiency_2_agents": 21.09845390223976,
+        "throughput_2_agents": 258.6163118708862,
+        "memory_total_2_agents": 0.0,
+        "efficiency_5_agents": 10.765357748654502,
+        "throughput_5_agents": 205.02925634620743,
+        "memory_total_5_agents": 0.0,
+        "efficiency_10_agents": 3.1915877161211617,
+        "throughput_10_agents": 199.88486246401953,
+        "memory_total_10_agents": 0.0,
+        "efficiency_15_agents": 2.291926248307878,
+        "throughput_15_agents": 201.67489260652718,
+        "memory_total_15_agents": 0.3125,
+        "efficiency_20_agents": 1.588151025457488,
+        "throughput_20_agents": 203.95867048425245,
+        "memory_total_20_agents": 0.46875,
+        "end_timestamp": "2025-07-15T18:07:10.823002",
+        "duration_seconds": 3.570324420928955,
+        "final_cpu_percent": 0.0,
+        "final_memory_mb": 198.55859375,
+        "memory_delta_mb": 16.40625
+      },
+      "validation": {
+        "benchmark": "scalability_analysis",
+        "category": "coordination",
+        "timestamp": "2025-07-15T18:07:10.823178",
+        "status": "fail",
+        "regressions": [
+          {
+            "metric": "efficiency_at_10_agents",
+            "severity": "critical",
+            "actual": 3.1915877161211617,
+            "baseline": 70.0,
+            "threshold": 52.5
+          }
+        ],
+        "improvements": [],
+        "warnings": [],
+        "metrics": {
+          "agent_counts_tested": [
+            1,
+            2,
+            5,
+            10,
+            15,
+            20
+          ],
+          "scalability_data": [
+            {
+              "num_agents": 1,
+              "operations_per_agent": 10,
+              "total_operations": 10,
+              "coordination_duration_s": 0.016887664794921875,
+              "coordination_efficiency_percent": 98.71668172577365,
+              "total_throughput_ops_sec": 592.1481816128304,
+              "theoretical_throughput_ops_sec": 599.8461164423724,
+              "scaling_factor": 0.9871668172577366,
+              "avg_operation_time_ms": 1.6167879104614258,
+              "baseline_time_ms": 1.6670942306518555,
+              "total_memory_mb": 0.0,
+              "overhead_percent": 1.283318274226346
+            },
+            {
+              "num_agents": 2,
+              "operations_per_agent": 10,
+              "total_operations": 20,
+              "coordination_duration_s": 0.07733464241027832,
+              "coordination_efficiency_percent": 21.09845390223976,
+              "total_throughput_ops_sec": 258.6163118708862,
+              "theoretical_throughput_ops_sec": 1225.7595417616458,
+              "scaling_factor": 0.4219690780447953,
+              "avg_operation_time_ms": 7.247984409332275,
+              "baseline_time_ms": 1.6316413879394531,
+              "total_memory_mb": 0.0,
+              "overhead_percent": 78.90154609776025
+            },
+            {
+              "num_agents": 5,
+              "operations_per_agent": 10,
+              "total_operations": 50,
+              "coordination_duration_s": 0.2438676357269287,
+              "coordination_efficiency_percent": 10.765357748654502,
+              "total_throughput_ops_sec": 205.02925634620743,
+              "theoretical_throughput_ops_sec": 1904.528034582342,
+              "scaling_factor": 0.538267887432725,
+              "avg_operation_time_ms": 22.250518798828125,
+              "baseline_time_ms": 2.6253223419189453,
+              "total_memory_mb": 0.0,
+              "overhead_percent": 89.23464225134549
+            },
+            {
+              "num_agents": 10,
+              "operations_per_agent": 10,
+              "total_operations": 100,
+              "coordination_duration_s": 0.5002880096435547,
+              "coordination_efficiency_percent": 3.1915877161211617,
+              "total_throughput_ops_sec": 199.88486246401953,
+              "theoretical_throughput_ops_sec": 6262.866016634065,
+              "scaling_factor": 0.3191587716121162,
+              "avg_operation_time_ms": 42.7462363243103,
+              "baseline_time_ms": 1.5967130661010742,
+              "total_memory_mb": 0.0,
+              "overhead_percent": 96.80841228387884
+            },
+            {
+              "num_agents": 15,
+              "operations_per_agent": 10,
+              "total_operations": 150,
+              "coordination_duration_s": 0.7437713146209717,
+              "coordination_efficiency_percent": 2.291926248307878,
+              "total_throughput_ops_sec": 201.67489260652718,
+              "theoretical_throughput_ops_sec": 8799.362228842361,
+              "scaling_factor": 0.34378893724618165,
+              "avg_operation_time_ms": 68.48713874816895,
+              "baseline_time_ms": 1.7046689987182617,
+              "total_memory_mb": 0.3125,
+              "overhead_percent": 97.70807375169213
+            },
+            {
+              "num_agents": 20,
+              "operations_per_agent": 10,
+              "total_operations": 200,
+              "coordination_duration_s": 0.9805908203125,
+              "coordination_efficiency_percent": 1.588151025457488,
+              "total_throughput_ops_sec": 203.95867048425245,
+              "theoretical_throughput_ops_sec": 12842.523614874694,
+              "scaling_factor": 0.31763020509149753,
+              "avg_operation_time_ms": 91.5934693813324,
+              "baseline_time_ms": 1.557326316833496,
+              "total_memory_mb": 0.46875,
+              "overhead_percent": 98.41184897454251
+            }
+          ],
+          "efficiency_curve": [
+            {
+              "agents": 1,
+              "efficiency": 98.71668172577365
+            },
+            {
+              "agents": 2,
+              "efficiency": 21.09845390223976
+            },
+            {
+              "agents": 5,
+              "efficiency": 10.765357748654502
+            },
+            {
+              "agents": 10,
+              "efficiency": 3.1915877161211617
+            },
+            {
+              "agents": 15,
+              "efficiency": 2.291926248307878
+            },
+            {
+              "agents": 20,
+              "efficiency": 1.588151025457488
+            }
+          ],
+          "throughput_curve": [
+            {
+              "agents": 1,
+              "throughput": 592.1481816128304
+            },
+            {
+              "agents": 2,
+              "throughput": 258.6163118708862
+            },
+            {
+              "agents": 5,
+              "throughput": 205.02925634620743
+            },
+            {
+              "agents": 10,
+              "throughput": 199.88486246401953
+            },
+            {
+              "agents": 15,
+              "throughput": 201.67489260652718
+            },
+            {
+              "agents": 20,
+              "throughput": 203.95867048425245
+            }
+          ],
+          "memory_scaling": [
+            {
+              "agents": 1,
+              "total_memory": 0.0,
+              "memory_per_agent": 0.0
+            },
+            {
+              "agents": 2,
+              "total_memory": 0.0,
+              "memory_per_agent": 0.0
+            },
+            {
+              "agents": 5,
+              "total_memory": 0.0,
+              "memory_per_agent": 0.0
+            },
+            {
+              "agents": 10,
+              "total_memory": 0.0,
+              "memory_per_agent": 0.0
+            },
+            {
+              "agents": 15,
+              "total_memory": 0.3125,
+              "memory_per_agent": 0.020833333333333332
+            },
+            {
+              "agents": 20,
+              "total_memory": 0.46875,
+              "memory_per_agent": 0.0234375
+            }
+          ],
+          "efficiency_at_10_agents": 3.1915877161211617,
+          "efficiency_at_20_agents": 1.588151025457488,
+          "efficiency_degradation_per_agent": 3.218347109480741,
+          "memory_per_agent_avg_mb": 0.007378472222222221,
+          "memory_scaling_variance": 0.00010944884500385802,
+          "avg_throughput_scaling_factor": 0.49081459303054836,
+          "max_efficient_agents": 1,
+          "scalability_rating": "excellent",
+          "start_timestamp": "2025-07-15T18:07:07.252675",
+          "initial_cpu_percent": 0.0,
+          "initial_memory_mb": 182.15234375,
+          "efficiency_1_agents": 98.71668172577365,
+          "throughput_1_agents": 592.1481816128304,
+          "memory_total_1_agents": 0.0,
+          "efficiency_2_agents": 21.09845390223976,
+          "throughput_2_agents": 258.6163118708862,
+          "memory_total_2_agents": 0.0,
+          "efficiency_5_agents": 10.765357748654502,
+          "throughput_5_agents": 205.02925634620743,
+          "memory_total_5_agents": 0.0,
+          "efficiency_10_agents": 3.1915877161211617,
+          "throughput_10_agents": 199.88486246401953,
+          "memory_total_10_agents": 0.0,
+          "efficiency_15_agents": 2.291926248307878,
+          "throughput_15_agents": 201.67489260652718,
+          "memory_total_15_agents": 0.3125,
+          "efficiency_20_agents": 1.588151025457488,
+          "throughput_20_agents": 203.95867048425245,
+          "memory_total_20_agents": 0.46875,
+          "end_timestamp": "2025-07-15T18:07:10.823002",
+          "duration_seconds": 3.570324420928955,
+          "final_cpu_percent": 0.0,
+          "final_memory_mb": 198.55859375,
+          "memory_delta_mb": 16.40625
+        }
+      }
+    }
+  },
+  "overall_status": "fail",
+  "summary": {
+    "total_benchmarks": 2,
+    "passed": 1,
+    "warnings": 0,
+    "failed": 1,
+    "total_regressions": 1,
+    "total_improvements": 5,
+    "critical_regressions": 1,
+    "warning_regressions": 0
+  },
+  "performance_analysis": {
+    "overall_health": "poor",
+    "critical_issues": [
+      {
+        "benchmark": "scalability_analysis",
+        "metric": "efficiency_at_10_agents",
+        "regression": 3.1915877161211617,
+        "impact": "high"
+      }
+    ],
+    "recommendations": [
+      "Address critical performance regressions before production deployment"
+    ],
+    "performance_trend": "stable",
+    "production_readiness": "needs_attention"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "timestamp": "2025-07-15T14:36:54.056066",
+  "files_removed": [
+    "tests/performance/reports/performance_results_20250712_164201.json"
+  ],
+  "directories_removed": [],
+  "files_consolidated": [],
+  "space_freed": 2,
+  "summary": {
+    "files_removed": 1,
+    "directories_removed": 0,
+    "files_consolidated": 0,
+    "space_freed_kb": 0.001953125,
+    "space_freed_mb": 1.9073486328125e-06
+  }
+}

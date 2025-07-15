@@ -1,0 +1,95 @@
+# Production Dockerfile for FreeAgentics
+# Multi-stage build optimized for production deployment
+
+# Base stage with common dependencies
+FROM python:3.11-slim as base
+
+# Set environment variables for production
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTHONPATH=/app
+
+# Install system dependencies required for production
+RUN apt-get update && apt-get install -y \
+    # Runtime dependencies
+    curl \
+    ca-certificates \
+    # Build dependencies for Python packages
+    gcc \
+    g++ \
+    # Clean up in same layer to reduce image size
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Create non-root user for security
+RUN useradd --create-home --shell /bin/bash --uid 1000 app
+
+# Production build stage
+FROM base as production-build
+
+WORKDIR /app
+
+# Copy requirements files
+COPY requirements-production.txt requirements-core.txt ./
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements-production.txt
+
+# Production runtime stage
+FROM base as production
+
+WORKDIR /app
+
+# Copy Python packages from build stage
+COPY --from=production-build /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=production-build /usr/local/bin /usr/local/bin
+
+# Copy application source code selectively
+COPY agents/ ./agents/
+COPY api/ ./api/
+COPY auth/ ./auth/
+COPY coalitions/ ./coalitions/
+COPY config/ ./config/
+COPY database/ ./database/
+COPY inference/ ./inference/
+COPY knowledge_graph/ ./knowledge_graph/
+COPY observability/ ./observability/
+COPY world/ ./world/
+
+# Copy configuration files
+COPY main.py ./
+COPY pyproject.toml ./
+COPY alembic.ini ./
+COPY alembic/ ./alembic/
+
+# Create necessary directories with proper permissions
+RUN mkdir -p /app/logs /tmp/freeagentics \
+    && chown -R app:app /app \
+    && chmod -R 755 /app \
+    && chmod 777 /tmp/freeagentics
+
+# Switch to non-root user
+USER app
+
+# Health check for production monitoring
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Expose application port
+EXPOSE 8000
+
+# Production command with optimized settings
+CMD ["gunicorn", "main:app", \
+     "--workers", "4", \
+     "--worker-class", "uvicorn.workers.UvicornWorker", \
+     "--bind", "0.0.0.0:8000", \
+     "--timeout", "60", \
+     "--keep-alive", "2", \
+     "--max-requests", "1000", \
+     "--max-requests-jitter", "100", \
+     "--preload", \
+     "--access-logfile", "-", \
+     "--error-logfile", "-", \
+     "--log-level", "info"]

@@ -1,0 +1,86 @@
+================================================================================
+PYMDP MEMORY HOTSPOT ANALYSIS REPORT
+Generated: 2025-07-14T17:26:51.705384
+================================================================================
+
+### MATRIX MEMORY ANALYSIS ###
+
+5x5 Grid:
+  - A matrices: 0.00 MB
+  - B matrices: 0.00 MB
+  - Total: 0.00 MB
+
+10x10 Grid:
+  - A matrices: 0.00 MB
+  - B matrices: 0.01 MB
+  - Total: 0.01 MB
+
+20x20 Grid:
+  - A matrices: 0.01 MB
+  - B matrices: 0.02 MB
+  - Total: 0.02 MB
+
+50x50 Grid:
+  - A matrices: 0.04 MB
+  - B matrices: 0.10 MB
+  - Total: 0.14 MB
+
+### MATRIX INEFFICIENCIES ###
+
+- A (observation) matrix (20x20):
+  - Sparsity: 5.0%
+  - Potential savings: 0.01 MB
+
+- B (transition) matrix (20x20):
+  - Sparsity: 5.0%
+  - Potential savings: 0.02 MB
+
+- A (observation) matrix (50x50):
+  - Sparsity: 2.0%
+  - Potential savings: 0.04 MB
+
+- B (transition) matrix (50x50):
+  - Sparsity: 2.0%
+  - Potential savings: 0.09 MB
+
+### BELIEF OPERATION COSTS ###
+- belief_updates_0: 0.00 MB
+- belief_updates_20: 0.01 MB
+- belief_updates_40: 0.01 MB
+- belief_updates_60: 0.01 MB
+- belief_updates_80: 0.02 MB
+
+### AGENT LIFECYCLE MEMORY ###
+- Creation cost: 0.22 MB/agent
+- Operation cost: 0.26 KB/operation
+- Cleanup efficiency: 88.3%
+
+### OPTIMIZATION OPPORTUNITIES ###
+
+Matrix Optimizations:
+
+Belief Optimizations:
+- belief_compression: 60-80% for sparse beliefs
+- belief_sharing: 30-50% for similar agents
+
+Memory Pooling:
+- matrix_pool: 20-40% reduction in allocations
+- belief_pool: 15-25% reduction in GC pressure
+
+Data Structure Improvements:
+- lazy_evaluation: Reduce peak memory usage by 30-50%
+- incremental_updates: Reduce computation memory by 40-60%
+
+### KEY FINDINGS ###
+1. Matrix operations are the primary memory consumers
+2. Dense matrix storage for sparse data is inefficient
+3. Belief state updates show potential memory leak patterns
+4. Float64 usage doubles memory requirements unnecessarily
+5. Lack of memory pooling causes excessive allocations
+
+### RECOMMENDATIONS ###
+1. Implement sparse matrix support for A and B matrices
+2. Switch to float32 for all non-critical calculations
+3. Implement belief state compression for sparse beliefs
+4. Add memory pooling for temporary matrix operations
+5. Use incremental belief updates instead of full recomputation

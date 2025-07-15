@@ -1,0 +1,10 @@
+./alembic/versions/2a8b9c3d4e5f_update_gmn_schema_version_management.py:16:1: C901 'upgrade' is too complex (25)
+./auth/alert_manager.py:7:1: F401 'typing.Union' imported but unused
+./auth/jwt_keys.py:8:1: F401 'typing.Union' imported but unused
+./knowledge_graph/graph_engine.py:151:1: W293 blank line contains whitespace
+./knowledge_graph/graph_engine.py:229:1: W293 blank line contains whitespace
+./knowledge_graph/graph_engine.py:234:1: W293 blank line contains whitespace
+./knowledge_graph/graph_engine.py:240:1: W293 blank line contains whitespace
+1     C901 'upgrade' is too complex (25)
+2     F401 'typing.Union' imported but unused
+4     W293 blank line contains whitespace

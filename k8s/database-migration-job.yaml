@@ -1,0 +1,289 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: database-migration
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: migration
+    tier: database
+spec:
+  template:
+    metadata:
+      labels:
+        app: freeagentics
+        component: migration
+        tier: database
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: migration
+        image: freeagentics/backend:latest
+        command: ["alembic", "upgrade", "head"]
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: freeagentics-secrets
+              key: database-url
+        - name: ENVIRONMENT
+          value: "production"
+        - name: LOG_LEVEL
+          value: "INFO"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+  backoffLimit: 3
+  activeDeadlineSeconds: 600
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: database-backup
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: backup
+    tier: database
+spec:
+  schedule: "0 2 * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: freeagentics
+            component: backup
+            tier: database
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: backup
+            image: postgres:15
+            command:
+            - /bin/bash
+            - -c
+            - |
+              export PGPASSWORD="$POSTGRES_PASSWORD"
+              pg_dump -h postgres -U freeagentics -d freeagentics | gzip > /backup/freeagentics-$(date +%Y%m%d-%H%M%S).sql.gz
+              # Keep only last 7 days of backups
+              find /backup -name "freeagentics-*.sql.gz" -type f -mtime +7 -delete
+            env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: freeagentics-secrets
+                  key: postgres-password
+            volumeMounts:
+            - name: backup-storage
+              mountPath: /backup
+            resources:
+              requests:
+                memory: "256Mi"
+                cpu: "250m"
+              limits:
+                memory: "512Mi"
+                cpu: "500m"
+          volumes:
+          - name: backup-storage
+            persistentVolumeClaim:
+              claimName: backup-pvc
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ssl-cert-monitor
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: ssl-monitor
+    tier: security
+spec:
+  schedule: "0 6 * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: freeagentics
+            component: ssl-monitor
+            tier: security
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: ssl-monitor
+            image: alpine:latest
+            command:
+            - /bin/sh
+            - -c
+            - |
+              apk add --no-cache openssl curl
+              
+              # Check SSL certificate expiration
+              DOMAIN="yourdomain.com"
+              CERT_INFO=$(echo | openssl s_client -servername $DOMAIN -connect $DOMAIN:443 2>/dev/null | openssl x509 -noout -dates)
+              EXPIRY_DATE=$(echo "$CERT_INFO" | grep notAfter | cut -d= -f2)
+              EXPIRY_TIMESTAMP=$(date -d "$EXPIRY_DATE" +%s)
+              CURRENT_TIMESTAMP=$(date +%s)
+              DAYS_UNTIL_EXPIRY=$(( (EXPIRY_TIMESTAMP - CURRENT_TIMESTAMP) / 86400 ))
+              
+              echo "SSL certificate for $DOMAIN expires in $DAYS_UNTIL_EXPIRY days"
+              
+              if [ $DAYS_UNTIL_EXPIRY -lt 30 ]; then
+                echo "WARNING: SSL certificate expires in less than 30 days!"
+                # Send alert (implement your notification logic here)
+                curl -X POST -H 'Content-type: application/json' \
+                  --data "{\"text\":\"⚠️ SSL Certificate Warning: Certificate for $DOMAIN expires in $DAYS_UNTIL_EXPIRY days\"}" \
+                  "$SLACK_WEBHOOK_URL"
+              fi
+              
+              if [ $DAYS_UNTIL_EXPIRY -lt 7 ]; then
+                echo "CRITICAL: SSL certificate expires in less than 7 days!"
+                exit 1
+              fi
+            env:
+            - name: SLACK_WEBHOOK_URL
+              valueFrom:
+                secretKeyRef:
+                  name: freeagentics-secrets
+                  key: slack-webhook
+            resources:
+              requests:
+                memory: "64Mi"
+                cpu: "100m"
+              limits:
+                memory: "128Mi"
+                cpu: "200m"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cleanup-old-pods
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: cleanup
+    tier: maintenance
+spec:
+  schedule: "0 3 * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: freeagentics
+            component: cleanup
+            tier: maintenance
+        spec:
+          serviceAccountName: cleanup-service-account
+          restartPolicy: OnFailure
+          containers:
+          - name: cleanup
+            image: bitnami/kubectl:latest
+            command:
+            - /bin/bash
+            - -c
+            - |
+              # Clean up completed pods older than 1 day
+              kubectl get pods -n freeagentics-prod --field-selector=status.phase=Succeeded \
+                -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.startTime}{"\n"}{end}' | \
+                while read pod_name start_time; do
+                  if [[ -n "$start_time" ]]; then
+                    start_timestamp=$(date -d "$start_time" +%s)
+                    current_timestamp=$(date +%s)
+                    age_seconds=$((current_timestamp - start_timestamp))
+                    age_days=$((age_seconds / 86400))
+                    
+                    if [[ $age_days -gt 1 ]]; then
+                      echo "Deleting old completed pod: $pod_name (age: $age_days days)"
+                      kubectl delete pod "$pod_name" -n freeagentics-prod
+                    fi
+                  fi
+                done
+              
+              # Clean up failed pods older than 3 days
+              kubectl get pods -n freeagentics-prod --field-selector=status.phase=Failed \
+                -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.startTime}{"\n"}{end}' | \
+                while read pod_name start_time; do
+                  if [[ -n "$start_time" ]]; then
+                    start_timestamp=$(date -d "$start_time" +%s)
+                    current_timestamp=$(date +%s)
+                    age_seconds=$((current_timestamp - start_timestamp))
+                    age_days=$((age_seconds / 86400))
+                    
+                    if [[ $age_days -gt 3 ]]; then
+                      echo "Deleting old failed pod: $pod_name (age: $age_days days)"
+                      kubectl delete pod "$pod_name" -n freeagentics-prod
+                    fi
+                  fi
+                done
+            resources:
+              requests:
+                memory: "64Mi"
+                cpu: "100m"
+              limits:
+                memory: "128Mi"
+                cpu: "200m"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cleanup-service-account
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: cleanup
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cleanup-role
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: cleanup
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "delete"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cleanup-role-binding
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: cleanup
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cleanup-role
+subjects:
+- kind: ServiceAccount
+  name: cleanup-service-account
+  namespace: freeagentics-prod

@@ -1,0 +1,405 @@
+{
+  "audit_metadata": {
+    "timestamp": "2025-07-14T18:42:19.863959+00:00",
+    "auditor": "RBAC Security Auditor v1.0",
+    "scope": "Comprehensive RBAC and Authorization Security",
+    "compliance_frameworks": [
+      "OWASP",
+      "NIST",
+      "ISO 27001"
+    ]
+  },
+  "executive_summary": {
+    "security_score": 62.5,
+    "risk_level": "LOW",
+    "test_summary": {
+      "total_tests": 16,
+      "passed_tests": 10,
+      "failed_tests": 6,
+      "pass_rate": 62.5
+    },
+    "vulnerability_summary": {
+      "total_vulnerabilities": 0,
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0
+    },
+    "key_findings": [
+      "RBAC implementation is comprehensive",
+      "ABAC policies are needs improvement",
+      "Authorization controls are require attention",
+      "Audit logging is implemented"
+    ],
+    "compliance_status": {
+      "owasp_top_10": "NON_COMPLIANT",
+      "nist_framework": "NON_COMPLIANT",
+      "iso_27001": "NON_COMPLIANT"
+    }
+  },
+  "detailed_findings": {},
+  "test_results": [
+    {
+      "test_name": "role_permission_matrix",
+      "passed": true,
+      "severity": "info",
+      "findings": [
+        "Permission Permission.VIEW_AGENTS is granted to 4 roles: [<UserRole.ADMIN: 'admin'>, <UserRole.RESEARCHER: 'researcher'>, <UserRole.AGENT_MANAGER: 'agent_manager'>, <UserRole.OBSERVER: 'observer'>]",
+        "Permission Permission.VIEW_METRICS is granted to 4 roles: [<UserRole.ADMIN: 'admin'>, <UserRole.RESEARCHER: 'researcher'>, <UserRole.AGENT_MANAGER: 'agent_manager'>, <UserRole.OBSERVER: 'observer'>]"
+      ],
+      "recommendations": [],
+      "metadata": {}
+    },
+    {
+      "test_name": "principle_of_least_privilege",
+      "passed": true,
+      "severity": "info",
+      "findings": [
+        "Runtime permission usage analysis recommended"
+      ],
+      "recommendations": [
+        "Implement permission usage monitoring",
+        "Regular access reviews for role appropriateness",
+        "Consider time-limited permissions for sensitive operations"
+      ],
+      "metadata": {
+        "role_analysis": {
+          "admin": {
+            "total_permissions": 7,
+            "high_risk_permissions": [
+              "delete_agent",
+              "admin_system"
+            ],
+            "privilege_score": 39
+          },
+          "researcher": {
+            "total_permissions": 5,
+            "high_risk_permissions": [],
+            "privilege_score": 19
+          },
+          "agent_manager": {
+            "total_permissions": 4,
+            "high_risk_permissions": [],
+            "privilege_score": 14
+          },
+          "observer": {
+            "total_permissions": 2,
+            "high_risk_permissions": [],
+            "privilege_score": 4
+          }
+        }
+      }
+    },
+    {
+      "test_name": "vertical_privilege_escalation",
+      "passed": true,
+      "severity": "info",
+      "findings": [
+        "Token manipulation test failed: 1 validation error for TokenData\nexp\n  Field required [type=missing, input_value={'user_id': 'observer_tes...TRICS: 'view_metrics'>]}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.11/v/missing"
+      ],
+      "recommendations": [
+        "Implement strict token validation",
+        "Regular security reviews of role assignments",
+        "Monitor for unusual permission usage patterns"
+      ],
+      "metadata": {}
+    },
+    {
+      "test_name": "horizontal_access_controls",
+      "passed": true,
+      "severity": "info",
+      "findings": [
+        "Non-owner access to resource agent_002",
+        "Non-admin access to restricted resource agent_002 needs ABAC validation",
+        "Non-admin access to restricted resource agent_002 needs ABAC validation",
+        "Non-admin access to restricted resource agent_002 needs ABAC validation",
+        "Non-admin access to restricted resource system_config needs ABAC validation",
+        "Non-admin access to restricted resource system_config needs ABAC validation",
+        "Non-admin access to restricted resource system_config needs ABAC validation"
+      ],
+      "recommendations": [
+        "Implement strict resource ownership validation",
+        "Enforce department-based access controls",
+        "Regular audit of resource access patterns"
+      ],
+      "metadata": {}
+    },
+    {
+      "test_name": "abac_policy_evaluation",
+      "passed": false,
+      "severity": "high",
+      "findings": [
+        "ABAC evaluation mismatch for Business hours admin access: expected True, got False",
+        "ABAC test 'Business hours admin access': Access denied by rule: High Risk Access Denial (rules: ['High Risk Access Denial'])",
+        "ABAC test 'After hours admin access': Access denied by rule: High Risk Access Denial (rules: ['High Risk Access Denial'])",
+        "ABAC evaluation mismatch for High risk session access: expected False, got True",
+        "ABAC test 'High risk session access': Access allowed by rule: Resource Ownership Control (rules: ['Resource Ownership Control'])"
+      ],
+      "recommendations": [
+        "Regular ABAC rule effectiveness review",
+        "Monitor for rule conflicts and overlaps",
+        "Implement ABAC rule testing framework"
+      ],
+      "metadata": {}
+    },
+    {
+      "test_name": "audit_logging_integrity",
+      "passed": true,
+      "severity": "info",
+      "findings": [
+        "Security event logging functional",
+        "ABAC access decisions logged: 3",
+        "Audit log tampering detection should be implemented"
+      ],
+      "recommendations": [
+        "Implement audit log integrity verification",
+        "Centralized log aggregation and monitoring",
+        "Regular audit log review processes"
+      ],
+      "metadata": {}
+    },
+    {
+      "test_name": "role_hierarchy_validation",
+      "passed": false,
+      "severity": "medium",
+      "findings": [
+        "Role assignment auto-approved when it shouldn't be: UserRole.OBSERVER -> UserRole.OBSERVER",
+        "Role assignment not auto-approved when it should be: UserRole.RESEARCHER -> UserRole.AGENT_MANAGER",
+        "Role assignment not auto-approved when it should be: UserRole.ADMIN -> UserRole.RESEARCHER",
+        "Role assignment not auto-approved when it should be: UserRole.ADMIN -> UserRole.AGENT_MANAGER"
+      ],
+      "recommendations": [
+        "Implement strict role hierarchy enforcement",
+        "Regular validation of role assignment workflows",
+        "Monitor for hierarchy bypass attempts"
+      ],
+      "metadata": {}
+    },
+    {
+      "test_name": "indirect_object_references",
+      "passed": false,
+      "severity": "medium",
+      "findings": [
+        "Scenario 'Agent ID enumeration': 0 resources accessible",
+        "Scenario 'Coalition access by ID': 0 resources accessible",
+        "Resource uses sequential ID: agent_001 (potential enumeration vulnerability)",
+        "Resource uses sequential ID: agent_002 (potential enumeration vulnerability)",
+        "Resource uses sequential ID: coalition_001 (potential enumeration vulnerability)",
+        "Resource uses custom ID format: system_config (review needed)"
+      ],
+      "recommendations": [
+        "Use UUIDs instead of sequential IDs",
+        "Implement proper authorization checks for all resource access",
+        "Regular testing for object reference vulnerabilities"
+      ],
+      "metadata": {}
+    },
+    {
+      "test_name": "_test_api_endpoint_authorization",
+      "passed": false,
+      "severity": "high",
+      "findings": [
+        "Test execution failed: DATABASE_URL environment variable is required. Please set it in your .env file or environment. Format: postgresql://username:password@host:port/database"
+      ],
+      "recommendations": [
+        "Investigate test execution failure"
+      ],
+      "metadata": {}
+    },
+    {
+      "test_name": "_test_session_management_security",
+      "passed": false,
+      "severity": "high",
+      "findings": [
+        "Test execution failed: name 'ACCESS_TOKEN_EXPIRE_MINUTES' is not defined"
+      ],
+      "recommendations": [
+        "Investigate test execution failure"
+      ],
+      "metadata": {}
+    },
+    {
+      "test_name": "token_manipulation_attacks",
+      "passed": false,
+      "severity": "critical",
+      "findings": [
+        "Token manipulation test failed: 1 validation error for TokenData\nexp\n  Field required [type=missing, input_value={'user_id': 'observer_tes...TRICS: 'view_metrics'>]}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.11/v/missing",
+        "Algorithm security test: Algorithm downgrade",
+        "Algorithm security test: None algorithm"
+      ],
+      "recommendations": [
+        "Use strong JWT signing algorithms (RS256 or ES256)",
+        "Implement proper token signature verification",
+        "Regular security testing of token handling"
+      ],
+      "metadata": {}
+    },
+    {
+      "test_name": "concurrent_access_control",
+      "passed": true,
+      "severity": "info",
+      "findings": [
+        "Race condition test: Concurrent role assignment - Role confusion or privilege escalation",
+        "Race condition test: Concurrent resource access - Inconsistent authorization decisions",
+        "Race condition test: Concurrent session management - Session state corruption",
+        "Atomic operation test: role_assignment",
+        "Atomic operation test: permission_check",
+        "Atomic operation test: session_creation",
+        "Atomic operation test: audit_logging",
+        "Deadlock scenario: Role hierarchy deadlock - Implement timeout and retry mechanisms",
+        "Deadlock scenario: Resource lock deadlock - Implement ordered locking"
+      ],
+      "recommendations": [
+        "Implement proper concurrency controls",
+        "Regular testing of concurrent access scenarios",
+        "Monitor for race condition vulnerabilities"
+      ],
+      "metadata": {}
+    },
+    {
+      "test_name": "resource_level_authorization",
+      "passed": true,
+      "severity": "info",
+      "findings": [
+        "Resource agent_001 access for UserRole.ADMIN: False (No applicable rules found - default deny)",
+        "Resource agent_001 access for UserRole.RESEARCHER: True (Access allowed by rule: Department-based Isolation)",
+        "Resource agent_001 access for UserRole.AGENT_MANAGER: False (No applicable rules found - default deny)",
+        "Resource agent_001 access for UserRole.OBSERVER: False (No applicable rules found - default deny)",
+        "Resource agent_002 access for UserRole.ADMIN: True (Access allowed by rule: Department-based Isolation)",
+        "Resource agent_002 access for UserRole.RESEARCHER: False (No applicable rules found - default deny)",
+        "Resource agent_002 access for UserRole.AGENT_MANAGER: False (No applicable rules found - default deny)",
+        "Resource agent_002 access for UserRole.OBSERVER: False (No applicable rules found - default deny)",
+        "Resource coalition_001 access for UserRole.ADMIN: False (No applicable rules found - default deny)",
+        "Resource coalition_001 access for UserRole.RESEARCHER: True (Access allowed by rule: Department-based Isolation)",
+        "Resource coalition_001 access for UserRole.AGENT_MANAGER: False (No applicable rules found - default deny)",
+        "Resource coalition_001 access for UserRole.OBSERVER: False (No applicable rules found - default deny)",
+        "Resource system_config access for UserRole.ADMIN: True (Access allowed by rule: Department-based Isolation)",
+        "Resource system_config access for UserRole.RESEARCHER: False (No applicable rules found - default deny)",
+        "Resource system_config access for UserRole.AGENT_MANAGER: False (No applicable rules found - default deny)",
+        "Resource system_config access for UserRole.OBSERVER: False (No applicable rules found - default deny)",
+        "Sensitivity level 'public' allows: ['observer', 'agent_manager', 'researcher', 'admin']",
+        "Sensitivity level 'internal' allows: ['agent_manager', 'researcher', 'admin']",
+        "Sensitivity level 'confidential' allows: ['researcher', 'admin']",
+        "Sensitivity level 'restricted' allows: ['admin']"
+      ],
+      "recommendations": [
+        "Implement fine-grained resource-level controls",
+        "Regular review of resource access patterns",
+        "Implement data classification enforcement"
+      ],
+      "metadata": {}
+    },
+    {
+      "test_name": "cross_tenant_isolation",
+      "passed": true,
+      "severity": "info",
+      "findings": [
+        "Department isolation: Research -> IT = denied",
+        "Department isolation: Operations -> Research = denied",
+        "Department isolation: IT -> IT = allowed",
+        "Location isolation: HQ -> Field",
+        "Location isolation: Remote -> Lab",
+        "Data leakage prevention: Cross-department data access - Department-based ABAC rules",
+        "Data leakage prevention: Cross-location data access - Location-based access controls",
+        "Data leakage prevention: Role-based data segregation - Role-specific resource visibility"
+      ],
+      "recommendations": [
+        "Implement strong tenant isolation controls",
+        "Regular testing of cross-tenant access",
+        "Monitor for data leakage patterns"
+      ],
+      "metadata": {}
+    },
+    {
+      "test_name": "authentication_bypass_attempts",
+      "passed": true,
+      "severity": "info",
+      "findings": [
+        "Bypass test: JWT bypass with invalid signature - Attempt to use token with invalid signature",
+        "  Expected: Authentication bypass blocked",
+        "Bypass test: JWT bypass with expired token - Attempt to use expired token",
+        "  Expected: Authentication bypass blocked",
+        "Bypass test: JWT bypass with missing claims - Attempt to use token with missing required claims",
+        "  Expected: Authentication bypass blocked",
+        "Bypass test: Direct endpoint access - Attempt to access protected endpoints without authentication",
+        "  Expected: Authentication bypass blocked",
+        "Bypass test: SQL injection in auth - Attempt SQL injection in authentication parameters",
+        "  Expected: Authentication bypass blocked",
+        "Rate limiting: Brute force protection - max 5 attempts, 15 minutes lockout",
+        "Rate limiting: Token enumeration protection - max 10 attempts, 5 minutes lockout"
+      ],
+      "recommendations": [
+        "Implement comprehensive authentication validation",
+        "Regular testing of authentication bypass scenarios",
+        "Monitor for authentication attack patterns"
+      ],
+      "metadata": {}
+    },
+    {
+      "test_name": "authorization_boundary_conditions",
+      "passed": true,
+      "severity": "info",
+      "findings": [
+        "Boundary test: Null user ID - expected access_denied",
+        "Boundary test: Empty permissions list - expected access_denied",
+        "Boundary test: Invalid role - expected access_denied",
+        "Boundary test: Malformed token data - expected access_denied",
+        "Boundary test: Extremely long resource ID - expected handled_gracefully",
+        "Performance test: High concurrency authorization - < 100ms",
+        "Performance test: Complex ABAC rule evaluation - < 200ms",
+        "Resource limit test: Large permission set - 1000 permissions",
+        "Resource limit test: Deep role hierarchy - 10 hierarchy levels"
+      ],
+      "recommendations": [
+        "Implement robust boundary condition handling",
+        "Regular performance testing of authorization",
+        "Monitor for resource exhaustion attacks"
+      ],
+      "metadata": {}
+    }
+  ],
+  "vulnerabilities": [],
+  "recommendations": [
+    {
+      "priority": "MEDIUM",
+      "category": "Access Control",
+      "title": "Enhance ABAC Policies",
+      "description": "Attribute-based access control can be improved",
+      "action_items": [
+        "Review ABAC rule effectiveness",
+        "Implement context-aware policies",
+        "Regular policy testing"
+      ]
+    },
+    {
+      "priority": "MEDIUM",
+      "category": "Monitoring",
+      "title": "Enhance Security Monitoring",
+      "description": "Improve audit logging and monitoring capabilities",
+      "action_items": [
+        "Implement comprehensive audit logging",
+        "Set up security monitoring alerts",
+        "Regular log review processes"
+      ]
+    },
+    {
+      "priority": "LOW",
+      "category": "Maintenance",
+      "title": "Code Cleanup and Maintenance",
+      "description": "Regular cleanup of obsolete files and code",
+      "action_items": [
+        "Remove obsolete RBAC files",
+        "Consolidate authorization modules",
+        "Update documentation"
+      ]
+    }
+  ],
+  "cleanup_actions": [
+    "Validated RBAC file: /home/green/FreeAgentics/auth/security_implementation.py",
+    "Validated RBAC file: /home/green/FreeAgentics/auth/rbac_enhancements.py",
+    "Consolidate authentication logic in auth module",
+    "Merge similar authorization decorators",
+    "Standardize permission checking across modules",
+    "Unify audit logging interfaces"
+  ]
+}

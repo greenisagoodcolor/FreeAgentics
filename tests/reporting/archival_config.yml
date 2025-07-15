@@ -1,0 +1,6 @@
+archive_location: tests/reporting/archive
+cleanup_enabled: true
+compress_after_days: 7
+max_age_days: 90
+preserve_summaries: true
+retention_policy: monthly

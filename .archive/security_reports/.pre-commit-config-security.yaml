@@ -1,0 +1,285 @@
+# Enhanced Pre-commit configuration with security focus
+# This extends the base pre-commit config with additional security checks
+# To use: pre-commit install -c .pre-commit-config-security.yaml
+
+repos:
+  # Include all base hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ['--maxkb=1024']
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: detect-private-key
+      - id: check-ast
+      - id: debug-statements
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # Security: Secret Detection
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: ^(\.archive/|tests/fixtures/)
+
+  # Security: Gitleaks
+  - repo: https://github.com/zricethezav/gitleaks
+    rev: v8.16.3
+    hooks:
+      - id: gitleaks
+
+  # Security: Python Security Linting
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        args: ['-ll', '-r', '--skip=B101,B601,B603']
+        exclude: ^(tests/|\.archive/)
+
+  # Security: Safety check for dependencies
+  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
+    rev: v1.3.2
+    hooks:
+      - id: python-safety-dependencies-check
+        files: requirements.*\.txt$
+
+  # Security: Semgrep
+  - repo: https://github.com/returntocorp/semgrep
+    rev: v1.45.0
+    hooks:
+      - id: semgrep
+        args: ['--config=auto', '--config=p/security-audit', '--config=p/secrets']
+        exclude: ^(\.archive/|web/node_modules/)
+
+  # Docker security
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint-docker
+        args: ['--ignore=DL3008,DL3009,DL3015', '--format=json']
+
+  # YAML security
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.32.0
+    hooks:
+      - id: yamllint
+        args: ['-c', '.yamllint.yaml']
+
+  # SQL injection prevention
+  - repo: https://github.com/sqlfluff/sqlfluff
+    rev: 2.3.2
+    hooks:
+      - id: sqlfluff-lint
+        args: ['--dialect', 'postgres']
+        files: \.(sql|py)$
+
+  # Python type checking (security-relevant)
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.3.0
+    hooks:
+      - id: mypy
+        additional_dependencies: 
+          - types-all
+          - types-cryptography
+          - types-jwt
+          - types-requests
+        args: ['--strict', '--ignore-missing-imports']
+        exclude: ^(tests/|\.archive/)
+
+  # License compliance
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.1
+    hooks:
+      - id: insert-license
+        files: \.py$
+        args:
+          - --license-filepath
+          - LICENSE.txt
+          - --comment-style
+          - "#"
+
+  # Markdown security (prevent XSS in docs)
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.37.0
+    hooks:
+      - id: markdownlint
+        args: ['--fix']
+
+  # JSON security validation
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.26.3
+    hooks:
+      - id: check-github-workflows
+      - id: check-github-actions
+      - id: check-dependabot
+
+  # Terraform security
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.83.4
+    hooks:
+      - id: terraform_fmt
+      - id: terraform_validate
+      - id: terraform_tfsec
+      - id: terraform_checkov
+        args:
+          - --args=--quiet
+          - --args=--framework=terraform
+
+  # Custom security hooks
+  - repo: local
+    hooks:
+      # Check for hardcoded credentials
+      - id: check-credentials
+        name: Check for hardcoded credentials
+        entry: python scripts/security/check_hardcoded_credentials.py
+        language: system
+        pass_filenames: true
+        types: [python]
+
+      # Validate JWT implementation
+      - id: validate-jwt
+        name: Validate JWT implementation
+        entry: python scripts/security/validate_jwt_usage.py
+        language: system
+        files: (auth|jwt|token).*\.py$
+
+      # Check API security
+      - id: check-api-security
+        name: Check API security patterns
+        entry: python scripts/security/check_api_security.py
+        language: system
+        files: api/.*\.py$
+
+      # Validate CORS configuration
+      - id: validate-cors
+        name: Validate CORS configuration
+        entry: python scripts/security/validate_cors.py
+        language: system
+        files: (api|middleware).*\.py$
+
+      # Check for SQL injection vulnerabilities
+      - id: check-sql-injection
+        name: Check for SQL injection patterns
+        entry: python scripts/security/check_sql_injection.py
+        language: system
+        types: [python]
+
+      # Validate input sanitization
+      - id: validate-input-sanitization
+        name: Validate input sanitization
+        entry: python scripts/security/validate_input_sanitization.py
+        language: system
+        files: (api|routes|views).*\.py$
+
+      # Check encryption usage
+      - id: check-encryption
+        name: Check encryption usage
+        entry: python scripts/security/check_encryption.py
+        language: system
+        types: [python]
+
+      # Validate authentication flows
+      - id: validate-auth-flows
+        name: Validate authentication flows
+        entry: python scripts/security/validate_auth_flows.py
+        language: system
+        files: auth/.*\.py$
+
+      # Check for XSS vulnerabilities
+      - id: check-xss
+        name: Check for XSS vulnerabilities
+        entry: python scripts/security/check_xss.py
+        language: system
+        files: \.(py|js|jsx|ts|tsx)$
+
+      # Validate rate limiting
+      - id: validate-rate-limiting
+        name: Validate rate limiting
+        entry: python scripts/security/validate_rate_limiting.py
+        language: system
+        files: (api|middleware).*\.py$
+
+      # Check security headers
+      - id: check-security-headers
+        name: Check security headers
+        entry: python scripts/security/check_security_headers.py
+        language: system
+        files: (api|middleware).*\.py$
+
+      # Validate session management
+      - id: validate-sessions
+        name: Validate session management
+        entry: python scripts/security/validate_sessions.py
+        language: system
+        files: (auth|session).*\.py$
+
+      # Check for path traversal
+      - id: check-path-traversal
+        name: Check for path traversal vulnerabilities
+        entry: python scripts/security/check_path_traversal.py
+        language: system
+        types: [python]
+
+      # Validate error handling
+      - id: validate-error-handling
+        name: Validate secure error handling
+        entry: python scripts/security/validate_error_handling.py
+        language: system
+        types: [python]
+
+      # Frontend security checks
+      - id: frontend-security
+        name: Frontend security checks
+        entry: bash -c 'cd web && npm run security-check'
+        language: system
+        files: ^web/.*\.(js|jsx|ts|tsx)$
+        pass_filenames: false
+
+      # Check npm packages for vulnerabilities
+      - id: npm-audit
+        name: NPM security audit
+        entry: bash -c 'cd web && npm audit --audit-level=moderate'
+        language: system
+        files: ^web/package\.json$
+        pass_filenames: false
+
+# Configuration
+exclude: |
+  (?x)^(
+    \.archive/.*|
+    \.git/.*|
+    web/node_modules/.*|
+    web/\.next/.*|
+    __pycache__/.*|
+    \.pytest_cache/.*|
+    \.mypy_cache/.*|
+    .*\.pyc|
+    .*\.pyo|
+    .*\.egg-info/.*|
+    tests/fixtures/.*
+  )$
+
+fail_fast: false
+default_stages: [commit, push]
+
+# CI-specific settings
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto security fixes
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: false  # Don't auto-fix security issues
+  autoupdate_branch: 'security/pre-commit-updates'
+  autoupdate_commit_msg: '[pre-commit.ci] security hooks update'
+  autoupdate_schedule: daily
+  skip: []  # Run all security checks in CI

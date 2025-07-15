@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: freeagentics-prod
+  labels:
+    name: freeagentics-prod
+    environment: production
+    tier: production
+    app: freeagentics
+  annotations:
+    description: "Production namespace for FreeAgentics application"
+    owner: "platform-team"
+    cost-center: "engineering"
