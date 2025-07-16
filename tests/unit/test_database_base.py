@@ -10,6 +10,7 @@ class TestDatabaseBase:
         """Test that database.base can be imported."""
         try:
             from database.base import Base  # noqa: F401
+
             # Test that Base exists and is a class
             assert Base is not None
         except ImportError:
@@ -21,5 +22,5 @@ class TestDatabaseBase:
         from database.base import Base
 
         # Test that Base has the expected attributes
-        assert hasattr(Base, 'metadata')
-        assert hasattr(Base, 'registry')
+        assert hasattr(Base, "metadata")
+        assert hasattr(Base, "registry")

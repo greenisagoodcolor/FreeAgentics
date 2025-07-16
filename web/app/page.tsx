@@ -4,16 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 
 export default function HomePage() {
-  const [systemStatus, setSystemStatus] = useState<
-    "checking" | "online" | "offline"
-  >("checking");
+  const [systemStatus, setSystemStatus] = useState<"checking" | "online" | "offline">("checking");
 
   // Check backend status on mount
   useState(() => {
     fetch("/api/health")
-      .then((res) =>
-        res.ok ? setSystemStatus("online") : setSystemStatus("offline"),
-      )
+      .then((res) => (res.ok ? setSystemStatus("online") : setSystemStatus("offline")))
       .catch(() => setSystemStatus("offline"));
   });
 
@@ -22,12 +18,8 @@ export default function HomePage() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            FreeAgentics
-          </h1>
-          <p className="text-xl text-gray-600 mb-2">
-            Active Inference Multi-Agent Platform
-          </p>
+          <h1 className="text-5xl font-bold text-gray-900 mb-4">FreeAgentics</h1>
+          <p className="text-xl text-gray-600 mb-2">Active Inference Multi-Agent Platform</p>
           <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
             v0.1-alpha - Under Development
           </div>
@@ -57,30 +49,23 @@ export default function HomePage() {
           <Link href="/dashboard" className="block">
             <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
               <h3 className="text-xl font-semibold mb-2">Agent Dashboard</h3>
-              <p className="text-gray-600">
-                Monitor and control active agents in the system
-              </p>
+              <p className="text-gray-600">Monitor and control active agents in the system</p>
             </div>
           </Link>
 
           <Link href="/agents" className="block">
             <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
               <h3 className="text-xl font-semibold mb-2">Agent Explorer</h3>
-              <p className="text-gray-600">
-                Create and configure new active inference agents
-              </p>
+              <p className="text-gray-600">Create and configure new active inference agents</p>
             </div>
           </Link>
         </div>
 
         {/* Development Notice */}
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-yellow-900 mb-2">
-            🚧 Development Notice
-          </h3>
+          <h3 className="text-lg font-semibold text-yellow-900 mb-2">🚧 Development Notice</h3>
           <p className="text-yellow-800 mb-4">
-            This is an early alpha release. Core features are still being
-            implemented:
+            This is an early alpha release. Core features are still being implemented:
           </p>
           <ul className="list-disc list-inside text-yellow-700 space-y-1">
             <li>Active Inference engine integration (15% complete)</li>
@@ -102,9 +87,7 @@ export default function HomePage() {
 
         {/* Technical Stack */}
         <div className="mt-12 text-center text-sm text-gray-500">
-          <p>
-            Built with PyTorch • FastAPI • Next.js • Active Inference (PyMDP)
-          </p>
+          <p>Built with PyTorch • FastAPI • Next.js • Active Inference (PyMDP)</p>
         </div>
       </div>
     </main>

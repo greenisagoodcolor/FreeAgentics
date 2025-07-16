@@ -6,42 +6,34 @@ to ensure security tests pass before deployment.
 """
 
 import json
-import yaml
-from typing import Dict, List, Optional
 from pathlib import Path
+from typing import Dict, List, Optional
+
+import yaml
 
 
 class SecurityGatesConfig:
     """Security gates configuration for CI/CD pipelines"""
-    
+
     @staticmethod
     def github_actions_config() -> Dict:
         """Generate GitHub Actions security workflow"""
-        
+
         workflow = {
             "name": "Security Testing",
             "on": {
-                "push": {
-                    "branches": ["main", "develop"]
-                },
-                "pull_request": {
-                    "branches": ["main"]
-                }
+                "push": {"branches": ["main", "develop"]},
+                "pull_request": {"branches": ["main"]},
             },
             "jobs": {
                 "security-tests": {
                     "runs-on": "ubuntu-latest",
                     "steps": [
-                        {
-                            "name": "Checkout code",
-                            "uses": "actions/checkout@v3"
-                        },
+                        {"name": "Checkout code", "uses": "actions/checkout@v3"},
                         {
                             "name": "Setup Python",
                             "uses": "actions/setup-python@v4",
-                            "with": {
-                                "python-version": "3.10"
-                            }
+                            "with": {"python-version": "3.10"},
                         },
                         {
                             "name": "Install dependencies",
@@ -49,25 +41,25 @@ class SecurityGatesConfig:
                                 pip install --upgrade pip
                                 pip install -r requirements.txt
                                 pip install -r requirements-dev.txt
-                            """
+                            """,
                         },
                         {
                             "name": "Run security test suite",
                             "run": """
                                 python -m pytest tests/security/comprehensive_security_test_suite.py -v
-                            """
+                            """,
                         },
                         {
                             "name": "Run penetration tests",
                             "run": """
                                 python tests/security/run_comprehensive_penetration_tests.py
-                            """
+                            """,
                         },
                         {
                             "name": "Check security headers",
                             "run": """
                                 python -m pytest tests/unit/test_security_headers_validation.py -v
-                            """
+                            """,
                         },
                         {
                             "name": "OWASP Dependency Check",
@@ -76,22 +68,22 @@ class SecurityGatesConfig:
                                 "project": "FreeAgentics",
                                 "path": ".",
                                 "format": "ALL",
-                                "args": "--enableRetired --enableExperimental"
-                            }
+                                "args": "--enableRetired --enableExperimental",
+                            },
                         },
                         {
                             "name": "Run Bandit Security Scan",
                             "run": """
                                 pip install bandit
                                 bandit -r . -f json -o bandit-report.json || true
-                            """
+                            """,
                         },
                         {
                             "name": "Run Safety Check",
                             "run": """
                                 pip install safety
                                 safety check --json > safety-report.json || true
-                            """
+                            """,
                         },
                         {
                             "name": "OWASP ZAP Baseline Scan",
@@ -99,8 +91,8 @@ class SecurityGatesConfig:
                             "with": {
                                 "target": "http://localhost:8000",
                                 "allow_issue_writing": False,
-                                "fail_action": True
-                            }
+                                "fail_action": True,
+                            },
                         },
                         {
                             "name": "Upload security reports",
@@ -113,141 +105,111 @@ class SecurityGatesConfig:
                                     bandit-report.json
                                     safety-report.json
                                     zap_report.html
-                                """
-                            }
+                                """,
+                            },
                         },
                         {
                             "name": "Security gate check",
                             "run": """
                                 python tests/security/check_security_gates.py
-                            """
-                        }
+                            """,
+                        },
                     ],
                     "services": {
                         "postgres": {
                             "image": "postgres:14",
                             "env": {
                                 "POSTGRES_PASSWORD": "postgres",
-                                "POSTGRES_DB": "freeagentics_test"
+                                "POSTGRES_DB": "freeagentics_test",
                             },
-                            "options": "--health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5"
+                            "options": "--health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5",
                         },
                         "redis": {
                             "image": "redis:7",
-                            "options": "--health-cmd \"redis-cli ping\" --health-interval 10s --health-timeout 5s --health-retries 5"
-                        }
-                    }
+                            "options": '--health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5',
+                        },
+                    },
                 }
-            }
+            },
         }
-        
+
         return workflow
-    
+
     @staticmethod
     def gitlab_ci_config() -> Dict:
         """Generate GitLab CI security configuration"""
-        
+
         config = {
             "stages": ["test", "security", "deploy"],
-            
-            "variables": {
-                "PIP_CACHE_DIR": "$CI_PROJECT_DIR/.cache/pip"
-            },
-            
-            "cache": {
-                "paths": [".cache/pip"]
-            },
-            
+            "variables": {"PIP_CACHE_DIR": "$CI_PROJECT_DIR/.cache/pip"},
+            "cache": {"paths": [".cache/pip"]},
             "security-tests": {
                 "stage": "security",
                 "image": "python:3.10",
-                "services": [
-                    "postgres:14",
-                    "redis:latest"
-                ],
+                "services": ["postgres:14", "redis:latest"],
                 "variables": {
                     "POSTGRES_DB": "freeagentics_test",
                     "POSTGRES_USER": "postgres",
                     "POSTGRES_PASSWORD": "postgres",
-                    "DATABASE_URL": "postgresql://postgres:postgres@postgres/freeagentics_test"
+                    "DATABASE_URL": "postgresql://postgres:postgres@postgres/freeagentics_test",
                 },
                 "before_script": [
                     "pip install --upgrade pip",
                     "pip install -r requirements.txt",
-                    "pip install -r requirements-dev.txt"
+                    "pip install -r requirements-dev.txt",
                 ],
                 "script": [
                     "python -m pytest tests/security/ -v --junitxml=security-report.xml",
                     "python tests/security/run_comprehensive_penetration_tests.py",
                     "bandit -r . -f json -o bandit-report.json",
                     "safety check --json > safety-report.json",
-                    "python tests/security/check_security_gates.py"
+                    "python tests/security/check_security_gates.py",
                 ],
                 "artifacts": {
-                    "reports": {
-                        "junit": "security-report.xml"
-                    },
+                    "reports": {"junit": "security-report.xml"},
                     "paths": [
                         "security_test_report.json",
                         "bandit-report.json",
-                        "safety-report.json"
+                        "safety-report.json",
                     ],
-                    "when": "always"
+                    "when": "always",
                 },
-                "allow_failure": False
+                "allow_failure": False,
             },
-            
             "dependency-scanning": {
                 "stage": "security",
-                "image": {
-                    "name": "owasp/dependency-check:latest",
-                    "entrypoint": [""]
-                },
+                "image": {"name": "owasp/dependency-check:latest", "entrypoint": [""]},
                 "script": [
                     "/usr/share/dependency-check/bin/dependency-check.sh --scan . --format ALL --project FreeAgentics"
                 ],
-                "artifacts": {
-                    "paths": ["dependency-check-report.*"]
-                }
+                "artifacts": {"paths": ["dependency-check-report.*"]},
             },
-            
             "container-scanning": {
                 "stage": "security",
                 "image": "registry.gitlab.com/gitlab-org/security-products/analyzers/container-scanning:latest",
                 "variables": {
                     "CI_APPLICATION_REPOSITORY": "$CI_REGISTRY_IMAGE",
-                    "CI_APPLICATION_TAG": "$CI_COMMIT_SHA"
+                    "CI_APPLICATION_TAG": "$CI_COMMIT_SHA",
                 },
-                "script": [
-                    "/analyzer run"
-                ],
+                "script": ["/analyzer run"],
                 "artifacts": {
-                    "reports": {
-                        "container_scanning": "gl-container-scanning-report.json"
-                    }
-                }
+                    "reports": {"container_scanning": "gl-container-scanning-report.json"}
+                },
             },
-            
             "sast": {
                 "stage": "security",
                 "image": "registry.gitlab.com/gitlab-org/security-products/analyzers/semgrep:latest",
-                "script": [
-                    "/analyzer run"
-                ],
-                "artifacts": {
-                    "reports": {
-                        "sast": "gl-sast-report.json"
-                    }
-                }
-            }
+                "script": ["/analyzer run"],
+                "artifacts": {"reports": {"sast": "gl-sast-report.json"}},
+            },
         }
-        
+
         return config
-    
+
     @staticmethod
     def jenkins_pipeline() -> str:
         """Generate Jenkins security pipeline"""
-        
+
         pipeline = """
 pipeline {
     agent any
@@ -359,17 +321,14 @@ pipeline {
 }
 """
         return pipeline
-    
+
     @staticmethod
     def circleci_config() -> Dict:
         """Generate CircleCI security configuration"""
-        
+
         config = {
             "version": 2.1,
-            "orbs": {
-                "python": "circleci/python@2.1.1",
-                "security": "salto/security@0.2.0"
-            },
+            "orbs": {"python": "circleci/python@2.1.1", "security": "salto/security@0.2.0"},
             "jobs": {
                 "security-tests": {
                     "docker": [
@@ -379,92 +338,71 @@ pipeline {
                             "environment": {
                                 "POSTGRES_USER": "postgres",
                                 "POSTGRES_PASSWORD": "postgres",
-                                "POSTGRES_DB": "freeagentics_test"
-                            }
+                                "POSTGRES_DB": "freeagentics_test",
+                            },
                         },
-                        {"image": "cimg/redis:7.0"}
+                        {"image": "cimg/redis:7.0"},
                     ],
                     "steps": [
                         "checkout",
                         {
                             "python/install-packages": {
                                 "pkg-manager": "pip",
-                                "pip-dependency-file": "requirements.txt"
+                                "pip-dependency-file": "requirements.txt",
                             }
                         },
                         {
                             "run": {
                                 "name": "Install dev dependencies",
-                                "command": "pip install -r requirements-dev.txt"
+                                "command": "pip install -r requirements-dev.txt",
                             }
                         },
                         {
                             "run": {
                                 "name": "Run security test suite",
-                                "command": "python -m pytest tests/security/ -v"
+                                "command": "python -m pytest tests/security/ -v",
                             }
                         },
                         {
                             "run": {
                                 "name": "Run penetration tests",
-                                "command": "python tests/security/run_comprehensive_penetration_tests.py"
+                                "command": "python tests/security/run_comprehensive_penetration_tests.py",
                             }
                         },
-                        {
-                            "security/scan": {
-                                "scan-type": "sast",
-                                "fail-on-issues": True
-                            }
-                        },
+                        {"security/scan": {"scan-type": "sast", "fail-on-issues": True}},
                         {
                             "run": {
                                 "name": "Dependency check",
                                 "command": """
                                     safety check --json > safety-report.json
                                     pip-audit --format json > pip-audit-report.json
-                                """
+                                """,
                             }
                         },
                         {
                             "run": {
                                 "name": "Security gate check",
-                                "command": "python tests/security/check_security_gates.py"
+                                "command": "python tests/security/check_security_gates.py",
                             }
                         },
-                        {
-                            "store_artifacts": {
-                                "path": "security_test_report.json"
-                            }
-                        },
-                        {
-                            "store_test_results": {
-                                "path": "test-results"
-                            }
-                        }
-                    ]
+                        {"store_artifacts": {"path": "security_test_report.json"}},
+                        {"store_test_results": {"path": "test-results"}},
+                    ],
                 }
             },
-            "workflows": {
-                "security": {
-                    "jobs": ["security-tests"]
-                }
-            }
+            "workflows": {"security": {"jobs": ["security-tests"]}},
         }
-        
+
         return config
-    
+
     @staticmethod
     def azure_devops_pipeline() -> Dict:
         """Generate Azure DevOps security pipeline"""
-        
+
         pipeline = {
             "trigger": ["main", "develop"],
-            "pool": {
-                "vmImage": "ubuntu-latest"
-            },
-            "variables": {
-                "pythonVersion": "3.10"
-            },
+            "pool": {"vmImage": "ubuntu-latest"},
+            "variables": {"pythonVersion": "3.10"},
             "stages": [
                 {
                     "stage": "SecurityTests",
@@ -478,8 +416,8 @@ pipeline {
                                     "task": "UsePythonVersion@0",
                                     "inputs": {
                                         "versionSpec": "$(pythonVersion)",
-                                        "addToPath": True
-                                    }
+                                        "addToPath": True,
+                                    },
                                 },
                                 {
                                     "script": """
@@ -487,86 +425,86 @@ pipeline {
                                         pip install -r requirements.txt
                                         pip install -r requirements-dev.txt
                                     """,
-                                    "displayName": "Install dependencies"
+                                    "displayName": "Install dependencies",
                                 },
                                 {
                                     "script": "python -m pytest tests/security/ -v --junitxml=junit/security-tests.xml",
-                                    "displayName": "Run security tests"
+                                    "displayName": "Run security tests",
                                 },
                                 {
                                     "script": "python tests/security/run_comprehensive_penetration_tests.py",
-                                    "displayName": "Run penetration tests"
+                                    "displayName": "Run penetration tests",
                                 },
                                 {
                                     "task": "WhiteSource@21",
-                                    "displayName": "WhiteSource security scan"
+                                    "displayName": "WhiteSource security scan",
                                 },
                                 {
                                     "script": """
                                         bandit -r . -f json -o $(Build.ArtifactStagingDirectory)/bandit-report.json
                                         safety check --json > $(Build.ArtifactStagingDirectory)/safety-report.json
                                     """,
-                                    "displayName": "SAST and dependency scanning"
+                                    "displayName": "SAST and dependency scanning",
                                 },
                                 {
                                     "script": "python tests/security/check_security_gates.py",
-                                    "displayName": "Security gate validation"
+                                    "displayName": "Security gate validation",
                                 },
                                 {
                                     "task": "PublishTestResults@2",
                                     "inputs": {
                                         "testResultsFormat": "JUnit",
-                                        "testResultsFiles": "**/security-tests.xml"
-                                    }
+                                        "testResultsFiles": "**/security-tests.xml",
+                                    },
                                 },
                                 {
                                     "task": "PublishBuildArtifacts@1",
                                     "inputs": {
                                         "pathToPublish": "$(Build.ArtifactStagingDirectory)",
-                                        "artifactName": "SecurityReports"
-                                    }
-                                }
-                            ]
+                                        "artifactName": "SecurityReports",
+                                    },
+                                },
+                            ],
                         }
-                    ]
+                    ],
                 }
-            ]
+            ],
         }
-        
+
         return pipeline
-    
+
     @staticmethod
     def generate_all_configs(output_dir: str = "."):
         """Generate all CI/CD security configurations"""
-        
+
         output_path = Path(output_dir)
-        
+
         # GitHub Actions
         github_dir = output_path / ".github" / "workflows"
         github_dir.mkdir(parents=True, exist_ok=True)
-        
+
         with open(github_dir / "security-tests.yml", "w") as f:
             yaml.dump(SecurityGatesConfig.github_actions_config(), f, default_flow_style=False)
-        
+
         # GitLab CI
         with open(output_path / ".gitlab-ci-security.yml", "w") as f:
             yaml.dump(SecurityGatesConfig.gitlab_ci_config(), f, default_flow_style=False)
-        
+
         # Jenkins
         with open(output_path / "Jenkinsfile.security", "w") as f:
             f.write(SecurityGatesConfig.jenkins_pipeline())
-        
+
         # CircleCI
         circleci_dir = output_path / ".circleci"
         circleci_dir.mkdir(exist_ok=True)
-        
+
         with open(circleci_dir / "config-security.yml", "w") as f:
             yaml.dump(SecurityGatesConfig.circleci_config(), f, default_flow_style=False)
-        
+
         # Azure DevOps
         with open(output_path / "azure-pipelines-security.yml", "w") as f:
             yaml.dump(SecurityGatesConfig.azure_devops_pipeline(), f, default_flow_style=False)
-        
+
         print("Generated CI/CD security configurations:")
         print("- .github/workflows/security-tests.yml")
         print("- .gitlab-ci-security.yml")

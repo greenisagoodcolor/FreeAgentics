@@ -9,13 +9,15 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+
 # Create proper mock middleware classes
 class MockMiddleware:
     def __init__(self, *args, **kwargs):
         pass
-    
+
     async def __call__(self, scope, receive, send):
         pass
+
 
 # Mock dependencies before importing main
 with patch.dict(
@@ -40,19 +42,26 @@ with patch.dict(
     with patch("api.middleware.DDoSProtectionMiddleware", MockMiddleware):
         with patch("api.middleware.SecurityMonitoringMiddleware", MockMiddleware):
             with patch("auth.security_headers.SecurityHeadersMiddleware", MockMiddleware):
-                with patch("api.middleware.security_headers.security_headers_middleware", AsyncMock()):
+                with patch(
+                    "api.middleware.security_headers.security_headers_middleware", AsyncMock()
+                ):
                     # Mock the router objects
                     mock_router = MagicMock()
                     mock_router.router = MagicMock()
-                    
+
                     with patch("api.v1.agents.router", mock_router.router):
                         with patch("api.v1.auth.router", mock_router.router):
                             with patch("api.v1.inference.router", mock_router.router):
                                 with patch("api.v1.monitoring.router", mock_router.router):
                                     with patch("api.v1.security.router", mock_router.router):
                                         with patch("api.v1.system.router", mock_router.router):
-                                            with patch("api.v1.websocket.router", mock_router.router):
-                                                with patch("api.v1.graphql_schema.graphql_app", mock_router.router):
+                                            with patch(
+                                                "api.v1.websocket.router", mock_router.router
+                                            ):
+                                                with patch(
+                                                    "api.v1.graphql_schema.graphql_app",
+                                                    mock_router.router,
+                                                ):
                                                     from api.main import app, lifespan
 
 

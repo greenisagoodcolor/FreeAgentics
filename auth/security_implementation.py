@@ -286,23 +286,23 @@ class SecurityValidator:
 
 class CSRFProtection:
     """CSRF protection utilities."""
-    
+
     def __init__(self):
         self._token_store = {}  # In production, use Redis or similar
-        
+
     def generate_csrf_token(self, session_id: str) -> str:
         """Generate a new CSRF token for the session."""
         token = secrets.token_urlsafe(CSRF_TOKEN_LENGTH)
         self._token_store[session_id] = token
         return token
-        
+
     def verify_csrf_token(self, session_id: str, token: str) -> bool:
         """Verify CSRF token matches the session."""
         stored_token = self._token_store.get(session_id)
         if not stored_token:
             return False
         return hmac.compare_digest(stored_token, token)
-        
+
     def invalidate_csrf_token(self, session_id: str):
         """Invalidate CSRF token for session."""
         if session_id in self._token_store:
@@ -328,20 +328,20 @@ class AuthenticationManager:
     def create_access_token(self, user: User, client_fingerprint: Optional[str] = None) -> str:
         """Create JWT access token using secure handler."""
         permissions = ROLE_PERMISSIONS.get(user.role, [])
-        
+
         # Generate fingerprint if not provided
         if client_fingerprint is None:
             client_fingerprint = jwt_handler.generate_fingerprint()
-            
+
         # Store fingerprint for this user
         self._fingerprint_store[user.user_id] = client_fingerprint
-        
+
         return jwt_handler.create_access_token(
             user_id=user.user_id,
             username=user.username,
             role=user.role.value,
             permissions=[p.value for p in permissions],
-            fingerprint=client_fingerprint
+            fingerprint=client_fingerprint,
         )
 
     def create_refresh_token(self, user: User) -> str:
@@ -352,7 +352,7 @@ class AuthenticationManager:
     def verify_token(self, token: str, client_fingerprint: Optional[str] = None) -> TokenData:
         """Verify and decode JWT token using secure handler."""
         payload = jwt_handler.verify_access_token(token, fingerprint=client_fingerprint)
-        
+
         return TokenData(
             user_id=payload["user_id"],
             username=payload["username"],
@@ -396,26 +396,24 @@ class AuthenticationManager:
         """Refresh access token using refresh token with rotation."""
         # Use secure JWT handler for refresh token rotation
         user_id = self._extract_user_id_from_refresh_token(refresh_token)
-        
+
         # Find user by user_id
         user_data = None
         for username, data in self.users.items():
             if data["user"].user_id == user_id:
                 user_data = data["user"]
                 break
-        
+
         if not user_data:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"
-            )
-        
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+
         # Rotate refresh token
         new_access_token, new_refresh_token, family_id = jwt_handler.rotate_refresh_token(
             refresh_token, user_id
         )
-        
+
         return new_access_token, new_refresh_token
-        
+
     def _extract_user_id_from_refresh_token(self, refresh_token: str) -> str:
         """Extract user ID from refresh token for lookup."""
         try:
@@ -426,20 +424,20 @@ class AuthenticationManager:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token"
             )
-            
+
     def logout(self, token: str, user_id: Optional[str] = None):
         """Logout user by revoking tokens."""
         # Revoke the current access token
         jwt_handler.revoke_token(token)
-        
+
         # Revoke all user tokens if user_id provided
         if user_id:
             jwt_handler.revoke_user_tokens(user_id)
-            
+
         # Invalidate CSRF token for the session
         if user_id:
             self.csrf_protection.invalidate_csrf_token(user_id)
-            
+
     def set_token_cookie(self, response: Response, token: str, secure: bool = True):
         """Set JWT token in secure httpOnly cookie."""
         response.set_cookie(
@@ -449,9 +447,9 @@ class AuthenticationManager:
             secure=secure,  # HTTPS only in production
             samesite="strict",  # CSRF protection
             max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-            path="/"
+            path="/",
         )
-        
+
     def set_csrf_cookie(self, response: Response, csrf_token: str, secure: bool = True):
         """Set CSRF token in cookie (readable by JS)."""
         response.set_cookie(
@@ -461,9 +459,9 @@ class AuthenticationManager:
             secure=secure,
             samesite="strict",
             max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-            path="/"
+            path="/",
         )
-        
+
     def cleanup_blacklist(self):
         """Cleanup expired tokens from blacklist."""
         jwt_handler.blacklist._cleanup()
@@ -555,7 +553,7 @@ async def get_current_user(
     fingerprint = request.cookies.get("__Secure-Fgp", None)
     if not fingerprint:
         fingerprint = request.headers.get("X-Fingerprint", None)
-        
+
     return auth_manager.verify_token(credentials.credentials, client_fingerprint=fingerprint)
 
 
@@ -665,23 +663,24 @@ def secure_database_query(query_func):
 
 def require_csrf_token(func):
     """Require valid CSRF token for state-changing operations."""
+
     @wraps(func)
     async def wrapper(request: Request, *args, **kwargs):
         # Get session ID (from user token or session)
         session_id = None
-        
+
         # Try to get user from request
         for arg in args:
             if isinstance(arg, TokenData):
                 session_id = arg.user_id
                 break
-                
+
         if not session_id:
             for value in kwargs.values():
                 if isinstance(value, TokenData):
                     session_id = value.user_id
                     break
-                    
+
         if not session_id:
             # Try to extract from authorization header
             auth_header = request.headers.get("Authorization", "")
@@ -692,34 +691,28 @@ def require_csrf_token(func):
                     session_id = unverified.get("user_id")
                 except:
                     pass
-                    
+
         if not session_id:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Session required for CSRF validation"
+                detail="Session required for CSRF validation",
             )
-            
+
         # Get CSRF token from header or form
         csrf_token = request.headers.get(CSRF_HEADER_NAME)
         if not csrf_token and hasattr(request, "form"):
             form_data = await request.form()
             csrf_token = form_data.get("csrf_token")
-            
+
         if not csrf_token:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="CSRF token required"
-            )
-            
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="CSRF token required")
+
         # Validate CSRF token
         if not auth_manager.csrf_protection.verify_csrf_token(session_id, csrf_token):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Invalid CSRF token"
-            )
-            
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid CSRF token")
+
         return await func(request, *args, **kwargs)
-        
+
     return wrapper
 
 
@@ -741,7 +734,10 @@ class SecurityMiddleware:
                 (b"X-Frame-Options", b"DENY"),
                 (b"X-XSS-Protection", b"1; mode=block"),
                 (b"Strict-Transport-Security", b"max-age=31536000; includeSubDomains"),
-                (b"Content-Security-Policy", b"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"),
+                (
+                    b"Content-Security-Policy",
+                    b"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'",
+                ),
                 (b"Referrer-Policy", b"strict-origin-when-cross-origin"),
                 (b"Permissions-Policy", b"geolocation=(), microphone=(), camera=()"),
             ]

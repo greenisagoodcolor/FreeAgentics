@@ -7,12 +7,14 @@ This guide provides comprehensive instructions for deploying the FreeAgentics fr
 ## Prerequisites
 
 ### System Requirements
+
 - **Node.js**: 18.0.0 or higher
 - **npm**: 8.0.0 or higher
 - **Docker**: 20.10.0 or higher (for containerized deployment)
 - **SSL Certificate**: Required for HTTPS
 
 ### Environment Variables
+
 Create a `.env.production` file with the following variables:
 
 ```env
@@ -34,6 +36,7 @@ NEXT_PUBLIC_ENVIRONMENT=production
 ### Method 1: Docker Deployment (Recommended)
 
 #### 1. Build Production Image
+
 ```bash
 # Build optimized production image
 docker build -f Dockerfile.production -t freeagentics-web:latest .
@@ -43,6 +46,7 @@ docker images freeagentics-web:latest
 ```
 
 #### 2. Run Production Container
+
 ```bash
 # Run with environment variables
 docker run -d \
@@ -58,8 +62,9 @@ docker logs freeagentics-web
 ```
 
 #### 3. Production Docker Compose
+
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   web:
     image: freeagentics-web:latest
@@ -81,6 +86,7 @@ services:
 ### Method 2: Node.js Deployment
 
 #### 1. Install Dependencies
+
 ```bash
 # Install production dependencies
 npm ci --production
@@ -93,6 +99,7 @@ npm run start
 ```
 
 #### 2. Process Management with PM2
+
 ```bash
 # Install PM2 globally
 npm install -g pm2
@@ -125,6 +132,7 @@ pm2 startup
 ### Method 3: Serverless Deployment (Vercel/Netlify)
 
 #### Vercel Deployment
+
 ```bash
 # Install Vercel CLI
 npm install -g vercel
@@ -139,6 +147,7 @@ vercel env add NEXT_PUBLIC_APP_URL
 ```
 
 #### Netlify Deployment
+
 ```bash
 # Install Netlify CLI
 npm install -g netlify-cli
@@ -151,6 +160,7 @@ netlify deploy --prod --dir=.next
 ## Reverse Proxy Configuration
 
 ### Nginx Configuration
+
 ```nginx
 upstream freeagentics_web {
     server 127.0.0.1:3000;
@@ -218,6 +228,7 @@ server {
 ```
 
 ### Apache Configuration
+
 ```apache
 <VirtualHost *:80>
     ServerName app.freeagentics.com
@@ -226,21 +237,21 @@ server {
 
 <VirtualHost *:443>
     ServerName app.freeagentics.com
-    
+
     SSLEngine on
     SSLCertificateFile /path/to/ssl/cert.pem
     SSLCertificateKeyFile /path/to/ssl/key.pem
-    
+
     ProxyPreserveHost On
     ProxyPass / http://127.0.0.1:3000/
     ProxyPassReverse / http://127.0.0.1:3000/
-    
+
     # Security Headers
     Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
     Header always set X-Frame-Options "DENY"
     Header always set X-Content-Type-Options "nosniff"
     Header always set X-XSS-Protection "1; mode=block"
-    
+
     # Compression
     LoadModule deflate_module modules/mod_deflate.so
     <Location />
@@ -256,6 +267,7 @@ server {
 ## Performance Optimization
 
 ### CDN Configuration
+
 ```bash
 # Configure CDN for static assets
 # Example: Cloudflare, AWS CloudFront, or similar
@@ -269,6 +281,7 @@ server {
 ```
 
 ### Database Optimization
+
 ```sql
 -- Add indexes for frequently queried data
 CREATE INDEX idx_user_sessions ON user_sessions(user_id, created_at);
@@ -278,6 +291,7 @@ CREATE INDEX idx_agent_status ON agents(status, updated_at);
 ## Monitoring Setup
 
 ### Health Checks
+
 ```bash
 # Application health check
 curl -f http://localhost:3000/api/health
@@ -287,37 +301,41 @@ curl -f http://localhost:3000/api/health?detailed=true
 ```
 
 ### Logging Configuration
+
 ```javascript
 // Production logging setup
-const winston = require('winston');
+const winston = require("winston");
 
 const logger = winston.createLogger({
-  level: 'info',
+  level: "info",
   format: winston.format.json(),
   transports: [
-    new winston.transports.File({ filename: 'error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'combined.log' })
-  ]
+    new winston.transports.File({ filename: "error.log", level: "error" }),
+    new winston.transports.File({ filename: "combined.log" }),
+  ],
 });
 
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.simple()
-  }));
+if (process.env.NODE_ENV !== "production") {
+  logger.add(
+    new winston.transports.Console({
+      format: winston.format.simple(),
+    }),
+  );
 }
 ```
 
 ### Performance Monitoring
+
 ```javascript
 // Real User Monitoring setup
-import { getCLS, getFID, getFCP, getLCP, getTTFB } from 'web-vitals';
+import { getCLS, getFID, getFCP, getLCP, getTTFB } from "web-vitals";
 
 function sendToAnalytics(metric) {
   // Send to your analytics service
-  fetch('/api/analytics', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(metric)
+  fetch("/api/analytics", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(metric),
   });
 }
 
@@ -331,6 +349,7 @@ getTTFB(sendToAnalytics);
 ## Security Considerations
 
 ### Environment Security
+
 ```bash
 # Set proper file permissions
 chmod 600 .env.production
@@ -341,24 +360,26 @@ chown www-data:www-data .env.production
 ```
 
 ### Content Security Policy
+
 ```javascript
 // Strict CSP for production
 const csp = {
-  'default-src': ["'self'"],
-  'script-src': ["'self'", "'unsafe-inline'"],
-  'style-src': ["'self'", "'unsafe-inline'"],
-  'img-src': ["'self'", "data:", "https:"],
-  'font-src': ["'self'", "data:"],
-  'connect-src': ["'self'", "https://api.freeagentics.com"],
-  'frame-ancestors': ["'none'"],
-  'base-uri': ["'self'"],
-  'form-action': ["'self'"]
+  "default-src": ["'self'"],
+  "script-src": ["'self'", "'unsafe-inline'"],
+  "style-src": ["'self'", "'unsafe-inline'"],
+  "img-src": ["'self'", "data:", "https:"],
+  "font-src": ["'self'", "data:"],
+  "connect-src": ["'self'", "https://api.freeagentics.com"],
+  "frame-ancestors": ["'none'"],
+  "base-uri": ["'self'"],
+  "form-action": ["'self'"],
 };
 ```
 
 ## Backup and Recovery
 
 ### Database Backups
+
 ```bash
 # Automated backup script
 #!/bin/bash
@@ -368,6 +389,7 @@ aws s3 cp /backups/freeagentics_$DATE.sql s3://freeagentics-backups/
 ```
 
 ### Application Backups
+
 ```bash
 # Static files backup
 tar -czf /backups/static_files_$(date +%Y%m%d).tar.gz ./public/uploads/
@@ -376,6 +398,7 @@ tar -czf /backups/static_files_$(date +%Y%m%d).tar.gz ./public/uploads/
 ## Scaling Considerations
 
 ### Horizontal Scaling
+
 ```yaml
 # Kubernetes deployment
 apiVersion: apps/v1
@@ -393,23 +416,24 @@ spec:
         app: freeagentics-web
     spec:
       containers:
-      - name: web
-        image: freeagentics-web:latest
-        ports:
-        - containerPort: 3000
-        env:
-        - name: NODE_ENV
-          value: "production"
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "100m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
+        - name: web
+          image: freeagentics-web:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: "production"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
 ```
 
 ### Load Balancing
+
 ```nginx
 upstream freeagentics_web {
     least_conn;
@@ -422,12 +446,14 @@ upstream freeagentics_web {
 ## Troubleshooting
 
 ### Common Issues
+
 1. **Build Failures**: Check Node.js version and dependencies
 2. **Memory Issues**: Increase container memory limits
 3. **SSL Issues**: Verify certificate installation
 4. **Performance Issues**: Check bundle size and caching
 
 ### Debug Commands
+
 ```bash
 # Check application logs
 docker logs freeagentics-web
@@ -445,12 +471,14 @@ npm run lighthouse
 ## Maintenance
 
 ### Regular Tasks
+
 - **Weekly**: Review application logs and metrics
 - **Monthly**: Update dependencies and security patches
 - **Quarterly**: Performance audit and optimization review
 - **Annually**: SSL certificate renewal and security audit
 
 ### Update Process
+
 ```bash
 # 1. Backup current deployment
 docker tag freeagentics-web:latest freeagentics-web:backup-$(date +%Y%m%d)
@@ -473,22 +501,25 @@ curl -f http://localhost:3000/api/health
 ## Support and Resources
 
 ### Documentation
+
 - [Next.js Production Deployment](https://nextjs.org/docs/deployment)
 - [Docker Best Practices](https://docs.docker.com/develop/dev-best-practices/)
 - [Nginx Configuration](https://nginx.org/en/docs/)
 
 ### Monitoring Tools
+
 - **Application Performance**: New Relic, DataDog, or Sentry
 - **Infrastructure**: Prometheus, Grafana, or CloudWatch
 - **Uptime**: Pingdom, UptimeRobot, or StatusCake
 
 ### Emergency Contacts
+
 - **Development Team**: dev@freeagentics.com
 - **DevOps Team**: devops@freeagentics.com
 - **On-call Support**: +1-xxx-xxx-xxxx
 
 ---
 
-*Last Updated: $(date)*
-*Version: 1.0*
-*Next Review: 3 months*
+_Last Updated: $(date)_
+_Version: 1.0_
+_Next Review: 3 months_

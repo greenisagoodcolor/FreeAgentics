@@ -43,11 +43,7 @@ export function SystemPromptView({
             System Prompt
           </h3>
           {!editingSystemPrompt ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onEditSystemPrompt(true)}
-            >
+            <Button variant="outline" size="sm" onClick={() => onEditSystemPrompt(true)}>
               <Edit3 className="h-4 w-4 mr-2" />
               Edit
             </Button>
@@ -74,9 +70,8 @@ export function SystemPromptView({
 
         <div className="mb-4 p-3 bg-muted rounded-lg">
           <p className="text-sm text-muted-foreground">
-            The system prompt defines the agent&apos;s behavior, personality,
-            and capabilities. It is used as the initial context for all
-            interactions.
+            The system prompt defines the agent&apos;s behavior, personality, and capabilities. It
+            is used as the initial context for all interactions.
           </p>
         </div>
 
@@ -110,9 +105,7 @@ export function SystemPromptView({
             </div>
             <div className="space-y-1">
               <p className="text-muted-foreground">Line count:</p>
-              <p className="font-medium">
-                {systemPrompt.split("\n").length} lines
-              </p>
+              <p className="font-medium">{systemPrompt.split("\n").length} lines</p>
             </div>
           </div>
         </div>

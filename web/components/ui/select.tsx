@@ -6,12 +6,9 @@ const Select = React.forwardRef<
     value?: string;
     onValueChange?: (value: string) => void;
   }
->(
-  (
-    { className, value: _value, onValueChange: _onValueChange, ...props },
-    ref,
-  ) => <div ref={ref} className={className} {...props} />,
-);
+>(({ className, value: _value, onValueChange: _onValueChange, ...props }, ref) => (
+  <div ref={ref} className={className} {...props} />
+));
 Select.displayName = "Select";
 
 const SelectTrigger = React.forwardRef<
@@ -26,16 +23,15 @@ const SelectTrigger = React.forwardRef<
 ));
 SelectTrigger.displayName = "SelectTrigger";
 
-const SelectContent = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={`relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md ${className || ""}`}
-    {...props}
-  />
-));
+const SelectContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={`relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md ${className || ""}`}
+      {...props}
+    />
+  ),
+);
 SelectContent.displayName = "SelectContent";
 
 const SelectItem = React.forwardRef<
@@ -52,12 +48,9 @@ const SelectItem = React.forwardRef<
 ));
 SelectItem.displayName = "SelectItem";
 
-const SelectValue = React.forwardRef<
-  HTMLSpanElement,
-  React.HTMLAttributes<HTMLSpanElement>
->(({ className, ...props }, ref) => (
-  <span ref={ref} className={className} {...props} />
-));
+const SelectValue = React.forwardRef<HTMLSpanElement, React.HTMLAttributes<HTMLSpanElement>>(
+  ({ className, ...props }, ref) => <span ref={ref} className={className} {...props} />,
+);
 SelectValue.displayName = "SelectValue";
 
 export { Select, SelectTrigger, SelectContent, SelectItem, SelectValue };

@@ -36,9 +36,7 @@ export function ConversationsView({
   const relevantConversations = useMemo(() => {
     if (!selectedAgent) return conversationHistory;
 
-    return conversationHistory.filter((conv) =>
-      conv.participants.includes(selectedAgent.id),
-    );
+    return conversationHistory.filter((conv) => conv.participants.includes(selectedAgent.id));
   }, [conversationHistory, selectedAgent]);
 
   // Sort conversations by most recent
@@ -69,9 +67,7 @@ export function ConversationsView({
           <MessageSquare className="h-5 w-5" />
           Conversation History
         </h3>
-        <Badge variant="outline">
-          {sortedConversations.length} conversations
-        </Badge>
+        <Badge variant="outline">{sortedConversations.length} conversations</Badge>
       </div>
 
       <ScrollArea className="h-[500px] pr-4">
@@ -97,8 +93,7 @@ export function ConversationsView({
                       <Clock className="h-3 w-3" />
                       <span>
                         {formatTimestamp(conversation.startTime)}
-                        {conversation.endTime &&
-                          ` - ${formatTimestamp(conversation.endTime)}`}
+                        {conversation.endTime && ` - ${formatTimestamp(conversation.endTime)}`}
                       </span>
                     </div>
                   </div>
@@ -123,24 +118,15 @@ export function ConversationsView({
 
                 {/* Participants */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    Participants:
-                  </span>
+                  <span className="text-sm text-muted-foreground">Participants:</span>
                   <div className="flex -space-x-2">
                     {conversation.participants.map((participantId) => {
                       const participant = agentMap[participantId];
                       return (
-                        <Avatar
-                          key={participantId}
-                          className="h-6 w-6 border-2 border-background"
-                        >
-                          <AvatarImage
-                            src={participant?.avatar || participant?.avatarUrl}
-                          />
+                        <Avatar key={participantId} className="h-6 w-6 border-2 border-background">
+                          <AvatarImage src={participant?.avatar || participant?.avatarUrl} />
                           <AvatarFallback className="text-xs">
-                            {participant
-                              ? getAgentInitials(participant.name)
-                              : "?"}
+                            {participant ? getAgentInitials(participant.name) : "?"}
                           </AvatarFallback>
                         </Avatar>
                       );
@@ -162,29 +148,19 @@ export function ConversationsView({
                         }`}
                       >
                         <Avatar className="h-8 w-8">
-                          <AvatarImage
-                            src={agent?.avatar || agent?.avatarUrl}
-                          />
+                          <AvatarImage src={agent?.avatar || agent?.avatarUrl} />
                           <AvatarFallback className="text-xs">
                             {agent ? getAgentInitials(agent.name) : "?"}
                           </AvatarFallback>
                         </Avatar>
-                        <div
-                          className={`flex-1 space-y-1 ${
-                            isOwnMessage ? "text-right" : ""
-                          }`}
-                        >
+                        <div className={`flex-1 space-y-1 ${isOwnMessage ? "text-right" : ""}`}>
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium">
-                              {agent?.name || "Unknown"}
-                            </span>
+                            <span className="text-sm font-medium">{agent?.name || "Unknown"}</span>
                             <span className="text-xs text-muted-foreground">
                               {formatTimestamp(message.timestamp)}
                             </span>
                           </div>
-                          <p className="text-sm text-muted-foreground">
-                            {message.content}
-                          </p>
+                          <p className="text-sm text-muted-foreground">{message.content}</p>
                         </div>
                       </div>
                     );
@@ -202,29 +178,18 @@ export function ConversationsView({
                   <div className="flex flex-wrap gap-4 pt-2 border-t text-xs text-muted-foreground">
                     <span>
                       Avg response time:{" "}
-                      {Math.round(
-                        conversation.conversationMetrics.averageResponseTime,
-                      )}
+                      {Math.round(conversation.conversationMetrics.averageResponseTime)}
                       ms
                     </span>
-                    {conversation.conversationMetrics.engagementLevel !==
-                      undefined && (
+                    {conversation.conversationMetrics.engagementLevel !== undefined && (
                       <span>
                         Engagement:{" "}
-                        {Math.round(
-                          conversation.conversationMetrics.engagementLevel *
-                            100,
-                        )}
-                        %
+                        {Math.round(conversation.conversationMetrics.engagementLevel * 100)}%
                       </span>
                     )}
-                    {conversation.conversationMetrics.topicDrift !==
-                      undefined && (
+                    {conversation.conversationMetrics.topicDrift !== undefined && (
                       <span>
-                        Topic drift:{" "}
-                        {Math.round(
-                          conversation.conversationMetrics.topicDrift * 100,
-                        )}
+                        Topic drift: {Math.round(conversation.conversationMetrics.topicDrift * 100)}
                         %
                       </span>
                     )}

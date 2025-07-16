@@ -26,9 +26,7 @@ export function useToast() {
   }, []);
 
   const dismiss = React.useCallback((toastId?: string) => {
-    setToasts((currentToasts) =>
-      toastId ? currentToasts.filter((t) => t.id !== toastId) : [],
-    );
+    setToasts((currentToasts) => (toastId ? currentToasts.filter((t) => t.id !== toastId) : []));
   }, []);
 
   return {

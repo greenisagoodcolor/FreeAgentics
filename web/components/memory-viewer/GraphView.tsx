@@ -216,13 +216,7 @@ export function GraphView({ selectedAgent, knowledge }: GraphViewProps) {
 
         // Node circle
         ctx.beginPath();
-        ctx.arc(
-          node.x!,
-          node.y!,
-          hoveredNode === node ? 25 : 20,
-          0,
-          Math.PI * 2,
-        );
+        ctx.arc(node.x!, node.y!, hoveredNode === node ? 25 : 20, 0, Math.PI * 2);
         ctx.fillStyle = node.color || "#6b7280";
         ctx.fill();
 
@@ -238,12 +232,7 @@ export function GraphView({ selectedAgent, knowledge }: GraphViewProps) {
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
 
-        const icon =
-          node.type === "agent"
-            ? "👤"
-            : node.type === "knowledge"
-              ? "📄"
-              : "🏷️";
+        const icon = node.type === "agent" ? "👤" : node.type === "knowledge" ? "📄" : "🏷️";
         ctx.fillText(icon, node.x!, node.y!);
 
         // Node label (on hover)
@@ -304,19 +293,12 @@ export function GraphView({ selectedAgent, knowledge }: GraphViewProps) {
 
       <Card className="flex-1">
         <CardContent className="p-0 h-[500px]">
-          <canvas
-            ref={canvasRef}
-            className="w-full h-full"
-            style={{ background: "#f9fafb" }}
-          />
+          <canvas ref={canvasRef} className="w-full h-full" style={{ background: "#f9fafb" }} />
         </CardContent>
       </Card>
 
       <div className="text-sm text-muted-foreground">
-        <p>
-          Interactive knowledge graph visualization. Hover over nodes to see
-          details.
-        </p>
+        <p>Interactive knowledge graph visualization. Hover over nodes to see details.</p>
       </div>
     </div>
   );

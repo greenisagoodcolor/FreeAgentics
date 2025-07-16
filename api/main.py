@@ -4,21 +4,17 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
 from api.middleware.security_monitoring import (
     SecurityHeadersMiddleware,
     SecurityMonitoringMiddleware,
 )
-
-# Import routers
-from api.v1 import agents, auth, inference, monitoring, security, system, websocket
+from api.v1 import agents, auth, inference, mfa, monitoring, security, system, websocket
 from api.v1.graphql_schema import graphql_app
-
-# Import security middleware
 from auth.security_implementation import SecurityMiddleware
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 # Lifespan manager for startup/shutdown events
@@ -55,6 +51,7 @@ app.add_middleware(SecurityHeadersMiddleware)
 
 # Include routers
 app.include_router(auth.router, prefix="/api/v1", tags=["auth"])  # Auth must be first
+app.include_router(mfa.router, tags=["mfa"])  # MFA router has its own prefix
 app.include_router(agents.router, prefix="/api/v1", tags=["agents"])
 app.include_router(inference.router, prefix="/api/v1", tags=["inference"])
 app.include_router(system.router, prefix="/api/v1", tags=["system"])

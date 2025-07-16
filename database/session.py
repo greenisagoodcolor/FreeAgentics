@@ -41,28 +41,30 @@ engine_args = {
 # Configure pooling based on database dialect
 if DATABASE_URL.startswith("postgresql://") or DATABASE_URL.startswith("postgres://"):
     # PostgreSQL-specific configuration
-    engine_args.update({
-        "pool_size": int(os.getenv("DB_POOL_SIZE", "20")),
-        "max_overflow": int(os.getenv("DB_MAX_OVERFLOW", "40")),
-        "pool_timeout": int(os.getenv("DB_POOL_TIMEOUT", "30")),
-        "pool_pre_ping": True,  # Verify connections before using
-    })
-    
+    engine_args.update(
+        {
+            "pool_size": int(os.getenv("DB_POOL_SIZE", "20")),
+            "max_overflow": int(os.getenv("DB_MAX_OVERFLOW", "40")),
+            "pool_timeout": int(os.getenv("DB_POOL_TIMEOUT", "30")),
+            "pool_pre_ping": True,  # Verify connections before using
+        }
+    )
+
     # Additional production settings for PostgreSQL
     if os.getenv("PRODUCTION", "false").lower() == "true":
-        engine_args.update({
-            "pool_recycle": 3600,  # Recycle connections after 1 hour
-            "connect_args": {
-                "connect_timeout": 10,
-                "application_name": "freeagentics_api",
-                "options": "-c statement_timeout=30000",  # 30 second statement timeout
-            },
-        })
+        engine_args.update(
+            {
+                "pool_recycle": 3600,  # Recycle connections after 1 hour
+                "connect_args": {
+                    "connect_timeout": 10,
+                    "application_name": "freeagentics_api",
+                    "options": "-c statement_timeout=30000",  # 30 second statement timeout
+                },
+            }
+        )
 elif DATABASE_URL.startswith("sqlite://"):
     # SQLite-specific configuration
-    engine_args.update({
-        "connect_args": {"check_same_thread": False}
-    })
+    engine_args.update({"connect_args": {"check_same_thread": False}})
 
 engine = create_engine(DATABASE_URL, **engine_args)
 

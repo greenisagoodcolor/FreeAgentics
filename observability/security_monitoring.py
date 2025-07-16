@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 
 class ThreatLevel(str, Enum):
     """Threat severity levels."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -41,6 +42,7 @@ class ThreatLevel(str, Enum):
 
 class AttackType(str, Enum):
     """Types of detected attacks."""
+
     BRUTE_FORCE = "brute_force"
     DDoS = "ddos"
     SQL_INJECTION = "sql_injection"
@@ -56,6 +58,7 @@ class AttackType(str, Enum):
 @dataclass
 class SecurityAlert:
     """Security alert data structure."""
+
     id: str
     timestamp: datetime
     alert_type: AttackType
@@ -72,6 +75,7 @@ class SecurityAlert:
 @dataclass
 class ThreatIndicator:
     """Threat indicator for pattern matching."""
+
     indicator_type: str
     pattern: str
     description: str
@@ -83,6 +87,7 @@ class ThreatIndicator:
 @dataclass
 class SecurityMetrics:
     """Security metrics snapshot."""
+
     total_events: int
     alerts_generated: int
     threats_detected: int
@@ -103,48 +108,41 @@ class SecurityMonitoringSystem:
         self.security_events: deque = deque(maxlen=10000)
         self.blocked_ips: Set[str] = set()
         self.suspicious_users: Set[str] = set()
-        
+
         # Threat detection state
         self.ip_activity: Dict[str, List[datetime]] = defaultdict(list)
         self.user_activity: Dict[str, List[datetime]] = defaultdict(list)
         self.failed_logins: Dict[str, List[datetime]] = defaultdict(list)
         self.api_requests: Dict[str, List[datetime]] = defaultdict(list)
-        
+
         # Configuration
         self.brute_force_threshold = 5  # attempts per 15 minutes
         self.ddos_threshold = 1000  # requests per minute
         self.anomaly_threshold = 3.0  # standard deviations
         self.max_failed_logins = 10
-        
+
         # Metrics
         self.security_events_total = Counter(
-            'security_events_total',
-            'Total security events processed',
-            ['event_type', 'severity']
+            "security_events_total", "Total security events processed", ["event_type", "severity"]
         )
         self.threats_detected_total = Counter(
-            'threats_detected_total',
-            'Total threats detected',
-            ['threat_type', 'severity']
+            "threats_detected_total", "Total threats detected", ["threat_type", "severity"]
         )
         self.security_alerts_active = Gauge(
-            'security_alerts_active',
-            'Number of active security alerts'
+            "security_alerts_active", "Number of active security alerts"
         )
         self.threat_detection_time = Histogram(
-            'threat_detection_time_seconds',
-            'Time to detect threats',
-            ['threat_type']
+            "threat_detection_time_seconds", "Time to detect threats", ["threat_type"]
         )
-        
+
         # Initialize threat indicators
         self._initialize_threat_indicators()
-        
+
         # Background tasks
         self.monitoring_task: Optional[asyncio.Task] = None
         self.cleanup_task: Optional[asyncio.Task] = None
         self.running = False
-        
+
         logger.info("🛡️ Security monitoring system initialized")
 
     def _initialize_threat_indicators(self):
@@ -156,43 +154,39 @@ class SecurityMonitoringSystem:
                 pattern=r"(?i)(union|select|insert|update|delete|drop|create|alter|exec|script)",
                 description="SQL injection attempt detected",
                 severity=ThreatLevel.HIGH,
-                confidence=0.8
+                confidence=0.8,
             ),
-            
             # XSS patterns
             ThreatIndicator(
                 indicator_type="xss",
                 pattern=r"(?i)(<script|javascript:|vbscript:|onload=|onerror=|onclick=)",
                 description="Cross-site scripting attempt detected",
                 severity=ThreatLevel.HIGH,
-                confidence=0.7
+                confidence=0.7,
             ),
-            
             # Directory traversal
             ThreatIndicator(
                 indicator_type="directory_traversal",
                 pattern=r"(\.\./|\.\.\\|%2e%2e%2f|%2e%2e%5c)",
                 description="Directory traversal attempt detected",
                 severity=ThreatLevel.MEDIUM,
-                confidence=0.9
+                confidence=0.9,
             ),
-            
             # Command injection
             ThreatIndicator(
                 indicator_type="command_injection",
                 pattern=r"(?i)(;|&&|\|\||`|\$\(|nc\s|netcat|wget|curl|powershell|cmd\.exe)",
                 description="Command injection attempt detected",
                 severity=ThreatLevel.CRITICAL,
-                confidence=0.8
+                confidence=0.8,
             ),
-            
             # Suspicious user agents
             ThreatIndicator(
                 indicator_type="suspicious_user_agent",
                 pattern=r"(?i)(sqlmap|nmap|nikto|burp|owasp|zap|w3af|metasploit)",
                 description="Suspicious user agent detected",
                 severity=ThreatLevel.MEDIUM,
-                confidence=0.6
+                confidence=0.6,
             ),
         ]
 
@@ -200,31 +194,31 @@ class SecurityMonitoringSystem:
         """Start security monitoring tasks."""
         if self.running:
             return
-            
+
         self.running = True
         self.monitoring_task = asyncio.create_task(self._monitoring_loop())
         self.cleanup_task = asyncio.create_task(self._cleanup_loop())
-        
+
         logger.info("🔍 Security monitoring started")
 
     async def stop_monitoring(self):
         """Stop security monitoring tasks."""
         self.running = False
-        
+
         if self.monitoring_task:
             self.monitoring_task.cancel()
             try:
                 await self.monitoring_task
             except asyncio.CancelledError:
                 pass
-                
+
         if self.cleanup_task:
             self.cleanup_task.cancel()
             try:
                 await self.cleanup_task
             except asyncio.CancelledError:
                 pass
-                
+
         logger.info("🛑 Security monitoring stopped")
 
     async def _monitoring_loop(self):
@@ -258,28 +252,27 @@ class SecurityMonitoringSystem:
         try:
             # Add to event queue
             self.security_events.append(event)
-            
+
             # Update metrics
             event_type = event.get("event_type", "unknown")
             severity = event.get("severity", "info")
-            self.security_events_total.labels(
-                event_type=event_type,
-                severity=severity
-            ).inc()
-            
+            self.security_events_total.labels(event_type=event_type, severity=severity).inc()
+
             # Extract relevant information
             source_ip = event.get("ip_address", "unknown")
             user_id = event.get("user_id")
-            timestamp = datetime.fromisoformat(event.get("timestamp", datetime.utcnow().isoformat()))
-            
+            timestamp = datetime.fromisoformat(
+                event.get("timestamp", datetime.utcnow().isoformat())
+            )
+
             # Track activity patterns
             self.ip_activity[source_ip].append(timestamp)
             if user_id:
                 self.user_activity[user_id].append(timestamp)
-            
+
             # Check for immediate threats
             await self._check_for_threats(event)
-            
+
         except Exception as e:
             logger.error(f"Error processing security event: {e}")
 
@@ -291,28 +284,32 @@ class SecurityMonitoringSystem:
         message = event.get("message", "")
         user_agent = event.get("user_agent", "")
         endpoint = event.get("endpoint", "")
-        
+
         # Check for brute force attacks
         if event_type == SecurityEventType.LOGIN_FAILURE:
             await self._check_brute_force(source_ip, user_id, event)
-        
+
         # Check for DDoS attacks
         if event_type == SecurityEventType.API_ACCESS:
             await self._check_ddos(source_ip, event)
-        
+
         # Check for injection attacks
         for indicator in self.threat_indicators:
             if indicator.indicator_type in ["sql_injection", "xss", "command_injection"]:
                 if await self._match_pattern(indicator, message + " " + endpoint):
                     await self._generate_alert(
-                        AttackType.SQL_INJECTION if "sql" in indicator.indicator_type else AttackType.XSS,
+                        (
+                            AttackType.SQL_INJECTION
+                            if "sql" in indicator.indicator_type
+                            else AttackType.XSS
+                        ),
                         indicator.severity,
                         source_ip,
                         user_id,
                         f"{indicator.description}: {message}",
-                        event
+                        event,
                     )
-        
+
         # Check for suspicious user agents
         for indicator in self.threat_indicators:
             if indicator.indicator_type == "suspicious_user_agent":
@@ -323,24 +320,23 @@ class SecurityMonitoringSystem:
                         source_ip,
                         user_id,
                         f"Suspicious user agent: {user_agent}",
-                        event
+                        event,
                     )
 
     async def _check_brute_force(self, source_ip: str, user_id: str, event: Dict[str, Any]):
         """Check for brute force attacks."""
         now = datetime.utcnow()
         cutoff = now - timedelta(minutes=15)
-        
+
         # Clean old attempts
         key = f"{source_ip}:{user_id}" if user_id else source_ip
         self.failed_logins[key] = [
-            attempt for attempt in self.failed_logins[key]
-            if attempt > cutoff
+            attempt for attempt in self.failed_logins[key] if attempt > cutoff
         ]
-        
+
         # Add current attempt
         self.failed_logins[key].append(now)
-        
+
         # Check threshold
         if len(self.failed_logins[key]) >= self.brute_force_threshold:
             await self._generate_alert(
@@ -349,9 +345,9 @@ class SecurityMonitoringSystem:
                 source_ip,
                 user_id,
                 f"Brute force attack detected from {source_ip}",
-                event
+                event,
             )
-            
+
             # Block IP
             self.blocked_ips.add(source_ip)
             if user_id:
@@ -361,16 +357,15 @@ class SecurityMonitoringSystem:
         """Check for DDoS attacks."""
         now = datetime.utcnow()
         cutoff = now - timedelta(minutes=1)
-        
+
         # Clean old requests
         self.api_requests[source_ip] = [
-            request for request in self.api_requests[source_ip]
-            if request > cutoff
+            request for request in self.api_requests[source_ip] if request > cutoff
         ]
-        
+
         # Add current request
         self.api_requests[source_ip].append(now)
-        
+
         # Check threshold
         if len(self.api_requests[source_ip]) >= self.ddos_threshold:
             await self._generate_alert(
@@ -379,15 +374,16 @@ class SecurityMonitoringSystem:
                 source_ip,
                 None,
                 f"DDoS attack detected from {source_ip}",
-                event
+                event,
             )
-            
+
             # Block IP
             self.blocked_ips.add(source_ip)
 
     async def _match_pattern(self, indicator: ThreatIndicator, text: str) -> bool:
         """Check if text matches threat indicator pattern."""
         import re
+
         try:
             return bool(re.search(indicator.pattern, text))
         except Exception:
@@ -400,11 +396,11 @@ class SecurityMonitoringSystem:
         source_ip: str,
         user_id: Optional[str],
         description: str,
-        evidence: Dict[str, Any]
+        evidence: Dict[str, Any],
     ):
         """Generate a security alert."""
         alert_id = f"{attack_type}_{source_ip}_{int(time.time())}"
-        
+
         alert = SecurityAlert(
             id=alert_id,
             timestamp=datetime.utcnow(),
@@ -413,26 +409,27 @@ class SecurityMonitoringSystem:
             source_ip=source_ip,
             user_id=user_id,
             description=description,
-            evidence=evidence
+            evidence=evidence,
         )
-        
+
         self.active_alerts[alert_id] = alert
-        
+
         # Update metrics
-        self.threats_detected_total.labels(
-            threat_type=attack_type,
-            severity=threat_level
-        ).inc()
-        
+        self.threats_detected_total.labels(threat_type=attack_type, severity=threat_level).inc()
+
         self.security_alerts_active.inc()
-        
+
         # Record in Prometheus
         record_security_anomaly(attack_type, threat_level)
-        
+
         # Log security event
         security_auditor.log_event(
             SecurityEventType.SUSPICIOUS_PATTERN,
-            SecurityEventSeverity.CRITICAL if threat_level == ThreatLevel.CRITICAL else SecurityEventSeverity.WARNING,
+            (
+                SecurityEventSeverity.CRITICAL
+                if threat_level == ThreatLevel.CRITICAL
+                else SecurityEventSeverity.WARNING
+            ),
             description,
             details={
                 "alert_id": alert_id,
@@ -440,13 +437,13 @@ class SecurityMonitoringSystem:
                 "threat_level": threat_level,
                 "source_ip": source_ip,
                 "user_id": user_id,
-                "evidence": evidence
-            }
+                "evidence": evidence,
+            },
         )
-        
+
         # Send alert notification
         await self._send_alert_notification(alert)
-        
+
         logger.warning(f"🚨 Security alert generated: {alert_id} - {description}")
 
     async def _send_alert_notification(self, alert: SecurityAlert):
@@ -455,11 +452,11 @@ class SecurityMonitoringSystem:
             # This would integrate with your notification system
             # For now, we'll just log it
             logger.critical(f"SECURITY ALERT: {alert.description}")
-            
+
             # TODO: Implement actual notification (email, Slack, PagerDuty, etc.)
             # Example webhook notification:
             # await self._send_webhook_notification(alert)
-            
+
         except Exception as e:
             logger.error(f"Failed to send alert notification: {e}")
 
@@ -467,22 +464,22 @@ class SecurityMonitoringSystem:
         """Analyze security events for patterns and anomalies."""
         if not self.security_events:
             return
-            
+
         # Analyze recent events (last 100)
         recent_events = list(self.security_events)[-100:]
-        
+
         # Look for patterns
         event_types = defaultdict(int)
         source_ips = defaultdict(int)
         error_patterns = defaultdict(int)
-        
+
         for event in recent_events:
             event_types[event.get("event_type", "unknown")] += 1
             source_ips[event.get("ip_address", "unknown")] += 1
-            
+
             if event.get("severity") in ["error", "critical"]:
                 error_patterns[event.get("message", "")[:50]] += 1
-        
+
         # Detect anomalies
         await self._detect_anomalies(event_types, source_ips, error_patterns)
 
@@ -496,9 +493,9 @@ class SecurityMonitoringSystem:
                 "multiple",
                 None,
                 "High volume of failed login attempts detected",
-                {"failed_login_count": event_types[SecurityEventType.LOGIN_FAILURE]}
+                {"failed_login_count": event_types[SecurityEventType.LOGIN_FAILURE]},
             )
-        
+
         # Unusual number of errors from single IP
         for ip, count in source_ips.items():
             if count > 20:
@@ -508,17 +505,17 @@ class SecurityMonitoringSystem:
                     ip,
                     None,
                     f"Unusual activity from IP {ip}",
-                    {"request_count": count}
+                    {"request_count": count},
                 )
 
     async def _detect_threats(self):
         """Run threat detection algorithms."""
         # Update threat indicators
         await self._update_threat_indicators()
-        
+
         # Check for behavioral anomalies
         await self._check_behavioral_anomalies()
-        
+
         # Check for privilege escalation
         await self._check_privilege_escalation()
 
@@ -535,7 +532,9 @@ class SecurityMonitoringSystem:
         for user_id, activities in self.user_activity.items():
             if len(activities) > 100:  # High activity user
                 # Check for unusual patterns
-                recent_activities = [a for a in activities if a > datetime.utcnow() - timedelta(hours=1)]
+                recent_activities = [
+                    a for a in activities if a > datetime.utcnow() - timedelta(hours=1)
+                ]
                 if len(recent_activities) > 50:
                     await self._generate_alert(
                         AttackType.SUSPICIOUS_ACTIVITY,
@@ -543,7 +542,7 @@ class SecurityMonitoringSystem:
                         "unknown",
                         user_id,
                         f"Unusual high activity from user {user_id}",
-                        {"activity_count": len(recent_activities)}
+                        {"activity_count": len(recent_activities)},
                     )
 
     async def _check_privilege_escalation(self):
@@ -559,25 +558,23 @@ class SecurityMonitoringSystem:
     async def _cleanup_old_data(self):
         """Clean up old data and resolved alerts."""
         cutoff = datetime.utcnow() - timedelta(days=7)
-        
+
         # Clean up old IP activity
         for ip in list(self.ip_activity.keys()):
             self.ip_activity[ip] = [
-                activity for activity in self.ip_activity[ip]
-                if activity > cutoff
+                activity for activity in self.ip_activity[ip] if activity > cutoff
             ]
             if not self.ip_activity[ip]:
                 del self.ip_activity[ip]
-        
+
         # Clean up old user activity
         for user_id in list(self.user_activity.keys()):
             self.user_activity[user_id] = [
-                activity for activity in self.user_activity[user_id]
-                if activity > cutoff
+                activity for activity in self.user_activity[user_id] if activity > cutoff
             ]
             if not self.user_activity[user_id]:
                 del self.user_activity[user_id]
-        
+
         # Clean up resolved alerts older than 24 hours
         alert_cutoff = datetime.utcnow() - timedelta(hours=24)
         for alert_id in list(self.active_alerts.keys()):
@@ -590,32 +587,34 @@ class SecurityMonitoringSystem:
         # Calculate metrics
         total_events = len(self.security_events)
         alerts_generated = len(self.active_alerts)
-        
+
         # Top attack types
         top_attack_types = defaultdict(int)
         for alert in self.active_alerts.values():
             top_attack_types[alert.alert_type] += 1
-        
+
         # Top source IPs
         top_source_ips = defaultdict(int)
         for alert in self.active_alerts.values():
             top_source_ips[alert.source_ip] += 1
-        
+
         # Threat level distribution
         threat_level_distribution = defaultdict(int)
         for alert in self.active_alerts.values():
             threat_level_distribution[alert.threat_level] += 1
-        
+
         return SecurityMetrics(
             total_events=total_events,
             alerts_generated=alerts_generated,
             threats_detected=len([a for a in self.active_alerts.values() if a.status == "active"]),
-            false_positives=len([a for a in self.active_alerts.values() if a.status == "false_positive"]),
+            false_positives=len(
+                [a for a in self.active_alerts.values() if a.status == "false_positive"]
+            ),
             mean_detection_time=0.0,  # TODO: Calculate actual metrics
-            mean_response_time=0.0,   # TODO: Calculate actual metrics
+            mean_response_time=0.0,  # TODO: Calculate actual metrics
             top_attack_types=dict(top_attack_types),
             top_source_ips=dict(top_source_ips),
-            threat_level_distribution=dict(threat_level_distribution)
+            threat_level_distribution=dict(threat_level_distribution),
         )
 
     def get_active_alerts(self) -> List[SecurityAlert]:
@@ -629,9 +628,9 @@ class SecurityMonitoringSystem:
             alert.status = "resolved"
             alert.resolved_at = datetime.utcnow()
             alert.resolution_notes = resolution_notes
-            
+
             self.security_alerts_active.dec()
-            
+
             logger.info(f"🔍 Security alert resolved: {alert_id}")
             return True
         return False
@@ -643,9 +642,9 @@ class SecurityMonitoringSystem:
             alert.status = "false_positive"
             alert.resolved_at = datetime.utcnow()
             alert.resolution_notes = notes
-            
+
             self.security_alerts_active.dec()
-            
+
             logger.info(f"🔍 Security alert marked as false positive: {alert_id}")
             return True
         return False

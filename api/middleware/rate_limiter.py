@@ -30,6 +30,7 @@ from starlette.types import ASGIApp
 # Import metrics if available
 try:
     from observability.rate_limiting_metrics import rate_limiting_metrics
+
     METRICS_ENABLED = True
 except ImportError:
     METRICS_ENABLED = False
@@ -208,9 +209,7 @@ class RateLimiter:
             self.connection_limit_per_ip = ddos_config.get(
                 "connection_limit_per_ip", self.connection_limit_per_ip
             )
-            self.block_duration = timedelta(
-                minutes=ddos_config.get("block_duration_minutes", 30)
-            )
+            self.block_duration = timedelta(minutes=ddos_config.get("block_duration_minutes", 30))
 
         except Exception as e:
             logger.error(f"Failed to load rate limit config: {e}")
@@ -343,7 +342,9 @@ class RateLimiter:
         if METRICS_ENABLED:
             rate_limiting_metrics.time_redis_operation("zcard")
             elapsed = time.time() - start_time
-            rate_limiting_metrics.rate_limit_check_duration.labels(algorithm="sliding_window").observe(elapsed)
+            rate_limiting_metrics.rate_limit_check_duration.labels(
+                algorithm="sliding_window"
+            ).observe(elapsed)
 
         if request_count >= config.max_requests:
             # Get oldest request time to calculate retry after
@@ -401,9 +402,7 @@ class RateLimiter:
         if tokens >= 1:
             # Consume a token
             tokens -= 1
-            await self.redis_client.hset(
-                key, mapping={"tokens": tokens, "last_update": now}
-            )
+            await self.redis_client.hset(key, mapping={"tokens": tokens, "last_update": now})
             await self.redis_client.expire(key, config.window_seconds * 2)
 
             return True, {
@@ -473,9 +472,7 @@ class RateLimiter:
         # Check large requests
         content_length = request.headers.get("content-length")
         if content_length and int(content_length) > self.max_request_size:
-            if await self.pattern_detector.check_pattern(
-                ip, "large_requests", self.redis_client
-            ):
+            if await self.pattern_detector.check_pattern(ip, "large_requests", self.redis_client):
                 if METRICS_ENABLED:
                     rate_limiting_metrics.record_suspicious_pattern("large_requests")
                     rate_limiting_metrics.record_ddos_attack("large_request_flood", ip)
@@ -540,9 +537,7 @@ class RateLimiter:
             # Anonymous user
             identifier = f"ip:{ip}"
             config = (
-                endpoint_config.anonymous_limit
-                if endpoint_config
-                else self.default_anonymous_limit
+                endpoint_config.anonymous_limit if endpoint_config else self.default_anonymous_limit
             )
 
         # Check rate limit
@@ -576,9 +571,7 @@ class RateLimiter:
         # Add rate limit headers to successful requests
         request.state.rate_limit_headers = {
             "X-RateLimit-Limit": str(config.max_requests),
-            "X-RateLimit-Remaining": str(
-                config.max_requests - info.get("request_count", 0)
-            ),
+            "X-RateLimit-Remaining": str(config.max_requests - info.get("request_count", 0)),
             "X-RateLimit-Reset": str(int(time.time()) + config.window_seconds),
         }
 

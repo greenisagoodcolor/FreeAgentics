@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Any, Dict, List
 
 import psutil
-from fastapi import APIRouter
+from fastapi import APIRouter, Response
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
@@ -173,3 +173,70 @@ async def get_recent_logs(limit: int = 100) -> List[dict]:
     ]
 
     return logs[:limit]
+
+
+@router.get("/metrics/prometheus")
+async def get_prometheus_metrics() -> Response:
+    """Get Prometheus metrics."""
+    try:
+        from observability.prometheus_metrics import (
+            get_prometheus_content_type,
+            get_prometheus_metrics,
+        )
+
+        metrics_data = get_prometheus_metrics()
+        content_type = get_prometheus_content_type()
+
+        return Response(
+            content=metrics_data, media_type=content_type, headers={"Cache-Control": "no-cache"}
+        )
+    except ImportError:
+        logger.warning("Prometheus metrics not available")
+        return Response(
+            content="# Prometheus metrics not available\n", media_type="text/plain", status_code=503
+        )
+    except Exception as e:
+        logger.error(f"Error getting Prometheus metrics: {e}")
+        return Response(
+            content=f"# Error getting metrics: {e}\n", media_type="text/plain", status_code=500
+        )
+
+
+@router.get("/metrics/health")
+async def get_health_metrics() -> Dict[str, Any]:
+    """Get health-focused metrics for monitoring."""
+    try:
+        from observability.prometheus_metrics import prometheus_collector
+
+        # Get current metrics snapshot
+        snapshot = prometheus_collector.get_metrics_snapshot()
+
+        return {
+            "timestamp": snapshot.timestamp.isoformat(),
+            "status": "healthy",
+            "metrics": {
+                "active_agents": snapshot.active_agents,
+                "total_inferences": snapshot.total_inferences,
+                "total_belief_updates": snapshot.total_belief_updates,
+                "memory_usage_mb": snapshot.avg_memory_usage_mb,
+                "cpu_usage_percent": snapshot.avg_cpu_usage_percent,
+                "system_throughput": snapshot.system_throughput,
+                "free_energy_avg": snapshot.free_energy_avg,
+            },
+            "thresholds": {
+                "max_agents": 50,
+                "max_memory_mb": 2048,
+                "max_cpu_percent": 80,
+                "min_throughput": 0.1,
+            },
+        }
+    except ImportError:
+        logger.warning("Prometheus metrics not available")
+        return {
+            "timestamp": datetime.now().isoformat(),
+            "status": "degraded",
+            "error": "Prometheus metrics not available",
+        }
+    except Exception as e:
+        logger.error(f"Error getting health metrics: {e}")
+        return {"timestamp": datetime.now().isoformat(), "status": "unhealthy", "error": str(e)}

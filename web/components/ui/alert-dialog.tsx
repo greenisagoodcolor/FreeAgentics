@@ -14,44 +14,34 @@ AlertDialog.displayName = "AlertDialog";
 const AlertDialogTrigger = React.forwardRef<
   HTMLButtonElement,
   React.ButtonHTMLAttributes<HTMLButtonElement>
->(({ className, ...props }, ref) => (
-  <button ref={ref} className={className} {...props} />
-));
+>(({ className, ...props }, ref) => <button ref={ref} className={className} {...props} />);
 AlertDialogTrigger.displayName = "AlertDialogTrigger";
 
-const AlertDialogContent = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 ${className || ""}`}
-    {...props}
-  >
-    <div className="bg-background p-6 rounded-lg shadow-lg max-w-md w-full">
-      {props.children}
+const AlertDialogContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 ${className || ""}`}
+      {...props}
+    >
+      <div className="bg-background p-6 rounded-lg shadow-lg max-w-md w-full">{props.children}</div>
     </div>
-  </div>
-));
+  ),
+);
 AlertDialogContent.displayName = "AlertDialogContent";
 
-const AlertDialogHeader = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div ref={ref} className={`space-y-2 ${className || ""}`} {...props} />
-));
+const AlertDialogHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={`space-y-2 ${className || ""}`} {...props} />
+  ),
+);
 AlertDialogHeader.displayName = "AlertDialogHeader";
 
 const AlertDialogTitle = React.forwardRef<
   HTMLHeadingElement,
   React.HTMLAttributes<HTMLHeadingElement>
 >(({ className, ...props }, ref) => (
-  <h2
-    ref={ref}
-    className={`text-lg font-semibold ${className || ""}`}
-    {...props}
-  />
+  <h2 ref={ref} className={`text-lg font-semibold ${className || ""}`} {...props} />
 ));
 AlertDialogTitle.displayName = "AlertDialogTitle";
 
@@ -59,24 +49,15 @@ const AlertDialogDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <p
-    ref={ref}
-    className={`text-sm text-muted-foreground ${className || ""}`}
-    {...props}
-  />
+  <p ref={ref} className={`text-sm text-muted-foreground ${className || ""}`} {...props} />
 ));
 AlertDialogDescription.displayName = "AlertDialogDescription";
 
-const AlertDialogFooter = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={`flex justify-end space-x-2 mt-6 ${className || ""}`}
-    {...props}
-  />
-));
+const AlertDialogFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={`flex justify-end space-x-2 mt-6 ${className || ""}`} {...props} />
+  ),
+);
 AlertDialogFooter.displayName = "AlertDialogFooter";
 
 const AlertDialogAction = React.forwardRef<

@@ -355,6 +355,7 @@ async def get_all_belief_stats():
     """Get belief monitoring statistics for all agents."""
     try:
         from observability.belief_monitoring import get_all_belief_statistics
+
         return get_all_belief_statistics()
     except ImportError:
         return {"error": "Belief monitoring not available"}
@@ -365,6 +366,7 @@ async def get_agent_belief_stats(agent_id: str):
     """Get belief monitoring statistics for a specific agent."""
     try:
         from observability.belief_monitoring import get_belief_statistics
+
         return get_belief_statistics(agent_id)
     except ImportError:
         return {"error": "Belief monitoring not available"}
@@ -375,6 +377,7 @@ async def reset_belief_monitoring():
     """Reset belief monitoring for all agents."""
     try:
         from observability.belief_monitoring import belief_monitoring_hooks
+
         belief_monitoring_hooks.reset_all()
         return {"message": "Belief monitoring reset successfully"}
     except ImportError:
@@ -386,6 +389,7 @@ async def reset_agent_belief_monitoring(agent_id: str):
     """Reset belief monitoring for a specific agent."""
     try:
         from observability.belief_monitoring import belief_monitoring_hooks
+
         belief_monitoring_hooks.reset_agent_monitor(agent_id)
         return {"message": f"Belief monitoring reset for agent {agent_id}"}
     except ImportError:
@@ -397,6 +401,7 @@ async def get_coordination_stats():
     """Get coordination statistics for all agents."""
     try:
         from observability.coordination_metrics import get_system_coordination_report
+
         return get_system_coordination_report()
     except ImportError:
         return {"error": "Coordination metrics not available"}
@@ -407,6 +412,7 @@ async def get_agent_coordination_stats(agent_id: str):
     """Get coordination statistics for a specific agent."""
     try:
         from observability.coordination_metrics import get_agent_coordination_stats
+
         return get_agent_coordination_stats(agent_id)
     except ImportError:
         return {"error": "Coordination metrics not available"}
@@ -417,6 +423,7 @@ async def get_coalition_statistics():
     """Get coalition statistics."""
     try:
         from observability.coordination_metrics import coordination_metrics
+
         return coordination_metrics.get_coalition_statistics()
     except ImportError:
         return {"error": "Coordination metrics not available"}

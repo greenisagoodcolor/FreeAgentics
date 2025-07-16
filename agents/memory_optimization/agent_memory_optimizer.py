@@ -65,12 +65,21 @@ class OptimizedAgentMemory:
         total_bytes += self.position.nbytes
         total_bytes += 1  # bool
 
+        # Agent ID string
+        total_bytes += len(self.agent_id.encode()) if self.agent_id else 0
+
         # Lazy components (if loaded)
         if self._beliefs is not None:
-            if hasattr(self._beliefs, "sparse"):
+            if hasattr(self._beliefs, "memory_usage"):
+                # Use LazyBeliefArray's memory_usage method which returns MB
+                return self._beliefs.memory_usage() + (total_bytes / (1024 * 1024))
+            elif hasattr(self._beliefs, "sparse"):
                 sparse_beliefs = self._beliefs.sparse
                 total_bytes += sparse_beliefs.data.nbytes
                 total_bytes += sparse_beliefs.indices.nbytes
+                total_bytes += (
+                    sparse_beliefs.indptr.nbytes if hasattr(sparse_beliefs, "indptr") else 0
+                )
             elif (
                 hasattr(self._beliefs, "_sparse_representation")
                 and self._beliefs._sparse_representation
@@ -78,12 +87,18 @@ class OptimizedAgentMemory:
                 sparse_beliefs = self._beliefs._sparse_representation
                 total_bytes += sparse_beliefs.data.nbytes
                 total_bytes += sparse_beliefs.indices.nbytes
+                total_bytes += (
+                    sparse_beliefs.indptr.nbytes if hasattr(sparse_beliefs, "indptr") else 0
+                )
             else:
                 # Use small placeholder size since we optimize away the full dense array
                 total_bytes += 1024  # 1KB placeholder
 
         if self._action_history is not None:
             total_bytes += self._action_history.get_size_bytes()
+
+        # Add small overhead for Python object structure
+        total_bytes += 1024  # 1KB overhead
 
         # Don't count shared resources as they're shared across agents
 

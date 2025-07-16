@@ -40,11 +40,7 @@ export function BiographyView({
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Agent Biography</h3>
           {!editingBiography ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onEditBiography(true)}
-            >
+            <Button variant="outline" size="sm" onClick={() => onEditBiography(true)}>
               <Edit3 className="h-4 w-4 mr-2" />
               Edit
             </Button>

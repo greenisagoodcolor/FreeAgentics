@@ -15,14 +15,16 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Set
 
 import httpx
+
 from auth.security_logging import SecurityEventSeverity, SecurityEventType, security_auditor
-from observability.security_monitoring import SecurityAlert, ThreatLevel, AttackType
+from observability.security_monitoring import AttackType, SecurityAlert, ThreatLevel
 
 logger = logging.getLogger(__name__)
 
 
 class IncidentSeverity(str, Enum):
     """Incident severity levels."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -31,6 +33,7 @@ class IncidentSeverity(str, Enum):
 
 class IncidentStatus(str, Enum):
     """Incident status levels."""
+
     OPEN = "open"
     INVESTIGATING = "investigating"
     CONTAINMENT = "containment"
@@ -42,6 +45,7 @@ class IncidentStatus(str, Enum):
 
 class ResponseAction(str, Enum):
     """Types of automated response actions."""
+
     BLOCK_IP = "block_ip"
     SUSPEND_USER = "suspend_user"
     RATE_LIMIT = "rate_limit"
@@ -57,6 +61,7 @@ class ResponseAction(str, Enum):
 @dataclass
 class IncidentResponse:
     """Incident response data structure."""
+
     id: str
     incident_id: str
     action: ResponseAction
@@ -72,6 +77,7 @@ class IncidentResponse:
 @dataclass
 class SecurityIncident:
     """Security incident data structure."""
+
     id: str
     title: str
     description: str
@@ -98,6 +104,7 @@ class SecurityIncident:
 @dataclass
 class ResponsePlaybook:
     """Response playbook for specific attack types."""
+
     name: str
     attack_types: List[AttackType]
     severity_threshold: IncidentSeverity
@@ -118,25 +125,21 @@ class IncidentResponseSystem:
         self.suspended_users: Set[str] = set()
         self.quarantined_hosts: Set[str] = set()
         self.disabled_endpoints: Set[str] = set()
-        
+
         # Response playbooks
         self.playbooks: Dict[str, ResponsePlaybook] = {}
         self._initialize_playbooks()
-        
+
         # Configuration
         self.auto_response_enabled = True
         self.escalation_timeout = 30  # minutes
-        self.notification_channels = {
-            "email": [],
-            "slack": [],
-            "webhook": []
-        }
-        
+        self.notification_channels = {"email": [], "slack": [], "webhook": []}
+
         # Background tasks
         self.monitoring_task: Optional[asyncio.Task] = None
         self.escalation_task: Optional[asyncio.Task] = None
         self.running = False
-        
+
         logger.info("🚨 Incident response system initialized")
 
     def _initialize_playbooks(self):
@@ -150,23 +153,22 @@ class IncidentResponseSystem:
                     ResponseAction.BLOCK_IP,
                     ResponseAction.COLLECT_EVIDENCE,
                     ResponseAction.ALERT_TEAM,
-                    ResponseAction.LOG_ANALYSIS
+                    ResponseAction.LOG_ANALYSIS,
                 ],
                 manual_actions=[
                     "Review authentication logs",
                     "Check for successful logins from same IP",
                     "Verify user account security",
-                    "Update password policies if needed"
+                    "Update password policies if needed",
                 ],
                 escalation_timeout=15,
                 description="Automated response to brute force attacks",
                 success_criteria=[
                     "Attacker IP blocked",
                     "No successful logins from attacker",
-                    "Evidence collected and preserved"
-                ]
+                    "Evidence collected and preserved",
+                ],
             ),
-            
             "ddos": ResponsePlaybook(
                 name="DDoS Attack Response",
                 attack_types=[AttackType.DDoS],
@@ -176,23 +178,22 @@ class IncidentResponseSystem:
                     ResponseAction.RATE_LIMIT,
                     ResponseAction.ALERT_TEAM,
                     ResponseAction.NOTIFY_MANAGEMENT,
-                    ResponseAction.COLLECT_EVIDENCE
+                    ResponseAction.COLLECT_EVIDENCE,
                 ],
                 manual_actions=[
                     "Activate DDoS mitigation service",
                     "Scale up infrastructure if needed",
                     "Contact ISP for additional protection",
-                    "Monitor application performance"
+                    "Monitor application performance",
                 ],
                 escalation_timeout=5,
                 description="Automated response to DDoS attacks",
                 success_criteria=[
                     "Attack traffic blocked",
                     "Service availability maintained",
-                    "Performance metrics stable"
-                ]
+                    "Performance metrics stable",
+                ],
             ),
-            
             "sql_injection": ResponsePlaybook(
                 name="SQL Injection Response",
                 attack_types=[AttackType.SQL_INJECTION],
@@ -202,24 +203,23 @@ class IncidentResponseSystem:
                     ResponseAction.DISABLE_ENDPOINT,
                     ResponseAction.COLLECT_EVIDENCE,
                     ResponseAction.ALERT_TEAM,
-                    ResponseAction.NOTIFY_MANAGEMENT
+                    ResponseAction.NOTIFY_MANAGEMENT,
                 ],
                 manual_actions=[
                     "Review application code for vulnerabilities",
                     "Check database for unauthorized access",
                     "Validate input sanitization",
                     "Update WAF rules",
-                    "Perform security code review"
+                    "Perform security code review",
                 ],
                 escalation_timeout=10,
                 description="Automated response to SQL injection attacks",
                 success_criteria=[
                     "Vulnerable endpoint secured",
                     "No database compromise detected",
-                    "Attack vector eliminated"
-                ]
+                    "Attack vector eliminated",
+                ],
             ),
-            
             "privilege_escalation": ResponsePlaybook(
                 name="Privilege Escalation Response",
                 attack_types=[AttackType.PRIVILEGE_ESCALATION],
@@ -230,24 +230,23 @@ class IncidentResponseSystem:
                     ResponseAction.COLLECT_EVIDENCE,
                     ResponseAction.ALERT_TEAM,
                     ResponseAction.NOTIFY_MANAGEMENT,
-                    ResponseAction.ESCALATE
+                    ResponseAction.ESCALATE,
                 ],
                 manual_actions=[
                     "Review user permissions and roles",
                     "Check for unauthorized access",
                     "Audit system configuration",
                     "Validate authorization controls",
-                    "Investigate potential insider threat"
+                    "Investigate potential insider threat",
                 ],
                 escalation_timeout=5,
                 description="Automated response to privilege escalation attempts",
                 success_criteria=[
                     "User account secured",
                     "No unauthorized access confirmed",
-                    "System integrity maintained"
-                ]
+                    "System integrity maintained",
+                ],
             ),
-            
             "data_exfiltration": ResponsePlaybook(
                 name="Data Exfiltration Response",
                 attack_types=[AttackType.DATA_EXFILTRATION],
@@ -259,54 +258,54 @@ class IncidentResponseSystem:
                     ResponseAction.COLLECT_EVIDENCE,
                     ResponseAction.ALERT_TEAM,
                     ResponseAction.NOTIFY_MANAGEMENT,
-                    ResponseAction.ESCALATE
+                    ResponseAction.ESCALATE,
                 ],
                 manual_actions=[
                     "Identify compromised data",
                     "Assess breach impact",
                     "Activate data breach response plan",
                     "Notify legal and compliance teams",
-                    "Prepare breach notifications"
+                    "Prepare breach notifications",
                 ],
                 escalation_timeout=5,
                 description="Automated response to data exfiltration attempts",
                 success_criteria=[
                     "Data transfer stopped",
                     "Breach contained",
-                    "Legal requirements met"
-                ]
-            )
+                    "Legal requirements met",
+                ],
+            ),
         }
 
     async def start_monitoring(self):
         """Start incident response monitoring."""
         if self.running:
             return
-            
+
         self.running = True
         self.monitoring_task = asyncio.create_task(self._monitoring_loop())
         self.escalation_task = asyncio.create_task(self._escalation_loop())
-        
+
         logger.info("🔍 Incident response monitoring started")
 
     async def stop_monitoring(self):
         """Stop incident response monitoring."""
         self.running = False
-        
+
         if self.monitoring_task:
             self.monitoring_task.cancel()
             try:
                 await self.monitoring_task
             except asyncio.CancelledError:
                 pass
-                
+
         if self.escalation_task:
             self.escalation_task.cancel()
             try:
                 await self.escalation_task
             except asyncio.CancelledError:
                 pass
-                
+
         logger.info("🛑 Incident response monitoring stopped")
 
     async def _monitoring_loop(self):
@@ -336,15 +335,15 @@ class IncidentResponseSystem:
     async def create_incident_from_alert(self, alert: SecurityAlert) -> SecurityIncident:
         """Create a security incident from an alert."""
         incident_id = f"INC-{int(time.time())}"
-        
+
         # Map alert severity to incident severity
         severity_mapping = {
             ThreatLevel.LOW: IncidentSeverity.LOW,
             ThreatLevel.MEDIUM: IncidentSeverity.MEDIUM,
             ThreatLevel.HIGH: IncidentSeverity.HIGH,
-            ThreatLevel.CRITICAL: IncidentSeverity.CRITICAL
+            ThreatLevel.CRITICAL: IncidentSeverity.CRITICAL,
         }
-        
+
         incident = SecurityIncident(
             id=incident_id,
             title=f"{alert.alert_type.value.replace('_', ' ').title()} Incident",
@@ -357,15 +356,17 @@ class IncidentResponseSystem:
             affected_users=[alert.user_id] if alert.user_id else [],
             indicators=[alert.source_ip] if alert.source_ip else [],
             evidence=alert.evidence,
-            timeline=[{
-                "timestamp": alert.timestamp.isoformat(),
-                "event": "Incident created from security alert",
-                "details": {"alert_id": alert.id}
-            }]
+            timeline=[
+                {
+                    "timestamp": alert.timestamp.isoformat(),
+                    "event": "Incident created from security alert",
+                    "details": {"alert_id": alert.id},
+                }
+            ],
         )
-        
+
         self.incidents[incident_id] = incident
-        
+
         # Log incident creation
         security_auditor.log_event(
             SecurityEventType.SECURITY_CONFIG_CHANGE,
@@ -375,14 +376,14 @@ class IncidentResponseSystem:
                 "incident_id": incident_id,
                 "attack_type": alert.alert_type,
                 "severity": incident.severity,
-                "source_ip": alert.source_ip
-            }
+                "source_ip": alert.source_ip,
+            },
         )
-        
+
         # Trigger automated response
         if self.auto_response_enabled:
             await self._trigger_automated_response(incident)
-        
+
         logger.warning(f"🚨 Security incident created: {incident_id}")
         return incident
 
@@ -391,122 +392,128 @@ class IncidentResponseSystem:
         # Find applicable playbook
         playbook = None
         for pb in self.playbooks.values():
-            if (incident.attack_type in pb.attack_types and 
-                incident.severity.value >= pb.severity_threshold.value):
+            if (
+                incident.attack_type in pb.attack_types
+                and incident.severity.value >= pb.severity_threshold.value
+            ):
                 playbook = pb
                 break
-        
+
         if not playbook:
             logger.warning(f"No playbook found for incident {incident.id}")
             return
-        
+
         # Execute automated actions
         for action in playbook.automated_actions:
             try:
                 response = await self._execute_response_action(incident, action)
                 incident.responses.append(response)
-                
+
                 # Update incident timeline
-                incident.timeline.append({
-                    "timestamp": datetime.utcnow().isoformat(),
-                    "event": f"Automated response: {action.value}",
-                    "details": {
-                        "success": response.success,
-                        "execution_time": response.execution_time
+                incident.timeline.append(
+                    {
+                        "timestamp": datetime.utcnow().isoformat(),
+                        "event": f"Automated response: {action.value}",
+                        "details": {
+                            "success": response.success,
+                            "execution_time": response.execution_time,
+                        },
                     }
-                })
-                
+                )
+
             except Exception as e:
                 logger.error(f"Failed to execute {action.value} for incident {incident.id}: {e}")
-        
+
         # Update incident status
         incident.status = IncidentStatus.INVESTIGATING
         incident.updated_at = datetime.utcnow()
-        
+
         logger.info(f"Automated response completed for incident {incident.id}")
 
-    async def _execute_response_action(self, incident: SecurityIncident, action: ResponseAction) -> IncidentResponse:
+    async def _execute_response_action(
+        self, incident: SecurityIncident, action: ResponseAction
+    ) -> IncidentResponse:
         """Execute a specific response action."""
         start_time = time.time()
         response_id = f"RESP-{int(time.time())}"
-        
+
         response = IncidentResponse(
             id=response_id,
             incident_id=incident.id,
             action=action,
             status="executing",
             timestamp=datetime.utcnow(),
-            details={}
+            details={},
         )
-        
+
         try:
             if action == ResponseAction.BLOCK_IP:
                 await self._block_ip(incident.source_ip)
                 response.details = {"blocked_ip": incident.source_ip}
                 response.success = True
-                
+
             elif action == ResponseAction.SUSPEND_USER:
                 if incident.affected_users:
                     for user in incident.affected_users:
                         await self._suspend_user(user)
                     response.details = {"suspended_users": incident.affected_users}
                     response.success = True
-                
+
             elif action == ResponseAction.RATE_LIMIT:
                 await self._apply_rate_limit(incident.source_ip)
                 response.details = {"rate_limited_ip": incident.source_ip}
                 response.success = True
-                
+
             elif action == ResponseAction.ALERT_TEAM:
                 await self._alert_security_team(incident)
                 response.details = {"notification_sent": True}
                 response.success = True
-                
+
             elif action == ResponseAction.QUARANTINE_HOST:
                 if incident.source_ip:
                     await self._quarantine_host(incident.source_ip)
                     response.details = {"quarantined_host": incident.source_ip}
                     response.success = True
-                
+
             elif action == ResponseAction.DISABLE_ENDPOINT:
                 endpoints = self._extract_endpoints_from_evidence(incident.evidence)
                 for endpoint in endpoints:
                     await self._disable_endpoint(endpoint)
                 response.details = {"disabled_endpoints": endpoints}
                 response.success = True
-                
+
             elif action == ResponseAction.COLLECT_EVIDENCE:
                 evidence = await self._collect_evidence(incident)
                 response.details = {"evidence_collected": len(evidence)}
                 response.success = True
-                
+
             elif action == ResponseAction.NOTIFY_MANAGEMENT:
                 await self._notify_management(incident)
                 response.details = {"management_notified": True}
                 response.success = True
-                
+
             elif action == ResponseAction.ESCALATE:
                 await self._escalate_incident(incident)
                 response.details = {"escalation_level": incident.escalation_level}
                 response.success = True
-                
+
             elif action == ResponseAction.LOG_ANALYSIS:
                 analysis = await self._perform_log_analysis(incident)
                 response.details = {"analysis_results": analysis}
                 response.success = True
-                
+
             else:
                 response.error_message = f"Unknown action: {action}"
                 response.success = False
-                
+
         except Exception as e:
             response.error_message = str(e)
             response.success = False
             logger.error(f"Failed to execute {action.value}: {e}")
-        
+
         response.execution_time = time.time() - start_time
         response.status = "completed"
-        
+
         return response
 
     async def _block_ip(self, ip: str):
@@ -514,14 +521,14 @@ class IncidentResponseSystem:
         if ip and ip != "unknown":
             self.blocked_ips.add(ip)
             logger.info(f"🚫 IP blocked: {ip}")
-            
+
             # Here you would integrate with your firewall/WAF
             # For now, we'll just log it
             security_auditor.log_event(
                 SecurityEventType.SECURITY_CONFIG_CHANGE,
                 SecurityEventSeverity.WARNING,
                 f"IP address blocked: {ip}",
-                details={"blocked_ip": ip, "automated": True}
+                details={"blocked_ip": ip, "automated": True},
             )
 
     async def _suspend_user(self, user_id: str):
@@ -529,13 +536,13 @@ class IncidentResponseSystem:
         if user_id:
             self.suspended_users.add(user_id)
             logger.info(f"👤 User suspended: {user_id}")
-            
+
             # Here you would integrate with your user management system
             security_auditor.log_event(
                 SecurityEventType.SECURITY_CONFIG_CHANGE,
                 SecurityEventSeverity.WARNING,
                 f"User account suspended: {user_id}",
-                details={"suspended_user": user_id, "automated": True}
+                details={"suspended_user": user_id, "automated": True},
             )
 
     async def _apply_rate_limit(self, ip: str):
@@ -546,7 +553,7 @@ class IncidentResponseSystem:
     async def _alert_security_team(self, incident: SecurityIncident):
         """Alert the security team about an incident."""
         logger.info(f"📢 Security team alerted for incident: {incident.id}")
-        
+
         # Here you would integrate with notification systems
         alert_message = {
             "incident_id": incident.id,
@@ -554,9 +561,9 @@ class IncidentResponseSystem:
             "severity": incident.severity.value,
             "attack_type": incident.attack_type.value,
             "source_ip": incident.source_ip,
-            "timestamp": incident.created_at.isoformat()
+            "timestamp": incident.created_at.isoformat(),
         }
-        
+
         # Send to configured channels
         for channel in self.notification_channels.get("webhook", []):
             await self._send_webhook_alert(channel, alert_message)
@@ -580,9 +587,9 @@ class IncidentResponseSystem:
             "network_data": {},
             "system_info": {},
             "user_activity": [],
-            "file_integrity": {}
+            "file_integrity": {},
         }
-        
+
         # Here you would collect various types of evidence
         # For now, we'll just return the existing evidence
         return incident.evidence
@@ -590,7 +597,7 @@ class IncidentResponseSystem:
     async def _notify_management(self, incident: SecurityIncident):
         """Notify management about a critical incident."""
         logger.info(f"📧 Management notified for incident: {incident.id}")
-        
+
         # Here you would send notifications to management
         # Email, SMS, or other high-priority channels
 
@@ -605,9 +612,9 @@ class IncidentResponseSystem:
             "patterns_detected": [],
             "timeline_reconstructed": True,
             "related_events": [],
-            "recommendations": []
+            "recommendations": [],
         }
-        
+
         # Here you would perform actual log analysis
         return analysis
 
@@ -624,11 +631,11 @@ class IncidentResponseSystem:
     def _extract_endpoints_from_evidence(self, evidence: Dict[str, Any]) -> List[str]:
         """Extract endpoints from incident evidence."""
         endpoints = []
-        
+
         # Extract endpoints from evidence
         if "endpoint" in evidence:
             endpoints.append(evidence["endpoint"])
-        
+
         return endpoints
 
     async def _check_incident_status(self):
@@ -644,13 +651,13 @@ class IncidentResponseSystem:
     async def _check_escalations(self):
         """Check for incidents that need escalation."""
         now = datetime.utcnow()
-        
+
         for incident in self.incidents.values():
             if incident.status in [IncidentStatus.OPEN, IncidentStatus.INVESTIGATING]:
                 # Check if escalation timeout has passed
                 time_since_creation = now - incident.created_at
                 escalation_timeout = timedelta(minutes=self.escalation_timeout)
-                
+
                 if time_since_creation > escalation_timeout:
                     await self._escalate_incident(incident)
                     await self._notify_management(incident)
@@ -658,33 +665,37 @@ class IncidentResponseSystem:
     def get_incident_statistics(self) -> Dict[str, Any]:
         """Get incident statistics."""
         incidents = list(self.incidents.values())
-        
+
         stats = {
             "total_incidents": len(incidents),
             "open_incidents": len([i for i in incidents if i.status == IncidentStatus.OPEN]),
-            "resolved_incidents": len([i for i in incidents if i.status == IncidentStatus.RESOLVED]),
+            "resolved_incidents": len(
+                [i for i in incidents if i.status == IncidentStatus.RESOLVED]
+            ),
             "by_severity": {},
             "by_attack_type": {},
             "by_status": {},
             "average_response_time": 0.0,
             "escalated_incidents": len([i for i in incidents if i.escalation_level > 0]),
-            "false_positives": len([i for i in incidents if i.false_positive])
+            "false_positives": len([i for i in incidents if i.false_positive]),
         }
-        
+
         # Calculate statistics
         for incident in incidents:
             # Count by severity
             severity_key = incident.severity.value
             stats["by_severity"][severity_key] = stats["by_severity"].get(severity_key, 0) + 1
-            
+
             # Count by attack type
             attack_type_key = incident.attack_type.value
-            stats["by_attack_type"][attack_type_key] = stats["by_attack_type"].get(attack_type_key, 0) + 1
-            
+            stats["by_attack_type"][attack_type_key] = (
+                stats["by_attack_type"].get(attack_type_key, 0) + 1
+            )
+
             # Count by status
             status_key = incident.status.value
             stats["by_status"][status_key] = stats["by_status"].get(status_key, 0) + 1
-        
+
         return stats
 
     def get_recent_incidents(self, limit: int = 10) -> List[SecurityIncident]:
@@ -704,7 +715,7 @@ class IncidentResponseSystem:
             incident.resolved_at = datetime.utcnow()
             incident.updated_at = datetime.utcnow()
             incident.lesson_learned = resolution_notes
-            
+
             logger.info(f"✅ Incident resolved: {incident_id}")
             return True
         return False
@@ -718,7 +729,7 @@ class IncidentResponseSystem:
             incident.resolved_at = datetime.utcnow()
             incident.updated_at = datetime.utcnow()
             incident.lesson_learned = f"False positive: {notes}"
-            
+
             logger.info(f"🔍 Incident marked as false positive: {incident_id}")
             return True
         return False

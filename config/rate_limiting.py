@@ -5,15 +5,14 @@ across different environments (development, staging, production).
 """
 
 import os
-from typing import Dict, Optional
-
 from dataclasses import dataclass
-from typing import Optional
+from typing import Dict, Optional
 
 
 @dataclass
 class RateLimitConfig:
     """Rate limit configuration."""
+
     requests_per_minute: int = 60
     requests_per_hour: int = 1000
     burst_limit: int = 10

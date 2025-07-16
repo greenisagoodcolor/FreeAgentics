@@ -178,7 +178,6 @@ class AsyncAgentManager:
 
     async def start(self):
         """Start the async agent manager."""
-        loop = asyncio.get_event_loop()
         # Use ThreadPoolExecutor instead of ProcessPoolExecutor for dependency compatibility
         self.process_pool = ThreadPoolExecutor(max_workers=self.max_workers)
 

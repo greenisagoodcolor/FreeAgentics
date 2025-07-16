@@ -47,11 +47,13 @@ class SecurityPolicy:
 
     # Permissions Policy
     permissions_policy: Optional[str] = None
-    
+
     # Cache Control
     cache_control_default: str = "no-store, no-cache, must-revalidate, proxy-revalidate"
     cache_control_static: str = "public, max-age=31536000, immutable"
-    cache_control_sensitive: str = "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+    cache_control_sensitive: str = (
+        "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+    )
 
     # Expect-CT
     enable_expect_ct: bool = True
@@ -232,7 +234,9 @@ class SecurityHeadersManager:
             csp_directives = [
                 "default-src 'self'",
                 "script-src 'self'" + (f" 'nonce-{nonce}'" if nonce else " 'strict-dynamic'"),
-                "style-src 'self'" + (f" 'nonce-{nonce}'" if nonce else " 'unsafe-inline'") + " https://fonts.googleapis.com",
+                "style-src 'self'"
+                + (f" 'nonce-{nonce}'" if nonce else " 'unsafe-inline'")
+                + " https://fonts.googleapis.com",
                 "img-src 'self' data: https:",
                 "font-src 'self' data: https://fonts.gstatic.com",
                 "connect-src 'self' wss: https:",
@@ -304,7 +308,7 @@ class SecurityHeadersManager:
         """Generate cryptographically secure nonce for CSP."""
         # Generate 16 random bytes and base64 encode them
         random_bytes = secrets.token_bytes(16)
-        return base64.b64encode(random_bytes).decode('ascii')
+        return base64.b64encode(random_bytes).decode("ascii")
 
     def get_secure_cookie_config(self) -> Dict[str, Any]:
         """Get secure cookie configuration."""
@@ -334,9 +338,9 @@ class SecurityHeadersManager:
         if "text/html" in content_type:
             nonce = self.generate_nonce()
             # Store nonce in response for template usage
-            if hasattr(response, 'context'):
-                response.context['csp_nonce'] = nonce
-        
+            if hasattr(response, "context"):
+                response.context["csp_nonce"] = nonce
+
         headers["Content-Security-Policy"] = self.generate_csp_header(nonce)
 
         # Frame Options
@@ -357,7 +361,7 @@ class SecurityHeadersManager:
         # Expect-CT
         if expect_ct := self.generate_expect_ct_header():
             headers["Expect-CT"] = expect_ct
-        
+
         # Additional security headers
         headers["X-Permitted-Cross-Domain-Policies"] = "none"
         headers["X-DNS-Prefetch-Control"] = "off"
@@ -382,13 +386,17 @@ class SecurityHeadersManager:
         path = request.url.path
         if any(sensitive in path for sensitive in ["/auth/", "/api/", "/admin/", "/user/"]):
             # Sensitive endpoints - no caching
-            headers.update({
-                "Cache-Control": self.policy.cache_control_sensitive,
-                "Pragma": "no-cache",
-                "Expires": "0",
-                "X-Frame-Options": "DENY",  # Stricter for sensitive endpoints
-                "Clear-Site-Data": '"cache"' if "/logout" in path else None,  # Clear cache on logout
-            })
+            headers.update(
+                {
+                    "Cache-Control": self.policy.cache_control_sensitive,
+                    "Pragma": "no-cache",
+                    "Expires": "0",
+                    "X-Frame-Options": "DENY",  # Stricter for sensitive endpoints
+                    "Clear-Site-Data": (
+                        '"cache"' if "/logout" in path else None
+                    ),  # Clear cache on logout
+                }
+            )
             # Remove None values
             headers = {k: v for k, v in headers.items() if v is not None}
         elif any(static in path for static in ["/static/", "/assets/", "/public/"]):
@@ -481,86 +489,91 @@ PRODUCTION_SECURITY_POLICY = SecurityPolicy(
 # Global security headers manager for compatibility
 _default_security_manager = SecurityHeadersManager()
 
+
 def get_security_headers(custom_csp: Optional[str] = None) -> Dict[str, str]:
     """Get security headers dictionary (for testing compatibility)."""
     # Generate headers directly for better performance
     headers = {}
-    
+
     # HSTS
     headers["Strict-Transport-Security"] = _default_security_manager.generate_hsts_header()
-    
+
     # CSP
     if custom_csp:
         headers["Content-Security-Policy"] = custom_csp
     else:
         headers["Content-Security-Policy"] = _default_security_manager.generate_csp_header()
-    
+
     # Frame Options
     headers["X-Frame-Options"] = _default_security_manager.policy.x_frame_options
-    
+
     # Content Type Options
     headers["X-Content-Type-Options"] = _default_security_manager.policy.x_content_type_options
-    
+
     # XSS Protection
     headers["X-XSS-Protection"] = _default_security_manager.policy.x_xss_protection
-    
+
     # Referrer Policy
     headers["Referrer-Policy"] = _default_security_manager.policy.referrer_policy
-    
+
     # Permissions Policy
     headers["Permissions-Policy"] = _default_security_manager.generate_permissions_policy()
-    
+
     # Expect-CT
     if expect_ct := _default_security_manager.generate_expect_ct_header():
         headers["Expect-CT"] = expect_ct
-    
+
     return headers
+
 
 def add_security_headers(response) -> None:
     """Add security headers to a response (for testing compatibility)."""
-    if not response or not hasattr(response, 'headers'):
+    if not response or not hasattr(response, "headers"):
         return
-    
+
     headers = get_security_headers()
     for header_name, header_value in headers.items():
         response.headers[header_name] = header_value
+
 
 def validate_csp_header(csp_header: Optional[str]) -> bool:
     """Validate Content Security Policy header format."""
     if not csp_header:
         return False
-    
+
     # Check for required directives
     required_directives = ["default-src", "script-src", "style-src"]
-    
+
     for directive in required_directives:
         if directive not in csp_header:
             return False
-    
+
     # Check for invalid directives (basic validation)
     invalid_patterns = ["invalid-directive", "unknown-src"]
-    
+
     for pattern in invalid_patterns:
         if pattern in csp_header:
             return False
-    
+
     return True
+
 
 def validate_hsts_header(hsts_header: Optional[str]) -> bool:
     """Validate HTTP Strict Transport Security header format."""
     if not hsts_header:
         return False
-    
+
     # Must contain max-age
     if "max-age=" not in hsts_header:
         return False
-    
+
     # Extract max-age value
     import re
-    max_age_match = re.search(r'max-age=(\d+)', hsts_header)
+
+    max_age_match = re.search(r"max-age=(\d+)", hsts_header)
     if not max_age_match:
         return False
-    
+
     try:
         max_age = int(max_age_match.group(1))
         # Must be at least 1 year (31536000 seconds)
@@ -568,8 +581,9 @@ def validate_hsts_header(hsts_header: Optional[str]) -> bool:
             return False
     except ValueError:
         return False
-    
+
     return True
+
 
 def generate_csp_nonce() -> str:
     """Generate a CSP nonce for testing compatibility."""

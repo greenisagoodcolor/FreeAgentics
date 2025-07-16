@@ -225,7 +225,7 @@ class ActiveInferenceAgent(ABC):
         self.observability_enabled = OBSERVABILITY_AVAILABLE and config.get(
             "enable_observability", True
         )
-        
+
         # Belief monitoring integration
         self.belief_monitoring_enabled = BELIEF_MONITORING_AVAILABLE and config.get(
             "enable_belief_monitoring", True
@@ -532,16 +532,19 @@ class ActiveInferenceAgent(ABC):
     def stop(self):
         """Stop the agent."""
         self.is_active = False
-        
+
         # Cleanup belief monitoring
         if self.belief_monitoring_enabled:
             try:
                 from observability.belief_monitoring import belief_monitoring_hooks
+
                 belief_monitoring_hooks.reset_agent_monitor(self.agent_id)
                 logger.debug(f"Cleaned up belief monitoring for agent {self.agent_id}")
             except Exception as e:
-                logger.warning(f"Failed to cleanup belief monitoring for agent {self.agent_id}: {e}")
-        
+                logger.warning(
+                    f"Failed to cleanup belief monitoring for agent {self.agent_id}: {e}"
+                )
+
         logger.info(f"Agent {self.agent_id} stopped")
 
     def get_status(self) -> Dict[str, Any]:
@@ -569,18 +572,19 @@ class ActiveInferenceAgent(ABC):
             status["pymdp_error_report"] = self.pymdp_error_handler.get_error_report()
 
         return status
-    
+
     def get_belief_monitoring_stats(self) -> Dict[str, Any]:
         """Get belief monitoring statistics for this agent.
-        
+
         Returns:
             Dictionary containing belief monitoring statistics
         """
         if not self.belief_monitoring_enabled:
             return {"error": "Belief monitoring not enabled"}
-        
+
         try:
             from observability.belief_monitoring import belief_monitoring_hooks
+
             return belief_monitoring_hooks.get_agent_statistics(self.agent_id)
         except Exception as e:
             logger.error(f"Failed to get belief monitoring stats for agent {self.agent_id}: {e}")
@@ -896,9 +900,11 @@ class BasicExplorerAgent(ActiveInferenceAgent):
                                                 "qs": qs,
                                                 "entropy": self.metrics.get("belief_entropy", 0.0),
                                                 "state_posterior_size": len(qs) if qs else 0,
-                                                "previous_entropy": beliefs_before.get("belief_entropy", 0.0),
+                                                "previous_entropy": beliefs_before.get(
+                                                    "belief_entropy", 0.0
+                                                ),
                                             }
-                                            
+
                                             # Monitor belief update with detailed tracking
                                             asyncio.create_task(
                                                 monitor_belief_update(
@@ -910,10 +916,10 @@ class BasicExplorerAgent(ActiveInferenceAgent):
                                                         "update_type": "pymdp_inference",
                                                         "beliefs_before": beliefs_before,
                                                         "beliefs_after": beliefs_after,
-                                                    }
+                                                    },
                                                 )
                                             )
-                                        
+
                                         # Also record basic metrics
                                         asyncio.create_task(
                                             record_belief_update(
@@ -980,7 +986,9 @@ class BasicExplorerAgent(ActiveInferenceAgent):
                         lambda: 4,  # Default to "stay" action index
                     )
                     if error:
-                        logger.warning(f"Action index conversion failed, using fallback: {error}")
+                        logger.warning(
+                            f"Action index conversion failed, original error: {e}, using fallback: {error}"
+                        )
 
                 # Convert action index to string with safe indexing
                 selected_action = safe_array_index(self.action_map, action_idx_converted, "stay")

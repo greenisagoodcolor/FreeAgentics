@@ -8,6 +8,7 @@ mathematical rigor (Karl Friston, Yann LeCun).
 """
 
 import logging
+import os
 import sys
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
@@ -17,12 +18,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 
+from api.middleware.ddos_protection import DDoSProtectionMiddleware
+from api.middleware.rate_limiter import RateLimitMiddleware, create_rate_limiter
+
 # SECURITY: Import authentication and security components
 from auth import SecurityMiddleware
-from auth.security_headers import SecurityHeadersMiddleware, SecurityPolicy
 from auth.https_enforcement import HTTPSEnforcementMiddleware, SSLConfiguration
-from api.middleware.ddos_protection import DDoSProtectionMiddleware
-from api.middleware.rate_limiter import create_rate_limiter, RateLimitMiddleware
+from auth.security_headers import SecurityHeadersMiddleware, SecurityPolicy
 
 # Configure logging
 logging.basicConfig(
@@ -132,21 +134,22 @@ app.add_middleware(SecurityMiddleware)
 
 # SECURITY: Add HTTPS enforcement and SSL/TLS configuration
 # Configure based on environment
-import os
 is_production = os.getenv("PRODUCTION", "false").lower() == "true"
 
 ssl_config = SSLConfiguration(
     production_mode=is_production,
     enable_letsencrypt=is_production,
     letsencrypt_email=os.getenv("LETSENCRYPT_EMAIL", "admin@freeagentics.com"),
-    letsencrypt_domains=os.getenv("LETSENCRYPT_DOMAINS", "").split(",") if os.getenv("LETSENCRYPT_DOMAINS") else [],
+    letsencrypt_domains=(
+        os.getenv("LETSENCRYPT_DOMAINS", "").split(",") if os.getenv("LETSENCRYPT_DOMAINS") else []
+    ),
     hsts_enabled=True,
     hsts_max_age=31536000,  # 1 year
     hsts_include_subdomains=True,
     hsts_preload=is_production,
     secure_cookies=True,
     behind_load_balancer=os.getenv("BEHIND_LOAD_BALANCER", "false").lower() == "true",
-    trusted_proxies=os.getenv("TRUSTED_PROXIES", "127.0.0.1,::1").split(",")
+    trusted_proxies=os.getenv("TRUSTED_PROXIES", "127.0.0.1,::1").split(","),
 )
 
 app.add_middleware(HTTPSEnforcementMiddleware, config=ssl_config)
@@ -162,7 +165,7 @@ security_policy = SecurityPolicy(
     enable_expect_ct=True,
     expect_ct_report_uri="/api/v1/security/ct-report",
     enable_certificate_pinning=is_production,
-    secure_cookies=True
+    secure_cookies=True,
 )
 
 app.add_middleware(SecurityHeadersMiddleware, security_manager=security_policy)
@@ -174,11 +177,13 @@ config_file = os.path.join(os.path.dirname(__file__), "config", "rate_limiting.y
 # Create rate limiter instance
 rate_limiter = create_rate_limiter(redis_url=redis_url, config_file=config_file)
 
+
 # Function to extract user ID from request (for authenticated rate limiting)
 async def get_user_id_from_request(request):
     """Extract user ID from JWT token if present."""
     try:
         from auth import auth_manager
+
         authorization = request.headers.get("Authorization")
         if authorization and authorization.startswith("Bearer "):
             token = authorization.split(" ")[1]
@@ -189,11 +194,10 @@ async def get_user_id_from_request(request):
         pass
     return None
 
+
 # Add rate limiting middleware
 app.add_middleware(
-    RateLimitMiddleware,
-    rate_limiter=rate_limiter,
-    get_user_id=get_user_id_from_request
+    RateLimitMiddleware, rate_limiter=rate_limiter, get_user_id=get_user_id_from_request
 )
 
 # Alternative: Use DDoS protection middleware (includes rate limiting)
@@ -235,6 +239,36 @@ async def health_check() -> dict:
         "version": "1.0.0",
         "timestamp": "2025-06-26T00:00:00Z",
     }
+
+
+# Prometheus Metrics Endpoint
+@app.get("/metrics", tags=["monitoring"])
+async def get_metrics():
+    """Prometheus metrics endpoint for monitoring"""
+    try:
+        from fastapi import Response
+
+        from observability.prometheus_metrics import (
+            get_prometheus_content_type,
+            get_prometheus_metrics,
+        )
+
+        metrics_data = get_prometheus_metrics()
+        content_type = get_prometheus_content_type()
+
+        return Response(
+            content=metrics_data, media_type=content_type, headers={"Cache-Control": "no-cache"}
+        )
+    except ImportError:
+        logger.warning("Prometheus metrics not available")
+        return Response(
+            content="# Prometheus metrics not available\n", media_type="text/plain", status_code=503
+        )
+    except Exception as e:
+        logger.error(f"Error getting Prometheus metrics: {e}")
+        return Response(
+            content=f"# Error getting metrics: {e}\n", media_type="text/plain", status_code=500
+        )
 
 
 # Root Endpoint - API Discovery

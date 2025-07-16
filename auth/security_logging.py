@@ -71,6 +71,16 @@ class SecurityEventType(str, Enum):
     USER_MODIFIED = "user_modified"
     PASSWORD_CHANGED = "password_changed"
 
+    # MFA events
+    MFA_ENROLLED = "mfa_enrolled"
+    MFA_ENROLLMENT_FAILED = "mfa_enrollment_failed"
+    MFA_SUCCESS = "mfa_success"
+    MFA_FAILED = "mfa_failed"
+    MFA_ERROR = "mfa_error"
+    MFA_DISABLED = "mfa_disabled"
+    MFA_LOCKOUT = "mfa_lockout"
+    MFA_BACKUP_CODES_REGENERATED = "mfa_backup_codes_regenerated"
+
 
 class SecurityEventSeverity(str, Enum):
     """Severity levels for security events."""
@@ -112,20 +122,20 @@ AUDIT_DB_URL = os.getenv("AUDIT_DATABASE_URL", os.getenv("DATABASE_URL"))
 if AUDIT_DB_URL:
     # Configure audit engine based on database dialect
     audit_engine_args = {}
-    
+
     if AUDIT_DB_URL.startswith("postgresql://") or AUDIT_DB_URL.startswith("postgres://"):
         # PostgreSQL-specific configuration
-        audit_engine_args.update({
-            "pool_size": 5,
-            "max_overflow": 10,
-            "pool_pre_ping": True,
-        })
+        audit_engine_args.update(
+            {
+                "pool_size": 5,
+                "max_overflow": 10,
+                "pool_pre_ping": True,
+            }
+        )
     elif AUDIT_DB_URL.startswith("sqlite://"):
         # SQLite-specific configuration
-        audit_engine_args.update({
-            "connect_args": {"check_same_thread": False}
-        })
-    
+        audit_engine_args.update({"connect_args": {"check_same_thread": False}})
+
     audit_engine = create_engine(AUDIT_DB_URL, **audit_engine_args)
     AuditSessionLocal = sessionmaker(bind=audit_engine)
     Base.metadata.create_all(bind=audit_engine)

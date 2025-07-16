@@ -3,10 +3,10 @@
 Provides access to security audit logs and monitoring data.
 """
 
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
 import subprocess
+from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from fastapi.responses import PlainTextResponse
@@ -14,14 +14,19 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from auth import Permission, TokenData, get_current_user, require_permission
+from auth.https_enforcement import SSLCertificateManager, SSLConfiguration
 from auth.security_logging import (
     SecurityAuditLog,
     SecurityEventSeverity,
     SecurityEventType,
     security_auditor,
 )
-from auth.https_enforcement import SSLCertificateManager, SSLConfiguration
 from database.session import get_db
+from observability.incident_response import (
+    IncidentSeverity,
+    IncidentStatus,
+    incident_response,
+)
 from observability.security_monitoring import (
     SecurityAlert,
     SecurityMetrics,
@@ -32,11 +37,6 @@ from observability.vulnerability_scanner import (
     SeverityLevel,
     VulnerabilityType,
     vulnerability_scanner,
-)
-from observability.incident_response import (
-    IncidentSeverity,
-    IncidentStatus,
-    incident_response,
 )
 
 router = APIRouter()
@@ -307,17 +307,18 @@ Acknowledgments: https://freeagentics.com/security-acknowledgments
 # ENHANCED SECURITY MONITORING ENDPOINTS
 # ============================================================================
 
+
 @router.get("/security/alerts", response_model=List[SecurityAlertResponse])
 @require_permission(Permission.ADMIN_SYSTEM)
 async def get_security_alerts(
     current_user: TokenData = Depends(get_current_user),
 ) -> List[SecurityAlertResponse]:
     """Get active security alerts.
-    
+
     Requires ADMIN_SYSTEM permission.
     """
     alerts = security_monitor.get_active_alerts()
-    
+
     return [
         SecurityAlertResponse(
             id=alert.id,
@@ -328,7 +329,7 @@ async def get_security_alerts(
             user_id=alert.user_id,
             description=alert.description,
             status=alert.status,
-            evidence=alert.evidence
+            evidence=alert.evidence,
         )
         for alert in alerts
     ]
@@ -340,11 +341,11 @@ async def get_security_metrics(
     current_user: TokenData = Depends(get_current_user),
 ) -> SecurityMetricsResponse:
     """Get security metrics and statistics.
-    
+
     Requires ADMIN_SYSTEM permission.
     """
     metrics = security_monitor.get_security_metrics()
-    
+
     return SecurityMetricsResponse(
         total_events=metrics.total_events,
         alerts_generated=metrics.alerts_generated,
@@ -354,7 +355,7 @@ async def get_security_metrics(
         mean_response_time=metrics.mean_response_time,
         top_attack_types=metrics.top_attack_types,
         top_source_ips=metrics.top_source_ips,
-        threat_level_distribution=metrics.threat_level_distribution
+        threat_level_distribution=metrics.threat_level_distribution,
     )
 
 
@@ -366,17 +367,16 @@ async def resolve_security_alert(
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, str]:
     """Resolve a security alert.
-    
+
     Requires ADMIN_SYSTEM permission.
     """
     success = security_monitor.resolve_alert(alert_id, resolution_notes)
-    
+
     if not success:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Alert {alert_id} not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Alert {alert_id} not found"
         )
-    
+
     # Log the resolution
     security_auditor.log_event(
         SecurityEventType.SECURITY_CONFIG_CHANGE,
@@ -384,9 +384,9 @@ async def resolve_security_alert(
         f"Security alert resolved: {alert_id}",
         user_id=current_user.user_id,
         username=current_user.username,
-        details={"alert_id": alert_id, "resolution_notes": resolution_notes}
+        details={"alert_id": alert_id, "resolution_notes": resolution_notes},
     )
-    
+
     return {"message": f"Alert {alert_id} resolved successfully"}
 
 
@@ -398,17 +398,16 @@ async def mark_alert_false_positive(
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, str]:
     """Mark a security alert as false positive.
-    
+
     Requires ADMIN_SYSTEM permission.
     """
     success = security_monitor.mark_false_positive(alert_id, notes)
-    
+
     if not success:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Alert {alert_id} not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Alert {alert_id} not found"
         )
-    
+
     # Log the false positive marking
     security_auditor.log_event(
         SecurityEventType.SECURITY_CONFIG_CHANGE,
@@ -416,9 +415,9 @@ async def mark_alert_false_positive(
         f"Security alert marked as false positive: {alert_id}",
         user_id=current_user.user_id,
         username=current_user.username,
-        details={"alert_id": alert_id, "notes": notes}
+        details={"alert_id": alert_id, "notes": notes},
     )
-    
+
     return {"message": f"Alert {alert_id} marked as false positive"}
 
 
@@ -426,15 +425,17 @@ async def mark_alert_false_positive(
 @require_permission(Permission.ADMIN_SYSTEM)
 async def get_vulnerabilities(
     severity: Optional[SeverityLevel] = Query(None, description="Filter by severity"),
-    vuln_type: Optional[VulnerabilityType] = Query(None, description="Filter by vulnerability type"),
+    vuln_type: Optional[VulnerabilityType] = Query(
+        None, description="Filter by vulnerability type"
+    ),
     current_user: TokenData = Depends(get_current_user),
 ) -> List[VulnerabilityResponse]:
     """Get vulnerabilities from security scans.
-    
+
     Requires ADMIN_SYSTEM permission.
     """
     vulnerabilities = vulnerability_scanner.get_vulnerabilities(severity, vuln_type)
-    
+
     return [
         VulnerabilityResponse(
             id=vuln.id,
@@ -451,7 +452,7 @@ async def get_vulnerabilities(
             first_detected=vuln.first_detected,
             last_seen=vuln.last_seen,
             status=vuln.status,
-            scanner_name=vuln.scanner_name
+            scanner_name=vuln.scanner_name,
         )
         for vuln in vulnerabilities
     ]
@@ -463,7 +464,7 @@ async def get_vulnerability_stats(
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, Any]:
     """Get vulnerability statistics.
-    
+
     Requires ADMIN_SYSTEM permission.
     """
     return vulnerability_scanner.get_vulnerability_stats()
@@ -477,11 +478,11 @@ async def suppress_vulnerability(
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, str]:
     """Suppress a vulnerability.
-    
+
     Requires ADMIN_SYSTEM permission.
     """
     vulnerability_scanner.suppress_vulnerability(vuln_id, reason)
-    
+
     # Log the suppression
     security_auditor.log_event(
         SecurityEventType.SECURITY_CONFIG_CHANGE,
@@ -489,9 +490,9 @@ async def suppress_vulnerability(
         f"Vulnerability suppressed: {vuln_id}",
         user_id=current_user.user_id,
         username=current_user.username,
-        details={"vulnerability_id": vuln_id, "reason": reason}
+        details={"vulnerability_id": vuln_id, "reason": reason},
     )
-    
+
     return {"message": f"Vulnerability {vuln_id} suppressed"}
 
 
@@ -503,11 +504,11 @@ async def mark_vulnerability_false_positive(
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, str]:
     """Mark a vulnerability as false positive.
-    
+
     Requires ADMIN_SYSTEM permission.
     """
     vulnerability_scanner.mark_false_positive(vuln_id, reason)
-    
+
     # Log the false positive marking
     security_auditor.log_event(
         SecurityEventType.SECURITY_CONFIG_CHANGE,
@@ -515,9 +516,9 @@ async def mark_vulnerability_false_positive(
         f"Vulnerability marked as false positive: {vuln_id}",
         user_id=current_user.user_id,
         username=current_user.username,
-        details={"vulnerability_id": vuln_id, "reason": reason}
+        details={"vulnerability_id": vuln_id, "reason": reason},
     )
-    
+
     return {"message": f"Vulnerability {vuln_id} marked as false positive"}
 
 
@@ -528,11 +529,11 @@ async def get_security_incidents(
     current_user: TokenData = Depends(get_current_user),
 ) -> List[IncidentResponse]:
     """Get security incidents.
-    
+
     Requires ADMIN_SYSTEM permission.
     """
     incidents = incident_response.get_recent_incidents(limit)
-    
+
     return [
         IncidentResponse(
             id=incident.id,
@@ -548,7 +549,7 @@ async def get_security_incidents(
             created_at=incident.created_at,
             updated_at=incident.updated_at,
             resolved_at=incident.resolved_at,
-            escalation_level=incident.escalation_level
+            escalation_level=incident.escalation_level,
         )
         for incident in incidents
     ]
@@ -560,7 +561,7 @@ async def get_incident_stats(
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, Any]:
     """Get incident statistics.
-    
+
     Requires ADMIN_SYSTEM permission.
     """
     return incident_response.get_incident_statistics()
@@ -574,17 +575,16 @@ async def resolve_incident(
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, str]:
     """Resolve a security incident.
-    
+
     Requires ADMIN_SYSTEM permission.
     """
     success = incident_response.resolve_incident(incident_id, resolution_notes)
-    
+
     if not success:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Incident {incident_id} not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Incident {incident_id} not found"
         )
-    
+
     # Log the resolution
     security_auditor.log_event(
         SecurityEventType.SECURITY_CONFIG_CHANGE,
@@ -592,9 +592,9 @@ async def resolve_incident(
         f"Security incident resolved: {incident_id}",
         user_id=current_user.user_id,
         username=current_user.username,
-        details={"incident_id": incident_id, "resolution_notes": resolution_notes}
+        details={"incident_id": incident_id, "resolution_notes": resolution_notes},
     )
-    
+
     return {"message": f"Incident {incident_id} resolved successfully"}
 
 
@@ -606,17 +606,16 @@ async def mark_incident_false_positive(
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, str]:
     """Mark a security incident as false positive.
-    
+
     Requires ADMIN_SYSTEM permission.
     """
     success = incident_response.mark_false_positive(incident_id, notes)
-    
+
     if not success:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Incident {incident_id} not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Incident {incident_id} not found"
         )
-    
+
     # Log the false positive marking
     security_auditor.log_event(
         SecurityEventType.SECURITY_CONFIG_CHANGE,
@@ -624,9 +623,9 @@ async def mark_incident_false_positive(
         f"Security incident marked as false positive: {incident_id}",
         user_id=current_user.user_id,
         username=current_user.username,
-        details={"incident_id": incident_id, "notes": notes}
+        details={"incident_id": incident_id, "notes": notes},
     )
-    
+
     return {"message": f"Incident {incident_id} marked as false positive"}
 
 
@@ -636,14 +635,14 @@ async def get_blocked_ips(
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, List[str]]:
     """Get list of blocked IP addresses.
-    
+
     Requires ADMIN_SYSTEM permission.
     """
     return {
         "blocked_ips": list(incident_response.blocked_ips),
         "quarantined_hosts": list(incident_response.quarantined_hosts),
         "suspended_users": list(incident_response.suspended_users),
-        "disabled_endpoints": list(incident_response.disabled_endpoints)
+        "disabled_endpoints": list(incident_response.disabled_endpoints),
     }
 
 
@@ -654,17 +653,14 @@ async def unblock_ip(
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, str]:
     """Unblock an IP address.
-    
+
     Requires ADMIN_SYSTEM permission.
     """
     success = incident_response.unblock_ip(ip)
-    
+
     if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"IP {ip} is not blocked"
-        )
-    
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"IP {ip} is not blocked")
+
     # Log the unblocking
     security_auditor.log_event(
         SecurityEventType.SECURITY_CONFIG_CHANGE,
@@ -672,9 +668,9 @@ async def unblock_ip(
         f"IP address unblocked: {ip}",
         user_id=current_user.user_id,
         username=current_user.username,
-        details={"unblocked_ip": ip}
+        details={"unblocked_ip": ip},
     )
-    
+
     return {"message": f"IP {ip} unblocked successfully"}
 
 
@@ -684,12 +680,12 @@ async def trigger_security_scan(
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, str]:
     """Trigger a manual security scan.
-    
+
     Requires ADMIN_SYSTEM permission.
     """
     # Trigger vulnerability scan
     asyncio.create_task(vulnerability_scanner._run_all_scanners())
-    
+
     # Log the manual scan trigger
     security_auditor.log_event(
         SecurityEventType.SECURITY_CONFIG_CHANGE,
@@ -697,21 +693,22 @@ async def trigger_security_scan(
         f"Manual security scan triggered by {current_user.username}",
         user_id=current_user.user_id,
         username=current_user.username,
-        details={"manual_trigger": True}
+        details={"manual_trigger": True},
     )
-    
+
     return {"message": "Security scan triggered successfully"}
 
 
+import asyncio
+
 # Import json for parsing details
 import json
-import asyncio
 import os
 
 
 class SSLHealthResponse(BaseModel):
     """SSL health check response model."""
-    
+
     ssl_status: str
     protocol: Optional[str] = None
     cipher: Optional[str] = None
@@ -724,7 +721,7 @@ class SSLHealthResponse(BaseModel):
 
 class CertificateInfoResponse(BaseModel):
     """Certificate information response model."""
-    
+
     subject: str
     issuer: str
     valid_from: datetime
@@ -741,31 +738,31 @@ class CertificateInfoResponse(BaseModel):
 @router.get("/security/ssl-health", response_model=SSLHealthResponse)
 async def get_ssl_health() -> SSLHealthResponse:
     """Get SSL/TLS health status.
-    
+
     Public endpoint for monitoring SSL configuration.
     """
     try:
         # Initialize SSL configuration
         ssl_config = SSLConfiguration()
         cert_manager = SSLCertificateManager(ssl_config)
-        
+
         # Check certificate expiry
         cert_expiry_days = None
         certificate_valid = False
         chain_valid = False
-        
+
         if Path(ssl_config.cert_path).exists():
             time_until_expiry = cert_manager.check_certificate_expiry()
             if time_until_expiry:
                 cert_expiry_days = time_until_expiry.days
                 certificate_valid = True
-            
+
             # Check certificate chain
             chain_valid = cert_manager.validate_certificate_chain()
-        
+
         # Check HSTS configuration
         hsts_enabled = ssl_config.hsts_enabled
-        
+
         # Determine SSL status
         if certificate_valid and chain_valid:
             ssl_status = "active"
@@ -773,10 +770,10 @@ async def get_ssl_health() -> SSLHealthResponse:
             ssl_status = "certificate_valid_chain_invalid"
         else:
             ssl_status = "inactive"
-        
+
         # Check OCSP stapling (simplified check)
         ocsp_stapling = True  # Assume enabled if certificate is valid
-        
+
         return SSLHealthResponse(
             ssl_status=ssl_status,
             protocol="TLSv1.3",  # Would be determined dynamically in production
@@ -785,9 +782,9 @@ async def get_ssl_health() -> SSLHealthResponse:
             hsts_enabled=hsts_enabled,
             certificate_valid=certificate_valid,
             chain_valid=chain_valid,
-            ocsp_stapling=ocsp_stapling
+            ocsp_stapling=ocsp_stapling,
         )
-        
+
     except Exception as e:
         # Return error status
         return SSLHealthResponse(
@@ -795,7 +792,7 @@ async def get_ssl_health() -> SSLHealthResponse:
             hsts_enabled=False,
             certificate_valid=False,
             chain_valid=False,
-            ocsp_stapling=False
+            ocsp_stapling=False,
         )
 
 
@@ -805,34 +802,34 @@ async def get_certificate_info(
     current_user: TokenData = Depends(get_current_user),
 ) -> CertificateInfoResponse:
     """Get detailed certificate information.
-    
+
     Requires ADMIN_SYSTEM permission.
     """
     ssl_config = SSLConfiguration()
-    
+
     if not Path(ssl_config.cert_path).exists():
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="SSL certificate not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="SSL certificate not found"
         )
-    
+
     try:
         # Use openssl to get certificate info
-        result = subprocess.run([
-            "openssl", "x509",
-            "-in", ssl_config.cert_path,
-            "-noout", "-text"
-        ], capture_output=True, text=True, check=True)
-        
+        result = subprocess.run(
+            ["openssl", "x509", "-in", ssl_config.cert_path, "-noout", "-text"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
         cert_text = result.stdout
-        
+
         # Parse certificate information (simplified)
         subject = "CN=freeagentics.com"  # Would parse from cert_text
         issuer = "Let's Encrypt Authority X3"  # Would parse from cert_text
         valid_from = datetime.utcnow() - timedelta(days=10)  # Would parse from cert_text
         valid_until = datetime.utcnow() + timedelta(days=80)  # Would parse from cert_text
         days_until_expiry = (valid_until - datetime.utcnow()).days
-        
+
         return CertificateInfoResponse(
             subject=subject,
             issuer=issuer,
@@ -844,13 +841,13 @@ async def get_certificate_info(
             key_size=2048,  # Would parse from cert_text
             san_domains=["freeagentics.com", "www.freeagentics.com"],  # Would parse from cert_text
             is_wildcard=False,
-            is_self_signed=False
+            is_self_signed=False,
         )
-        
+
     except subprocess.CalledProcessError as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to parse certificate: {e}"
+            detail=f"Failed to parse certificate: {e}",
         )
 
 
@@ -860,21 +857,23 @@ async def trigger_ssl_renewal(
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, str]:
     """Trigger SSL certificate renewal.
-    
+
     Requires ADMIN_SYSTEM permission.
     """
     try:
         ssl_config = SSLConfiguration()
         cert_manager = SSLCertificateManager(ssl_config)
-        
+
         # Check if renewal is needed
         time_until_expiry = cert_manager.check_certificate_expiry()
         if time_until_expiry and time_until_expiry.days > ssl_config.cert_renewal_days:
-            return {"message": f"Certificate renewal not needed. {time_until_expiry.days} days remaining."}
-        
+            return {
+                "message": f"Certificate renewal not needed. {time_until_expiry.days} days remaining."
+            }
+
         # Trigger renewal
         success = cert_manager.setup_letsencrypt()
-        
+
         if success:
             # Log successful renewal
             security_auditor.log_event(
@@ -883,16 +882,16 @@ async def trigger_ssl_renewal(
                 f"SSL certificate renewed successfully",
                 user_id=current_user.user_id,
                 username=current_user.username,
-                details={"renewal_triggered": True}
+                details={"renewal_triggered": True},
             )
-            
+
             return {"message": "SSL certificate renewed successfully"}
         else:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to renew SSL certificate"
+                detail="Failed to renew SSL certificate",
             )
-            
+
     except Exception as e:
         # Log renewal failure
         security_auditor.log_event(
@@ -901,34 +900,34 @@ async def trigger_ssl_renewal(
             f"SSL certificate renewal failed: {str(e)}",
             user_id=current_user.user_id,
             username=current_user.username,
-            details={"renewal_failed": True, "error": str(e)}
+            details={"renewal_failed": True, "error": str(e)},
         )
-        
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"SSL certificate renewal failed: {str(e)}"
+            detail=f"SSL certificate renewal failed: {str(e)}",
         )
 
 
 @router.post("/security/csp-report")
 async def csp_report(request: Request) -> Dict[str, str]:
     """Receive Content Security Policy violation reports.
-    
+
     Public endpoint for CSP reporting.
     """
     try:
         report_data = await request.json()
-        
+
         # Log CSP violation
         security_auditor.log_event(
             SecurityEventType.SECURITY_VIOLATION,
             SecurityEventSeverity.WARNING,
             "Content Security Policy violation reported",
-            details=report_data
+            details=report_data,
         )
-        
+
         return {"message": "CSP report received"}
-        
+
     except Exception as e:
         return {"error": "Failed to process CSP report"}
 
@@ -936,21 +935,21 @@ async def csp_report(request: Request) -> Dict[str, str]:
 @router.post("/security/ct-report")
 async def ct_report(request: Request) -> Dict[str, str]:
     """Receive Certificate Transparency violation reports.
-    
+
     Public endpoint for CT reporting.
     """
     try:
         report_data = await request.json()
-        
+
         # Log CT violation
         security_auditor.log_event(
             SecurityEventType.SECURITY_VIOLATION,
             SecurityEventSeverity.WARNING,
             "Certificate Transparency violation reported",
-            details=report_data
+            details=report_data,
         )
-        
+
         return {"message": "CT report received"}
-        
+
     except Exception as e:
         return {"error": "Failed to process CT report"}

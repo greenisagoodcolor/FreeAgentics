@@ -6,7 +6,9 @@ of the GMN versioned storage system. They should be run regularly in production.
 
 import logging
 from datetime import datetime, timedelta
+from typing import Any, Dict
 
+from sqlalchemy import and_, desc, func, text
 from sqlalchemy.orm import Session
 
 from database.gmn_versioned_models import (

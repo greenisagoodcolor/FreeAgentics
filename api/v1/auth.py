@@ -1,15 +1,23 @@
 """Authentication API endpoints."""
 
+import os
 from datetime import datetime
 from typing import Any, Dict
-import os
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel, EmailStr
 
 from auth import (
-    Permission, TokenData, User, UserRole, auth_manager, get_current_user, 
-    rate_limit, require_csrf_token, CSRF_COOKIE_NAME, CSRF_HEADER_NAME
+    CSRF_COOKIE_NAME,
+    CSRF_HEADER_NAME,
+    Permission,
+    TokenData,
+    User,
+    UserRole,
+    auth_manager,
+    get_current_user,
+    rate_limit,
+    require_csrf_token,
 )
 from auth.security_logging import (
     SecurityEventSeverity,
@@ -60,15 +68,19 @@ async def register_user(request: Request, response: Response, user_data: UserReg
         )
 
         # Generate fingerprint for token binding
-        fingerprint = auth_manager.jwt_handler.generate_fingerprint() if hasattr(auth_manager, 'jwt_handler') else None
-        
+        fingerprint = (
+            auth_manager.jwt_handler.generate_fingerprint()
+            if hasattr(auth_manager, "jwt_handler")
+            else None
+        )
+
         access_token = auth_manager.create_access_token(user, client_fingerprint=fingerprint)
         refresh_token = auth_manager.create_refresh_token(user)
 
         # Set secure cookies
         is_production = os.getenv("PRODUCTION", "false").lower() == "true"
         auth_manager.set_token_cookie(response, access_token, secure=is_production)
-        
+
         # Set fingerprint cookie if using token binding
         if fingerprint:
             response.set_cookie(
@@ -77,9 +89,9 @@ async def register_user(request: Request, response: Response, user_data: UserReg
                 httponly=True,
                 secure=is_production,
                 samesite="strict",
-                max_age=7 * 24 * 60 * 60  # 7 days
+                max_age=7 * 24 * 60 * 60,  # 7 days
             )
-        
+
         # Generate and set CSRF token
         csrf_token = auth_manager.csrf_protection.generate_csrf_token(user.user_id)
         auth_manager.set_csrf_cookie(response, csrf_token, secure=is_production)
@@ -127,15 +139,19 @@ async def login_user(request: Request, response: Response, login_data: UserLogin
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Account is disabled")
 
     # Generate fingerprint for token binding
-    fingerprint = auth_manager.jwt_handler.generate_fingerprint() if hasattr(auth_manager, 'jwt_handler') else None
-    
+    fingerprint = (
+        auth_manager.jwt_handler.generate_fingerprint()
+        if hasattr(auth_manager, "jwt_handler")
+        else None
+    )
+
     access_token = auth_manager.create_access_token(user, client_fingerprint=fingerprint)
     refresh_token = auth_manager.create_refresh_token(user)
 
     # Set secure cookies
     is_production = os.getenv("PRODUCTION", "false").lower() == "true"
     auth_manager.set_token_cookie(response, access_token, secure=is_production)
-    
+
     # Set fingerprint cookie if using token binding
     if fingerprint:
         response.set_cookie(
@@ -144,9 +160,9 @@ async def login_user(request: Request, response: Response, login_data: UserLogin
             httponly=True,
             secure=is_production,
             samesite="strict",
-            max_age=7 * 24 * 60 * 60  # 7 days
+            max_age=7 * 24 * 60 * 60,  # 7 days
         )
-    
+
     # Generate and set CSRF token
     csrf_token = auth_manager.csrf_protection.generate_csrf_token(user.user_id)
     auth_manager.set_csrf_cookie(response, csrf_token, secure=is_production)
@@ -172,18 +188,16 @@ async def get_current_user_info(current_user: TokenData = Depends(get_current_us
 @router.post("/logout")
 @require_csrf_token
 async def logout_user(
-    request: Request, 
-    response: Response,
-    current_user: TokenData = Depends(get_current_user)
+    request: Request, response: Response, current_user: TokenData = Depends(get_current_user)
 ):
     """Logout user (invalidate tokens and CSRF)."""
     # Get the authorization token from header
     auth_header = request.headers.get("Authorization", "")
     token = auth_header.split(" ")[1] if auth_header.startswith("Bearer ") else None
-    
+
     # Logout with token revocation
     auth_manager.logout(token, user_id=current_user.user_id)
-    
+
     # Clear cookies
     response.delete_cookie(key="access_token")
     response.delete_cookie(key="__Secure-Fgp")
@@ -209,11 +223,11 @@ async def refresh_token(request: Request, response: Response, refresh_token: str
     try:
         # Rotate tokens
         new_access_token, new_refresh_token = auth_manager.refresh_access_token(refresh_token)
-        
+
         # Set new access token cookie
         is_production = os.getenv("PRODUCTION", "false").lower() == "true"
         auth_manager.set_token_cookie(response, new_access_token, secure=is_production)
-        
+
         # Log token refresh
         security_auditor.log_event(
             SecurityEventType.TOKEN_REFRESHED,
@@ -221,11 +235,11 @@ async def refresh_token(request: Request, response: Response, refresh_token: str
             "Access token refreshed",
             request=request,
         )
-        
+
         return {
             "access_token": new_access_token,
             "refresh_token": new_refresh_token,
-            "token_type": "bearer"
+            "token_type": "bearer",
         }
     except HTTPException:
         raise
@@ -237,8 +251,7 @@ async def refresh_token(request: Request, response: Response, refresh_token: str
             request=request,
         )
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid refresh token"
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token"
         )
 
 
@@ -257,15 +270,13 @@ async def get_user_permissions(current_user: TokenData = Depends(get_current_use
 
 @router.get("/csrf-token")
 async def get_csrf_token(
-    request: Request,
-    response: Response,
-    current_user: TokenData = Depends(get_current_user)
+    request: Request, response: Response, current_user: TokenData = Depends(get_current_user)
 ):
     """Get a new CSRF token for the authenticated user."""
     csrf_token = auth_manager.csrf_protection.generate_csrf_token(current_user.user_id)
-    
+
     # Set CSRF cookie
     is_production = os.getenv("PRODUCTION", "false").lower() == "true"
     auth_manager.set_csrf_cookie(response, csrf_token, secure=is_production)
-    
+
     return {"csrf_token": csrf_token}

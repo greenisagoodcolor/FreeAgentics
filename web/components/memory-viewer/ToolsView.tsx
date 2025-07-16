@@ -12,10 +12,7 @@ interface ToolsViewProps {
   selectedAgent: Agent | null;
   toolPermissions: AgentToolPermissions;
   editingTools: boolean;
-  onToolPermissionChange: (
-    tool: keyof AgentToolPermissions,
-    value: boolean,
-  ) => void;
+  onToolPermissionChange: (tool: keyof AgentToolPermissions, value: boolean) => void;
   onSaveTools: () => void;
   onEditTools: (editing: boolean) => void;
 }
@@ -199,21 +196,13 @@ export function ToolsView({
                 {enabledCount} of {totalCount} tools enabled
               </span>
               {!editingTools ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onEditTools(true)}
-                >
+                <Button variant="outline" size="sm" onClick={() => onEditTools(true)}>
                   <Edit3 className="h-4 w-4 mr-2" />
                   Edit
                 </Button>
               ) : (
                 <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onEditTools(false)}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => onEditTools(false)}>
                     <X className="h-4 w-4 mr-2" />
                     Cancel
                   </Button>
@@ -238,28 +227,19 @@ export function ToolsView({
                   <div key={tool.key}>
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
-                        <Label
-                          htmlFor={`tool-${tool.key}`}
-                          className="text-sm font-medium"
-                        >
+                        <Label htmlFor={`tool-${tool.key}`} className="text-sm font-medium">
                           {tool.label}
                         </Label>
-                        <p className="text-xs text-muted-foreground">
-                          {tool.description}
-                        </p>
+                        <p className="text-xs text-muted-foreground">{tool.description}</p>
                       </div>
                       <Switch
                         id={`tool-${tool.key}`}
                         checked={toolPermissions[tool.key]}
-                        onCheckedChange={(checked) =>
-                          onToolPermissionChange(tool.key, checked)
-                        }
+                        onCheckedChange={(checked) => onToolPermissionChange(tool.key, checked)}
                         disabled={!editingTools}
                       />
                     </div>
-                    {toolIndex < category.tools.length - 1 && (
-                      <Separator className="my-3" />
-                    )}
+                    {toolIndex < category.tools.length - 1 && <Separator className="my-3" />}
                   </div>
                 ))}
               </div>
@@ -272,10 +252,9 @@ export function ToolsView({
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">
-              <strong>Note:</strong> Tool permissions determine what
-              capabilities this agent has access to. Disabling tools may limit
-              the agent&apos;s functionality but can improve security and
-              performance.
+              <strong>Note:</strong> Tool permissions determine what capabilities this agent has
+              access to. Disabling tools may limit the agent&apos;s functionality but can improve
+              security and performance.
             </p>
           </CardContent>
         </Card>

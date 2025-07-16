@@ -196,6 +196,7 @@ class TestSecurityHeadersManager:
         assert len(nonce) >= 16
         # Nonce is base64 encoded, so contains '=' and other chars
         import base64
+
         try:
             decoded = base64.b64decode(nonce)
             assert len(decoded) == 16

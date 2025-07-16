@@ -15,8 +15,7 @@ const agentTemplates: AgentTemplate[] = [
   {
     id: "basic-explorer",
     name: "Basic Explorer",
-    description:
-      "Simple agent that explores the environment using active inference",
+    description: "Simple agent that explores the environment using active inference",
     type: "explorer",
     complexity: "simple",
   },
@@ -30,8 +29,7 @@ const agentTemplates: AgentTemplate[] = [
   {
     id: "pattern-predictor",
     name: "Pattern Predictor",
-    description:
-      "Advanced agent that learns and predicts environmental patterns",
+    description: "Advanced agent that learns and predicts environmental patterns",
     type: "predictor",
     complexity: "complex",
   },
@@ -50,9 +48,7 @@ export default function AgentsPage() {
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     // In real implementation, this would call the API
-    alert(
-      `Agent "${agentName}" would be created with template: ${selectedTemplate}`,
-    );
+    alert(`Agent "${agentName}" would be created with template: ${selectedTemplate}`);
     setCreating(false);
     setAgentName("");
     setSelectedTemplate(null);
@@ -74,10 +70,7 @@ export default function AgentsPage() {
 
         {/* Agent Name Input */}
         <div className="mb-6">
-          <label
-            htmlFor="agent-name"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
+          <label htmlFor="agent-name" className="block text-sm font-medium text-gray-700 mb-2">
             Agent Name
           </label>
           <input
@@ -92,9 +85,7 @@ export default function AgentsPage() {
 
         {/* Template Selection */}
         <div className="mb-6">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">
-            Select Template
-          </h3>
+          <h3 className="text-sm font-medium text-gray-700 mb-3">Select Template</h3>
           <div className="grid md:grid-cols-3 gap-4">
             {agentTemplates.map((template) => (
               <button
@@ -106,12 +97,8 @@ export default function AgentsPage() {
                     : "border-gray-200 hover:border-gray-300"
                 }`}
               >
-                <h4 className="font-semibold text-gray-900 mb-1">
-                  {template.name}
-                </h4>
-                <p className="text-sm text-gray-600 mb-2">
-                  {template.description}
-                </p>
+                <h4 className="font-semibold text-gray-900 mb-1">{template.name}</h4>
+                <p className="text-sm text-gray-600 mb-2">{template.description}</p>
                 <div className="flex items-center gap-2">
                   <span
                     className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
@@ -166,8 +153,8 @@ export default function AgentsPage() {
       {/* Development Notice */}
       <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
         <p className="text-sm text-yellow-800">
-          <strong>Note:</strong> Agent creation is currently in demo mode.
-          Active Inference engine integration is in progress.
+          <strong>Note:</strong> Agent creation is currently in demo mode. Active Inference engine
+          integration is in progress.
         </p>
       </div>
     </div>

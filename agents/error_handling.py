@@ -278,6 +278,7 @@ def safe_pymdp_operation(operation_name: str, default_value: Any = None):
                     e = PyMDPError(f"PyMDP operation failed: {str(e)}")
 
                 recovery_info = self.error_handler.handle_error(e, operation_name)
+                logger.debug(f"Recovery info for {operation_name}: {recovery_info}")
 
                 # Try fallback method first
                 fallback_method_name = f"_fallback_{func.__name__}"

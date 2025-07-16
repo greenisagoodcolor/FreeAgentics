@@ -96,8 +96,8 @@ export default function GlobalError({
                 lineHeight: "1.5",
               }}
             >
-              We&apos;re experiencing a critical error. Our team has been automatically notified and is
-              working to resolve this issue.
+              We&apos;re experiencing a critical error. Our team has been automatically notified and
+              is working to resolve this issue.
             </p>
 
             {error.digest && (

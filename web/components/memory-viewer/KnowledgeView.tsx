@@ -41,14 +41,8 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { exportAgentKnowledge } from "@/lib/knowledge-export";
 import { formatTimestamp, extractTagsFromMarkdown } from "@/lib/utils";
-import {
-  renderMarkdownWithTags,
-  calculateKnowledgeStats,
-} from "@/lib/memory-viewer-utils";
-import type {
-  KnowledgeEntry,
-  SelectedKnowledgeNode,
-} from "@/types/memory-viewer";
+import { renderMarkdownWithTags, calculateKnowledgeStats } from "@/lib/memory-viewer-utils";
+import type { KnowledgeEntry, SelectedKnowledgeNode } from "@/types/memory-viewer";
 import type { Agent } from "@/lib/types";
 
 interface KnowledgeViewProps {
@@ -70,14 +64,10 @@ export function KnowledgeView({
   onUpdateKnowledge,
   onExtractBeliefs,
 }: KnowledgeViewProps) {
-  const [knowledgeView, setKnowledgeView] = useState<
-    "browse" | "add" | "insights"
-  >("browse");
+  const [knowledgeView, setKnowledgeView] = useState<"browse" | "add" | "insights">("browse");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<"lastUpdated" | "importance" | "title">(
-    "lastUpdated",
-  );
+  const [sortBy, setSortBy] = useState<"lastUpdated" | "importance" | "title">("lastUpdated");
   const [filterConfidence, setFilterConfidence] = useState([0, 1]);
   const [showOnlyRelated, setShowOnlyRelated] = useState(false);
 
@@ -118,31 +108,25 @@ export function KnowledgeView({
         (k) =>
           k.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
           k.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          k.tags.some((tag) =>
-            tag.toLowerCase().includes(searchTerm.toLowerCase()),
-          ),
+          k.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase())),
       );
     }
 
     // Tag filter
     if (selectedTags.length > 0) {
-      filtered = filtered.filter((k) =>
-        selectedTags.every((tag) => k.tags.includes(tag)),
-      );
+      filtered = filtered.filter((k) => selectedTags.every((tag) => k.tags.includes(tag)));
     }
 
     // Confidence filter
     filtered = filtered.filter(
       (k) =>
-        (k.confidence || 0) >= filterConfidence[0] &&
-        (k.confidence || 0) <= filterConfidence[1],
+        (k.confidence || 0) >= filterConfidence[0] && (k.confidence || 0) <= filterConfidence[1],
     );
 
     // Related knowledge filter
     if (showOnlyRelated && selectedKnowledgeNode?.type === "entry") {
       const relatedIds =
-        knowledge.find((k) => k.id === selectedKnowledgeNode.id)
-          ?.relatedKnowledge || [];
+        knowledge.find((k) => k.id === selectedKnowledgeNode.id)?.relatedKnowledge || [];
       filtered = filtered.filter((k) => relatedIds.includes(k.id));
     }
 
@@ -155,10 +139,7 @@ export function KnowledgeView({
           return a.title.localeCompare(b.title);
         case "lastUpdated":
         default:
-          return (
-            new Date(b.lastUpdated).getTime() -
-            new Date(a.lastUpdated).getTime()
-          );
+          return new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime();
       }
     });
 
@@ -185,9 +166,7 @@ export function KnowledgeView({
     }
 
     const extractedTags = extractTagsFromMarkdown(newKnowledgeContent);
-    const allTags = Array.from(
-      new Set([...newKnowledgeTags, ...extractedTags]),
-    );
+    const allTags = Array.from(new Set([...newKnowledgeTags, ...extractedTags]));
 
     const newKnowledge: KnowledgeEntry = {
       id: `knowledge-${Date.now()}`,
@@ -329,9 +308,7 @@ export function KnowledgeView({
 
       <Tabs
         value={knowledgeView}
-        onValueChange={(v) =>
-          setKnowledgeView(v as "browse" | "add" | "insights")
-        }
+        onValueChange={(v) => setKnowledgeView(v as "browse" | "add" | "insights")}
       >
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="browse" className="flex items-center gap-2">
@@ -370,9 +347,7 @@ export function KnowledgeView({
                   <Label>Sort by</Label>
                   <Select
                     value={sortBy}
-                    onValueChange={(v) =>
-                      setSortBy(v as "lastUpdated" | "importance" | "title")
-                    }
+                    onValueChange={(v) => setSortBy(v as "lastUpdated" | "importance" | "title")}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -403,9 +378,7 @@ export function KnowledgeView({
 
               {selectedKnowledgeNode?.type === "entry" && (
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="related-only">
-                    Show only related knowledge
-                  </Label>
+                  <Label htmlFor="related-only">Show only related knowledge</Label>
                   <Switch
                     id="related-only"
                     checked={showOnlyRelated}
@@ -421,15 +394,11 @@ export function KnowledgeView({
                     {stats.topTags.map((tag) => (
                       <Badge
                         key={tag}
-                        variant={
-                          selectedTags.includes(tag) ? "default" : "outline"
-                        }
+                        variant={selectedTags.includes(tag) ? "default" : "outline"}
                         className="cursor-pointer"
                         onClick={() => {
                           setSelectedTags((prev) =>
-                            prev.includes(tag)
-                              ? prev.filter((t) => t !== tag)
-                              : [...prev, tag],
+                            prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
                           );
                         }}
                       >
@@ -447,11 +416,7 @@ export function KnowledgeView({
             {filteredKnowledge.map((entry) => (
               <Card
                 key={entry.id}
-                className={
-                  selectedKnowledgeNode?.id === entry.id
-                    ? "ring-2 ring-primary"
-                    : ""
-                }
+                className={selectedKnowledgeNode?.id === entry.id ? "ring-2 ring-primary" : ""}
               >
                 <CardContent className="p-4">
                   {editingId === entry.id ? (
@@ -480,10 +445,7 @@ export function KnowledgeView({
                           <X className="h-4 w-4 mr-2" />
                           Cancel
                         </Button>
-                        <Button
-                          size="sm"
-                          onClick={() => handleUpdateKnowledge(entry.id)}
-                        >
+                        <Button size="sm" onClick={() => handleUpdateKnowledge(entry.id)}>
                           <Save className="h-4 w-4 mr-2" />
                           Save
                         </Button>
@@ -498,26 +460,15 @@ export function KnowledgeView({
                             <span>{formatTimestamp(entry.timestamp)}</span>
                             <span>Source: {entry.source}</span>
                             {entry.confidence !== undefined && (
-                              <span>
-                                Confidence: {Math.round(entry.confidence * 100)}
-                                %
-                              </span>
+                              <span>Confidence: {Math.round(entry.confidence * 100)}%</span>
                             )}
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => startEditing(entry)}
-                          >
+                          <Button size="sm" variant="ghost" onClick={() => startEditing(entry)}>
                             <Edit3 className="h-4 w-4" />
                           </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setDeleteId(entry.id)}
-                          >
+                          <Button size="sm" variant="ghost" onClick={() => setDeleteId(entry.id)}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -571,9 +522,7 @@ export function KnowledgeView({
               </div>
 
               <div className="space-y-2">
-                <Label>
-                  Confidence: {Math.round(newKnowledgeConfidence * 100)}%
-                </Label>
+                <Label>Confidence: {Math.round(newKnowledgeConfidence * 100)}%</Label>
                 <Slider
                   value={[newKnowledgeConfidence]}
                   onValueChange={([v]) => setNewKnowledgeConfidence(v)}
@@ -612,9 +561,7 @@ export function KnowledgeView({
           <Card>
             <CardContent className="p-4 space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="extraction-text">
-                  Text to Extract Beliefs From
-                </Label>
+                <Label htmlFor="extraction-text">Text to Extract Beliefs From</Label>
                 <Textarea
                   id="extraction-text"
                   placeholder="Paste or type text here to extract beliefs and knowledge..."
@@ -649,15 +596,12 @@ export function KnowledgeView({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Knowledge Entry</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this knowledge entry? This action
-              cannot be undone.
+              Are you sure you want to delete this knowledge entry? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => deleteId && handleDeleteKnowledge(deleteId)}
-            >
+            <AlertDialogAction onClick={() => deleteId && handleDeleteKnowledge(deleteId)}>
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -6,24 +6,20 @@ const Tabs = React.forwardRef<
     value?: string;
     onValueChange?: (value: string) => void;
   }
->(
-  (
-    { className, value: _value, onValueChange: _onValueChange, ...props },
-    ref,
-  ) => <div ref={ref} className={className} {...props} />,
-);
+>(({ className, value: _value, onValueChange: _onValueChange, ...props }, ref) => (
+  <div ref={ref} className={className} {...props} />
+));
 Tabs.displayName = "Tabs";
 
-const TabsList = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={`inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground ${className || ""}`}
-    {...props}
-  />
-));
+const TabsList = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={`inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground ${className || ""}`}
+      {...props}
+    />
+  ),
+);
 TabsList.displayName = "TabsList";
 
 const TabsTrigger = React.forwardRef<

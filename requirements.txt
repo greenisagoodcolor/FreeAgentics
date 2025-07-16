@@ -144,6 +144,8 @@ passlib==1.7.4
 pathspec==0.12.1
 pbr==6.1.1
 pexpect==4.9.0
+pyotp==2.9.0
+qrcode==7.4.2
 pillow==11.3.0
 pip-api==0.0.34
 pip-requirements-parser==32.0.1

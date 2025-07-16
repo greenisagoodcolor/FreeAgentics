@@ -1,0 +1,535 @@
+{
+  "timestamp": "2025-07-16T07:40:16.426204",
+  "summary": {
+    "total_tests": 51,
+    "passed": 29,
+    "failed": 10,
+    "warnings": 12,
+    "critical_failures": 5
+  },
+  "detailed_results": {
+    "authentication": [
+      {
+        "test_name": "user_registration",
+        "status": "PASS",
+        "message": "User registration successful",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:14.837110"
+      },
+      {
+        "test_name": "password_strength_123",
+        "status": "FAIL",
+        "message": "Weak password '123' was accepted",
+        "details": null,
+        "severity": "critical",
+        "timestamp": "2025-07-16T07:40:15.064049"
+      },
+      {
+        "test_name": "password_strength_password",
+        "status": "FAIL",
+        "message": "Weak password 'password' was accepted",
+        "details": null,
+        "severity": "critical",
+        "timestamp": "2025-07-16T07:40:15.287554"
+      },
+      {
+        "test_name": "password_strength_abc123",
+        "status": "FAIL",
+        "message": "Weak password 'abc123' was accepted",
+        "details": null,
+        "severity": "critical",
+        "timestamp": "2025-07-16T07:40:15.506711"
+      },
+      {
+        "test_name": "password_strength_qwerty",
+        "status": "FAIL",
+        "message": "Weak password 'qwerty' was accepted",
+        "details": null,
+        "severity": "critical",
+        "timestamp": "2025-07-16T07:40:15.727413"
+      },
+      {
+        "test_name": "valid_authentication",
+        "status": "PASS",
+        "message": "Valid authentication successful",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:15.948390"
+      },
+      {
+        "test_name": "invalid_authentication",
+        "status": "PASS",
+        "message": "Invalid authentication correctly rejected",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.169298"
+      },
+      {
+        "test_name": "sql_injection_'; DROP TA",
+        "status": "PASS",
+        "message": "SQL injection payload correctly rejected: '; DROP TABLE users; --",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.169315"
+      },
+      {
+        "test_name": "sql_injection_' OR '1'='",
+        "status": "PASS",
+        "message": "SQL injection payload correctly rejected: ' OR '1'='1",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.169320"
+      },
+      {
+        "test_name": "sql_injection_admin'--",
+        "status": "PASS",
+        "message": "SQL injection payload correctly rejected: admin'--",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.169323"
+      },
+      {
+        "test_name": "sql_injection_' UNION SE",
+        "status": "PASS",
+        "message": "SQL injection payload correctly rejected: ' UNION SELECT * FROM users --",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.169336"
+      }
+    ],
+    "authorization": [
+      {
+        "test_name": "role_test_admin",
+        "status": "FAIL",
+        "message": "Role test failed for admin: 'SecurityValidator' object has no attribute 'check_permission'",
+        "details": null,
+        "severity": "high",
+        "timestamp": "2025-07-16T07:40:16.169527"
+      },
+      {
+        "test_name": "role_test_researcher",
+        "status": "FAIL",
+        "message": "Role test failed for researcher: 'SecurityValidator' object has no attribute 'check_permission'",
+        "details": null,
+        "severity": "high",
+        "timestamp": "2025-07-16T07:40:16.169539"
+      },
+      {
+        "test_name": "role_test_observer",
+        "status": "FAIL",
+        "message": "Role test failed for observer: 'SecurityValidator' object has no attribute 'check_permission'",
+        "details": null,
+        "severity": "high",
+        "timestamp": "2025-07-16T07:40:16.169545"
+      },
+      {
+        "test_name": "role_test_agent_manager",
+        "status": "FAIL",
+        "message": "Role test failed for agent_manager: 'SecurityValidator' object has no attribute 'check_permission'",
+        "details": null,
+        "severity": "high",
+        "timestamp": "2025-07-16T07:40:16.169550"
+      }
+    ],
+    "ssl_tls": [
+      {
+        "test_name": "min_tls_version",
+        "status": "PASS",
+        "message": "Minimum TLS version is secure: TLSv1.2",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.169611"
+      },
+      {
+        "test_name": "cipher_suites",
+        "status": "PASS",
+        "message": "All cipher suites are secure",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.169617"
+      },
+      {
+        "test_name": "hsts_enabled",
+        "status": "PASS",
+        "message": "HSTS is enabled",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.169619"
+      },
+      {
+        "test_name": "hsts_max_age",
+        "status": "PASS",
+        "message": "HSTS max age is secure: 31536000",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.169621"
+      },
+      {
+        "test_name": "secure_cookies",
+        "status": "PASS",
+        "message": "Secure cookies are enabled",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.169622"
+      }
+    ],
+    "security_headers": [
+      {
+        "test_name": "header_X-Content-Type-Options",
+        "status": "WARNING",
+        "message": "Security header X-Content-Type-Options implementation not found",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.169678"
+      },
+      {
+        "test_name": "header_X-Frame-Options",
+        "status": "WARNING",
+        "message": "Security header X-Frame-Options implementation not found",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.169683"
+      },
+      {
+        "test_name": "header_X-XSS-Protection",
+        "status": "WARNING",
+        "message": "Security header X-XSS-Protection implementation not found",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.169688"
+      },
+      {
+        "test_name": "header_Content-Security-Policy",
+        "status": "WARNING",
+        "message": "Security header Content-Security-Policy implementation not found",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.169691"
+      },
+      {
+        "test_name": "header_Strict-Transport-Security",
+        "status": "WARNING",
+        "message": "Security header Strict-Transport-Security implementation not found",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.169693"
+      }
+    ],
+    "rate_limiting": [
+      {
+        "test_name": "rate_limit_config",
+        "status": "PASS",
+        "message": "Rate limiting configured: 10 requests per 60s",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.169721"
+      },
+      {
+        "test_name": "rate_limiter_creation",
+        "status": "PASS",
+        "message": "Rate limiter created successfully",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.169741"
+      }
+    ],
+    "jwt_security": [
+      {
+        "test_name": "jwt_creation",
+        "status": "FAIL",
+        "message": "JWT creation error: JWTHandler.create_access_token() missing 3 required positional arguments: 'username', 'role', and 'permissions'",
+        "details": null,
+        "severity": "high",
+        "timestamp": "2025-07-16T07:40:16.425937"
+      },
+      {
+        "test_name": "malicious_jwt_eyJhbGciOi",
+        "status": "PASS",
+        "message": "Malicious JWT correctly failed: eyJhbGciOiJub25lIiwi...",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.425953"
+      },
+      {
+        "test_name": "malicious_jwt_invalid.jw",
+        "status": "PASS",
+        "message": "Malicious JWT correctly failed: invalid.jwt.token...",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.425957"
+      },
+      {
+        "test_name": "malicious_jwt_",
+        "status": "PASS",
+        "message": "Malicious JWT correctly failed: ...",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.425960"
+      },
+      {
+        "test_name": "malicious_jwt_null",
+        "status": "PASS",
+        "message": "Malicious JWT correctly failed: null...",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.425962"
+      }
+    ],
+    "rbac": [
+      {
+        "test_name": "rbac_admin_user_management",
+        "status": "WARNING",
+        "message": "RBAC check failed for admin -> user_management: 'ZeroTrustValidator' object has no attribute 'check_permission'",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.426066"
+      },
+      {
+        "test_name": "rbac_admin_system_config",
+        "status": "WARNING",
+        "message": "RBAC check failed for admin -> system_config: 'ZeroTrustValidator' object has no attribute 'check_permission'",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.426070"
+      },
+      {
+        "test_name": "rbac_researcher_data_access",
+        "status": "WARNING",
+        "message": "RBAC check failed for researcher -> data_access: 'ZeroTrustValidator' object has no attribute 'check_permission'",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.426073"
+      },
+      {
+        "test_name": "rbac_observer_user_management",
+        "status": "WARNING",
+        "message": "RBAC check failed for observer -> user_management: 'ZeroTrustValidator' object has no attribute 'check_permission'",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.426081"
+      },
+      {
+        "test_name": "rbac_observer_system_config",
+        "status": "WARNING",
+        "message": "RBAC check failed for observer -> system_config: 'ZeroTrustValidator' object has no attribute 'check_permission'",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.426083"
+      }
+    ],
+    "security_monitoring": [],
+    "incident_response": [
+      {
+        "test_name": "incident_response_module",
+        "status": "FAIL",
+        "message": "Incident response module error: IncidentResponse.__init__() missing 6 required positional arguments: 'id', 'incident_id', 'action', 'status', 'timestamp', and 'details'",
+        "details": null,
+        "severity": "critical",
+        "timestamp": "2025-07-16T07:40:16.426120"
+      }
+    ],
+    "penetration_testing": [
+      {
+        "test_name": "path_traversal_../../../e",
+        "status": "PASS",
+        "message": "Path traversal payload detected: ../../../etc/passwd",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.426142"
+      },
+      {
+        "test_name": "path_traversal_..\\..\\..\\w",
+        "status": "PASS",
+        "message": "Path traversal payload detected: ..\\..\\..\\windows\\system32\\config\\sam",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.426144"
+      },
+      {
+        "test_name": "path_traversal_....//....",
+        "status": "PASS",
+        "message": "Path traversal payload detected: ....//....//....//etc/passwd",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.426146"
+      },
+      {
+        "test_name": "path_traversal_%2e%2e%2f%",
+        "status": "WARNING",
+        "message": "Path traversal detection may need improvement: %2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.426148"
+      },
+      {
+        "test_name": "xss_<script>al",
+        "status": "PASS",
+        "message": "XSS payload detected: <script>alert('XSS')</script>",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.426151"
+      },
+      {
+        "test_name": "xss_<img src=x",
+        "status": "PASS",
+        "message": "XSS payload detected: <img src=x onerror=alert('XSS')>",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.426153"
+      },
+      {
+        "test_name": "xss_javascript",
+        "status": "PASS",
+        "message": "XSS payload detected: javascript:alert('XSS')",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.426155"
+      },
+      {
+        "test_name": "xss_<svg onloa",
+        "status": "WARNING",
+        "message": "XSS detection may need improvement: <svg onload=alert('XSS')>",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.426156"
+      },
+      {
+        "test_name": "cmd_injection_; ls -la",
+        "status": "PASS",
+        "message": "Command injection payload detected: ; ls -la",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.426161"
+      },
+      {
+        "test_name": "cmd_injection_| whoami",
+        "status": "PASS",
+        "message": "Command injection payload detected: | whoami",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.426164"
+      },
+      {
+        "test_name": "cmd_injection_&& cat /et",
+        "status": "PASS",
+        "message": "Command injection payload detected: && cat /etc/passwd",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.426167"
+      },
+      {
+        "test_name": "cmd_injection_`id`",
+        "status": "PASS",
+        "message": "Command injection payload detected: `id`",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.426169"
+      },
+      {
+        "test_name": "cmd_injection_$(whoami)",
+        "status": "PASS",
+        "message": "Command injection payload detected: $(whoami)",
+        "details": null,
+        "severity": "info",
+        "timestamp": "2025-07-16T07:40:16.426171"
+      }
+    ]
+  },
+  "recommendations": [
+    {
+      "priority": "CRITICAL",
+      "category": "authentication",
+      "issue": "Critical security failures in authentication",
+      "recommendation": "Immediate attention required for authentication security",
+      "failures": [
+        "password_strength_123",
+        "password_strength_password",
+        "password_strength_abc123",
+        "password_strength_qwerty"
+      ]
+    },
+    {
+      "priority": "CRITICAL",
+      "category": "incident_response",
+      "issue": "Critical security failures in incident_response",
+      "recommendation": "Immediate attention required for incident_response security",
+      "failures": [
+        "incident_response_module"
+      ]
+    },
+    {
+      "priority": "HIGH",
+      "category": "authorization",
+      "issue": "High severity security issues in authorization",
+      "recommendation": "Priority fixing required for authorization security",
+      "failures": [
+        "role_test_admin",
+        "role_test_researcher",
+        "role_test_observer",
+        "role_test_agent_manager"
+      ]
+    },
+    {
+      "priority": "HIGH",
+      "category": "jwt_security",
+      "issue": "High severity security issues in jwt_security",
+      "recommendation": "Priority fixing required for jwt_security security",
+      "failures": [
+        "jwt_creation"
+      ]
+    },
+    {
+      "priority": "MEDIUM",
+      "category": "security_headers",
+      "issue": "Security warnings in security_headers",
+      "recommendation": "Review and improve security_headers security",
+      "warnings": [
+        "header_X-Content-Type-Options",
+        "header_X-Frame-Options",
+        "header_X-XSS-Protection",
+        "header_Content-Security-Policy",
+        "header_Strict-Transport-Security"
+      ]
+    },
+    {
+      "priority": "MEDIUM",
+      "category": "rbac",
+      "issue": "Security warnings in rbac",
+      "recommendation": "Review and improve rbac security",
+      "warnings": [
+        "rbac_admin_user_management",
+        "rbac_admin_system_config",
+        "rbac_researcher_data_access",
+        "rbac_observer_user_management",
+        "rbac_observer_system_config"
+      ]
+    },
+    {
+      "priority": "MEDIUM",
+      "category": "penetration_testing",
+      "issue": "Security warnings in penetration_testing",
+      "recommendation": "Review and improve penetration_testing security",
+      "warnings": [
+        "path_traversal_%2e%2e%2f%",
+        "xss_<svg onloa"
+      ]
+    }
+  ],
+  "compliance_status": {
+    "OWASP_Top_10": {
+      "A01_Broken_Access_Control": "PASS",
+      "A02_Cryptographic_Failures": "PASS",
+      "A03_Injection": "PASS",
+      "A04_Insecure_Design": "PASS",
+      "A05_Security_Misconfiguration": "PASS",
+      "A06_Vulnerable_Components": "PASS",
+      "A07_Auth_Failures": "FAIL",
+      "A08_Software_Data_Integrity": "PASS",
+      "A09_Security_Logging_Failures": "PASS",
+      "A10_SSRF": "PASS"
+    },
+    "overall_compliance": "FAIL"
+  },
+  "security_score": 0
+}
