@@ -1,0 +1,228 @@
+# Rate Limiting Configuration
+# This file defines rate limiting rules for different endpoints and environments
+
+# Global DDoS Protection Settings
+ddos_protection:
+  max_request_size: 10485760  # 10MB
+  max_header_size: 8192       # 8KB
+  connection_limit_per_ip: 50
+  block_duration_minutes: 30  # How long to block IPs that trigger DDoS protection
+
+# IP Whitelist - These IPs bypass rate limiting
+whitelist:
+  ips:
+    - "127.0.0.1"
+    - "::1"  # IPv6 localhost
+  networks:
+    - "10.0.0.0/8"     # Private network (optional, for internal services)
+    - "172.16.0.0/12"  # Private network (optional, for internal services)
+
+# IP Blacklist - These IPs are always blocked
+blacklist:
+  ips: []
+  networks: []
+
+# Endpoint-specific rate limiting configurations
+endpoints:
+  # Authentication endpoints - very strict limits
+  - path: "/api/v1/auth/login"
+    priority: 100
+    anonymous:
+      max_requests: 5
+      window_seconds: 60
+      algorithm: sliding_window
+      burst_size: 3
+    authenticated:
+      max_requests: 10
+      window_seconds: 60
+      algorithm: sliding_window
+      burst_size: 5
+
+  - path: "/api/v1/auth/register"
+    priority: 100
+    anonymous:
+      max_requests: 3
+      window_seconds: 300  # 5 minutes
+      algorithm: sliding_window
+      burst_size: 2
+    authenticated:
+      max_requests: 5
+      window_seconds: 300
+      algorithm: sliding_window
+      burst_size: 3
+
+  - path: "/api/v1/auth/forgot-password"
+    priority: 100
+    anonymous:
+      max_requests: 3
+      window_seconds: 900  # 15 minutes
+      algorithm: sliding_window
+      burst_size: 2
+    authenticated:
+      max_requests: 5
+      window_seconds: 900
+      algorithm: sliding_window
+      burst_size: 3
+
+  - path: "/api/v1/auth/refresh"
+    priority: 90
+    anonymous:
+      max_requests: 10
+      window_seconds: 60
+      algorithm: sliding_window
+      burst_size: 5
+    authenticated:
+      max_requests: 30
+      window_seconds: 60
+      algorithm: sliding_window
+      burst_size: 10
+
+  # API endpoints - standard limits
+  - path: "/api/v1/agents"
+    priority: 50
+    anonymous:
+      max_requests: 20
+      window_seconds: 60
+      algorithm: sliding_window
+      burst_size: 10
+    authenticated:
+      max_requests: 100
+      window_seconds: 60
+      algorithm: sliding_window
+      burst_size: 30
+
+  - path: "/api/v1/knowledge"
+    priority: 50
+    anonymous:
+      max_requests: 20
+      window_seconds: 60
+      algorithm: sliding_window
+      burst_size: 10
+    authenticated:
+      max_requests: 100
+      window_seconds: 60
+      algorithm: sliding_window
+      burst_size: 30
+
+  - path: "/api/v1/system"
+    priority: 50
+    anonymous:
+      max_requests: 10
+      window_seconds: 60
+      algorithm: sliding_window
+      burst_size: 5
+    authenticated:
+      max_requests: 50
+      window_seconds: 60
+      algorithm: sliding_window
+      burst_size: 20
+
+  # WebSocket endpoints - higher limits for real-time
+  - path: "/api/v1/websocket"
+    priority: 40
+    anonymous:
+      max_requests: 50
+      window_seconds: 60
+      algorithm: token_bucket
+      burst_size: 100
+    authenticated:
+      max_requests: 200
+      window_seconds: 60
+      algorithm: token_bucket
+      burst_size: 400
+
+  - path: "/ws"
+    priority: 40
+    anonymous:
+      max_requests: 50
+      window_seconds: 60
+      algorithm: token_bucket
+      burst_size: 100
+    authenticated:
+      max_requests: 200
+      window_seconds: 60
+      algorithm: token_bucket
+      burst_size: 400
+
+  # Health and monitoring endpoints - very lenient
+  - path: "/health"
+    priority: 10
+    anonymous:
+      max_requests: 1000
+      window_seconds: 60
+      algorithm: sliding_window
+      burst_size: 2000
+    authenticated:
+      max_requests: 1000
+      window_seconds: 60
+      algorithm: sliding_window
+      burst_size: 2000
+
+  - path: "/metrics"
+    priority: 10
+    anonymous:
+      max_requests: 100
+      window_seconds: 60
+      algorithm: sliding_window
+      burst_size: 200
+    authenticated:
+      max_requests: 100
+      window_seconds: 60
+      algorithm: sliding_window
+      burst_size: 200
+
+  # Documentation endpoints - moderate limits
+  - path: "/docs"
+    priority: 20
+    anonymous:
+      max_requests: 100
+      window_seconds: 60
+      algorithm: sliding_window
+      burst_size: 200
+    authenticated:
+      max_requests: 200
+      window_seconds: 60
+      algorithm: sliding_window
+      burst_size: 400
+
+  - path: "/redoc"
+    priority: 20
+    anonymous:
+      max_requests: 100
+      window_seconds: 60
+      algorithm: sliding_window
+      burst_size: 200
+    authenticated:
+      max_requests: 200
+      window_seconds: 60
+      algorithm: sliding_window
+      burst_size: 400
+
+  # Default catch-all configuration
+  - path: "*"
+    priority: 0
+    anonymous:
+      max_requests: 60
+      window_seconds: 60
+      algorithm: sliding_window
+      burst_size: 120
+    authenticated:
+      max_requests: 300
+      window_seconds: 60
+      algorithm: sliding_window
+      burst_size: 600
+
+# Suspicious pattern detection thresholds
+suspicious_patterns:
+  rapid_404:
+    threshold: 10
+    window: 60
+  rapid_errors:
+    threshold: 20
+    window: 60
+  path_scanning:
+    threshold: 15
+    window: 30
+  large_requests:
+    threshold: 5
+    window: 60

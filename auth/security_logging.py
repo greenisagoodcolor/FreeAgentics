@@ -38,6 +38,7 @@ class SecurityEventType(str, Enum):
     LOGIN_FAILURE = "login_failure"
     LOGOUT = "logout"
     TOKEN_REFRESH = "token_refresh"
+    TOKEN_REFRESHED = "token_refreshed"
     TOKEN_EXPIRED = "token_expired"
     TOKEN_INVALID = "token_invalid"
 
@@ -109,12 +110,23 @@ class SecurityAuditLog(Base):
 # Create separate engine for audit logs
 AUDIT_DB_URL = os.getenv("AUDIT_DATABASE_URL", os.getenv("DATABASE_URL"))
 if AUDIT_DB_URL:
-    audit_engine = create_engine(
-        AUDIT_DB_URL,
-        pool_size=5,
-        max_overflow=10,
-        pool_pre_ping=True,
-    )
+    # Configure audit engine based on database dialect
+    audit_engine_args = {}
+    
+    if AUDIT_DB_URL.startswith("postgresql://") or AUDIT_DB_URL.startswith("postgres://"):
+        # PostgreSQL-specific configuration
+        audit_engine_args.update({
+            "pool_size": 5,
+            "max_overflow": 10,
+            "pool_pre_ping": True,
+        })
+    elif AUDIT_DB_URL.startswith("sqlite://"):
+        # SQLite-specific configuration
+        audit_engine_args.update({
+            "connect_args": {"check_same_thread": False}
+        })
+    
+    audit_engine = create_engine(AUDIT_DB_URL, **audit_engine_args)
     AuditSessionLocal = sessionmaker(bind=audit_engine)
     Base.metadata.create_all(bind=audit_engine)
 else:

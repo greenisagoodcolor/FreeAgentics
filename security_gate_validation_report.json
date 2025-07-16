@@ -1,0 +1,12 @@
+{
+  "passed": false,
+  "failures": [
+    {
+      "test": "Security Test Suite",
+      "reason": "Report file not found",
+      "severity": "CRITICAL"
+    }
+  ],
+  "warnings": [],
+  "summary": {}
+}

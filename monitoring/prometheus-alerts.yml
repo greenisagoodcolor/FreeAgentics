@@ -1,0 +1,470 @@
+groups:
+- name: freeagentics-application
+  rules:
+  # Application Health Alerts
+  - alert: FreeAgenticsBackendDown
+    expr: up{job="freeagentics-backend"} == 0
+    for: 1m
+    labels:
+      severity: critical
+      service: backend
+      team: platform
+    annotations:
+      summary: "FreeAgentics Backend is down"
+      description: "FreeAgentics backend service has been down for more than 1 minute"
+      runbook_url: "https://runbooks.yourdomain.com/backend-down"
+      dashboard_url: "https://grafana.yourdomain.com/d/backend-overview"
+
+  - alert: FreeAgenticsFrontendDown
+    expr: up{job="freeagentics-frontend"} == 0
+    for: 1m
+    labels:
+      severity: critical
+      service: frontend
+      team: platform
+    annotations:
+      summary: "FreeAgentics Frontend is down"
+      description: "FreeAgentics frontend service has been down for more than 1 minute"
+      runbook_url: "https://runbooks.yourdomain.com/frontend-down"
+
+  # Response Time Alerts
+  - alert: HighResponseTime
+    expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="freeagentics-backend"}[5m])) by (le)) > 1
+    for: 5m
+    labels:
+      severity: warning
+      service: backend
+      team: platform
+    annotations:
+      summary: "High response time detected"
+      description: "95th percentile response time is {{ $value }}s for the last 5 minutes"
+      runbook_url: "https://runbooks.yourdomain.com/high-response-time"
+
+  - alert: VeryHighResponseTime
+    expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="freeagentics-backend"}[5m])) by (le)) > 3
+    for: 2m
+    labels:
+      severity: critical
+      service: backend
+      team: platform
+    annotations:
+      summary: "Very high response time detected"
+      description: "95th percentile response time is {{ $value }}s for the last 2 minutes"
+      runbook_url: "https://runbooks.yourdomain.com/very-high-response-time"
+
+  # Error Rate Alerts
+  - alert: HighErrorRate
+    expr: sum(rate(http_requests_total{job="freeagentics-backend", code=~"5.."}[5m])) / sum(rate(http_requests_total{job="freeagentics-backend"}[5m])) > 0.05
+    for: 5m
+    labels:
+      severity: warning
+      service: backend
+      team: platform
+    annotations:
+      summary: "High error rate detected"
+      description: "Error rate is {{ $value | humanizePercentage }} for the last 5 minutes"
+      runbook_url: "https://runbooks.yourdomain.com/high-error-rate"
+
+  - alert: VeryHighErrorRate
+    expr: sum(rate(http_requests_total{job="freeagentics-backend", code=~"5.."}[5m])) / sum(rate(http_requests_total{job="freeagentics-backend"}[5m])) > 0.10
+    for: 2m
+    labels:
+      severity: critical
+      service: backend
+      team: platform
+    annotations:
+      summary: "Very high error rate detected"
+      description: "Error rate is {{ $value | humanizePercentage }} for the last 2 minutes"
+      runbook_url: "https://runbooks.yourdomain.com/very-high-error-rate"
+
+  # Request Rate Alerts
+  - alert: UnusualTrafficSpike
+    expr: sum(rate(http_requests_total{job="freeagentics-backend"}[5m])) > 1000
+    for: 5m
+    labels:
+      severity: warning
+      service: backend
+      team: platform
+    annotations:
+      summary: "Unusual traffic spike detected"
+      description: "Request rate is {{ $value }} requests/second for the last 5 minutes"
+      runbook_url: "https://runbooks.yourdomain.com/traffic-spike"
+
+  - alert: TrafficDrop
+    expr: sum(rate(http_requests_total{job="freeagentics-backend"}[5m])) < 1 and sum(rate(http_requests_total{job="freeagentics-backend"}[1h] offset 1h)) > 10
+    for: 10m
+    labels:
+      severity: warning
+      service: backend
+      team: platform
+    annotations:
+      summary: "Unusual traffic drop detected"
+      description: "Request rate is {{ $value }} requests/second, significantly lower than usual"
+      runbook_url: "https://runbooks.yourdomain.com/traffic-drop"
+
+- name: freeagentics-infrastructure
+  rules:
+  # Database Alerts
+  - alert: PostgreSQLDown
+    expr: up{job="postgres"} == 0
+    for: 1m
+    labels:
+      severity: critical
+      service: database
+      team: platform
+    annotations:
+      summary: "PostgreSQL database is down"
+      description: "PostgreSQL database has been down for more than 1 minute"
+      runbook_url: "https://runbooks.yourdomain.com/postgresql-down"
+
+  - alert: HighDatabaseConnections
+    expr: pg_stat_database_numbackends{datname="freeagentics"} > 150
+    for: 5m
+    labels:
+      severity: warning
+      service: database
+      team: platform
+    annotations:
+      summary: "High number of database connections"
+      description: "Database has {{ $value }} active connections"
+      runbook_url: "https://runbooks.yourdomain.com/high-db-connections"
+
+  - alert: DatabaseConnectionsExhausted
+    expr: pg_stat_database_numbackends{datname="freeagentics"} > 180
+    for: 2m
+    labels:
+      severity: critical
+      service: database
+      team: platform
+    annotations:
+      summary: "Database connections nearly exhausted"
+      description: "Database has {{ $value }} active connections, close to limit"
+      runbook_url: "https://runbooks.yourdomain.com/db-connections-exhausted"
+
+  - alert: SlowDatabaseQueries
+    expr: pg_stat_statements_mean_time_ms > 1000
+    for: 5m
+    labels:
+      severity: warning
+      service: database
+      team: platform
+    annotations:
+      summary: "Slow database queries detected"
+      description: "Average query time is {{ $value }}ms"
+      runbook_url: "https://runbooks.yourdomain.com/slow-queries"
+
+  # Cache Alerts
+  - alert: RedisDown
+    expr: up{job="redis"} == 0
+    for: 1m
+    labels:
+      severity: critical
+      service: cache
+      team: platform
+    annotations:
+      summary: "Redis cache is down"
+      description: "Redis cache has been down for more than 1 minute"
+      runbook_url: "https://runbooks.yourdomain.com/redis-down"
+
+  - alert: HighRedisMemoryUsage
+    expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.8
+    for: 5m
+    labels:
+      severity: warning
+      service: cache
+      team: platform
+    annotations:
+      summary: "High Redis memory usage"
+      description: "Redis memory usage is {{ $value | humanizePercentage }}"
+      runbook_url: "https://runbooks.yourdomain.com/high-redis-memory"
+
+  - alert: RedisMemoryExhausted
+    expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.95
+    for: 2m
+    labels:
+      severity: critical
+      service: cache
+      team: platform
+    annotations:
+      summary: "Redis memory nearly exhausted"
+      description: "Redis memory usage is {{ $value | humanizePercentage }}"
+      runbook_url: "https://runbooks.yourdomain.com/redis-memory-exhausted"
+
+  - alert: LowCacheHitRate
+    expr: rate(redis_keyspace_hits_total[5m]) / (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m])) < 0.8
+    for: 10m
+    labels:
+      severity: warning
+      service: cache
+      team: platform
+    annotations:
+      summary: "Low cache hit rate"
+      description: "Cache hit rate is {{ $value | humanizePercentage }}"
+      runbook_url: "https://runbooks.yourdomain.com/low-cache-hit-rate"
+
+- name: freeagentics-kubernetes
+  rules:
+  # Pod Alerts
+  - alert: PodCrashLooping
+    expr: rate(kube_pod_container_status_restarts_total[5m]) > 0
+    for: 5m
+    labels:
+      severity: warning
+      service: kubernetes
+      team: platform
+    annotations:
+      summary: "Pod is crash looping"
+      description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is crash looping"
+      runbook_url: "https://runbooks.yourdomain.com/pod-crash-looping"
+
+  - alert: PodNotReady
+    expr: kube_pod_status_ready{condition="false"} == 1
+    for: 5m
+    labels:
+      severity: warning
+      service: kubernetes
+      team: platform
+    annotations:
+      summary: "Pod not ready"
+      description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is not ready"
+      runbook_url: "https://runbooks.yourdomain.com/pod-not-ready"
+
+  - alert: DeploymentReplicasMismatch
+    expr: kube_deployment_status_replicas_available != kube_deployment_spec_replicas
+    for: 5m
+    labels:
+      severity: warning
+      service: kubernetes
+      team: platform
+    annotations:
+      summary: "Deployment replicas mismatch"
+      description: "Deployment {{ $labels.deployment }} has {{ $value }} available replicas, expected {{ $labels.spec_replicas }}"
+      runbook_url: "https://runbooks.yourdomain.com/deployment-replicas-mismatch"
+
+  # Resource Alerts
+  - alert: HighMemoryUsage
+    expr: (container_memory_usage_bytes{container!="POD",container!=""} / container_spec_memory_limit_bytes) > 0.8
+    for: 5m
+    labels:
+      severity: warning
+      service: kubernetes
+      team: platform
+    annotations:
+      summary: "High memory usage"
+      description: "Container {{ $labels.container }} in pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of memory"
+      runbook_url: "https://runbooks.yourdomain.com/high-memory-usage"
+
+  - alert: HighCPUUsage
+    expr: (rate(container_cpu_usage_seconds_total{container!="POD",container!=""}[5m]) / container_spec_cpu_quota * container_spec_cpu_period) > 0.8
+    for: 5m
+    labels:
+      severity: warning
+      service: kubernetes
+      team: platform
+    annotations:
+      summary: "High CPU usage"
+      description: "Container {{ $labels.container }} in pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of CPU"
+      runbook_url: "https://runbooks.yourdomain.com/high-cpu-usage"
+
+  - alert: PersistentVolumeClaimPending
+    expr: kube_persistentvolumeclaim_status_phase{phase="Pending"} == 1
+    for: 5m
+    labels:
+      severity: warning
+      service: kubernetes
+      team: platform
+    annotations:
+      summary: "PVC is pending"
+      description: "PVC {{ $labels.persistentvolumeclaim }} in namespace {{ $labels.namespace }} is pending"
+      runbook_url: "https://runbooks.yourdomain.com/pvc-pending"
+
+- name: freeagentics-security
+  rules:
+  # Authentication Alerts
+  - alert: HighFailedAuthRate
+    expr: sum(rate(http_requests_total{job="freeagentics-backend", endpoint="/api/v1/auth/login", code="401"}[5m])) > 10
+    for: 5m
+    labels:
+      severity: warning
+      service: security
+      team: security
+    annotations:
+      summary: "High failed authentication rate"
+      description: "{{ $value }} failed authentication attempts per second"
+      runbook_url: "https://runbooks.yourdomain.com/high-failed-auth"
+
+  - alert: SuspiciousAuthActivity
+    expr: sum(rate(http_requests_total{job="freeagentics-backend", endpoint="/api/v1/auth/login", code="401"}[5m])) > 50
+    for: 2m
+    labels:
+      severity: critical
+      service: security
+      team: security
+    annotations:
+      summary: "Suspicious authentication activity"
+      description: "{{ $value }} failed authentication attempts per second - possible attack"
+      runbook_url: "https://runbooks.yourdomain.com/suspicious-auth-activity"
+
+  # SSL Certificate Alerts
+  - alert: SSLCertificateExpiringSoon
+    expr: (ssl_certificate_expiry_seconds - time()) / (24 * 3600) < 30
+    for: 1h
+    labels:
+      severity: warning
+      service: security
+      team: platform
+    annotations:
+      summary: "SSL certificate expiring soon"
+      description: "SSL certificate for {{ $labels.domain }} expires in {{ $value | humanizeDuration }}"
+      runbook_url: "https://runbooks.yourdomain.com/ssl-cert-expiring"
+
+  - alert: SSLCertificateExpiredOrExpiringSoon
+    expr: (ssl_certificate_expiry_seconds - time()) / (24 * 3600) < 7
+    for: 1h
+    labels:
+      severity: critical
+      service: security
+      team: platform
+    annotations:
+      summary: "SSL certificate expired or expiring very soon"
+      description: "SSL certificate for {{ $labels.domain }} expires in {{ $value | humanizeDuration }}"
+      runbook_url: "https://runbooks.yourdomain.com/ssl-cert-expired"
+
+  # Rate Limiting Alerts
+  - alert: RateLimitingTriggered
+    expr: sum(rate(http_requests_total{job="freeagentics-backend", code="429"}[5m])) > 5
+    for: 5m
+    labels:
+      severity: warning
+      service: security
+      team: platform
+    annotations:
+      summary: "Rate limiting frequently triggered"
+      description: "{{ $value }} requests per second are being rate limited"
+      runbook_url: "https://runbooks.yourdomain.com/rate-limiting-triggered"
+
+  - alert: HighRateLimitViolations
+    expr: sum(rate(http_requests_total{job="freeagentics-backend", code="429"}[5m])) by (endpoint) > 10
+    for: 5m
+    labels:
+      severity: warning
+      service: security
+      team: platform
+    annotations:
+      summary: "High rate of rate limit violations"
+      description: "Rate limit violations exceeding 10/min for endpoint {{ $labels.endpoint }}"
+      runbook_url: "https://runbooks.yourdomain.com/high-rate-limit-violations"
+
+  - alert: DDoSAttackDetected
+    expr: sum(rate(http_requests_total{job="freeagentics-backend"}[1m])) > 1000 and sum(rate(http_requests_total{job="freeagentics-backend", code="429"}[1m])) > 100
+    for: 1m
+    labels:
+      severity: critical
+      service: security
+      team: security
+    annotations:
+      summary: "Potential DDoS attack detected"
+      description: "Extremely high request rate ({{ $value }} req/s) with many rate limit violations"
+      runbook_url: "https://runbooks.yourdomain.com/ddos-attack-detected"
+
+  - alert: RateLimitingRedisDown
+    expr: up{job="redis", instance=~".*:6379"} == 0
+    for: 2m
+    labels:
+      severity: critical
+      service: security
+      team: platform
+    annotations:
+      summary: "Redis for rate limiting is down"
+      description: "Redis instance {{ $labels.instance }} is down, rate limiting may not function properly"
+      runbook_url: "https://runbooks.yourdomain.com/redis-rate-limiting-down"
+
+  - alert: SuspiciousIPActivity
+    expr: sum(rate(http_requests_total{job="freeagentics-backend", code="429"}[5m])) by (client_ip) > 50
+    for: 2m
+    labels:
+      severity: critical
+      service: security
+      team: security
+    annotations:
+      summary: "Suspicious activity from IP"
+      description: "IP {{ $labels.client_ip }} is generating {{ $value }} rate-limited requests per second"
+      runbook_url: "https://runbooks.yourdomain.com/suspicious-ip-activity"
+
+- name: freeagentics-business
+  rules:
+  # Business Metrics Alerts
+  - alert: LowActiveUsers
+    expr: sum(active_users_total) < 100
+    for: 15m
+    labels:
+      severity: warning
+      service: business
+      team: product
+    annotations:
+      summary: "Low active user count"
+      description: "Only {{ $value }} active users in the last 15 minutes"
+      runbook_url: "https://runbooks.yourdomain.com/low-active-users"
+
+  - alert: HighTaskFailureRate
+    expr: sum(rate(task_completion_total{status="failed"}[5m])) / sum(rate(task_completion_total[5m])) > 0.1
+    for: 10m
+    labels:
+      severity: warning
+      service: business
+      team: product
+    annotations:
+      summary: "High task failure rate"
+      description: "Task failure rate is {{ $value | humanizePercentage }}"
+      runbook_url: "https://runbooks.yourdomain.com/high-task-failure-rate"
+
+  - alert: CoalitionFormationFailures
+    expr: sum(rate(coalition_formation_attempts_total{status="failed"}[5m])) > 1
+    for: 10m
+    labels:
+      severity: warning
+      service: business
+      team: product
+    annotations:
+      summary: "Coalition formation failures"
+      description: "{{ $value }} coalition formation failures per second"
+      runbook_url: "https://runbooks.yourdomain.com/coalition-formation-failures"
+
+- name: freeagentics-sli-slo
+  rules:
+  # SLI/SLO Alerts
+  - alert: ErrorBudgetExhausted
+    expr: (1 - (sum(rate(http_requests_total{job="freeagentics-backend", code!~"5.."}[5m])) / sum(rate(http_requests_total{job="freeagentics-backend"}[5m])))) > 0.001
+    for: 5m
+    labels:
+      severity: critical
+      service: sli-slo
+      team: platform
+    annotations:
+      summary: "Error budget exhausted"
+      description: "Error budget has been exhausted - current error rate {{ $value | humanizePercentage }}"
+      runbook_url: "https://runbooks.yourdomain.com/error-budget-exhausted"
+
+  - alert: AvailabilitySLOBreach
+    expr: (1 - (sum(rate(http_requests_total{job="freeagentics-backend", code!~"5.."}[5m])) / sum(rate(http_requests_total{job="freeagentics-backend"}[5m])))) > 0.005
+    for: 2m
+    labels:
+      severity: critical
+      service: sli-slo
+      team: platform
+    annotations:
+      summary: "Availability SLO breach"
+      description: "Availability is below SLO threshold - current error rate {{ $value | humanizePercentage }}"
+      runbook_url: "https://runbooks.yourdomain.com/availability-slo-breach"
+
+  - alert: LatencySLOBreach
+    expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="freeagentics-backend"}[5m])) by (le)) > 0.5
+    for: 5m
+    labels:
+      severity: warning
+      service: sli-slo
+      team: platform
+    annotations:
+      summary: "Latency SLO breach"
+      description: "95th percentile latency is {{ $value }}s, above SLO threshold"
+      runbook_url: "https://runbooks.yourdomain.com/latency-slo-breach"

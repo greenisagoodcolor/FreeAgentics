@@ -24,6 +24,40 @@ from agents.pymdp_error_handling import (
     validate_pymdp_matrices,
 )
 
+# Import coordination metrics
+try:
+    from observability.coordination_metrics import (
+        coordination_metrics,
+        record_coordination,
+        record_coalition_event,
+        get_agent_coordination_stats,
+    )
+    COORDINATION_METRICS_AVAILABLE = True
+except ImportError:
+    logger.warning("Coordination metrics not available")
+    COORDINATION_METRICS_AVAILABLE = False
+    
+    # Mock functions
+    class MockCoordinationMetrics:
+        async def record_coordination_start(self, *args, **kwargs):
+            return "mock_session"
+        async def record_coordination_end(self, *args, **kwargs):
+            pass
+        async def record_coalition_formation(self, *args, **kwargs):
+            pass
+        async def record_coalition_dissolution(self, *args, **kwargs):
+            pass
+        async def record_inter_agent_message(self, *args, **kwargs):
+            pass
+    
+    coordination_metrics = MockCoordinationMetrics()
+    async def record_coordination(*args, **kwargs):
+        pass
+    async def record_coalition_event(*args, **kwargs):
+        pass
+    def get_agent_coordination_stats(agent_id: str):
+        return {"error": "Coordination metrics not available"}
+
 if PYMDP_AVAILABLE:
     from pymdp import utils
     from pymdp.agent import Agent as PyMDPAgent
@@ -102,6 +136,11 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
         self.coordination_success_rate = 0.0
         self.average_coalition_lifetime = 0.0
         self.total_coordinated_tasks = 0
+        
+        # Advanced coordination metrics tracking
+        self.coordination_metrics_enabled = COORDINATION_METRICS_AVAILABLE
+        self.active_coordination_sessions: Dict[str, float] = {}
+        self.coordination_start_times: Dict[str, float] = {}
 
         # Initialize additional attributes needed by base class
         self.total_observations = 0
@@ -519,6 +558,10 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
 
     def _update_coordination_metrics(self, action: str):
         """Update coordination performance metrics."""
+        import time
+        current_time = time.time()
+        
+        # Update basic metrics
         if action == "coordinate":
             self.metrics["coordination_attempts"] = self.metrics.get("coordination_attempts", 0) + 1
         elif action == "invite":
@@ -532,7 +575,46 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
                 [c.get("performance", 0) for c in self.active_coalitions.values()]
             )
             self.metrics["avg_coalition_performance"] = avg_performance
+            
+        # Record coordination metrics if enabled
+        if self.coordination_metrics_enabled:
+            import asyncio
+            try:
+                # Check if there's an active event loop
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    # Record coordination action
+                    participant_ids = []
+                    if action == "coordinate" and self.active_coalitions:
+                        # Get participants from all active coalitions
+                        for coalition in self.active_coalitions.values():
+                            participant_ids.extend(coalition.get("members", []))
+                    elif action == "invite" and self.known_agents:
+                        # Include known agents as potential participants
+                        participant_ids = list(self.known_agents.keys())[:5]  # Limit to 5 for performance
+                    
+                    # Record coordination event
+                    if participant_ids:
+                        asyncio.create_task(
+                            record_coordination(
+                                self.agent_id,
+                                participant_ids,
+                                action,
+                                current_time - 0.01,  # Small duration for synchronous action
+                                True,  # Assume success for now
+                                {"action": action, "coalition_count": len(self.active_coalitions)}
+                            )
+                        )
+            except RuntimeError:
+                # No event loop, skip async recording
+                pass
 
+    def get_coordination_stats(self) -> Dict[str, Any]:
+        """Get detailed coordination statistics."""
+        if self.coordination_metrics_enabled:
+            return get_agent_coordination_stats(self.agent_id)
+        return {"error": "Coordination metrics not enabled"}
+    
     def get_status(self) -> Dict[str, Any]:
         """Get coordinator agent status."""
         status = super().get_status()
@@ -544,8 +626,14 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
                 "average_coalition_lifetime": round(self.average_coalition_lifetime, 2),
                 "total_coordinated_tasks": self.total_coordinated_tasks,
                 "coordination_range": self.coordination_range,
+                "coordination_metrics_enabled": self.coordination_metrics_enabled,
             }
         )
+        
+        # Add coordination statistics if available
+        if self.coordination_metrics_enabled:
+            status["coordination_stats"] = self.get_coordination_stats()
+        
         return status
 
     def _observation_to_index(self, observation: Dict[str, Any]) -> Optional[int]:

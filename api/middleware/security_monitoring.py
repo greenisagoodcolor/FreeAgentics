@@ -94,47 +94,5 @@ class SecurityMonitoringMiddleware(BaseHTTPMiddleware):
             )
 
 
-class SecurityHeadersMiddleware:
-    """Middleware to add security headers to all responses."""
-
-    def __init__(self, app):
-        self.app = app
-
-    async def __call__(self, scope, receive, send):
-        """Add security headers to response."""
-        if scope["type"] == "http":
-
-            async def send_wrapper(message):
-                if message["type"] == "http.response.start":
-                    headers = dict(message.get("headers", []))
-
-                    # Add security headers
-                    security_headers = [
-                        (b"X-Content-Type-Options", b"nosniff"),
-                        (b"X-Frame-Options", b"DENY"),
-                        (b"X-XSS-Protection", b"1; mode=block"),
-                        (b"Referrer-Policy", b"strict-origin-when-cross-origin"),
-                        (b"Permissions-Policy", b"geolocation=(), microphone=(), camera=()"),
-                    ]
-
-                    # Add HSTS in production
-                    import os
-
-                    if os.getenv("PRODUCTION", "false").lower() == "true":
-                        security_headers.append(
-                            (b"Strict-Transport-Security", b"max-age=31536000; includeSubDomains")
-                        )
-
-                    # Add CSP if configured
-                    csp = os.getenv("CSP_DIRECTIVES")
-                    if csp:
-                        security_headers.append((b"Content-Security-Policy", csp.encode()))
-
-                    # Merge with existing headers
-                    message["headers"] = list(headers.items()) + security_headers
-
-                await send(message)
-
-            await self.app(scope, receive, send_wrapper)
-        else:
-            await self.app(scope, receive, send)
+# Import the enhanced SecurityHeadersMiddleware from auth module
+from auth.security_headers import SecurityHeadersMiddleware

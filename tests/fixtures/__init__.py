@@ -24,7 +24,7 @@ from .fixtures import (
     agent_fixture,
     clean_database,
     coalition_fixture,
-    db_session_fixture,
+    db_session,
     knowledge_graph_fixture,
 )
 from .generators import (

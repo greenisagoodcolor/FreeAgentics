@@ -91,11 +91,14 @@ try:
         record_agent_lifecycle_event,
         record_belief_update,
     )
+    from observability.belief_monitoring import monitor_belief_update
 
     OBSERVABILITY_AVAILABLE = True
+    BELIEF_MONITORING_AVAILABLE = True
 except ImportError:
     logger.warning("Observability integration not available")
     OBSERVABILITY_AVAILABLE = False
+    BELIEF_MONITORING_AVAILABLE = False
 
     # Mock observability functions
     def monitor_pymdp_inference(agent_id: str):
@@ -110,6 +113,11 @@ except ImportError:
         pass
 
     async def record_agent_lifecycle_event(agent_id: str, event: str, metadata: dict = None):
+        pass
+
+    async def monitor_belief_update(
+        agent_id: str, beliefs: dict, free_energy: float = None, metadata: dict = None
+    ):
         pass
 
 
@@ -216,6 +224,11 @@ class ActiveInferenceAgent(ABC):
         # Observability integration
         self.observability_enabled = OBSERVABILITY_AVAILABLE and config.get(
             "enable_observability", True
+        )
+        
+        # Belief monitoring integration
+        self.belief_monitoring_enabled = BELIEF_MONITORING_AVAILABLE and config.get(
+            "enable_belief_monitoring", True
         )
 
         # Error handling
@@ -519,6 +532,16 @@ class ActiveInferenceAgent(ABC):
     def stop(self):
         """Stop the agent."""
         self.is_active = False
+        
+        # Cleanup belief monitoring
+        if self.belief_monitoring_enabled:
+            try:
+                from observability.belief_monitoring import belief_monitoring_hooks
+                belief_monitoring_hooks.reset_agent_monitor(self.agent_id)
+                logger.debug(f"Cleaned up belief monitoring for agent {self.agent_id}")
+            except Exception as e:
+                logger.warning(f"Failed to cleanup belief monitoring for agent {self.agent_id}: {e}")
+        
         logger.info(f"Agent {self.agent_id} stopped")
 
     def get_status(self) -> Dict[str, Any]:
@@ -546,6 +569,22 @@ class ActiveInferenceAgent(ABC):
             status["pymdp_error_report"] = self.pymdp_error_handler.get_error_report()
 
         return status
+    
+    def get_belief_monitoring_stats(self) -> Dict[str, Any]:
+        """Get belief monitoring statistics for this agent.
+        
+        Returns:
+            Dictionary containing belief monitoring statistics
+        """
+        if not self.belief_monitoring_enabled:
+            return {"error": "Belief monitoring not enabled"}
+        
+        try:
+            from observability.belief_monitoring import belief_monitoring_hooks
+            return belief_monitoring_hooks.get_agent_statistics(self.agent_id)
+        except Exception as e:
+            logger.error(f"Failed to get belief monitoring stats for agent {self.agent_id}: {e}")
+            return {"error": str(e)}
 
 
 class BasicExplorerAgent(ActiveInferenceAgent):
@@ -850,6 +889,32 @@ class BasicExplorerAgent(ActiveInferenceAgent):
                                 try:
                                     loop = asyncio.get_event_loop()
                                     if loop.is_running():
+                                        # Use new belief monitoring system if available
+                                        if self.belief_monitoring_enabled:
+                                            # Create comprehensive belief state for monitoring
+                                            beliefs_state = {
+                                                "qs": qs,
+                                                "entropy": self.metrics.get("belief_entropy", 0.0),
+                                                "state_posterior_size": len(qs) if qs else 0,
+                                                "previous_entropy": beliefs_before.get("belief_entropy", 0.0),
+                                            }
+                                            
+                                            # Monitor belief update with detailed tracking
+                                            asyncio.create_task(
+                                                monitor_belief_update(
+                                                    self.agent_id,
+                                                    beliefs_state,
+                                                    beliefs_after.get("avg_free_energy"),
+                                                    {
+                                                        "step": self.total_steps,
+                                                        "update_type": "pymdp_inference",
+                                                        "beliefs_before": beliefs_before,
+                                                        "beliefs_after": beliefs_after,
+                                                    }
+                                                )
+                                            )
+                                        
+                                        # Also record basic metrics
                                         asyncio.create_task(
                                             record_belief_update(
                                                 self.agent_id,

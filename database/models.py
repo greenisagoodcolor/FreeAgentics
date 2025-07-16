@@ -22,11 +22,11 @@ from sqlalchemy import (
     Table,
     Text,
 )
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from database.base import Base
+from database.types import GUID
 
 
 # Enums for database columns
@@ -62,8 +62,8 @@ class AgentRole(PyEnum):
 agent_coalition_association = Table(
     "agent_coalition",
     Base.metadata,
-    Column("agent_id", UUID(as_uuid=True), ForeignKey("agents.id"), primary_key=True),
-    Column("coalition_id", UUID(as_uuid=True), ForeignKey("coalitions.id"), primary_key=True),
+    Column("agent_id", GUID(), ForeignKey("agents.id"), primary_key=True),
+    Column("coalition_id", GUID(), ForeignKey("coalitions.id"), primary_key=True),
     Column("role", Enum(AgentRole), default=AgentRole.MEMBER),
     Column("joined_at", DateTime, server_default=func.now()),
     Column("contribution_score", Float, default=0.0),
@@ -80,7 +80,7 @@ class Agent(Base):
     __tablename__ = "agents"
 
     # Primary key
-    id: Column[uuid.UUID] = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Column[uuid.UUID] = Column(GUID(), primary_key=True, default=uuid.uuid4)
 
     # Basic properties
     name: Column[str] = Column(String(100), nullable=False)
@@ -140,7 +140,7 @@ class Coalition(Base):
     __tablename__ = "coalitions"
 
     # Primary key
-    id: Column[uuid.UUID] = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Column[uuid.UUID] = Column(GUID(), primary_key=True, default=uuid.uuid4)
 
     # Basic properties
     name: Column[str] = Column(String(100), nullable=False)
@@ -193,7 +193,7 @@ class KnowledgeNode(Base):
     __tablename__ = "db_knowledge_nodes"
 
     # Primary key
-    id: Column[uuid.UUID] = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Column[uuid.UUID] = Column(GUID(), primary_key=True, default=uuid.uuid4)
 
     # Node properties
     type: Column[str] = Column(String(50), nullable=False)
@@ -210,7 +210,7 @@ class KnowledgeNode(Base):
 
     # Creator agent relationship
     creator_agent_id: Column[Optional[uuid.UUID]] = Column(
-        UUID(as_uuid=True), ForeignKey("agents.id"), nullable=True
+        GUID(), ForeignKey("agents.id"), nullable=True
     )
     creator_agent = relationship("Agent", back_populates="knowledge_nodes")
 
@@ -242,11 +242,11 @@ class KnowledgeEdge(Base):
     __tablename__ = "db_knowledge_edges"
 
     # Primary key
-    id: Column[uuid.UUID] = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Column[uuid.UUID] = Column(GUID(), primary_key=True, default=uuid.uuid4)
 
     # Edge endpoints
-    source_id: Column[uuid.UUID] = Column(UUID(as_uuid=True), ForeignKey("db_knowledge_nodes.id"))
-    target_id: Column[uuid.UUID] = Column(UUID(as_uuid=True), ForeignKey("db_knowledge_nodes.id"))
+    source_id: Column[uuid.UUID] = Column(GUID(), ForeignKey("db_knowledge_nodes.id"))
+    target_id: Column[uuid.UUID] = Column(GUID(), ForeignKey("db_knowledge_nodes.id"))
 
     # Edge properties
     type: Column[str] = Column(String(50), nullable=False)

@@ -87,6 +87,24 @@ class ResourceAccessValidator:
                 access_context, resource_context, action
             )
             
+            # Log ABAC decision
+            comprehensive_auditor.log_abac_decision(
+                user_id=current_user.user_id,
+                username=current_user.username,
+                resource_type="agent",
+                resource_id=agent_id,
+                action=action,
+                decision=access_granted,
+                reason=reason,
+                applied_rules=applied_rules,
+                context={
+                    "agent_name": agent.name,
+                    "agent_template": agent.template,
+                    "agent_status": agent.status.value,
+                    "ip_address": request.client.host if request and request.client else None
+                }
+            )
+            
             if not access_granted:
                 logger.warning(f"ABAC denied access: {reason}")
                 return False
@@ -94,9 +112,26 @@ class ResourceAccessValidator:
             # Check ownership for sensitive operations
             if action in ["modify", "update", "patch", "delete"]:
                 # Only the creator or admin can modify/delete
-                if (current_user.role.value != "admin" and 
-                    hasattr(agent, 'created_by') and 
-                    str(agent.created_by) != current_user.user_id):
+                is_owner = (hasattr(agent, 'created_by') and 
+                           str(agent.created_by) == current_user.user_id)
+                admin_override = current_user.role.value == "admin"
+                
+                # Log ownership check
+                comprehensive_auditor.log_ownership_check(
+                    user_id=current_user.user_id,
+                    username=current_user.username,
+                    resource_type="agent",
+                    resource_id=agent_id,
+                    is_owner=is_owner,
+                    admin_override=admin_override,
+                    metadata={
+                        "action": action,
+                        "agent_name": agent.name,
+                        "agent_creator": str(agent.created_by) if hasattr(agent, 'created_by') else None
+                    }
+                )
+                
+                if not is_owner and not admin_override:
                     logger.warning(f"User {current_user.username} not authorized to {action} agent {agent_id} - not owner")
                     return False
             
@@ -280,6 +315,21 @@ def require_resource_access(
                     required_permission = _get_required_permission(resource_type, action)
                     if required_permission:
                         access_granted = required_permission in current_user.permissions
+                        
+                        # Log RBAC decision
+                        comprehensive_auditor.log_rbac_decision(
+                            user_id=current_user.user_id,
+                            username=current_user.username,
+                            role=current_user.role.value,
+                            required_permission=required_permission.value,
+                            has_permission=access_granted,
+                            endpoint=f"/{resource_type}/{resource_id or 'N/A'}",
+                            resource_id=resource_id,
+                            metadata={
+                                "action": action,
+                                "resource_type": resource_type
+                            }
+                        )
                     else:
                         access_granted = True  # No specific permission required
                 

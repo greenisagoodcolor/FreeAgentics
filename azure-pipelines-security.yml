@@ -1,0 +1,43 @@
+pool:
+  vmImage: ubuntu-latest
+stages:
+- displayName: Security Testing
+  jobs:
+  - displayName: Run Security Scans
+    job: SecurityScan
+    steps:
+    - inputs:
+        addToPath: true
+        versionSpec: $(pythonVersion)
+      task: UsePythonVersion@0
+    - displayName: Install dependencies
+      script: "\n                                        pip install --upgrade pip\n\
+        \                                        pip install -r requirements.txt\n\
+        \                                        pip install -r requirements-dev.txt\n\
+        \                                    "
+    - displayName: Run security tests
+      script: python -m pytest tests/security/ -v --junitxml=junit/security-tests.xml
+    - displayName: Run penetration tests
+      script: python tests/security/run_comprehensive_penetration_tests.py
+    - displayName: WhiteSource security scan
+      task: WhiteSource@21
+    - displayName: SAST and dependency scanning
+      script: "\n                                        bandit -r . -f json -o $(Build.ArtifactStagingDirectory)/bandit-report.json\n\
+        \                                        safety check --json > $(Build.ArtifactStagingDirectory)/safety-report.json\n\
+        \                                    "
+    - displayName: Security gate validation
+      script: python tests/security/check_security_gates.py
+    - inputs:
+        testResultsFiles: '**/security-tests.xml'
+        testResultsFormat: JUnit
+      task: PublishTestResults@2
+    - inputs:
+        artifactName: SecurityReports
+        pathToPublish: $(Build.ArtifactStagingDirectory)
+      task: PublishBuildArtifacts@1
+  stage: SecurityTests
+trigger:
+- main
+- develop
+variables:
+  pythonVersion: '3.10'

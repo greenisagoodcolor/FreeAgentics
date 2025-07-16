@@ -18,7 +18,11 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 
 # SECURITY: Import authentication and security components
-from auth import SecurityMiddleware, rate_limiter
+from auth import SecurityMiddleware
+from auth.security_headers import SecurityHeadersMiddleware, SecurityPolicy
+from auth.https_enforcement import HTTPSEnforcementMiddleware, SSLConfiguration
+from api.middleware.ddos_protection import DDoSProtectionMiddleware
+from api.middleware.rate_limiter import create_rate_limiter, RateLimitMiddleware
 
 # Configure logging
 logging.basicConfig(
@@ -125,6 +129,75 @@ app = FastAPI(
 # Middleware Stack - Production Security Enhanced
 # SECURITY: Add security middleware first
 app.add_middleware(SecurityMiddleware)
+
+# SECURITY: Add HTTPS enforcement and SSL/TLS configuration
+# Configure based on environment
+import os
+is_production = os.getenv("PRODUCTION", "false").lower() == "true"
+
+ssl_config = SSLConfiguration(
+    production_mode=is_production,
+    enable_letsencrypt=is_production,
+    letsencrypt_email=os.getenv("LETSENCRYPT_EMAIL", "admin@freeagentics.com"),
+    letsencrypt_domains=os.getenv("LETSENCRYPT_DOMAINS", "").split(",") if os.getenv("LETSENCRYPT_DOMAINS") else [],
+    hsts_enabled=True,
+    hsts_max_age=31536000,  # 1 year
+    hsts_include_subdomains=True,
+    hsts_preload=is_production,
+    secure_cookies=True,
+    behind_load_balancer=os.getenv("BEHIND_LOAD_BALANCER", "false").lower() == "true",
+    trusted_proxies=os.getenv("TRUSTED_PROXIES", "127.0.0.1,::1").split(",")
+)
+
+app.add_middleware(HTTPSEnforcementMiddleware, config=ssl_config)
+
+# SECURITY: Add comprehensive security headers
+security_policy = SecurityPolicy(
+    production_mode=is_production,
+    enable_hsts=True,
+    hsts_max_age=31536000,
+    hsts_include_subdomains=True,
+    hsts_preload=is_production,
+    csp_report_uri="/api/v1/security/csp-report",
+    enable_expect_ct=True,
+    expect_ct_report_uri="/api/v1/security/ct-report",
+    enable_certificate_pinning=is_production,
+    secure_cookies=True
+)
+
+app.add_middleware(SecurityHeadersMiddleware, security_manager=security_policy)
+
+# SECURITY: Add comprehensive rate limiting and DDoS protection
+redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+config_file = os.path.join(os.path.dirname(__file__), "config", "rate_limiting.yaml")
+
+# Create rate limiter instance
+rate_limiter = create_rate_limiter(redis_url=redis_url, config_file=config_file)
+
+# Function to extract user ID from request (for authenticated rate limiting)
+async def get_user_id_from_request(request):
+    """Extract user ID from JWT token if present."""
+    try:
+        from auth import auth_manager
+        authorization = request.headers.get("Authorization")
+        if authorization and authorization.startswith("Bearer "):
+            token = authorization.split(" ")[1]
+            payload = auth_manager.decode_token(token)
+            if payload and "sub" in payload:
+                return payload["sub"]
+    except Exception:
+        pass
+    return None
+
+# Add rate limiting middleware
+app.add_middleware(
+    RateLimitMiddleware,
+    rate_limiter=rate_limiter,
+    get_user_id=get_user_id_from_request
+)
+
+# Alternative: Use DDoS protection middleware (includes rate limiting)
+# app.add_middleware(DDoSProtectionMiddleware, redis_url=redis_url)
 
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(

@@ -21,8 +21,7 @@ import pytest
 from fastapi import FastAPI, Request, Response
 from fastapi.testclient import TestClient
 
-from api.v1.headers import apply_security_headers
-from auth.security_headers import SecurityHeadersManager
+from auth.security_headers import SecurityHeadersManager, SecurityHeadersMiddleware
 from auth.security_implementation import AuthenticationManager
 
 

@@ -1,0 +1,380 @@
+global:
+  # Global SMTP configuration
+  smtp_smarthost: 'smtp.yourdomain.com:587'
+  smtp_from: 'alerts@yourdomain.com'
+  smtp_auth_username: 'alerts@yourdomain.com'
+  smtp_auth_password: 'REPLACE_WITH_SMTP_PASSWORD'
+  smtp_require_tls: true
+  
+  # Global Slack configuration
+  slack_api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+  
+  # Global PagerDuty configuration
+  pagerduty_url: 'https://events.pagerduty.com/v2/enqueue'
+  
+  # Global notification settings
+  resolve_timeout: 5m
+  http_config:
+    follow_redirects: true
+    enable_http2: true
+
+# Templates for notifications
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Routing configuration
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'default-receiver'
+  
+  routes:
+  # Critical alerts - immediate notification
+  - match:
+      severity: critical
+    receiver: 'critical-alerts'
+    group_wait: 0s
+    group_interval: 30s
+    repeat_interval: 30m
+    routes:
+    # Database critical alerts
+    - match:
+        service: database
+      receiver: 'database-critical'
+      continue: true
+    # Security critical alerts
+    - match:
+        service: security
+      receiver: 'security-critical'
+      continue: true
+    # SLO breach alerts
+    - match:
+        service: sli-slo
+      receiver: 'slo-breach'
+      continue: true
+    # Application critical alerts
+    - match:
+        service: backend
+      receiver: 'backend-critical'
+      continue: true
+
+  # Warning alerts - grouped notifications
+  - match:
+      severity: warning
+    receiver: 'warning-alerts'
+    group_wait: 30s
+    group_interval: 5m
+    repeat_interval: 4h
+    routes:
+    # Performance warnings
+    - match_re:
+        alertname: 'High.*'
+      receiver: 'performance-warnings'
+      continue: true
+    # Infrastructure warnings
+    - match:
+        service: kubernetes
+      receiver: 'infrastructure-warnings'
+      continue: true
+
+  # Business alerts - product team
+  - match:
+      team: product
+    receiver: 'business-alerts'
+    group_wait: 1m
+    group_interval: 10m
+    repeat_interval: 6h
+
+  # Security alerts - security team
+  - match:
+      team: security
+    receiver: 'security-alerts'
+    group_wait: 30s
+    group_interval: 2m
+    repeat_interval: 1h
+
+  # Maintenance window - silence all alerts
+  - match:
+      maintenance: 'true'
+    receiver: 'null'
+
+# Inhibition rules - prevent alert spam
+inhibit_rules:
+# Inhibit any warning alert if there's a critical alert for the same service
+- source_match:
+    severity: 'critical'
+  target_match:
+    severity: 'warning'
+  equal: ['alertname', 'service', 'instance']
+
+# Inhibit individual pod alerts if deployment alert is firing
+- source_match:
+    alertname: 'DeploymentReplicasMismatch'
+  target_match_re:
+    alertname: 'Pod.*'
+  equal: ['namespace', 'deployment']
+
+# Inhibit database connection alerts if database is down
+- source_match:
+    alertname: 'PostgreSQLDown'
+  target_match_re:
+    alertname: '.*Database.*'
+  equal: ['instance']
+
+# Inhibit backend alerts if backend is down
+- source_match:
+    alertname: 'FreeAgenticsBackendDown'
+  target_match_re:
+    alertname: 'High.*'
+  equal: ['service']
+
+# Notification receivers
+receivers:
+# Default receiver - basic notifications
+- name: 'default-receiver'
+  slack_configs:
+  - channel: '#alerts-general'
+    title: 'FreeAgentics Alert'
+    text: |
+      {{ range .Alerts }}
+      *Alert:* {{ .Annotations.summary }}
+      *Description:* {{ .Annotations.description }}
+      *Severity:* {{ .Labels.severity }}
+      *Service:* {{ .Labels.service }}
+      {{ if .Annotations.runbook_url }}*Runbook:* {{ .Annotations.runbook_url }}{{ end }}
+      {{ if .Annotations.dashboard_url }}*Dashboard:* {{ .Annotations.dashboard_url }}{{ end }}
+      {{ end }}
+    send_resolved: true
+
+# Critical alerts - immediate escalation
+- name: 'critical-alerts'
+  slack_configs:
+  - channel: '#alerts-critical'
+    title: '🚨 CRITICAL ALERT - FreeAgentics Production'
+    text: |
+      {{ range .Alerts }}
+      *CRITICAL ALERT:* {{ .Annotations.summary }}
+      *Description:* {{ .Annotations.description }}
+      *Service:* {{ .Labels.service }}
+      *Started:* {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+      {{ if .Annotations.runbook_url }}*Runbook:* {{ .Annotations.runbook_url }}{{ end }}
+      {{ if .Annotations.dashboard_url }}*Dashboard:* {{ .Annotations.dashboard_url }}{{ end }}
+      {{ end }}
+    send_resolved: true
+    color: 'danger'
+  pagerduty_configs:
+  - routing_key: 'REPLACE_WITH_PAGERDUTY_ROUTING_KEY'
+    description: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+    severity: 'critical'
+    details:
+      service: '{{ .CommonLabels.service }}'
+      alert_count: '{{ .Alerts | len }}'
+      runbook_url: '{{ range .Alerts }}{{ .Annotations.runbook_url }}{{ end }}'
+  email_configs:
+  - to: 'oncall@yourdomain.com, platform-team@yourdomain.com'
+    subject: '🚨 CRITICAL ALERT - FreeAgentics Production'
+    html: |
+      <h2>Critical Alert - FreeAgentics Production</h2>
+      {{ range .Alerts }}
+      <div style="background: #ff6b6b; padding: 15px; margin: 10px 0; border-radius: 5px;">
+        <h3>{{ .Annotations.summary }}</h3>
+        <p><strong>Description:</strong> {{ .Annotations.description }}</p>
+        <p><strong>Service:</strong> {{ .Labels.service }}</p>
+        <p><strong>Started:</strong> {{ .StartsAt.Format "2006-01-02 15:04:05" }}</p>
+        {{ if .Annotations.runbook_url }}<p><strong>Runbook:</strong> <a href="{{ .Annotations.runbook_url }}">{{ .Annotations.runbook_url }}</a></p>{{ end }}
+        {{ if .Annotations.dashboard_url }}<p><strong>Dashboard:</strong> <a href="{{ .Annotations.dashboard_url }}">{{ .Annotations.dashboard_url }}</a></p>{{ end }}
+      </div>
+      {{ end }}
+
+# Database critical alerts
+- name: 'database-critical'
+  slack_configs:
+  - channel: '#alerts-database'
+    title: '💾 DATABASE CRITICAL ALERT'
+    text: |
+      {{ range .Alerts }}
+      *DATABASE CRITICAL:* {{ .Annotations.summary }}
+      *Description:* {{ .Annotations.description }}
+      *Database:* {{ .Labels.instance }}
+      *Started:* {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+      {{ if .Annotations.runbook_url }}*Runbook:* {{ .Annotations.runbook_url }}{{ end }}
+      {{ end }}
+    send_resolved: true
+    color: 'danger'
+  pagerduty_configs:
+  - routing_key: 'REPLACE_WITH_DATABASE_PAGERDUTY_KEY'
+    description: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+    severity: 'critical'
+    component: 'database'
+
+# Security critical alerts
+- name: 'security-critical'
+  slack_configs:
+  - channel: '#alerts-security'
+    title: '🔒 SECURITY CRITICAL ALERT'
+    text: |
+      {{ range .Alerts }}
+      *SECURITY CRITICAL:* {{ .Annotations.summary }}
+      *Description:* {{ .Annotations.description }}
+      *Started:* {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+      {{ if .Annotations.runbook_url }}*Runbook:* {{ .Annotations.runbook_url }}{{ end }}
+      {{ end }}
+    send_resolved: true
+    color: 'danger'
+  email_configs:
+  - to: 'security-team@yourdomain.com, ciso@yourdomain.com'
+    subject: '🔒 SECURITY CRITICAL ALERT - FreeAgentics'
+    html: |
+      <h2>Security Critical Alert - FreeAgentics</h2>
+      {{ range .Alerts }}
+      <div style="background: #ff4757; padding: 15px; margin: 10px 0; border-radius: 5px;">
+        <h3>{{ .Annotations.summary }}</h3>
+        <p><strong>Description:</strong> {{ .Annotations.description }}</p>
+        <p><strong>Started:</strong> {{ .StartsAt.Format "2006-01-02 15:04:05" }}</p>
+        {{ if .Annotations.runbook_url }}<p><strong>Runbook:</strong> <a href="{{ .Annotations.runbook_url }}">{{ .Annotations.runbook_url }}</a></p>{{ end }}
+      </div>
+      {{ end }}
+
+# SLO breach alerts
+- name: 'slo-breach'
+  slack_configs:
+  - channel: '#alerts-slo'
+    title: '📊 SLO BREACH ALERT'
+    text: |
+      {{ range .Alerts }}
+      *SLO BREACH:* {{ .Annotations.summary }}
+      *Description:* {{ .Annotations.description }}
+      *Started:* {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+      {{ if .Annotations.runbook_url }}*Runbook:* {{ .Annotations.runbook_url }}{{ end }}
+      {{ end }}
+    send_resolved: true
+    color: 'warning'
+  email_configs:
+  - to: 'sre-team@yourdomain.com'
+    subject: '📊 SLO BREACH - FreeAgentics'
+    body: |
+      SLO Breach Alert
+      
+      {{ range .Alerts }}
+      Alert: {{ .Annotations.summary }}
+      Description: {{ .Annotations.description }}
+      Started: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+      {{ if .Annotations.runbook_url }}Runbook: {{ .Annotations.runbook_url }}{{ end }}
+      {{ end }}
+
+# Backend critical alerts
+- name: 'backend-critical'
+  slack_configs:
+  - channel: '#alerts-backend'
+    title: '⚙️ BACKEND CRITICAL ALERT'
+    text: |
+      {{ range .Alerts }}
+      *BACKEND CRITICAL:* {{ .Annotations.summary }}
+      *Description:* {{ .Annotations.description }}
+      *Started:* {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+      {{ if .Annotations.runbook_url }}*Runbook:* {{ .Annotations.runbook_url }}{{ end }}
+      {{ end }}
+    send_resolved: true
+    color: 'danger'
+
+# Warning alerts
+- name: 'warning-alerts'
+  slack_configs:
+  - channel: '#alerts-warnings'
+    title: '⚠️ Warning Alert - FreeAgentics'
+    text: |
+      {{ range .Alerts }}
+      *Warning:* {{ .Annotations.summary }}
+      *Description:* {{ .Annotations.description }}
+      *Service:* {{ .Labels.service }}
+      {{ if .Annotations.runbook_url }}*Runbook:* {{ .Annotations.runbook_url }}{{ end }}
+      {{ end }}
+    send_resolved: true
+    color: 'warning'
+
+# Performance warnings
+- name: 'performance-warnings'
+  slack_configs:
+  - channel: '#alerts-performance'
+    title: '🚀 Performance Warning'
+    text: |
+      {{ range .Alerts }}
+      *Performance Issue:* {{ .Annotations.summary }}
+      *Description:* {{ .Annotations.description }}
+      *Service:* {{ .Labels.service }}
+      {{ if .Annotations.runbook_url }}*Runbook:* {{ .Annotations.runbook_url }}{{ end }}
+      {{ end }}
+    send_resolved: true
+    color: 'warning'
+
+# Infrastructure warnings
+- name: 'infrastructure-warnings'
+  slack_configs:
+  - channel: '#alerts-infrastructure'
+    title: '🏗️ Infrastructure Warning'
+    text: |
+      {{ range .Alerts }}
+      *Infrastructure Issue:* {{ .Annotations.summary }}
+      *Description:* {{ .Annotations.description }}
+      *Namespace:* {{ .Labels.namespace }}
+      {{ if .Annotations.runbook_url }}*Runbook:* {{ .Annotations.runbook_url }}{{ end }}
+      {{ end }}
+    send_resolved: true
+    color: 'warning'
+
+# Business alerts
+- name: 'business-alerts'
+  slack_configs:
+  - channel: '#alerts-business'
+    title: '💼 Business Metric Alert'
+    text: |
+      {{ range .Alerts }}
+      *Business Alert:* {{ .Annotations.summary }}
+      *Description:* {{ .Annotations.description }}
+      {{ if .Annotations.runbook_url }}*Runbook:* {{ .Annotations.runbook_url }}{{ end }}
+      {{ end }}
+    send_resolved: true
+    color: 'good'
+  email_configs:
+  - to: 'product-team@yourdomain.com'
+    subject: '💼 Business Metric Alert - FreeAgentics'
+    body: |
+      Business Metric Alert
+      
+      {{ range .Alerts }}
+      Alert: {{ .Annotations.summary }}
+      Description: {{ .Annotations.description }}
+      {{ if .Annotations.runbook_url }}Runbook: {{ .Annotations.runbook_url }}{{ end }}
+      {{ end }}
+
+# Security alerts
+- name: 'security-alerts'
+  slack_configs:
+  - channel: '#alerts-security'
+    title: '🔐 Security Alert'
+    text: |
+      {{ range .Alerts }}
+      *Security Alert:* {{ .Annotations.summary }}
+      *Description:* {{ .Annotations.description }}
+      *Started:* {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+      {{ if .Annotations.runbook_url }}*Runbook:* {{ .Annotations.runbook_url }}{{ end }}
+      {{ end }}
+    send_resolved: true
+    color: 'warning'
+  email_configs:
+  - to: 'security-team@yourdomain.com'
+    subject: '🔐 Security Alert - FreeAgentics'
+    body: |
+      Security Alert
+      
+      {{ range .Alerts }}
+      Alert: {{ .Annotations.summary }}
+      Description: {{ .Annotations.description }}
+      Started: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+      {{ if .Annotations.runbook_url }}Runbook: {{ .Annotations.runbook_url }}{{ end }}
+      {{ end }}
+
+# Null receiver for maintenance windows
+- name: 'null'

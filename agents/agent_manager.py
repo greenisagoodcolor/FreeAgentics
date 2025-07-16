@@ -338,6 +338,95 @@ class AgentManager:
             return self.world.render()
         return None
 
+    def get_agent_belief_stats(self, agent_id: str) -> Dict[str, Any]:
+        """Get belief monitoring statistics for a specific agent.
+        
+        Args:
+            agent_id: Agent to query
+            
+        Returns:
+            Belief monitoring statistics
+        """
+        if agent_id not in self.agents:
+            raise ValueError(f"Agent {agent_id} not found")
+        
+        return self.agents[agent_id].get_belief_monitoring_stats()
+    
+    def get_all_belief_stats(self) -> Dict[str, Dict[str, Any]]:
+        """Get belief monitoring statistics for all agents.
+        
+        Returns:
+            Dictionary mapping agent IDs to their belief statistics
+        """
+        results = {}
+        for agent_id, agent in self.agents.items():
+            try:
+                results[agent_id] = agent.get_belief_monitoring_stats()
+            except Exception as e:
+                logger.error(f"Failed to get belief stats for agent {agent_id}: {e}")
+                results[agent_id] = {"error": str(e)}
+        
+        return results
+    
+    def reset_belief_monitoring(self, agent_id: Optional[str] = None) -> bool:
+        """Reset belief monitoring for one or all agents.
+        
+        Args:
+            agent_id: Agent to reset (None for all agents)
+            
+        Returns:
+            True if successful
+        """
+        try:
+            from observability.belief_monitoring import belief_monitoring_hooks
+            
+            if agent_id:
+                if agent_id not in self.agents:
+                    raise ValueError(f"Agent {agent_id} not found")
+                belief_monitoring_hooks.reset_agent_monitor(agent_id)
+                logger.info(f"Reset belief monitoring for agent {agent_id}")
+            else:
+                belief_monitoring_hooks.reset_all()
+                logger.info("Reset belief monitoring for all agents")
+            
+            return True
+        except Exception as e:
+            logger.error(f"Failed to reset belief monitoring: {e}")
+            return False
+    
+    def get_coordination_stats(self, agent_id: Optional[str] = None) -> Dict[str, Any]:
+        """Get coordination statistics for one or all agents.
+        
+        Args:
+            agent_id: Agent to query (None for all agents)
+            
+        Returns:
+            Coordination statistics
+        """
+        try:
+            from observability.coordination_metrics import get_agent_coordination_stats, get_system_coordination_report
+            
+            if agent_id:
+                if agent_id not in self.agents:
+                    raise ValueError(f"Agent {agent_id} not found")
+                return get_agent_coordination_stats(agent_id)
+            else:
+                # Get system-wide coordination report
+                system_report = get_system_coordination_report()
+                
+                # Add individual agent stats
+                agent_stats = {}
+                for aid in self.agents.keys():
+                    agent_stats[aid] = get_agent_coordination_stats(aid)
+                
+                return {
+                    "system_report": system_report,
+                    "agent_stats": agent_stats
+                }
+        except Exception as e:
+            logger.error(f"Failed to get coordination stats: {e}")
+            return {"error": str(e)}
+
     def run_simulation(self, steps: int = 100) -> List[Dict[str, Dict[str, Any]]]:
         """Run simulation for multiple steps.
 

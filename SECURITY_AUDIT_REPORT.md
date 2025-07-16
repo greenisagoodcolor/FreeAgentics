@@ -104,28 +104,66 @@ if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable is required")
 ```
 
-### 2. WebSocket Security 🔴
+### 2. WebSocket Security ✅
 
-**Issue:** WebSocket endpoints have NO authentication
+**Actions Taken:**
 
-**Required Implementation:**
+- Implemented comprehensive JWT-based authentication for all WebSocket connections
+- Added dedicated `websocket/auth_handler.py` with full authentication system
+- Integrated rate limiting for WebSocket connections and messages
+- Added permission-based authorization for different WebSocket operations
+- Implemented secure message validation with injection attack prevention
+- Added automatic token refresh support within WebSocket sessions
+- Implemented heartbeat/keepalive with authentication checks
+- Added connection limits per user and IP-based rate limiting
+- Created proper error handling with specific WebSocket close codes
+
+**Security Features Implemented:**
+
+1. **Authentication & Authorization:**
+   - JWT token validation on connection (via query params or headers)
+   - Permission checks for all operations (subscribe, commands, queries)
+   - Role-based access control integration
+   - Token refresh without disconnection
+
+2. **Rate Limiting & DDoS Protection:**
+   - Connection rate limiting per IP (10 connections/minute)
+   - Message rate limiting to prevent flooding
+   - Maximum connections per user enforcement
+   - Automatic cleanup of timed-out connections
+
+3. **Input Validation & Injection Prevention:**
+   - Message type validation with regex patterns
+   - Event type and agent ID sanitization
+   - Message size limits (100KB max)
+   - Protection against SQL, NoSQL, XSS, and command injection
+
+4. **Connection Security:**
+   - Origin header validation (configurable whitelist)
+   - Heartbeat monitoring with 60-second timeout
+   - Graceful error handling and connection cleanup
+   - Secure WebSocket close codes for different error types
+
+**Code Implementation:**
 
 ```python
-# Add to websocket.py
-async def websocket_auth(websocket: WebSocket, token: str):
-    try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
-        return payload
-    except jwt.InvalidTokenError:
-        await websocket.close(code=4001, reason="Invalid authentication")
-        return None
-
-@router.websocket("/ws/{agent_id}")
-async def websocket_endpoint(websocket: WebSocket, agent_id: str, token: str = Query(...)):
-    user = await websocket_auth(websocket, token)
-    if not user:
+# WebSocket endpoint with full security
+@router.websocket("/ws/{client_id}")
+async def websocket_endpoint(
+    websocket: WebSocket, 
+    client_id: str,
+    token: Optional[str] = Query(None)
+):
+    # Rate limiting check
+    if not await websocket_rate_limit_manager.check_connection_allowed(websocket):
+        await websocket.close(code=WebSocketErrorCode.RATE_LIMITED)
         return
-    # Continue with authenticated connection
+    
+    # Authenticate connection
+    user_data = await ws_auth_handler.authenticate_connection(websocket, client_id, token)
+    
+    # Connection accepted with full security context
+    # All messages validated and permission-checked
 ```
 
 ### 3. SSL/TLS Configuration 🔴
@@ -152,7 +190,7 @@ async def websocket_endpoint(websocket: WebSocket, agent_id: str, token: str = Q
 ### Immediate Actions Required
 
 - [ ] Remove all hardcoded database credentials
-- [ ] Implement WebSocket authentication
+- [x] Implement WebSocket authentication
 - [ ] Configure SSL/TLS certificates
 - [ ] Set up HTTPS-only access
 - [ ] Create security test suite

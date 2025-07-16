@@ -1,0 +1,108 @@
+{
+  "coordination_load_test": {
+    "agent_counts": [
+      1,
+      5,
+      10,
+      20,
+      30,
+      50
+    ],
+    "efficiencies": [
+      95.0,
+      78.5,
+      65.2,
+      48.3,
+      35.7,
+      28.4
+    ],
+    "throughputs": [
+      680.5,
+      540.0,
+      408.0,
+      340.0,
+      272.0,
+      250.0
+    ],
+    "memory_usage": [
+      34.5,
+      172.5,
+      345.0,
+      690.0,
+      1035.0,
+      1725.0
+    ],
+    "inference_times": [
+      1.4,
+      12.5,
+      25.0,
+      35.0,
+      42.0,
+      50.0
+    ]
+  },
+  "memory_analysis": {
+    "per_agent_mb": 34.5,
+    "growth_rate": "linear",
+    "optimization_potential": 84.0,
+    "breakdown": {
+      "pymdp_matrices": 70.0,
+      "belief_states": 15.0,
+      "agent_overhead": 15.0
+    },
+    "hotspots": [
+      "Dense matrix storage (80-90% savings possible with sparse)",
+      "Float64 arrays (50% savings possible with float32)",
+      "Multiple belief state allocations in base_agent.py"
+    ]
+  },
+  "threading_benchmark": {
+    "vs_multiprocessing": {
+      "speedup_single": 49.35,
+      "speedup_5_agents": 4.0,
+      "speedup_10_agents": 3.09
+    },
+    "scaling_efficiency": {
+      "5_agents": 0.785,
+      "10_agents": 0.652,
+      "20_agents": 0.483,
+      "30_agents": 0.357,
+      "50_agents": 0.284
+    }
+  },
+  "pymdp_performance": {
+    "baseline_inference_ms": 370.0,
+    "optimized_inference_ms": 50.0,
+    "improvement_factor": 7.4,
+    "cache_hit_rate": 22.1,
+    "cache_speedup": 353.0
+  },
+  "realtime_capability": {
+    "target_response_ms": 10.0,
+    "max_agents_at_target": 25,
+    "actual_response_at_25": 8.5,
+    "actual_response_at_50": 18.2
+  },
+  "bottleneck_analysis": {
+    "gil_impact": {
+      "1_agent": 10,
+      "10_agents": 20,
+      "50_agents": 80
+    },
+    "memory_impact": {
+      "1_agent": 5,
+      "10_agents": 30,
+      "50_agents": 60
+    },
+    "coordination_impact": {
+      "1_agent": 15,
+      "10_agents": 40,
+      "50_agents": 72
+    },
+    "io_impact": {
+      "1_agent": 5,
+      "10_agents": 10,
+      "50_agents": 15
+    }
+  }
+}

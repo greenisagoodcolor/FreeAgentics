@@ -1,0 +1,379 @@
+# Cert-Manager Configuration for FreeAgentics
+# Handles automatic SSL/TLS certificate provisioning and renewal
+---
+# ClusterIssuer for Let's Encrypt Production
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+  namespace: cert-manager
+spec:
+  acme:
+    # Production Let's Encrypt server
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: ${LETSENCRYPT_EMAIL}
+    privateKeySecretRef:
+      name: letsencrypt-prod-key
+    solvers:
+    # HTTP01 challenge solver
+    - http01:
+        ingress:
+          class: nginx
+          serviceType: ClusterIP
+      selector:
+        dnsNames:
+        - "*.freeagentics.com"
+        - "freeagentics.com"
+    # DNS01 challenge solver for wildcard certificates
+    - dns01:
+        cloudflare:
+          email: ${CLOUDFLARE_EMAIL}
+          apiTokenSecretRef:
+            name: cloudflare-api-token
+            key: api-token
+      selector:
+        dnsNames:
+        - "*.freeagentics.com"
+
+---
+# ClusterIssuer for Let's Encrypt Staging (for testing)
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+  namespace: cert-manager
+spec:
+  acme:
+    # Staging Let's Encrypt server
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: ${LETSENCRYPT_EMAIL}
+    privateKeySecretRef:
+      name: letsencrypt-staging-key
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
+
+---
+# Certificate for main domain
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: freeagentics-tls
+  namespace: freeagentics-prod
+spec:
+  secretName: freeagentics-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+    group: cert-manager.io
+  commonName: freeagentics.com
+  dnsNames:
+  - freeagentics.com
+  - www.freeagentics.com
+  - api.freeagentics.com
+  - admin.freeagentics.com
+  duration: 2160h  # 90 days
+  renewBefore: 720h  # 30 days before expiry
+  # Key configuration
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  # Certificate usages
+  usages:
+    - digital signature
+    - key encipherment
+    - server auth
+    - client auth
+
+---
+# Certificate for wildcard subdomain
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: freeagentics-wildcard-tls
+  namespace: freeagentics-prod
+spec:
+  secretName: freeagentics-wildcard-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+    group: cert-manager.io
+  commonName: "*.freeagentics.com"
+  dnsNames:
+  - "*.freeagentics.com"
+  duration: 2160h  # 90 days
+  renewBefore: 720h  # 30 days before expiry
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+
+---
+# ServiceMonitor for cert-manager metrics
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+  labels:
+    app: cert-manager
+    prometheus: kube-prometheus
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cert-manager
+      app.kubernetes.io/component: controller
+  endpoints:
+  - port: tcp-prometheus-servicemonitor
+    path: /metrics
+    interval: 60s
+    scheme: http
+
+---
+# PrometheusRule for certificate expiry alerts
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cert-manager-alerts
+  namespace: cert-manager
+  labels:
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+  - name: cert-manager
+    interval: 60s
+    rules:
+    # Certificate expiry warning (30 days)
+    - alert: CertificateExpiryWarning
+      expr: |
+        certmanager_certificate_expiration_timestamp_seconds - time() < 30 * 24 * 60 * 60
+      for: 1h
+      labels:
+        severity: warning
+        component: cert-manager
+      annotations:
+        summary: "Certificate expiring soon"
+        description: "Certificate {{ $labels.name }} in namespace {{ $labels.namespace }} expires in {{ $value | humanizeDuration }}"
+    
+    # Certificate expiry critical (7 days)
+    - alert: CertificateExpiryCritical
+      expr: |
+        certmanager_certificate_expiration_timestamp_seconds - time() < 7 * 24 * 60 * 60
+      for: 15m
+      labels:
+        severity: critical
+        component: cert-manager
+      annotations:
+        summary: "Certificate expiring critically soon"
+        description: "Certificate {{ $labels.name }} in namespace {{ $labels.namespace }} expires in {{ $value | humanizeDuration }}"
+    
+    # Certificate renewal failure
+    - alert: CertificateRenewalFailure
+      expr: |
+        increase(certmanager_certificate_renewal_errors_total[1h]) > 0
+      for: 15m
+      labels:
+        severity: critical
+        component: cert-manager
+      annotations:
+        summary: "Certificate renewal failed"
+        description: "Certificate {{ $labels.name }} in namespace {{ $labels.namespace }} failed to renew"
+    
+    # ACME rate limit approaching
+    - alert: ACMERateLimitWarning
+      expr: |
+        certmanager_acme_rate_limit_remaining < 10
+      for: 5m
+      labels:
+        severity: warning
+        component: cert-manager
+      annotations:
+        summary: "ACME rate limit approaching"
+        description: "Only {{ $value }} ACME requests remaining for {{ $labels.host }}"
+
+---
+# NetworkPolicy for cert-manager
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cert-manager-network-policy
+  namespace: cert-manager
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: cert-manager
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow webhook calls
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: TCP
+      port: 10250
+  # Allow metrics scraping
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 9402
+  egress:
+  # Allow DNS
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  # Allow HTTPS to Let's Encrypt
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+    ports:
+    - protocol: TCP
+      port: 443
+  # Allow access to Kubernetes API
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: default
+    ports:
+    - protocol: TCP
+      port: 443
+
+---
+# Secret for Cloudflare API token (for DNS01 challenges)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cloudflare-api-token
+  namespace: cert-manager
+type: Opaque
+stringData:
+  api-token: ${CLOUDFLARE_API_TOKEN}
+
+---
+# ConfigMap for certificate monitoring script
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cert-monitor-script
+  namespace: freeagentics-prod
+data:
+  monitor.sh: |
+    #!/bin/bash
+    # Certificate monitoring script
+    
+    NAMESPACE="freeagentics-prod"
+    ALERT_DAYS=30
+    
+    # Check certificate expiry
+    check_cert() {
+      local secret_name=$1
+      local cert_data=$(kubectl get secret $secret_name -n $NAMESPACE -o jsonpath='{.data.tls\.crt}' | base64 -d)
+      
+      if [ -z "$cert_data" ]; then
+        echo "ERROR: Certificate not found in secret $secret_name"
+        return 1
+      fi
+      
+      local expiry_date=$(echo "$cert_data" | openssl x509 -noout -enddate | cut -d= -f2)
+      local expiry_epoch=$(date -d "$expiry_date" +%s)
+      local current_epoch=$(date +%s)
+      local days_until_expiry=$(( ($expiry_epoch - $current_epoch) / 86400 ))
+      
+      echo "Certificate in $secret_name expires in $days_until_expiry days ($expiry_date)"
+      
+      if [ $days_until_expiry -lt $ALERT_DAYS ]; then
+        echo "WARNING: Certificate expiring soon!"
+        return 2
+      fi
+      
+      return 0
+    }
+    
+    # Check all TLS secrets
+    for secret in $(kubectl get secrets -n $NAMESPACE -o json | jq -r '.items[] | select(.type=="kubernetes.io/tls") | .metadata.name'); do
+      check_cert $secret
+    done
+
+---
+# CronJob for certificate monitoring
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cert-monitor
+  namespace: freeagentics-prod
+spec:
+  schedule: "0 0 * * *"  # Daily at midnight
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: cert-monitor
+          containers:
+          - name: monitor
+            image: bitnami/kubectl:latest
+            command:
+            - /bin/bash
+            - /scripts/monitor.sh
+            volumeMounts:
+            - name: script
+              mountPath: /scripts
+          volumes:
+          - name: script
+            configMap:
+              name: cert-monitor-script
+              defaultMode: 0755
+          restartPolicy: OnFailure
+
+---
+# ServiceAccount for certificate monitoring
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cert-monitor
+  namespace: freeagentics-prod
+
+---
+# Role for certificate monitoring
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cert-monitor
+  namespace: freeagentics-prod
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list"]
+
+---
+# RoleBinding for certificate monitoring
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cert-monitor
+  namespace: freeagentics-prod
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cert-monitor
+subjects:
+- kind: ServiceAccount
+  name: cert-monitor
+  namespace: freeagentics-prod

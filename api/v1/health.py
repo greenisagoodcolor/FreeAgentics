@@ -28,18 +28,24 @@ async def health_check(db: Session = Depends(get_db)):
         - 200 OK with {"status": "healthy", "db": "connected"} when DB is accessible
         - 503 Service Unavailable with error details when DB is down
 
-    No try/except - let FastAPI handle exceptions via exception handlers.
+    Uses try/except to handle database errors.
     """
-    # Perform SELECT 1 query to verify database connectivity
-    result = db.execute(text("SELECT 1"))
-    result.fetchone()  # Ensure query executes
+    try:
+        # Perform SELECT 1 query to verify database connectivity
+        result = db.execute(text("SELECT 1"))
+        result.fetchone()  # Ensure query executes
+        
+        return {"status": "healthy", "db": "connected"}
+    except OperationalError as exc:
+        # Handle database operational errors with 503 status
+        return JSONResponse(
+            status_code=503, 
+            content={"status": "unhealthy", "db": "disconnected", "error": str(exc)}
+        )
 
-    return {"status": "healthy", "db": "connected"}
 
-
-# Exception handler for database operational errors
-@router.exception_handler(OperationalError)
-async def database_exception_handler(request, exc):
+# Define a function that can be used as exception handler at app level
+def database_exception_handler(request, exc):
     """Handle database operational errors with 503 status."""
     return JSONResponse(
         status_code=503, content={"status": "unhealthy", "db": "disconnected", "error": str(exc)}

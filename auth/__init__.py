@@ -13,8 +13,12 @@ from .security_implementation import (
     rate_limiter,
     require_permission,
     require_role,
+    require_csrf_token,
     secure_database_query,
     security_validator,
+    CSRFProtection,
+    CSRF_HEADER_NAME,
+    CSRF_COOKIE_NAME,
 )
 
 __all__ = [
@@ -24,6 +28,7 @@ __all__ = [
     "get_current_user",
     "require_permission",
     "require_role",
+    "require_csrf_token",
     "rate_limit",
     "secure_database_query",
     "SecurityMiddleware",
@@ -32,4 +37,7 @@ __all__ = [
     "Permission",
     "TokenData",
     "SecurityValidator",
+    "CSRFProtection",
+    "CSRF_HEADER_NAME",
+    "CSRF_COOKIE_NAME",
 ]

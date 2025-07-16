@@ -1,0 +1,679 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: backend-rollout
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: backend
+    tier: application
+spec:
+  replicas: 3
+  strategy:
+    blueGreen:
+      activeService: backend-active
+      previewService: backend-preview
+      autoPromotionEnabled: false
+      scaleDownDelaySeconds: 30
+      prePromotionAnalysis:
+        templates:
+        - templateName: success-rate
+        args:
+        - name: service-name
+          value: backend-preview
+      postPromotionAnalysis:
+        templates:
+        - templateName: success-rate
+        args:
+        - name: service-name
+          value: backend-active
+      previewReplicaCount: 1
+      promotionPolicy:
+        type: RollingUpdate
+  selector:
+    matchLabels:
+      app: freeagentics
+      component: backend
+  template:
+    metadata:
+      labels:
+        app: freeagentics
+        component: backend
+        tier: application
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+      - name: backend
+        image: freeagentics/backend:latest
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: freeagentics-secrets
+              key: database-url
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: freeagentics-secrets
+              key: redis-url
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: freeagentics-secrets
+              key: secret-key
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: freeagentics-secrets
+              key: jwt-secret
+        - name: ENVIRONMENT
+          value: "production"
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: DEPLOYMENT_COLOR
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['rollouts-pod-template-hash']
+        ports:
+        - containerPort: 8000
+          name: http
+          protocol: TCP
+        volumeMounts:
+        - name: logs
+          mountPath: /app/logs
+        - name: tmp
+          mountPath: /tmp
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: logs
+        emptyDir: {}
+      - name: tmp
+        emptyDir: {}
+      nodeSelector:
+        workload: application
+      tolerations:
+      - key: "application"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: freeagentics
+                  component: backend
+              topologyKey: kubernetes.io/hostname
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: frontend-rollout
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: frontend
+    tier: web
+spec:
+  replicas: 2
+  strategy:
+    blueGreen:
+      activeService: frontend-active
+      previewService: frontend-preview
+      autoPromotionEnabled: false
+      scaleDownDelaySeconds: 30
+      prePromotionAnalysis:
+        templates:
+        - templateName: success-rate
+        args:
+        - name: service-name
+          value: frontend-preview
+      postPromotionAnalysis:
+        templates:
+        - templateName: success-rate
+        args:
+        - name: service-name
+          value: frontend-active
+      previewReplicaCount: 1
+  selector:
+    matchLabels:
+      app: freeagentics
+      component: frontend
+  template:
+    metadata:
+      labels:
+        app: freeagentics
+        component: frontend
+        tier: web
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/api/metrics"
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+      - name: frontend
+        image: freeagentics/frontend:latest
+        env:
+        - name: NEXT_PUBLIC_API_URL
+          value: "https://yourdomain.com/api"
+        - name: NODE_ENV
+          value: "production"
+        - name: DEPLOYMENT_COLOR
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['rollouts-pod-template-hash']
+        ports:
+        - containerPort: 3000
+          name: http
+          protocol: TCP
+        volumeMounts:
+        - name: next-cache
+          mountPath: /app/.next/cache
+        - name: tmp
+          mountPath: /tmp
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: next-cache
+        emptyDir: {}
+      - name: tmp
+        emptyDir: {}
+      nodeSelector:
+        workload: web
+      tolerations:
+      - key: "web"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-active
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: backend
+    tier: application
+    deployment: active
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: 8000
+    name: http
+    protocol: TCP
+  selector:
+    app: freeagentics
+    component: backend
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-preview
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: backend
+    tier: application
+    deployment: preview
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: 8000
+    name: http
+    protocol: TCP
+  selector:
+    app: freeagentics
+    component: backend
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-active
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: frontend
+    tier: web
+    deployment: active
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3000
+    targetPort: 3000
+    name: http
+    protocol: TCP
+  selector:
+    app: freeagentics
+    component: frontend
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-preview
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: frontend
+    tier: web
+    deployment: preview
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3000
+    targetPort: 3000
+    name: http
+    protocol: TCP
+  selector:
+    app: freeagentics
+    component: frontend
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: success-rate
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: analysis
+spec:
+  args:
+  - name: service-name
+  - name: prometheus-url
+    value: http://prometheus:9090
+  metrics:
+  - name: success-rate
+    successCondition: result[0] >= 0.95
+    failureCondition: result[0] < 0.90
+    interval: 30s
+    count: 5
+    provider:
+      prometheus:
+        address: "{{args.prometheus-url}}"
+        query: |
+          sum(rate(http_requests_total{service="{{args.service-name}}", code!~"5.."}[2m])) /
+          sum(rate(http_requests_total{service="{{args.service-name}}"}[2m]))
+  - name: response-time
+    successCondition: result[0] <= 500
+    failureCondition: result[0] > 1000
+    interval: 30s
+    count: 5
+    provider:
+      prometheus:
+        address: "{{args.prometheus-url}}"
+        query: |
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service="{{args.service-name}}"}[2m])) by (le)) * 1000
+  - name: error-rate
+    successCondition: result[0] <= 0.05
+    failureCondition: result[0] > 0.10
+    interval: 30s
+    count: 5
+    provider:
+      prometheus:
+        address: "{{args.prometheus-url}}"
+        query: |
+          sum(rate(http_requests_total{service="{{args.service-name}}", code=~"5.."}[2m])) /
+          sum(rate(http_requests_total{service="{{args.service-name}}"}[2m]))
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: freeagentics-blue-green-ingress
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: ingress
+    tier: web
+    deployment: blue-green
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    
+    # Blue-Green specific annotations
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-by-header: "X-Canary"
+    nginx.ingress.kubernetes.io/canary-by-header-value: "preview"
+    nginx.ingress.kubernetes.io/canary-weight: "0"
+    
+    # Security headers
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      add_header X-Frame-Options "SAMEORIGIN" always;
+      add_header X-Content-Type-Options "nosniff" always;
+      add_header X-XSS-Protection "1; mode=block" always;
+      add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+      add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+      
+      # Add deployment color header
+      add_header X-Deployment-Color $deployment_color always;
+    
+    # Rate limiting
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    
+    # SSL Certificate management
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    
+spec:
+  tls:
+  - hosts:
+    - yourdomain.com
+    - preview.yourdomain.com
+    secretName: freeagentics-tls
+  rules:
+  - host: yourdomain.com
+    http:
+      paths:
+      # API routes (active)
+      - path: /api/
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-active
+            port:
+              number: 8000
+      # Frontend routes (active)
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-active
+            port:
+              number: 3000
+  
+  # Preview environment for testing
+  - host: preview.yourdomain.com
+    http:
+      paths:
+      # API routes (preview)
+      - path: /api/
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-preview
+            port:
+              number: 8000
+      # Frontend routes (preview)
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-preview
+            port:
+              number: 3000
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: blue-green-scripts
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: deployment
+data:
+  promote.sh: |
+    #!/bin/bash
+    # Blue-Green Deployment Promotion Script
+    
+    set -euo pipefail
+    
+    NAMESPACE="${NAMESPACE:-freeagentics-prod}"
+    ROLLOUT_NAME="${ROLLOUT_NAME:-backend-rollout}"
+    
+    log() {
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+    }
+    
+    promote_rollout() {
+        log "Promoting rollout: $ROLLOUT_NAME"
+        
+        # Check if rollout is healthy
+        if ! kubectl argo rollouts get rollout "$ROLLOUT_NAME" -n "$NAMESPACE" | grep -q "Healthy"; then
+            log "ERROR: Rollout $ROLLOUT_NAME is not healthy"
+            exit 1
+        fi
+        
+        # Promote the rollout
+        kubectl argo rollouts promote "$ROLLOUT_NAME" -n "$NAMESPACE"
+        
+        # Wait for promotion to complete
+        kubectl argo rollouts wait "$ROLLOUT_NAME" -n "$NAMESPACE" --timeout=600s
+        
+        log "Rollout $ROLLOUT_NAME promoted successfully"
+    }
+    
+    main() {
+        log "Starting blue-green promotion process"
+        
+        # Promote backend
+        ROLLOUT_NAME="backend-rollout"
+        promote_rollout
+        
+        # Promote frontend
+        ROLLOUT_NAME="frontend-rollout"
+        promote_rollout
+        
+        log "Blue-green promotion completed successfully"
+    }
+    
+    main "$@"
+  
+  rollback.sh: |
+    #!/bin/bash
+    # Blue-Green Deployment Rollback Script
+    
+    set -euo pipefail
+    
+    NAMESPACE="${NAMESPACE:-freeagentics-prod}"
+    ROLLOUT_NAME="${ROLLOUT_NAME:-backend-rollout}"
+    
+    log() {
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+    }
+    
+    rollback_rollout() {
+        log "Rolling back rollout: $ROLLOUT_NAME"
+        
+        # Abort current rollout
+        kubectl argo rollouts abort "$ROLLOUT_NAME" -n "$NAMESPACE" || true
+        
+        # Rollback to previous version
+        kubectl argo rollouts undo "$ROLLOUT_NAME" -n "$NAMESPACE"
+        
+        # Wait for rollback to complete
+        kubectl argo rollouts wait "$ROLLOUT_NAME" -n "$NAMESPACE" --timeout=600s
+        
+        log "Rollout $ROLLOUT_NAME rolled back successfully"
+    }
+    
+    main() {
+        log "Starting blue-green rollback process"
+        
+        # Rollback backend
+        ROLLOUT_NAME="backend-rollout"
+        rollback_rollout
+        
+        # Rollback frontend
+        ROLLOUT_NAME="frontend-rollout"
+        rollback_rollout
+        
+        log "Blue-green rollback completed successfully"
+    }
+    
+    main "$@"
+  
+  status.sh: |
+    #!/bin/bash
+    # Blue-Green Deployment Status Script
+    
+    set -euo pipefail
+    
+    NAMESPACE="${NAMESPACE:-freeagentics-prod}"
+    
+    log() {
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+    }
+    
+    show_rollout_status() {
+        local rollout_name="$1"
+        
+        log "=== Rollout Status: $rollout_name ==="
+        kubectl argo rollouts get rollout "$rollout_name" -n "$NAMESPACE"
+        
+        log "=== Rollout History: $rollout_name ==="
+        kubectl argo rollouts history "$rollout_name" -n "$NAMESPACE"
+        
+        echo ""
+    }
+    
+    main() {
+        log "Blue-Green Deployment Status"
+        
+        # Show backend status
+        show_rollout_status "backend-rollout"
+        
+        # Show frontend status
+        show_rollout_status "frontend-rollout"
+        
+        # Show analysis results
+        log "=== Analysis Results ==="
+        kubectl get analysisruns -n "$NAMESPACE" | tail -5
+        
+        # Show service endpoints
+        log "=== Service Endpoints ==="
+        kubectl get services -n "$NAMESPACE" | grep -E "(active|preview)"
+        
+        log "Status check completed"
+    }
+    
+    main "$@"
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: blue-green-health-check
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    component: monitoring
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: health-check
+            image: curlimages/curl:latest
+            command:
+            - /bin/sh
+            - -c
+            - |
+              # Check active services
+              curl -f https://yourdomain.com/health || exit 1
+              curl -f https://yourdomain.com/api/v1/health || exit 1
+              
+              # Check preview services (if accessible)
+              curl -f https://preview.yourdomain.com/health || echo "Preview not accessible"
+              curl -f https://preview.yourdomain.com/api/v1/health || echo "Preview API not accessible"
+              
+              echo "Health check completed successfully"
+            resources:
+              requests:
+                memory: "64Mi"
+                cpu: "100m"
+              limits:
+                memory: "128Mi"
+                cpu: "200m"
+          restartPolicy: OnFailure
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1

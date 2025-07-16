@@ -7,7 +7,20 @@ across different environments (development, staging, production).
 import os
 from typing import Dict, Optional
 
-from api.middleware.ddos_protection import RateLimitConfig
+from dataclasses import dataclass
+from typing import Optional
+
+
+@dataclass
+class RateLimitConfig:
+    """Rate limit configuration."""
+    requests_per_minute: int = 60
+    requests_per_hour: int = 1000
+    burst_limit: int = 10
+    window_size: int = 60
+    block_duration: int = 300
+    ddos_threshold: int = 1000
+    ddos_block_duration: int = 3600
 
 
 class RateLimitingConfig:

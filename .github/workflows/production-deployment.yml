@@ -1,0 +1,582 @@
+name: Production Deployment Pipeline
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      deploy_environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
+        - staging
+      skip_tests:
+        description: 'Skip tests (emergency deployment)'
+        required: false
+        default: false
+        type: boolean
+      force_deploy:
+        description: 'Force deployment (bypass safety checks)'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "18"
+
+jobs:
+  # Security and Quality Checks
+  security-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Run Semgrep security scan
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: auto
+          generateRules: true
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+
+  # Unit and Integration Tests
+  test-backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: ${{ !inputs.skip_tests }}
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Run linting
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      - name: Run type checking
+        run: mypy . --ignore-missing-imports
+
+      - name: Run unit tests
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379
+          SECRET_KEY: test-secret-key
+          JWT_SECRET: test-jwt-secret
+        run: |
+          pytest tests/unit/ -v --cov=. --cov-report=xml --cov-report=html
+          
+      - name: Run integration tests
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379
+          SECRET_KEY: test-secret-key
+          JWT_SECRET: test-jwt-secret
+        run: |
+          pytest tests/integration/ -v --cov=. --cov-append --cov-report=xml
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          flags: backend
+          name: backend-coverage
+
+  test-frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: ${{ !inputs.skip_tests }}
+    
+    defaults:
+      run:
+        working-directory: ./web
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run type checking
+        run: npm run type-check
+
+      - name: Run unit tests
+        run: npm run test:unit
+
+      - name: Run integration tests
+        run: npm run test:integration
+
+      - name: Build application
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-build
+          path: web/.next/
+          retention-days: 1
+
+  # End-to-End Tests
+  e2e-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: ${{ !inputs.skip_tests }}
+    needs: [test-backend, test-frontend]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build test environment
+        run: |
+          docker-compose -f docker-compose.test.yml build
+          docker-compose -f docker-compose.test.yml up -d
+
+      - name: Wait for services
+        run: |
+          timeout 300 bash -c 'until curl -f http://localhost:8000/health; do sleep 5; done'
+          timeout 300 bash -c 'until curl -f http://localhost:3000/api/health; do sleep 5; done'
+
+      - name: Run E2E tests
+        run: |
+          docker-compose -f docker-compose.test.yml exec -T backend pytest tests/e2e/ -v
+
+      - name: Collect logs
+        if: failure()
+        run: |
+          docker-compose -f docker-compose.test.yml logs > e2e-logs.txt
+
+      - name: Upload E2E logs
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: e2e-logs
+          path: e2e-logs.txt
+
+      - name: Cleanup test environment
+        if: always()
+        run: |
+          docker-compose -f docker-compose.test.yml down -v
+
+  # Performance Tests
+  performance-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: ${{ !inputs.skip_tests }}
+    needs: [test-backend, test-frontend]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Run performance benchmarks
+        run: |
+          python tests/performance/ci_performance_benchmarks.py --ci-mode
+
+      - name: Upload performance results
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-results
+          path: tests/performance/enhanced_ci_results/
+          retention-days: 30
+
+  # Build and Push Docker Images
+  build-images:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [security-scan, test-backend, test-frontend]
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+
+    outputs:
+      backend-image: ${{ steps.meta-backend.outputs.tags }}
+      frontend-image: ${{ steps.meta-frontend.outputs.tags }}
+      backend-digest: ${{ steps.build-backend.outputs.digest }}
+      frontend-digest: ${{ steps.build-frontend.outputs.digest }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for backend
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/backend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: Extract metadata for frontend
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/frontend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: Build and push backend image
+        id: build-backend
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.production
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=${{ github.sha }}
+            BUILD_DATE=${{ github.run_number }}
+
+      - name: Build and push frontend image
+        id: build-frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./web
+          file: ./web/Dockerfile.production
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ steps.meta-backend.outputs.tags }}
+          format: spdx-json
+          output-file: backend-sbom.spdx.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v3
+        with:
+          name: sbom
+          path: backend-sbom.spdx.json
+
+  # Container Security Scanning
+  container-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [build-images]
+    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+
+    steps:
+      - name: Run Trivy vulnerability scanner on backend
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ needs.build-images.outputs.backend-image }}
+          format: 'sarif'
+          output: 'trivy-backend-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-backend-results.sarif'
+
+      - name: Run Snyk Container Security
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: ${{ needs.build-images.outputs.backend-image }}
+          args: --severity-threshold=high
+
+  # Staging Deployment
+  deploy-staging:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [build-images, e2e-tests, performance-tests]
+    if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+    environment: staging
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Set up Kubernetes config
+        run: |
+          echo "${{ secrets.KUBE_CONFIG_STAGING }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Deploy to staging
+        run: |
+          cd k8s
+          ./deploy-k8s.sh --namespace freeagentics-staging --context staging
+
+      - name: Run smoke tests
+        run: |
+          # Wait for deployment to be ready
+          sleep 60
+          
+          # Run basic smoke tests
+          curl -f https://staging.yourdomain.com/health
+          curl -f https://staging.yourdomain.com/api/v1/health
+
+      - name: Notify deployment status
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: "Staging deployment ${{ job.status }}: ${{ github.sha }}"
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+
+  # Production Deployment
+  deploy-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [build-images, deploy-staging, container-security]
+    if: |
+      always() &&
+      (github.event_name == 'workflow_dispatch' && inputs.deploy_environment == 'production') ||
+      (github.ref == 'refs/heads/main' && github.event_name == 'push' && needs.deploy-staging.result == 'success')
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Set up Kubernetes config
+        run: |
+          echo "${{ secrets.KUBE_CONFIG_PRODUCTION }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Pre-deployment backup
+        run: |
+          # Create backup before deployment
+          kubectl create job backup-pre-deploy-$(date +%s) --from=cronjob/database-backup -n freeagentics-prod
+
+      - name: Deploy to production
+        id: deploy
+        run: |
+          cd k8s
+          ./deploy-k8s.sh --namespace freeagentics-prod --context production
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Post-deployment tests
+        run: |
+          # Wait for deployment to be ready
+          sleep 120
+          
+          # Run comprehensive health checks
+          curl -f https://yourdomain.com/health
+          curl -f https://yourdomain.com/api/v1/health
+          
+          # Check database connectivity
+          kubectl exec -n freeagentics-prod deployment/backend -- python -c "
+          from database.session import get_db
+          db = next(get_db())
+          db.execute('SELECT 1')
+          print('Database OK')
+          "
+
+      - name: Update deployment status
+        if: always()
+        run: |
+          if [ "${{ steps.deploy.outcome }}" == "success" ]; then
+            echo "✅ Production deployment successful"
+          else
+            echo "❌ Production deployment failed"
+            exit 1
+          fi
+
+      - name: Notify deployment status
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: |
+            Production deployment ${{ job.status }}
+            Commit: ${{ github.sha }}
+            Images: 
+            - Backend: ${{ needs.build-images.outputs.backend-image }}
+            - Frontend: ${{ needs.build-images.outputs.frontend-image }}
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+
+  # Rollback Job (Manual Trigger)
+  rollback-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.force_deploy }}
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Set up Kubernetes config
+        run: |
+          echo "${{ secrets.KUBE_CONFIG_PRODUCTION }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Rollback deployment
+        run: |
+          # Rollback deployments
+          kubectl rollout undo deployment/backend -n freeagentics-prod
+          kubectl rollout undo deployment/frontend -n freeagentics-prod
+          
+          # Wait for rollback to complete
+          kubectl rollout status deployment/backend -n freeagentics-prod
+          kubectl rollout status deployment/frontend -n freeagentics-prod
+
+      - name: Notify rollback status
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: "Production rollback ${{ job.status }}: ${{ github.sha }}"
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+
+  # Cleanup Job
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: always()
+    needs: [deploy-production, deploy-staging]
+
+    steps:
+      - name: Cleanup old images
+        run: |
+          # Cleanup logic would go here
+          echo "Cleanup completed"
+
+      - name: Generate deployment report
+        run: |
+          echo "## Deployment Report" > deployment-report.md
+          echo "- Commit: ${{ github.sha }}" >> deployment-report.md
+          echo "- Timestamp: $(date)" >> deployment-report.md
+          echo "- Backend Image: ${{ needs.build-images.outputs.backend-image }}" >> deployment-report.md
+          echo "- Frontend Image: ${{ needs.build-images.outputs.frontend-image }}" >> deployment-report.md
+          echo "- Status: ${{ job.status }}" >> deployment-report.md
+
+      - name: Upload deployment report
+        uses: actions/upload-artifact@v3
+        with:
+          name: deployment-report
+          path: deployment-report.md

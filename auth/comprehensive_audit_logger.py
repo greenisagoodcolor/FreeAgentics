@@ -68,7 +68,7 @@ class AccessDecisionAuditor:
                 "endpoint": endpoint,
                 "resource_id": resource_id,
                 "decision": "allow" if has_permission else "deny",
-                **metadata or {}
+                **(metadata or {})
             }
         )
     
@@ -120,7 +120,7 @@ class AccessDecisionAuditor:
                 "decision": "allow" if decision else "deny",
                 "reason": reason,
                 "applied_rules": applied_rules,
-                **context or {}
+                **(context or {})
             }
         )
     
@@ -172,7 +172,7 @@ class AccessDecisionAuditor:
                 "admin_override": admin_override,
                 "decision": "allow" if decision_result else "deny",
                 "reason": reason,
-                **metadata or {}
+                **(metadata or {})
             }
         )
     
@@ -233,7 +233,7 @@ class AccessDecisionAuditor:
                 "session_id": session_id,
                 "ip_address": ip_address,
                 "user_agent": user_agent,
-                **metadata or {}
+                **(metadata or {})
             }
         )
     
@@ -323,7 +323,7 @@ class AccessDecisionAuditor:
                 "attempted_permission": attempted_permission,
                 "endpoint": endpoint,
                 "blocked": blocked,
-                **metadata or {}
+                **(metadata or {})
             }
         )
     
@@ -375,7 +375,7 @@ class AccessDecisionAuditor:
                 "action": action,
                 "sensitivity_level": sensitivity_level,
                 "authorized": authorized,
-                **metadata or {}
+                **(metadata or {})
             }
         )
     

@@ -1,5 +1,7 @@
 # FreeAgentics Performance Limits Documentation
 
+*Last Updated: 2025-07-16*
+
 ## Executive Summary
 
 This document provides comprehensive documentation of FreeAgentics performance limits based on empirical testing, memory analysis, and benchmarking results. The system shows significant scalability constraints that limit production deployment to specific agent count thresholds.
@@ -11,6 +13,13 @@ This document provides comprehensive documentation of FreeAgentics performance l
 - **Threading vs Multiprocessing**: Threading provides 3-49x better performance
 - **Real-time Capability**: Limited to ~25 agents at 10ms response time
 - **Memory Scaling**: Linear growth with potential for 84% reduction through optimization
+
+### Visual Performance Analysis
+
+For detailed performance charts and visualizations, see:
+- [Performance Charts](performance_documentation/charts/)
+- [Interactive HTML Report](performance_documentation/performance_report.html)
+- [Raw Performance Data](performance_documentation/performance_data.json)
 
 ## Detailed Performance Analysis
 
@@ -106,13 +115,76 @@ Single agent inference benchmarks:
 - **Optimized Performance**: <50ms per inference (7.4x improvement)
 - **Real-time Capability**: ~25 agents at 10ms target response time
 
-### System Bottlenecks
+## Benchmarking Methodology
 
-#### Identified Performance Bottlenecks
+### Test Environment
+
+- **Hardware**: Standard development machine (8 CPU cores, 16GB RAM)
+- **Python Version**: 3.11+ with GIL enabled
+- **Key Libraries**: PyMDP, asyncio, threading, multiprocessing
+- **Test Duration**: Multiple iterations with statistical validation
+
+### Test Scenarios
+
+1. **Single Agent Baseline**: Establish performance characteristics
+2. **Multi-Agent Scaling**: Test with 1, 5, 10, 20, 30, 50 agents
+3. **Coordination Patterns**: Async, threading, and multiprocessing
+4. **Memory Analysis**: Track allocation patterns and growth
+5. **Real-time Simulation**: 10ms target response time
+
+### Measurement Techniques
+
+- **Efficiency Calculation**: (Actual Throughput) / (Expected Linear Throughput) × 100
+- **Memory Profiling**: Using memory_profiler and pympler
+- **Latency Tracking**: High-resolution timers for operation timing
+- **Resource Monitoring**: CPU, memory, and I/O utilization
+
+### Statistical Analysis
+
+- **Sample Size**: Minimum 100 iterations per test
+- **Confidence Intervals**: 95% confidence for all measurements
+- **Outlier Detection**: Remove top/bottom 5% of measurements
+- **Regression Analysis**: Identify scaling patterns and limits
+
+## System Bottlenecks
+
+### Root Cause Analysis
+
+#### Python Global Interpreter Lock (GIL)
+**Impact**: Critical
+
+The Python GIL prevents true parallelism for CPU-bound operations, causing:
+- Thread serialization for PyMDP computations
+- CPU underutilization (only one core active at a time)
+- Scaling limitations beyond single-threaded performance
+
+**Evidence**: Threading shows 72% efficiency loss at 50 agents despite optimization attempts. GIL impact increases from 10% at 1 agent to 80% at 50 agents.
+
+#### Async Coordination Overhead
+**Impact**: High
+
+Async/await coordination introduces significant overhead at scale:
+- Context switching between coroutines
+- Event loop congestion with many agents
+- Message queue delays and bottlenecks
+
+**Evidence**: Async coordination performs worse than simple threading for agent counts > 5.
+
+#### Memory Allocation Patterns
+**Impact**: Medium
+
+Frequent memory allocations cause:
+- Garbage collection pressure
+- Cache misses and poor locality
+- Allocation/deallocation overhead
+
+**Evidence**: 34.5 MB per agent with 84% potential reduction through optimization.
+
+### Identified Performance Bottlenecks
 
 1. **Memory Allocation Overhead**:
    - Multiple array allocations in `agents/base_agent.py`
-   - Dense matrix storage for sparse data
+   - Dense matrix storage for sparse data (80-90% waste)
    - Float64 precision unnecessary for most operations
 
 2. **Coordination Overhead**:

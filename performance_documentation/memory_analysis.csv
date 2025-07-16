@@ -1,0 +1,2 @@
+per_agent_mb,growth_rate,optimization_potential,breakdown,hotspots
+34.5,linear,84.0,"{'pymdp_matrices': 70.0, 'belief_states': 15.0, 'agent_overhead': 15.0}","['Dense matrix storage (80-90% savings possible with sparse)', 'Float64 arrays (50% savings possible with float32)', 'Multiple belief state allocations in base_agent.py']"
