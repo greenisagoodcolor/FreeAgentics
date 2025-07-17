@@ -1,0 +1,14 @@
+{
+  "service_name": "service-36",
+  "fingerprint": "49875254d10a629fe469460acf8b0141129d1c09760c068d4fb1ebd20afe46b2",
+  "serial_number": 611873779662795746645150078465262264513683244211,
+  "issued_at": "2025-07-16T21:28:23",
+  "expires_at": "2025-08-15T21:28:23",
+  "dns_names": [
+    "service-36",
+    "service-36.local",
+    "service-36.cluster.local"
+  ],
+  "revoked": false,
+  "revocation_reason": null
+}

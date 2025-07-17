@@ -653,3 +653,52 @@ def create_middleware(
     """Create rate limit middleware for FastAPI."""
     rate_limiter = create_rate_limiter(redis_url, config_file)
     return RateLimitMiddleware(app, rate_limiter, get_user_id)
+
+
+# Global rate limiter instance
+_global_rate_limiter = None
+
+
+def get_global_rate_limiter() -> RateLimiter:
+    """Get or create global rate limiter instance."""
+    global _global_rate_limiter
+    if _global_rate_limiter is None:
+        _global_rate_limiter = create_rate_limiter()
+    return _global_rate_limiter
+
+
+def rate_limit(
+    max_requests: int = 100,
+    window_seconds: int = 60,
+    algorithm: RateLimitAlgorithm = RateLimitAlgorithm.SLIDING_WINDOW,
+):
+    """Decorator for rate limiting individual endpoints."""
+
+    def decorator(func):
+        async def wrapper(request: Request, *args, **kwargs):
+            rate_limiter = get_global_rate_limiter()
+            await rate_limiter.connect()
+
+            # Create temporary config for this endpoint
+            config = RateLimitConfig(
+                max_requests=max_requests, window_seconds=window_seconds, algorithm=algorithm
+            )
+
+            ip = rate_limiter.get_client_ip(request)
+            identifier = f"ip:{ip}"
+
+            # Check rate limit
+            allowed, info = await rate_limiter.check_rate_limit(identifier, config)
+
+            if not allowed:
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail="Rate limit exceeded",
+                    headers={"Retry-After": str(info.get("retry_after", 60))},
+                )
+
+            return await func(request, *args, **kwargs)
+
+        return wrapper
+
+    return decorator

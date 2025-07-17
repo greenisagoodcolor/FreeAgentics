@@ -1,0 +1,14 @@
+{
+  "service_name": "service-48",
+  "fingerprint": "66dce7e36131236f6f92b8bea6e091df4c6b156bcef5bedeae9f11d6a363101f",
+  "serial_number": 723978766831986714758843999927100604803080861647,
+  "issued_at": "2025-07-16T21:28:24",
+  "expires_at": "2025-08-15T21:28:24",
+  "dns_names": [
+    "service-48",
+    "service-48.local",
+    "service-48.cluster.local"
+  ],
+  "revoked": false,
+  "revocation_reason": null
+}

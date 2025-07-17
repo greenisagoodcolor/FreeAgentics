@@ -1,0 +1,14 @@
+{
+  "service_name": "service-83",
+  "fingerprint": "933d5764f12ef6cd04f5eb840d5540c8f890d8a5ab29ffc1141d9844184a4ab4",
+  "serial_number": 10355775769463357022057569873038611631055155875,
+  "issued_at": "2025-07-16T21:27:56",
+  "expires_at": "2025-08-15T21:27:56",
+  "dns_names": [
+    "service-83",
+    "service-83.local",
+    "service-83.cluster.local"
+  ],
+  "revoked": false,
+  "revocation_reason": null
+}

@@ -1,0 +1,14 @@
+{
+  "service_name": "service-22",
+  "fingerprint": "9e371bda61d50e7f8641dbfcf0dfeefcc0f13aefe0e8ac5088fdde2e4fd781fe",
+  "serial_number": 484407233934378079175489826527652884268935229147,
+  "issued_at": "2025-07-16T21:28:23",
+  "expires_at": "2025-08-15T21:28:23",
+  "dns_names": [
+    "service-22",
+    "service-22.local",
+    "service-22.cluster.local"
+  ],
+  "revoked": false,
+  "revocation_reason": null
+}

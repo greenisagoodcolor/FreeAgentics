@@ -1,0 +1,14 @@
+{
+  "service_name": "service-17",
+  "fingerprint": "535603d0e719d4de80e4597f1d2ff284b67438f8e609418b3274320f92efc0f2",
+  "serial_number": 727204233924264869346849728160023667903098198426,
+  "issued_at": "2025-07-16T21:28:22",
+  "expires_at": "2025-08-15T21:28:22",
+  "dns_names": [
+    "service-17",
+    "service-17.local",
+    "service-17.cluster.local"
+  ],
+  "revoked": false,
+  "revocation_reason": null
+}

@@ -8,6 +8,7 @@ Following TDD principles for minimal implementation.
 import logging
 from typing import Any, Optional
 
+import numpy as np
 from sqlalchemy import Engine, create_engine, text
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.exc import TimeoutError as SQLTimeoutError

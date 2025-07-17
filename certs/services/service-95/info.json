@@ -1,0 +1,14 @@
+{
+  "service_name": "service-95",
+  "fingerprint": "e9d980d0869825de5ab4cbd4981f79a8a9eaef514e7d5cb37f76986b42d44897",
+  "serial_number": 174592484146330242763656501322745414618797209340,
+  "issued_at": "2025-07-16T21:27:57",
+  "expires_at": "2025-08-15T21:27:57",
+  "dns_names": [
+    "service-95",
+    "service-95.local",
+    "service-95.cluster.local"
+  ],
+  "revoked": false,
+  "revocation_reason": null
+}

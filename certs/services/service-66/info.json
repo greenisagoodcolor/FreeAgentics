@@ -1,0 +1,14 @@
+{
+  "service_name": "service-66",
+  "fingerprint": "6b2c2c62b0e41da3d5def46ac5fe98f6a7d634b5db624c67c36391777eae437c",
+  "serial_number": 671491951278326476856435944115476449301439627116,
+  "issued_at": "2025-07-16T21:27:56",
+  "expires_at": "2025-08-15T21:27:56",
+  "dns_names": [
+    "service-66",
+    "service-66.local",
+    "service-66.cluster.local"
+  ],
+  "revoked": false,
+  "revocation_reason": null
+}

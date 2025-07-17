@@ -1,0 +1,14 @@
+{
+  "service_name": "service-28",
+  "fingerprint": "0baf78ea7c5df84af0d6056ede31e0015cc851050f52c562b7db7c3dc7d715c7",
+  "serial_number": 682290437516190123815980552136882433734037518325,
+  "issued_at": "2025-07-16T21:28:23",
+  "expires_at": "2025-08-15T21:28:23",
+  "dns_names": [
+    "service-28",
+    "service-28.local",
+    "service-28.cluster.local"
+  ],
+  "revoked": false,
+  "revocation_reason": null
+}

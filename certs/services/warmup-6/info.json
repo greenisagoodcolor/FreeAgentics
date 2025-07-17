@@ -1,0 +1,14 @@
+{
+  "service_name": "warmup-6",
+  "fingerprint": "eed91f3a72fb6d322eda35f76904db6fc7fd8c65a5cba6c4b11f17f22c901e0b",
+  "serial_number": 478136169614109669067900952660940782321370259673,
+  "issued_at": "2025-07-16T21:28:20",
+  "expires_at": "2025-08-15T21:28:20",
+  "dns_names": [
+    "warmup-6",
+    "warmup-6.local",
+    "warmup-6.cluster.local"
+  ],
+  "revoked": false,
+  "revocation_reason": null
+}

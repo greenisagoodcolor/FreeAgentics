@@ -1,0 +1,14 @@
+{
+  "service_name": "service-44",
+  "fingerprint": "ade27e7ae916ffecae1b78f307b660e0ed0b02827ce09e281f75441bc7e82d5e",
+  "serial_number": 228981093995137196303169799841120316421866544738,
+  "issued_at": "2025-07-16T21:28:24",
+  "expires_at": "2025-08-15T21:28:24",
+  "dns_names": [
+    "service-44",
+    "service-44.local",
+    "service-44.cluster.local"
+  ],
+  "revoked": false,
+  "revocation_reason": null
+}

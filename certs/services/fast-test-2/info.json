@@ -1,0 +1,14 @@
+{
+  "service_name": "fast-test-2",
+  "fingerprint": "5cc44fa7c7a9cf572c03dc932d0862a080b94ab321df7c6180bdedfb704ed0fb",
+  "serial_number": 296290130837379630861245452083546694321105179313,
+  "issued_at": "2025-07-16T21:28:24",
+  "expires_at": "2025-08-15T21:28:24",
+  "dns_names": [
+    "fast-test-2",
+    "fast-test-2.local",
+    "fast-test-2.cluster.local"
+  ],
+  "revoked": false,
+  "revocation_reason": null
+}

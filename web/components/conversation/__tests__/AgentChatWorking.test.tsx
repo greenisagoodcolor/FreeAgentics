@@ -21,69 +21,79 @@ jest.mock("@/lib/websocket-client", () => ({
 }));
 
 describe("AgentChat - Working Implementation", () => {
-  const mockAgents: Agent[] = [
-    {
-      id: "agent-1",
-      name: "Test Agent 1",
-      template: "test",
-      status: "active",
-      pymdp_config: {},
-      beliefs: {},
-      preferences: {},
-      metrics: {},
-      parameters: {},
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      inference_count: 0,
-      total_steps: 0,
-      avatar: "/test-avatar-1.png",
-    },
-    {
-      id: "agent-2",
-      name: "Test Agent 2",
-      template: "test",
-      status: "active",
-      pymdp_config: {},
-      beliefs: {},
-      preferences: {},
-      metrics: {},
-      parameters: {},
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      inference_count: 0,
-      total_steps: 0,
-      avatar: "/test-avatar-2.png",
-    },
-  ];
+  const mockAgent: Agent = {
+    id: "agent-1",
+    name: "Test Agent 1",
+    template: "test",
+    status: "active",
+    pymdp_config: {},
+    beliefs: {},
+    preferences: {},
+    metrics: {},
+    parameters: {},
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    inference_count: 0,
+    total_steps: 0,
+    avatar: "/test-avatar-1.png",
+  };
 
-  const mockChannels = [
-    {
-      id: "channel-1",
-      name: "Test Channel 1",
-      type: "group" as const,
-      participants: ["agent-1", "agent-2"],
-      unreadCount: 2,
-      lastMessage: {
-        id: "msg-1",
-        agentId: "agent-2",
-        content: "Hello from agent 2",
-        timestamp: new Date().toISOString(),
-        type: "text" as const,
-      },
-    },
-    {
-      id: "channel-2",
-      name: "Direct Chat",
-      type: "direct" as const,
-      participants: ["agent-1", "agent-2"],
-      unreadCount: 0,
-    },
-  ];
+  // Mock agents - keeping for future test cases
+  // const mockAgents: Agent[] = [
+  //   mockAgent,
+  //   {
+  //     id: "agent-2",
+  //     name: "Test Agent 2",
+  //     template: "test",
+  //     status: "active",
+  //     pymdp_config: {},
+  //     beliefs: {},
+  //     preferences: {},
+  //     metrics: {},
+  //     parameters: {},
+  //     created_at: new Date().toISOString(),
+  //     updated_at: new Date().toISOString(),
+  //     inference_count: 0,
+  //     total_steps: 0,
+  //     avatar: "/test-avatar-2.png",
+  //   },
+  // ];
+
+  // const mockChannels = [
+  //   {
+  //     id: "channel-1",
+  //     name: "Test Channel 1",
+  //     type: "group" as const,
+  //     participants: ["agent-1", "agent-2"],
+  //     unreadCount: 2,
+  //     lastMessage: {
+  //       id: "msg-1",
+  //       agentId: "agent-2",
+  //       content: "Hello from agent 2",
+  //       timestamp: new Date().toISOString(),
+  //       type: "text" as const,
+  //     },
+  //   },
+  //   {
+  //     id: "channel-2",
+  //     name: "Direct Chat",
+  //     type: "direct" as const,
+  //     participants: ["agent-1", "agent-2"],
+  //     unreadCount: 0,
+  //   },
+  // ];
 
   const defaultProps = {
-    currentAgentId: "agent-1",
-    agents: mockAgents,
-    channels: mockChannels,
+    agent: mockAgent,
+    messages: [
+      {
+        id: "msg-1",
+        content: "Hello from agent 2",
+        role: "agent" as const,
+        timestamp: new Date().toISOString(),
+      },
+    ],
+    onSendMessage: jest.fn(),
   };
 
   beforeEach(() => {
@@ -92,27 +102,26 @@ describe("AgentChat - Working Implementation", () => {
 
   it("renders without crashing", () => {
     render(<AgentChat {...defaultProps} />);
-    expect(screen.getByText("Channels")).toBeInTheDocument();
+    expect(screen.getByText("Test Agent 1")).toBeInTheDocument();
   });
 
-  it("displays channels in the sidebar", () => {
+  it("displays agent name in header", () => {
     render(<AgentChat {...defaultProps} />);
 
-    expect(screen.getByText("Test Channel 1")).toBeInTheDocument();
-    expect(screen.getByText("Direct Chat")).toBeInTheDocument();
+    expect(screen.getByText("Test Agent 1")).toBeInTheDocument();
   });
 
-  it("shows unread count badges", () => {
-    render(<AgentChat {...defaultProps} />);
-
-    const unreadBadge = screen.getByText("2");
-    expect(unreadBadge).toBeInTheDocument();
-  });
-
-  it("displays last message preview", () => {
+  it("displays messages", () => {
     render(<AgentChat {...defaultProps} />);
 
     expect(screen.getByText("Hello from agent 2")).toBeInTheDocument();
+  });
+
+  it("displays message input", () => {
+    render(<AgentChat {...defaultProps} />);
+
+    expect(screen.getByPlaceholderText("Type a message...")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Send" })).toBeInTheDocument();
   });
 
   it("shows connection status", () => {

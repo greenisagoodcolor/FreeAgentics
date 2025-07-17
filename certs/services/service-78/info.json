@@ -1,0 +1,14 @@
+{
+  "service_name": "service-78",
+  "fingerprint": "48fa8099cc833ac1a11c0cc0c371a8fb7218f05ac1296b2895208975c30fb97c",
+  "serial_number": 118808755564743878639727142959266105221107768171,
+  "issued_at": "2025-07-16T21:27:56",
+  "expires_at": "2025-08-15T21:27:56",
+  "dns_names": [
+    "service-78",
+    "service-78.local",
+    "service-78.cluster.local"
+  ],
+  "revoked": false,
+  "revocation_reason": null
+}

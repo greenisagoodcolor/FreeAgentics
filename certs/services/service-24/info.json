@@ -1,0 +1,14 @@
+{
+  "service_name": "service-24",
+  "fingerprint": "4606a2f82e4224d06b85d9d877bf31b24d38b99922e340ae04ff1f808dee37a7",
+  "serial_number": 31911222255931241237317224021665778570276237531,
+  "issued_at": "2025-07-16T21:28:23",
+  "expires_at": "2025-08-15T21:28:23",
+  "dns_names": [
+    "service-24",
+    "service-24.local",
+    "service-24.cluster.local"
+  ],
+  "revoked": false,
+  "revocation_reason": null
+}

@@ -1,0 +1,14 @@
+{
+  "service_name": "service-49",
+  "fingerprint": "71344109b042f4097100ba06f5bc4184125a90c46c4f8213c98631e260f51618",
+  "serial_number": 661038034735482145275304285393087840004767519020,
+  "issued_at": "2025-07-16T21:28:24",
+  "expires_at": "2025-08-15T21:28:24",
+  "dns_names": [
+    "service-49",
+    "service-49.local",
+    "service-49.cluster.local"
+  ],
+  "revoked": false,
+  "revocation_reason": null
+}

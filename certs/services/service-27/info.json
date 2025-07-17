@@ -1,0 +1,14 @@
+{
+  "service_name": "service-27",
+  "fingerprint": "bc7ff7d189a065d8abd7a876e2db4b319a602cf685d480cbe00347fc4289ce88",
+  "serial_number": 712198843422548888723713280892128352090632398324,
+  "issued_at": "2025-07-16T21:28:23",
+  "expires_at": "2025-08-15T21:28:23",
+  "dns_names": [
+    "service-27",
+    "service-27.local",
+    "service-27.cluster.local"
+  ],
+  "revoked": false,
+  "revocation_reason": null
+}

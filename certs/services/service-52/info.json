@@ -1,0 +1,14 @@
+{
+  "service_name": "service-52",
+  "fingerprint": "3d3592655a69e0feeffbec5edf9056036cd5e4be2c1c2cc703762a94fdb4cb25",
+  "serial_number": 288010309099813022641517594387105848293381402585,
+  "issued_at": "2025-07-16T21:27:55",
+  "expires_at": "2025-08-15T21:27:55",
+  "dns_names": [
+    "service-52",
+    "service-52.local",
+    "service-52.cluster.local"
+  ],
+  "revoked": false,
+  "revocation_reason": null
+}

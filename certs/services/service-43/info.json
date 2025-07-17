@@ -1,0 +1,14 @@
+{
+  "service_name": "service-43",
+  "fingerprint": "066aa281e12c33c0584be26bdda2fb5d617e905762cb7bb6835ece74c140a56f",
+  "serial_number": 551941038760426520751579200170931916009563304599,
+  "issued_at": "2025-07-16T21:28:23",
+  "expires_at": "2025-08-15T21:28:23",
+  "dns_names": [
+    "service-43",
+    "service-43.local",
+    "service-43.cluster.local"
+  ],
+  "revoked": false,
+  "revocation_reason": null
+}

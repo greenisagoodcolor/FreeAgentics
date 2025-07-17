@@ -1,0 +1,14 @@
+{
+  "service_name": "service-50",
+  "fingerprint": "4a2a3f0b2f415a16a8d2a76e655344eed5afecd1165b2256b469a9e7647e037b",
+  "serial_number": 562666415785752258274123936216929288920521580153,
+  "issued_at": "2025-07-16T21:27:55",
+  "expires_at": "2025-08-15T21:27:55",
+  "dns_names": [
+    "service-50",
+    "service-50.local",
+    "service-50.cluster.local"
+  ],
+  "revoked": false,
+  "revocation_reason": null
+}

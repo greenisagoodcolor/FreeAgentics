@@ -1,0 +1,236 @@
+# Zero-Trust Service Mesh Configuration
+# Generated configuration for service mesh deployment with mTLS and traffic policies
+
+mesh_type: istio
+
+# Service definitions
+services:
+  frontend:
+    namespace: production
+    port: 80
+    version: v1
+    labels:
+      app: frontend
+      tier: presentation
+  
+  api-gateway:
+    namespace: production
+    port: 8080
+    version: v1
+    labels:
+      app: api-gateway
+      tier: gateway
+  
+  auth-service:
+    namespace: production
+    port: 8443
+    version: v1
+    labels:
+      app: auth-service
+      tier: security
+  
+  data-service:
+    namespace: production
+    port: 9090
+    version: v1
+    labels:
+      app: data-service
+      tier: data
+
+# Traffic management policies
+traffic_policies:
+  - name: frontend-to-api
+    source: frontend
+    destination: api-gateway
+    tls_mode: ISTIO_MUTUAL
+    load_balancer: ROUND_ROBIN
+    retry_attempts: 3
+    timeout_seconds: 30
+    connection_pool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 10
+        http2MaxRequests: 100
+    outlier_detection:
+      consecutiveErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+  
+  - name: api-to-auth
+    source: api-gateway
+    destination: auth-service
+    tls_mode: ISTIO_MUTUAL
+    load_balancer: ROUND_ROBIN
+    retry_attempts: 2
+    timeout_seconds: 10
+    connection_pool:
+      tcp:
+        maxConnections: 50
+      http:
+        http1MaxPendingRequests: 5
+        http2MaxRequests: 50
+  
+  - name: api-to-data
+    source: api-gateway
+    destination: data-service
+    tls_mode: ISTIO_MUTUAL
+    load_balancer: LEAST_REQUEST
+    retry_attempts: 3
+    timeout_seconds: 20
+
+# Service access policies
+service_policies:
+  - source: frontend
+    target: api-gateway
+    allowed_operations:
+      - read
+      - write
+    allowed_methods:
+      - GET
+      - POST
+      - PUT
+    mtls_required: true
+    conditions:
+      rate_limit: 1000  # requests per minute
+      time_window:
+        start: "00:00"
+        end: "23:59"
+  
+  - source: api-gateway
+    target: auth-service
+    allowed_operations:
+      - authenticate
+      - validate
+      - refresh
+    allowed_methods:
+      - POST
+    mtls_required: true
+    conditions:
+      rate_limit: 500
+      circuit_breaker:
+        consecutive_failures: 3
+        timeout: 30s
+  
+  - source: api-gateway
+    target: data-service
+    allowed_operations:
+      - read
+      - write
+      - delete
+    allowed_methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+    mtls_required: true
+    conditions:
+      rate_limit: 2000
+
+# Encryption policies
+encryption_policies:
+  auth-service:
+    min_tls_version: "1.3"
+    cipher_suites:
+      - TLS_AES_256_GCM_SHA384
+      - TLS_CHACHA20_POLY1305_SHA256
+    client_cert_required: true
+    verify_subject_alt_name:
+      - api-gateway.production.svc.cluster.local
+  
+  data-service:
+    min_tls_version: "1.3"
+    cipher_suites:
+      - TLS_AES_256_GCM_SHA384
+      - TLS_AES_128_GCM_SHA256
+    client_cert_required: true
+
+# Routing rules for canary deployments
+routing_rules:
+  api-gateway:
+    version_weights:
+      v1: 90
+      v2: 10
+    sticky_sessions: true
+    load_balancer_type: ROUND_ROBIN
+    health_check:
+      path: /health
+      interval: 10s
+      timeout: 3s
+  
+  data-service:
+    version_weights:
+      v1: 100
+    sticky_sessions: false
+    load_balancer_type: LEAST_REQUEST
+
+# Global mesh configuration
+global_config:
+  mtls:
+    mode: STRICT
+    certificate_chain_depth: 2
+  
+  observability:
+    metrics:
+      enabled: true
+      prometheus:
+        enabled: true
+    tracing:
+      enabled: true
+      sampling_rate: 0.1
+      provider: jaeger
+    access_logs:
+      enabled: true
+      format: JSON
+  
+  security:
+    authorization_mode: ENFORCE
+    jwt_validation:
+      enabled: true
+      issuers:
+        - https://auth.example.com
+    
+  resilience:
+    retry_policy:
+      attempts: 3
+      per_try_timeout: 5s
+      retry_on:
+        - 5xx
+        - reset
+        - connect-failure
+        - refused-stream
+    
+    circuit_breaker:
+      consecutive_errors: 5
+      interval: 30s
+      base_ejection_time: 30s
+      max_ejection_percent: 50
+
+# Service mesh deployment configuration
+deployment:
+  control_plane:
+    namespace: istio-system
+    resources:
+      pilot:
+        cpu: 2
+        memory: 4Gi
+      citadel:
+        cpu: 1
+        memory: 2Gi
+      telemetry:
+        cpu: 1
+        memory: 2Gi
+  
+  data_plane:
+    sidecar_injection:
+      enabled: true
+      namespace_selector:
+        - production
+        - staging
+    resources:
+      proxy:
+        cpu: 100m
+        memory: 128Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
