@@ -65,8 +65,12 @@ class BaseE2ETest(ABC):
 
     async def teardown(self):
         """Teardown method called after each test"""
-        test_duration = time.time() - self.test_start_time if self.test_start_time else 0
-        logger.info(f"Finished E2E test: {self.__class__.__name__} in {test_duration:.2f}s")
+        test_duration = (
+            time.time() - self.test_start_time if self.test_start_time else 0
+        )
+        logger.info(
+            f"Finished E2E test: {self.__class__.__name__} in {test_duration:.2f}s"
+        )
 
         # Cleanup driver
         await self._cleanup_driver()
@@ -109,7 +113,9 @@ class BaseE2ETest(ABC):
 
         try:
             engine = create_engine(self.config.test_db_url)
-            SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+            SessionLocal = sessionmaker(
+                autocommit=False, autoflush=False, bind=engine
+            )
             self.session = SessionLocal()
 
             # Create test tables if needed
@@ -159,7 +165,9 @@ class BaseE2ETest(ABC):
             try:
                 if service == "backend":
                     async with httpx.AsyncClient() as client:
-                        response = await client.get(f"{self.config.base_url}/health")
+                        response = await client.get(
+                            f"{self.config.base_url}/health"
+                        )
                         if response.status_code == 200:
                             logger.info(f"Service {service} is ready")
                             return
@@ -185,12 +193,16 @@ class BaseE2ETest(ABC):
                     return
 
             except Exception as e:
-                logger.debug(f"Service {service} not ready (attempt {attempt + 1}): {e}")
+                logger.debug(
+                    f"Service {service} not ready (attempt {attempt + 1}): {e}"
+                )
 
             if attempt < max_retries - 1:
                 await asyncio.sleep(retry_delay)
 
-        logger.warning(f"Service {service} not ready after {max_retries} attempts")
+        logger.warning(
+            f"Service {service} not ready after {max_retries} attempts"
+        )
 
     # Helper methods for common test operations
 
@@ -226,7 +238,9 @@ class BaseE2ETest(ABC):
             path = self.config.get_screenshot_path(filename)
             await self.driver.screenshot(path)
 
-    async def api_request(self, method: str, endpoint: str, **kwargs) -> httpx.Response:
+    async def api_request(
+        self, method: str, endpoint: str, **kwargs
+    ) -> httpx.Response:
         """Make an API request"""
         url = f"{self.config.api_url}{endpoint}"
         async with httpx.AsyncClient() as client:
@@ -257,9 +271,13 @@ class BaseE2ETest(ABC):
 
     def assert_api_response_ok(self, response: httpx.Response):
         """Assert that API response is OK"""
-        assert response.status_code == 200, f"Expected 200, got {response.status_code}"
+        assert (
+            response.status_code == 200
+        ), f"Expected 200, got {response.status_code}"
 
-    def assert_api_response_json(self, response: httpx.Response, expected_keys: List[str]):
+    def assert_api_response_json(
+        self, response: httpx.Response, expected_keys: List[str]
+    ):
         """Assert that API response contains expected JSON keys"""
         data = response.json()
         for key in expected_keys:

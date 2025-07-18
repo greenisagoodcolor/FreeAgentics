@@ -15,7 +15,10 @@ from knowledge_graph.conversation_monitoring import (
     ConversationMonitor,
 )
 from knowledge_graph.entity_node_mapper import EntityNodeMapper, GraphEngine
-from knowledge_graph.nlp_entity_extractor import ExtractionResult, NLPEntityExtractor
+from knowledge_graph.nlp_entity_extractor import (
+    ExtractionResult,
+    NLPEntityExtractor,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +30,9 @@ class ConversationAutoUpdater:
     """
 
     def __init__(
-        self, graph_engine: Optional[GraphEngine] = None, nlp_model: str = "en_core_web_sm"
+        self,
+        graph_engine: Optional[GraphEngine] = None,
+        nlp_model: str = "en_core_web_sm",
     ):
         """Initialize the auto-updater with real NLP components"""
         self.graph_engine = graph_engine or GraphEngine()
@@ -59,7 +64,9 @@ class ConversationAutoUpdater:
         await self.conversation_monitor.stop()
         logger.info("Conversation Auto-Updater stopped")
 
-    async def process_conversation(self, conversation: Conversation) -> Dict[str, Any]:
+    async def process_conversation(
+        self, conversation: Conversation
+    ) -> Dict[str, Any]:
         """
         Process an entire conversation and update the knowledge graph
         Returns statistics about the processing
@@ -81,13 +88,19 @@ class ConversationAutoUpdater:
 
             # Calculate processing time
             end_time = datetime.utcnow()
-            conversation_stats["processing_time"] = (end_time - start_time).total_seconds()
+            conversation_stats["processing_time"] = (
+                end_time - start_time
+            ).total_seconds()
 
-            logger.info(f"Processed conversation {conversation.id}: {conversation_stats}")
+            logger.info(
+                f"Processed conversation {conversation.id}: {conversation_stats}"
+            )
             return conversation_stats
 
         except Exception as e:
-            logger.error(f"Error processing conversation {conversation.id}: {e}")
+            logger.error(
+                f"Error processing conversation {conversation.id}: {e}"
+            )
             conversation_stats["error"] = str(e)
             self.stats["errors"] += 1
             return conversation_stats
@@ -111,11 +124,15 @@ class ConversationAutoUpdater:
 
             # Map entities to nodes
             if extraction_result.entities:
-                entity_mappings = await self.entity_mapper.map_entities(extraction_result.entities)
+                entity_mappings = await self.entity_mapper.map_entities(
+                    extraction_result.entities
+                )
 
                 # Map relationships to edges
                 for relationship in extraction_result.relationships:
-                    await self.entity_mapper.map_relationship(relationship, entity_mappings)
+                    await self.entity_mapper.map_relationship(
+                        relationship, entity_mappings
+                    )
                     self.stats["relationships_created"] += 1
 
                 self.stats["nodes_created"] += len(entity_mappings)
@@ -180,7 +197,9 @@ class ConversationAutoUpdater:
             "errors": 0,
         }
 
-    async def query_knowledge_for_conversation(self, conversation_id: str) -> List[Dict[str, Any]]:
+    async def query_knowledge_for_conversation(
+        self, conversation_id: str
+    ) -> List[Dict[str, Any]]:
         """
         Query the knowledge graph for entities related to a conversation
         Provides the bidirectional sync - getting knowledge back to inform conversations
@@ -210,7 +229,9 @@ class ConversationAutoUpdater:
             for node in related_nodes:
                 for edge_id, edge in self.graph_engine.graph.edges.items():
                     if edge.source_id == node["id"]:
-                        target_node = self.graph_engine.graph.nodes.get(edge.target_id)
+                        target_node = self.graph_engine.graph.nodes.get(
+                            edge.target_id
+                        )
                         if target_node:
                             connected_nodes.append(
                                 {
@@ -231,7 +252,9 @@ class ConversationAutoUpdater:
             }
 
         except Exception as e:
-            logger.error(f"Error querying knowledge for conversation {conversation_id}: {e}")
+            logger.error(
+                f"Error querying knowledge for conversation {conversation_id}: {e}"
+            )
             return {"error": str(e)}
 
     async def suggest_conversation_context(
@@ -243,21 +266,27 @@ class ConversationAutoUpdater:
         """
         try:
             # Extract entities from current message
-            extraction_result = self.nlp_extractor.extract_entities(current_message)
+            extraction_result = self.nlp_extractor.extract_entities(
+                current_message
+            )
 
             # Find related knowledge
             suggestions = []
 
             for entity in extraction_result.entities:
                 # Find existing nodes for this entity
-                existing_nodes = await self.graph_engine.find_nodes_by_name(entity.text)
+                existing_nodes = await self.graph_engine.find_nodes_by_name(
+                    entity.text
+                )
 
                 for node in existing_nodes:
                     # Get connected information
                     connected_info = []
                     for edge_id, edge in self.graph_engine.graph.edges.items():
                         if edge.source_id == node.id:
-                            target_node = self.graph_engine.graph.nodes.get(edge.target_id)
+                            target_node = self.graph_engine.graph.nodes.get(
+                                edge.target_id
+                            )
                             if target_node:
                                 connected_info.append(
                                     {
@@ -280,16 +309,22 @@ class ConversationAutoUpdater:
             return suggestions
 
         except Exception as e:
-            logger.error(f"Error generating suggestions for conversation {conversation_id}: {e}")
+            logger.error(
+                f"Error generating suggestions for conversation {conversation_id}: {e}"
+            )
             return []
 
-    async def export_conversation_knowledge(self, conversation_id: str) -> Dict[str, Any]:
+    async def export_conversation_knowledge(
+        self, conversation_id: str
+    ) -> Dict[str, Any]:
         """
         Export all knowledge derived from a specific conversation
         Useful for debugging and understanding what was learned
         """
         try:
-            knowledge = await self.query_knowledge_for_conversation(conversation_id)
+            knowledge = await self.query_knowledge_for_conversation(
+                conversation_id
+            )
 
             # Add metadata about the extraction process
             knowledge["extraction_metadata"] = {
@@ -308,5 +343,7 @@ class ConversationAutoUpdater:
             return knowledge
 
         except Exception as e:
-            logger.error(f"Error exporting knowledge for conversation {conversation_id}: {e}")
+            logger.error(
+                f"Error exporting knowledge for conversation {conversation_id}: {e}"
+            )
             return {"error": str(e)}

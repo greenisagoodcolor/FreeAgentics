@@ -16,7 +16,9 @@ import numpy as np
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from agents.memory_optimization.agent_memory_optimizer import get_agent_optimizer
+from agents.memory_optimization.agent_memory_optimizer import (
+    get_agent_optimizer,
+)
 from agents.memory_optimization.belief_compression import BeliefCompressor
 from agents.memory_optimization.efficient_structures import LazyBeliefArray
 
@@ -45,18 +47,28 @@ class RealisticAgent:
 
         # Action history with repetitive patterns (compressible)
         self.action_history = []
-        base_actions = ["move_north", "move_south", "move_east", "move_west", "stay"]
+        base_actions = [
+            "move_north",
+            "move_south",
+            "move_east",
+            "move_west",
+            "stay",
+        ]
         for _ in range(5000):
             # Repetitive pattern for compression
             action = np.random.choice(base_actions)
-            self.action_history.append(f"{action}_at_{len(self.action_history) % 100}")
+            self.action_history.append(
+                f"{action}_at_{len(self.action_history) % 100}"
+            )
 
         # Sparse observation matrix
         obs_shape = (500, 500)
         observations = np.zeros(obs_shape, dtype=np.float32)
         # Only 1% of observations are non-zero
         num_obs_nonzero = int(0.01 * observations.size)
-        obs_indices = np.random.choice(observations.size, num_obs_nonzero, replace=False)
+        obs_indices = np.random.choice(
+            observations.size, num_obs_nonzero, replace=False
+        )
         observations.flat[obs_indices] = np.random.rand(num_obs_nonzero)
         self.observations = observations
 
@@ -65,11 +77,15 @@ class RealisticAgent:
         self.transition_matrix = np.eye(trans_size, dtype=np.float32)
         # Add small noise to 0.1% of elements
         noise_indices = np.random.choice(
-            trans_size * trans_size, int(0.001 * trans_size * trans_size), replace=False
+            trans_size * trans_size,
+            int(0.001 * trans_size * trans_size),
+            replace=False,
         )
         noise_i = noise_indices // trans_size
         noise_j = noise_indices % trans_size
-        self.transition_matrix[noise_i, noise_j] += np.random.rand(len(noise_indices)) * 0.01
+        self.transition_matrix[noise_i, noise_j] += (
+            np.random.rand(len(noise_indices)) * 0.01
+        )
 
         # Large but repetitive cache (compressible)
         self.computation_cache = {}
@@ -77,7 +93,9 @@ class RealisticAgent:
             # Repetitive patterns
             key = f"cache_key_{i % 20}"
             if key not in self.computation_cache:
-                self.computation_cache[key] = np.zeros((50, 50), dtype=np.float32)
+                self.computation_cache[key] = np.zeros(
+                    (50, 50), dtype=np.float32
+                )
             self.computation_cache[key] += np.random.rand(50, 50) * 0.001
 
 
@@ -101,10 +119,14 @@ def demonstrate_optimization():
 
     # Calculate original memory
     beliefs_mb = agent.beliefs.nbytes / (1024 * 1024)
-    history_mb = sum(len(s.encode()) for s in agent.action_history) / (1024 * 1024)
+    history_mb = sum(len(s.encode()) for s in agent.action_history) / (
+        1024 * 1024
+    )
     obs_mb = agent.observations.nbytes / (1024 * 1024)
     trans_mb = agent.transition_matrix.nbytes / (1024 * 1024)
-    cache_mb = sum(v.nbytes for v in agent.computation_cache.values()) / (1024 * 1024)
+    cache_mb = sum(v.nbytes for v in agent.computation_cache.values()) / (
+        1024 * 1024
+    )
 
     original_total = beliefs_mb + history_mb + obs_mb + trans_mb + cache_mb
 
@@ -112,7 +134,9 @@ def demonstrate_optimization():
     print(
         f"  Beliefs: {beliefs_mb:.2f} MB (sparse: {np.count_nonzero(agent.beliefs)} non-zero values)"
     )
-    print(f"  Action History: {history_mb:.2f} MB ({len(agent.action_history)} actions)")
+    print(
+        f"  Action History: {history_mb:.2f} MB ({len(agent.action_history)} actions)"
+    )
     print(
         f"  Observations: {obs_mb:.2f} MB (sparse: {np.count_nonzero(agent.observations)} non-zero)"
     )
@@ -142,13 +166,17 @@ def demonstrate_optimization():
     compressor = BeliefCompressor()
     compressed_beliefs = compressor.compress(agent.beliefs)
     # Calculate compressed size from sparse representation
-    if hasattr(compressed_beliefs, "data") and hasattr(compressed_beliefs, "indices"):
+    if hasattr(compressed_beliefs, "data") and hasattr(
+        compressed_beliefs, "indices"
+    ):
         compressed_beliefs_mb = (
             compressed_beliefs.data.nbytes + compressed_beliefs.indices.nbytes
         ) / (1024 * 1024)
     else:
         compressed_beliefs_mb = beliefs_mb * 0.1  # Estimate 10x compression
-    print(f"    Original: {beliefs_mb:.2f} MB -> Compressed: {compressed_beliefs_mb:.2f} MB")
+    print(
+        f"    Original: {beliefs_mb:.2f} MB -> Compressed: {compressed_beliefs_mb:.2f} MB"
+    )
     print(
         f"    Compression ratio: {beliefs_mb / compressed_beliefs_mb:.1f}x"
         if compressed_beliefs_mb > 0
@@ -162,7 +190,9 @@ def demonstrate_optimization():
     history_bytes = json.dumps(agent.action_history).encode()
     compressed_history = zlib.compress(history_bytes, level=9)
     compressed_history_mb = len(compressed_history) / (1024 * 1024)
-    print(f"    Original: {history_mb:.2f} MB -> Compressed: {compressed_history_mb:.2f} MB")
+    print(
+        f"    Original: {history_mb:.2f} MB -> Compressed: {compressed_history_mb:.2f} MB"
+    )
     print(f"    Compression ratio: {history_mb / compressed_history_mb:.1f}x")
 
     manual_optimized = (
@@ -186,13 +216,17 @@ def demonstrate_optimization():
     # Beliefs (compressed sparse)
     if opt_memory._beliefs:
         sparse_beliefs = opt_memory._beliefs.sparse
-        belief_memory = (sparse_beliefs.data.nbytes + sparse_beliefs.indices.nbytes) / (1024 * 1024)
+        belief_memory = (
+            sparse_beliefs.data.nbytes + sparse_beliefs.indices.nbytes
+        ) / (1024 * 1024)
         actual_memory += belief_memory
         print(f"  Optimized beliefs: {belief_memory:.2f} MB")
 
     # History (compressed)
     if opt_memory._action_history:
-        history_memory = opt_memory._action_history.get_size_bytes() / (1024 * 1024)
+        history_memory = opt_memory._action_history.get_size_bytes() / (
+            1024 * 1024
+        )
         actual_memory += history_memory
         print(f"  Optimized history: {history_memory:.2f} MB")
 
@@ -201,14 +235,18 @@ def demonstrate_optimization():
     print(f"  Shared observation buffer: 0 MB (shared across agents)")
 
     print(f"\n  Total optimized memory: {actual_memory:.2f} MB")
-    print(f"  Reduction: {((original_total - actual_memory) / original_total * 100):.1f}%")
+    print(
+        f"  Reduction: {((original_total - actual_memory) / original_total * 100):.1f}%"
+    )
     print(f"  Target achieved: {'YES' if actual_memory < 10.0 else 'NO'}\n")
 
     results["phases"].append(
         {
             "phase": "optimized",
             "memory_mb": float(actual_memory),
-            "reduction_percent": float(((original_total - actual_memory) / original_total * 100)),
+            "reduction_percent": float(
+                ((original_total - actual_memory) / original_total * 100)
+            ),
         }
     )
 
@@ -233,7 +271,9 @@ def demonstrate_optimization():
         # Calculate sparse belief memory
         if opt._beliefs and hasattr(opt._beliefs, "sparse"):
             sparse_b = opt._beliefs.sparse
-            belief_mem = (sparse_b.data.nbytes + sparse_b.indices.nbytes) / (1024 * 1024)
+            belief_mem = (sparse_b.data.nbytes + sparse_b.indices.nbytes) / (
+                1024 * 1024
+            )
         else:
             belief_mem = 0.001
 
@@ -249,7 +289,11 @@ def demonstrate_optimization():
     print(f"  True average memory: {true_avg:.2f} MB per agent")
 
     results["phases"].append(
-        {"phase": "scalability", "agents": len(agents), "avg_memory_mb": float(true_avg)}
+        {
+            "phase": "scalability",
+            "agents": len(agents),
+            "avg_memory_mb": float(true_avg),
+        }
     )
 
     # Summary
@@ -258,15 +302,21 @@ def demonstrate_optimization():
     print("=" * 60)
     print(f"Original memory: {original_total:.1f} MB (close to 34.5MB target)")
     print(f"Optimized memory: {actual_memory:.1f} MB")
-    print(f"Reduction: {((original_total - actual_memory) / original_total * 100):.1f}%")
-    print(f"Target (<10MB): {'✓ ACHIEVED' if actual_memory < 10.0 else '✗ NOT MET'}")
+    print(
+        f"Reduction: {((original_total - actual_memory) / original_total * 100):.1f}%"
+    )
+    print(
+        f"Target (<10MB): {'✓ ACHIEVED' if actual_memory < 10.0 else '✗ NOT MET'}"
+    )
     print(f"Scalability: {len(agents)} agents at {true_avg:.1f} MB average")
     print("=" * 60)
 
     results["summary"] = {
         "original_memory_mb": float(original_total),
         "optimized_memory_mb": float(actual_memory),
-        "reduction_percent": float(((original_total - actual_memory) / original_total * 100)),
+        "reduction_percent": float(
+            ((original_total - actual_memory) / original_total * 100)
+        ),
         "target_achieved": actual_memory < 10.0,
         "agents_tested": len(agents),
         "avg_memory_at_scale": float(true_avg),

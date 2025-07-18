@@ -85,7 +85,9 @@ class ComprehensiveErrorDisclosureTestRunner:
                     elif test_name == "production_hardening":
                         result = tester.run_all_production_hardening_tests()
                     else:
-                        result = {"error": f"No runner method found for {test_name}"}
+                        result = {
+                            "error": f"No runner method found for {test_name}"
+                        }
 
                 self.test_results[test_name] = result
 
@@ -98,9 +100,13 @@ class ComprehensiveErrorDisclosureTestRunner:
                     print(f"  Pass Rate: {summary.get('pass_rate', 0):.1f}%")
 
                     if "critical_failures" in summary:
-                        print(f"  Critical Issues: {summary.get('critical_failures', 0)}")
+                        print(
+                            f"  Critical Issues: {summary.get('critical_failures', 0)}"
+                        )
                     if "high_failures" in summary:
-                        print(f"  High Issues: {summary.get('high_failures', 0)}")
+                        print(
+                            f"  High Issues: {summary.get('high_failures', 0)}"
+                        )
 
                 print()
 
@@ -143,13 +149,15 @@ class ComprehensiveErrorDisclosureTestRunner:
                 total_failed += summary.get("failed_tests", 0)
 
                 # Count issues by severity
-                critical_issues += summary.get("critical_failures", 0) + summary.get(
-                    "critical_findings", 0
+                critical_issues += summary.get(
+                    "critical_failures", 0
+                ) + summary.get("critical_findings", 0)
+                high_issues += summary.get("high_failures", 0) + summary.get(
+                    "high_findings", 0
                 )
-                high_issues += summary.get("high_failures", 0) + summary.get("high_findings", 0)
-                medium_issues += summary.get("medium_failures", 0) + summary.get(
-                    "medium_findings", 0
-                )
+                medium_issues += summary.get(
+                    "medium_failures", 0
+                ) + summary.get("medium_findings", 0)
 
                 # Collect recommendations
                 if "recommendations" in result:
@@ -164,7 +172,9 @@ class ComprehensiveErrorDisclosureTestRunner:
                 unique_recommendations.append(rec)
 
         # Calculate security scores
-        overall_pass_rate = (total_passed / total_tests * 100) if total_tests > 0 else 0
+        overall_pass_rate = (
+            (total_passed / total_tests * 100) if total_tests > 0 else 0
+        )
 
         # Security score based on pass rate and issue severity
         security_score = overall_pass_rate
@@ -193,13 +203,19 @@ class ComprehensiveErrorDisclosureTestRunner:
             security_level = "GOOD"
 
         # Check production readiness
-        production_ready = critical_issues == 0 and high_issues <= 2 and security_score >= 80
+        production_ready = (
+            critical_issues == 0 and high_issues <= 2 and security_score >= 80
+        )
 
         comprehensive_report = {
             "metadata": {
-                "test_execution_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "test_execution_time": datetime.now().strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                ),
                 "test_duration_seconds": (
-                    self.end_time - self.start_time if self.end_time and self.start_time else 0
+                    self.end_time - self.start_time
+                    if self.end_time and self.start_time
+                    else 0
                 ),
                 "platform": "FreeAgentics",
                 "test_version": "1.0.0",
@@ -233,8 +249,12 @@ class ComprehensiveErrorDisclosureTestRunner:
             "test_suite_results": test_suite_summaries,
             "detailed_results": self.test_results,
             "security_recommendations": {
-                "immediate_actions": self._get_immediate_actions(critical_issues, high_issues),
-                "all_recommendations": unique_recommendations[:20],  # Limit to top 20
+                "immediate_actions": self._get_immediate_actions(
+                    critical_issues, high_issues
+                ),
+                "all_recommendations": unique_recommendations[
+                    :20
+                ],  # Limit to top 20
                 "priority_recommendations": self._prioritize_recommendations(
                     unique_recommendations
                 ),
@@ -247,7 +267,9 @@ class ComprehensiveErrorDisclosureTestRunner:
 
         return comprehensive_report
 
-    def _get_immediate_actions(self, critical_issues: int, high_issues: int) -> List[str]:
+    def _get_immediate_actions(
+        self, critical_issues: int, high_issues: int
+    ) -> List[str]:
         """Get immediate actions based on issue severity."""
         immediate_actions = []
 
@@ -277,7 +299,9 @@ class ComprehensiveErrorDisclosureTestRunner:
 
         return immediate_actions
 
-    def _prioritize_recommendations(self, recommendations: List[str]) -> Dict[str, List[str]]:
+    def _prioritize_recommendations(
+        self, recommendations: List[str]
+    ) -> Dict[str, List[str]]:
         """Prioritize recommendations by category."""
         categorized = {"critical": [], "high": [], "medium": [], "low": []}
 
@@ -286,7 +310,13 @@ class ComprehensiveErrorDisclosureTestRunner:
 
             if any(
                 critical_term in rec_lower
-                for critical_term in ["critical", "urgent", "immediate", "stop", "disable debug"]
+                for critical_term in [
+                    "critical",
+                    "urgent",
+                    "immediate",
+                    "stop",
+                    "disable debug",
+                ]
             ):
                 categorized["critical"].append(rec)
             elif any(
@@ -302,7 +332,12 @@ class ComprehensiveErrorDisclosureTestRunner:
                 categorized["high"].append(rec)
             elif any(
                 medium_term in rec_lower
-                for medium_term in ["configure", "implement", "review", "update"]
+                for medium_term in [
+                    "configure",
+                    "implement",
+                    "review",
+                    "update",
+                ]
             ):
                 categorized["medium"].append(rec)
             else:
@@ -341,7 +376,9 @@ class ComprehensiveErrorDisclosureTestRunner:
 
         compliance_results["owasp_top_10"] = {
             "issues_found": list(set(owasp_issues)),
-            "compliance_level": "Non-Compliant" if owasp_issues else "Compliant",
+            "compliance_level": "Non-Compliant"
+            if owasp_issues
+            else "Compliant",
         }
 
         # Add other compliance frameworks as needed
@@ -353,17 +390,26 @@ class ComprehensiveErrorDisclosureTestRunner:
 
         return compliance_results
 
-    def _assess_risk_levels(self, critical: int, high: int, medium: int) -> Dict[str, Any]:
+    def _assess_risk_levels(
+        self, critical: int, high: int, medium: int
+    ) -> Dict[str, Any]:
         """Assess risk levels for different attack vectors."""
         risk_assessment = {
             "information_disclosure": {
-                "level": "HIGH" if critical > 0 else "MEDIUM" if high > 2 else "LOW",
+                "level": "HIGH"
+                if critical > 0
+                else "MEDIUM"
+                if high > 2
+                else "LOW",
                 "description": "Risk of sensitive information being disclosed through error messages",
             },
             "authentication_bypass": {
                 "level": (
                     "HIGH"
-                    if any("authentication" in str(result) for result in self.test_results.values())
+                    if any(
+                        "authentication" in str(result)
+                        for result in self.test_results.values()
+                    )
                     else "LOW"
                 ),
                 "description": "Risk of authentication mechanisms being bypassed",
@@ -371,7 +417,10 @@ class ComprehensiveErrorDisclosureTestRunner:
             "injection_attacks": {
                 "level": (
                     "MEDIUM"
-                    if any("injection" in str(result) for result in self.test_results.values())
+                    if any(
+                        "injection" in str(result)
+                        for result in self.test_results.values()
+                    )
                     else "LOW"
                 ),
                 "description": "Risk of injection attacks through error handling",
@@ -385,7 +434,10 @@ class ComprehensiveErrorDisclosureTestRunner:
         return risk_assessment
 
     def save_report(
-        self, report: Dict[str, Any], output_format: str = "both", output_dir: str = None
+        self,
+        report: Dict[str, Any],
+        output_format: str = "both",
+        output_dir: str = None,
     ) -> List[str]:
         """Save the comprehensive report in specified format(s)."""
         if output_dir is None:
@@ -399,7 +451,8 @@ class ComprehensiveErrorDisclosureTestRunner:
         # Save JSON report
         if output_format in ["json", "both"]:
             json_file = os.path.join(
-                output_dir, f"comprehensive_error_disclosure_report_{timestamp}.json"
+                output_dir,
+                f"comprehensive_error_disclosure_report_{timestamp}.json",
             )
             try:
                 with open(json_file, "w") as f:
@@ -412,7 +465,8 @@ class ComprehensiveErrorDisclosureTestRunner:
         # Save HTML report
         if output_format in ["html", "both"]:
             html_file = os.path.join(
-                output_dir, f"comprehensive_error_disclosure_report_{timestamp}.html"
+                output_dir,
+                f"comprehensive_error_disclosure_report_{timestamp}.html",
             )
             try:
                 html_content = self._generate_html_report(report)
@@ -560,7 +614,7 @@ class ComprehensiveErrorDisclosureTestRunner:
             <div class="status-badge status-{report['executive_summary']['security_level'].lower()}">
                 {report['executive_summary']['security_status']}
             </div>
-            
+
             <div class="metrics">
                 <div class="metric">
                     <div class="metric-value">{report['executive_summary']['security_score']}</div>
@@ -593,7 +647,9 @@ class ComprehensiveErrorDisclosureTestRunner:
                 <h3>🚨 Immediate Actions Required</h3>
                 <ul>
             """
-            for action in report["security_recommendations"]["immediate_actions"]:
+            for action in report["security_recommendations"][
+                "immediate_actions"
+            ]:
                 html += f"<li>{action}</li>"
             html += "</ul></div>"
 
@@ -625,7 +681,9 @@ class ComprehensiveErrorDisclosureTestRunner:
                 <h2>Top Security Recommendations</h2>
                 <ul>
             """
-            for rec in report["security_recommendations"]["all_recommendations"][:10]:
+            for rec in report["security_recommendations"][
+                "all_recommendations"
+            ][:10]:
                 html += f"<li>{rec}</li>"
             html += "</ul></div>"
 
@@ -653,7 +711,9 @@ class ComprehensiveErrorDisclosureTestRunner:
 
         print(f"Security Status: {exec_summary['security_status']}")
         print(f"Security Score: {exec_summary['security_score']}/100")
-        print(f"Production Ready: {'✅ YES' if exec_summary['production_ready'] else '❌ NO'}")
+        print(
+            f"Production Ready: {'✅ YES' if exec_summary['production_ready'] else '❌ NO'}"
+        )
         print()
 
         print("Test Statistics:")
@@ -671,14 +731,17 @@ class ComprehensiveErrorDisclosureTestRunner:
 
         if exec_summary["immediate_action_required"]:
             print("🚨 IMMEDIATE ACTION REQUIRED:")
-            for action in report["security_recommendations"]["immediate_actions"]:
+            for action in report["security_recommendations"][
+                "immediate_actions"
+            ]:
                 print(f"  • {action}")
             print()
 
         if report["security_recommendations"]["all_recommendations"]:
             print("Top Recommendations:")
             for i, rec in enumerate(
-                report["security_recommendations"]["all_recommendations"][:5], 1
+                report["security_recommendations"]["all_recommendations"][:5],
+                1,
             ):
                 print(f"  {i}. {rec}")
 
@@ -694,9 +757,13 @@ def main():
         default="both",
         help="Output format for the report",
     )
-    parser.add_argument("--output-dir", default=None, help="Output directory for reports")
     parser.add_argument(
-        "--quiet", action="store_true", help="Suppress detailed output during testing"
+        "--output-dir", default=None, help="Output directory for reports"
+    )
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Suppress detailed output during testing",
     )
 
     args = parser.parse_args()
@@ -718,7 +785,9 @@ def main():
     runner.print_summary(report)
 
     # Save reports
-    saved_files = runner.save_report(report, args.output_format, args.output_dir)
+    saved_files = runner.save_report(
+        report, args.output_format, args.output_dir
+    )
 
     if saved_files:
         print(f"\nReports saved:")
@@ -728,16 +797,24 @@ def main():
     # Exit with appropriate code
     exec_summary = report["executive_summary"]
     if exec_summary["critical_issues"] > 0:
-        print("\n❌ CRITICAL ISSUES DETECTED - Application not ready for production")
+        print(
+            "\n❌ CRITICAL ISSUES DETECTED - Application not ready for production"
+        )
         sys.exit(1)
     elif exec_summary["high_issues"] > 5:
-        print("\n⚠️  HIGH RISK ISSUES DETECTED - Significant security improvements needed")
+        print(
+            "\n⚠️  HIGH RISK ISSUES DETECTED - Significant security improvements needed"
+        )
         sys.exit(2)
     elif not exec_summary["production_ready"]:
-        print("\n⚠️  APPLICATION NOT PRODUCTION READY - Address security issues before deployment")
+        print(
+            "\n⚠️  APPLICATION NOT PRODUCTION READY - Address security issues before deployment"
+        )
         sys.exit(3)
     else:
-        print("\n✅ SECURITY ASSESSMENT COMPLETED - Application has acceptable security posture")
+        print(
+            "\n✅ SECURITY ASSESSMENT COMPLETED - Application has acceptable security posture"
+        )
         sys.exit(0)
 
 

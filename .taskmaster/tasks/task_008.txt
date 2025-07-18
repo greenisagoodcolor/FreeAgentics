@@ -171,4 +171,3 @@ Pre-commit Infrastructure Cleanup Requirements:
 
 This systematic cleanup ensures the pre-commit hook infrastructure remains clean and focused without legacy artifacts that could cause confusion during code quality automation development.
 </info added on 2025-07-14T10:29:56.467Z>
-

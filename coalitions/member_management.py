@@ -39,9 +39,15 @@ class CoalitionMemberManager:
                     result[str(agent_id)] = member
                 elif isinstance(member, dict):
                     # Convert dict to CoalitionMember
-                    result[str(agent_id)] = CoalitionMemberManager._dict_to_member(agent_id, member)
+                    result[
+                        str(agent_id)
+                    ] = CoalitionMemberManager._dict_to_member(
+                        agent_id, member
+                    )
                 else:
-                    raise MemberTypeError(f"Invalid member type for {agent_id}: {type(member)}")
+                    raise MemberTypeError(
+                        f"Invalid member type for {agent_id}: {type(member)}"
+                    )
             return result
 
         elif isinstance(members, (list, set)):
@@ -55,7 +61,9 @@ class CoalitionMemberManager:
                     if not agent_id_raw:
                         raise MemberTypeError("Member dict missing agent_id")
                     agent_id = str(agent_id_raw)
-                    result[str(agent_id)] = CoalitionMemberManager._dict_to_member(agent_id, item)
+                    result[
+                        str(agent_id)
+                    ] = CoalitionMemberManager._dict_to_member(agent_id, item)
                 elif hasattr(item, "agent_id"):
                     # Agent-like object
                     agent_id = str(item.agent_id)
@@ -65,14 +73,18 @@ class CoalitionMemberManager:
                         capabilities=getattr(item, "capabilities", []),
                     )
                 else:
-                    raise MemberTypeError(f"Cannot convert item to member: {type(item)}")
+                    raise MemberTypeError(
+                        f"Cannot convert item to member: {type(item)}"
+                    )
             return result
 
         else:
             raise MemberTypeError(f"Invalid members type: {type(members)}")
 
     @staticmethod
-    def _dict_to_member(agent_id: str, member_dict: Dict[str, Any]) -> CoalitionMember:
+    def _dict_to_member(
+        agent_id: str, member_dict: Dict[str, Any]
+    ) -> CoalitionMember:
         """Convert dictionary to CoalitionMember."""
         role_value = member_dict.get("role", "member")
         if isinstance(role_value, str):
@@ -81,7 +93,11 @@ class CoalitionMemberManager:
             except ValueError:
                 role = CoalitionRole.MEMBER
         else:
-            role = role_value if isinstance(role_value, CoalitionRole) else CoalitionRole.MEMBER
+            role = (
+                role_value
+                if isinstance(role_value, CoalitionRole)
+                else CoalitionRole.MEMBER
+            )
 
         return CoalitionMember(
             agent_id=str(agent_id),
@@ -114,10 +130,14 @@ class CoalitionMemberManager:
         if isinstance(capabilities, (list, set, tuple)):
             return [str(cap) for cap in capabilities]
 
-        raise MemberTypeError(f"Invalid capabilities type: {type(capabilities)}")
+        raise MemberTypeError(
+            f"Invalid capabilities type: {type(capabilities)}"
+        )
 
     @staticmethod
-    def get_member_by_id(coalition: Coalition, agent_id: str) -> Optional[CoalitionMember]:
+    def get_member_by_id(
+        coalition: Coalition, agent_id: str
+    ) -> Optional[CoalitionMember]:
         """Safely get a member by ID with type checking.
 
         Args:
@@ -134,7 +154,9 @@ class CoalitionMemberManager:
         return coalition.members.get(agent_id)
 
     @staticmethod
-    def get_members_by_role(coalition: Coalition, role: CoalitionRole) -> List[CoalitionMember]:
+    def get_members_by_role(
+        coalition: Coalition, role: CoalitionRole
+    ) -> List[CoalitionMember]:
         """Get all members with a specific role.
 
         Args:
@@ -147,7 +169,11 @@ class CoalitionMemberManager:
         if not isinstance(coalition, Coalition):
             raise MemberTypeError(f"Expected Coalition, got {type(coalition)}")
 
-        return [member for member in coalition.members.values() if member.role == role]
+        return [
+            member
+            for member in coalition.members.values()
+            if member.role == role
+        ]
 
     @staticmethod
     def get_members_with_capabilities(
@@ -176,7 +202,9 @@ class CoalitionMemberManager:
         return matching_members
 
     @staticmethod
-    def update_member_status(coalition: Coalition, agent_id: str, **updates: Any) -> bool:
+    def update_member_status(
+        coalition: Coalition, agent_id: str, **updates: Any
+    ) -> bool:
         """Update member status with type validation.
 
         Args:
@@ -201,7 +229,9 @@ class CoalitionMemberManager:
                     continue
 
             if field == "capabilities":
-                value = CoalitionMemberManager.validate_member_capabilities(value)
+                value = CoalitionMemberManager.validate_member_capabilities(
+                    value
+                )
 
             if hasattr(member, field):
                 setattr(member, field, value)
@@ -247,7 +277,11 @@ class CoalitionMemberManager:
             return issues
 
         # Check for leader
-        leaders = [m for m in coalition.members.values() if m.role == CoalitionRole.LEADER]
+        leaders = [
+            m
+            for m in coalition.members.values()
+            if m.role == CoalitionRole.LEADER
+        ]
         if not leaders:
             issues.append("No leader assigned")
         elif len(leaders) > 1:
@@ -256,18 +290,26 @@ class CoalitionMemberManager:
         # Check for valid member types
         for agent_id, member in coalition.members.items():
             if not isinstance(member, CoalitionMember):
-                issues.append(f"Invalid member type for {agent_id}: {type(member)}")
+                issues.append(
+                    f"Invalid member type for {agent_id}: {type(member)}"
+                )
 
             if member.agent_id != agent_id:
-                issues.append(f"Member ID mismatch: {member.agent_id} != {agent_id}")
+                issues.append(
+                    f"Member ID mismatch: {member.agent_id} != {agent_id}"
+                )
 
         # Check leader consistency
         if coalition.leader_id:
             if coalition.leader_id not in coalition.members:
-                issues.append(f"Leader ID {coalition.leader_id} not in members")
+                issues.append(
+                    f"Leader ID {coalition.leader_id} not in members"
+                )
             else:
                 leader_member = coalition.members[coalition.leader_id]
                 if leader_member.role != CoalitionRole.LEADER:
-                    issues.append(f"Leader {coalition.leader_id} does not have LEADER role")
+                    issues.append(
+                        f"Leader {coalition.leader_id} does not have LEADER role"
+                    )
 
         return issues

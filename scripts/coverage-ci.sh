@@ -90,7 +90,7 @@ with open('test-reports/coverage/coverage.json') as f:
     data = json.load(f)
     total = data['totals']['percent_covered']
     print(f'Coverage: {total:.1f}%')
-    
+
     # Create badge JSON
     badge = {
         'schemaVersion': 1,
@@ -110,7 +110,7 @@ from pathlib import Path
 
 with open('test-reports/coverage/coverage.json') as f:
     data = json.load(f)
-    
+
 uncovered = []
 low_coverage = []
 

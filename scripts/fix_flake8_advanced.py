@@ -14,7 +14,11 @@ def run_flake8(filepath: str) -> List[str]:
     """Run flake8 on a file and return violations."""
     try:
         result = subprocess.run(
-            ["flake8", filepath, "--format=%(path)s:%(row)d:%(col)d: %(code)s %(text)s"],
+            [
+                "flake8",
+                filepath,
+                "--format=%(path)s:%(row)d:%(col)d: %(code)s %(text)s",
+            ],
             capture_output=True,
             text=True,
         )
@@ -57,7 +61,10 @@ def fix_line_too_long(lines: List[str], line_num: int) -> List[str]:
                     best_split = i
             if best_split > 0:
                 lines[line_num] = line[: best_split + 1]
-                lines.insert(line_num + 1, indent_str + "    " + line[best_split + 1 :].lstrip())
+                lines.insert(
+                    line_num + 1,
+                    indent_str + "    " + line[best_split + 1 :].lstrip(),
+                )
 
     # Function definitions
     elif stripped.startswith(("def ", "async def ")):
@@ -69,10 +76,17 @@ def fix_line_too_long(lines: List[str], line_num: int) -> List[str]:
                 param_list = params.split(",")
                 lines[line_num] = prefix + "("
                 for i, param in enumerate(param_list[:-1]):
-                    lines.insert(line_num + 1 + i, indent_str + "        " + param.strip() + ",")
+                    lines.insert(
+                        line_num + 1 + i,
+                        indent_str + "        " + param.strip() + ",",
+                    )
                 lines.insert(
                     line_num + 1 + len(param_list) - 1,
-                    indent_str + "        " + param_list[-1].strip() + ")" + suffix,
+                    indent_str
+                    + "        "
+                    + param_list[-1].strip()
+                    + ")"
+                    + suffix,
                 )
 
     # Long conditionals
@@ -86,8 +100,13 @@ def fix_line_too_long(lines: List[str], line_num: int) -> List[str]:
                     rest = parts[1]
                     if " else " in rest:
                         cond, else_part = rest.split(" else ", 1)
-                        lines.insert(line_num + 1, indent_str + "    " + cond.strip())
-                        lines.insert(line_num + 2, indent_str + ") else " + else_part.strip())
+                        lines.insert(
+                            line_num + 1, indent_str + "    " + cond.strip()
+                        )
+                        lines.insert(
+                            line_num + 2,
+                            indent_str + ") else " + else_part.strip(),
+                        )
 
     return lines
 
@@ -143,7 +162,9 @@ def fix_unused_imports(lines: List[str]) -> List[str]:
                     if imp_name != name:
                         new_imports.append(imp.strip())
                 if new_imports:
-                    lines[line_idx] = parts[0] + " import " + ", ".join(new_imports)
+                    lines[line_idx] = (
+                        parts[0] + " import " + ", ".join(new_imports)
+                    )
                 else:
                     lines_to_remove.add(line_idx)
             else:
@@ -212,7 +233,9 @@ def fix_blank_lines(lines: List[str]) -> List[str]:
     return new_lines
 
 
-def fix_indentation_errors(lines: List[str], line_num: int, col: int) -> List[str]:
+def fix_indentation_errors(
+    lines: List[str], line_num: int, col: int
+) -> List[str]:
     """Fix E128: continuation line under-indented."""
     if line_num >= len(lines) or line_num == 0:
         return lines
@@ -233,7 +256,9 @@ def fix_indentation_errors(lines: List[str], line_num: int, col: int) -> List[st
 
                 if current_indent < expected_indent:
                     # Fix indentation
-                    lines[line_num] = " " * expected_indent + current_line.lstrip()
+                    lines[line_num] = (
+                        " " * expected_indent + current_line.lstrip()
+                    )
                 break
 
     return lines
@@ -247,7 +272,9 @@ def fix_missing_placeholders(lines: List[str], line_num: int) -> List[str]:
     line = lines[line_num]
     # Remove f prefix from strings without placeholders
     lines[line_num] = re.sub(
-        r'\bf"([^"]*)"', lambda m: f'"{m.group(1)}"' if "{" not in m.group(1) else m.group(0), line
+        r'\bf"([^"]*)"',
+        lambda m: f'"{m.group(1)}"' if "{" not in m.group(1) else m.group(0),
+        line,
     )
     lines[line_num] = re.sub(
         r"\bf'([^']*)'",
@@ -284,7 +311,9 @@ def fix_file_comprehensive(filepath: str) -> bool:
         if not violation:
             continue
 
-        match = re.match(r"^[^:]+:(\d+):(\d+):\s*([A-Z]\d+)\s+(.*)$", violation)
+        match = re.match(
+            r"^[^:]+:(\d+):(\d+):\s*([A-Z]\d+)\s+(.*)$", violation
+        )
         if not match:
             continue
 
@@ -325,10 +354,15 @@ def fix_file_comprehensive(filepath: str) -> bool:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Fix flake8 violations comprehensively")
+    parser = argparse.ArgumentParser(
+        description="Fix flake8 violations comprehensively"
+    )
     parser.add_argument("paths", nargs="+", help="Files or directories to fix")
     parser.add_argument(
-        "--max-iterations", type=int, default=3, help="Maximum fix iterations per file"
+        "--max-iterations",
+        type=int,
+        default=3,
+        help="Maximum fix iterations per file",
     )
 
     args = parser.parse_args()

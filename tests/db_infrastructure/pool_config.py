@@ -29,7 +29,9 @@ class DatabasePool:
     ):
         """Initialize connection pool with configurable parameters."""
         # Build database URL
-        self.database_url = f"postgresql://{user}:{password}@{host}:{port}/{database}"
+        self.database_url = (
+            f"postgresql://{user}:{password}@{host}:{port}/{database}"
+        )
 
         # Create engine with QueuePool for thread safety
         self.engine = create_engine(
@@ -44,7 +46,9 @@ class DatabasePool:
         )
 
         # Create session factory
-        self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
+        self.SessionLocal = sessionmaker(
+            autocommit=False, autoflush=False, bind=self.engine
+        )
 
         self.min_connections = min_connections
         self.max_connections = max_connections
@@ -96,10 +100,14 @@ class DatabasePool:
         """Execute operations within a transaction with optional isolation level."""
         with self.get_session() as session:
             if isolation_level:
-                session.connection().execution_options(isolation_level=isolation_level)
+                session.connection().execution_options(
+                    isolation_level=isolation_level
+                )
             yield session
 
-    def execute(self, query: str, params: Optional[Dict[str, Any]] = None) -> Any:
+    def execute(
+        self, query: str, params: Optional[Dict[str, Any]] = None
+    ) -> Any:
         """Execute a single query and return results."""
         with self.get_session() as session:
             result = session.execute(text(query), params or {})
@@ -124,7 +132,9 @@ class DatabasePool:
             "checked_out_connections": pool_impl.checkedout(),
             "overflow": pool_impl.overflow(),
             "total": pool_impl.size() + pool_impl.overflow(),
-            "available": pool_impl.size() + pool_impl.overflow() - pool_impl.checkedout(),
+            "available": pool_impl.size()
+            + pool_impl.overflow()
+            - pool_impl.checkedout(),
         }
 
     def close(self):
@@ -178,7 +188,10 @@ class PerformancePool(DatabasePool):
 
         for operation, data in self.query_stats.items():
             if data["count"] > 0:
-                stats[operation] = {**data, "avg_time": data["total_time"] / data["count"]}
+                stats[operation] = {
+                    **data,
+                    "avg_time": data["total_time"] / data["count"],
+                }
 
         return stats
 
@@ -188,7 +201,10 @@ _pools = {}
 
 
 def get_pool(
-    pool_name: str = "default", min_connections: int = 5, max_connections: int = 50, **kwargs
+    pool_name: str = "default",
+    min_connections: int = 5,
+    max_connections: int = 50,
+    **kwargs,
 ) -> DatabasePool:
     """Get or create a named connection pool."""
     if pool_name not in _pools:

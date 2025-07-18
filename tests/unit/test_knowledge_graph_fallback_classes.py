@@ -77,7 +77,10 @@ class TestEventFunctions:
 
     def test_get_event_dispatcher(self):
         """Test get_event_dispatcher function."""
-        from knowledge_graph.fallback_classes import EventDispatcher, get_event_dispatcher
+        from knowledge_graph.fallback_classes import (
+            EventDispatcher,
+            get_event_dispatcher,
+        )
 
         result = get_event_dispatcher()
         assert isinstance(result, EventDispatcher)
@@ -95,7 +98,9 @@ class TestConversationEventIntegration:
 
     def test_conversation_event_integration_creation(self):
         """Test ConversationEventIntegration creation."""
-        from knowledge_graph.fallback_classes import ConversationEventIntegration
+        from knowledge_graph.fallback_classes import (
+            ConversationEventIntegration,
+        )
 
         integration = ConversationEventIntegration()
         assert integration is not None
@@ -369,7 +374,9 @@ class TestCreateAllFallbackClasses:
     @patch("knowledge_graph.fallback_classes.logging.getLogger")
     def test_create_all_fallback_classes(self, mock_get_logger):
         """Test create_all_fallback_classes function."""
-        from knowledge_graph.fallback_classes import create_all_fallback_classes
+        from knowledge_graph.fallback_classes import (
+            create_all_fallback_classes,
+        )
 
         mock_logger = MagicMock()
         mock_get_logger.return_value = mock_logger
@@ -377,7 +384,9 @@ class TestCreateAllFallbackClasses:
         result = create_all_fallback_classes()
 
         # Check that logger was created
-        mock_get_logger.assert_called_once_with("knowledge_graph.fallback_classes")
+        mock_get_logger.assert_called_once_with(
+            "knowledge_graph.fallback_classes"
+        )
 
         # Check that all expected classes are returned
         expected_keys = {
@@ -429,7 +438,10 @@ class TestCreateAllFallbackClasses:
         result = create_all_fallback_classes()
 
         # Test that correct classes are returned
-        assert result["ConversationEventIntegration"] == ConversationEventIntegration
+        assert (
+            result["ConversationEventIntegration"]
+            == ConversationEventIntegration
+        )
         assert result["EventSource"] == EventSource
         assert result["EventType"] == EventType
         assert result["create_node_event"] == create_node_event

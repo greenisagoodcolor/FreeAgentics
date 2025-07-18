@@ -27,7 +27,8 @@ sys.path.insert(0, str(project_root))
 
 # Set up logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -57,7 +58,10 @@ except ImportError as e:
     security_modules["headers"] = False
 
 try:
-    from auth.https_enforcement import HTTPSEnforcementMiddleware, SSLConfiguration
+    from auth.https_enforcement import (
+        HTTPSEnforcementMiddleware,
+        SSLConfiguration,
+    )
 
     security_modules["ssl"] = True
     logger.info("SSL/TLS module imported successfully")
@@ -227,10 +231,16 @@ class ComprehensiveSecurityValidator:
             # Test user registration
             try:
                 user = auth_manager.register_user(
-                    "test_user", "test@example.com", "SecurePassword123!", UserRole.OBSERVER
+                    "test_user",
+                    "test@example.com",
+                    "SecurePassword123!",
+                    UserRole.OBSERVER,
                 )
                 self.results.add_result(
-                    "authentication", "user_registration", "PASS", "User registration successful"
+                    "authentication",
+                    "user_registration",
+                    "PASS",
+                    "User registration successful",
                 )
             except Exception as e:
                 self.results.add_result(
@@ -268,7 +278,9 @@ class ComprehensiveSecurityValidator:
 
             # Test authentication with correct credentials
             try:
-                auth_result = auth_manager.authenticate_user("test_user", "SecurePassword123!")
+                auth_result = auth_manager.authenticate_user(
+                    "test_user", "SecurePassword123!"
+                )
                 if auth_result:
                     self.results.add_result(
                         "authentication",
@@ -295,7 +307,9 @@ class ComprehensiveSecurityValidator:
 
             # Test authentication with wrong credentials
             try:
-                auth_result = auth_manager.authenticate_user("test_user", "WrongPassword")
+                auth_result = auth_manager.authenticate_user(
+                    "test_user", "WrongPassword"
+                )
                 if not auth_result:
                     self.results.add_result(
                         "authentication",
@@ -329,7 +343,9 @@ class ComprehensiveSecurityValidator:
 
             for payload in sql_injection_payloads:
                 try:
-                    auth_result = auth_manager.authenticate_user(payload, "password")
+                    auth_result = auth_manager.authenticate_user(
+                        payload, "password"
+                    )
                     if not auth_result:
                         self.results.add_result(
                             "authentication",
@@ -371,7 +387,12 @@ class ComprehensiveSecurityValidator:
             security_impl = SecurityValidator()
 
             # Test role-based access control
-            roles = [UserRole.ADMIN, UserRole.RESEARCHER, UserRole.OBSERVER, UserRole.AGENT_MANAGER]
+            roles = [
+                UserRole.ADMIN,
+                UserRole.RESEARCHER,
+                UserRole.OBSERVER,
+                UserRole.AGENT_MANAGER,
+            ]
 
             for role in roles:
                 try:
@@ -385,7 +406,9 @@ class ComprehensiveSecurityValidator:
                     )
 
                     # Test admin-only access
-                    admin_access = security_impl.check_permission(user, "admin_access")
+                    admin_access = security_impl.check_permission(
+                        user, "admin_access"
+                    )
                     if role == UserRole.ADMIN:
                         if admin_access:
                             self.results.add_result(
@@ -469,11 +492,16 @@ class ComprehensiveSecurityValidator:
             for cipher in ssl_config.cipher_suites:
                 for weak in weak_ciphers:
                     if weak in cipher:
-                        cipher_issues.append(f"{cipher} contains weak algorithm {weak}")
+                        cipher_issues.append(
+                            f"{cipher} contains weak algorithm {weak}"
+                        )
 
             if not cipher_issues:
                 self.results.add_result(
-                    "ssl_tls", "cipher_suites", "PASS", "All cipher suites are secure"
+                    "ssl_tls",
+                    "cipher_suites",
+                    "PASS",
+                    "All cipher suites are secure",
                 )
             else:
                 self.results.add_result(
@@ -486,9 +514,13 @@ class ComprehensiveSecurityValidator:
 
             # Test HSTS configuration
             if ssl_config.hsts_enabled:
-                self.results.add_result("ssl_tls", "hsts_enabled", "PASS", "HSTS is enabled")
+                self.results.add_result(
+                    "ssl_tls", "hsts_enabled", "PASS", "HSTS is enabled"
+                )
             else:
-                self.results.add_result("ssl_tls", "hsts_enabled", "WARNING", "HSTS is disabled")
+                self.results.add_result(
+                    "ssl_tls", "hsts_enabled", "WARNING", "HSTS is disabled"
+                )
 
             # Test HSTS max age
             if ssl_config.hsts_max_age >= 31536000:  # 1 year
@@ -509,11 +541,17 @@ class ComprehensiveSecurityValidator:
             # Test secure cookies
             if ssl_config.secure_cookies:
                 self.results.add_result(
-                    "ssl_tls", "secure_cookies", "PASS", "Secure cookies are enabled"
+                    "ssl_tls",
+                    "secure_cookies",
+                    "PASS",
+                    "Secure cookies are enabled",
                 )
             else:
                 self.results.add_result(
-                    "ssl_tls", "secure_cookies", "WARNING", "Secure cookies are disabled"
+                    "ssl_tls",
+                    "secure_cookies",
+                    "WARNING",
+                    "Secure cookies are disabled",
                 )
 
         except Exception as e:
@@ -554,7 +592,10 @@ class ComprehensiveSecurityValidator:
             for header in required_headers:
                 try:
                     # This would need to be adapted based on actual implementation
-                    if hasattr(headers_manager, f"add_{header.lower().replace('-', '_')}"):
+                    if hasattr(
+                        headers_manager,
+                        f"add_{header.lower().replace('-', '_')}",
+                    ):
                         self.results.add_result(
                             "security_headers",
                             f"header_{header}",
@@ -664,7 +705,10 @@ class ComprehensiveSecurityValidator:
                 token = jwt_handler.create_access_token(test_user)
                 if token:
                     self.results.add_result(
-                        "jwt_security", "jwt_creation", "PASS", "JWT token created successfully"
+                        "jwt_security",
+                        "jwt_creation",
+                        "PASS",
+                        "JWT token created successfully",
                     )
                 else:
                     self.results.add_result(
@@ -800,7 +844,11 @@ class ComprehensiveSecurityValidator:
 
         except Exception as e:
             self.results.add_result(
-                "rbac", "rbac_module", "FAIL", f"RBAC module error: {str(e)}", severity="critical"
+                "rbac",
+                "rbac_module",
+                "FAIL",
+                f"RBAC module error: {str(e)}",
+                severity="critical",
             )
 
     async def test_security_monitoring(self):
@@ -813,7 +861,10 @@ class ComprehensiveSecurityValidator:
 
             # Test monitoring is properly initialized
             self.results.add_result(
-                "security_monitoring", "monitoring_init", "PASS", "Security monitoring initialized"
+                "security_monitoring",
+                "monitoring_init",
+                "PASS",
+                "Security monitoring initialized",
             )
 
             # Test alert generation
@@ -953,7 +1004,11 @@ class ComprehensiveSecurityValidator:
             for payload in xss_payloads:
                 # Test that XSS is blocked (basic detection)
                 try:
-                    if "<script>" in payload or "javascript:" in payload or "onerror=" in payload:
+                    if (
+                        "<script>" in payload
+                        or "javascript:" in payload
+                        or "onerror=" in payload
+                    ):
                         self.results.add_result(
                             "penetration_testing",
                             f"xss_{payload[:10]}",
@@ -1042,7 +1097,9 @@ class ComprehensiveSecurityValidator:
 
         # Analyze critical failures
         for category, results in self.results.get_detailed_results().items():
-            critical_failures = [r for r in results if r.get("severity") == "critical"]
+            critical_failures = [
+                r for r in results if r.get("severity") == "critical"
+            ]
 
             if critical_failures:
                 recommendations.append(
@@ -1051,7 +1108,9 @@ class ComprehensiveSecurityValidator:
                         "category": category,
                         "issue": f"Critical security failures in {category}",
                         "recommendation": f"Immediate attention required for {category} security",
-                        "failures": [f["test_name"] for f in critical_failures],
+                        "failures": [
+                            f["test_name"] for f in critical_failures
+                        ],
                     }
                 )
 
@@ -1110,15 +1169,26 @@ class ComprehensiveSecurityValidator:
             compliance["overall_compliance"] = "FAIL"
 
             # Mark specific areas as failed based on critical failures
-            for category, results in self.results.get_detailed_results().items():
-                critical_failures = [r for r in results if r.get("severity") == "critical"]
+            for (
+                category,
+                results,
+            ) in self.results.get_detailed_results().items():
+                critical_failures = [
+                    r for r in results if r.get("severity") == "critical"
+                ]
                 if critical_failures:
                     if category == "authentication":
-                        compliance["OWASP_Top_10"]["A07_Auth_Failures"] = "FAIL"
+                        compliance["OWASP_Top_10"][
+                            "A07_Auth_Failures"
+                        ] = "FAIL"
                     elif category == "authorization":
-                        compliance["OWASP_Top_10"]["A01_Broken_Access_Control"] = "FAIL"
+                        compliance["OWASP_Top_10"][
+                            "A01_Broken_Access_Control"
+                        ] = "FAIL"
                     elif category == "ssl_tls":
-                        compliance["OWASP_Top_10"]["A02_Cryptographic_Failures"] = "FAIL"
+                        compliance["OWASP_Top_10"][
+                            "A02_Cryptographic_Failures"
+                        ] = "FAIL"
                     elif category == "penetration_testing":
                         compliance["OWASP_Top_10"]["A03_Injection"] = "FAIL"
 
@@ -1171,7 +1241,9 @@ async def main():
         print(f"Security Score: {report['security_score']}/100")
 
         # Print compliance status
-        print(f"\nCompliance Status: {report['compliance_status']['overall_compliance']}")
+        print(
+            f"\nCompliance Status: {report['compliance_status']['overall_compliance']}"
+        )
 
         # Print critical recommendations
         critical_recommendations = [
@@ -1191,7 +1263,9 @@ async def main():
 
         # Return exit code based on critical failures
         if report["summary"]["critical_failures"] > 0:
-            print("\n❌ CRITICAL SECURITY ISSUES FOUND - IMMEDIATE ATTENTION REQUIRED")
+            print(
+                "\n❌ CRITICAL SECURITY ISSUES FOUND - IMMEDIATE ATTENTION REQUIRED"
+            )
             return 1
         elif report["summary"]["failed"] > 0:
             print("\n⚠️  SECURITY ISSUES FOUND - REVIEW REQUIRED")

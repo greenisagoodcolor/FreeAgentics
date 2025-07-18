@@ -41,7 +41,9 @@ class TestResourceConfig:
     def test_custom_config(self):
         """Test custom resource configuration."""
         config = ResourceConfig(
-            max_agents_per_connection=5, max_memory_per_agent=50 * 1024 * 1024, agent_timeout=1800.0
+            max_agents_per_connection=5,
+            max_memory_per_agent=50 * 1024 * 1024,
+            agent_timeout=1800.0,
         )
         assert config.max_agents_per_connection == 5
         assert config.max_memory_per_agent == 50 * 1024 * 1024
@@ -65,7 +67,9 @@ class TestAgentResource:
     def test_agent_resource_creation(self):
         """Test creating an agent resource."""
         resource = AgentResource(
-            agent_id="agent-123", connection_id="conn-456", allocated_at=datetime.utcnow()
+            agent_id="agent-123",
+            connection_id="conn-456",
+            allocated_at=datetime.utcnow(),
         )
 
         assert resource.agent_id == "agent-123"
@@ -77,7 +81,9 @@ class TestAgentResource:
     def test_resource_state_transitions(self):
         """Test resource state transitions."""
         resource = AgentResource(
-            agent_id="agent-123", connection_id="conn-456", allocated_at=datetime.utcnow()
+            agent_id="agent-123",
+            connection_id="conn-456",
+            allocated_at=datetime.utcnow(),
         )
 
         # Transition to active
@@ -102,7 +108,9 @@ class TestAgentResource:
     def test_resource_metadata(self):
         """Test resource metadata management."""
         resource = AgentResource(
-            agent_id="agent-123", connection_id="conn-456", allocated_at=datetime.utcnow()
+            agent_id="agent-123",
+            connection_id="conn-456",
+            allocated_at=datetime.utcnow(),
         )
 
         resource.set_metadata("type", "inference")
@@ -262,16 +270,22 @@ class TestAgentResourceManager:
         resource = await manager.allocate_resource("agent-mem")
 
         # Update within limits - should succeed
-        await manager.update_resource_usage("agent-mem", memory=50 * 1024 * 1024, cpu=0.5)
+        await manager.update_resource_usage(
+            "agent-mem", memory=50 * 1024 * 1024, cpu=0.5
+        )
         assert resource.memory_usage == 50 * 1024 * 1024
 
         # Update exceeding memory limit - should raise error
         with pytest.raises(ResourceAllocationError):
-            await manager.update_resource_usage("agent-mem", memory=150 * 1024 * 1024, cpu=0.5)
+            await manager.update_resource_usage(
+                "agent-mem", memory=150 * 1024 * 1024, cpu=0.5
+            )
 
         # Update exceeding CPU limit - should raise error
         with pytest.raises(ResourceAllocationError):
-            await manager.update_resource_usage("agent-mem", memory=50 * 1024 * 1024, cpu=1.5)
+            await manager.update_resource_usage(
+                "agent-mem", memory=50 * 1024 * 1024, cpu=1.5
+            )
 
     async def test_get_agent_connection(self, manager, pool):
         """Test getting connection for an agent."""

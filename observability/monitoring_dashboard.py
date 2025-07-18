@@ -75,7 +75,9 @@ class MonitoringDashboard:
 
         # Data storage
         self.current_dashboard = None
-        self.metric_history = defaultdict(lambda: deque(maxlen=300))  # 5 min history
+        self.metric_history = defaultdict(
+            lambda: deque(maxlen=300)
+        )  # 5 min history
         self.event_history = deque(maxlen=100)
         self.alert_history = deque(maxlen=50)
 
@@ -140,7 +142,9 @@ class MonitoringDashboard:
         recent_events = list(self.event_history)[-20:]
 
         # Get current alerts
-        current_alerts = await self._check_alerts(system_metrics, agent_dashboards)
+        current_alerts = await self._check_alerts(
+            system_metrics, agent_dashboards
+        )
 
         # Create dashboard snapshot
         self.current_dashboard = SystemDashboard(
@@ -175,7 +179,8 @@ class MonitoringDashboard:
             unit="ms",
             timestamp=timestamp,
             status=self._get_metric_status(
-                "inference_time_ms", perf_report["detailed_stats"]["inference_times"]["avg"]
+                "inference_time_ms",
+                perf_report["detailed_stats"]["inference_times"]["avg"],
             ),
         )
 
@@ -185,7 +190,8 @@ class MonitoringDashboard:
             unit="MB",
             timestamp=timestamp,
             status=self._get_metric_status(
-                "memory_usage_mb", perf_report["detailed_stats"]["memory_usage"]["latest"]
+                "memory_usage_mb",
+                perf_report["detailed_stats"]["memory_usage"]["latest"],
             ),
         )
 
@@ -195,7 +201,8 @@ class MonitoringDashboard:
             unit="%",
             timestamp=timestamp,
             status=self._get_metric_status(
-                "cpu_usage_percent", perf_report["detailed_stats"]["cpu_usage"]["latest"]
+                "cpu_usage_percent",
+                perf_report["detailed_stats"]["cpu_usage"]["latest"],
             ),
         )
 
@@ -215,7 +222,9 @@ class MonitoringDashboard:
             value=coord_report["system_success_rate"] * 100,
             unit="%",
             timestamp=timestamp,
-            status="healthy" if coord_report["system_success_rate"] > 0.8 else "warning",
+            status="healthy"
+            if coord_report["system_success_rate"] > 0.8
+            else "warning",
         )
 
         # Update history
@@ -232,13 +241,21 @@ class MonitoringDashboard:
         for agent_id in performance_tracker.agent_metrics.keys():
             try:
                 # Get agent performance metrics
-                agent_perf = await performance_tracker.get_agent_performance_summary(agent_id)
+                agent_perf = (
+                    await performance_tracker.get_agent_performance_summary(
+                        agent_id
+                    )
+                )
 
                 # Get belief statistics
-                belief_stats = belief_monitoring_hooks.get_agent_statistics(agent_id)
+                belief_stats = belief_monitoring_hooks.get_agent_statistics(
+                    agent_id
+                )
 
                 # Get coordination statistics
-                coord_stats = coordination_metrics.get_coordination_statistics(agent_id)
+                coord_stats = coordination_metrics.get_coordination_statistics(
+                    agent_id
+                )
 
                 # Create agent metrics
                 current_metrics = {
@@ -248,7 +265,8 @@ class MonitoringDashboard:
                         unit="ms",
                         timestamp=datetime.now(),
                         status=self._get_metric_status(
-                            "inference_time_ms", agent_perf["inference_performance"]["avg"]
+                            "inference_time_ms",
+                            agent_perf["inference_performance"]["avg"],
                         ),
                     ),
                     "belief_entropy": DashboardMetric(
@@ -257,7 +275,8 @@ class MonitoringDashboard:
                         unit="bits",
                         timestamp=datetime.now(),
                         status=self._get_metric_status(
-                            "belief_entropy", belief_stats.get("entropy", {}).get("mean", 0.0)
+                            "belief_entropy",
+                            belief_stats.get("entropy", {}).get("mean", 0.0),
                         ),
                     ),
                     "coordination_rate": DashboardMetric(
@@ -272,7 +291,9 @@ class MonitoringDashboard:
                         value=agent_perf["error_rate"]["count"],
                         unit="errors",
                         timestamp=datetime.now(),
-                        status="healthy" if agent_perf["error_rate"]["count"] == 0 else "warning",
+                        status="healthy"
+                        if agent_perf["error_rate"]["count"] == 0
+                        else "warning",
                     ),
                 }
 
@@ -290,7 +311,9 @@ class MonitoringDashboard:
                 )
 
             except Exception as e:
-                logger.error(f"Failed to get dashboard for agent {agent_id}: {e}")
+                logger.error(
+                    f"Failed to get dashboard for agent {agent_id}: {e}"
+                )
 
         return dashboards
 
@@ -298,7 +321,10 @@ class MonitoringDashboard:
         """Get active coalition information."""
         coalitions = []
 
-        for coalition_id, coalition_metrics in coordination_metrics.coalition_metrics.items():
+        for (
+            coalition_id,
+            coalition_metrics,
+        ) in coordination_metrics.coalition_metrics.items():
             coalitions.append(
                 {
                     "coalition_id": coalition_id,
@@ -329,7 +355,9 @@ class MonitoringDashboard:
                         "type": "system",
                         "metric": metric_name,
                         "value": metric.value,
-                        "threshold": self.alert_thresholds.get(metric_name, {}).get("warning"),
+                        "threshold": self.alert_thresholds.get(
+                            metric_name, {}
+                        ).get("warning"),
                         "timestamp": timestamp.isoformat(),
                         "message": f"System {metric.name} is above warning threshold",
                     }
@@ -341,7 +369,9 @@ class MonitoringDashboard:
                         "type": "system",
                         "metric": metric_name,
                         "value": metric.value,
-                        "threshold": self.alert_thresholds.get(metric_name, {}).get("critical"),
+                        "threshold": self.alert_thresholds.get(
+                            metric_name, {}
+                        ).get("critical"),
                         "timestamp": timestamp.isoformat(),
                         "message": f"System {metric.name} is above critical threshold",
                     }
@@ -398,7 +428,11 @@ class MonitoringDashboard:
     def record_event(self, event_type: str, data: Dict[str, Any]):
         """Record a dashboard event."""
         self.event_history.append(
-            {"timestamp": datetime.now().isoformat(), "type": event_type, "data": data}
+            {
+                "timestamp": datetime.now().isoformat(),
+                "type": event_type,
+                "data": data,
+            }
         )
 
     def get_current_dashboard(self) -> Optional[Dict[str, Any]]:
@@ -436,7 +470,9 @@ class MonitoringDashboard:
             "status": metric.status,
         }
 
-    def _agent_dashboard_to_dict(self, dashboard: AgentDashboard) -> Dict[str, Any]:
+    def _agent_dashboard_to_dict(
+        self, dashboard: AgentDashboard
+    ) -> Dict[str, Any]:
         """Convert agent dashboard to dictionary."""
         return {
             "agent_id": dashboard.agent_id,
@@ -513,9 +549,13 @@ def get_dashboard_data() -> Optional[Dict[str, Any]]:
     return monitoring_dashboard.get_current_dashboard()
 
 
-def get_metric_time_series(metric_name: str, duration_minutes: int = 5) -> Optional[Dict[str, Any]]:
+def get_metric_time_series(
+    metric_name: str, duration_minutes: int = 5
+) -> Optional[Dict[str, Any]]:
     """Get time series data for a metric."""
-    time_series = monitoring_dashboard.get_metric_history(metric_name, duration_minutes)
+    time_series = monitoring_dashboard.get_metric_history(
+        metric_name, duration_minutes
+    )
     if not time_series:
         return None
 

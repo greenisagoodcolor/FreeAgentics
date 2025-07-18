@@ -57,7 +57,10 @@ class PersonaProfile:
     interaction_pattern: InteractionPattern
 
     # Behavioral characteristics
-    attention_span: Tuple[float, float] = (30.0, 300.0)  # Min/max seconds on task
+    attention_span: Tuple[float, float] = (
+        30.0,
+        300.0,
+    )  # Min/max seconds on task
     response_time: Tuple[float, float] = (0.1, 2.0)  # Reaction time range
     error_rate: float = 0.02  # Probability of mistakes
     multitasking_level: int = 1  # Number of concurrent tasks
@@ -74,7 +77,9 @@ class PersonaProfile:
 
     # Connection behavior
     connection_stability: float = 0.95  # Probability of maintaining connection
-    reconnect_probability: float = 0.8  # Probability of reconnecting after disconnect
+    reconnect_probability: float = (
+        0.8  # Probability of reconnecting after disconnect
+    )
     max_reconnect_attempts: int = 3
 
     # Message patterns
@@ -177,7 +182,9 @@ class UserBehavior(ABC):
 
         # Check if currently busy with a task
         if self.state["busy"] and self.state["task_start_time"]:
-            elapsed = (datetime.now() - self.state["task_start_time"]).total_seconds()
+            elapsed = (
+                datetime.now() - self.state["task_start_time"]
+            ).total_seconds()
             min_span, max_span = self.profile.attention_span
             task_duration = self.rng.uniform(min_span, max_span)
 
@@ -191,7 +198,9 @@ class UserBehavior(ABC):
         if self.profile.interaction_pattern == InteractionPattern.SCHEDULED:
             current_hour = datetime.now().hour
             if current_hour not in self.profile.active_hours:
-                return self.rng.random() < 0.1  # 10% chance of off-hours activity
+                return (
+                    self.rng.random() < 0.1
+                )  # 10% chance of off-hours activity
 
         # Activity level determines action frequency
         activity_thresholds = {
@@ -237,7 +246,8 @@ class ResearcherBehavior(UserBehavior):
 
         # Choose action based on weights
         action_type = self.rng.choice(
-            list(self.profile.message_weights.keys()), p=list(self.profile.message_weights.values())
+            list(self.profile.message_weights.keys()),
+            p=list(self.profile.message_weights.values()),
         )
 
         if action_type == "query":
@@ -305,7 +315,11 @@ class ResearcherBehavior(UserBehavior):
                     if self.state["active_agents"]
                     else []
                 ),
-                "belief_types": ["state_beliefs", "policy_beliefs", "preference_beliefs"],
+                "belief_types": [
+                    "state_beliefs",
+                    "policy_beliefs",
+                    "preference_beliefs",
+                ],
                 "time_window": self.rng.choice([300, 600, 1800, 3600]),
             }
 
@@ -331,7 +345,11 @@ class ResearcherBehavior(UserBehavior):
                 "params": {
                     "name": f"Research_Agent_{self.rng.integers(1000, 9999)}",
                     "template": self.rng.choice(
-                        ["grid_navigator", "coalition_former", "resource_collector"]
+                        [
+                            "grid_navigator",
+                            "coalition_former",
+                            "resource_collector",
+                        ]
                     ),
                     "controlled": True,
                     "parameters": {
@@ -356,7 +374,11 @@ class ResearcherBehavior(UserBehavior):
                     "params": {
                         "parameters": {
                             self.rng.choice(
-                                ["learning_rate", "exploration_rate", "precision"]
+                                [
+                                    "learning_rate",
+                                    "exploration_rate",
+                                    "precision",
+                                ]
                             ): self.rng.uniform(0.01, 0.5)
                         }
                     },
@@ -377,7 +399,9 @@ class ResearcherBehavior(UserBehavior):
 
         # Subscribe to multiple related events
         num_events = self.rng.integers(2, 5)
-        selected_events = self.rng.choice(research_events, size=num_events, replace=False)
+        selected_events = self.rng.choice(
+            research_events, size=num_events, replace=False
+        )
 
         return {
             "type": "subscribe",
@@ -397,9 +421,13 @@ class ResearcherBehavior(UserBehavior):
                     "belief_entropy",
                     "policy_entropy",
                 ],
-                "agents": list(self.state["active_agents"]) if self.state["active_agents"] else [],
+                "agents": list(self.state["active_agents"])
+                if self.state["active_agents"]
+                else [],
                 "sample_rate": self.rng.choice([0.5, 1.0, 2.0]),
-                "aggregation": self.rng.choice(["mean", "std", "min_max", "percentiles"]),
+                "aggregation": self.rng.choice(
+                    ["mean", "std", "min_max", "percentiles"]
+                ),
             },
         }
 
@@ -425,7 +453,8 @@ class CoordinatorBehavior(UserBehavior):
 
         # Regular action selection
         action_type = self.rng.choice(
-            list(self.profile.message_weights.keys()), p=list(self.profile.message_weights.values())
+            list(self.profile.message_weights.keys()),
+            p=list(self.profile.message_weights.values()),
         )
 
         if action_type == "command":
@@ -460,7 +489,12 @@ class CoordinatorBehavior(UserBehavior):
                 "params": {
                     "name": f"Coalition_{fake.word()}_{self.rng.integers(100, 999)}",
                     "goal": self.rng.choice(
-                        ["explore_region", "collect_resources", "defend_position", "research_task"]
+                        [
+                            "explore_region",
+                            "collect_resources",
+                            "defend_position",
+                            "research_task",
+                        ]
                     ),
                     "required_agents": num_agents,
                     "formation_strategy": self.rng.choice(
@@ -471,14 +505,27 @@ class CoordinatorBehavior(UserBehavior):
             }
 
         elif command == "assign_agent_role":
-            if self.state["managed_coalitions"] and self.state["active_agents"]:
+            if (
+                self.state["managed_coalitions"]
+                and self.state["active_agents"]
+            ):
                 return {
                     "type": "command",
                     "command": "assign_role",
-                    "coalition_id": self.rng.choice(list(self.state["managed_coalitions"])),
-                    "agent_id": self.rng.choice(list(self.state["active_agents"])),
+                    "coalition_id": self.rng.choice(
+                        list(self.state["managed_coalitions"])
+                    ),
+                    "agent_id": self.rng.choice(
+                        list(self.state["active_agents"])
+                    ),
                     "role": self.rng.choice(
-                        ["scout", "collector", "defender", "coordinator", "analyst"]
+                        [
+                            "scout",
+                            "collector",
+                            "defender",
+                            "coordinator",
+                            "analyst",
+                        ]
                     ),
                 }
 
@@ -487,7 +534,9 @@ class CoordinatorBehavior(UserBehavior):
                 return {
                     "type": "command",
                     "command": "coordinate_action",
-                    "coalition_id": self.rng.choice(list(self.state["managed_coalitions"])),
+                    "coalition_id": self.rng.choice(
+                        list(self.state["managed_coalitions"])
+                    ),
                     "action_type": self.rng.choice(
                         [
                             "move_formation",
@@ -533,7 +582,10 @@ class CoordinatorBehavior(UserBehavior):
 
         query_type = self.rng.choice(query_types)
 
-        if query_type == "coalition_status" and self.state["managed_coalitions"]:
+        if (
+            query_type == "coalition_status"
+            and self.state["managed_coalitions"]
+        ):
             return {
                 "type": "query",
                 "query_type": "coalition_status",
@@ -547,7 +599,11 @@ class CoordinatorBehavior(UserBehavior):
                 "type": "query",
                 "query_type": "available_agents",
                 "capabilities": self.rng.choice(
-                    [["navigation", "planning"], ["combat", "defense"], ["research", "analysis"]],
+                    [
+                        ["navigation", "planning"],
+                        ["combat", "defense"],
+                        ["research", "analysis"],
+                    ],
                     p=[0.5, 0.3, 0.2],
                 ),
                 "min_trust_score": self.rng.uniform(0.5, 0.8),
@@ -580,7 +636,9 @@ class CoordinatorBehavior(UserBehavior):
             },
         }
 
-    def _handle_coordination_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_coordination_task(
+        self, task: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Handle specific coordination tasks."""
         task_type = task.get("type")
 
@@ -609,7 +667,8 @@ class ObserverBehavior(UserBehavior):
             return None
 
         action_type = self.rng.choice(
-            list(self.profile.message_weights.keys()), p=list(self.profile.message_weights.values())
+            list(self.profile.message_weights.keys()),
+            p=list(self.profile.message_weights.values()),
         )
 
         if action_type == "event":
@@ -643,7 +702,9 @@ class ObserverBehavior(UserBehavior):
 
         # Observers tend to subscribe to many events
         num_events = self.rng.integers(5, 10)
-        selected_events = self.rng.choice(all_events, size=num_events, replace=False)
+        selected_events = self.rng.choice(
+            all_events, size=num_events, replace=False
+        )
 
         return {
             "type": "subscribe",
@@ -664,7 +725,9 @@ class ObserverBehavior(UserBehavior):
                 "type": "query",
                 "query_type": "event_stream",
                 "limit": self.rng.integers(50, 200),
-                "event_types": self.rng.choice([None, ["agent:*"], ["coalition:*"], ["world:*"]]),
+                "event_types": self.rng.choice(
+                    [None, ["agent:*"], ["coalition:*"], ["world:*"]]
+                ),
             },
             {
                 "type": "query",
@@ -690,7 +753,9 @@ class ObserverBehavior(UserBehavior):
                 ],
                 "sample_rate": self.rng.choice([5.0, 10.0, 30.0]),
                 "passive": True,
-                "visualization": self.rng.choice(["dashboard", "timeline", "graph"]),
+                "visualization": self.rng.choice(
+                    ["dashboard", "timeline", "graph"]
+                ),
             },
         }
 
@@ -698,7 +763,11 @@ class ObserverBehavior(UserBehavior):
         """Generate minimal, non-intrusive commands."""
         # Observers rarely issue commands, usually just viewing
         commands = [
-            {"type": "command", "command": "snapshot", "params": {"include_all": True}},
+            {
+                "type": "command",
+                "command": "snapshot",
+                "params": {"include_all": True},
+            },
             {
                 "type": "command",
                 "command": "export_data",
@@ -726,7 +795,8 @@ class AdminBehavior(UserBehavior):
             return self._generate_maintenance_task()
 
         action_type = self.rng.choice(
-            list(self.profile.message_weights.keys()), p=list(self.profile.message_weights.values())
+            list(self.profile.message_weights.keys()),
+            p=list(self.profile.message_weights.values()),
         )
 
         if action_type == "monitoring":
@@ -759,9 +829,21 @@ class AdminBehavior(UserBehavior):
                 "sample_rate": 1.0,
                 "alert_rules": [
                     {"metric": "cpu_usage", "threshold": 80, "duration": 300},
-                    {"metric": "memory_usage", "threshold": 85, "duration": 300},
-                    {"metric": "error_rate", "threshold": 0.05, "duration": 60},
-                    {"metric": "response_time", "threshold": 1000, "duration": 120},
+                    {
+                        "metric": "memory_usage",
+                        "threshold": 85,
+                        "duration": 300,
+                    },
+                    {
+                        "metric": "error_rate",
+                        "threshold": 0.05,
+                        "duration": 60,
+                    },
+                    {
+                        "metric": "response_time",
+                        "threshold": 1000,
+                        "duration": 120,
+                    },
                 ],
                 "export_prometheus": True,
             },
@@ -773,26 +855,48 @@ class AdminBehavior(UserBehavior):
             {
                 "type": "query",
                 "query_type": "system_health",
-                "components": ["api", "database", "websocket", "inference_engine"],
+                "components": [
+                    "api",
+                    "database",
+                    "websocket",
+                    "inference_engine",
+                ],
                 "include_diagnostics": True,
             },
             {
                 "type": "query",
                 "query_type": "performance_report",
                 "time_range": self.rng.choice([3600, 86400, 604800]),
-                "metrics": ["throughput", "latency", "error_rate", "resource_usage"],
+                "metrics": [
+                    "throughput",
+                    "latency",
+                    "error_rate",
+                    "resource_usage",
+                ],
             },
             {
                 "type": "query",
                 "query_type": "user_activity",
-                "group_by": self.rng.choice(["persona_type", "connection_pattern", "hour"]),
+                "group_by": self.rng.choice(
+                    ["persona_type", "connection_pattern", "hour"]
+                ),
                 "include_anomalies": True,
             },
             {
                 "type": "query",
                 "query_type": "database_stats",
-                "tables": ["agents", "coalitions", "websocket_connections", "events"],
-                "metrics": ["row_count", "size", "index_usage", "slow_queries"],
+                "tables": [
+                    "agents",
+                    "coalitions",
+                    "websocket_connections",
+                    "events",
+                ],
+                "metrics": [
+                    "row_count",
+                    "size",
+                    "index_usage",
+                    "slow_queries",
+                ],
             },
         ]
 
@@ -831,7 +935,11 @@ class AdminBehavior(UserBehavior):
                 "command": "scale_resources",
                 "params": {
                     "component": self.rng.choice(
-                        ["worker_pool", "database_connections", "websocket_handlers"]
+                        [
+                            "worker_pool",
+                            "database_connections",
+                            "websocket_handlers",
+                        ]
                     ),
                     "action": self.rng.choice(["scale_up", "scale_down"]),
                     "amount": self.rng.integers(1, 5),
@@ -843,11 +951,15 @@ class AdminBehavior(UserBehavior):
                 "type": "command",
                 "command": "update_config",
                 "params": {
-                    "section": self.rng.choice(["performance", "security", "logging", "limits"]),
+                    "section": self.rng.choice(
+                        ["performance", "security", "logging", "limits"]
+                    ),
                     "changes": {
                         "max_connections": self.rng.integers(100, 1000),
                         "timeout": self.rng.integers(30, 300),
-                        "log_level": self.rng.choice(["debug", "info", "warning", "error"]),
+                        "log_level": self.rng.choice(
+                            ["debug", "info", "warning", "error"]
+                        ),
                     },
                 },
             }
@@ -877,7 +989,11 @@ class AdminBehavior(UserBehavior):
                 "command": "cleanup_old_data",
                 "params": {
                     "older_than_days": self.rng.choice([7, 14, 30]),
-                    "tables": ["websocket_events", "agent_history", "monitoring_data"],
+                    "tables": [
+                        "websocket_events",
+                        "agent_history",
+                        "monitoring_data",
+                    ],
                 },
             },
             {
@@ -913,8 +1029,16 @@ def create_persona(persona_type: PersonaType, **kwargs) -> PersonaProfile:
             response_time=(0.5, 3.0),
             multitasking_level=3,
             preferred_agents=["experimental_agent_*", "research_agent_*"],
-            favorite_queries=["belief_evolution", "performance_metrics", "learning_curves"],
-            monitoring_interests=["free_energy", "epistemic_value", "learning_rate"],
+            favorite_queries=[
+                "belief_evolution",
+                "performance_metrics",
+                "learning_curves",
+            ],
+            monitoring_interests=[
+                "free_energy",
+                "epistemic_value",
+                "learning_rate",
+            ],
         ),
         PersonaType.COORDINATOR: PersonaProfile(
             persona_type=PersonaType.COORDINATOR,
@@ -925,7 +1049,11 @@ def create_persona(persona_type: PersonaType, **kwargs) -> PersonaProfile:
             error_rate=0.01,
             multitasking_level=5,
             preferred_coalitions=["task_force_*", "coordination_group_*"],
-            favorite_queries=["coalition_status", "agent_availability", "task_progress"],
+            favorite_queries=[
+                "coalition_status",
+                "agent_availability",
+                "task_progress",
+            ],
         ),
         PersonaType.OBSERVER: PersonaProfile(
             persona_type=PersonaType.OBSERVER,
@@ -935,7 +1063,11 @@ def create_persona(persona_type: PersonaType, **kwargs) -> PersonaProfile:
             response_time=(1.0, 5.0),
             multitasking_level=1,
             connection_stability=0.99,
-            favorite_queries=["event_stream", "system_overview", "activity_patterns"],
+            favorite_queries=[
+                "event_stream",
+                "system_overview",
+                "activity_patterns",
+            ],
         ),
         PersonaType.ADMIN: PersonaProfile(
             persona_type=PersonaType.ADMIN,
@@ -947,7 +1079,11 @@ def create_persona(persona_type: PersonaType, **kwargs) -> PersonaProfile:
             multitasking_level=4,
             active_hours=list(range(24)),  # 24/7 availability
             peak_hours=[9, 10, 14, 15, 20, 21],
-            monitoring_interests=["system_health", "resource_usage", "error_rates"],
+            monitoring_interests=[
+                "system_health",
+                "resource_usage",
+                "error_rates",
+            ],
         ),
         PersonaType.DEVELOPER: PersonaProfile(
             persona_type=PersonaType.DEVELOPER,
@@ -958,7 +1094,11 @@ def create_persona(persona_type: PersonaType, **kwargs) -> PersonaProfile:
             error_rate=0.03,  # Higher error rate due to experimentation
             multitasking_level=4,
             active_hours=list(range(8, 20)) + [22, 23],  # Late night coding
-            favorite_queries=["debug_info", "stack_traces", "performance_profiling"],
+            favorite_queries=[
+                "debug_info",
+                "stack_traces",
+                "performance_profiling",
+            ],
         ),
         PersonaType.ANALYST: PersonaProfile(
             persona_type=PersonaType.ANALYST,
@@ -968,8 +1108,16 @@ def create_persona(persona_type: PersonaType, **kwargs) -> PersonaProfile:
             response_time=(1.0, 4.0),
             multitasking_level=2,
             active_hours=list(range(9, 18)),
-            favorite_queries=["aggregate_stats", "trend_analysis", "correlation_matrix"],
-            monitoring_interests=["kpi_metrics", "anomaly_detection", "predictive_indicators"],
+            favorite_queries=[
+                "aggregate_stats",
+                "trend_analysis",
+                "correlation_matrix",
+            ],
+            monitoring_interests=[
+                "kpi_metrics",
+                "anomaly_detection",
+                "predictive_indicators",
+            ],
         ),
     }
 
@@ -986,7 +1134,9 @@ def create_persona(persona_type: PersonaType, **kwargs) -> PersonaProfile:
 
 
 # Behavior factory
-def create_behavior(user_id: str, persona_type: PersonaType, **kwargs) -> UserBehavior:
+def create_behavior(
+    user_id: str, persona_type: PersonaType, **kwargs
+) -> UserBehavior:
     """Create a user behavior instance."""
     profile = create_persona(persona_type, **kwargs)
 

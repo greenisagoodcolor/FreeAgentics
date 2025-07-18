@@ -115,11 +115,15 @@ class Coalition:
             True if member was added successfully
         """
         if self.max_size and len(self.members) >= self.max_size:
-            logger.warning(f"Coalition {self.coalition_id} is at maximum capacity")
+            logger.warning(
+                f"Coalition {self.coalition_id} is at maximum capacity"
+            )
             return False
 
         if agent_id in self.members:
-            logger.warning(f"Agent {agent_id} is already in coalition {self.coalition_id}")
+            logger.warning(
+                f"Agent {agent_id} is already in coalition {self.coalition_id}"
+            )
             return False
 
         member = CoalitionMember(
@@ -131,7 +135,9 @@ class Coalition:
         self.members[agent_id] = member
 
         # Set as leader if first member or explicitly assigned
-        if role == CoalitionRole.LEADER or (not self.leader_id and len(self.members) == 1):
+        if role == CoalitionRole.LEADER or (
+            not self.leader_id and len(self.members) == 1
+        ):
             self.leader_id = agent_id
             member.role = CoalitionRole.LEADER
 
@@ -151,7 +157,9 @@ class Coalition:
             True if member was removed successfully
         """
         if agent_id not in self.members:
-            logger.warning(f"Agent {agent_id} not found in coalition {self.coalition_id}")
+            logger.warning(
+                f"Agent {agent_id} not found in coalition {self.coalition_id}"
+            )
             return False
 
         was_leader = self.leader_id == agent_id
@@ -196,7 +204,9 @@ class Coalition:
             self.leader_id = best_candidate.agent_id
 
             self._log_decision(f"Elected new leader: {self.leader_id}")
-            logger.info(f"Elected new leader for coalition {self.coalition_id}: {self.leader_id}")
+            logger.info(
+                f"Elected new leader for coalition {self.coalition_id}: {self.leader_id}"
+            )
 
     def add_objective(self, objective: CoalitionObjective) -> bool:
         """Add an objective to the coalition.
@@ -225,10 +235,14 @@ class Coalition:
         self.last_modified = datetime.now()
         self._log_decision(f"Added objective {objective.objective_id}")
 
-        logger.info(f"Added objective {objective.objective_id} to coalition {self.coalition_id}")
+        logger.info(
+            f"Added objective {objective.objective_id} to coalition {self.coalition_id}"
+        )
         return True
 
-    def update_objective_progress(self, objective_id: str, progress: float) -> bool:
+    def update_objective_progress(
+        self, objective_id: str, progress: float
+    ) -> bool:
         """Update progress on an objective.
 
         Args:
@@ -253,7 +267,9 @@ class Coalition:
                 self._update_performance_metrics()
                 return True
 
-        logger.warning(f"Objective {objective_id} not found in coalition {self.coalition_id}")
+        logger.warning(
+            f"Objective {objective_id} not found in coalition {self.coalition_id}"
+        )
         return False
 
     def _update_performance_metrics(self):
@@ -265,7 +281,9 @@ class Coalition:
             self.objective_completion_rate = completed / len(self.objectives)
 
         # Calculate coordination efficiency based on member activity
-        active_members = sum(1 for member in self.members.values() if member.active)
+        active_members = sum(
+            1 for member in self.members.values() if member.active
+        )
         total_members = len(self.members)
 
         if total_members > 0:
@@ -275,7 +293,8 @@ class Coalition:
 
         # Overall performance score combines completion rate and coordination
         self.performance_score = (
-            0.7 * self.objective_completion_rate + 0.3 * self.coordination_efficiency
+            0.7 * self.objective_completion_rate
+            + 0.3 * self.coordination_efficiency
         )
 
     def get_capabilities(self) -> Set[str]:
@@ -298,7 +317,9 @@ class Coalition:
         Returns:
             List of members with the specified role
         """
-        return [member for member in self.members.values() if member.role == role]
+        return [
+            member for member in self.members.values() if member.role == role
+        ]
 
     def can_achieve_objective(self, objective: CoalitionObjective) -> bool:
         """Check if coalition can achieve an objective.
@@ -325,7 +346,10 @@ class Coalition:
         )
 
     def add_communication(
-        self, sender_id: str, message: str, recipients: Optional[List[str]] = None
+        self,
+        sender_id: str,
+        message: str,
+        recipients: Optional[List[str]] = None,
     ):
         """Add a communication record.
 
@@ -376,7 +400,9 @@ class Coalition:
             "member_count": len(self.members),
             "leader_id": self.leader_id,
             "objectives_count": len(self.objectives),
-            "completed_objectives": sum(1 for obj in self.objectives if obj.completed),
+            "completed_objectives": sum(
+                1 for obj in self.objectives if obj.completed
+            ),
             "performance_score": self.performance_score,
             "coordination_efficiency": self.coordination_efficiency,
             "objective_completion_rate": self.objective_completion_rate,

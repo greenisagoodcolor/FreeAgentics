@@ -63,7 +63,9 @@ class TestBasicErrorHandling:
 
         # Simulate multiple failures
         for i in range(4):  # Max retries is 3
-            recovery_info = handler.handle_error(PyMDPError(f"Failure {i}"), "test_operation")
+            recovery_info = handler.handle_error(
+                PyMDPError(f"Failure {i}"), "test_operation"
+            )
 
         # Should not be able to retry after max attempts
         assert recovery_info["can_retry"] is False
@@ -491,4 +493,11 @@ class TestNumericEdgeCases:
 
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-v", "--cov=agents.error_handling", "--cov-report=term-missing"])
+    pytest.main(
+        [
+            __file__,
+            "-v",
+            "--cov=agents.error_handling",
+            "--cov-report=term-missing",
+        ]
+    )

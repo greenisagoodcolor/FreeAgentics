@@ -95,8 +95,12 @@ class AuthorizationTests(BasePenetrationTest):
         logger.info("Testing horizontal privilege escalation")
 
         # Create two users with same role
-        user1_name, user1_pass, user1_id = self.create_test_user(UserRole.OBSERVER)
-        user2_name, user2_pass, user2_id = self.create_test_user(UserRole.OBSERVER)
+        user1_name, user1_pass, user1_id = self.create_test_user(
+            UserRole.OBSERVER
+        )
+        user2_name, user2_pass, user2_id = self.create_test_user(
+            UserRole.OBSERVER
+        )
 
         # Get tokens for both users
         user1_token = self.get_auth_token(user1_name, user1_pass)
@@ -153,9 +157,17 @@ class AuthorizationTests(BasePenetrationTest):
         logger.info("Testing vertical privilege escalation")
 
         # Create users with different privilege levels
-        observer_name, observer_pass, observer_id = self.create_test_user(UserRole.OBSERVER)
-        researcher_name, researcher_pass, researcher_id = self.create_test_user(UserRole.RESEARCHER)
-        admin_name, admin_pass, admin_id = self.create_test_user(UserRole.ADMIN)
+        observer_name, observer_pass, observer_id = self.create_test_user(
+            UserRole.OBSERVER
+        )
+        (
+            researcher_name,
+            researcher_pass,
+            researcher_id,
+        ) = self.create_test_user(UserRole.RESEARCHER)
+        admin_name, admin_pass, admin_id = self.create_test_user(
+            UserRole.ADMIN
+        )
 
         # Get tokens
         observer_token = self.get_auth_token(observer_name, observer_pass)
@@ -180,7 +192,11 @@ class AuthorizationTests(BasePenetrationTest):
             response = self._make_request(method, endpoint, observer_token)
 
             if response.status_code in [200, 201, 202]:
-                severity = SeverityLevel.CRITICAL if "admin" in endpoint else SeverityLevel.HIGH
+                severity = (
+                    SeverityLevel.CRITICAL
+                    if "admin" in endpoint
+                    else SeverityLevel.HIGH
+                )
 
                 self.add_vulnerability(
                     VulnerabilityFinding(
@@ -205,7 +221,9 @@ class AuthorizationTests(BasePenetrationTest):
                             "Regular audit of endpoint permissions",
                         ],
                         cwe_id="CWE-269",
-                        cvss_score=9.1 if severity == SeverityLevel.CRITICAL else 8.5,
+                        cvss_score=9.1
+                        if severity == SeverityLevel.CRITICAL
+                        else 8.5,
                         test_method="vertical_privilege_escalation",
                     )
                 )
@@ -218,8 +236,12 @@ class AuthorizationTests(BasePenetrationTest):
         logger.info("Testing IDOR vulnerabilities")
 
         # Create test users
-        user1_name, user1_pass, user1_id = self.create_test_user(UserRole.RESEARCHER)
-        user2_name, user2_pass, user2_id = self.create_test_user(UserRole.RESEARCHER)
+        user1_name, user1_pass, user1_id = self.create_test_user(
+            UserRole.RESEARCHER
+        )
+        user2_name, user2_pass, user2_id = self.create_test_user(
+            UserRole.RESEARCHER
+        )
 
         user1_token = self.get_auth_token(user1_name, user1_pass)
 
@@ -240,7 +262,9 @@ class AuthorizationTests(BasePenetrationTest):
         logger.info("Testing role bypass vulnerabilities")
 
         # Create user with limited role
-        user_name, user_pass, user_id = self.create_test_user(UserRole.OBSERVER)
+        user_name, user_pass, user_id = self.create_test_user(
+            UserRole.OBSERVER
+        )
         user_token = self.get_auth_token(user_name, user_pass)
 
         # Test role bypass techniques
@@ -263,7 +287,9 @@ class AuthorizationTests(BasePenetrationTest):
 
             # Test on privileged endpoint
             response = self.client.post(
-                "/api/v1/agents", json={"name": "test_agent", "type": "basic"}, headers=headers
+                "/api/v1/agents",
+                json={"name": "test_agent", "type": "basic"},
+                headers=headers,
             )
 
             if response.status_code in [200, 201]:
@@ -299,8 +325,12 @@ class AuthorizationTests(BasePenetrationTest):
         logger.info("Testing resource ownership validation")
 
         # Create users and resources
-        owner_name, owner_pass, owner_id = self.create_test_user(UserRole.RESEARCHER)
-        attacker_name, attacker_pass, attacker_id = self.create_test_user(UserRole.RESEARCHER)
+        owner_name, owner_pass, owner_id = self.create_test_user(
+            UserRole.RESEARCHER
+        )
+        attacker_name, attacker_pass, attacker_id = self.create_test_user(
+            UserRole.RESEARCHER
+        )
 
         owner_token = self.get_auth_token(owner_name, owner_pass)
         attacker_token = self.get_auth_token(attacker_name, attacker_pass)
@@ -327,7 +357,9 @@ class AuthorizationTests(BasePenetrationTest):
                     ]
 
                     for endpoint, method in ownership_tests:
-                        response = self._make_request(method, endpoint, attacker_token)
+                        response = self._make_request(
+                            method, endpoint, attacker_token
+                        )
 
                         if response.status_code in [200, 201, 202, 204]:
                             self.add_vulnerability(
@@ -365,7 +397,9 @@ class AuthorizationTests(BasePenetrationTest):
         logger.info("Testing permission boundaries")
 
         # Create user with specific limited permissions
-        user_name, user_pass, user_id = self.create_test_user(UserRole.AGENT_MANAGER)
+        user_name, user_pass, user_id = self.create_test_user(
+            UserRole.AGENT_MANAGER
+        )
         user_token = self.get_auth_token(user_name, user_pass)
 
         # Test operations outside of granted permissions
@@ -412,7 +446,9 @@ class AuthorizationTests(BasePenetrationTest):
         logger.info("Testing admin function access control")
 
         # Create non-admin user
-        user_name, user_pass, user_id = self.create_test_user(UserRole.RESEARCHER)
+        user_name, user_pass, user_id = self.create_test_user(
+            UserRole.RESEARCHER
+        )
         user_token = self.get_auth_token(user_name, user_pass)
 
         # Test access to admin functions
@@ -510,7 +546,9 @@ class AuthorizationTests(BasePenetrationTest):
         logger.info("Testing parameter tampering for authorization bypass")
 
         # Create limited user
-        user_name, user_pass, user_id = self.create_test_user(UserRole.OBSERVER)
+        user_name, user_pass, user_id = self.create_test_user(
+            UserRole.OBSERVER
+        )
         user_token = self.get_auth_token(user_name, user_pass)
 
         # Test parameter injection for privilege escalation
@@ -519,7 +557,11 @@ class AuthorizationTests(BasePenetrationTest):
             {
                 "endpoint": "/api/v1/agents",
                 "method": "POST",
-                "data": {"name": "test", "role": "admin", "permissions": ["admin"]},
+                "data": {
+                    "name": "test",
+                    "role": "admin",
+                    "permissions": ["admin"],
+                },
                 "description": "Role injection in request body",
             },
             # Try user_id tampering
@@ -533,7 +575,11 @@ class AuthorizationTests(BasePenetrationTest):
             {
                 "endpoint": "/api/v1/agents",
                 "method": "POST",
-                "data": {"name": "test", "owner": "admin", "created_by": "admin"},
+                "data": {
+                    "name": "test",
+                    "owner": "admin",
+                    "created_by": "admin",
+                },
                 "description": "Owner tampering in request",
             },
         ]
@@ -553,7 +599,10 @@ class AuthorizationTests(BasePenetrationTest):
                     headers=self.get_auth_headers(user_token),
                 )
 
-            if response.status_code in [200, 201] and self._detect_privilege_escalation(response):
+            if response.status_code in [
+                200,
+                201,
+            ] and self._detect_privilege_escalation(response):
                 self.add_vulnerability(
                     VulnerabilityFinding(
                         vulnerability_type=VulnerabilityType.PRIVILEGE_ESCALATION_VERTICAL,
@@ -587,7 +636,9 @@ class AuthorizationTests(BasePenetrationTest):
         logger.info("Testing token privilege escalation")
 
         # Create test user
-        user_name, user_pass, user_id = self.create_test_user(UserRole.OBSERVER)
+        user_name, user_pass, user_id = self.create_test_user(
+            UserRole.OBSERVER
+        )
         original_token = self.get_auth_token(user_name, user_pass)
 
         # Try to manipulate JWT token for privilege escalation
@@ -595,12 +646,18 @@ class AuthorizationTests(BasePenetrationTest):
             import jwt as pyjwt
 
             # Decode token without verification
-            payload = pyjwt.decode(original_token, options={"verify_signature": False})
+            payload = pyjwt.decode(
+                original_token, options={"verify_signature": False}
+            )
 
             # Try role escalation
             escalated_payload = payload.copy()
             escalated_payload["role"] = "admin"
-            escalated_payload["permissions"] = ["admin_system", "create_agent", "delete_agent"]
+            escalated_payload["permissions"] = [
+                "admin_system",
+                "create_agent",
+                "delete_agent",
+            ]
 
             # Try different signing methods
             escalation_attempts = [
@@ -612,7 +669,9 @@ class AuthorizationTests(BasePenetrationTest):
 
             for algorithm, secret in escalation_attempts:
                 try:
-                    escalated_token = pyjwt.encode(escalated_payload, secret, algorithm=algorithm)
+                    escalated_token = pyjwt.encode(
+                        escalated_payload, secret, algorithm=algorithm
+                    )
 
                     # Test escalated token
                     response = self.client.get(
@@ -659,16 +718,22 @@ class AuthorizationTests(BasePenetrationTest):
 
     # Helper methods for IDOR testing
 
-    async def _test_numeric_idor(self, token: str, user1_id: str, user2_id: str):
+    async def _test_numeric_idor(
+        self, token: str, user1_id: str, user2_id: str
+    ):
         """Test numeric ID manipulation for IDOR."""
         # Try sequential IDs around known user ID
         try:
-            base_id = int(user1_id) if user1_id.isdigit() else hash(user1_id) % 10000
+            base_id = (
+                int(user1_id) if user1_id.isdigit() else hash(user1_id) % 10000
+            )
 
             for test_id in range(base_id - 5, base_id + 5):
                 if str(test_id) != user1_id:  # Don't test own ID
                     endpoint = f"/api/v1/users/{test_id}"
-                    response = self.client.get(endpoint, headers=self.get_auth_headers(token))
+                    response = self.client.get(
+                        endpoint, headers=self.get_auth_headers(token)
+                    )
 
                     if response.status_code == 200:
                         self.add_vulnerability(
@@ -703,7 +768,9 @@ class AuthorizationTests(BasePenetrationTest):
         """Test UUID manipulation for IDOR."""
         if len(user2_id) > 10:  # Likely UUID
             endpoint = f"/api/v1/users/{user2_id}"
-            response = self.client.get(endpoint, headers=self.get_auth_headers(token))
+            response = self.client.get(
+                endpoint, headers=self.get_auth_headers(token)
+            )
 
             if response.status_code == 200:
                 self.add_vulnerability(
@@ -737,7 +804,9 @@ class AuthorizationTests(BasePenetrationTest):
             for offset in range(5):
                 test_id = base_id + offset
                 endpoint = f"/api/v1/agents/{test_id}"
-                response = self.client.get(endpoint, headers=self.get_auth_headers(token))
+                response = self.client.get(
+                    endpoint, headers=self.get_auth_headers(token)
+                )
 
                 if response.status_code == 200:
                     try:
@@ -782,7 +851,9 @@ class AuthorizationTests(BasePenetrationTest):
         ]
 
         for endpoint in file_endpoints:
-            response = self.client.get(endpoint, headers=self.get_auth_headers(token))
+            response = self.client.get(
+                endpoint, headers=self.get_auth_headers(token)
+            )
 
             if response.status_code == 200:
                 self.add_vulnerability(
@@ -809,7 +880,9 @@ class AuthorizationTests(BasePenetrationTest):
                     )
                 )
 
-    async def _test_resource_enumeration(self, token: str, user1_id: str, user2_id: str):
+    async def _test_resource_enumeration(
+        self, token: str, user1_id: str, user2_id: str
+    ):
         """Test resource enumeration capabilities."""
         # Test if user can enumerate other users' resources
         enum_endpoints = [
@@ -819,7 +892,9 @@ class AuthorizationTests(BasePenetrationTest):
         ]
 
         for endpoint in enum_endpoints:
-            response = self.client.get(endpoint, headers=self.get_auth_headers(token))
+            response = self.client.get(
+                endpoint, headers=self.get_auth_headers(token)
+            )
 
             if response.status_code == 200:
                 try:
@@ -864,13 +939,17 @@ class AuthorizationTests(BasePenetrationTest):
 
         for params in role_params:
             response = self.client.get(
-                "/api/v1/auth/me", params=params, headers=self.get_auth_headers(token)
+                "/api/v1/auth/me",
+                params=params,
+                headers=self.get_auth_headers(token),
             )
 
             if response.status_code == 200:
                 try:
                     data = response.json()
-                    if data.get("role") == "admin" or "admin" in str(data.get("permissions", [])):
+                    if data.get("role") == "admin" or "admin" in str(
+                        data.get("permissions", [])
+                    ):
                         self.add_vulnerability(
                             VulnerabilityFinding(
                                 vulnerability_type=VulnerabilityType.PRIVILEGE_ESCALATION_VERTICAL,
@@ -899,7 +978,9 @@ class AuthorizationTests(BasePenetrationTest):
 
     # Helper methods
 
-    def _make_request(self, method: str, endpoint: str, token: Optional[str], **kwargs):
+    def _make_request(
+        self, method: str, endpoint: str, token: Optional[str], **kwargs
+    ):
         """Make HTTP request with optional authentication."""
         headers = self.get_auth_headers(token) if token else {}
         headers.update(kwargs.get("headers", {}))
@@ -925,9 +1006,15 @@ class AuthorizationTests(BasePenetrationTest):
 
             # Check for admin indicators
             admin_indicators = ["admin", "administrator", "root", "superuser"]
-            privilege_indicators = ["create_agent", "delete_agent", "admin_system"]
+            privilege_indicators = [
+                "create_agent",
+                "delete_agent",
+                "admin_system",
+            ]
 
-            return any(indicator in response_text for indicator in admin_indicators) or any(
+            return any(
+                indicator in response_text for indicator in admin_indicators
+            ) or any(
                 indicator in str(data) for indicator in privilege_indicators
             )
         except:
@@ -936,7 +1023,11 @@ class AuthorizationTests(BasePenetrationTest):
     def _count_test_users(self) -> int:
         """Count the number of test users created."""
         return len(
-            [user for user in self.auth_manager.users.keys() if user.startswith("test_user_")]
+            [
+                user
+                for user in self.auth_manager.users.keys()
+                if user.startswith("test_user_")
+            ]
         )
 
     def _get_tested_endpoints(self) -> List[str]:

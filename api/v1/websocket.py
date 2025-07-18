@@ -12,7 +12,11 @@ from pydantic import BaseModel, Field, validator
 
 from api.middleware.websocket_rate_limiting import websocket_rate_limit_manager
 from auth.security_implementation import Permission
-from websocket.auth_handler import WebSocketErrorCode, handle_token_refresh, ws_auth_handler
+from websocket.auth_handler import (
+    WebSocketErrorCode,
+    handle_token_refresh,
+    ws_auth_handler,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +58,12 @@ class ConnectionManager:
         # Connection metadata
         self.connection_metadata: Dict[str, dict] = {}
 
-    async def connect(self, websocket: WebSocket, client_id: str, metadata: Optional[dict] = None):
+    async def connect(
+        self,
+        websocket: WebSocket,
+        client_id: str,
+        metadata: Optional[dict] = None,
+    ):
         """Accept and register a new WebSocket connection."""
         # Connection is already accepted by the endpoint after authentication
         self.active_connections[client_id] = websocket
@@ -136,25 +145,34 @@ manager = ConnectionManager()
 async def websocket_endpoint(
     websocket: WebSocket,
     client_id: str,
-    token: Optional[str] = Query(None, description="JWT token for authentication"),
+    token: Optional[str] = Query(
+        None, description="JWT token for authentication"
+    ),
 ):
     """Main WebSocket endpoint for real-time communication with authentication."""
     try:
         # Check rate limiting first
-        if not await websocket_rate_limit_manager.check_connection_allowed(websocket):
+        if not await websocket_rate_limit_manager.check_connection_allowed(
+            websocket
+        ):
             await websocket.close(
-                code=WebSocketErrorCode.RATE_LIMITED, reason="Rate limit exceeded"
+                code=WebSocketErrorCode.RATE_LIMITED,
+                reason="Rate limit exceeded",
             )
             return
 
         # Authenticate the connection
-        user_data = await ws_auth_handler.authenticate_connection(websocket, client_id, token)
+        user_data = await ws_auth_handler.authenticate_connection(
+            websocket, client_id, token
+        )
 
         # Accept the connection after successful authentication
         await websocket.accept()
 
         # Register with rate limiter
-        await websocket_rate_limit_manager.register_connection(websocket, client_id)
+        await websocket_rate_limit_manager.register_connection(
+            websocket, client_id
+        )
 
         # Connect to manager with user metadata
         metadata = {
@@ -167,7 +185,9 @@ async def websocket_endpoint(
         await manager.connect(websocket, client_id, metadata)
 
         # Start heartbeat task
-        heartbeat_task = asyncio.create_task(heartbeat_handler(websocket, client_id))
+        heartbeat_task = asyncio.create_task(
+            heartbeat_handler(websocket, client_id)
+        )
 
         try:
             while True:
@@ -175,7 +195,9 @@ async def websocket_endpoint(
                 data = await websocket.receive_text()
 
                 # Check message rate limiting
-                if not await websocket_rate_limit_manager.check_message_allowed(websocket, data):
+                if not await websocket_rate_limit_manager.check_message_allowed(
+                    websocket, data
+                ):
                     await manager.send_personal_message(
                         {
                             "type": "error",
@@ -203,8 +225,12 @@ async def websocket_endpoint(
                     if validated_msg.type == "refresh_token":
                         refresh_token = validated_msg.data.get("refresh_token")
                         if refresh_token:
-                            result = await handle_token_refresh(client_id, refresh_token)
-                            await manager.send_personal_message(result, client_id)
+                            result = await handle_token_refresh(
+                                client_id, refresh_token
+                            )
+                            await manager.send_personal_message(
+                                result, client_id
+                            )
                         else:
                             await manager.send_personal_message(
                                 {
@@ -218,24 +244,40 @@ async def websocket_endpoint(
                         # Update heartbeat
                         await ws_auth_handler.update_heartbeat(client_id)
                         await manager.send_personal_message(
-                            {"type": "heartbeat_ack", "timestamp": datetime.now().isoformat()},
+                            {
+                                "type": "heartbeat_ack",
+                                "timestamp": datetime.now().isoformat(),
+                            },
                             client_id,
                         )
                     else:
                         # Handle regular messages with permission checks
-                        await handle_client_message_with_auth(client_id, message)
+                        await handle_client_message_with_auth(
+                            client_id, message
+                        )
 
                 except json.JSONDecodeError:
                     await manager.send_personal_message(
-                        {"type": "error", "code": "INVALID_JSON", "message": "Invalid JSON format"},
+                        {
+                            "type": "error",
+                            "code": "INVALID_JSON",
+                            "message": "Invalid JSON format",
+                        },
                         client_id,
                     )
                 except ValueError as e:
                     await manager.send_personal_message(
-                        {"type": "error", "code": "VALIDATION_ERROR", "message": str(e)}, client_id
+                        {
+                            "type": "error",
+                            "code": "VALIDATION_ERROR",
+                            "message": str(e),
+                        },
+                        client_id,
                     )
                 except Exception as e:
-                    logger.error(f"Error handling message from {client_id}: {e}")
+                    logger.error(
+                        f"Error handling message from {client_id}: {e}"
+                    )
                     await manager.send_personal_message(
                         {
                             "type": "error",
@@ -285,7 +327,9 @@ async def handle_client_message_with_auth(client_id: str, message: dict):
 
     if msg_type == "subscribe":
         # Check permission for subscriptions
-        if not await ws_auth_handler.verify_permission(client_id, Permission.VIEW_AGENTS):
+        if not await ws_auth_handler.verify_permission(
+            client_id, Permission.VIEW_AGENTS
+        ):
             await manager.send_personal_message(
                 {
                     "type": "error",
@@ -301,7 +345,9 @@ async def handle_client_message_with_auth(client_id: str, message: dict):
         # Validate event types
         valid_event_types = []
         for event_type in event_types:
-            if isinstance(event_type, str) and re.match(r"^[a-zA-Z0-9:_-]+$", event_type):
+            if isinstance(event_type, str) and re.match(
+                r"^[a-zA-Z0-9:_-]+$", event_type
+            ):
                 valid_event_types.append(event_type)
             else:
                 logger.warning(f"Invalid event type rejected: {event_type}")
@@ -310,7 +356,11 @@ async def handle_client_message_with_auth(client_id: str, message: dict):
             manager.subscribe(client_id, event_type)
 
         await manager.send_personal_message(
-            {"type": "subscription_confirmed", "event_types": valid_event_types}, client_id
+            {
+                "type": "subscription_confirmed",
+                "event_types": valid_event_types,
+            },
+            client_id,
         )
 
     elif msg_type == "unsubscribe":
@@ -320,13 +370,15 @@ async def handle_client_message_with_auth(client_id: str, message: dict):
             manager.unsubscribe(client_id, event_type)
 
         await manager.send_personal_message(
-            {"type": "unsubscription_confirmed", "event_types": event_types}, client_id
+            {"type": "unsubscription_confirmed", "event_types": event_types},
+            client_id,
         )
 
     elif msg_type == "ping":
         # Handle ping/pong for connection health check
         await manager.send_personal_message(
-            {"type": "pong", "timestamp": datetime.now().isoformat()}, client_id
+            {"type": "pong", "timestamp": datetime.now().isoformat()},
+            client_id,
         )
 
     elif msg_type == "agent_command":
@@ -341,7 +393,9 @@ async def handle_client_message_with_auth(client_id: str, message: dict):
         elif command in ["create", "delete"]:
             required_permission = Permission.CREATE_AGENT
 
-        if not await ws_auth_handler.verify_permission(client_id, required_permission):
+        if not await ws_auth_handler.verify_permission(
+            client_id, required_permission
+        ):
             await manager.send_personal_message(
                 {
                     "type": "error",
@@ -357,7 +411,9 @@ async def handle_client_message_with_auth(client_id: str, message: dict):
 
     elif msg_type == "query":
         # Check permission for queries
-        if not await ws_auth_handler.verify_permission(client_id, Permission.VIEW_AGENTS):
+        if not await ws_auth_handler.verify_permission(
+            client_id, Permission.VIEW_AGENTS
+        ):
             await manager.send_personal_message(
                 {
                     "type": "error",
@@ -390,7 +446,11 @@ async def handle_agent_command(client_id: str, command_data: dict):
     # Validate inputs
     if not command or not agent_id:
         await manager.send_personal_message(
-            {"type": "error", "code": "INVALID_COMMAND", "message": "Missing command or agent_id"},
+            {
+                "type": "error",
+                "code": "INVALID_COMMAND",
+                "message": "Missing command or agent_id",
+            },
             client_id,
         )
         return
@@ -398,16 +458,32 @@ async def handle_agent_command(client_id: str, command_data: dict):
     # Validate agent_id format to prevent injection
     if not re.match(r"^[a-zA-Z0-9_-]+$", agent_id):
         await manager.send_personal_message(
-            {"type": "error", "code": "INVALID_AGENT_ID", "message": "Invalid agent_id format"},
+            {
+                "type": "error",
+                "code": "INVALID_AGENT_ID",
+                "message": "Invalid agent_id format",
+            },
             client_id,
         )
         return
 
     # Validate command
-    valid_commands = ["start", "stop", "restart", "status", "update", "create", "delete"]
+    valid_commands = [
+        "start",
+        "stop",
+        "restart",
+        "status",
+        "update",
+        "create",
+        "delete",
+    ]
     if command not in valid_commands:
         await manager.send_personal_message(
-            {"type": "error", "code": "INVALID_COMMAND", "message": f"Invalid command: {command}"},
+            {
+                "type": "error",
+                "code": "INVALID_COMMAND",
+                "message": f"Invalid command: {command}",
+            },
             client_id,
         )
         return
@@ -457,7 +533,8 @@ async def handle_query(client_id: str, query_data: dict):
 
     else:
         await manager.send_personal_message(
-            {"type": "error", "message": f"Unknown query type: {query_type}"}, client_id
+            {"type": "error", "message": f"Unknown query type: {query_type}"},
+            client_id,
         )
 
 
@@ -515,7 +592,9 @@ async def get_active_connections():
 
     return {
         "total_connections": len(manager.active_connections),
-        "authenticated_connections": len([c for c in connections_info if c.get("user_id")]),
+        "authenticated_connections": len(
+            [c for c in connections_info if c.get("user_id")]
+        ),
         "connections": connections_info,
     }
 

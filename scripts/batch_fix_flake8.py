@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Batch script to systematically fix flake8 violations across the codebase.
-"""
+"""Batch script to systematically fix flake8 violations across the codebase."""
 
 import argparse
 import json
@@ -49,7 +47,7 @@ def fix_imports_with_isort(directory: str) -> bool:
             print(f"✓ Fixed import ordering in {directory}")
             return True
     except (subprocess.CalledProcessError, FileNotFoundError):
-        print(f"⚠ isort not available, skipping import fixes")
+        print("⚠ isort not available, skipping import fixes")
 
     return False
 
@@ -61,14 +59,20 @@ def fix_with_black(directory: str) -> bool:
         subprocess.run(["black", "--version"], capture_output=True, check=True)
 
         # Run black with 79 char line length
-        cmd = ["black", directory, "--line-length", "79", "--skip-string-normalization"]
+        cmd = [
+            "black",
+            directory,
+            "--line-length",
+            "79",
+            "--skip-string-normalization",
+        ]
         result = subprocess.run(cmd, capture_output=True, text=True)
 
         if result.returncode == 0:
             print(f"✓ Formatted code with black in {directory}")
             return True
     except (subprocess.CalledProcessError, FileNotFoundError):
-        print(f"⚠ black not available, skipping formatting")
+        print("⚠ black not available, skipping formatting")
 
     return False
 
@@ -80,7 +84,12 @@ def remove_unused_imports(file_path: str) -> int:
             lines = f.readlines()
 
         # Get unused imports
-        cmd = ["flake8", file_path, "--select=F401", "--format=%(row)d:%(code)s:%(text)s"]
+        cmd = [
+            "flake8",
+            file_path,
+            "--select=F401",
+            "--format=%(row)d:%(code)s:%(text)s",
+        ]
         result = subprocess.run(cmd, capture_output=True, text=True)
 
         if not result.stdout:
@@ -124,7 +133,7 @@ def fix_line_length_violations(file_path: str) -> int:
             lines = f.readlines()
 
         new_lines = []
-        for i, line in enumerate(lines):
+        for _, line in enumerate(lines):
             if len(line.rstrip()) > 79:
                 # Try to break long lines intelligently
                 stripped = line.strip()
@@ -139,7 +148,9 @@ def fix_line_length_violations(file_path: str) -> int:
                         if len(current_line) + len(word) + 1 <= 78:
                             current_line += " " + word
                         else:
-                            new_lines.append(" " * indent + current_line + "\n")
+                            new_lines.append(
+                                " " * indent + current_line + "\n"
+                            )
                             current_line = "#" + " " + word
                             fixed_count += 1
                     new_lines.append(" " * indent + current_line + "\n")
@@ -154,15 +165,21 @@ def fix_line_length_violations(file_path: str) -> int:
                     # Try to break at commas
                     prefix = line[: line.index("(") + 1]
                     suffix = line[line.rindex(")") :]
-                    params = line[line.index("(") + 1 : line.rindex(")")].split(",")
+                    params = line[
+                        line.index("(") + 1 : line.rindex(")")
+                    ].split(",")
 
                     if len(params) > 1:
                         new_lines.append(prefix + "\n")
                         for j, param in enumerate(params):
                             if j < len(params) - 1:
-                                new_lines.append(" " * (indent + 4) + param.strip() + ",\n")
+                                new_lines.append(
+                                    " " * (indent + 4) + param.strip() + ",\n"
+                                )
                             else:
-                                new_lines.append(" " * (indent + 4) + param.strip() + "\n")
+                                new_lines.append(
+                                    " " * (indent + 4) + param.strip() + "\n"
+                                )
                         new_lines.append(" " * indent + suffix)
                         fixed_count += 1
                     else:
@@ -191,7 +208,7 @@ def process_directory(directory: str, fix_types: List[str]) -> Dict[str, int]:
     total_before = sum(before_stats.values())
 
     if total_before == 0:
-        print(f"  ✓ No violations found!")
+        print("  ✓ No violations found!")
         return {"fixed": 0, "remaining": 0}
 
     print(f"  Found {total_before} violations")
@@ -221,12 +238,16 @@ def process_directory(directory: str, fix_types: List[str]) -> Dict[str, int]:
             if "unused" in fix_types:
                 removed = remove_unused_imports(file_path)
                 if removed > 0:
-                    print(f"    Removed {removed} unused imports from {file_path}")
+                    print(
+                        f"    Removed {removed} unused imports from {file_path}"
+                    )
 
             if "length" in fix_types:
                 fixed = fix_line_length_violations(file_path)
                 if fixed > 0:
-                    print(f"    Fixed {fixed} line length violations in {file_path}")
+                    print(
+                        f"    Fixed {fixed} line length violations in {file_path}"
+                    )
 
     # Get final stats
     after_stats = get_violation_stats(directory)
@@ -253,12 +274,24 @@ def main():
         default=["agents", "api", "database", "inference", "knowledge_graph"],
         help="Directories to process",
     )
-    parser.add_argument("--fix-imports", action="store_true", help="Fix import ordering")
-    parser.add_argument("--fix-format", action="store_true", help="Format with black")
-    parser.add_argument("--fix-unused", action="store_true", help="Remove unused imports")
-    parser.add_argument("--fix-length", action="store_true", help="Fix line length violations")
-    parser.add_argument("--fix-all", action="store_true", help="Apply all fixes")
-    parser.add_argument("--report", default="flake8_fix_report.json", help="Output report file")
+    parser.add_argument(
+        "--fix-imports", action="store_true", help="Fix import ordering"
+    )
+    parser.add_argument(
+        "--fix-format", action="store_true", help="Format with black"
+    )
+    parser.add_argument(
+        "--fix-unused", action="store_true", help="Remove unused imports"
+    )
+    parser.add_argument(
+        "--fix-length", action="store_true", help="Fix line length violations"
+    )
+    parser.add_argument(
+        "--fix-all", action="store_true", help="Apply all fixes"
+    )
+    parser.add_argument(
+        "--report", default="flake8_fix_report.json", help="Output report file"
+    )
 
     args = parser.parse_args()
 

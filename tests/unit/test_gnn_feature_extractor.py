@@ -121,14 +121,22 @@ class TestNodeFeatureExtractor:
                     "position": {"lat": 37.7749, "lon": -122.4194},  # SF
                     "timestamp": datetime.now(),
                     "category": "agent",
-                    "attributes": {"energy": 0.8, "velocity": 5.0, "confidence": 0.9},
+                    "attributes": {
+                        "energy": 0.8,
+                        "velocity": 5.0,
+                        "confidence": 0.9,
+                    },
                 },
                 {
                     "id": "node_2",
                     "position": {"lat": 37.7849, "lon": -122.4094},
                     "timestamp": datetime.now() - timedelta(minutes=5),
                     "category": "resource",
-                    "attributes": {"energy": 0.6, "velocity": 0.0, "confidence": 0.7},
+                    "attributes": {
+                        "energy": 0.6,
+                        "velocity": 0.0,
+                        "confidence": 0.7,
+                    },
                 },
             ]
         }
@@ -155,7 +163,10 @@ class TestNodeFeatureExtractor:
         """Test spatial feature extraction."""
         # Modify sample data to have proper position format
         test_nodes = [
-            {"id": "node_1", "position": [37.7749, -122.4194]},  # x, y coordinates
+            {
+                "id": "node_1",
+                "position": [37.7749, -122.4194],
+            },  # x, y coordinates
             {"id": "node_2", "position": [37.7849, -122.4094]},
             {"id": "node_3", "position": [0.0, 0.0]},  # Test zero position
         ]
@@ -171,20 +182,25 @@ class TestNodeFeatureExtractor:
         if expected_resolution != 1.0:
             # Verify that coordinates are scaled by resolution
             assert torch.allclose(
-                features[0], torch.tensor([37.7749, -122.4194]) / expected_resolution
+                features[0],
+                torch.tensor([37.7749, -122.4194]) / expected_resolution,
             )
 
     def test_extract_spatial_features_no_h3(self, extractor, sample_node_data):
         """Test spatial features when H3 is not available."""
         with patch.dict("sys.modules", {"h3": None}):
-            features = extractor._extract_spatial_features(sample_node_data["nodes"])
+            features = extractor._extract_spatial_features(
+                sample_node_data["nodes"]
+            )
 
             assert features is not None
             assert features.shape[1] >= 2  # Should still have lat/lon
 
     def test_extract_temporal_features(self, extractor, sample_node_data):
         """Test temporal feature extraction."""
-        features = extractor._extract_temporal_features(sample_node_data["nodes"])
+        features = extractor._extract_temporal_features(
+            sample_node_data["nodes"]
+        )
 
         assert features is not None
         assert features.shape[0] == len(sample_node_data["nodes"])
@@ -193,7 +209,9 @@ class TestNodeFeatureExtractor:
 
     def test_extract_categorical_features(self, extractor, sample_node_data):
         """Test categorical feature extraction."""
-        features = extractor._extract_categorical_features(sample_node_data["nodes"])
+        features = extractor._extract_categorical_features(
+            sample_node_data["nodes"]
+        )
 
         assert features is not None
         assert features.shape[0] == len(sample_node_data["nodes"])
@@ -202,7 +220,9 @@ class TestNodeFeatureExtractor:
 
     def test_extract_numerical_features(self, extractor, sample_node_data):
         """Test numerical feature extraction."""
-        features = extractor._extract_numerical_features(sample_node_data["nodes"])
+        features = extractor._extract_numerical_features(
+            sample_node_data["nodes"]
+        )
 
         assert features is not None
         assert features.shape[0] == len(sample_node_data["nodes"])
@@ -211,8 +231,14 @@ class TestNodeFeatureExtractor:
     def test_handle_missing_values(self, extractor):
         """Test handling of missing values."""
         nodes_with_missing = [
-            {"id": "node_1", "attributes": {"energy": 0.8, "velocity": None}},  # Missing velocity
-            {"id": "node_2", "attributes": {"energy": None, "velocity": 5.0}},  # Missing energy
+            {
+                "id": "node_1",
+                "attributes": {"energy": 0.8, "velocity": None},
+            },  # Missing velocity
+            {
+                "id": "node_2",
+                "attributes": {"energy": None, "velocity": 5.0},
+            },  # Missing energy
         ]
 
         features = extractor._extract_numerical_features(nodes_with_missing)
@@ -262,7 +288,10 @@ class TestNodeFeatureExtractor:
             large_batch.append(
                 {
                     "id": f"node_{i}",
-                    "position": {"lat": 37.0 + i * 0.001, "lon": -122.0 + i * 0.001},
+                    "position": {
+                        "lat": 37.0 + i * 0.001,
+                        "lon": -122.0 + i * 0.001,
+                    },
                     "timestamp": datetime.now() - timedelta(minutes=i),
                     "category": f"cat_{i % 10}",
                     "attributes": {
@@ -281,7 +310,9 @@ class TestNodeFeatureExtractor:
     def test_incremental_feature_updates(self, extractor, sample_node_data):
         """Test incremental feature updates."""
         # Initial extraction
-        initial_features = extractor.extract_features(sample_node_data["nodes"])
+        initial_features = extractor.extract_features(
+            sample_node_data["nodes"]
+        )
 
         # Update one node
         updated_nodes = sample_node_data["nodes"].copy()
@@ -339,7 +370,9 @@ class TestNodeFeatureExtractor:
         ]
 
         if hasattr(extractor, "_extract_graph_structural_features"):
-            features = extractor._extract_graph_structural_features(nodes_with_edges)
+            features = extractor._extract_graph_structural_features(
+                nodes_with_edges
+            )
 
             assert features is not None
             # Should include degree, clustering coefficient, etc.
@@ -348,7 +381,9 @@ class TestNodeFeatureExtractor:
         """Test adding custom feature extractors."""
 
         def custom_extractor(nodes):
-            return torch.tensor([[node.get("custom_value", 0)] for node in nodes])
+            return torch.tensor(
+                [[node.get("custom_value", 0)] for node in nodes]
+            )
 
         if hasattr(extractor, "add_custom_extractor"):
             extractor.add_custom_extractor("custom", custom_extractor)
@@ -381,7 +416,10 @@ class TestNodeFeatureExtractor:
         features = extractor._extract_numerical_features(nodes)
 
         # With robust normalization, outliers should be handled
-        if extractor.config.normalization_strategy == NormalizationStrategy.ROBUST:
+        if (
+            extractor.config.normalization_strategy
+            == NormalizationStrategy.ROBUST
+        ):
             assert torch.all(torch.abs(features) < 10)  # Outliers clipped
 
     def test_memory_efficiency(self, extractor):
@@ -403,7 +441,9 @@ class TestNodeFeatureExtractor:
                         "lat": np.random.rand() * 180 - 90,
                         "lon": np.random.rand() * 360 - 180,
                     },
-                    "attributes": {f"attr_{j}": np.random.rand() for j in range(50)},
+                    "attributes": {
+                        f"attr_{j}": np.random.rand() for j in range(50)
+                    },
                 }
             )
 
@@ -429,8 +469,12 @@ class TestNodeFeatureExtractor:
         assert features_onehot.shape[1] == 3  # 3 unique categories
 
         # Test with high cardinality
-        high_card_nodes = [{"id": str(i), "category": f"cat_{i}"} for i in range(100)]
-        features_high = extractor._extract_categorical_features(high_card_nodes)
+        high_card_nodes = [
+            {"id": str(i), "category": f"cat_{i}"} for i in range(100)
+        ]
+        features_high = extractor._extract_categorical_features(
+            high_card_nodes
+        )
 
         # Should handle high cardinality appropriately
         assert features_high is not None
@@ -444,7 +488,9 @@ class TestNodeFeatureExtractor:
 
         def extract_features_thread():
             try:
-                features = extractor.extract_features(sample_node_data["nodes"])
+                features = extractor.extract_features(
+                    sample_node_data["nodes"]
+                )
                 results.append(features)
             except Exception as e:
                 errors.append(e)
@@ -548,7 +594,10 @@ class TestFeatureExtractorEdgeCases:
         malformed_nodes = [
             {"id": "1", "position": "not a dict"},
             {"id": "2", "position": {"lat": "not a number", "lon": -122}},
-            {"id": "3", "position": {"latitude": 37, "longitude": -122}},  # Wrong keys
+            {
+                "id": "3",
+                "position": {"latitude": 37, "longitude": -122},
+            },  # Wrong keys
         ]
 
         features = extractor._extract_spatial_features(malformed_nodes)
@@ -590,7 +639,9 @@ class TestFeatureExtractorEdgeCases:
         high_dim_nodes = []
         for i in range(10):
             attributes = {f"attr_{j}": np.random.rand() for j in range(1000)}
-            high_dim_nodes.append({"id": f"node_{i}", "attributes": attributes})
+            high_dim_nodes.append(
+                {"id": f"node_{i}", "attributes": attributes}
+            )
 
         features = extractor._extract_numerical_features(high_dim_nodes)
 
@@ -599,4 +650,11 @@ class TestFeatureExtractorEdgeCases:
 
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-v", "--cov=inference.gnn.feature_extractor", "--cov-report=html"])
+    pytest.main(
+        [
+            __file__,
+            "-v",
+            "--cov=inference.gnn.feature_extractor",
+            "--cov-report=html",
+        ]
+    )

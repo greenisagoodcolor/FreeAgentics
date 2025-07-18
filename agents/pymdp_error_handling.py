@@ -31,12 +31,17 @@ class PyMDPError(Exception):
     """Custom exception for PyMDP-related errors with recovery context."""
 
     def __init__(
-        self, error_type: PyMDPErrorType, original_error: Exception, context: Dict[str, Any] = None
+        self,
+        error_type: PyMDPErrorType,
+        original_error: Exception,
+        context: Dict[str, Any] = None,
     ):
         self.error_type = error_type
         self.original_error = original_error
         self.context = context or {}
-        super().__init__(f"PyMDP Error [{error_type.value}]: {str(original_error)}")
+        super().__init__(
+            f"PyMDP Error [{error_type.value}]: {str(original_error)}"
+        )
 
 
 class PyMDPErrorHandler:
@@ -130,7 +135,9 @@ class PyMDPErrorHandler:
                 except Exception as fallback_error:
                     # Fallback also failed
                     pymdp_error.context["fallback_error"] = str(fallback_error)
-                    logger.error(f"Fallback also failed for '{operation_name}': {fallback_error}")
+                    logger.error(
+                        f"Fallback also failed for '{operation_name}': {fallback_error}"
+                    )
 
             return False, None, pymdp_error
 
@@ -140,38 +147,55 @@ class PyMDPErrorHandler:
         error_type_name = type(error).__name__.lower()
 
         # Numpy conversion errors (most common production issue)
-        if "unhashable" in error_msg and ("numpy" in error_msg or "array" in error_msg):
+        if "unhashable" in error_msg and (
+            "numpy" in error_msg or "array" in error_msg
+        ):
             return PyMDPErrorType.NUMPY_CONVERSION
 
         # Matrix dimension mismatches
         if any(
-            keyword in error_msg for keyword in ["dimension", "shape", "broadcasting", "matmul"]
+            keyword in error_msg
+            for keyword in ["dimension", "shape", "broadcasting", "matmul"]
         ):
             return PyMDPErrorType.MATRIX_DIMENSION
 
         # Convergence issues
         if any(
             keyword in error_msg
-            for keyword in ["convergence", "iteration", "max_iter", "tolerance"]
+            for keyword in [
+                "convergence",
+                "iteration",
+                "max_iter",
+                "tolerance",
+            ]
         ):
             return PyMDPErrorType.INFERENCE_CONVERGENCE
 
         # Policy sampling errors
         if any(
             keyword in error_msg
-            for keyword in ["policy", "sampling", "sample_action", "infer_policies"]
+            for keyword in [
+                "policy",
+                "sampling",
+                "sample_action",
+                "infer_policies",
+            ]
         ):
             return PyMDPErrorType.POLICY_SAMPLING
 
         # Belief update errors
         if any(
-            keyword in error_msg for keyword in ["belie", "update", "infer_states", "posterior"]
+            keyword in error_msg
+            for keyword in ["belie", "update", "infer_states", "posterior"]
         ):
             return PyMDPErrorType.BELIEF_UPDATE
 
         # Indexing errors
         if (
-            any(keyword in error_type_name for keyword in ["indexerror", "keyerror"])
+            any(
+                keyword in error_type_name
+                for keyword in ["indexerror", "keyerror"]
+            )
             or "index" in error_msg
         ):
             return PyMDPErrorType.INDEX_ERROR
@@ -179,7 +203,13 @@ class PyMDPErrorHandler:
         # Numerical instability
         if any(
             keyword in error_msg
-            for keyword in ["nan", "in", "overflow", "underflow", "divide by zero"]
+            for keyword in [
+                "nan",
+                "in",
+                "overflow",
+                "underflow",
+                "divide by zero",
+            ]
         ):
             return PyMDPErrorType.NUMERICAL_INSTABILITY
 
@@ -192,8 +222,10 @@ class PyMDPErrorHandler:
             "total_errors": self.error_count,
             "operation_failures": dict(self.operation_failures),
             "successful_recoveries": dict(self.recovery_stats),
-            "error_rate": self.error_count / max(sum(self.operation_failures.values()), 1),
-            "recovery_rate": sum(self.recovery_stats.values()) / max(self.error_count, 1),
+            "error_rate": self.error_count
+            / max(sum(self.operation_failures.values()), 1),
+            "recovery_rate": sum(self.recovery_stats.values())
+            / max(self.error_count, 1),
         }
 
     def reset_stats(self):
@@ -203,7 +235,9 @@ class PyMDPErrorHandler:
         self.recovery_stats.clear()
 
 
-def safe_numpy_conversion(value: Any, target_type: type = int, default: Any = None) -> Any:
+def safe_numpy_conversion(
+    value: Any, target_type: type = int, default: Any = None
+) -> Any:
     """Safely convert numpy arrays/scalars to Python primitives.
 
     This is the most robust solution for the common PyMDP issue where operations
@@ -241,7 +275,9 @@ def safe_numpy_conversion(value: Any, target_type: type = int, default: Any = No
                     f"Converting multi-element array {value} to scalar, taking first element"
                 )
                 try:
-                    first_elem = value.flat[0] if hasattr(value, "flat") else value[0]
+                    first_elem = (
+                        value.flat[0] if hasattr(value, "flat") else value[0]
+                    )
                     if hasattr(first_elem, "item"):
                         return target_type(first_elem.item())
                     else:
@@ -291,11 +327,15 @@ def safe_array_index(array: Any, index: Any, default: Any = None) -> Any:
             return default
 
     except (IndexError, KeyError, TypeError) as e:
-        logger.warning(f"Failed to index array {type(array)} with index {index}: {e}")
+        logger.warning(
+            f"Failed to index array {type(array)} with index {index}: {e}"
+        )
         return default
 
 
-def validate_pymdp_matrices(A: Any, B: Any, C: Any, D: Any) -> Tuple[bool, str]:
+def validate_pymdp_matrices(
+    A: Any, B: Any, C: Any, D: Any
+) -> Tuple[bool, str]:
     """Validate PyMDP matrix dimensions and properties.
 
     Args:
@@ -332,7 +372,10 @@ def validate_pymdp_matrices(A: Any, B: Any, C: Any, D: Any) -> Tuple[bool, str]:
         # Check dimension consistency
         num_obs, num_states = A.shape
         if B.shape[0] != num_states or B.shape[1] != num_states:
-            return False, f"B matrix dimensions {B.shape} inconsistent with A matrix {A.shape}"
+            return (
+                False,
+                f"B matrix dimensions {B.shape} inconsistent with A matrix {A.shape}",
+            )
         if C.shape[0] != num_obs:
             return (
                 False,
@@ -346,9 +389,15 @@ def validate_pymdp_matrices(A: Any, B: Any, C: Any, D: Any) -> Tuple[bool, str]:
 
         # Check probability constraints
         if not np.allclose(A.sum(axis=0), 1.0, rtol=1e-3):
-            return False, "A matrix columns must sum to 1 (observation probabilities)"
+            return (
+                False,
+                "A matrix columns must sum to 1 (observation probabilities)",
+            )
         if not np.allclose(B.sum(axis=0), 1.0, rtol=1e-3):
-            return False, "B matrix must have transition probabilities summing to 1"
+            return (
+                False,
+                "B matrix must have transition probabilities summing to 1",
+            )
         if not np.allclose(D.sum(), 1.0, rtol=1e-3):
             return False, "D vector must sum to 1 (prior probabilities)"
 

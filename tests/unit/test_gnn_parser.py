@@ -143,8 +143,16 @@ class TestConfigParser:
                 {"type": "conv", "input_dim": 10, "output_dim": 64},
                 {"type": "conv", "input_dim": 64, "output_dim": 32},
             ],
-            "hyperparameters": {"learning_rate": 0.01, "dropout": 0.1, "batch_size": 32},
-            "metadata": {"name": "test_model", "author": "test_user", "created_at": "2023-01-01"},
+            "hyperparameters": {
+                "learning_rate": 0.01,
+                "dropout": 0.1,
+                "batch_size": 32,
+            },
+            "metadata": {
+                "name": "test_model",
+                "author": "test_user",
+                "created_at": "2023-01-01",
+            },
         }
 
     def test_parser_initialization(self, parser):
@@ -183,7 +191,11 @@ class TestConfigParser:
         result = parser.parse(config)
 
         # Find architecture node in AST
-        arch_nodes = [child for child in result.ast.children if child.node_type == "architecture"]
+        arch_nodes = [
+            child
+            for child in result.ast.children
+            if child.node_type == "architecture"
+        ]
         assert len(arch_nodes) == 1
         assert arch_nodes[0].attributes["name"] == "GAT"
 
@@ -198,7 +210,11 @@ class TestConfigParser:
         result = parser.parse(config)
 
         # Find layers node in AST
-        layer_nodes = [child for child in result.ast.children if child.node_type == "layers"]
+        layer_nodes = [
+            child
+            for child in result.ast.children
+            if child.node_type == "layers"
+        ]
         assert len(layer_nodes) == 1
 
         layers_node = layer_nodes[0]
@@ -213,13 +229,19 @@ class TestConfigParser:
 
     def test_parse_hyperparameters_section(self, parser):
         """Test parsing hyperparameters section."""
-        hyperparams = {"learning_rate": 0.001, "dropout": 0.2, "weight_decay": 1e-5}
+        hyperparams = {
+            "learning_rate": 0.001,
+            "dropout": 0.2,
+            "weight_decay": 1e-5,
+        }
         config = {"hyperparameters": hyperparams}
         result = parser.parse(config)
 
         # Find hyperparameters node
         hyper_nodes = [
-            child for child in result.ast.children if child.node_type == "hyperparameters"
+            child
+            for child in result.ast.children
+            if child.node_type == "hyperparameters"
         ]
         assert len(hyper_nodes) == 1
         assert hyper_nodes[0].attributes == hyperparams
@@ -236,7 +258,11 @@ class TestConfigParser:
         result = parser.parse(config)
 
         # Find metadata node
-        meta_nodes = [child for child in result.ast.children if child.node_type == "metadata"]
+        meta_nodes = [
+            child
+            for child in result.ast.children
+            if child.node_type == "metadata"
+        ]
         assert len(meta_nodes) == 1
         assert meta_nodes[0].attributes == metadata
         assert result.metadata == metadata
@@ -292,7 +318,10 @@ class TestConfigParser:
 
     def test_parse_layers_internal(self, parser):
         """Test internal _parse_layers method."""
-        layers = [{"type": "conv", "input_dim": 10}, {"type": "attention", "num_heads": 4}]
+        layers = [
+            {"type": "conv", "input_dim": 10},
+            {"type": "attention", "num_heads": 4},
+        ]
         layers_node = parser._parse_layers(layers)
 
         assert layers_node.node_type == "layers"
@@ -373,7 +402,9 @@ class TestConfigParser:
 
         assert result.ast is not None
         assert len(result.errors) == 0
-        assert len(result.ast.children) == 4  # arch, layers, hyperparams, metadata
+        assert (
+            len(result.ast.children) == 4
+        )  # arch, layers, hyperparams, metadata
 
         # Verify all sections were parsed
         assert "architecture" in result.sections
@@ -382,7 +413,8 @@ class TestConfigParser:
         assert result.metadata["name"] == "complex_gat_model"
 
     @pytest.mark.parametrize(
-        "architecture", ["GCN", "GAT", "GraphSAGE", "GIN", "EdgeConv", "Custom"]
+        "architecture",
+        ["GCN", "GAT", "GraphSAGE", "GIN", "EdgeConv", "Custom"],
     )
     def test_parse_different_architectures(self, parser, architecture):
         """Test parsing different architecture types."""
@@ -433,4 +465,6 @@ class TestConfigParser:
 
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-v", "--cov=inference.gnn.parser", "--cov-report=html"])
+    pytest.main(
+        [__file__, "-v", "--cov=inference.gnn.parser", "--cov-report=html"]
+    )

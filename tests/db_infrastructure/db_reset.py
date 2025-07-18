@@ -34,14 +34,14 @@ class DatabaseReset:
         self.admin_password = admin_password
         self.admin_database = admin_database
 
-        self.admin_url = (
-            f"postgresql://{admin_user}:{admin_password}@{host}:{port}/{admin_database}"
-        )
+        self.admin_url = f"postgresql://{admin_user}:{admin_password}@{host}:{port}/{admin_database}"
 
     def _get_admin_engine(self) -> Engine:
         """Get an engine with admin privileges."""
         # Create engine with autocommit for DDL operations
-        engine = create_engine(self.admin_url, isolation_level="AUTOCOMMIT", pool_pre_ping=True)
+        engine = create_engine(
+            self.admin_url, isolation_level="AUTOCOMMIT", pool_pre_ping=True
+        )
         return engine
 
     def create_test_database(self, db_name: str = "freeagentics_test") -> bool:
@@ -52,7 +52,8 @@ class DatabaseReset:
             with engine.connect() as conn:
                 # Check if database exists
                 result = conn.execute(
-                    text("SELECT 1 FROM pg_database WHERE datname = :dbname"), {"dbname": db_name}
+                    text("SELECT 1 FROM pg_database WHERE datname = :dbname"),
+                    {"dbname": db_name},
                 )
 
                 if result.fetchone():
@@ -60,7 +61,9 @@ class DatabaseReset:
                     return True
 
                 # Create database
-                conn.execute(text(f"CREATE DATABASE {db_name} OWNER {self.admin_user}"))
+                conn.execute(
+                    text(f"CREATE DATABASE {db_name} OWNER {self.admin_user}")
+                )
                 logger.info(f"Created database '{db_name}'")
 
             engine.dispose()
@@ -148,7 +151,9 @@ class DatabaseReset:
             env = os.environ.copy()
             env["PGPASSWORD"] = self.admin_password
 
-            result = subprocess.run(cmd, env=env, capture_output=True, text=True)
+            result = subprocess.run(
+                cmd, env=env, capture_output=True, text=True
+            )
 
             if result.returncode != 0:
                 logger.error(f"Schema application failed: {result.stderr}")
@@ -164,7 +169,12 @@ class DatabaseReset:
     def truncate_all_tables(self, db_name: str = "freeagentics_test") -> bool:
         """Truncate all tables in the database."""
         try:
-            pool = get_pool("truncate", min_connections=1, max_connections=1, database=db_name)
+            pool = get_pool(
+                "truncate",
+                min_connections=1,
+                max_connections=1,
+                database=db_name,
+            )
 
             with pool.get_session() as session:
                 # Get all table names
@@ -196,7 +206,9 @@ class DatabaseReset:
             close_all_pools()
 
     def create_snapshot(
-        self, db_name: str = "freeagentics_test", snapshot_name: str = "test_snapshot"
+        self,
+        db_name: str = "freeagentics_test",
+        snapshot_name: str = "test_snapshot",
     ) -> bool:
         """Create a database snapshot using pg_dump."""
         try:
@@ -221,7 +233,9 @@ class DatabaseReset:
             env = os.environ.copy()
             env["PGPASSWORD"] = self.admin_password
 
-            result = subprocess.run(cmd, env=env, capture_output=True, text=True)
+            result = subprocess.run(
+                cmd, env=env, capture_output=True, text=True
+            )
 
             if result.returncode != 0:
                 logger.error(f"Snapshot creation failed: {result.stderr}")
@@ -235,7 +249,9 @@ class DatabaseReset:
             return False
 
     def restore_snapshot(
-        self, db_name: str = "freeagentics_test", snapshot_name: str = "test_snapshot"
+        self,
+        db_name: str = "freeagentics_test",
+        snapshot_name: str = "test_snapshot",
     ) -> bool:
         """Restore database from a snapshot."""
         try:
@@ -267,7 +283,9 @@ class DatabaseReset:
             env = os.environ.copy()
             env["PGPASSWORD"] = self.admin_password
 
-            result = subprocess.run(cmd, env=env, capture_output=True, text=True)
+            result = subprocess.run(
+                cmd, env=env, capture_output=True, text=True
+            )
 
             if result.returncode != 0:
                 logger.error(f"Snapshot restoration failed: {result.stderr}")
@@ -280,12 +298,19 @@ class DatabaseReset:
             logger.error(f"Failed to restore snapshot: {e}")
             return False
 
-    def get_table_counts(self, db_name: str = "freeagentics_test") -> Dict[str, int]:
+    def get_table_counts(
+        self, db_name: str = "freeagentics_test"
+    ) -> Dict[str, int]:
         """Get row counts for all tables."""
         counts = {}
 
         try:
-            pool = get_pool("counts", min_connections=1, max_connections=1, database=db_name)
+            pool = get_pool(
+                "counts",
+                min_connections=1,
+                max_connections=1,
+                database=db_name,
+            )
 
             with pool.get_session() as session:
                 # Get all table names
@@ -304,7 +329,9 @@ class DatabaseReset:
 
                 # Get count for each table
                 for table in tables:
-                    result = session.execute(text(f"SELECT COUNT(*) as count FROM {table}"))
+                    result = session.execute(
+                        text(f"SELECT COUNT(*) as count FROM {table}")
+                    )
                     counts[table] = result.scalar()
 
             return counts
@@ -315,12 +342,25 @@ class DatabaseReset:
         finally:
             close_all_pools()
 
-    def verify_schema(self, db_name: str = "freeagentics_test") -> Dict[str, Any]:
+    def verify_schema(
+        self, db_name: str = "freeagentics_test"
+    ) -> Dict[str, Any]:
         """Verify that the schema is correctly applied."""
-        verification = {"tables": {}, "types": {}, "indexes": {}, "constraints": {}, "triggers": {}}
+        verification = {
+            "tables": {},
+            "types": {},
+            "indexes": {},
+            "constraints": {},
+            "triggers": {},
+        }
 
         try:
-            pool = get_pool("verify", min_connections=1, max_connections=1, database=db_name)
+            pool = get_pool(
+                "verify",
+                min_connections=1,
+                max_connections=1,
+                database=db_name,
+            )
 
             with pool.get_session() as session:
                 # Check tables
@@ -333,7 +373,9 @@ class DatabaseReset:
                 """
                     )
                 )
-                verification["tables"] = {row.tablename: True for row in result}
+                verification["tables"] = {
+                    row.tablename: True for row in result
+                }
 
                 # Check custom types
                 result = session.execute(
@@ -360,7 +402,9 @@ class DatabaseReset:
                 """
                     )
                 )
-                verification["indexes"] = {row.indexname: True for row in result}
+                verification["indexes"] = {
+                    row.indexname: True for row in result
+                }
 
                 # Check constraints
                 result = session.execute(
@@ -374,7 +418,9 @@ class DatabaseReset:
                 """
                     )
                 )
-                verification["constraints"] = {row.conname: True for row in result}
+                verification["constraints"] = {
+                    row.conname: True for row in result
+                }
 
                 # Check triggers
                 result = session.execute(
@@ -410,11 +456,24 @@ def main():
     parser = argparse.ArgumentParser(description="Database reset utilities")
     parser.add_argument(
         "command",
-        choices=["reset", "create", "drop", "truncate", "snapshot", "restore", "verify", "counts"],
+        choices=[
+            "reset",
+            "create",
+            "drop",
+            "truncate",
+            "snapshot",
+            "restore",
+            "verify",
+            "counts",
+        ],
     )
-    parser.add_argument("--database", default="freeagentics_test", help="Database name")
     parser.add_argument(
-        "--snapshot", default="test_snapshot", help="Snapshot name for backup/restore"
+        "--database", default="freeagentics_test", help="Database name"
+    )
+    parser.add_argument(
+        "--snapshot",
+        default="test_snapshot",
+        help="Snapshot name for backup/restore",
     )
     parser.add_argument("--host", default="localhost")
     parser.add_argument("--port", type=int, default=5432)
@@ -425,12 +484,16 @@ def main():
 
     # Set up logging
     logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
     # Create reset utility
     reset_util = DatabaseReset(
-        host=args.host, port=args.port, admin_user=args.user, admin_password=args.password
+        host=args.host,
+        port=args.port,
+        admin_user=args.user,
+        admin_password=args.password,
     )
 
     # Execute command

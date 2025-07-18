@@ -64,7 +64,9 @@ class SSLConfiguration:
     def __post_init__(self):
         """Initialize configuration with defaults."""
         if self.production_mode is None:
-            self.production_mode = os.getenv("PRODUCTION", "false").lower() == "true"
+            self.production_mode = (
+                os.getenv("PRODUCTION", "false").lower() == "true"
+            )
 
         if self.letsencrypt_domains is None:
             self.letsencrypt_domains = []
@@ -134,7 +136,9 @@ class HTTPSEnforcementMiddleware(BaseHTTPMiddleware):
 
         # Add HSTS header for HTTPS requests
         if is_secure and self.config.hsts_enabled:
-            response.headers["Strict-Transport-Security"] = self._generate_hsts_header()
+            response.headers[
+                "Strict-Transport-Security"
+            ] = self._generate_hsts_header()
 
         # Ensure secure cookies
         if self.config.secure_cookies:
@@ -152,7 +156,9 @@ class HTTPSEnforcementMiddleware(BaseHTTPMiddleware):
         if self.config.behind_load_balancer:
             client_host = request.client.host if request.client else None
             if client_host in self.config.trusted_proxies:
-                forwarded_proto = request.headers.get("X-Forwarded-Proto", "").lower()
+                forwarded_proto = request.headers.get(
+                    "X-Forwarded-Proto", ""
+                ).lower()
                 if forwarded_proto == "https":
                     return True
 
@@ -206,7 +212,9 @@ class HTTPSEnforcementMiddleware(BaseHTTPMiddleware):
                 if "samesite" not in cookie_str.lower():
                     cookie_str += f"; SameSite={self.config.cookie_samesite}"
 
-                set_cookie_headers.append((b"set-cookie", cookie_str.encode("latin-1")))
+                set_cookie_headers.append(
+                    (b"set-cookie", cookie_str.encode("latin-1"))
+                )
             else:
                 set_cookie_headers.append((header_name, header_value))
 
@@ -225,7 +233,10 @@ class SSLCertificateManager:
         """Find certbot executable."""
         try:
             result = subprocess.run(
-                ["which", "certbot"], capture_output=True, text=True, check=True
+                ["which", "certbot"],
+                capture_output=True,
+                text=True,
+                check=True,
             )
             return result.stdout.strip()
         except subprocess.CalledProcessError:
@@ -273,7 +284,9 @@ class SSLCertificateManager:
             logger.info(
                 f"Obtaining Let's Encrypt certificate for domains: {self.config.letsencrypt_domains}"
             )
-            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, check=True
+            )
             logger.info("Let's Encrypt certificate obtained successfully")
 
             # Copy certificates to configured paths
@@ -282,7 +295,9 @@ class SSLCertificateManager:
             return True
 
         except subprocess.CalledProcessError as e:
-            logger.error(f"Failed to obtain Let's Encrypt certificate: {e.stderr}")
+            logger.error(
+                f"Failed to obtain Let's Encrypt certificate: {e.stderr}"
+            )
             return False
 
     def _copy_certificates(self):
@@ -292,11 +307,20 @@ class SSLCertificateManager:
 
         try:
             # Copy certificate files
-            subprocess.run(["cp", f"{le_path}/fullchain.pem", self.config.cert_path], check=True)
+            subprocess.run(
+                ["cp", f"{le_path}/fullchain.pem", self.config.cert_path],
+                check=True,
+            )
 
-            subprocess.run(["cp", f"{le_path}/privkey.pem", self.config.key_path], check=True)
+            subprocess.run(
+                ["cp", f"{le_path}/privkey.pem", self.config.key_path],
+                check=True,
+            )
 
-            subprocess.run(["cp", f"{le_path}/chain.pem", self.config.chain_path], check=True)
+            subprocess.run(
+                ["cp", f"{le_path}/chain.pem", self.config.chain_path],
+                check=True,
+            )
 
             # Set proper permissions
             os.chmod(self.config.key_path, 0o600)
@@ -340,14 +364,20 @@ fi
             cron_entry = f"0 0,12 * * * {script_path} >> /var/log/letsencrypt-renewal.log 2>&1\n"
 
             # Check if cron entry exists
-            result = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
+            result = subprocess.run(
+                ["crontab", "-l"], capture_output=True, text=True
+            )
 
             if script_path not in result.stdout:
                 # Add cron entry
-                current_crontab = result.stdout if result.returncode == 0 else ""
+                current_crontab = (
+                    result.stdout if result.returncode == 0 else ""
+                )
                 new_crontab = current_crontab + cron_entry
 
-                process = subprocess.Popen(["crontab", "-"], stdin=subprocess.PIPE, text=True)
+                process = subprocess.Popen(
+                    ["crontab", "-"], stdin=subprocess.PIPE, text=True
+                )
                 process.communicate(input=new_crontab)
 
                 logger.info("Auto-renewal cron job added successfully")
@@ -366,7 +396,14 @@ fi
         try:
             # Use openssl to check certificate expiry
             result = subprocess.run(
-                ["openssl", "x509", "-in", self.config.cert_path, "-noout", "-enddate"],
+                [
+                    "openssl",
+                    "x509",
+                    "-in",
+                    self.config.cert_path,
+                    "-noout",
+                    "-enddate",
+                ],
                 capture_output=True,
                 text=True,
                 check=True,
@@ -381,7 +418,9 @@ fi
 
             # Log warning if expiring soon
             if time_until_expiry.days <= self.config.cert_expiry_warning_days:
-                logger.warning(f"Certificate expiring in {time_until_expiry.days} days")
+                logger.warning(
+                    f"Certificate expiring in {time_until_expiry.days} days"
+                )
 
             return time_until_expiry
 
@@ -394,7 +433,13 @@ fi
         try:
             # Verify certificate chain
             result = subprocess.run(
-                ["openssl", "verify", "-CAfile", self.config.chain_path, self.config.cert_path],
+                [
+                    "openssl",
+                    "verify",
+                    "-CAfile",
+                    self.config.chain_path,
+                    self.config.cert_path,
+                ],
                 capture_output=True,
                 text=True,
                 check=True,
@@ -418,7 +463,9 @@ class LoadBalancerSSLConfig:
             "Protocol": "HTTPS",
             "Port": 443,
             "SslPolicy": "ELBSecurityPolicy-TLS-1-2-2017-01",
-            "Certificates": [{"CertificateArn": "arn:aws:acm:region:account:certificate/id"}],
+            "Certificates": [
+                {"CertificateArn": "arn:aws:acm:region:account:certificate/id"}
+            ],
             "DefaultActions": [
                 {
                     "Type": "forward",
@@ -434,19 +481,19 @@ class LoadBalancerSSLConfig:
 server {{
     listen 80;
     server_name _;
-    
+
     # Trust X-Forwarded headers from load balancer
     set_real_ip_from {' '.join(self.config.trusted_proxies)};
     real_ip_header X-Forwarded-For;
-    
+
     # Enforce HTTPS through X-Forwarded-Proto
     if ($http_x_forwarded_proto != "https") {{
         return 301 https://$host$request_uri;
     }}
-    
+
     # HSTS header (load balancer should also add this)
     add_header Strict-Transport-Security "{self._generate_hsts_value()}" always;
-    
+
     # Proxy to application
     location / {{
         proxy_pass http://backend:8000;
@@ -483,7 +530,9 @@ def setup_https_enforcement(app, config: Optional[SSLConfiguration] = None):
 
 
 # Development SSL setup helper
-def generate_self_signed_cert(domain: str = "localhost", days: int = 365) -> Tuple[str, str]:
+def generate_self_signed_cert(
+    domain: str = "localhost", days: int = 365
+) -> Tuple[str, str]:
     """Generate self-signed certificate for development."""
     cert_dir = Path("./ssl")
     cert_dir.mkdir(exist_ok=True)

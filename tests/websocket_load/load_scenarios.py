@@ -35,8 +35,12 @@ class ScenarioConfig:
     base_url: str = "ws://localhost:8000"
 
     # Client behavior
-    connection_pattern: str = "persistent"  # persistent, intermittent, bursty, failover
-    message_generator_type: str = "mixed"  # event, command, query, monitoring, mixed, realistic
+    connection_pattern: str = (
+        "persistent"  # persistent, intermittent, bursty, failover
+    )
+    message_generator_type: str = (
+        "mixed"  # event, command, query, monitoring, mixed, realistic
+    )
     message_interval: float = 1.0  # seconds between messages
 
     # Connection parameters
@@ -66,8 +70,12 @@ class LoadScenario(ABC):
         self.client_manager = WebSocketClientManager(
             base_url=config.base_url, client_prefix=f"{config.name}_client"
         )
-        self.metrics = MetricsCollector(enable_prometheus=config.enable_prometheus)
-        self.lifecycle_manager = ConnectionLifecycleManager(self.client_manager, self.metrics)
+        self.metrics = MetricsCollector(
+            enable_prometheus=config.enable_prometheus
+        )
+        self.lifecycle_manager = ConnectionLifecycleManager(
+            self.client_manager, self.metrics
+        )
 
         # Message callbacks
         self.client_manager.global_on_message = self._on_message
@@ -151,11 +159,15 @@ class LoadScenario(ABC):
         elif generator_type == "realistic":
             return RealisticScenarioGenerator()
         else:
-            raise ValueError(f"Unknown message generator type: {generator_type}")
+            raise ValueError(
+                f"Unknown message generator type: {generator_type}"
+            )
 
     async def _on_message(self, client, message):
         """Handle incoming messages."""
-        self.metrics.record_message_received(message.get("type", "unknown"), len(str(message)))
+        self.metrics.record_message_received(
+            message.get("type", "unknown"), len(str(message))
+        )
 
         # Track latency if message has ID
         if "id" in message and message["id"] in client.pending_messages:
@@ -198,7 +210,8 @@ class SteadyLoadScenario(LoadScenario):
         clients = await self.client_manager.create_clients(
             self.config.total_clients,
             stagger_delay=(
-                self.config.connection_ramp_up_seconds / self.config.total_clients
+                self.config.connection_ramp_up_seconds
+                / self.config.total_clients
                 if self.config.connection_ramp_up_seconds > 0
                 else 0.0
             ),
@@ -222,8 +235,12 @@ class SteadyLoadScenario(LoadScenario):
         }
 
         # Start lifecycle management
-        lifecycle_tasks = await self.lifecycle_manager.start_lifecycle_management(
-            clients, pattern=self.config.connection_pattern, **lifecycle_kwargs
+        lifecycle_tasks = (
+            await self.lifecycle_manager.start_lifecycle_management(
+                clients,
+                pattern=self.config.connection_pattern,
+                **lifecycle_kwargs,
+            )
         )
 
         # Start progress monitoring
@@ -259,7 +276,9 @@ class BurstLoadScenario(LoadScenario):
     async def run(self):
         """Run burst load scenario."""
         # Create initial pool of clients
-        base_clients = await self.client_manager.create_clients(self.config.total_clients // 2)
+        base_clients = await self.client_manager.create_clients(
+            self.config.total_clients // 2
+        )
 
         # Connect base clients
         await self.client_manager.connect_clients(base_clients)
@@ -270,7 +289,8 @@ class BurstLoadScenario(LoadScenario):
             base_clients,
             pattern="persistent",
             activity_generator=message_generator,
-            activity_interval=self.config.message_interval * 2,  # Slower base rate
+            activity_interval=self.config.message_interval
+            * 2,  # Slower base rate
         )
 
         # Burst cycle management
@@ -280,29 +300,38 @@ class BurstLoadScenario(LoadScenario):
 
         while total_duration < self.config.duration_seconds:
             # Burst phase
-            logger.info(f"Starting burst phase with {self.burst_size} additional clients")
+            logger.info(
+                f"Starting burst phase with {self.burst_size} additional clients"
+            )
 
             # Create burst clients
-            new_burst_clients = await self.client_manager.create_clients(self.burst_size)
+            new_burst_clients = await self.client_manager.create_clients(
+                self.burst_size
+            )
             burst_clients.extend(new_burst_clients)
 
             # Connect burst clients
             await self.client_manager.connect_clients(new_burst_clients)
 
             # Start burst activity
-            new_tasks = await self.lifecycle_manager.start_lifecycle_management(
-                new_burst_clients,
-                pattern="bursty",
-                burst_size=(20, 50),
-                burst_interval=0.1,
-                message_generator=message_generator,
-                cycles=int(self.burst_duration / 10),  # Approximate cycles
+            new_tasks = (
+                await self.lifecycle_manager.start_lifecycle_management(
+                    new_burst_clients,
+                    pattern="bursty",
+                    burst_size=(20, 50),
+                    burst_interval=0.1,
+                    message_generator=message_generator,
+                    cycles=int(self.burst_duration / 10),  # Approximate cycles
+                )
             )
             burst_tasks.extend(new_tasks)
 
             # Monitor during burst
             await asyncio.sleep(
-                min(self.burst_duration, self.config.duration_seconds - total_duration)
+                min(
+                    self.burst_duration,
+                    self.config.duration_seconds - total_duration,
+                )
             )
             total_duration += self.burst_duration
 
@@ -317,7 +346,10 @@ class BurstLoadScenario(LoadScenario):
 
                 # Wait for idle duration
                 await asyncio.sleep(
-                    min(self.idle_duration, self.config.duration_seconds - total_duration)
+                    min(
+                        self.idle_duration,
+                        self.config.duration_seconds - total_duration,
+                    )
                 )
                 total_duration += self.idle_duration
 
@@ -337,7 +369,9 @@ class RampUpScenario(LoadScenario):
         self.initial_clients = initial_clients
         self.ramp_steps = ramp_steps
         self.step_duration = step_duration
-        self.clients_per_step = (config.total_clients - initial_clients) // ramp_steps
+        self.clients_per_step = (
+            config.total_clients - initial_clients
+        ) // ramp_steps
 
     async def run(self):
         """Run ramp-up load scenario."""
@@ -359,17 +393,21 @@ class RampUpScenario(LoadScenario):
             logger.info(f"Ramp step {step}: Adding {step_clients} clients")
 
             # Create and connect new clients
-            new_clients = await self.client_manager.create_clients(step_clients)
+            new_clients = await self.client_manager.create_clients(
+                step_clients
+            )
             all_clients.extend(new_clients)
 
             await self.client_manager.connect_clients(new_clients)
 
             # Start lifecycle management
-            new_tasks = await self.lifecycle_manager.start_lifecycle_management(
-                new_clients,
-                pattern=self.config.connection_pattern,
-                activity_generator=message_generator,
-                activity_interval=self.config.message_interval,
+            new_tasks = (
+                await self.lifecycle_manager.start_lifecycle_management(
+                    new_clients,
+                    pattern=self.config.connection_pattern,
+                    activity_generator=message_generator,
+                    activity_interval=self.config.message_interval,
+                )
             )
             all_tasks.extend(new_tasks)
 
@@ -386,7 +424,9 @@ class RampUpScenario(LoadScenario):
                 await asyncio.sleep(self.step_duration)
 
         # Continue running at peak load for remaining duration
-        remaining_time = self.config.duration_seconds - (actual_steps * self.step_duration)
+        remaining_time = self.config.duration_seconds - (
+            actual_steps * self.step_duration
+        )
         if remaining_time > 0:
             logger.info(
                 f"Running at peak load ({len(all_clients)} clients) for {remaining_time:.1f}s"
@@ -426,7 +466,8 @@ class StressTestScenario(LoadScenario):
         ):
             # Add more clients
             new_client_count = min(
-                self.clients_increment, self.config.total_clients - current_clients
+                self.clients_increment,
+                self.config.total_clients - current_clients,
             )
 
             logger.info(
@@ -434,17 +475,21 @@ class StressTestScenario(LoadScenario):
             )
 
             # Create and connect new clients
-            new_clients = await self.client_manager.create_clients(new_client_count)
+            new_clients = await self.client_manager.create_clients(
+                new_client_count
+            )
             all_clients.extend(new_clients)
 
             await self.client_manager.connect_clients(new_clients)
 
             # Start lifecycle management
-            new_tasks = await self.lifecycle_manager.start_lifecycle_management(
-                new_clients,
-                pattern="persistent",
-                activity_generator=message_generator,
-                activity_interval=self.config.message_interval,
+            new_tasks = (
+                await self.lifecycle_manager.start_lifecycle_management(
+                    new_clients,
+                    pattern="persistent",
+                    activity_generator=message_generator,
+                    activity_interval=self.config.message_interval,
+                )
             )
             all_tasks.extend(new_tasks)
 
@@ -496,7 +541,9 @@ class StressTestScenario(LoadScenario):
                 # Check metrics again
                 metrics_dict = self.metrics.current_metrics.to_dict()
                 recovered_latency = metrics_dict["latency_metrics"]["avg_ms"]
-                recovered_error_rate = metrics_dict["error_metrics"]["error_rate"]
+                recovered_error_rate = metrics_dict["error_metrics"][
+                    "error_rate"
+                ]
 
                 logger.info(
                     f"After reduction - Latency: {recovered_latency:.1f}ms, "
@@ -512,7 +559,9 @@ class StressTestScenario(LoadScenario):
 
         # Generate final report
         logger.info("\nStress Test Summary:")
-        logger.info(f"Peak sustainable load: {self.peak_clients} concurrent clients")
+        logger.info(
+            f"Peak sustainable load: {self.peak_clients} concurrent clients"
+        )
         logger.info(f"Target latency: {self.target_latency_ms}ms")
         logger.info(f"Error threshold: {self.error_rate_threshold:.1%}")
 
@@ -547,7 +596,9 @@ class RealisticUsageScenario(LoadScenario):
         # Adjust for rounding
         total_assigned = sum(profile_counts.values())
         if total_assigned < self.config.total_clients:
-            profile_counts["regular"] += self.config.total_clients - total_assigned
+            profile_counts["regular"] += (
+                self.config.total_clients - total_assigned
+            )
 
         all_tasks = []
 
@@ -604,8 +655,12 @@ class RealisticUsageScenario(LoadScenario):
                 pattern=pattern,
                 activity_generator=generator,
                 activity_interval=interval,
-                connect_duration=(300, 600) if pattern == "intermittent" else None,
-                disconnect_duration=(60, 300) if pattern == "intermittent" else None,
+                connect_duration=(300, 600)
+                if pattern == "intermittent"
+                else None,
+                disconnect_duration=(60, 300)
+                if pattern == "intermittent"
+                else None,
             )
             all_tasks.extend(tasks)
 

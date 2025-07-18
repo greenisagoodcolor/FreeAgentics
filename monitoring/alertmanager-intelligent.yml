@@ -8,13 +8,13 @@ global:
   smtp_auth_username: '{{ env "ALERTMANAGER_SMTP_USER" | default "alerts@freeagentics.com" }}'
   smtp_auth_password: '{{ env "ALERTMANAGER_SMTP_PASSWORD" | default "change-me" }}'
   smtp_require_tls: true
-  
+
   # Slack configuration
   slack_api_url: '{{ env "ALERTMANAGER_SLACK_WEBHOOK" | default "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK" }}'
-  
+
   # PagerDuty configuration
   pagerduty_url: 'https://events.pagerduty.com/v2/enqueue'
-  
+
   # Resolve timeout for alerts
   resolve_timeout: 5m
 
@@ -32,7 +32,7 @@ route:
   group_interval: 30s
   repeat_interval: 4h
   receiver: 'default-receiver'
-  
+
   routes:
     # ================================================================
     # CRITICAL ALERTS - IMMEDIATE ESCALATION
@@ -51,28 +51,28 @@ route:
           receiver: 'system-down-escalation'
           group_wait: 0s
           repeat_interval: 5m
-        
+
         # Security anomalies - immediate security team alert
         - match:
             category: security
           receiver: 'security-critical'
           group_wait: 0s
           repeat_interval: 10m
-        
+
         # Agent coordination failures - agents team
         - match:
             category: coordination
           receiver: 'agents-critical'
           group_wait: 0s
           repeat_interval: 15m
-        
+
         # Memory/performance critical
         - match:
             component: memory
           receiver: 'sre-critical'
           group_wait: 0s
           repeat_interval: 15m
-    
+
     # ================================================================
     # HIGH SEVERITY ALERTS - ESCALATED ROUTING
     # ================================================================
@@ -88,31 +88,31 @@ route:
             component: api
           receiver: 'backend-high'
           group_interval: 2m
-        
+
         # Database issues
         - match:
             component: postgresql
           receiver: 'database-high'
           group_interval: 2m
-        
+
         # Agent errors
         - match:
             category: agents
           receiver: 'agents-high'
           group_interval: 2m
-        
+
         # Security violations
         - match:
             category: security
           receiver: 'security-high'
           group_interval: 1m
-        
+
         # Infrastructure issues
         - match:
             category: infrastructure
           receiver: 'sre-high'
           group_interval: 3m
-    
+
     # ================================================================
     # MEDIUM SEVERITY ALERTS - STANDARD ROUTING
     # ================================================================
@@ -128,25 +128,25 @@ route:
             category: performance
           receiver: 'performance-team'
           group_interval: 10m
-        
+
         # Business logic issues
         - match:
             category: business
           receiver: 'product-team'
           group_interval: 15m
-        
+
         # Coordination warnings
         - match:
             category: coordination
           receiver: 'agents-medium'
           group_interval: 10m
-        
+
         # Knowledge graph issues
         - match:
             category: knowledge_graph
           receiver: 'backend-medium'
           group_interval: 10m
-    
+
     # ================================================================
     # TEAM-SPECIFIC ROUTING
     # ================================================================
@@ -155,37 +155,37 @@ route:
       receiver: 'sre-team'
       group_interval: 5m
       repeat_interval: 2h
-    
+
     - match:
         team: backend
       receiver: 'backend-team'
       group_interval: 5m
       repeat_interval: 2h
-    
+
     - match:
         team: agents
       receiver: 'agents-team'
       group_interval: 5m
       repeat_interval: 2h
-    
+
     - match:
         team: security
       receiver: 'security-team'
       group_interval: 2m
       repeat_interval: 1h
-    
+
     - match:
         team: database
       receiver: 'database-team'
       group_interval: 5m
       repeat_interval: 2h
-    
+
     - match:
         team: product
       receiver: 'product-team'
       group_interval: 15m
       repeat_interval: 4h
-    
+
     # ================================================================
     # COMPONENT-SPECIFIC ROUTING
     # ================================================================
@@ -194,13 +194,13 @@ route:
       receiver: 'belief-system-alerts'
       group_interval: 5m
       repeat_interval: 2h
-    
+
     - match:
         component: inference
       receiver: 'inference-alerts'
       group_interval: 5m
       repeat_interval: 2h
-    
+
     - match:
         component: coalitions
       receiver: 'coalition-alerts'
@@ -217,40 +217,40 @@ inhibit_rules:
     target_match_re:
       alertname: '.*'
     equal: ['job']
-  
+
   # Critical alerts inhibit lower severity alerts for same component
   - source_match:
       severity: 'critical'
     target_match:
       severity: 'high'
     equal: ['component']
-  
+
   - source_match:
       severity: 'critical'
     target_match:
       severity: 'medium'
     equal: ['component']
-  
+
   - source_match:
       severity: 'high'
     target_match:
       severity: 'medium'
     equal: ['component']
-  
+
   # Agent coordination failures inhibit individual agent alerts
   - source_match:
       alertname: 'AgentCoordinationFailure'
     target_match_re:
       alertname: '.*Agent.*'
     equal: ['job']
-  
+
   # Memory critical inhibits memory warnings
   - source_match:
       alertname: 'SystemMemoryUsageCritical'
     target_match:
       alertname: 'AgentMemoryUsageWarning'
     equal: ['job']
-  
+
   # API down inhibits response time alerts
   - source_match:
       alertname: 'HighSystemErrorRate'
@@ -277,7 +277,7 @@ receivers:
           {{ if .Annotations.runbook_url }}*Runbook:* {{ .Annotations.runbook_url }}{{ end }}
           {{ end }}
         send_resolved: true
-  
+
   # ================================================================
   # CRITICAL ESCALATION RECEIVERS
   # ================================================================
@@ -293,7 +293,7 @@ receivers:
           component: '{{ .GroupLabels.component }}'
           category: '{{ .GroupLabels.category }}'
           runbook: '{{ range .Alerts }}{{ .Annotations.runbook_url }}{{ end }}'
-    
+
     slack_configs:
       - api_url: '{{ .SlackAPIURL }}'
         channel: '#critical-alerts'
@@ -302,13 +302,13 @@ receivers:
         text: |
           {{ range .Alerts }}
           *CRITICAL ALERT TRIGGERED*
-          
+
           *Summary:* {{ .Annotations.summary }}
           *Component:* {{ .Labels.component }}
           *Category:* {{ .Labels.category }}
           *Team:* {{ .Labels.team }}
           *Time:* {{ .StartsAt.Format "2006-01-02 15:04:05" }}
-          
+
           *Description:* {{ .Annotations.description }}
           {{ if .Annotations.runbook_url }}
           *Runbook:* <{{ .Annotations.runbook_url }}|View Runbook>
@@ -318,13 +318,13 @@ receivers:
           {{ end }}
           {{ end }}
         send_resolved: true
-    
+
     email_configs:
       - to: '{{ env "CRITICAL_EMAIL_LIST" | default "oncall@freeagentics.com,sre@freeagentics.com" }}'
         subject: '🚨 CRITICAL: FreeAgentics Alert - {{ .GroupLabels.alertname }}'
         body: |
           CRITICAL ALERT TRIGGERED
-          
+
           {{ range .Alerts }}
           Alert: {{ .Annotations.summary }}
           Component: {{ .Labels.component }}
@@ -332,7 +332,7 @@ receivers:
           Team: {{ .Labels.team }}
           Severity: {{ .Labels.severity }}
           Time: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
-          
+
           Description: {{ .Annotations.description }}
           {{ if .Annotations.runbook_url }}
           Runbook: {{ .Annotations.runbook_url }}
@@ -340,9 +340,9 @@ receivers:
           {{ if .Annotations.dashboard_url }}
           Dashboard: {{ .Annotations.dashboard_url }}
           {{ end }}
-          
+
           {{ end }}
-  
+
   # System down escalation
   - name: 'system-down-escalation'
     pagerduty_configs:
@@ -354,7 +354,7 @@ receivers:
           summary: 'FreeAgentics backend system is completely down'
           impact: 'All users affected'
           urgency: 'immediate'
-    
+
     slack_configs:
       - api_url: '{{ .SlackAPIURL }}'
         channel: '#incidents'
@@ -362,35 +362,35 @@ receivers:
         title: '🚨 SYSTEM DOWN - IMMEDIATE ACTION REQUIRED'
         text: |
           @here @channel
-          
+
           **SYSTEM DOWN ALERT**
-          
+
           The FreeAgentics backend system is completely down.
-          
+
           **Immediate Actions Required:**
           1. Check system status
           2. Investigate root cause
           3. Initiate incident response
-          
+
           **Escalation Path:**
           - Primary: SRE Team
           - Secondary: Backend Team
           - Emergency: CTO
         send_resolved: true
-    
+
     email_configs:
       - to: '{{ env "SYSTEM_DOWN_EMAIL_LIST" | default "oncall@freeagentics.com,engineering@freeagentics.com,cto@freeagentics.com" }}'
         subject: '🚨 SYSTEM DOWN: FreeAgentics Backend - IMMEDIATE ACTION REQUIRED'
         body: |
           SYSTEM DOWN ALERT
-          
+
           The FreeAgentics backend system is completely down.
           All users are affected.
-          
+
           This requires immediate attention and incident response.
-          
+
           Please check the system status and investigate the root cause immediately.
-  
+
   # ================================================================
   # SECURITY ALERT RECEIVERS
   # ================================================================
@@ -404,7 +404,7 @@ receivers:
           summary: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
           security_type: '{{ .GroupLabels.component }}'
           category: 'security'
-    
+
     slack_configs:
       - api_url: '{{ .SlackAPIURL }}'
         channel: '#security-incidents'
@@ -412,9 +412,9 @@ receivers:
         title: '🔒 SECURITY ALERT: {{ .GroupLabels.alertname }}'
         text: |
           @security-team @here
-          
+
           **SECURITY ALERT TRIGGERED**
-          
+
           {{ range .Alerts }}
           *Type:* {{ .Labels.component }}
           *Summary:* {{ .Annotations.summary }}
@@ -424,20 +424,20 @@ receivers:
           *Runbook:* <{{ .Annotations.runbook_url }}|Security Response Guide>
           {{ end }}
           {{ end }}
-          
+
           **Immediate Actions:**
           1. Assess threat level
           2. Implement containment measures
           3. Document incident
           4. Escalate if necessary
         send_resolved: true
-    
+
     email_configs:
       - to: '{{ env "SECURITY_EMAIL_LIST" | default "security@freeagentics.com,ciso@freeagentics.com" }}'
         subject: '🔒 SECURITY ALERT: {{ .GroupLabels.alertname }}'
         body: |
           SECURITY ALERT
-          
+
           {{ range .Alerts }}
           Alert: {{ .Annotations.summary }}
           Type: {{ .Labels.component }}
@@ -447,7 +447,7 @@ receivers:
           Runbook: {{ .Annotations.runbook_url }}
           {{ end }}
           {{ end }}
-  
+
   # ================================================================
   # TEAM-SPECIFIC RECEIVERS
   # ================================================================
@@ -459,9 +459,9 @@ receivers:
         title: '🤖 CRITICAL AGENT ALERT: {{ .GroupLabels.alertname }}'
         text: |
           @agents-team
-          
+
           **CRITICAL AGENT SYSTEM ALERT**
-          
+
           {{ range .Alerts }}
           *Alert:* {{ .Annotations.summary }}
           *Component:* {{ .Labels.component }}
@@ -471,7 +471,7 @@ receivers:
           {{ end }}
           {{ end }}
         send_resolved: true
-  
+
   - name: 'sre-critical'
     slack_configs:
       - api_url: '{{ .SlackAPIURL }}'
@@ -480,9 +480,9 @@ receivers:
         title: '⚡ SRE CRITICAL: {{ .GroupLabels.alertname }}'
         text: |
           @sre-team
-          
+
           **CRITICAL INFRASTRUCTURE ALERT**
-          
+
           {{ range .Alerts }}
           *Alert:* {{ .Annotations.summary }}
           *Component:* {{ .Labels.component }}
@@ -492,7 +492,7 @@ receivers:
           {{ end }}
           {{ end }}
         send_resolved: true
-  
+
   # ================================================================
   # HIGH SEVERITY RECEIVERS
   # ================================================================
@@ -504,7 +504,7 @@ receivers:
         title: '⚠️ HIGH PRIORITY: {{ .GroupLabels.alertname }}'
         text: |
           **HIGH PRIORITY ALERT**
-          
+
           {{ range .Alerts }}
           *Alert:* {{ .Annotations.summary }}
           *Component:* {{ .Labels.component }}
@@ -515,13 +515,13 @@ receivers:
           {{ end }}
           {{ end }}
         send_resolved: true
-    
+
     email_configs:
       - to: '{{ env "HIGH_SEVERITY_EMAIL_LIST" | default "alerts@freeagentics.com" }}'
         subject: '⚠️ HIGH PRIORITY: {{ .GroupLabels.alertname }}'
         body: |
           HIGH PRIORITY ALERT
-          
+
           {{ range .Alerts }}
           Alert: {{ .Annotations.summary }}
           Component: {{ .Labels.component }}
@@ -531,7 +531,7 @@ receivers:
           Runbook: {{ .Annotations.runbook_url }}
           {{ end }}
           {{ end }}
-  
+
   # ================================================================
   # MEDIUM SEVERITY AND STANDARD RECEIVERS
   # ================================================================
@@ -552,7 +552,7 @@ receivers:
           {{ end }}
           {{ end }}
         send_resolved: true
-  
+
   # Team-specific receivers
   - name: 'sre-team'
     slack_configs:
@@ -569,7 +569,7 @@ receivers:
           {{ end }}
           {{ end }}
         send_resolved: true
-  
+
   - name: 'backend-team'
     slack_configs:
       - api_url: '{{ .SlackAPIURL }}'
@@ -585,7 +585,7 @@ receivers:
           {{ end }}
           {{ end }}
         send_resolved: true
-  
+
   - name: 'agents-team'
     slack_configs:
       - api_url: '{{ .SlackAPIURL }}'
@@ -601,7 +601,7 @@ receivers:
           {{ end }}
           {{ end }}
         send_resolved: true
-  
+
   - name: 'security-team'
     slack_configs:
       - api_url: '{{ .SlackAPIURL }}'
@@ -617,7 +617,7 @@ receivers:
           {{ end }}
           {{ end }}
         send_resolved: true
-  
+
   - name: 'database-team'
     slack_configs:
       - api_url: '{{ .SlackAPIURL }}'
@@ -633,7 +633,7 @@ receivers:
           {{ end }}
           {{ end }}
         send_resolved: true
-  
+
   - name: 'product-team'
     slack_configs:
       - api_url: '{{ .SlackAPIURL }}'
@@ -649,7 +649,7 @@ receivers:
           {{ end }}
           {{ end }}
         send_resolved: true
-  
+
   # Component-specific receivers
   - name: 'belief-system-alerts'
     slack_configs:
@@ -666,7 +666,7 @@ receivers:
           {{ end }}
           {{ end }}
         send_resolved: true
-  
+
   - name: 'inference-alerts'
     slack_configs:
       - api_url: '{{ .SlackAPIURL }}'
@@ -682,7 +682,7 @@ receivers:
           {{ end }}
           {{ end }}
         send_resolved: true
-  
+
   - name: 'coalition-alerts'
     slack_configs:
       - api_url: '{{ .SlackAPIURL }}'
@@ -698,7 +698,7 @@ receivers:
           {{ end }}
           {{ end }}
         send_resolved: true
-  
+
   # ================================================================
   # HIGH SEVERITY TEAM-SPECIFIC RECEIVERS
   # ================================================================
@@ -710,9 +710,9 @@ receivers:
         title: '🔧 HIGH PRIORITY Backend: {{ .GroupLabels.alertname }}'
         text: |
           @backend-team
-          
+
           **HIGH PRIORITY BACKEND ALERT**
-          
+
           {{ range .Alerts }}
           *Alert:* {{ .Annotations.summary }}
           *Component:* {{ .Labels.component }}
@@ -722,13 +722,13 @@ receivers:
           {{ end }}
           {{ end }}
         send_resolved: true
-    
+
     email_configs:
       - to: '{{ env "BACKEND_HIGH_EMAIL_LIST" | default "backend-lead@freeagentics.com" }}'
         subject: '🔧 HIGH PRIORITY Backend: {{ .GroupLabels.alertname }}'
         body: |
           HIGH PRIORITY BACKEND ALERT
-          
+
           {{ range .Alerts }}
           Alert: {{ .Annotations.summary }}
           Component: {{ .Labels.component }}
@@ -737,7 +737,7 @@ receivers:
           Runbook: {{ .Annotations.runbook_url }}
           {{ end }}
           {{ end }}
-  
+
   - name: 'database-high'
     slack_configs:
       - api_url: '{{ .SlackAPIURL }}'
@@ -746,9 +746,9 @@ receivers:
         title: '🗄️ HIGH PRIORITY Database: {{ .GroupLabels.alertname }}'
         text: |
           @database-team
-          
+
           **HIGH PRIORITY DATABASE ALERT**
-          
+
           {{ range .Alerts }}
           *Alert:* {{ .Annotations.summary }}
           *Component:* {{ .Labels.component }}
@@ -758,13 +758,13 @@ receivers:
           {{ end }}
           {{ end }}
         send_resolved: true
-    
+
     email_configs:
       - to: '{{ env "DATABASE_HIGH_EMAIL_LIST" | default "database-lead@freeagentics.com" }}'
         subject: '🗄️ HIGH PRIORITY Database: {{ .GroupLabels.alertname }}'
         body: |
           HIGH PRIORITY DATABASE ALERT
-          
+
           {{ range .Alerts }}
           Alert: {{ .Annotations.summary }}
           Component: {{ .Labels.component }}
@@ -773,7 +773,7 @@ receivers:
           Runbook: {{ .Annotations.runbook_url }}
           {{ end }}
           {{ end }}
-  
+
   - name: 'agents-high'
     slack_configs:
       - api_url: '{{ .SlackAPIURL }}'
@@ -782,9 +782,9 @@ receivers:
         title: '🤖 HIGH PRIORITY Agents: {{ .GroupLabels.alertname }}'
         text: |
           @agents-team
-          
+
           **HIGH PRIORITY AGENTS ALERT**
-          
+
           {{ range .Alerts }}
           *Alert:* {{ .Annotations.summary }}
           *Component:* {{ .Labels.component }}
@@ -794,13 +794,13 @@ receivers:
           {{ end }}
           {{ end }}
         send_resolved: true
-    
+
     email_configs:
       - to: '{{ env "AGENTS_HIGH_EMAIL_LIST" | default "agents-lead@freeagentics.com" }}'
         subject: '🤖 HIGH PRIORITY Agents: {{ .GroupLabels.alertname }}'
         body: |
           HIGH PRIORITY AGENTS ALERT
-          
+
           {{ range .Alerts }}
           Alert: {{ .Annotations.summary }}
           Component: {{ .Labels.component }}
@@ -809,7 +809,7 @@ receivers:
           Runbook: {{ .Annotations.runbook_url }}
           {{ end }}
           {{ end }}
-  
+
   - name: 'security-high'
     slack_configs:
       - api_url: '{{ .SlackAPIURL }}'
@@ -818,9 +818,9 @@ receivers:
         title: '🔒 HIGH PRIORITY Security: {{ .GroupLabels.alertname }}'
         text: |
           @security-team
-          
+
           **HIGH PRIORITY SECURITY ALERT**
-          
+
           {{ range .Alerts }}
           *Alert:* {{ .Annotations.summary }}
           *Component:* {{ .Labels.component }}
@@ -830,13 +830,13 @@ receivers:
           {{ end }}
           {{ end }}
         send_resolved: true
-    
+
     email_configs:
       - to: '{{ env "SECURITY_HIGH_EMAIL_LIST" | default "security-lead@freeagentics.com" }}'
         subject: '🔒 HIGH PRIORITY Security: {{ .GroupLabels.alertname }}'
         body: |
           HIGH PRIORITY SECURITY ALERT
-          
+
           {{ range .Alerts }}
           Alert: {{ .Annotations.summary }}
           Component: {{ .Labels.component }}
@@ -845,7 +845,7 @@ receivers:
           Runbook: {{ .Annotations.runbook_url }}
           {{ end }}
           {{ end }}
-  
+
   - name: 'sre-high'
     slack_configs:
       - api_url: '{{ .SlackAPIURL }}'
@@ -854,9 +854,9 @@ receivers:
         title: '⚡ HIGH PRIORITY SRE: {{ .GroupLabels.alertname }}'
         text: |
           @sre-team
-          
+
           **HIGH PRIORITY SRE ALERT**
-          
+
           {{ range .Alerts }}
           *Alert:* {{ .Annotations.summary }}
           *Component:* {{ .Labels.component }}
@@ -866,13 +866,13 @@ receivers:
           {{ end }}
           {{ end }}
         send_resolved: true
-    
+
     email_configs:
       - to: '{{ env "SRE_HIGH_EMAIL_LIST" | default "sre-lead@freeagentics.com" }}'
         subject: '⚡ HIGH PRIORITY SRE: {{ .GroupLabels.alertname }}'
         body: |
           HIGH PRIORITY SRE ALERT
-          
+
           {{ range .Alerts }}
           Alert: {{ .Annotations.summary }}
           Component: {{ .Labels.component }}
@@ -881,7 +881,7 @@ receivers:
           Runbook: {{ .Annotations.runbook_url }}
           {{ end }}
           {{ end }}
-  
+
   # ================================================================
   # MEDIUM SEVERITY TEAM-SPECIFIC RECEIVERS
   # ================================================================
@@ -900,7 +900,7 @@ receivers:
           {{ end }}
           {{ end }}
         send_resolved: true
-  
+
   - name: 'agents-medium'
     slack_configs:
       - api_url: '{{ .SlackAPIURL }}'
@@ -916,7 +916,7 @@ receivers:
           {{ end }}
           {{ end }}
         send_resolved: true
-  
+
   - name: 'backend-medium'
     slack_configs:
       - api_url: '{{ .SlackAPIURL }}'

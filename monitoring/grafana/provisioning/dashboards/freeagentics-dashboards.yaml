@@ -12,7 +12,7 @@ providers:
       path: /var/lib/grafana/dashboards/freeagentics
     updateIntervalSeconds: 300
     allowUiUpdates: true
-    
+
   - name: 'freeagentics-system'
     orgId: 1
     folder: 'FreeAgentics/System'
@@ -24,7 +24,7 @@ providers:
       path: /var/lib/grafana/dashboards/freeagentics/system
     updateIntervalSeconds: 300
     allowUiUpdates: true
-    
+
   - name: 'freeagentics-agents'
     orgId: 1
     folder: 'FreeAgentics/Agents'
@@ -36,7 +36,7 @@ providers:
       path: /var/lib/grafana/dashboards/freeagentics/agents
     updateIntervalSeconds: 300
     allowUiUpdates: true
-    
+
   - name: 'freeagentics-performance'
     orgId: 1
     folder: 'FreeAgentics/Performance'

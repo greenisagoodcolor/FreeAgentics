@@ -16,7 +16,11 @@ from knowledge_graph.entity_node_mapper import (
     Node,
     NodeMapping,
 )
-from knowledge_graph.nlp_entity_extractor import Entity, EntityType, Relationship
+from knowledge_graph.nlp_entity_extractor import (
+    Entity,
+    EntityType,
+    Relationship,
+)
 
 
 class TestEntityToNodeMapping:
@@ -25,10 +29,15 @@ class TestEntityToNodeMapping:
     def test_node_mapping_data_structure(self):
         """Test NodeMapping data structure"""
         entity = Entity("Python", EntityType.TECHNOLOGY, 0, 6, 0.9)
-        node = Node(id="node_123", type="Technology", properties={"name": "Python"})
+        node = Node(
+            id="node_123", type="Technology", properties={"name": "Python"}
+        )
 
         mapping = NodeMapping(
-            entity=entity, node=node, confidence=0.85, strategy=MappingStrategy.EXACT_MATCH
+            entity=entity,
+            node=node,
+            confidence=0.85,
+            strategy=MappingStrategy.EXACT_MATCH,
         )
 
         assert mapping.entity == entity
@@ -63,7 +72,9 @@ class TestEntityToNodeMapping:
             type="Technology",
             properties={"name": "Python", "category": "programming_language"},
         )
-        graph_engine.find_nodes_by_name = AsyncMock(return_value=[existing_node])
+        graph_engine.find_nodes_by_name = AsyncMock(
+            return_value=[existing_node]
+        )
 
         mapper = EntityNodeMapper(graph_engine=graph_engine)
 
@@ -89,7 +100,9 @@ class TestEntityToNodeMapping:
             properties={"name": "JavaScript", "aliases": ["JS", "ECMAScript"]},
         )
         graph_engine.find_nodes_by_name = AsyncMock(return_value=[])
-        graph_engine.search_similar_nodes = AsyncMock(return_value=[existing_node])
+        graph_engine.search_similar_nodes = AsyncMock(
+            return_value=[existing_node]
+        )
 
         mapper = EntityNodeMapper(graph_engine=graph_engine)
 
@@ -139,7 +152,9 @@ class TestEntityToNodeMapping:
         graph_engine.search_similar_nodes = AsyncMock(return_value=[])
         graph_engine.create_node = AsyncMock(
             side_effect=lambda **kwargs: Node(
-                f"node_{kwargs['properties']['name'].lower()}", kwargs["type"], kwargs["properties"]
+                f"node_{kwargs['properties']['name'].lower()}",
+                kwargs["type"],
+                kwargs["properties"],
             )
         )
 
@@ -164,7 +179,9 @@ class TestEntityToNodeMapping:
         assert django_result.strategy == MappingStrategy.CREATE_NEW
 
         # Check person was created with correct type
-        person_result = next(r for r in results if r.entity.text == "Guido van Rossum")
+        person_result = next(
+            r for r in results if r.entity.text == "Guido van Rossum"
+        )
         assert person_result.node.type == "Person"
 
     @pytest.mark.asyncio
@@ -178,9 +195,10 @@ class TestEntityToNodeMapping:
 
         # Mock node lookups
         graph_engine.find_nodes_by_name = AsyncMock(
-            side_effect=lambda name: {"Python": [python_node], "Django": [django_node]}.get(
-                name, []
-            )
+            side_effect=lambda name: {
+                "Python": [python_node],
+                "Django": [django_node],
+            }.get(name, [])
         )
 
         # Mock edge creation
@@ -199,14 +217,21 @@ class TestEntityToNodeMapping:
         python_entity = Entity("Python", EntityType.TECHNOLOGY, 0, 6, 0.95)
         django_entity = Entity("Django", EntityType.TECHNOLOGY, 10, 16, 0.9)
         relationship = Relationship(
-            source=python_entity, target=django_entity, type="used_for", confidence=0.8
+            source=python_entity,
+            target=django_entity,
+            type="used_for",
+            confidence=0.8,
         )
 
         # Map entities first
-        entity_mappings = await mapper.map_entities([python_entity, django_entity])
+        entity_mappings = await mapper.map_entities(
+            [python_entity, django_entity]
+        )
 
         # Map relationship
-        edge_result = await mapper.map_relationship(relationship, entity_mappings)
+        edge_result = await mapper.map_relationship(
+            relationship, entity_mappings
+        )
 
         assert edge_result is not None
         assert edge_result.source_id == python_node.id
@@ -235,7 +260,10 @@ class TestEntityToNodeMapping:
         test_cases = [
             (Entity("Python", EntityType.TECHNOLOGY, 0, 6, 0.9), "Technology"),
             (Entity("John Doe", EntityType.PERSON, 0, 8, 0.9), "Person"),
-            (Entity("Google", EntityType.ORGANIZATION, 0, 6, 0.9), "Organization"),
+            (
+                Entity("Google", EntityType.ORGANIZATION, 0, 6, 0.9),
+                "Organization",
+            ),
             (Entity("AI", EntityType.CONCEPT, 0, 2, 0.9), "Concept"),
             (Entity("New York", EntityType.LOCATION, 0, 8, 0.9), "Location"),
         ]
@@ -254,12 +282,16 @@ class TestEntityToNodeMapping:
         python_node = Node("node_python", "Technology", {"name": "Python"})
 
         graph_engine.find_nodes_by_name = AsyncMock(
-            side_effect=lambda name: {"ML": [], "Python": [python_node]}.get(name, [])
+            side_effect=lambda name: {"ML": [], "Python": [python_node]}.get(
+                name, []
+            )
         )
 
         # ML should match to Machine Learning with context
         graph_engine.search_similar_nodes = AsyncMock(
-            side_effect=lambda name, context: [ml_node] if name == "ML" and context else []
+            side_effect=lambda name, context: [ml_node]
+            if name == "ML" and context
+            else []
         )
 
         mapper = EntityNodeMapper(graph_engine=graph_engine)
@@ -268,7 +300,10 @@ class TestEntityToNodeMapping:
         ml_entity = Entity("ML", EntityType.CONCEPT, 0, 2, 0.8)
 
         # Map with context
-        context = {"previous_entities": ["Machine Learning", "Python"], "domain": "AI"}
+        context = {
+            "previous_entities": ["Machine Learning", "Python"],
+            "domain": "AI",
+        }
 
         result = await mapper.map_entity(ml_entity, context=context)
 
@@ -304,7 +339,9 @@ class TestEntityToNodeMapping:
         graph_engine.search_similar_nodes = AsyncMock(return_value=[])
         graph_engine.create_node = AsyncMock(
             side_effect=lambda **kwargs: Node(
-                f"node_{kwargs['properties']['name']}", kwargs["type"], kwargs["properties"]
+                f"node_{kwargs['properties']['name']}",
+                kwargs["type"],
+                kwargs["properties"],
             )
         )
 
@@ -348,8 +385,16 @@ class TestEntityToNodeMapping:
 
         # Multiple nodes for same entity
         nodes = [
-            Node("node_1", "Technology", {"name": "JavaScript", "aliases": ["JS"]}),
-            Node("node_2", "Technology", {"name": "JS", "full_name": "JavaScript"}),
+            Node(
+                "node_1",
+                "Technology",
+                {"name": "JavaScript", "aliases": ["JS"]},
+            ),
+            Node(
+                "node_2",
+                "Technology",
+                {"name": "JS", "full_name": "JavaScript"},
+            ),
         ]
 
         graph_engine.find_nodes_by_name = AsyncMock(return_value=nodes)

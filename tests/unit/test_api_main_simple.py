@@ -33,7 +33,9 @@ class MockMiddleware:
 sys.modules["api.middleware"].DDoSProtectionMiddleware = MockMiddleware
 sys.modules["api.middleware"].SecurityMonitoringMiddleware = MockMiddleware
 sys.modules["auth.security_headers"].SecurityHeadersMiddleware = MockMiddleware
-sys.modules["api.middleware.security_headers"].security_headers_middleware = MagicMock()
+sys.modules[
+    "api.middleware.security_headers"
+].security_headers_middleware = MagicMock()
 
 # Mock routers
 mock_router = MagicMock()
@@ -64,7 +66,10 @@ class TestAPIMainSimple:
 
     def test_app_description(self):
         """Test app description."""
-        assert app.description == "Multi-Agent AI Platform API with Active Inference"
+        assert (
+            app.description
+            == "Multi-Agent AI Platform API with Active Inference"
+        )
 
     def test_lifespan_exists(self):
         """Test that lifespan function exists."""
@@ -86,13 +91,17 @@ class TestAPIMainSimple:
 
     def test_root_endpoint_exists(self):
         """Test that root endpoint exists."""
-        routes = [route for route in app.router.routes if hasattr(route, "path")]
+        routes = [
+            route for route in app.router.routes if hasattr(route, "path")
+        ]
         root_routes = [route for route in routes if route.path == "/"]
         assert len(root_routes) > 0
 
     def test_health_endpoint_exists(self):
         """Test that health endpoint exists."""
-        routes = [route for route in app.router.routes if hasattr(route, "path")]
+        routes = [
+            route for route in app.router.routes if hasattr(route, "path")
+        ]
         health_routes = [route for route in routes if route.path == "/health"]
         assert len(health_routes) > 0
 
@@ -122,7 +131,8 @@ class TestAPIMainSimple:
                 mock_prometheus_start,
             ):
                 with patch(
-                    "observability.performance_metrics.start_performance_tracking", mock_perf_start
+                    "observability.performance_metrics.start_performance_tracking",
+                    mock_perf_start,
                 ):
                     with patch(
                         "observability.prometheus_metrics.stop_prometheus_metrics_collection",
@@ -136,18 +146,26 @@ class TestAPIMainSimple:
                                 pass
 
                             # Verify startup calls
-                            mock_logger.info.assert_any_call("Starting FreeAgentics API...")
+                            mock_logger.info.assert_any_call(
+                                "Starting FreeAgentics API..."
+                            )
                             mock_logger.info.assert_any_call(
                                 "✅ Prometheus metrics collection started"
                             )
-                            mock_logger.info.assert_any_call("✅ Performance tracking started")
+                            mock_logger.info.assert_any_call(
+                                "✅ Performance tracking started"
+                            )
 
                             # Verify shutdown calls
-                            mock_logger.info.assert_any_call("Shutting down FreeAgentics API...")
+                            mock_logger.info.assert_any_call(
+                                "Shutting down FreeAgentics API..."
+                            )
                             mock_logger.info.assert_any_call(
                                 "✅ Prometheus metrics collection stopped"
                             )
-                            mock_logger.info.assert_any_call("✅ Performance tracking stopped")
+                            mock_logger.info.assert_any_call(
+                                "✅ Performance tracking stopped"
+                            )
 
     @pytest.mark.asyncio
     async def test_lifespan_startup_prometheus_failure(self):
@@ -155,7 +173,9 @@ class TestAPIMainSimple:
         mock_app = MagicMock()
 
         # Mock prometheus start failure
-        mock_prometheus_start = MagicMock(side_effect=Exception("Prometheus connection failed"))
+        mock_prometheus_start = MagicMock(
+            side_effect=Exception("Prometheus connection failed")
+        )
 
         # Mock successful performance tracking start
         mock_perf_start = MagicMock()
@@ -167,7 +187,8 @@ class TestAPIMainSimple:
                 mock_prometheus_start,
             ):
                 with patch(
-                    "observability.performance_metrics.start_performance_tracking", mock_perf_start
+                    "observability.performance_metrics.start_performance_tracking",
+                    mock_perf_start,
                 ):
                     with patch(
                         "observability.prometheus_metrics.stop_prometheus_metrics_collection",
@@ -186,7 +207,9 @@ class TestAPIMainSimple:
                             )
 
                             # Verify performance tracking still succeeded
-                            mock_logger.info.assert_any_call("✅ Performance tracking started")
+                            mock_logger.info.assert_any_call(
+                                "✅ Performance tracking started"
+                            )
 
     @pytest.mark.asyncio
     async def test_lifespan_startup_performance_failure(self):
@@ -198,7 +221,9 @@ class TestAPIMainSimple:
         mock_prometheus_start.return_value = None
 
         # Mock performance tracking start failure
-        mock_perf_start = MagicMock(side_effect=Exception("Performance tracking failed"))
+        mock_perf_start = MagicMock(
+            side_effect=Exception("Performance tracking failed")
+        )
 
         with patch("api.main.logger") as mock_logger:
             with patch(
@@ -206,7 +231,8 @@ class TestAPIMainSimple:
                 mock_prometheus_start,
             ):
                 with patch(
-                    "observability.performance_metrics.start_performance_tracking", mock_perf_start
+                    "observability.performance_metrics.start_performance_tracking",
+                    mock_perf_start,
                 ):
                     with patch(
                         "observability.prometheus_metrics.stop_prometheus_metrics_collection",
@@ -239,7 +265,9 @@ class TestAPIMainSimple:
         mock_perf_start = MagicMock()
 
         # Mock prometheus stop failure
-        mock_prometheus_stop = MagicMock(side_effect=Exception("Prometheus stop failed"))
+        mock_prometheus_stop = MagicMock(
+            side_effect=Exception("Prometheus stop failed")
+        )
         mock_perf_stop = MagicMock()
 
         with patch("api.main.logger") as mock_logger:
@@ -248,7 +276,8 @@ class TestAPIMainSimple:
                 mock_prometheus_start,
             ):
                 with patch(
-                    "observability.performance_metrics.start_performance_tracking", mock_perf_start
+                    "observability.performance_metrics.start_performance_tracking",
+                    mock_perf_start,
                 ):
                     with patch(
                         "observability.prometheus_metrics.stop_prometheus_metrics_collection",
@@ -267,7 +296,9 @@ class TestAPIMainSimple:
                             )
 
                             # Verify performance tracking still stopped
-                            mock_logger.info.assert_any_call("✅ Performance tracking stopped")
+                            mock_logger.info.assert_any_call(
+                                "✅ Performance tracking stopped"
+                            )
 
     @pytest.mark.asyncio
     async def test_lifespan_shutdown_performance_failure(self):
@@ -282,7 +313,9 @@ class TestAPIMainSimple:
         mock_prometheus_stop = MagicMock()
 
         # Mock performance tracking stop failure
-        mock_perf_stop = MagicMock(side_effect=Exception("Performance stop failed"))
+        mock_perf_stop = MagicMock(
+            side_effect=Exception("Performance stop failed")
+        )
 
         with patch("api.main.logger") as mock_logger:
             with patch(
@@ -290,7 +323,8 @@ class TestAPIMainSimple:
                 mock_prometheus_start,
             ):
                 with patch(
-                    "observability.performance_metrics.start_performance_tracking", mock_perf_start
+                    "observability.performance_metrics.start_performance_tracking",
+                    mock_perf_start,
                 ):
                     with patch(
                         "observability.prometheus_metrics.stop_prometheus_metrics_collection",

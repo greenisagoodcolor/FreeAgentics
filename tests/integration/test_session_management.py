@@ -73,8 +73,12 @@ class TestSessionManagement:
         assert auth_manager.refresh_tokens[user_id] == refresh_token
 
         # Verify tokens are valid JWT
-        access_payload = jwt.decode(access_token, options={"verify_signature": False})
-        refresh_payload = jwt.decode(refresh_token, options={"verify_signature": False})
+        access_payload = jwt.decode(
+            access_token, options={"verify_signature": False}
+        )
+        refresh_payload = jwt.decode(
+            refresh_token, options={"verify_signature": False}
+        )
 
         assert access_payload["type"] == "access"
         assert refresh_payload["type"] == "refresh"
@@ -195,7 +199,10 @@ class TestSessionManagement:
         user_id = sessions[0]["user"]["user_id"]
         if user_id in auth_manager.refresh_tokens:
             # Should be the last refresh token
-            assert auth_manager.refresh_tokens[user_id] == sessions[-1]["refresh_token"]
+            assert (
+                auth_manager.refresh_tokens[user_id]
+                == sessions[-1]["refresh_token"]
+            )
 
     def test_concurrent_sessions_different_users(self, client):
         """Test concurrent sessions for different users."""
@@ -234,7 +241,9 @@ class TestSessionManagement:
 
         # Make concurrent requests
         with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [executor.submit(make_authenticated_request) for _ in range(20)]
+            futures = [
+                executor.submit(make_authenticated_request) for _ in range(20)
+            ]
             results = [future.result() for future in as_completed(futures)]
 
         # All requests should succeed
@@ -255,7 +264,9 @@ class TestSessionManagement:
             {"Authorization": f"Bearer {access_token} extra"},  # Extra content
             {"Authorization": f"bearer {access_token}"},  # Wrong case
             {"Authorization": access_token},  # Missing Bearer
-            {"Authorization": f"Bearer {access_token[:-5]}"},  # Truncated token
+            {
+                "Authorization": f"Bearer {access_token[:-5]}"
+            },  # Truncated token
             {"Authorization": f"Bearer {access_token}x"},  # Modified token
         ]
 
@@ -387,7 +398,9 @@ class TestSessionManagement:
         assert "user_3" in manager.refresh_tokens
         assert "user_4" in manager.refresh_tokens
 
-    def test_session_invalidation_on_user_deactivation(self, client, test_user_data):
+    def test_session_invalidation_on_user_deactivation(
+        self, client, test_user_data
+    ):
         """Test session invalidation when user is deactivated."""
         # Register and login
         response = client.post("/api/v1/auth/register", json=test_user_data)

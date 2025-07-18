@@ -17,14 +17,21 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 import click
 import yaml
 
-from tests.performance.agent_simulation_framework import AgentSimulationFramework
+from tests.performance.agent_simulation_framework import (
+    AgentSimulationFramework,
+)
 from tests.performance.monitoring_dashboard import (
     DashboardConfig,
     MetricsDashboard,
     start_dashboard,
 )
-from tests.performance.performance_profiler import ComponentProfiler, profile_operation
-from tests.performance.performance_report_generator import PerformanceReportGenerator
+from tests.performance.performance_profiler import (
+    ComponentProfiler,
+    profile_operation,
+)
+from tests.performance.performance_report_generator import (
+    PerformanceReportGenerator,
+)
 from tests.performance.regression_analyzer import (
     RegressionAnalyzer,
     RegressionSeverity,
@@ -110,7 +117,10 @@ class IntegratedMonitoringSystem:
         self.dashboard = None
         if self.config.enable_dashboard:
             self.dashboard = MetricsDashboard(
-                DashboardConfig(host=self.config.dashboard_host, port=self.config.dashboard_port)
+                DashboardConfig(
+                    host=self.config.dashboard_host,
+                    port=self.config.dashboard_port,
+                )
             )
 
         self.profiler = (
@@ -124,7 +134,9 @@ class IntegratedMonitoringSystem:
 
         self.regression_analyzer = None
         if self.config.enable_regression_analysis:
-            self.regression_analyzer = initialize_regression_analyzer(self.metrics_collector)
+            self.regression_analyzer = initialize_regression_analyzer(
+                self.metrics_collector
+            )
 
         self.report_generator = PerformanceReportGenerator()
 
@@ -209,7 +221,9 @@ class IntegratedMonitoringSystem:
             await self.metrics_collector.start()
 
             # Start metric collection tasks
-            self._background_tasks.append(asyncio.create_task(self._collect_all_metrics()))
+            self._background_tasks.append(
+                asyncio.create_task(self._collect_all_metrics())
+            )
 
         # Start dashboard
         if self.config.enable_dashboard and self.dashboard:
@@ -217,15 +231,21 @@ class IntegratedMonitoringSystem:
 
         # Start regression monitoring
         if self.config.enable_regression_analysis:
-            self._background_tasks.append(asyncio.create_task(self._regression_monitoring_loop()))
+            self._background_tasks.append(
+                asyncio.create_task(self._regression_monitoring_loop())
+            )
 
         # Start automated reporting
         if self.config.enable_automated_reports:
-            self._background_tasks.append(asyncio.create_task(self._automated_reporting_loop()))
+            self._background_tasks.append(
+                asyncio.create_task(self._automated_reporting_loop())
+            )
 
         # Start load testing if enabled
         if self.config.enable_load_testing:
-            self._background_tasks.append(asyncio.create_task(self._load_testing_loop()))
+            self._background_tasks.append(
+                asyncio.create_task(self._load_testing_loop())
+            )
 
         logger.info("Integrated monitoring system started successfully")
         logger.info(
@@ -296,14 +316,20 @@ class IntegratedMonitoringSystem:
                 await asyncio.sleep(self.config.regression_check_interval)
 
                 # Analyze for regressions
-                regressions = await self.regression_analyzer.analyze_regressions()
+                regressions = (
+                    await self.regression_analyzer.analyze_regressions()
+                )
 
                 if regressions:
                     # Log critical regressions
                     critical_count = sum(
                         1
                         for r in regressions
-                        if r.severity in [RegressionSeverity.CRITICAL, RegressionSeverity.MAJOR]
+                        if r.severity
+                        in [
+                            RegressionSeverity.CRITICAL,
+                            RegressionSeverity.MAJOR,
+                        ]
                     )
 
                     if critical_count > 0:
@@ -326,7 +352,9 @@ class IntegratedMonitoringSystem:
                         with open(report_path, "w") as f:
                             f.write(report)
 
-                        logger.info(f"Regression report saved to {report_path}")
+                        logger.info(
+                            f"Regression report saved to {report_path}"
+                        )
 
             except asyncio.CancelledError:
                 break
@@ -387,19 +415,27 @@ class IntegratedMonitoringSystem:
 
         # Profile the load test
         if self.profiler:
-            async with self.profiler.profile_component_async("database", "load_test"):
+            async with self.profiler.profile_component_async(
+                "database", "load_test"
+            ):
                 await tester.run_comprehensive_test()
         else:
             await tester.run_comprehensive_test()
 
     async def _run_websocket_load_test(self):
         """Run WebSocket load test with monitoring."""
-        test_config = {"num_connections": 100, "duration": 60, "message_rate": 10}
+        test_config = {
+            "num_connections": 100,
+            "duration": 60,
+            "message_rate": 10,
+        }
 
         tester = WebSocketLoadTest(test_config)
 
         if self.profiler:
-            async with self.profiler.profile_component_async("websocket", "load_test"):
+            async with self.profiler.profile_component_async(
+                "websocket", "load_test"
+            ):
                 await tester.run()
         else:
             await tester.run()
@@ -409,17 +445,25 @@ class IntegratedMonitoringSystem:
         framework = AgentSimulationFramework()
 
         if self.profiler:
-            async with self.profiler.profile_component_async("agent", "simulation"):
-                results = await framework.run_scalability_test(agent_counts=[10, 20, 30, 40, 50])
+            async with self.profiler.profile_component_async(
+                "agent", "simulation"
+            ):
+                results = await framework.run_scalability_test(
+                    agent_counts=[10, 20, 30, 40, 50]
+                )
         else:
-            results = await framework.run_scalability_test(agent_counts=[10, 20, 30, 40, 50])
+            results = await framework.run_scalability_test(
+                agent_counts=[10, 20, 30, 40, 50]
+            )
 
     async def _run_coordination_load_test(self):
         """Run coordination load test."""
         tester = CoordinationLoadTester()
 
         if self.profiler:
-            async with self.profiler.profile_component_async("coordination", "load_test"):
+            async with self.profiler.profile_component_async(
+                "coordination", "load_test"
+            ):
                 await tester.run_comprehensive_test()
         else:
             await tester.run_comprehensive_test()
@@ -442,11 +486,17 @@ class IntegratedMonitoringSystem:
                 report_data = {
                     "timestamp": timestamp.isoformat(),
                     "metrics_summary": metrics_summary,
-                    "profiling_data": self._get_profiling_summary() if self.profiler else {},
+                    "profiling_data": self._get_profiling_summary()
+                    if self.profiler
+                    else {},
                     "regression_analysis": (
-                        self._get_regression_summary() if self.regression_analyzer else {}
+                        self._get_regression_summary()
+                        if self.regression_analyzer
+                        else {}
                     ),
-                    "alerts": list(self.metrics_collector._alert_history)[-100:],  # Last 100 alerts
+                    "alerts": list(self.metrics_collector._alert_history)[
+                        -100:
+                    ],  # Last 100 alerts
                 }
 
                 report_path = (
@@ -461,7 +511,9 @@ class IntegratedMonitoringSystem:
                 reports["json"] = str(report_path)
 
             elif format == "html":
-                html_report = self._generate_html_report(timestamp, metrics_summary)
+                html_report = self._generate_html_report(
+                    timestamp, metrics_summary
+                )
 
                 report_path = (
                     Path("tests/performance/reports")
@@ -474,7 +526,9 @@ class IntegratedMonitoringSystem:
                 reports["html"] = str(report_path)
 
             elif format == "markdown":
-                md_report = self._generate_markdown_report(timestamp, metrics_summary)
+                md_report = self._generate_markdown_report(
+                    timestamp, metrics_summary
+                )
 
                 report_path = (
                     Path("tests/performance/reports")
@@ -509,15 +563,21 @@ class IntegratedMonitoringSystem:
 
         return {
             "baselines": len(self.regression_analyzer._baselines),
-            "recent_regressions": len(self.regression_analyzer._regression_history),
+            "recent_regressions": len(
+                self.regression_analyzer._regression_history
+            ),
             "last_analysis": (
-                self.regression_analyzer._regression_history[-1].detected_at.isoformat()
+                self.regression_analyzer._regression_history[
+                    -1
+                ].detected_at.isoformat()
                 if self.regression_analyzer._regression_history
                 else None
             ),
         }
 
-    def _generate_html_report(self, timestamp: datetime, metrics_summary: Dict[str, Any]) -> str:
+    def _generate_html_report(
+        self, timestamp: datetime, metrics_summary: Dict[str, Any]
+    ) -> str:
         """Generate HTML format report."""
         html = """<!DOCTYPE html>
 <html>
@@ -558,7 +618,9 @@ class IntegratedMonitoringSystem:
 """
 
         # Add source-specific metrics
-        for source_name, source_data in metrics_summary.get("sources", {}).items():
+        for source_name, source_data in metrics_summary.get(
+            "sources", {}
+        ).items():
             html += """
         <h2>📈 {source_name.title()} Metrics</h2>
         <table>
@@ -634,7 +696,9 @@ This report provides a comprehensive overview of system performance across all m
 """
 
         # Add metrics for each source
-        for source_name, source_data in metrics_summary.get("sources", {}).items():
+        for source_name, source_data in metrics_summary.get(
+            "sources", {}
+        ).items():
             md += f"### {source_name.title()} Performance\n\n"
             md += "| Metric | Current | Average | Min | Max | P95 | P99 |\n"
             md += "|--------|---------|---------|-----|-----|-----|-----|\n"
@@ -668,10 +732,15 @@ This report provides a comprehensive overview of system performance across all m
                     md += "\n"
 
         # Add regression analysis if available
-        if self.regression_analyzer and self.regression_analyzer._regression_history:
+        if (
+            self.regression_analyzer
+            and self.regression_analyzer._regression_history
+        ):
             md += "## Recent Performance Regressions\n\n"
 
-            recent_regressions = self.regression_analyzer._regression_history[-10:]
+            recent_regressions = self.regression_analyzer._regression_history[
+                -10:
+            ]
             for reg in recent_regressions:
                 severity_icon = {
                     "critical": "🔴",
@@ -689,15 +758,19 @@ This report provides a comprehensive overview of system performance across all m
         if recent_alerts:
             md += "\n## Recent Alerts\n\n"
             for alert in recent_alerts[-10:]:
-                severity_icon = {"critical": "🚨", "warning": "⚠️", "info": "ℹ️"}.get(
-                    alert.get("severity", "info"), "📌"
-                )
+                severity_icon = {
+                    "critical": "🚨",
+                    "warning": "⚠️",
+                    "info": "ℹ️",
+                }.get(alert.get("severity", "info"), "📌")
 
                 md += f"{severity_icon} **{alert.get('rule_name', 'Unknown')}** - "
                 md += f"{alert.get('metric_name', 'Unknown')} {alert.get('condition', '')} "
                 md += f"(value: {alert.get('actual_value', 0):.2f})\n"
 
-        md += "\n---\n*Generated by FreeAgentics Integrated Monitoring System*\n"
+        md += (
+            "\n---\n*Generated by FreeAgentics Integrated Monitoring System*\n"
+        )
 
         return md
 
@@ -718,11 +791,21 @@ def cli():
 
 
 @cli.command()
-@click.option("--config", type=click.Path(exists=True), help="Configuration file (YAML)")
-@click.option("--dashboard/--no-dashboard", default=True, help="Enable dashboard")
+@click.option(
+    "--config", type=click.Path(exists=True), help="Configuration file (YAML)"
+)
+@click.option(
+    "--dashboard/--no-dashboard", default=True, help="Enable dashboard"
+)
 @click.option("--port", default=8090, help="Dashboard port")
-@click.option("--profiling/--no-profiling", default=True, help="Enable profiling")
-@click.option("--regression/--no-regression", default=True, help="Enable regression analysis")
+@click.option(
+    "--profiling/--no-profiling", default=True, help="Enable profiling"
+)
+@click.option(
+    "--regression/--no-regression",
+    default=True,
+    help="Enable regression analysis",
+)
 def start(config, dashboard, port, profiling, regression):
     """Start the integrated monitoring system."""
     # Load configuration
@@ -815,7 +898,9 @@ def report(format, window):
             metrics = generator.extract_metrics(results)
             regressions = generator.detect_regressions(metrics)
             charts = generator.generate_performance_charts(metrics)
-            report_file = generator.generate_summary_report(metrics, regressions, charts)
+            report_file = generator.generate_summary_report(
+                metrics, regressions, charts
+            )
 
             click.echo(f"Markdown report saved to: {report_file}")
 
@@ -834,7 +919,9 @@ def baseline(duration):
         await collector.start()
 
         click.echo(f"Establishing baselines for {duration} seconds...")
-        baselines = await analyzer.establish_baseline(duration_seconds=duration)
+        baselines = await analyzer.establish_baseline(
+            duration_seconds=duration
+        )
 
         await collector.stop()
 

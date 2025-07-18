@@ -44,7 +44,8 @@ class TestLLMIntegration:
 
     @pytest.mark.integration
     @pytest.mark.skipif(
-        not OllamaProvider(LocalLLMConfig()).is_available(), reason="Ollama not available"
+        not OllamaProvider(LocalLLMConfig()).is_available(),
+        reason="Ollama not available",
     )
     def test_ollama_real_generation(self, ollama_config):
         """Test real text generation with Ollama."""
@@ -69,7 +70,9 @@ class TestLLMIntegration:
 
     @pytest.mark.integration
     @pytest.mark.skipif(
-        not Path(os.getenv("LLAMA_CPP_MODEL_PATH", "/models/llama2.ggu")).exists(),
+        not Path(
+            os.getenv("LLAMA_CPP_MODEL_PATH", "/models/llama2.ggu")
+        ).exists(),
         reason="llama.cpp model not found",
     )
     def test_llama_cpp_real_generation(self, llama_cpp_config):
@@ -109,7 +112,9 @@ class TestLLMIntegration:
     @pytest.mark.integration
     def test_llm_fallback_behavior(self):
         """Test fallback when no providers available."""
-        config = LocalLLMConfig(provider=LocalLLMProvider.OLLAMA, enable_fallback=True)
+        config = LocalLLMConfig(
+            provider=LocalLLMProvider.OLLAMA, enable_fallback=True
+        )
         manager = LocalLLMManager(config)
 
         # Force no providers available
@@ -124,11 +129,19 @@ class TestLLMIntegration:
     @pytest.mark.parametrize(
         "prompt,expected_keywords",
         [
-            ("What is Active Inference?", ["active", "inference", "free energy"]),
-            ("Explain exploration vs exploitation", ["exploration", "exploitation"]),
+            (
+                "What is Active Inference?",
+                ["active", "inference", "free energy"],
+            ),
+            (
+                "Explain exploration vs exploitation",
+                ["exploration", "exploitation"],
+            ),
         ],
     )
-    def test_llm_response_quality(self, ollama_config, prompt, expected_keywords):
+    def test_llm_response_quality(
+        self, ollama_config, prompt, expected_keywords
+    ):
         """Test quality of LLM responses for agent-related prompts."""
         manager = LocalLLMManager(ollama_config)
 

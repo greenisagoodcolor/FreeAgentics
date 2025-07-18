@@ -59,7 +59,9 @@ class AlertingSystem:
 
         logger.info("Initialized alerting system")
 
-    async def check_agent_health(self, agent_id: str, agent_data: Dict[str, Any]):
+    async def check_agent_health(
+        self, agent_id: str, agent_data: Dict[str, Any]
+    ):
         """Check agent health and raise alerts if needed."""
         # Check for agent failure
         if agent_data.get("agent_status") == "failed":
@@ -141,7 +143,9 @@ class AlertingSystem:
         alert_key = f"{alert_type.value}_{source}"
         last_alert_time = self.last_alert_times.get(alert_key)
         if last_alert_time:
-            cooldown_elapsed = (datetime.now() - last_alert_time).total_seconds() / 60
+            cooldown_elapsed = (
+                datetime.now() - last_alert_time
+            ).total_seconds() / 60
             if cooldown_elapsed < 5:  # 5 minute cooldown
                 return
 
@@ -172,7 +176,9 @@ class AlertingSystem:
         else:
             logger.info(f"ALERT {level.value}: {title} - {message}")
 
-    def resolve_alert(self, alert_id: str, resolution_notes: Optional[str] = None):
+    def resolve_alert(
+        self, alert_id: str, resolution_notes: Optional[str] = None
+    ):
         """Mark an alert as resolved."""
         if alert_id in self.alerts:
             alert = self.alerts[alert_id]
@@ -213,7 +219,8 @@ class AlertingSystem:
                     "source": a.source,
                 }
                 for a in active_alerts
-                if a.level == AlertLevel.CRITICAL or a.level == AlertLevel.EMERGENCY
+                if a.level == AlertLevel.CRITICAL
+                or a.level == AlertLevel.EMERGENCY
             ],
         }
 
@@ -235,7 +242,9 @@ class AlertingSystem:
                         "title": a.title,
                         "message": a.message,
                         "resolved": a.resolved,
-                        "resolved_at": a.resolved_at.isoformat() if a.resolved_at else None,
+                        "resolved_at": a.resolved_at.isoformat()
+                        if a.resolved_at
+                        else None,
                     }
                     for a in alerts
                 ],

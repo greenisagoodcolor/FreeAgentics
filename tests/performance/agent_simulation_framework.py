@@ -72,11 +72,15 @@ class AgentLifecycleManager:
         self._lock = threading.Lock()
         self._spawn_counter = 0
 
-    def spawn_agent(self, agent_type: AgentType, config: Dict[str, Any]) -> ActiveInferenceAgent:
+    def spawn_agent(
+        self, agent_type: AgentType, config: Dict[str, Any]
+    ) -> ActiveInferenceAgent:
         """Spawn a single agent with given configuration."""
         with self._lock:
             if len(self.agents) >= self.max_agents:
-                raise RuntimeError(f"Maximum agent limit ({self.max_agents}) reached")
+                raise RuntimeError(
+                    f"Maximum agent limit ({self.max_agents}) reached"
+                )
 
             self._spawn_counter += 1
             agent_id = f"{agent_type.value}_{self._spawn_counter}"
@@ -84,9 +88,13 @@ class AgentLifecycleManager:
 
         # Create agent based on type
         if agent_type == AgentType.EXPLORER:
-            agent = BasicExplorerAgent(agent_id, name, grid_size=config.get("grid_size", 10))
+            agent = BasicExplorerAgent(
+                agent_id, name, grid_size=config.get("grid_size", 10)
+            )
         elif agent_type == AgentType.COLLECTOR:
-            agent = ResourceCollectorAgent(agent_id, name, grid_size=config.get("grid_size", 10))
+            agent = ResourceCollectorAgent(
+                agent_id, name, grid_size=config.get("grid_size", 10)
+            )
         elif agent_type == AgentType.COORDINATOR:
             agent = CoalitionCoordinatorAgent(
                 agent_id, name, max_agents=config.get("max_agents", 10)
@@ -115,7 +123,9 @@ class AgentLifecycleManager:
 
         return agent
 
-    def spawn_batch(self, spawn_config: AgentSpawnConfig) -> List[ActiveInferenceAgent]:
+    def spawn_batch(
+        self, spawn_config: AgentSpawnConfig
+    ) -> List[ActiveInferenceAgent]:
         """Spawn a batch of agents with staggered timing."""
         agents = []
 
@@ -128,7 +138,9 @@ class AgentLifecycleManager:
             }
 
             # Set initial position if provided
-            if spawn_config.initial_positions and i < len(spawn_config.initial_positions):
+            if spawn_config.initial_positions and i < len(
+                spawn_config.initial_positions
+            ):
                 config["initial_position"] = spawn_config.initial_positions[i]
 
             # Spawn agent
@@ -137,7 +149,10 @@ class AgentLifecycleManager:
                 agents.append(agent)
 
                 # Stagger spawning to avoid thundering herd
-                if spawn_config.spawn_delay_ms > 0 and i < spawn_config.count - 1:
+                if (
+                    spawn_config.spawn_delay_ms > 0
+                    and i < spawn_config.count - 1
+                ):
                     time.sleep(spawn_config.spawn_delay_ms / 1000.0)
 
             except Exception as e:
@@ -169,7 +184,10 @@ class AgentLifecycleManager:
     def get_all_metrics(self) -> Dict[str, Dict[str, Any]]:
         """Get metrics for all agents."""
         with self._lock:
-            return {agent_id: self.get_agent_metrics(agent_id) for agent_id in self.agents.keys()}
+            return {
+                agent_id: self.get_agent_metrics(agent_id)
+                for agent_id in self.agents.keys()
+            }
 
     def terminate_agent(self, agent_id: str) -> bool:
         """Terminate a specific agent."""
@@ -204,7 +222,9 @@ class SimulationEnvironment:
     """Manages the simulation environment including world and agent interactions."""
 
     def __init__(self, world_size: int = 20):
-        self.world = GridWorld(GridWorldConfig(width=world_size, height=world_size))
+        self.world = GridWorld(
+            GridWorldConfig(width=world_size, height=world_size)
+        )
         self.lifecycle_manager = AgentLifecycleManager()
         self.tick_count = 0
         self.start_time = None
@@ -216,7 +236,9 @@ class SimulationEnvironment:
         for _ in range(count):
             x = random.randint(0, self.world.width - 1)
             y = random.randint(0, self.world.height - 1)
-            resource_type = random.choice(["energy", "material", "information"])
+            resource_type = random.choice(
+                ["energy", "material", "information"]
+            )
             amount = random.randint(5, 20)
 
             # Add resource at position (simplified - would need proper world API)
@@ -233,20 +255,35 @@ class SimulationEnvironment:
 
             # Update metrics
             with self.lifecycle_manager._lock:
-                metrics = self.lifecycle_manager.agent_metrics.get(agent.agent_id, {})
+                metrics = self.lifecycle_manager.agent_metrics.get(
+                    agent.agent_id, {}
+                )
                 metrics["steps"] = metrics.get("steps", 0) + 1
 
-            return {"agent_id": agent.agent_id, "action": action, "success": True}
+            return {
+                "agent_id": agent.agent_id,
+                "action": action,
+                "success": True,
+            }
 
         except Exception as e:
             # Track errors
             with self.lifecycle_manager._lock:
-                metrics = self.lifecycle_manager.agent_metrics.get(agent.agent_id, {})
+                metrics = self.lifecycle_manager.agent_metrics.get(
+                    agent.agent_id, {}
+                )
                 metrics["errors"] = metrics.get("errors", 0) + 1
 
-            return {"agent_id": agent.agent_id, "action": "stay", "success": False, "error": str(e)}
+            return {
+                "agent_id": agent.agent_id,
+                "action": "stay",
+                "success": False,
+                "error": str(e),
+            }
 
-    def generate_observation(self, agent: ActiveInferenceAgent) -> Dict[str, Any]:
+    def generate_observation(
+        self, agent: ActiveInferenceAgent
+    ) -> Dict[str, Any]:
         """Generate observation for agent based on type and world state."""
         base_observation = {
             "position": getattr(agent, "position", [0, 0]),
@@ -271,8 +308,12 @@ class SimulationEnvironment:
                     visible_agents.append(
                         {
                             "id": other_id,
-                            "position": getattr(other_agent, "position", [0, 0]),
-                            "status": "active" if other_agent.is_active else "inactive",
+                            "position": getattr(
+                                other_agent, "position", [0, 0]
+                            ),
+                            "status": "active"
+                            if other_agent.is_active
+                            else "inactive",
                         }
                     )
             base_observation["visible_agents"] = visible_agents
@@ -320,10 +361,18 @@ class SimulationEnvironment:
         self.start_time = time.time()
         tick_interval = 1.0 / config.tick_rate_hz
 
-        results = {"ticks": [], "total_ticks": 0, "total_errors": 0, "average_tick_ms": 0}
+        results = {
+            "ticks": [],
+            "total_ticks": 0,
+            "total_errors": 0,
+            "average_tick_ms": 0,
+        }
 
         try:
-            while self.running and (time.time() - self.start_time) < config.duration_seconds:
+            while (
+                self.running
+                and (time.time() - self.start_time) < config.duration_seconds
+            ):
                 tick_start = time.time()
 
                 # Run one tick
@@ -346,12 +395,16 @@ class SimulationEnvironment:
             results["duration_seconds"] = time.time() - self.start_time
 
             if results["ticks"]:
-                avg_tick_ms = np.mean([t["tick_duration_ms"] for t in results["ticks"]])
+                avg_tick_ms = np.mean(
+                    [t["tick_duration_ms"] for t in results["ticks"]]
+                )
                 results["average_tick_ms"] = avg_tick_ms
 
         return results
 
-    def inject_failure(self, agent_id: str, failure_type: str = "crash") -> bool:
+    def inject_failure(
+        self, agent_id: str, failure_type: str = "crash"
+    ) -> bool:
         """Inject a failure into a specific agent."""
         if agent_id not in self.lifecycle_manager.agents:
             return False
@@ -395,7 +448,9 @@ class LoadTestScenario:
 class ScalingTestScenario(LoadTestScenario):
     """Test scaling behavior with increasing agent counts."""
 
-    def __init__(self, environment: SimulationEnvironment, max_agents: int = 50):
+    def __init__(
+        self, environment: SimulationEnvironment, max_agents: int = 50
+    ):
         super().__init__("Scaling Test", environment)
         self.max_agents = max_agents
 
@@ -418,25 +473,31 @@ class ScalingTestScenario(LoadTestScenario):
                 spawn_delay_ms=50,
             )
 
-            agents = self.environment.lifecycle_manager.spawn_batch(spawn_config)
+            agents = self.environment.lifecycle_manager.spawn_batch(
+                spawn_config
+            )
 
             # Run simulation
             sim_config = SimulationConfig(
-                duration_seconds=min(duration_seconds, 10.0), tick_rate_hz=10.0, enable_metrics=True
+                duration_seconds=min(duration_seconds, 10.0),
+                tick_rate_hz=10.0,
+                enable_metrics=True,
             )
 
             phase_results = self.environment.run_simulation(sim_config)
 
             # Calculate metrics
             total_agent_steps = sum(
-                m["steps"] for m in self.environment.lifecycle_manager.get_all_metrics().values()
+                m["steps"]
+                for m in self.environment.lifecycle_manager.get_all_metrics().values()
             )
 
             phase_results.update(
                 {
                     "agent_count": agent_count,
                     "total_agent_steps": total_agent_steps,
-                    "steps_per_second": total_agent_steps / phase_results["duration_seconds"],
+                    "steps_per_second": total_agent_steps
+                    / phase_results["duration_seconds"],
                     "avg_steps_per_agent": total_agent_steps / agent_count,
                 }
             )
@@ -512,21 +573,29 @@ def run_agent_simulation_tests():
 
     # Spawn different agent types
     explorer = lifecycle_mgr.spawn_agent(AgentType.EXPLORER, {"grid_size": 10})
-    collector = lifecycle_mgr.spawn_agent(AgentType.COLLECTOR, {"grid_size": 10})
-    coordinator = lifecycle_mgr.spawn_agent(AgentType.COORDINATOR, {"max_agents": 5})
+    collector = lifecycle_mgr.spawn_agent(
+        AgentType.COLLECTOR, {"grid_size": 10}
+    )
+    coordinator = lifecycle_mgr.spawn_agent(
+        AgentType.COORDINATOR, {"max_agents": 5}
+    )
 
     print(f"✅ Spawned agents: {list(lifecycle_mgr.agents.keys())}")
 
     # Test 2: Batch spawning
     print("\n2. Testing batch spawning...")
-    batch_config = AgentSpawnConfig(agent_type=AgentType.EXPLORER, count=10, spawn_delay_ms=50)
+    batch_config = AgentSpawnConfig(
+        agent_type=AgentType.EXPLORER, count=10, spawn_delay_ms=50
+    )
 
     start_time = time.time()
     batch_agents = lifecycle_mgr.spawn_batch(batch_config)
     spawn_duration = time.time() - start_time
 
     print(f"✅ Spawned {len(batch_agents)} agents in {spawn_duration:.2f}s")
-    print(f"   Average spawn time: {spawn_duration/len(batch_agents)*1000:.1f}ms per agent")
+    print(
+        f"   Average spawn time: {spawn_duration/len(batch_agents)*1000:.1f}ms per agent"
+    )
 
     # Test 3: Scaling scenario
     print("\n3. Running scaling test scenario...")

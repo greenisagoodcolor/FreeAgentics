@@ -25,7 +25,13 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from database.indexing_strategy import get_indexing_strategy
-from database.models import Agent, AgentRole, AgentStatus, Coalition, CoalitionStatus
+from database.models import (
+    Agent,
+    AgentRole,
+    AgentStatus,
+    Coalition,
+    CoalitionStatus,
+)
 from database.query_optimizer import (
     BatchOperationManager,
     EnhancedQueryOptimizer,
@@ -63,20 +69,34 @@ class DatabaseOptimizationBenchmark:
             agent_data = {
                 "id": str(uuid4()),
                 "name": f"Agent_{i}",
-                "template": random.choice(["explorer", "analyzer", "coordinator", "observer"]),
+                "template": random.choice(
+                    ["explorer", "analyzer", "coordinator", "observer"]
+                ),
                 "status": random.choice(list(AgentStatus)).value,
-                "created_at": datetime.now() - timedelta(days=random.randint(0, 365)),
-                "last_active": datetime.now() - timedelta(hours=random.randint(0, 72)),
+                "created_at": datetime.now()
+                - timedelta(days=random.randint(0, 365)),
+                "last_active": datetime.now()
+                - timedelta(hours=random.randint(0, 72)),
                 "inference_count": random.randint(0, 10000),
                 "total_steps": random.randint(0, 100000),
                 "beliefs": json.dumps(
-                    {"state": random.randint(0, 100), "confidence": random.random()}
+                    {
+                        "state": random.randint(0, 100),
+                        "confidence": random.random(),
+                    }
                 ),
                 "preferences": json.dumps(
-                    {"goals": [f"goal_{j}" for j in range(random.randint(1, 5))]}
+                    {
+                        "goals": [
+                            f"goal_{j}" for j in range(random.randint(1, 5))
+                        ]
+                    }
                 ),
                 "metrics": json.dumps(
-                    {"performance": random.random(), "efficiency": random.random()}
+                    {
+                        "performance": random.random(),
+                        "efficiency": random.random(),
+                    }
                 ),
             }
             agents.append(agent_data)
@@ -91,11 +111,15 @@ class DatabaseOptimizationBenchmark:
                 "id": str(uuid4()),
                 "name": f"Coalition_{i}",
                 "status": random.choice(list(CoalitionStatus)).value,
-                "created_at": datetime.now() - timedelta(days=random.randint(0, 365)),
+                "created_at": datetime.now()
+                - timedelta(days=random.randint(0, 365)),
                 "performance_score": random.random(),
                 "cohesion_score": random.random(),
                 "objectives": json.dumps(
-                    {"primary": f"objective_{i}", "secondary": [f"sub_{j}" for j in range(3)]}
+                    {
+                        "primary": f"objective_{i}",
+                        "secondary": [f"sub_{j}" for j in range(3)],
+                    }
                 ),
                 "required_capabilities": json.dumps(
                     [f"capability_{j}" for j in range(random.randint(2, 5))]
@@ -122,22 +146,31 @@ class DatabaseOptimizationBenchmark:
                     "agent_id": agent_id,
                     "coalition_id": coalition_id,
                     "role": random.choice(list(AgentRole)).value,
-                    "joined_at": datetime.now() - timedelta(days=random.randint(0, 30)),
+                    "joined_at": datetime.now()
+                    - timedelta(days=random.randint(0, 30)),
                     "contribution_score": random.random(),
                     "trust_score": random.random(),
                 }
                 relationships.append(relationship_data)
 
         # Batch insert relationships
-        await batch_manager.batch_insert(session, "agent_coalition", relationships)
+        await batch_manager.batch_insert(
+            session, "agent_coalition", relationships
+        )
 
         logger.info(
             f"Created {len(agents)} agents, {len(coalitions)} coalitions, {len(relationships)} relationships"
         )
 
-    async def benchmark_query_performance(self, session: AsyncSession) -> Dict[str, Any]:
+    async def benchmark_query_performance(
+        self, session: AsyncSession
+    ) -> Dict[str, Any]:
         """Benchmark various query patterns before and after optimization."""
-        results = {"before_optimization": {}, "after_optimization": {}, "improvements": {}}
+        results = {
+            "before_optimization": {},
+            "after_optimization": {},
+            "improvements": {},
+        }
 
         # Test queries
         test_queries = [
@@ -160,7 +193,9 @@ class DatabaseOptimizationBenchmark:
                     WHERE ac.coalition_id = :coalition_id
                     ORDER BY ac.contribution_score DESC
                 """,
-                "params": {"coalition_id": str(uuid4())},  # Will be replaced with actual ID
+                "params": {
+                    "coalition_id": str(uuid4())
+                },  # Will be replaced with actual ID
             },
             {
                 "name": "agent_search",
@@ -176,7 +211,7 @@ class DatabaseOptimizationBenchmark:
             {
                 "name": "performance_aggregation",
                 "query": """
-                    SELECT 
+                    SELECT
                         c.id,
                         c.name,
                         COUNT(ac.agent_id) as member_count,
@@ -193,7 +228,7 @@ class DatabaseOptimizationBenchmark:
             {
                 "name": "time_series_query",
                 "query": """
-                    SELECT 
+                    SELECT
                         DATE_TRUNC('hour', last_active) as hour,
                         COUNT(*) as active_agents,
                         AVG(inference_count) as avg_inferences
@@ -206,7 +241,9 @@ class DatabaseOptimizationBenchmark:
         ]
 
         # Get a real coalition ID for testing
-        coalition_result = await session.execute(text("SELECT id FROM coalitions LIMIT 1"))
+        coalition_result = await session.execute(
+            text("SELECT id FROM coalitions LIMIT 1")
+        )
         coalition_id = coalition_result.scalar()
 
         # Run benchmarks before optimization
@@ -264,7 +301,9 @@ class DatabaseOptimizationBenchmark:
             if "_plan" not in query_name:
                 before = results["before_optimization"][query_name]
                 after = results["after_optimization"][query_name]
-                improvement = ((before - after) / before) * 100 if before > 0 else 0
+                improvement = (
+                    ((before - after) / before) * 100 if before > 0 else 0
+                )
                 results["improvements"][query_name] = {
                     "before_ms": before * 1000,
                     "after_ms": after * 1000,
@@ -279,21 +318,29 @@ class DatabaseOptimizationBenchmark:
         await self.optimizer.create_multi_agent_indexes(session)
 
         # Apply indexing strategy recommendations
-        await self.indexing_strategy.apply_recommendations(session, auto_approve=True)
+        await self.indexing_strategy.apply_recommendations(
+            session, auto_approve=True
+        )
 
         # Analyze and vacuum tables
         await self.optimizer.analyze_and_vacuum_tables(session)
 
     async def benchmark_connection_pooling(self) -> Dict[str, Any]:
         """Benchmark connection pooling performance."""
-        results = {"without_pooling": {}, "with_pooling": {}, "pgbouncer_pooling": {}}
+        results = {
+            "without_pooling": {},
+            "with_pooling": {},
+            "pgbouncer_pooling": {},
+        }
 
         # Test configurations
         configs = [
             {
                 "name": "without_pooling",
                 "engine": create_async_engine(
-                    self.database_url.replace("postgresql://", "postgresql+asyncpg://"),
+                    self.database_url.replace(
+                        "postgresql://", "postgresql+asyncpg://"
+                    ),
                     pool_size=1,
                     max_overflow=0,
                 ),
@@ -301,7 +348,9 @@ class DatabaseOptimizationBenchmark:
             {
                 "name": "with_pooling",
                 "engine": create_async_engine(
-                    self.database_url.replace("postgresql://", "postgresql+asyncpg://"),
+                    self.database_url.replace(
+                        "postgresql://", "postgresql+asyncpg://"
+                    ),
                     pool_size=20,
                     max_overflow=10,
                 ),
@@ -312,7 +361,9 @@ class DatabaseOptimizationBenchmark:
         async def run_concurrent_queries(engine, num_queries=100):
             async def single_query():
                 async with AsyncSession(engine) as session:
-                    result = await session.execute(text("SELECT COUNT(*) FROM agents"))
+                    result = await session.execute(
+                        text("SELECT COUNT(*) FROM agents")
+                    )
                     return result.scalar()
 
             start_time = time.time()
@@ -333,7 +384,9 @@ class DatabaseOptimizationBenchmark:
 
         return results
 
-    async def benchmark_batch_operations(self, session: AsyncSession) -> Dict[str, Any]:
+    async def benchmark_batch_operations(
+        self, session: AsyncSession
+    ) -> Dict[str, Any]:
         """Benchmark batch operation performance."""
         results = {
             "individual_inserts": {},
@@ -379,9 +432,13 @@ class DatabaseOptimizationBenchmark:
 
         # Benchmark batch inserts
         start_time = time.time()
-        await batch_manager.batch_insert(session, "agents", test_agents[100:1000])  # 900 records
+        await batch_manager.batch_insert(
+            session, "agents", test_agents[100:1000]
+        )  # 900 records
         results["batch_inserts"]["time"] = time.time() - start_time
-        results["batch_inserts"]["records_per_second"] = 900 / results["batch_inserts"]["time"]
+        results["batch_inserts"]["records_per_second"] = (
+            900 / results["batch_inserts"]["time"]
+        )
 
         # Prepare update data
         update_data = []
@@ -400,7 +457,7 @@ class DatabaseOptimizationBenchmark:
             await session.execute(
                 text(
                     """
-                    UPDATE agents 
+                    UPDATE agents
                     SET inference_count = :inference_count, total_steps = :total_steps, updated_at = NOW()
                     WHERE id = :id
                 """
@@ -427,7 +484,9 @@ class DatabaseOptimizationBenchmark:
         start_time = time.time()
         await batch_manager.batch_update(session, "agents", batch_update_data)
         results["batch_updates"]["time"] = time.time() - start_time
-        results["batch_updates"]["records_per_second"] = 900 / results["batch_updates"]["time"]
+        results["batch_updates"]["records_per_second"] = (
+            900 / results["batch_updates"]["time"]
+        )
 
         # Calculate improvements
         results["improvements"] = {
@@ -439,7 +498,9 @@ class DatabaseOptimizationBenchmark:
 
         return results
 
-    async def benchmark_prepared_statements(self, session: AsyncSession) -> Dict[str, Any]:
+    async def benchmark_prepared_statements(
+        self, session: AsyncSession
+    ) -> Dict[str, Any]:
         """Benchmark prepared statement performance."""
         results = {"without_prepared": {}, "with_prepared": {}}
 
@@ -466,7 +527,9 @@ class DatabaseOptimizationBenchmark:
         )
 
         # Register prepared statement
-        prep_name = prep_manager.register_statement("agent_lookup", query, params)
+        prep_name = prep_manager.register_statement(
+            "agent_lookup", query, params
+        )
 
         # Prepare the statement
         await session.execute(text(f"PREPARE {prep_name} AS {query}"))
@@ -475,9 +538,13 @@ class DatabaseOptimizationBenchmark:
         # Benchmark with prepared statements
         start_time = time.time()
         for _ in range(100):
-            await session.execute(text(f"EXECUTE {prep_name} (:template, :status)"), params)
+            await session.execute(
+                text(f"EXECUTE {prep_name} (:template, :status)"), params
+            )
         results["with_prepared"]["time"] = time.time() - start_time
-        results["with_prepared"]["queries_per_second"] = 100 / results["with_prepared"]["time"]
+        results["with_prepared"]["queries_per_second"] = (
+            100 / results["with_prepared"]["time"]
+        )
 
         # Calculate improvement
         results["improvement_percent"] = (
@@ -493,7 +560,9 @@ class DatabaseOptimizationBenchmark:
 
     async def run_comprehensive_benchmark(self) -> Dict[str, Any]:
         """Run all benchmarks and generate comprehensive report."""
-        logger.info("Starting comprehensive database optimization benchmark...")
+        logger.info(
+            "Starting comprehensive database optimization benchmark..."
+        )
 
         all_results = {
             "timestamp": datetime.now().isoformat(),
@@ -511,46 +580,61 @@ class DatabaseOptimizationBenchmark:
 
             # Run query performance benchmark
             logger.info("Running query performance benchmark...")
-            all_results["benchmarks"]["query_performance"] = await self.benchmark_query_performance(
-                session
-            )
+            all_results["benchmarks"][
+                "query_performance"
+            ] = await self.benchmark_query_performance(session)
 
             # Run batch operations benchmark
             logger.info("Running batch operations benchmark...")
-            all_results["benchmarks"]["batch_operations"] = await self.benchmark_batch_operations(
-                session
-            )
+            all_results["benchmarks"][
+                "batch_operations"
+            ] = await self.benchmark_batch_operations(session)
 
             # Run prepared statements benchmark
             logger.info("Running prepared statements benchmark...")
-            all_results["benchmarks"]["prepared_statements"] = (
-                await self.benchmark_prepared_statements(session)
-            )
+            all_results["benchmarks"][
+                "prepared_statements"
+            ] = await self.benchmark_prepared_statements(session)
 
         # Run connection pooling benchmark
         logger.info("Running connection pooling benchmark...")
-        all_results["benchmarks"]["connection_pooling"] = await self.benchmark_connection_pooling()
+        all_results["benchmarks"][
+            "connection_pooling"
+        ] = await self.benchmark_connection_pooling()
 
         # Generate performance report
-        all_results["optimizer_report"] = self.optimizer.get_performance_report()
+        all_results[
+            "optimizer_report"
+        ] = self.optimizer.get_performance_report()
 
         # Calculate overall improvements
-        all_results["summary"] = self._generate_summary(all_results["benchmarks"])
+        all_results["summary"] = self._generate_summary(
+            all_results["benchmarks"]
+        )
 
         return all_results
 
     def _generate_summary(self, benchmarks: Dict[str, Any]) -> Dict[str, Any]:
         """Generate summary of benchmark results."""
-        summary = {"key_improvements": [], "recommendations": [], "performance_gains": {}}
+        summary = {
+            "key_improvements": [],
+            "recommendations": [],
+            "performance_gains": {},
+        }
 
         # Analyze query performance improvements
         if "query_performance" in benchmarks:
-            query_improvements = benchmarks["query_performance"]["improvements"]
+            query_improvements = benchmarks["query_performance"][
+                "improvements"
+            ]
             avg_improvement = sum(
-                imp["improvement_percent"] for imp in query_improvements.values()
+                imp["improvement_percent"]
+                for imp in query_improvements.values()
             ) / len(query_improvements)
 
-            summary["performance_gains"]["average_query_improvement"] = f"{avg_improvement:.1f}%"
+            summary["performance_gains"][
+                "average_query_improvement"
+            ] = f"{avg_improvement:.1f}%"
 
             for query, improvement in query_improvements.items():
                 if improvement["improvement_percent"] > 20:
@@ -592,11 +676,23 @@ async def test_database_optimization_comprehensive():
 
     # Assert improvements
     assert results["benchmarks"]["query_performance"]["improvements"]
-    assert results["benchmarks"]["batch_operations"]["improvements"]["insert_speedup"] > 1
-    assert results["benchmarks"]["batch_operations"]["improvements"]["update_speedup"] > 1
+    assert (
+        results["benchmarks"]["batch_operations"]["improvements"][
+            "insert_speedup"
+        ]
+        > 1
+    )
+    assert (
+        results["benchmarks"]["batch_operations"]["improvements"][
+            "update_speedup"
+        ]
+        > 1
+    )
 
     # Log results
-    logger.info(f"Benchmark completed: {json.dumps(results['summary'], indent=2)}")
+    logger.info(
+        f"Benchmark completed: {json.dumps(results['summary'], indent=2)}"
+    )
 
     return results
 
@@ -625,7 +721,9 @@ async def test_index_effectiveness():
 
             # Assert index usage
             assert plan["index_scans"] > 0, f"Query not using indexes: {query}"
-            assert plan["seq_scans"] == 0, f"Query using sequential scan: {query}"
+            assert (
+                plan["seq_scans"] == 0
+            ), f"Query using sequential scan: {query}"
 
 
 @pytest.mark.asyncio
@@ -669,7 +767,9 @@ async def test_concurrent_query_handling():
     assert avg_time < 0.1, f"Average query time too high: {avg_time:.3f}s"
     assert max_time < 0.5, f"Maximum query time too high: {max_time:.3f}s"
 
-    logger.info(f"Concurrent query test: avg={avg_time:.3f}s, max={max_time:.3f}s")
+    logger.info(
+        f"Concurrent query test: avg={avg_time:.3f}s, max={max_time:.3f}s"
+    )
 
 
 if __name__ == "__main__":
@@ -677,7 +777,9 @@ if __name__ == "__main__":
     import asyncio
 
     async def main():
-        database_url = "postgresql://test_user:test_pass@localhost:5432/test_db"
+        database_url = (
+            "postgresql://test_user:test_pass@localhost:5432/test_db"
+        )
         benchmark = DatabaseOptimizationBenchmark(database_url)
         results = await benchmark.run_comprehensive_benchmark()
 
@@ -685,7 +787,9 @@ if __name__ == "__main__":
         with open("database_optimization_results.json", "w") as f:
             json.dump(results, f, indent=2)
 
-        print(f"Benchmark completed. Results saved to database_optimization_results.json")
+        print(
+            f"Benchmark completed. Results saved to database_optimization_results.json"
+        )
         print(f"\nSummary: {json.dumps(results['summary'], indent=2)}")
 
     asyncio.run(main())

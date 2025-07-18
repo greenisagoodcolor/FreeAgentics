@@ -48,7 +48,9 @@ class TestDatabaseConnectionPool:
         start_time = time.time()
 
         with pytest.raises(ConnectionPoolError) as exc_info:
-            await create_pool("postgresql://invalid:invalid@nonexistent:5432/testdb")
+            await create_pool(
+                "postgresql://invalid:invalid@nonexistent:5432/testdb"
+            )
 
         elapsed = time.time() - start_time
         # Should have attempted 3 retries with exponential backoff
@@ -85,7 +87,9 @@ class TestDatabaseConnectionPool:
     async def test_connection_timeout_behavior(self):
         """Test connection acquisition timeout"""
         # This test should fail as timeout configuration doesn't exist
-        pool = await create_pool(TEST_DB_URL, min_size=1, max_size=1, command_timeout=2.0)
+        pool = await create_pool(
+            TEST_DB_URL, min_size=1, max_size=1, command_timeout=2.0
+        )
 
         # Acquire the only connection
         conn1 = await pool.acquire()
@@ -119,7 +123,9 @@ class TestDatabaseConnectionPool:
         """Test that connection failures raise exceptions (no graceful degradation)"""
         # This test should fail as error propagation doesn't exist
         with pytest.raises(ConnectionPoolError) as exc_info:
-            pool = await create_pool("postgresql://invalid:invalid@localhost:5432/testdb")
+            pool = await create_pool(
+                "postgresql://invalid:invalid@localhost:5432/testdb"
+            )
 
         assert "Failed to create connection pool" in str(exc_info.value)
         assert exc_info.value.attempts == MAX_RETRIES
@@ -136,7 +142,9 @@ class TestDatabaseConnectionPool:
 
         with patch("asyncpg.create_pool", side_effect=mock_connect_fail):
             with pytest.raises(ConnectionPoolError):
-                await create_pool("postgresql://test:test@localhost:5432/testdb")
+                await create_pool(
+                    "postgresql://test:test@localhost:5432/testdb"
+                )
 
         # Calculate actual delays between retries
         actual_delays = []
@@ -144,7 +152,9 @@ class TestDatabaseConnectionPool:
             actual_delays.append(retry_delays[i] - retry_delays[i - 1])
 
         # Verify exponential backoff: 1s, 2s, 4s
-        expected_delays = [RETRY_DELAY * (2**i) for i in range(MAX_RETRIES - 1)]
+        expected_delays = [
+            RETRY_DELAY * (2**i) for i in range(MAX_RETRIES - 1)
+        ]
 
         for actual, expected in zip(actual_delays, expected_delays):
             assert abs(actual - expected) < 0.1  # Allow 100ms variance
@@ -155,7 +165,10 @@ class TestDatabaseConnectionPool:
         # Test invalid formats - these should fail immediately without connection attempts
         invalid_formats = [
             ("mysql://user:pass@localhost/db", ValueError),  # Wrong protocol
-            ("postgresql://", ConnectionPoolError),  # Incomplete but valid protocol
+            (
+                "postgresql://",
+                ConnectionPoolError,
+            ),  # Incomplete but valid protocol
             ("", ValueError),  # Empty
             (None, ValueError),  # None
         ]

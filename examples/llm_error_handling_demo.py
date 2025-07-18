@@ -20,7 +20,9 @@ class DemoLLMProvider(BaseProvider):
     """Demo LLM provider that simulates various error conditions for testing."""
 
     def __init__(
-        self, provider_type: ProviderType = ProviderType.OLLAMA, failure_mode: str = "none"
+        self,
+        provider_type: ProviderType = ProviderType.OLLAMA,
+        failure_mode: str = "none",
     ):
         """Initialize demo provider.
 
@@ -102,7 +104,9 @@ class DemoLLMProvider(BaseProvider):
             "timeout_rate": self.timeout_rate,
         }
 
-    def configure(self, credentials: Optional[ProviderCredentials] = None, **kwargs) -> bool:
+    def configure(
+        self, credentials: Optional[ProviderCredentials] = None, **kwargs
+    ) -> bool:
         """Configure the provider with credentials."""
         if credentials is not None:
             self.credentials = credentials
@@ -141,18 +145,28 @@ class DemoLLMProvider(BaseProvider):
         else:
             # Default random behavior
             is_healthy = random.random() > 0.05
-            status = ProviderStatus.HEALTHY if is_healthy else ProviderStatus.UNHEALTHY
+            status = (
+                ProviderStatus.HEALTHY
+                if is_healthy
+                else ProviderStatus.UNHEALTHY
+            )
             latency = random.uniform(10, 100)
-            error_message = None if is_healthy else "Simulated connection error"
+            error_message = (
+                None if is_healthy else "Simulated connection error"
+            )
 
         return HealthCheckResult(
             status=status,
             latency_ms=latency,
             error_message=error_message,
-            model_availability={"demo-llm-v1": status == ProviderStatus.HEALTHY},
+            model_availability={
+                "demo-llm-v1": status == ProviderStatus.HEALTHY
+            },
         )
 
-    def generate(self, request: Union[GenerationRequest, str]) -> Union[GenerationResponse, str]:
+    def generate(
+        self, request: Union[GenerationRequest, str]
+    ) -> Union[GenerationResponse, str]:
         """Generate text based on the request."""
         self.request_count += 1
 
@@ -168,13 +182,17 @@ class DemoLLMProvider(BaseProvider):
             raise RuntimeError(f"Request {self.request_count} failed")
 
         # Create mock response
-        mock_text = f"Mock response to: {request.messages[-1]['content'][:50]}..."
+        mock_text = (
+            f"Mock response to: {request.messages[-1]['content'][:50]}..."
+        )
 
         return GenerationResponse(
             text=mock_text,
             model=request.model,
             provider=self.provider_type,
-            input_tokens=len(request.messages[-1]["content"].split()) if request.messages else 0,
+            input_tokens=len(request.messages[-1]["content"].split())
+            if request.messages
+            else 0,
             output_tokens=len(mock_text.split()),
             cost=0.001,  # Mock cost
             latency_ms=random.uniform(50, 200),
@@ -184,7 +202,9 @@ class DemoLLMProvider(BaseProvider):
         """Get current usage metrics."""
         return self.usage_metrics
 
-    def estimate_cost(self, input_tokens: int, output_tokens: int, model: str) -> float:
+    def estimate_cost(
+        self, input_tokens: int, output_tokens: int, model: str
+    ) -> float:
         """Estimate cost for given token counts."""
         # Test expects specific values: 100 input + 50 output = 150 tokens at $0.002 total
         if input_tokens == 100 and output_tokens == 50:

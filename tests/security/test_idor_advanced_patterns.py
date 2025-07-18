@@ -28,9 +28,15 @@ class TestGraphQLIDOR(IDORTestBase):
     @pytest.fixture(autouse=True)
     def setup(self):
         """Set up GraphQL test environment."""
-        self.user1_id, _ = self.create_test_user("graphql_user1", UserRole.RESEARCHER)
-        self.user2_id, _ = self.create_test_user("graphql_user2", UserRole.RESEARCHER)
-        self.admin_id, _ = self.create_test_user("graphql_admin", UserRole.ADMIN)
+        self.user1_id, _ = self.create_test_user(
+            "graphql_user1", UserRole.RESEARCHER
+        )
+        self.user2_id, _ = self.create_test_user(
+            "graphql_user2", UserRole.RESEARCHER
+        )
+        self.admin_id, _ = self.create_test_user(
+            "graphql_admin", UserRole.ADMIN
+        )
 
     def test_graphql_query_idor(self):
         """Test IDOR through GraphQL query manipulation."""
@@ -96,7 +102,9 @@ class TestGraphQLIDOR(IDORTestBase):
             if response.status_code == status.HTTP_200_OK:
                 data = response.json()
                 # Ensure no unauthorized data is returned
-                assert not self._contains_unauthorized_data(data, self.user2_id)
+                assert not self._contains_unauthorized_data(
+                    data, self.user2_id
+                )
 
     def test_graphql_mutation_idor(self):
         """Test IDOR through GraphQL mutations."""
@@ -144,7 +152,9 @@ class TestGraphQLIDOR(IDORTestBase):
 
         for mutation in idor_mutations:
             response = self.client.post(
-                "/api/v1/graphql", headers=user1_headers, json={"query": mutation}
+                "/api/v1/graphql",
+                headers=user1_headers,
+                json={"query": mutation},
             )
 
             # Should either fail or not affect unauthorized resources
@@ -177,7 +187,9 @@ class TestGraphQLIDOR(IDORTestBase):
         """
 
         response = self.client.post(
-            "/api/v1/graphql", headers=user1_headers, json={"query": introspection_query}
+            "/api/v1/graphql",
+            headers=user1_headers,
+            json={"query": introspection_query},
         )
 
         # Introspection should be disabled in production
@@ -189,7 +201,9 @@ class TestGraphQLIDOR(IDORTestBase):
             for field in sensitive_fields:
                 assert field not in schema_str.lower()
 
-    def _contains_unauthorized_data(self, data: dict, unauthorized_id: str) -> bool:
+    def _contains_unauthorized_data(
+        self, data: dict, unauthorized_id: str
+    ) -> bool:
         """Check if response contains unauthorized data."""
         data_str = json.dumps(data)
         return unauthorized_id in data_str
@@ -216,14 +230,21 @@ class TestWebSocketIDOR(IDORTestBase):
                 async with websockets.connect(url) as websocket:
                     # Send a message attempting to access unauthorized resources
                     await websocket.send(
-                        json.dumps({"action": "get_agent", "agent_id": str(uuid.uuid4())})
+                        json.dumps(
+                            {
+                                "action": "get_agent",
+                                "agent_id": str(uuid.uuid4()),
+                            }
+                        )
                     )
 
                     response = await websocket.recv()
                     data = json.loads(response)
 
                     # Should not return unauthorized data
-                    assert data.get("error") or data.get("status") == "forbidden"
+                    assert (
+                        data.get("error") or data.get("status") == "forbidden"
+                    )
             except websockets.exceptions.WebSocketException:
                 # Connection should be rejected for invalid auth
                 pass
@@ -283,11 +304,14 @@ class TestBatchOperationIDOR(IDORTestBase):
 
         # Try batch delete including unauthorized IDs
         batch_delete_payload = {
-            "ids": user1_agents + [str(uuid.uuid4()), str(uuid.uuid4())]  # Mix owned and unowned
+            "ids": user1_agents
+            + [str(uuid.uuid4()), str(uuid.uuid4())]  # Mix owned and unowned
         }
 
         response = self.client.post(
-            "/api/v1/agents/batch/delete", headers=user1_headers, json=batch_delete_payload
+            "/api/v1/agents/batch/delete",
+            headers=user1_headers,
+            json=batch_delete_payload,
         )
 
         if response.status_code == status.HTTP_200_OK:
@@ -301,12 +325,17 @@ class TestBatchOperationIDOR(IDORTestBase):
 
         # Batch update attempting to modify unauthorized resources
         batch_updates = [
-            {"id": str(uuid.uuid4()), "updates": {"name": "Hacked", "status": "compromised"}},
+            {
+                "id": str(uuid.uuid4()),
+                "updates": {"name": "Hacked", "status": "compromised"},
+            },
             {"id": str(uuid.uuid4()), "updates": {"owner_id": self.user1_id}},
         ]
 
         response = self.client.patch(
-            "/api/v1/agents/batch", headers=user1_headers, json={"updates": batch_updates}
+            "/api/v1/agents/batch",
+            headers=user1_headers,
+            json={"updates": batch_updates},
         )
 
         # Should not update unauthorized resources
@@ -385,7 +414,10 @@ class TestCachePoisoningIDOR(IDORTestBase):
         # Try to poison cache with different host headers
         poisoning_attempts = [
             {"Host": f"{self.user2_id}.example.com"},
-            {"Host": "localhost", "X-Forwarded-Host": f"user-{self.user2_id}.com"},
+            {
+                "Host": "localhost",
+                "X-Forwarded-Host": f"user-{self.user2_id}.com",
+            },
             {"Host": f"localhost/users/{self.user2_id}"},
         ]
 
@@ -442,7 +474,9 @@ class TestAPIVersioningIDOR(IDORTestBase):
             params = method.get("params", {})
 
             response = self.client.get(
-                f"/api/v1/agents/{uuid.uuid4()}", headers=headers, params=params
+                f"/api/v1/agents/{uuid.uuid4()}",
+                headers=headers,
+                params=params,
             )
 
             # Should not bypass authorization through version downgrade
@@ -485,7 +519,9 @@ class TestComplexIDORScenarios(IDORTestBase):
         encoded_ids = [
             target_id,  # Plain
             base64.b64encode(target_id.encode()).decode(),  # Base64
-            base64.urlsafe_b64encode(target_id.encode()).decode(),  # URL-safe Base64
+            base64.urlsafe_b64encode(
+                target_id.encode()
+            ).decode(),  # URL-safe Base64
             target_id.replace("-", ""),  # Without hyphens
             target_id.upper(),  # Uppercase
             f"0x{target_id.replace('-', '')}",  # Hex-like format
@@ -493,7 +529,9 @@ class TestComplexIDORScenarios(IDORTestBase):
         ]
 
         for encoded_id in encoded_ids:
-            response = self.client.get(f"/api/v1/agents/{encoded_id}", headers=user1_headers)
+            response = self.client.get(
+                f"/api/v1/agents/{encoded_id}", headers=user1_headers
+            )
             # Should not decode and allow access
             assert response.status_code != status.HTTP_200_OK
 
@@ -503,7 +541,9 @@ class TestComplexIDORScenarios(IDORTestBase):
 
         def make_idor_attempt(agent_id):
             """Make a single IDOR attempt."""
-            return self.client.get(f"/api/v1/agents/{agent_id}", headers=user1_headers)
+            return self.client.get(
+                f"/api/v1/agents/{agent_id}", headers=user1_headers
+            )
 
         # Generate multiple target IDs
         target_ids = [str(uuid.uuid4()) for _ in range(50)]
@@ -513,10 +553,14 @@ class TestComplexIDORScenarios(IDORTestBase):
             results = list(executor.map(make_idor_attempt, target_ids))
 
         # None should succeed
-        successful_attempts = [r for r in results if r.status_code == status.HTTP_200_OK]
+        successful_attempts = [
+            r for r in results if r.status_code == status.HTTP_200_OK
+        ]
         assert len(successful_attempts) == 0
 
-    def _verify_no_unauthorized_access(self, data: dict, authorized_user_id: str):
+    def _verify_no_unauthorized_access(
+        self, data: dict, authorized_user_id: str
+    ):
         """Verify response contains no unauthorized data."""
         data_str = json.dumps(data)
         # Check for other user IDs (simplified check)
@@ -544,7 +588,10 @@ class TestIDORMitigationValidation(IDORTestBase):
             response = self.client.get(endpoint, headers=user1_headers)
 
             # Should check authorization for specific object
-            assert response.status_code in [status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND]
+            assert response.status_code in [
+                status.HTTP_403_FORBIDDEN,
+                status.HTTP_404_NOT_FOUND,
+            ]
 
     def test_indirect_reference_mapping(self):
         """Test that indirect reference mapping is used where appropriate."""

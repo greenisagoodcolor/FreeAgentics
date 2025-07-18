@@ -38,11 +38,18 @@ class TestPyMDPHardFailureIntegration:
 
         # Mock PyMDP agent to return wrong type (tuple instead of expected format)
         mock_pymdp_agent = MagicMock(spec=PyMDPAgent)
-        mock_pymdp_agent.sample_action.return_value = (1, 2, 3)  # Wrong: returns tuple
+        mock_pymdp_agent.sample_action.return_value = (
+            1,
+            2,
+            3,
+        )  # Wrong: returns tuple
         agent.pymdp_agent = mock_pymdp_agent
 
         # This should raise RuntimeError, not gracefully fallback
-        with pytest.raises(RuntimeError, match="PyMDP sample_action.*returned.*tuple.*expected"):
+        with pytest.raises(
+            RuntimeError,
+            match="PyMDP sample_action.*returned.*tuple.*expected",
+        ):
             agent.select_action({"time": 1})
 
     def test_base_agent_no_fallback_on_pymdp_failure(self):
@@ -53,7 +60,9 @@ class TestPyMDPHardFailureIntegration:
         agent.pymdp_agent = None
 
         # select_action should fail hard, not return a default action
-        with pytest.raises(AttributeError):  # Trying to call sample_action on None
+        with pytest.raises(
+            AttributeError
+        ):  # Trying to call sample_action on None
             agent.select_action({"time": 1})
 
     def test_pymdp_adapter_strict_type_checking(self):
@@ -66,13 +75,17 @@ class TestPyMDPHardFailureIntegration:
 
         # Test 2: Mock agent returns wrong dtype
         mock_agent = MagicMock(spec=PyMDPAgent)
-        mock_agent.sample_action.return_value = np.array(["string"])  # Wrong dtype
+        mock_agent.sample_action.return_value = np.array(
+            ["string"]
+        )  # Wrong dtype
 
         with pytest.raises(RuntimeError, match="unexpected dtype"):
             adapter.sample_action(mock_agent)
 
         # Test 3: Mock agent returns wrong shape
-        mock_agent.sample_action.return_value = np.array([[1, 2], [3, 4]])  # Wrong shape
+        mock_agent.sample_action.return_value = np.array(
+            [[1, 2], [3, 4]]
+        )  # Wrong shape
 
         with pytest.raises(RuntimeError, match="shape.*expected \\(1,\\)"):
             adapter.sample_action(mock_agent)
@@ -89,7 +102,9 @@ class TestPyMDPHardFailureIntegration:
 
         # Mock PyMDP agent to raise exception during belief update
         mock_pymdp_agent = MagicMock(spec=PyMDPAgent)
-        mock_pymdp_agent.infer_states.side_effect = ValueError("Belief update failed")
+        mock_pymdp_agent.infer_states.side_effect = ValueError(
+            "Belief update failed"
+        )
         agent.pymdp_agent = mock_pymdp_agent
         agent.current_observation = [0]
 
@@ -129,13 +144,19 @@ class TestPyMDPHardFailureIntegration:
 
         # Test various error scenarios that should all propagate
         error_scenarios = [
-            (AttributeError("q_pi not set"), "PyMDP agent not properly initialized"),
+            (
+                AttributeError("q_pi not set"),
+                "PyMDP agent not properly initialized",
+            ),
             (
                 ValueError("Invalid action probabilities"),
                 "Action probability validation failed",
             ),
             (IndexError("Action index out of range"), "Action mapping failed"),
-            (TypeError("Cannot convert to int"), "Action type conversion failed"),
+            (
+                TypeError("Cannot convert to int"),
+                "Action type conversion failed",
+            ),
         ]
 
         for error, expected_message_part in error_scenarios:
@@ -176,7 +197,9 @@ class TestPyMDPHardFailureIntegration:
 
         # Mock PyMDP to fail
         mock_pymdp_agent = MagicMock(spec=PyMDPAgent)
-        mock_pymdp_agent.sample_action.side_effect = RuntimeError("PyMDP internal error")
+        mock_pymdp_agent.sample_action.side_effect = RuntimeError(
+            "PyMDP internal error"
+        )
         agent.pymdp_agent = mock_pymdp_agent
 
         # Should propagate the error
@@ -185,11 +208,15 @@ class TestPyMDPHardFailureIntegration:
 
     def test_coalition_coordinator_hard_failures(self):
         """Test CoalitionCoordinatorAgent fails hard on PyMDP errors."""
-        agent = CoalitionCoordinatorAgent(agent_id="coordinator_1", position=(10, 10))
+        agent = CoalitionCoordinatorAgent(
+            agent_id="coordinator_1", position=(10, 10)
+        )
 
         # Mock PyMDP to fail during policy inference
         mock_pymdp_agent = MagicMock(spec=PyMDPAgent)
-        mock_pymdp_agent.infer_policies.side_effect = ValueError("Policy inference failed")
+        mock_pymdp_agent.infer_policies.side_effect = ValueError(
+            "Policy inference failed"
+        )
         agent.pymdp_agent = mock_pymdp_agent
 
         # Should propagate the error
@@ -204,7 +231,9 @@ class TestPyMDPHardFailureIntegration:
         with pytest.raises(Exception):  # Should raise validation error
             agent._initialize_pymdp_with_gmn(
                 {
-                    "beliefs": {"location": "invalid"},  # Invalid belief format
+                    "beliefs": {
+                        "location": "invalid"
+                    },  # Invalid belief format
                     "policies": [],
                     "A_matrix": "not_a_matrix",  # Invalid matrix
                     "B_matrix": None,
@@ -231,7 +260,9 @@ class TestPyMDPHardFailureIntegration:
             agent.select_action({"time": 1})
 
         # Verify the original error message is preserved
-        assert "numerical instability" in str(exc_info.value) or "Deep PyMDP" in str(exc_info.value)
+        assert "numerical instability" in str(
+            exc_info.value
+        ) or "Deep PyMDP" in str(exc_info.value)
 
 
 class TestPerformanceTheaterRemoval:
@@ -267,9 +298,12 @@ class TestPerformanceTheaterRemoval:
             assert "sleep(" not in content, f"Found sleep() in {file_path}"
 
             # Check for progress bar theater
-            assert "tqdm" not in content, f"Found tqdm progress bar in {file_path}"
             assert (
-                "progress" not in content.lower() or "in progress" in content.lower()
+                "tqdm" not in content
+            ), f"Found tqdm progress bar in {file_path}"
+            assert (
+                "progress" not in content.lower()
+                or "in progress" in content.lower()
             ), f"Found progress indicator in {file_path}"
 
     def test_no_mock_benchmark_data(self):
@@ -305,7 +339,8 @@ class TestPerformanceTheaterRemoval:
 
             # Check for decorator patterns that indicate graceful degradation
             assert (
-                "@safe_pymdp_operation" not in content or "default_value=None" not in content
+                "@safe_pymdp_operation" not in content
+                or "default_value=None" not in content
             ), f"Found safe_operation decorator with None default in {file_path}"
 
 
@@ -354,7 +389,13 @@ class TestNemesisLevelValidation:
             # Should contain actionable information
             assert any(
                 keyword in error_msg.lower()
-                for keyword in ["pymdp", "install", "initialize", "failed", "error"]
+                for keyword in [
+                    "pymdp",
+                    "install",
+                    "initialize",
+                    "failed",
+                    "error",
+                ]
             ), "Error message should contain actionable information"
 
     def test_performance_benchmarks_use_real_measurements(self):

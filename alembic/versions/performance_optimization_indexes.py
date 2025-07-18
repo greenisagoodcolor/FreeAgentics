@@ -42,13 +42,16 @@ def upgrade():
     )
 
     op.create_index(
-        "idx_agents_template_status", "agents", ["template", "status"], postgresql_concurrently=True
+        "idx_agents_template_status",
+        "agents",
+        ["template", "status"],
+        postgresql_concurrently=True,
     )
 
     # Text search index for agent names
     op.execute(
         """
-        CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_agents_name_trgm 
+        CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_agents_name_trgm
         ON agents USING gin (name gin_trgm_ops)
     """
     )
@@ -61,7 +64,10 @@ def upgrade():
     )
 
     op.create_index(
-        "idx_agents_total_steps", "agents", [sa.desc("total_steps")], postgresql_concurrently=True
+        "idx_agents_total_steps",
+        "agents",
+        [sa.desc("total_steps")],
+        postgresql_concurrently=True,
     )
 
     # Coalition performance indexes
@@ -89,7 +95,7 @@ def upgrade():
     # Text search index for coalition names
     op.execute(
         """
-        CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_coalitions_name_trgm 
+        CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_coalitions_name_trgm
         ON coalitions USING gin (name gin_trgm_ops)
     """
     )
@@ -110,7 +116,10 @@ def upgrade():
     )
 
     op.create_index(
-        "idx_agent_coalition_role", "agent_coalition", ["role"], postgresql_concurrently=True
+        "idx_agent_coalition_role",
+        "agent_coalition",
+        ["role"],
+        postgresql_concurrently=True,
     )
 
     op.create_index(
@@ -136,7 +145,10 @@ def upgrade():
 
     # Knowledge graph indexes
     op.create_index(
-        "idx_knowledge_nodes_type", "db_knowledge_nodes", ["type"], postgresql_concurrently=True
+        "idx_knowledge_nodes_type",
+        "db_knowledge_nodes",
+        ["type"],
+        postgresql_concurrently=True,
     )
 
     op.create_index(
@@ -197,35 +209,35 @@ def upgrade():
     # JSON field indexes (PostgreSQL-specific)
     op.execute(
         """
-        CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_agents_beliefs_gin 
+        CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_agents_beliefs_gin
         ON agents USING gin (beliefs)
     """
     )
 
     op.execute(
         """
-        CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_agents_preferences_gin 
+        CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_agents_preferences_gin
         ON agents USING gin (preferences)
     """
     )
 
     op.execute(
         """
-        CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_agents_metrics_gin 
+        CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_agents_metrics_gin
         ON agents USING gin (metrics)
     """
     )
 
     op.execute(
         """
-        CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_coalitions_objectives_gin 
+        CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_coalitions_objectives_gin
         ON coalitions USING gin (objectives)
     """
     )
 
     op.execute(
         """
-        CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_coalitions_capabilities_gin 
+        CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_coalitions_capabilities_gin
         ON coalitions USING gin (required_capabilities)
     """
     )
@@ -234,7 +246,7 @@ def upgrade():
     op.execute(
         """
         CREATE MATERIALIZED VIEW IF NOT EXISTS agent_performance_summary AS
-        SELECT 
+        SELECT
             a.id,
             a.name,
             a.status,
@@ -245,7 +257,7 @@ def upgrade():
             COUNT(ac.coalition_id) as coalition_count,
             AVG(ac.contribution_score) as avg_contribution,
             AVG(ac.trust_score) as avg_trust,
-            CASE 
+            CASE
                 WHEN a.last_active IS NULL THEN 0
                 WHEN a.last_active < NOW() - INTERVAL '1 hour' THEN 1
                 WHEN a.last_active < NOW() - INTERVAL '10 minutes' THEN 2
@@ -260,7 +272,10 @@ def upgrade():
 
     # Create unique index on materialized view
     op.create_index(
-        "idx_agent_performance_summary_id", "agent_performance_summary", ["id"], unique=True
+        "idx_agent_performance_summary_id",
+        "agent_performance_summary",
+        ["id"],
+        unique=True,
     )
 
     op.create_index(
@@ -274,7 +289,7 @@ def upgrade():
     op.execute(
         """
         CREATE MATERIALIZED VIEW IF NOT EXISTS coalition_performance_summary AS
-        SELECT 
+        SELECT
             c.id,
             c.name,
             c.status,
@@ -288,7 +303,7 @@ def upgrade():
             AVG(ac.trust_score) as avg_member_trust,
             SUM(a.inference_count) as total_member_inferences,
             SUM(a.total_steps) as total_member_steps,
-            CASE 
+            CASE
                 WHEN c.dissolved_at IS NOT NULL THEN 0
                 WHEN c.status = 'active' AND COUNT(ac.agent_id) > 0 THEN 3
                 WHEN c.status = 'forming' THEN 2
@@ -304,7 +319,10 @@ def upgrade():
 
     # Create unique index on coalition materialized view
     op.create_index(
-        "idx_coalition_performance_summary_id", "coalition_performance_summary", ["id"], unique=True
+        "idx_coalition_performance_summary_id",
+        "coalition_performance_summary",
+        ["id"],
+        unique=True,
     )
 
     op.create_index(
@@ -355,12 +373,16 @@ def downgrade():
     """Remove performance optimization indexes."""
 
     # Drop triggers
-    op.execute("DROP TRIGGER IF EXISTS trigger_agent_activity_update ON agents")
+    op.execute(
+        "DROP TRIGGER IF EXISTS trigger_agent_activity_update ON agents"
+    )
     op.execute("DROP FUNCTION IF EXISTS update_agent_last_active()")
     op.execute("DROP FUNCTION IF EXISTS refresh_performance_views()")
 
     # Drop materialized views
-    op.execute("DROP MATERIALIZED VIEW IF EXISTS coalition_performance_summary")
+    op.execute(
+        "DROP MATERIALIZED VIEW IF EXISTS coalition_performance_summary"
+    )
     op.execute("DROP MATERIALIZED VIEW IF EXISTS agent_performance_summary")
 
     # Drop indexes (in reverse order)

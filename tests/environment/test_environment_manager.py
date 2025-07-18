@@ -73,7 +73,11 @@ class TestServiceHealth:
             mock_connect.return_value = mock_conn
 
             is_healthy = health_checker.check_postgres(
-                host="localhost", port=5432, user="test", password="test", database="test"
+                host="localhost",
+                port=5432,
+                user="test",
+                password="test",
+                database="test",
             )
 
             assert is_healthy is True
@@ -84,10 +88,16 @@ class TestServiceHealth:
         health_checker = ServiceHealth()
 
         with patch("psycopg2.connect") as mock_connect:
-            mock_connect.side_effect = psycopg2.OperationalError("Connection failed")
+            mock_connect.side_effect = psycopg2.OperationalError(
+                "Connection failed"
+            )
 
             is_healthy = health_checker.check_postgres(
-                host="localhost", port=5432, user="test", password="test", database="test"
+                host="localhost",
+                port=5432,
+                user="test",
+                password="test",
+                database="test",
             )
 
             assert is_healthy is False
@@ -101,7 +111,9 @@ class TestServiceHealth:
             mock_redis.ping.return_value = True
             mock_redis_class.return_value = mock_redis
 
-            is_healthy = health_checker.check_redis(host="localhost", port=6379)
+            is_healthy = health_checker.check_redis(
+                host="localhost", port=6379
+            )
 
             assert is_healthy is True
             mock_redis.close.assert_called_once()
@@ -112,10 +124,14 @@ class TestServiceHealth:
 
         with patch("redis.Redis") as mock_redis_class:
             mock_redis = Mock()
-            mock_redis.ping.side_effect = redis.ConnectionError("Connection failed")
+            mock_redis.ping.side_effect = redis.ConnectionError(
+                "Connection failed"
+            )
             mock_redis_class.return_value = mock_redis
 
-            is_healthy = health_checker.check_redis(host="localhost", port=6379)
+            is_healthy = health_checker.check_redis(
+                host="localhost", port=6379
+            )
 
             assert is_healthy is False
 
@@ -166,7 +182,9 @@ class TestEnvironmentManager:
                 assert "-d" in call_args
 
     @patch("docker.from_env")
-    def test_start_environment_health_check_failure(self, mock_docker, env_manager):
+    def test_start_environment_health_check_failure(
+        self, mock_docker, env_manager
+    ):
         """Test starting environment when health checks fail."""
         mock_client = Mock()
         mock_docker.return_value = mock_client
@@ -224,7 +242,9 @@ class TestEnvironmentManager:
     def test_get_service_config(self, env_manager):
         """Test getting service configuration."""
         # Mock port allocator
-        with patch.object(env_manager.port_allocator, "allocate_port") as mock_allocate:
+        with patch.object(
+            env_manager.port_allocator, "allocate_port"
+        ) as mock_allocate:
             mock_allocate.side_effect = [5433, 6380, 5673, 9201, 9002]
 
             config = env_manager.get_service_config()
@@ -240,13 +260,19 @@ class TestEnvironmentManager:
         """Test environment state validation."""
         env_manager.state = EnvironmentState.RUNNING
 
-        with patch.object(env_manager.health_checker, "check_postgres") as mock_pg:
+        with patch.object(
+            env_manager.health_checker, "check_postgres"
+        ) as mock_pg:
             mock_pg.return_value = True
 
-            with patch.object(env_manager.health_checker, "check_redis") as mock_redis:
+            with patch.object(
+                env_manager.health_checker, "check_redis"
+            ) as mock_redis:
                 mock_redis.return_value = True
 
-                with patch.object(env_manager.health_checker, "check_all_services") as mock_all:
+                with patch.object(
+                    env_manager.health_checker, "check_all_services"
+                ) as mock_all:
                     mock_all.return_value = {"postgres": True, "redis": True}
 
                     is_valid = env_manager.validate_state()
@@ -287,7 +313,9 @@ class TestEnvironmentManager:
     def test_get_logs(self, env_manager):
         """Test getting service logs."""
         with patch("subprocess.run") as mock_run:
-            mock_run.return_value = Mock(returncode=0, stdout="Service logs here", stderr="")
+            mock_run.return_value = Mock(
+                returncode=0, stdout="Service logs here", stderr=""
+            )
 
             logs = env_manager.get_logs("postgres", lines=100)
 

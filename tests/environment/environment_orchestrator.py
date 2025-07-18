@@ -66,7 +66,9 @@ class TestEnvironmentSpec:
 class EnvironmentOrchestrator:
     """Enhanced environment orchestrator with resource pooling and isolation."""
 
-    def __init__(self, config_path: str = "tests/environment/orchestrator_config.yml"):
+    def __init__(
+        self, config_path: str = "tests/environment/orchestrator_config.yml"
+    ):
         self.config_path = config_path
         self.config = self._load_config()
         self.resource_pools = {}
@@ -111,19 +113,33 @@ class EnvironmentOrchestrator:
                         "timeout": 120,
                     },
                     "e2e": {
-                        "services": ["postgres", "redis", "rabbitmq", "elasticsearch"],
+                        "services": [
+                            "postgres",
+                            "redis",
+                            "rabbitmq",
+                            "elasticsearch",
+                        ],
                         "isolation_level": "DATABASE",
                         "parallel_instances": 1,
                         "timeout": 300,
                     },
                     "performance": {
-                        "services": ["postgres", "redis", "rabbitmq", "elasticsearch", "minio"],
+                        "services": [
+                            "postgres",
+                            "redis",
+                            "rabbitmq",
+                            "elasticsearch",
+                            "minio",
+                        ],
                         "isolation_level": "CONTAINER",
                         "parallel_instances": 1,
                         "timeout": 600,
                     },
                 },
-                "cleanup": {"max_age_hours": 24, "auto_cleanup_interval": 3600},
+                "cleanup": {
+                    "max_age_hours": 24,
+                    "auto_cleanup_interval": 3600,
+                },
             }
 
     def _initialize_resource_pools(self):
@@ -176,7 +192,9 @@ class EnvironmentOrchestrator:
                 # Start environment
                 if env_manager.start(services=spec.services):
                     # Set up isolation
-                    isolation_context = self.isolation_manager.isolate_all(env_id)
+                    isolation_context = self.isolation_manager.isolate_all(
+                        env_id
+                    )
 
                     # Store environment
                     self.active_environments[env_id] = {
@@ -188,7 +206,9 @@ class EnvironmentOrchestrator:
                         "status": "running",
                     }
 
-                    logger.info(f"Created environment {env_id} with profile {spec.profile.value}")
+                    logger.info(
+                        f"Created environment {env_id} with profile {spec.profile.value}"
+                    )
                     return env_id
                 else:
                     # Release resources if environment failed to start
@@ -219,7 +239,9 @@ class EnvironmentOrchestrator:
                 else:
                     # No resources available
                     self._release_resources(allocated)
-                    raise Exception(f"No resources available for service {service}")
+                    raise Exception(
+                        f"No resources available for service {service}"
+                    )
 
                 allocated[service] = instance_id
 
@@ -248,7 +270,9 @@ class EnvironmentOrchestrator:
                 env_info["manager"].stop()
 
                 # Clean up isolation
-                self.isolation_manager.cleanup_all(env_info["isolation_context"])
+                self.isolation_manager.cleanup_all(
+                    env_info["isolation_context"]
+                )
 
                 # Release resources
                 self._release_resources(env_info["resources"])
@@ -292,7 +316,9 @@ class EnvironmentOrchestrator:
                 "busy_instances": len(pool.busy_instances),
                 "max_instances": pool.max_instances,
                 "utilization": (
-                    len(pool.busy_instances) / pool.max_instances if pool.max_instances > 0 else 0
+                    len(pool.busy_instances) / pool.max_instances
+                    if pool.max_instances > 0
+                    else 0
                 ),
             }
 
@@ -316,7 +342,9 @@ class EnvironmentOrchestrator:
                     pool.available_instances.add(instance_id)
 
                 pool.current_instances = target_instances
-                logger.info(f"Scaled up pool {pool_name} to {target_instances} instances")
+                logger.info(
+                    f"Scaled up pool {pool_name} to {target_instances} instances"
+                )
 
             elif target_instances < pool.current_instances:
                 # Scale down (only if instances are available)
@@ -338,7 +366,9 @@ class EnvironmentOrchestrator:
                             pool.available_instances.pop()
 
                     pool.current_instances = target_instances
-                    logger.info(f"Scaled down pool {pool_name} to {target_instances} instances")
+                    logger.info(
+                        f"Scaled down pool {pool_name} to {target_instances} instances"
+                    )
                 else:
                     logger.warning(
                         f"Cannot scale down pool {pool_name}: not enough available instances"
@@ -347,7 +377,9 @@ class EnvironmentOrchestrator:
 
         return True
 
-    def run_parallel_tests(self, specs: List[TestEnvironmentSpec]) -> Dict[str, Any]:
+    def run_parallel_tests(
+        self, specs: List[TestEnvironmentSpec]
+    ) -> Dict[str, Any]:
         """Run multiple test environments in parallel."""
         results = {}
         futures = []
@@ -365,7 +397,9 @@ class EnvironmentOrchestrator:
 
         return results
 
-    def _run_single_environment(self, spec: TestEnvironmentSpec) -> Dict[str, Any]:
+    def _run_single_environment(
+        self, spec: TestEnvironmentSpec
+    ) -> Dict[str, Any]:
         """Run a single test environment."""
         try:
             with self.environment(spec) as (env_id, env_info):
@@ -381,7 +415,12 @@ class EnvironmentOrchestrator:
 
     def cleanup_orphaned_resources(self) -> Dict[str, Any]:
         """Clean up orphaned Docker containers, volumes, and networks."""
-        cleanup_results = {"containers": 0, "volumes": 0, "networks": 0, "images": 0}
+        cleanup_results = {
+            "containers": 0,
+            "volumes": 0,
+            "networks": 0,
+            "images": 0,
+        }
 
         try:
             # Clean up test containers
@@ -453,7 +492,9 @@ class EnvironmentOrchestrator:
             "resource_pools": self.get_pool_status(),
             "uptime": time.time() - getattr(self, "_start_time", time.time()),
             "total_environments_created": getattr(self, "_total_created", 0),
-            "total_environments_destroyed": getattr(self, "_total_destroyed", 0),
+            "total_environments_destroyed": getattr(
+                self, "_total_destroyed", 0
+            ),
         }
 
     def save_config(self):
@@ -528,7 +569,13 @@ def create_performance_test_spec(name: str, **kwargs) -> TestEnvironmentSpec:
     """Create a performance test environment specification."""
     defaults = {
         "profile": EnvironmentProfile.PERFORMANCE,
-        "services": ["postgres", "redis", "rabbitmq", "elasticsearch", "minio"],
+        "services": [
+            "postgres",
+            "redis",
+            "rabbitmq",
+            "elasticsearch",
+            "minio",
+        ],
         "resources": {},
         "isolation_level": IsolationLevel.CONTAINER,
         "parallel_instances": 1,

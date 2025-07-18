@@ -19,10 +19,7 @@ import jwt
 from fastapi.testclient import TestClient
 
 from api.main import app
-from auth.security_implementation import (
-    AuthenticationManager,
-    rate_limiter,
-)
+from auth.security_implementation import AuthenticationManager, rate_limiter
 
 
 class AuthenticationFlowTester:
@@ -32,7 +29,12 @@ class AuthenticationFlowTester:
         self.client = TestClient(app)
         self.auth_manager = AuthenticationManager()
         self.test_sessions = {}
-        self.test_results = {"flows_tested": 0, "flows_passed": 0, "flows_failed": 0, "errors": []}
+        self.test_results = {
+            "flows_tested": 0,
+            "flows_passed": 0,
+            "flows_failed": 0,
+            "errors": [],
+        }
 
     def setup_test_environment(self):
         """Setup clean test environment."""
@@ -42,7 +44,9 @@ class AuthenticationFlowTester:
         rate_limiter.requests.clear()
         self.test_sessions.clear()
 
-    def record_flow_result(self, flow_name: str, success: bool, error: str = None):
+    def record_flow_result(
+        self, flow_name: str, success: bool, error: str = None
+    ):
         """Record flow test result."""
         self.test_results["flows_tested"] += 1
         if success:
@@ -91,8 +95,12 @@ class TestCompleteAuthenticationFlows:
             }
 
             # Step 2: Register user
-            response = self.tester.client.post("/api/v1/auth/register", json=user_data)
-            assert response.status_code == 200, f"Registration failed: {response.json()}"
+            response = self.tester.client.post(
+                "/api/v1/auth/register", json=user_data
+            )
+            assert (
+                response.status_code == 200
+            ), f"Registration failed: {response.json()}"
 
             registration_data = response.json()
             assert "access_token" in registration_data
@@ -114,7 +122,9 @@ class TestCompleteAuthenticationFlows:
 
             # Test access token
             headers = {"Authorization": f"Bearer {access_token}"}
-            me_response = self.tester.client.get("/api/v1/auth/me", headers=headers)
+            me_response = self.tester.client.get(
+                "/api/v1/auth/me", headers=headers
+            )
             assert me_response.status_code == 200
 
             # Test refresh token
@@ -131,8 +141,12 @@ class TestCompleteAuthenticationFlows:
 
             perms = permissions_response.json()
             assert perms["role"] == "researcher"
-            assert perms["can_create_agents"] is True  # Researcher can create agents
-            assert perms["can_admin_system"] is False  # Researcher cannot admin
+            assert (
+                perms["can_create_agents"] is True
+            )  # Researcher can create agents
+            assert (
+                perms["can_admin_system"] is False
+            )  # Researcher cannot admin
 
             self.tester.record_flow_result(flow_name, True)
 
@@ -153,13 +167,20 @@ class TestCompleteAuthenticationFlows:
                 "role": "agent_manager",
             }
 
-            reg_response = self.tester.client.post("/api/v1/auth/register", json=user_data)
+            reg_response = self.tester.client.post(
+                "/api/v1/auth/register", json=user_data
+            )
             assert reg_response.status_code == 200
 
             # Step 2: Login with credentials
-            login_data = {"username": user_data["username"], "password": user_data["password"]}
+            login_data = {
+                "username": user_data["username"],
+                "password": user_data["password"],
+            }
 
-            login_response = self.tester.client.post("/api/v1/auth/login", json=login_data)
+            login_response = self.tester.client.post(
+                "/api/v1/auth/login", json=login_data
+            )
             assert login_response.status_code == 200
 
             login_result = login_response.json()
@@ -172,7 +193,9 @@ class TestCompleteAuthenticationFlows:
             headers = {"Authorization": f"Bearer {access_token}"}
 
             # Test authenticated endpoint
-            me_response = self.tester.client.get("/api/v1/auth/me", headers=headers)
+            me_response = self.tester.client.get(
+                "/api/v1/auth/me", headers=headers
+            )
             assert me_response.status_code == 200
 
             user_info = me_response.json()
@@ -193,7 +216,9 @@ class TestCompleteAuthenticationFlows:
             assert perms["role"] == "agent_manager"
             assert perms["can_create_agents"] is True
             assert perms["can_modify_agent"] is True
-            assert perms["can_delete_agents"] is False  # Agent manager cannot delete
+            assert (
+                perms["can_delete_agents"] is False
+            )  # Agent manager cannot delete
 
             self.tester.record_flow_result(flow_name, True)
 
@@ -214,7 +239,9 @@ class TestCompleteAuthenticationFlows:
                 "role": "observer",
             }
 
-            reg_response = self.tester.client.post("/api/v1/auth/register", json=user_data)
+            reg_response = self.tester.client.post(
+                "/api/v1/auth/register", json=user_data
+            )
             assert reg_response.status_code == 200
 
             # Step 2: Get initial tokens
@@ -224,7 +251,8 @@ class TestCompleteAuthenticationFlows:
 
             # Step 3: Use refresh token to get new access token
             refresh_response = self.tester.client.post(
-                "/api/v1/auth/refresh", json={"refresh_token": initial_refresh_token}
+                "/api/v1/auth/refresh",
+                json={"refresh_token": initial_refresh_token},
             )
             assert refresh_response.status_code == 200
 
@@ -238,12 +266,15 @@ class TestCompleteAuthenticationFlows:
 
             # Step 5: Verify new access token works
             headers = {"Authorization": f"Bearer {new_access_token}"}
-            me_response = self.tester.client.get("/api/v1/auth/me", headers=headers)
+            me_response = self.tester.client.get(
+                "/api/v1/auth/me", headers=headers
+            )
             assert me_response.status_code == 200
 
             # Step 6: Verify old refresh token is invalidated (token rotation)
             old_refresh_response = self.tester.client.post(
-                "/api/v1/auth/refresh", json={"refresh_token": initial_refresh_token}
+                "/api/v1/auth/refresh",
+                json={"refresh_token": initial_refresh_token},
             )
             assert (
                 old_refresh_response.status_code == 401
@@ -251,7 +282,8 @@ class TestCompleteAuthenticationFlows:
 
             # Step 7: Verify new refresh token works
             newer_refresh_response = self.tester.client.post(
-                "/api/v1/auth/refresh", json={"refresh_token": new_refresh_token}
+                "/api/v1/auth/refresh",
+                json={"refresh_token": new_refresh_token},
             )
             assert newer_refresh_response.status_code == 200
 
@@ -274,7 +306,9 @@ class TestCompleteAuthenticationFlows:
                 "role": "researcher",
             }
 
-            reg_response = self.tester.client.post("/api/v1/auth/register", json=user_data)
+            reg_response = self.tester.client.post(
+                "/api/v1/auth/register", json=user_data
+            )
             assert reg_response.status_code == 200
 
             tokens = reg_response.json()
@@ -284,14 +318,18 @@ class TestCompleteAuthenticationFlows:
 
             # Step 2: Verify tokens work before logout
             headers = {"Authorization": f"Bearer {access_token}"}
-            me_response = self.tester.client.get("/api/v1/auth/me", headers=headers)
+            me_response = self.tester.client.get(
+                "/api/v1/auth/me", headers=headers
+            )
             assert me_response.status_code == 200
 
             # Step 3: Verify refresh token exists
             assert user_id in self.tester.auth_manager.refresh_tokens
 
             # Step 4: Logout
-            logout_response = self.tester.client.post("/api/v1/auth/logout", headers=headers)
+            logout_response = self.tester.client.post(
+                "/api/v1/auth/logout", headers=headers
+            )
             assert logout_response.status_code == 200
 
             logout_result = logout_response.json()
@@ -302,7 +340,9 @@ class TestCompleteAuthenticationFlows:
 
             # Step 6: Verify access token still works temporarily (until it expires naturally)
             # This is expected behavior - access tokens are stateless
-            me_response_after = self.tester.client.get("/api/v1/auth/me", headers=headers)
+            me_response_after = self.tester.client.get(
+                "/api/v1/auth/me", headers=headers
+            )
             # Access token should still work as they're stateless JWTs
 
             # Step 7: Verify refresh token no longer works
@@ -332,38 +372,62 @@ class TestCompleteAuthenticationFlows:
                 "role": "admin",
             }
 
-            reg_response = self.tester.client.post("/api/v1/auth/register", json=user_data)
+            reg_response = self.tester.client.post(
+                "/api/v1/auth/register", json=user_data
+            )
             assert reg_response.status_code == 200
 
             # Step 2: Create multiple sessions
-            login_data = {"username": user_data["username"], "password": user_data["password"]}
+            login_data = {
+                "username": user_data["username"],
+                "password": user_data["password"],
+            }
 
             sessions = []
             for i in range(3):
-                login_response = self.tester.client.post("/api/v1/auth/login", json=login_data)
+                login_response = self.tester.client.post(
+                    "/api/v1/auth/login", json=login_data
+                )
                 assert login_response.status_code == 200
                 sessions.append(login_response.json())
 
             # Step 3: Verify all sessions are valid
             for i, session in enumerate(sessions):
-                headers = {"Authorization": f"Bearer {session['access_token']}"}
-                me_response = self.tester.client.get("/api/v1/auth/me", headers=headers)
-                assert me_response.status_code == 200, f"Session {i} should be valid"
+                headers = {
+                    "Authorization": f"Bearer {session['access_token']}"
+                }
+                me_response = self.tester.client.get(
+                    "/api/v1/auth/me", headers=headers
+                )
+                assert (
+                    me_response.status_code == 200
+                ), f"Session {i} should be valid"
 
             # Step 4: Logout one session
-            logout_headers = {"Authorization": f"Bearer {sessions[0]['access_token']}"}
-            logout_response = self.tester.client.post("/api/v1/auth/logout", headers=logout_headers)
+            logout_headers = {
+                "Authorization": f"Bearer {sessions[0]['access_token']}"
+            }
+            logout_response = self.tester.client.post(
+                "/api/v1/auth/logout", headers=logout_headers
+            )
             assert logout_response.status_code == 200
 
             # Step 5: Verify other sessions still work
             for i in range(1, 3):
-                headers = {"Authorization": f"Bearer {sessions[i]['access_token']}"}
-                me_response = self.tester.client.get("/api/v1/auth/me", headers=headers)
-                assert me_response.status_code == 200, f"Session {i} should still be valid"
+                headers = {
+                    "Authorization": f"Bearer {sessions[i]['access_token']}"
+                }
+                me_response = self.tester.client.get(
+                    "/api/v1/auth/me", headers=headers
+                )
+                assert (
+                    me_response.status_code == 200
+                ), f"Session {i} should still be valid"
 
             # Step 6: Verify logged out session's refresh token is invalidated
             refresh_response = self.tester.client.post(
-                "/api/v1/auth/refresh", json={"refresh_token": sessions[0]["refresh_token"]}
+                "/api/v1/auth/refresh",
+                json={"refresh_token": sessions[0]["refresh_token"]},
             )
             assert (
                 refresh_response.status_code == 401
@@ -410,9 +474,13 @@ class TestCompleteAuthenticationFlows:
 
             user_tokens = {}
             for user_data in users:
-                reg_response = self.tester.client.post("/api/v1/auth/register", json=user_data)
+                reg_response = self.tester.client.post(
+                    "/api/v1/auth/register", json=user_data
+                )
                 assert reg_response.status_code == 200
-                user_tokens[user_data["role"]] = reg_response.json()["access_token"]
+                user_tokens[user_data["role"]] = reg_response.json()[
+                    "access_token"
+                ]
 
             # Step 2: Test admin permissions
             admin_headers = {"Authorization": f"Bearer {user_tokens['admin']}"}
@@ -426,7 +494,9 @@ class TestCompleteAuthenticationFlows:
             assert admin_perms["can_admin_system"] is True
 
             # Step 3: Test researcher permissions
-            researcher_headers = {"Authorization": f"Bearer {user_tokens['researcher']}"}
+            researcher_headers = {
+                "Authorization": f"Bearer {user_tokens['researcher']}"
+            }
             researcher_perms = self.tester.client.get(
                 "/api/v1/auth/permissions", headers=researcher_headers
             ).json()
@@ -437,7 +507,9 @@ class TestCompleteAuthenticationFlows:
             assert researcher_perms["can_admin_system"] is False
 
             # Step 4: Test agent_manager permissions
-            manager_headers = {"Authorization": f"Bearer {user_tokens['agent_manager']}"}
+            manager_headers = {
+                "Authorization": f"Bearer {user_tokens['agent_manager']}"
+            }
             manager_perms = self.tester.client.get(
                 "/api/v1/auth/permissions", headers=manager_headers
             ).json()
@@ -448,7 +520,9 @@ class TestCompleteAuthenticationFlows:
             assert manager_perms["can_admin_system"] is False
 
             # Step 5: Test observer permissions
-            observer_headers = {"Authorization": f"Bearer {user_tokens['observer']}"}
+            observer_headers = {
+                "Authorization": f"Bearer {user_tokens['observer']}"
+            }
             observer_perms = self.tester.client.get(
                 "/api/v1/auth/permissions", headers=observer_headers
             ).json()
@@ -479,26 +553,36 @@ class TestCompleteAuthenticationFlows:
                 "role": "researcher",
             }
 
-            reg_response = self.tester.client.post("/api/v1/auth/register", json=user_data)
+            reg_response = self.tester.client.post(
+                "/api/v1/auth/register", json=user_data
+            )
             assert reg_response.status_code == 200
 
             # Step 2: Define concurrent operations
             def concurrent_login(thread_id):
                 """Perform concurrent login."""
-                login_data = {"username": user_data["username"], "password": user_data["password"]}
+                login_data = {
+                    "username": user_data["username"],
+                    "password": user_data["password"],
+                }
 
-                response = self.tester.client.post("/api/v1/auth/login", json=login_data)
+                response = self.tester.client.post(
+                    "/api/v1/auth/login", json=login_data
+                )
                 return {
                     "thread_id": thread_id,
                     "status_code": response.status_code,
                     "success": response.status_code == 200,
-                    "response": response.json() if response.status_code == 200 else None,
+                    "response": response.json()
+                    if response.status_code == 200
+                    else None,
                 }
 
             def concurrent_token_refresh(thread_id, refresh_token):
                 """Perform concurrent token refresh."""
                 response = self.tester.client.post(
-                    "/api/v1/auth/refresh", json={"refresh_token": refresh_token}
+                    "/api/v1/auth/refresh",
+                    json={"refresh_token": refresh_token},
                 )
                 return {
                     "thread_id": thread_id,
@@ -507,32 +591,51 @@ class TestCompleteAuthenticationFlows:
                 }
 
             # Step 3: Test concurrent logins
-            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-                login_futures = [executor.submit(concurrent_login, i) for i in range(10)]
+            with concurrent.futures.ThreadPoolExecutor(
+                max_workers=5
+            ) as executor:
+                login_futures = [
+                    executor.submit(concurrent_login, i) for i in range(10)
+                ]
                 login_results = [
-                    future.result() for future in concurrent.futures.as_completed(login_futures)
+                    future.result()
+                    for future in concurrent.futures.as_completed(
+                        login_futures
+                    )
                 ]
 
             # Step 4: Verify login results
             successful_logins = [r for r in login_results if r["success"]]
-            assert len(successful_logins) > 0, "At least some concurrent logins should succeed"
+            assert (
+                len(successful_logins) > 0
+            ), "At least some concurrent logins should succeed"
 
             # Step 5: Test concurrent token refreshes
             if successful_logins:
-                refresh_token = successful_logins[0]["response"]["refresh_token"]
+                refresh_token = successful_logins[0]["response"][
+                    "refresh_token"
+                ]
 
-                with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+                with concurrent.futures.ThreadPoolExecutor(
+                    max_workers=3
+                ) as executor:
                     refresh_futures = [
-                        executor.submit(concurrent_token_refresh, i, refresh_token)
+                        executor.submit(
+                            concurrent_token_refresh, i, refresh_token
+                        )
                         for i in range(5)
                     ]
                     refresh_results = [
                         future.result()
-                        for future in concurrent.futures.as_completed(refresh_futures)
+                        for future in concurrent.futures.as_completed(
+                            refresh_futures
+                        )
                     ]
 
                 # Only one refresh should succeed due to token rotation
-                successful_refreshes = [r for r in refresh_results if r["success"]]
+                successful_refreshes = [
+                    r for r in refresh_results if r["success"]
+                ]
                 assert (
                     len(successful_refreshes) == 1
                 ), "Only one token refresh should succeed due to rotation"
@@ -556,7 +659,9 @@ class TestCompleteAuthenticationFlows:
                 "role": "observer",
             }
 
-            reg_response = self.tester.client.post("/api/v1/auth/register", json=user_data)
+            reg_response = self.tester.client.post(
+                "/api/v1/auth/register", json=user_data
+            )
             assert reg_response.status_code == 200
 
             tokens = reg_response.json()
@@ -565,12 +670,18 @@ class TestCompleteAuthenticationFlows:
 
             # Step 2: Verify tokens work initially
             headers = {"Authorization": f"Bearer {access_token}"}
-            me_response = self.tester.client.get("/api/v1/auth/me", headers=headers)
+            me_response = self.tester.client.get(
+                "/api/v1/auth/me", headers=headers
+            )
             assert me_response.status_code == 200
 
             # Step 3: Decode tokens to check expiration times
-            access_payload = jwt.decode(access_token, options={"verify_signature": False})
-            refresh_payload = jwt.decode(refresh_token, options={"verify_signature": False})
+            access_payload = jwt.decode(
+                access_token, options={"verify_signature": False}
+            )
+            refresh_payload = jwt.decode(
+                refresh_token, options={"verify_signature": False}
+            )
 
             access_exp = datetime.fromtimestamp(access_payload["exp"])
             refresh_exp = datetime.fromtimestamp(refresh_payload["exp"])
@@ -600,7 +711,9 @@ class TestCompleteAuthenticationFlows:
             new_access_token = new_tokens["access_token"]
 
             # Step 6: Verify new access token has fresh expiration
-            new_access_payload = jwt.decode(new_access_token, options={"verify_signature": False})
+            new_access_payload = jwt.decode(
+                new_access_token, options={"verify_signature": False}
+            )
             new_access_exp = datetime.fromtimestamp(new_access_payload["exp"])
 
             new_access_expires_in = (new_access_exp - now).total_seconds()
@@ -633,7 +746,12 @@ class TestCompleteAuthenticationFlows:
                     "password": "Pass123!",
                     "role": "observer",
                 },
-                {"username": "test", "email": "test@test.com", "password": "", "role": "observer"},
+                {
+                    "username": "test",
+                    "email": "test@test.com",
+                    "password": "",
+                    "role": "observer",
+                },
                 {
                     "username": "test",
                     "email": "test@test.com",
@@ -643,7 +761,9 @@ class TestCompleteAuthenticationFlows:
             ]
 
             for invalid_data in invalid_registrations:
-                response = self.tester.client.post("/api/v1/auth/register", json=invalid_data)
+                response = self.tester.client.post(
+                    "/api/v1/auth/register", json=invalid_data
+                )
                 assert response.status_code in [
                     400,
                     422,
@@ -657,7 +777,9 @@ class TestCompleteAuthenticationFlows:
             ]
 
             for invalid_data in invalid_logins:
-                response = self.tester.client.post("/api/v1/auth/login", json=invalid_data)
+                response = self.tester.client.post(
+                    "/api/v1/auth/login", json=invalid_data
+                )
                 assert response.status_code in [
                     400,
                     401,
@@ -674,7 +796,9 @@ class TestCompleteAuthenticationFlows:
 
             for token in invalid_tokens:
                 headers = {"Authorization": f"Bearer {token}"}
-                response = self.tester.client.get("/api/v1/auth/me", headers=headers)
+                response = self.tester.client.get(
+                    "/api/v1/auth/me", headers=headers
+                )
                 assert response.status_code in [
                     401,
                     403,
@@ -689,7 +813,8 @@ class TestCompleteAuthenticationFlows:
 
             for refresh_token in invalid_refresh_tokens:
                 response = self.tester.client.post(
-                    "/api/v1/auth/refresh", json={"refresh_token": refresh_token}
+                    "/api/v1/auth/refresh",
+                    json={"refresh_token": refresh_token},
                 )
                 assert (
                     response.status_code == 401
@@ -715,12 +840,18 @@ class TestCompleteAuthenticationFlows:
                     "role": "observer",
                 }
 
-                response = self.tester.client.post("/api/v1/auth/register", json=user_data)
+                response = self.tester.client.post(
+                    "/api/v1/auth/register", json=user_data
+                )
 
                 if i < 5:
-                    assert response.status_code == 200, f"Registration {i} should succeed"
+                    assert (
+                        response.status_code == 200
+                    ), f"Registration {i} should succeed"
                 else:
-                    assert response.status_code == 429, f"Registration {i} should be rate limited"
+                    assert (
+                        response.status_code == 429
+                    ), f"Registration {i} should be rate limited"
 
             # Step 2: Test login rate limiting
             # First create a user
@@ -734,19 +865,30 @@ class TestCompleteAuthenticationFlows:
             # Clear rate limiting for new test
             rate_limiter.requests.clear()
 
-            reg_response = self.tester.client.post("/api/v1/auth/register", json=user_data)
+            reg_response = self.tester.client.post(
+                "/api/v1/auth/register", json=user_data
+            )
             assert reg_response.status_code == 200
 
             # Now test login rate limiting
             for i in range(12):  # Rate limit is 10 per 5 minutes
-                login_data = {"username": user_data["username"], "password": "WrongPassword123!"}
+                login_data = {
+                    "username": user_data["username"],
+                    "password": "WrongPassword123!",
+                }
 
-                response = self.tester.client.post("/api/v1/auth/login", json=login_data)
+                response = self.tester.client.post(
+                    "/api/v1/auth/login", json=login_data
+                )
 
                 if i < 10:
-                    assert response.status_code == 401, f"Login {i} should fail with 401"
+                    assert (
+                        response.status_code == 401
+                    ), f"Login {i} should fail with 401"
                 else:
-                    assert response.status_code == 429, f"Login {i} should be rate limited"
+                    assert (
+                        response.status_code == 429
+                    ), f"Login {i} should be rate limited"
 
             self.tester.record_flow_result(flow_name, True)
 
@@ -767,7 +909,9 @@ class TestCompleteAuthenticationFlows:
                 "role": "admin",
             }
 
-            reg_response = self.tester.client.post("/api/v1/auth/register", json=user_data)
+            reg_response = self.tester.client.post(
+                "/api/v1/auth/register", json=user_data
+            )
             assert reg_response.status_code == 200
 
             access_token = reg_response.json()["access_token"]
@@ -782,9 +926,13 @@ class TestCompleteAuthenticationFlows:
 
             for endpoint, method in authenticated_endpoints:
                 if method == "GET":
-                    response = self.tester.client.get(endpoint, headers=headers)
+                    response = self.tester.client.get(
+                        endpoint, headers=headers
+                    )
                 elif method == "POST":
-                    response = self.tester.client.post(endpoint, headers=headers)
+                    response = self.tester.client.post(
+                        endpoint, headers=headers
+                    )
 
                 assert (
                     response.status_code == 200

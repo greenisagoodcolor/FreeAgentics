@@ -38,7 +38,9 @@ class TestPyMDPMatrixPoolingIntegration(unittest.TestCase):
 
         # Monitor memory usage
         self.process = psutil.Process()
-        self.initial_memory = self.process.memory_info().rss / 1024 / 1024  # MB
+        self.initial_memory = (
+            self.process.memory_info().rss / 1024 / 1024
+        )  # MB
 
     def tearDown(self):
         """Clean up after tests."""
@@ -58,7 +60,9 @@ class TestPyMDPMatrixPoolingIntegration(unittest.TestCase):
         A = A / A.sum(axis=0, keepdims=True)  # Normalize
 
         # B matrix: P(state'|state,action)
-        B = np.random.rand(num_states, num_states, num_actions).astype(np.float32)
+        B = np.random.rand(num_states, num_states, num_actions).astype(
+            np.float32
+        )
         B = B / B.sum(axis=0, keepdims=True)  # Normalize
 
         # Test belief update operation with pooling
@@ -77,7 +81,9 @@ class TestPyMDPMatrixPoolingIntegration(unittest.TestCase):
         # Pooled belief update
         start_time = time.time()
         for _ in range(100):
-            with self.pool.allocate_matrix((num_states,), np.float32) as pooled_posterior:
+            with self.pool.allocate_matrix(
+                (num_states,), np.float32
+            ) as pooled_posterior:
                 likelihood = A[observation, :]
                 np.multiply(likelihood, belief, out=pooled_posterior)
                 pooled_posterior /= pooled_posterior.sum()
@@ -157,9 +163,9 @@ class TestPyMDPMatrixPoolingIntegration(unittest.TestCase):
         belief = belief / belief.sum()
 
         # Transition tensor
-        transition = np.random.rand(dims[0], dims[1], dims[2], dims[0], dims[1], dims[2], 4).astype(
-            np.float32
-        )
+        transition = np.random.rand(
+            dims[0], dims[1], dims[2], dims[0], dims[1], dims[2], 4
+        ).astype(np.float32)
 
         # Action selection via tensor contraction
         iterations = 20
@@ -176,7 +182,9 @@ class TestPyMDPMatrixPoolingIntegration(unittest.TestCase):
         start_time = time.time()
         for action in range(4):
             for _ in range(iterations):
-                pooled_einsum("ijk,ijklmna->lmn", belief, transition[..., action])
+                pooled_einsum(
+                    "ijk,ijklmna->lmn", belief, transition[..., action]
+                )
         time.time() - start_time
 
         # Check statistics
@@ -202,7 +210,9 @@ class TestPyMDPMatrixPoolingIntegration(unittest.TestCase):
         A = np.eye(num_obs, num_states)[:, :num_obs]  # Simple observation
         A = A / A.sum(axis=0, keepdims=True)
 
-        B = np.random.rand(num_states, num_states, num_actions).astype(np.float32)
+        B = np.random.rand(num_states, num_states, num_actions).astype(
+            np.float32
+        )
         B = B / B.sum(axis=0, keepdims=True)
 
         C = np.zeros(num_obs)
@@ -252,7 +262,9 @@ class TestPyMDPMatrixPoolingIntegration(unittest.TestCase):
 
         # Create compressor and pool
         compressor = BeliefCompressor(sparsity_threshold=0.8)
-        belief_pool = CompressedBeliefPool(pool_size=10, belief_shape=(100,), dtype=np.float32)
+        belief_pool = CompressedBeliefPool(
+            pool_size=10, belief_shape=(100,), dtype=np.float32
+        )
 
         # Simulate belief updates with both compression and matrix pooling
         num_updates = 50
@@ -324,7 +336,9 @@ class TestPyMDPMatrixPoolingIntegration(unittest.TestCase):
                 results[size][op] = {
                     "no_pool": no_pool_time,
                     "pooled": pool_time,
-                    "speedup": no_pool_time / pool_time if pool_time > 0 else 1.0,
+                    "speedup": no_pool_time / pool_time
+                    if pool_time > 0
+                    else 1.0,
                 }
 
         # Pooling should provide benefits for repeated operations
@@ -409,7 +423,9 @@ class TestMemoryPoolingBenchmarks(unittest.TestCase):
         # With pooling - reduces fragmentation
         for i in range(iterations):
             for _ in range(10):
-                with self.pool.allocate_matrix((size, size), np.float32) as arr:
+                with self.pool.allocate_matrix(
+                    (size, size), np.float32
+                ) as arr:
                     pass
 
             if i % 100 == 0:

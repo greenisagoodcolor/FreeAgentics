@@ -24,7 +24,11 @@ from .security_implementation import (
     TokenData,
     UserRole,
 )
-from .security_logging import SecurityEventSeverity, SecurityEventType, security_auditor
+from .security_logging import (
+    SecurityEventSeverity,
+    SecurityEventType,
+    security_auditor,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -146,7 +150,13 @@ class EnhancedRBACManager:
                 "resource_conditions": {},
                 "environment_conditions": {
                     "time_range": {"start": "08:00", "end": "18:00"},
-                    "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                    "days": [
+                        "Monday",
+                        "Tuesday",
+                        "Wednesday",
+                        "Thursday",
+                        "Friday",
+                    ],
                 },
                 "effect": ABACEffect.ALLOW,
                 "priority": 100,
@@ -160,7 +170,11 @@ class EnhancedRBACManager:
                 "subject_conditions": {"role": ["admin"]},
                 "resource_conditions": {},
                 "environment_conditions": {
-                    "ip_whitelist": ["127.0.0.1", "192.168.0.0/16", "10.0.0.0/8"]
+                    "ip_whitelist": [
+                        "127.0.0.1",
+                        "192.168.0.0/16",
+                        "10.0.0.0/8",
+                    ]
                 },
                 "effect": ABACEffect.ALLOW,
                 "priority": 95,
@@ -226,7 +240,9 @@ class EnhancedRBACManager:
         """Add a new ABAC rule."""
         try:
             # Validate rule doesn't conflict
-            existing_rule = next((r for r in self.abac_rules if r.id == rule.id), None)
+            existing_rule = next(
+                (r for r in self.abac_rules if r.id == rule.id), None
+            )
             if existing_rule:
                 logger.warning(f"ABAC rule with ID {rule.id} already exists")
                 return False
@@ -244,7 +260,10 @@ class EnhancedRBACManager:
             return False
 
     def evaluate_abac_access(
-        self, access_context: AccessContext, resource_context: ResourceContext, action: str
+        self,
+        access_context: AccessContext,
+        resource_context: ResourceContext,
+        action: str,
     ) -> Tuple[bool, str, List[str]]:
         """
         Evaluate ABAC rules for access decision.
@@ -260,7 +279,10 @@ class EnhancedRBACManager:
         applicable_rules = [
             rule
             for rule in self.abac_rules
-            if rule.is_active and self._rule_applies(rule, resource_context.resource_type, action)
+            if rule.is_active
+            and self._rule_applies(
+                rule, resource_context.resource_type, action
+            )
         ]
 
         # Sort by priority (highest first)
@@ -282,24 +304,36 @@ class EnhancedRBACManager:
 
         # Log the decision
         self._log_abac_decision(
-            access_context, resource_context, action, final_decision, decision_reason, applied_rules
+            access_context,
+            resource_context,
+            action,
+            final_decision,
+            decision_reason,
+            applied_rules,
         )
 
         return final_decision, decision_reason, applied_rules
 
-    def _rule_applies(self, rule: ABACRule, resource_type: str, action: str) -> bool:
+    def _rule_applies(
+        self, rule: ABACRule, resource_type: str, action: str
+    ) -> bool:
         """Check if a rule applies to the given resource type and action."""
-        return (rule.resource_type == "*" or rule.resource_type == resource_type) and (
-            rule.action == "*" or rule.action == action
-        )
+        return (
+            rule.resource_type == "*" or rule.resource_type == resource_type
+        ) and (rule.action == "*" or rule.action == action)
 
     def _evaluate_rule(
-        self, rule: ABACRule, access_context: AccessContext, resource_context: ResourceContext
+        self,
+        rule: ABACRule,
+        access_context: AccessContext,
+        resource_context: ResourceContext,
     ) -> bool:
         """Evaluate if a rule's conditions are satisfied."""
 
         # Evaluate subject conditions
-        if not self._evaluate_subject_conditions(rule.subject_conditions, access_context):
+        if not self._evaluate_subject_conditions(
+            rule.subject_conditions, access_context
+        ):
             return False
 
         # Evaluate resource conditions
@@ -309,7 +343,9 @@ class EnhancedRBACManager:
             return False
 
         # Evaluate environment conditions
-        if not self._evaluate_environment_conditions(rule.environment_conditions, access_context):
+        if not self._evaluate_environment_conditions(
+            rule.environment_conditions, access_context
+        ):
             return False
 
         return True
@@ -367,7 +403,12 @@ class EnhancedRBACManager:
                     return False
 
             elif key == "sensitivity_level":
-                allowed_levels = ["public", "internal", "confidential", "restricted"]
+                allowed_levels = [
+                    "public",
+                    "internal",
+                    "confidential",
+                    "restricted",
+                ]
                 if isinstance(value, str):
                     max_level_index = allowed_levels.index(value)
                     resource_level_index = allowed_levels.index(
@@ -393,7 +434,9 @@ class EnhancedRBACManager:
                     return False
 
             elif key == "ip_whitelist":
-                if not self._check_ip_whitelist(context.ip_address or "", value):
+                if not self._check_ip_whitelist(
+                    context.ip_address or "", value
+                ):
                     return False
 
             elif key == "location":
@@ -438,14 +481,18 @@ class EnhancedRBACManager:
             for allowed_ip in whitelist:
                 try:
                     if "/" in allowed_ip:  # CIDR notation
-                        network = ipaddress.ip_network(allowed_ip, strict=False)
+                        network = ipaddress.ip_network(
+                            allowed_ip, strict=False
+                        )
                         if user_ip_obj in network:
                             return True
                     else:  # Single IP
                         if str(user_ip_obj) == allowed_ip:
                             return True
                 except ValueError:
-                    logger.warning(f"Invalid IP/network in whitelist: {allowed_ip}")
+                    logger.warning(
+                        f"Invalid IP/network in whitelist: {allowed_ip}"
+                    )
                     continue
 
         except ValueError:
@@ -484,11 +531,15 @@ class EnhancedRBACManager:
 
         # Also log through security auditor
         event_type = (
-            SecurityEventType.ACCESS_GRANTED if decision else SecurityEventType.ACCESS_DENIED
+            SecurityEventType.ACCESS_GRANTED
+            if decision
+            else SecurityEventType.ACCESS_DENIED
         )
         security_auditor.log_event(
             event_type,
-            SecurityEventSeverity.INFO if decision else SecurityEventSeverity.WARNING,
+            SecurityEventSeverity.INFO
+            if decision
+            else SecurityEventSeverity.WARNING,
             f"ABAC decision: {('ALLOW' if decision else 'DENY')} - {reason}",
             user_id=access_context.user_id,
             username=access_context.username,
@@ -594,11 +645,16 @@ class EnhancedRBACManager:
         return False
 
     def approve_role_request(
-        self, request_id: str, reviewer_id: str, reviewer_notes: Optional[str] = None
+        self,
+        request_id: str,
+        reviewer_id: str,
+        reviewer_notes: Optional[str] = None,
     ) -> bool:
         """Approve a role assignment request."""
 
-        request = next((r for r in self.role_requests if r.id == request_id), None)
+        request = next(
+            (r for r in self.role_requests if r.id == request_id), None
+        )
 
         if not request:
             logger.warning(f"Role assignment request not found: {request_id}")
@@ -633,10 +689,14 @@ class EnhancedRBACManager:
         logger.info(f"Role assignment request approved: {request_id}")
         return True
 
-    def reject_role_request(self, request_id: str, reviewer_id: str, reviewer_notes: str) -> bool:
+    def reject_role_request(
+        self, request_id: str, reviewer_id: str, reviewer_notes: str
+    ) -> bool:
         """Reject a role assignment request."""
 
-        request = next((r for r in self.role_requests if r.id == request_id), None)
+        request = next(
+            (r for r in self.role_requests if r.id == request_id), None
+        )
 
         if not request:
             logger.warning(f"Role assignment request not found: {request_id}")
@@ -676,7 +736,9 @@ class EnhancedRBACManager:
     ) -> List[RoleAssignmentRequest]:
         """Get pending role assignment requests."""
 
-        pending_requests = [r for r in self.role_requests if r.status == RequestStatus.PENDING]
+        pending_requests = [
+            r for r in self.role_requests if r.status == RequestStatus.PENDING
+        ]
 
         # Filter based on reviewer role if specified
         if reviewer_role:
@@ -706,12 +768,17 @@ class EnhancedRBACManager:
         expired_count = 0
 
         for request in self.role_requests:
-            if request.status == RequestStatus.PENDING and request.created_at < cutoff_date:
+            if (
+                request.status == RequestStatus.PENDING
+                and request.created_at < cutoff_date
+            ):
                 request.status = RequestStatus.EXPIRED
                 expired_count += 1
 
         if expired_count > 0:
-            logger.info(f"Expired {expired_count} old role assignment requests")
+            logger.info(
+                f"Expired {expired_count} old role assignment requests"
+            )
 
         return expired_count
 
@@ -727,12 +794,15 @@ class EnhancedRBACManager:
                 "total_roles": len(UserRole),
                 "total_permissions": len(Permission),
                 "role_permission_matrix": {
-                    role.value: [p.value for p in perms] for role, perms in ROLE_PERMISSIONS.items()
+                    role.value: [p.value for p in perms]
+                    for role, perms in ROLE_PERMISSIONS.items()
                 },
             },
             "abac_config": {
                 "total_rules": len(self.abac_rules),
-                "active_rules": len([r for r in self.abac_rules if r.is_active]),
+                "active_rules": len(
+                    [r for r in self.abac_rules if r.is_active]
+                ),
                 "rules_by_priority": [
                     {
                         "id": rule.id,
@@ -742,26 +812,46 @@ class EnhancedRBACManager:
                         "resource_type": rule.resource_type,
                         "action": rule.action,
                     }
-                    for rule in sorted(self.abac_rules, key=lambda x: x.priority, reverse=True)
+                    for rule in sorted(
+                        self.abac_rules, key=lambda x: x.priority, reverse=True
+                    )
                 ],
             },
             "role_assignment_workflow": {
                 "total_requests": len(self.role_requests),
                 "pending_requests": len(
-                    [r for r in self.role_requests if r.status == RequestStatus.PENDING]
+                    [
+                        r
+                        for r in self.role_requests
+                        if r.status == RequestStatus.PENDING
+                    ]
                 ),
                 "approved_requests": len(
-                    [r for r in self.role_requests if r.status == RequestStatus.APPROVED]
+                    [
+                        r
+                        for r in self.role_requests
+                        if r.status == RequestStatus.APPROVED
+                    ]
                 ),
                 "rejected_requests": len(
-                    [r for r in self.role_requests if r.status == RequestStatus.REJECTED]
+                    [
+                        r
+                        for r in self.role_requests
+                        if r.status == RequestStatus.REJECTED
+                    ]
                 ),
-                "auto_approved_requests": len([r for r in self.role_requests if r.auto_approved]),
+                "auto_approved_requests": len(
+                    [r for r in self.role_requests if r.auto_approved]
+                ),
             },
             "audit_statistics": {
                 "total_access_decisions": len(self.access_audit_log),
-                "access_granted": len([e for e in self.access_audit_log if e.get("decision")]),
-                "access_denied": len([e for e in self.access_audit_log if not e.get("decision")]),
+                "access_granted": len(
+                    [e for e in self.access_audit_log if e.get("decision")]
+                ),
+                "access_denied": len(
+                    [e for e in self.access_audit_log if not e.get("decision")]
+                ),
             },
         }
 
@@ -796,7 +886,8 @@ def enhanced_permission_check(permission: Permission):
                 from fastapi import HTTPException, status
 
                 raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required"
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Authentication required",
                 )
 
             # Standard RBAC check
@@ -814,17 +905,27 @@ def enhanced_permission_check(permission: Permission):
                 username=current_user.username,
                 role=current_user.role,
                 permissions=current_user.permissions,
-                ip_address=request.client.host if request and request.client else None,
-                user_agent=request.headers.get("user-agent") if request else None,
+                ip_address=request.client.host
+                if request and request.client
+                else None,
+                user_agent=request.headers.get("user-agent")
+                if request
+                else None,
                 timestamp=datetime.now(timezone.utc),
             )
 
             # Basic resource context (could be enhanced based on function parameters)
             resource_context = ResourceContext(
-                resource_type=func.__name__.split("_")[-1] if "_" in func.__name__ else "unknown"
+                resource_type=func.__name__.split("_")[-1]
+                if "_" in func.__name__
+                else "unknown"
             )
 
-            access_granted, reason, applied_rules = enhanced_rbac_manager.evaluate_abac_access(
+            (
+                access_granted,
+                reason,
+                applied_rules,
+            ) = enhanced_rbac_manager.evaluate_abac_access(
                 access_context, resource_context, permission.value
             )
 

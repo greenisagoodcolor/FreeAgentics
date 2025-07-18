@@ -82,11 +82,14 @@ class BruteForceTestRunner:
         results = {}
 
         with Progress(
-            SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console,
         ) as progress:
-
             for test_class in suite["tests"]:
-                task = progress.add_task(f"Testing {test_class}...", total=None)
+                task = progress.add_task(
+                    f"Testing {test_class}...", total=None
+                )
 
                 # Run pytest for specific test class
                 cmd = [
@@ -138,13 +141,19 @@ class BruteForceTestRunner:
         """Run performance benchmark."""
         console.print("\n[yellow]Running Performance Benchmark[/yellow]")
 
-        cmd = [sys.executable, "tests/security/benchmark_brute_force_protection.py"]
+        cmd = [
+            sys.executable,
+            "tests/security/benchmark_brute_force_protection.py",
+        ]
 
         with Progress(
-            SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console,
         ) as progress:
-
-            task = progress.add_task("Running benchmark scenarios...", total=None)
+            task = progress.add_task(
+                "Running benchmark scenarios...", total=None
+            )
 
             result = subprocess.run(cmd, capture_output=True, text=True)
 
@@ -152,7 +161,9 @@ class BruteForceTestRunner:
 
         self.results["benchmark"] = {
             "completed": result.returncode == 0,
-            "output": result.stdout if result.returncode == 0 else result.stderr,
+            "output": result.stdout
+            if result.returncode == 0
+            else result.stderr,
         }
 
     def _print_suite_results(self, suite_name: str, results: Dict):
@@ -180,7 +191,8 @@ class BruteForceTestRunner:
         console.print("\n" + "=" * 80)
         console.print(
             Panel.fit(
-                "[bold green]Brute Force Protection Test Report[/bold green]", border_style="green"
+                "[bold green]Brute Force Protection Test Report[/bold green]",
+                border_style="green",
             )
         )
 
@@ -202,23 +214,37 @@ class BruteForceTestRunner:
         summary_table.add_column("Value", style="green")
 
         summary_table.add_row("Total Tests", str(total_tests))
-        summary_table.add_row("Passed", f"{total_passed} ({total_passed/total_tests*100:.1f}%)")
-        summary_table.add_row("Failed", f"{total_failed} ({total_failed/total_tests*100:.1f}%)")
+        summary_table.add_row(
+            "Passed", f"{total_passed} ({total_passed/total_tests*100:.1f}%)"
+        )
+        summary_table.add_row(
+            "Failed", f"{total_failed} ({total_failed/total_tests*100:.1f}%)"
+        )
         summary_table.add_row("Duration", f"{total_duration:.2f} seconds")
-        summary_table.add_row("Timestamp", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        summary_table.add_row(
+            "Timestamp", datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        )
 
         console.print(summary_table)
 
         # Security validation checklist
-        console.print("\n[bold yellow]Security Validation Checklist:[/bold yellow]")
+        console.print(
+            "\n[bold yellow]Security Validation Checklist:[/bold yellow]"
+        )
 
         checklist = [
             ("Authentication Rate Limiting", self._check_auth_protection()),
             ("Token Security", self._check_token_security()),
-            ("Resource Enumeration Protection", self._check_enumeration_protection()),
+            (
+                "Resource Enumeration Protection",
+                self._check_enumeration_protection(),
+            ),
             ("Timing Attack Prevention", self._check_timing_protection()),
             ("Distributed Attack Defense", self._check_distributed_defense()),
-            ("Performance Impact Acceptable", self._check_performance_impact()),
+            (
+                "Performance Impact Acceptable",
+                self._check_performance_impact(),
+            ),
         ]
 
         for item, passed in checklist:
@@ -347,7 +373,9 @@ def check_prerequisites():
         r.ping()
         console.print("✅ Redis is running")
     except Exception:
-        console.print("[red]❌ Redis is not running. Please start Redis first.[/red]")
+        console.print(
+            "[red]❌ Redis is not running. Please start Redis first.[/red]"
+        )
         console.print("   Run: docker run -d -p 6379:6379 redis:latest")
         return False
 
@@ -358,7 +386,9 @@ def check_prerequisites():
         console.print("✅ pytest is installed")
     except ImportError:
         console.print("[red]❌ pytest is not installed.[/red]")
-        console.print("   Run: pip install pytest pytest-asyncio pytest-json-report")
+        console.print(
+            "   Run: pip install pytest pytest-asyncio pytest-json-report"
+        )
         return False
 
     return True

@@ -32,7 +32,10 @@ class TestSecurityPenetrationTesting:
         """Test JWT token manipulation and signature verification."""
         # Register and authenticate user
         user = auth_manager.register_user(
-            "test_user", "test@example.com", "secure_password", UserRole.OBSERVER
+            "test_user",
+            "test@example.com",
+            "secure_password",
+            UserRole.OBSERVER,
         )
 
         # Get valid token
@@ -54,14 +57,20 @@ class TestSecurityPenetrationTesting:
         import json
 
         # Decode payload
-        payload = json.loads(base64.b64decode(token_parts[1] + "==").decode("utf-8"))
+        payload = json.loads(
+            base64.b64decode(token_parts[1] + "==").decode("utf-8")
+        )
 
         # Modify role to admin
         payload["role"] = "admin"
 
         # Re-encode
-        modified_payload = base64.b64encode(json.dumps(payload).encode()).decode().rstrip("=")
-        tampered_token = f"{token_parts[0]}.{modified_payload}.{token_parts[2]}"
+        modified_payload = (
+            base64.b64encode(json.dumps(payload).encode()).decode().rstrip("=")
+        )
+        tampered_token = (
+            f"{token_parts[0]}.{modified_payload}.{token_parts[2]}"
+        )
 
         # Should fail signature verification
         try:
@@ -74,7 +83,10 @@ class TestSecurityPenetrationTesting:
         """Test resistance to timing attacks in authentication."""
         # Register user
         auth_manager.register_user(
-            "timing_user", "timing@example.com", "correct_password", UserRole.OBSERVER
+            "timing_user",
+            "timing@example.com",
+            "correct_password",
+            UserRole.OBSERVER,
         )
 
         # Test authentication timing
@@ -87,13 +99,22 @@ class TestSecurityPenetrationTesting:
             return time.time() - start_time
 
         # Test with valid user, correct password
-        correct_times = [time_authentication("timing_user", "correct_password") for _ in range(5)]
+        correct_times = [
+            time_authentication("timing_user", "correct_password")
+            for _ in range(5)
+        ]
 
         # Test with valid user, wrong password
-        wrong_pass_times = [time_authentication("timing_user", "wrong_password") for _ in range(5)]
+        wrong_pass_times = [
+            time_authentication("timing_user", "wrong_password")
+            for _ in range(5)
+        ]
 
         # Test with non-existent user
-        nonexistent_times = [time_authentication("nonexistent", "any_password") for _ in range(5)]
+        nonexistent_times = [
+            time_authentication("nonexistent", "any_password")
+            for _ in range(5)
+        ]
 
         # Calculate averages
         avg_correct = sum(correct_times) / len(correct_times)
@@ -126,7 +147,9 @@ class TestSecurityPenetrationTesting:
         assert stored_password != password, "Password stored in plain text"
 
         # Hash should be bcrypt format
-        assert stored_password.startswith("$2b$"), "Password not using bcrypt hashing"
+        assert stored_password.startswith(
+            "$2b$"
+        ), "Password not using bcrypt hashing"
 
         # Hash should be of reasonable length
         assert len(stored_password) > 50, "Password hash too short"
@@ -151,7 +174,9 @@ class TestSecurityPenetrationTesting:
         unknown_user = test_auth("unknown_user", "any_password")
 
         # Both should fail
-        assert not known_user_wrong_pass, "Known user with wrong password should fail"
+        assert (
+            not known_user_wrong_pass
+        ), "Known user with wrong password should fail"
         assert not unknown_user, "Unknown user should fail"
 
         # Error messages should not reveal user existence
@@ -161,7 +186,10 @@ class TestSecurityPenetrationTesting:
         """Test JWT token expiration enforcement."""
         # Register user
         user = auth_manager.register_user(
-            "expire_user", "expire@example.com", "password123", UserRole.OBSERVER
+            "expire_user",
+            "expire@example.com",
+            "password123",
+            UserRole.OBSERVER,
         )
 
         # Create token with short expiration
@@ -210,7 +238,9 @@ class TestSecurityPenetrationTesting:
             # Test in username field
             try:
                 result = auth_manager.authenticate_user(payload, "password")
-                assert result is None, f"SQL injection may be possible with payload: {payload}"
+                assert (
+                    result is None
+                ), f"SQL injection may be possible with payload: {payload}"
             except Exception:
                 pass  # Exception is acceptable
 
@@ -230,7 +260,10 @@ class TestSecurityPenetrationTesting:
             "admin_user", "admin@example.com", "admin_pass", UserRole.ADMIN
         )
         regular_user = auth_manager.register_user(
-            "regular_user", "regular@example.com", "regular_pass", UserRole.OBSERVER
+            "regular_user",
+            "regular@example.com",
+            "regular_pass",
+            UserRole.OBSERVER,
         )
 
         # Test that roles are properly assigned
@@ -241,8 +274,12 @@ class TestSecurityPenetrationTesting:
         admin_token = auth_manager.create_access_token(admin_user)
         regular_token = auth_manager.create_access_token(regular_user)
 
-        admin_payload = jwt.decode(admin_token, JWT_SECRET, algorithms=[ALGORITHM])
-        regular_payload = jwt.decode(regular_token, JWT_SECRET, algorithms=[ALGORITHM])
+        admin_payload = jwt.decode(
+            admin_token, JWT_SECRET, algorithms=[ALGORITHM]
+        )
+        regular_payload = jwt.decode(
+            regular_token, JWT_SECRET, algorithms=[ALGORITHM]
+        )
 
         assert admin_payload["role"] == UserRole.ADMIN
         assert regular_payload["role"] == UserRole.OBSERVER
@@ -254,7 +291,10 @@ class TestSecurityPenetrationTesting:
         """Test session hijacking prevention measures."""
         # Register user
         user = auth_manager.register_user(
-            "session_user", "session@example.com", "password123", UserRole.OBSERVER
+            "session_user",
+            "session@example.com",
+            "password123",
+            UserRole.OBSERVER,
         )
 
         # Create token
@@ -275,7 +315,10 @@ class TestSecurityPenetrationTesting:
         """Test brute force attack indicators."""
         # Register user
         auth_manager.register_user(
-            "brute_user", "brute@example.com", "correct_password", UserRole.OBSERVER
+            "brute_user",
+            "brute@example.com",
+            "correct_password",
+            UserRole.OBSERVER,
         )
 
         # Simulate multiple failed attempts
@@ -284,26 +327,39 @@ class TestSecurityPenetrationTesting:
 
         for i in range(max_attempts):
             try:
-                result = auth_manager.authenticate_user("brute_user", f"wrong_password_{i}")
+                result = auth_manager.authenticate_user(
+                    "brute_user", f"wrong_password_{i}"
+                )
                 if result:
-                    pytest.fail(f"Unexpected successful authentication with wrong password")
+                    pytest.fail(
+                        f"Unexpected successful authentication with wrong password"
+                    )
             except Exception:
                 pass
 
             failed_attempts += 1
 
         # All attempts should fail
-        assert failed_attempts == max_attempts, "Not all brute force attempts failed"
+        assert (
+            failed_attempts == max_attempts
+        ), "Not all brute force attempts failed"
 
         # Successful authentication should still work
-        result = auth_manager.authenticate_user("brute_user", "correct_password")
-        assert result is not None, "Legitimate authentication failed after brute force attempts"
+        result = auth_manager.authenticate_user(
+            "brute_user", "correct_password"
+        )
+        assert (
+            result is not None
+        ), "Legitimate authentication failed after brute force attempts"
 
     def test_token_blacklisting_functionality(self, auth_manager):
         """Test token blacklisting/logout functionality."""
         # Register user
         user = auth_manager.register_user(
-            "logout_user", "logout@example.com", "password123", UserRole.OBSERVER
+            "logout_user",
+            "logout@example.com",
+            "password123",
+            UserRole.OBSERVER,
         )
 
         # Create token
@@ -326,7 +382,10 @@ class TestSecurityPenetrationTesting:
         """Test refresh token security measures."""
         # Register user
         user = auth_manager.register_user(
-            "refresh_user", "refresh@example.com", "password123", UserRole.OBSERVER
+            "refresh_user",
+            "refresh@example.com",
+            "password123",
+            UserRole.OBSERVER,
         )
 
         # Create refresh token
@@ -339,14 +398,19 @@ class TestSecurityPenetrationTesting:
 
         # Test refresh token usage
         try:
-            new_access_token, new_refresh_token = auth_manager.refresh_access_token(refresh_token)
+            (
+                new_access_token,
+                new_refresh_token,
+            ) = auth_manager.refresh_access_token(refresh_token)
 
             # New tokens should be different
             assert new_access_token != refresh_token
             assert new_refresh_token != refresh_token
 
             # New access token should be valid
-            new_payload = jwt.decode(new_access_token, JWT_SECRET, algorithms=[ALGORITHM])
+            new_payload = jwt.decode(
+                new_access_token, JWT_SECRET, algorithms=[ALGORITHM]
+            )
             assert new_payload["username"] == user.username
 
         except Exception as e:
@@ -358,16 +422,40 @@ class TestSecurityPenetrationTesting:
         # Test various malformed inputs
         bypass_attempts = [
             # Very long inputs
-            {"username": "a" * 10000, "email": "test@example.com", "password": "password123"},
+            {
+                "username": "a" * 10000,
+                "email": "test@example.com",
+                "password": "password123",
+            },
             # Null byte injection
-            {"username": "user\x00admin", "email": "test@example.com", "password": "password123"},
+            {
+                "username": "user\x00admin",
+                "email": "test@example.com",
+                "password": "password123",
+            },
             # Unicode/encoding attacks
-            {"username": "user\u0000admin", "email": "test@example.com", "password": "password123"},
+            {
+                "username": "user\u0000admin",
+                "email": "test@example.com",
+                "password": "password123",
+            },
             # Special characters
-            {"username": "user<script>", "email": "test@example.com", "password": "password123"},
+            {
+                "username": "user<script>",
+                "email": "test@example.com",
+                "password": "password123",
+            },
             # Empty/None values
-            {"username": "", "email": "test@example.com", "password": "password123"},
-            {"username": None, "email": "test@example.com", "password": "password123"},
+            {
+                "username": "",
+                "email": "test@example.com",
+                "password": "password123",
+            },
+            {
+                "username": None,
+                "email": "test@example.com",
+                "password": "password123",
+            },
         ]
 
         for i, attempt in enumerate(bypass_attempts):
@@ -392,7 +480,10 @@ class TestSecurityPenetrationTesting:
         """Test concurrent authentication safety."""
         # Register user
         auth_manager.register_user(
-            "concurrent_user", "concurrent@example.com", "password123", UserRole.OBSERVER
+            "concurrent_user",
+            "concurrent@example.com",
+            "password123",
+            UserRole.OBSERVER,
         )
 
         # Test concurrent authentication
@@ -402,7 +493,9 @@ class TestSecurityPenetrationTesting:
 
         def authenticate():
             try:
-                result = auth_manager.authenticate_user("concurrent_user", "password123")
+                result = auth_manager.authenticate_user(
+                    "concurrent_user", "password123"
+                )
                 results.append(result is not None)
             except Exception:
                 results.append(False)
@@ -444,8 +537,12 @@ class TestSecurityPenetrationTesting:
                 )
 
                 # Test that authentication works
-                result = auth_manager.authenticate_user(f"complexity_user_{i}", password)
-                assert result is not None, f"Authentication failed for password: {password}"
+                result = auth_manager.authenticate_user(
+                    f"complexity_user_{i}", password
+                )
+                assert (
+                    result is not None
+                ), f"Authentication failed for password: {password}"
 
             except Exception as e:
                 # Some passwords might be rejected

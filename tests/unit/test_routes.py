@@ -80,8 +80,14 @@ class TestRouteRegistration:
         """Test that agent routes are properly registered with /api/v1 prefix."""
         # List agents endpoint - should not return 404 (route not found)
         response = client.get("/api/v1/agents")
-        assert response.status_code != 404, f"Agents list route not found: {response.status_code}"
-        assert response.status_code in [200, 401, 503]  # OK, auth required, or service unavailable
+        assert (
+            response.status_code != 404
+        ), f"Agents list route not found: {response.status_code}"
+        assert response.status_code in [
+            200,
+            401,
+            503,
+        ]  # OK, auth required, or service unavailable
 
         # Agent creation endpoint - should not return 404 (route not found)
         response = client.post("/api/v1/agents", json={"name": "test"})
@@ -111,17 +117,27 @@ class TestRouteRegistration:
     def test_agent_converse_endpoint_exists(self, client):
         """Test that the agent converse endpoint is registered."""
         # This is the critical endpoint mentioned in the validation target
-        response = client.post("/api/v1/agents/test-id/converse", json={"prompt": "test"})
+        response = client.post(
+            "/api/v1/agents/test-id/converse", json={"prompt": "test"}
+        )
         # Should NOT return 404 (route not found)
         # Valid responses: 401 (auth), 422 (validation), 400 (bad request), 403 (forbidden), 503 (service unavailable)
-        assert response.status_code != 404, f"Converse route not found! Got {response.status_code}"
+        assert (
+            response.status_code != 404
+        ), f"Converse route not found! Got {response.status_code}"
         assert response.status_code in [400, 401, 403, 422, 503]
 
     def test_gmn_routes_registered(self, client):
         """Test that GMN routes are registered."""
         response = client.get("/api/v1/gmn/examples")
-        assert response.status_code != 404, f"GMN examples route not found: {response.status_code}"
-        assert response.status_code in [200, 401, 503]  # OK, auth required, or service unavailable
+        assert (
+            response.status_code != 404
+        ), f"GMN examples route not found: {response.status_code}"
+        assert response.status_code in [
+            200,
+            401,
+            503,
+        ]  # OK, auth required, or service unavailable
 
     def test_websocket_routes_registered(self, client):
         """Test that websocket routes are registered."""
@@ -131,7 +147,11 @@ class TestRouteRegistration:
         assert (
             response.status_code != 404
         ), f"WebSocket connections route not found: {response.status_code}"
-        assert response.status_code in [200, 401, 503]  # OK, auth required, or service unavailable
+        assert response.status_code in [
+            200,
+            401,
+            503,
+        ]  # OK, auth required, or service unavailable
 
     def test_openapi_schema_available(self, client):
         """Test that OpenAPI schema is available."""
@@ -165,8 +185,14 @@ class TestRouteRegistration:
         response = client.get("/api/v1/agents")
         # Should not get 500 Internal Server Error from missing dependency injection
         # Service might be unavailable (503) but shouldn't be a server error from bad DI
-        assert response.status_code != 500, f"Dependency injection failed: {response.status_code}"
-        assert response.status_code in [200, 401, 503]  # OK, auth required, or service unavailable
+        assert (
+            response.status_code != 500
+        ), f"Dependency injection failed: {response.status_code}"
+        assert response.status_code in [
+            200,
+            401,
+            503,
+        ]  # OK, auth required, or service unavailable
 
     def test_no_catch_all_error_handlers(self, client):
         """Test that exceptions propagate (no catch-all handlers)."""
@@ -183,13 +209,19 @@ class TestRouteRegistration:
             503,
         ], f"Unexpected error code: {response.status_code}"
 
-        if response.status_code in [400, 422]:  # Bad request or validation error
+        if response.status_code in [
+            400,
+            422,
+        ]:  # Bad request or validation error
             # Check that we get detailed error info, not a generic message
             data = response.json()
             assert "detail" in data
             assert not any(
                 generic in str(data.get("detail", "")).lower()
-                for generic in ["internal server error", "something went wrong"]
+                for generic in [
+                    "internal server error",
+                    "something went wrong",
+                ]
             )
 
     def test_route_naming_convention(self, client):
@@ -215,13 +247,17 @@ class TestRouteRegistration:
         ]
         for path in api_paths:
             if not path.startswith("/graphql"):  # GraphQL is an exception
-                assert path.startswith("/api/v1"), f"Route {path} doesn't follow /api/v1 convention"
+                assert path.startswith(
+                    "/api/v1"
+                ), f"Route {path} doesn't follow /api/v1 convention"
 
         # Check pluralization consistency (agents, not agent)
         agent_paths = [p for p in paths if "agent" in p and "/api/v1" in p]
         for path in agent_paths:
             if "/api/v1/agent/" in path:  # Single resource with trailing slash
-                pytest.fail(f"Route {path} uses singular 'agent' instead of 'agents'")
+                pytest.fail(
+                    f"Route {path} uses singular 'agent' instead of 'agents'"
+                )
 
     def test_all_routers_imported(self):
         """Test that all expected routers are imported in main.py."""
@@ -245,5 +281,11 @@ class TestRouteRegistration:
 
         for router in expected_routers:
             # Each router should contribute at least one path
-            router_paths = [p for p in paths if f"/api/v1/{router}" in p or f"/{router}" in p]
-            assert len(router_paths) > 0, f"No routes found for {router} router"
+            router_paths = [
+                p
+                for p in paths
+                if f"/api/v1/{router}" in p or f"/{router}" in p
+            ]
+            assert (
+                len(router_paths) > 0
+            ), f"No routes found for {router} router"

@@ -40,7 +40,9 @@ class AuthorizationTestRunner:
             },
         }
 
-    def run_test_suite(self, test_file: str, suite_name: str) -> Dict[str, Any]:
+    def run_test_suite(
+        self, test_file: str, suite_name: str
+    ) -> Dict[str, Any]:
         """Run a specific test suite and capture results."""
         print(f"\n{'='*60}")
         print(f"Running {suite_name}")
@@ -61,7 +63,9 @@ class AuthorizationTestRunner:
         ]
 
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, cwd=str(self.project_root))
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, cwd=str(self.project_root)
+            )
 
             # Parse results
             suite_results = {
@@ -137,10 +141,19 @@ class AuthorizationTestRunner:
 
         # Check for critical security test failures
         critical_patterns = [
-            ("privilege_escalation", "CRITICAL: Privilege escalation vulnerability detected"),
+            (
+                "privilege_escalation",
+                "CRITICAL: Privilege escalation vulnerability detected",
+            ),
             ("idor", "CRITICAL: IDOR vulnerability detected"),
-            ("authorization_bypass", "CRITICAL: Authorization bypass detected"),
-            ("token_manipulation", "CRITICAL: Token manipulation vulnerability"),
+            (
+                "authorization_bypass",
+                "CRITICAL: Authorization bypass detected",
+            ),
+            (
+                "token_manipulation",
+                "CRITICAL: Token manipulation vulnerability",
+            ),
             ("injection", "CRITICAL: Injection vulnerability detected"),
             ("race_condition", "HIGH: Race condition in authorization"),
         ]
@@ -151,7 +164,9 @@ class AuthorizationTestRunner:
                     {
                         "test": test_info["name"],
                         "issue": message,
-                        "severity": "CRITICAL" if "CRITICAL" in message else "HIGH",
+                        "severity": "CRITICAL"
+                        if "CRITICAL" in message
+                        else "HIGH",
                     }
                 )
                 break
@@ -177,7 +192,9 @@ class AuthorizationTestRunner:
                 self.results["test_suites"][suite_name] = suite_results
             else:
                 print(f"\nWARNING: Test file {test_file} not found")
-                self.results["summary"]["warnings"].append(f"Test file {test_file} not found")
+                self.results["summary"]["warnings"].append(
+                    f"Test file {test_file} not found"
+                )
 
         self.results["metadata"]["end_time"] = datetime.now().isoformat()
 
@@ -213,10 +230,27 @@ class AuthorizationTestRunner:
     def _calculate_coverage(self) -> Dict[str, Any]:
         """Calculate test coverage for authorization scenarios."""
         total_scenarios = {
-            "rbac_boundaries": ["role_hierarchy", "permission_inheritance", "cross_role_access"],
-            "resource_authorization": ["ownership", "cross_tenant", "hierarchy"],
-            "api_authorization": ["endpoint_permissions", "http_methods", "parameter_validation"],
-            "advanced_scenarios": ["abac", "context_aware", "time_based", "location_based"],
+            "rbac_boundaries": [
+                "role_hierarchy",
+                "permission_inheritance",
+                "cross_role_access",
+            ],
+            "resource_authorization": [
+                "ownership",
+                "cross_tenant",
+                "hierarchy",
+            ],
+            "api_authorization": [
+                "endpoint_permissions",
+                "http_methods",
+                "parameter_validation",
+            ],
+            "advanced_scenarios": [
+                "abac",
+                "context_aware",
+                "time_based",
+                "location_based",
+            ],
             "attack_vectors": [
                 "idor",
                 "privilege_escalation",
@@ -235,7 +269,10 @@ class AuthorizationTestRunner:
                 for test in suite_results.get("tests", []):
                     test_name = test.get("name", "").lower()
                     for scenario in scenarios:
-                        if scenario.replace("_", " ") in test_name or scenario in test_name:
+                        if (
+                            scenario.replace("_", " ") in test_name
+                            or scenario in test_name
+                        ):
                             covered += 1
                             break
 
@@ -268,11 +305,18 @@ class AuthorizationTestRunner:
 
         # Check for specific vulnerabilities
         critical_issues = self.results["summary"]["critical_issues"]
-        if any("privilege_escalation" in issue["issue"].lower() for issue in critical_issues):
-            recommendations.append("Implement additional privilege escalation prevention measures")
+        if any(
+            "privilege_escalation" in issue["issue"].lower()
+            for issue in critical_issues
+        ):
+            recommendations.append(
+                "Implement additional privilege escalation prevention measures"
+            )
 
         if any("idor" in issue["issue"].lower() for issue in critical_issues):
-            recommendations.append("Review and strengthen object-level authorization checks")
+            recommendations.append(
+                "Review and strengthen object-level authorization checks"
+            )
 
         # Check coverage
         coverage = self._calculate_coverage()
@@ -299,9 +343,13 @@ class AuthorizationTestRunner:
 
         with open(report_path, "w") as f:
             f.write("# FreeAgentics Authorization Security Test Report\n\n")
-            f.write(f"**Test Run ID:** {self.results['metadata']['test_run_id']}\n")
+            f.write(
+                f"**Test Run ID:** {self.results['metadata']['test_run_id']}\n"
+            )
             f.write(f"**Date:** {self.results['metadata']['start_time']}\n")
-            f.write(f"**Environment:** {self.results['metadata']['environment']}\n\n")
+            f.write(
+                f"**Environment:** {self.results['metadata']['environment']}\n\n"
+            )
 
             # Summary
             f.write("## Summary\n\n")
@@ -321,7 +369,9 @@ class AuthorizationTestRunner:
 
             # Test Suite Results
             f.write("## Test Suite Results\n\n")
-            for suite_name, suite_results in self.results["test_suites"].items():
+            for suite_name, suite_results in self.results[
+                "test_suites"
+            ].items():
                 f.write(f"### {suite_name}\n\n")
 
                 if "summary" in suite_results:
@@ -333,7 +383,9 @@ class AuthorizationTestRunner:
 
                 # Failed tests details
                 failed_tests = [
-                    t for t in suite_results.get("tests", []) if t["outcome"] == "failed"
+                    t
+                    for t in suite_results.get("tests", [])
+                    if t["outcome"] == "failed"
                 ]
                 if failed_tests:
                     f.write("**Failed Tests:**\n")
@@ -353,7 +405,9 @@ class AuthorizationTestRunner:
                 f.write(
                     f"- Scenarios Covered: {coverage['covered_scenarios']}/{coverage['total_scenarios']}\n"
                 )
-                f.write(f"- Coverage Percentage: {coverage['coverage_percentage']:.1f}%\n\n")
+                f.write(
+                    f"- Coverage Percentage: {coverage['coverage_percentage']:.1f}%\n\n"
+                )
 
                 # Vulnerabilities
                 f.write("### Vulnerability Summary\n\n")
@@ -385,7 +439,11 @@ class AuthorizationTestRunner:
         failed = summary["failed"]
 
         print(f"Total Tests: {total}")
-        print(f"Passed: {passed} ({passed/total*100:.1f}%)" if total > 0 else "Passed: 0")
+        print(
+            f"Passed: {passed} ({passed/total*100:.1f}%)"
+            if total > 0
+            else "Passed: 0"
+        )
         print(f"Failed: {failed}")
         print(f"Skipped: {summary['skipped']}")
 
@@ -395,7 +453,9 @@ class AuthorizationTestRunner:
                 print(f"  - {issue['severity']}: {issue['issue']}")
 
         if failed > 0:
-            print("\n❌ AUTHORIZATION TESTS FAILED - DO NOT DEPLOY TO PRODUCTION")
+            print(
+                "\n❌ AUTHORIZATION TESTS FAILED - DO NOT DEPLOY TO PRODUCTION"
+            )
             sys.exit(1)
         else:
             print("\n✅ All authorization tests passed")

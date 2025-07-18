@@ -16,7 +16,10 @@ logger = logging.getLogger(__name__)
 
 try:
     from selenium import webdriver
-    from selenium.common.exceptions import NoSuchElementException, TimeoutException
+    from selenium.common.exceptions import (
+        NoSuchElementException,
+        TimeoutException,
+    )
     from selenium.webdriver.chrome.options import Options as ChromeOptions
     from selenium.webdriver.common.action_chains import ActionChains
     from selenium.webdriver.common.by import By
@@ -52,7 +55,9 @@ class SeleniumDriver(BrowserDriver):
         self.console_logs = []
 
         if not SELENIUM_AVAILABLE:
-            raise ImportError("Selenium is not available. Install with: pip install selenium")
+            raise ImportError(
+                "Selenium is not available. Install with: pip install selenium"
+            )
 
     async def start(self):
         """Start the Selenium browser"""
@@ -88,7 +93,9 @@ class SeleniumDriver(BrowserDriver):
             self.driver.implicitly_wait(self.config.browser_config.timeout)
 
             # Create WebDriverWait instance
-            self.wait = WebDriverWait(self.driver, self.config.browser_config.timeout)
+            self.wait = WebDriverWait(
+                self.driver, self.config.browser_config.timeout
+            )
 
             # Enable logging
             self._enable_logging()
@@ -225,7 +232,9 @@ class SeleniumDriver(BrowserDriver):
 
         return self.driver.execute_script(script)
 
-    async def get_element_attribute(self, selector: str, attribute: str) -> str:
+    async def get_element_attribute(
+        self, selector: str, attribute: str
+    ) -> str:
         """Get element attribute"""
         if not self.driver:
             raise RuntimeError("Browser not started")
@@ -365,14 +374,18 @@ class SeleniumDriver(BrowserDriver):
         if not self.driver:
             raise RuntimeError("Browser not started")
 
-        return self.driver.execute_script(f"return localStorage.getItem('{key}');")
+        return self.driver.execute_script(
+            f"return localStorage.getItem('{key}');"
+        )
 
     async def set_local_storage(self, key: str, value: str):
         """Set local storage item"""
         if not self.driver:
             raise RuntimeError("Browser not started")
 
-        self.driver.execute_script(f"localStorage.setItem('{key}', '{value}');")
+        self.driver.execute_script(
+            f"localStorage.setItem('{key}', '{value}');"
+        )
 
     async def clear_local_storage(self):
         """Clear local storage"""
@@ -388,9 +401,14 @@ class SeleniumDriver(BrowserDriver):
 
         # Wait for document ready state
         wait = WebDriverWait(self.driver, timeout)
-        wait.until(lambda driver: driver.execute_script("return document.readyState") == "complete")
+        wait.until(
+            lambda driver: driver.execute_script("return document.readyState")
+            == "complete"
+        )
 
-    async def wait_for_load_state(self, state: str = "load", timeout: float = 10.0):
+    async def wait_for_load_state(
+        self, state: str = "load", timeout: float = 10.0
+    ):
         """Wait for specific load state"""
         if not self.driver:
             raise RuntimeError("Browser not started")
@@ -412,7 +430,11 @@ class SeleniumDriver(BrowserDriver):
         try:
             logs = self.driver.get_log("browser")
             return [
-                {"type": log["level"], "text": log["message"], "timestamp": log["timestamp"]}
+                {
+                    "type": log["level"],
+                    "text": log["message"],
+                    "timestamp": log["timestamp"],
+                }
                 for log in logs
             ]
         except Exception as e:

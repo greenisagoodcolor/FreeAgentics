@@ -14,7 +14,8 @@ from datetime import datetime
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -65,7 +66,9 @@ async def demonstrate_zero_trust_setup():
             validity_days=30,
         )
         certificates[service] = cert_info
-        print(f"   ✅ Certificate generated (fingerprint: {cert_info.fingerprint[:16]}...)")
+        print(
+            f"   ✅ Certificate generated (fingerprint: {cert_info.fingerprint[:16]}...)"
+        )
 
     # Step 2: Configure Certificate Rotation
     print("\n2️⃣ Setting up Certificate Rotation Policies")
@@ -129,16 +132,38 @@ async def demonstrate_zero_trust_setup():
 
     for policy in service_policies:
         proxy.add_service_policy(policy)
-        print(f"   🛡️  Policy added: {policy.source_service} → {policy.target_service}")
+        print(
+            f"   🛡️  Policy added: {policy.source_service} → {policy.target_service}"
+        )
 
     # Step 4: Test Permission Evaluation
     print("\n4️⃣ Testing Dynamic Permission Evaluation")
 
     test_scenarios = [
-        ("frontend", "api-gateway", "read", {"time": "10:00", "request_count": 100}),
-        ("api-gateway", "auth-service", "authenticate", {"time": "14:00", "request_count": 50}),
-        ("api-gateway", "data-service", "write", {"time": "16:00", "request_count": 200}),
-        ("frontend", "data-service", "read", {"time": "12:00", "request_count": 10}),  # Should fail
+        (
+            "frontend",
+            "api-gateway",
+            "read",
+            {"time": "10:00", "request_count": 100},
+        ),
+        (
+            "api-gateway",
+            "auth-service",
+            "authenticate",
+            {"time": "14:00", "request_count": 50},
+        ),
+        (
+            "api-gateway",
+            "data-service",
+            "write",
+            {"time": "16:00", "request_count": 200},
+        ),
+        (
+            "frontend",
+            "data-service",
+            "read",
+            {"time": "12:00", "request_count": 10},
+        ),  # Should fail
         (
             "api-gateway",
             "auth-service",
@@ -148,7 +173,9 @@ async def demonstrate_zero_trust_setup():
     ]
 
     for source, target, operation, context in test_scenarios:
-        is_allowed = await proxy.evaluate_permission(source, target, operation, context)
+        is_allowed = await proxy.evaluate_permission(
+            source, target, operation, context
+        )
         status = "✅ ALLOWED" if is_allowed else "❌ DENIED"
         print(f"   {status} {source} → {target}:{operation}")
 
@@ -190,10 +217,18 @@ async def demonstrate_zero_trust_setup():
         risk_level = (
             "🔴 HIGH"
             if risk_score.score > 0.7
-            else "🟡 MEDIUM" if risk_score.score > 0.3 else "🟢 LOW"
+            else "🟡 MEDIUM"
+            if risk_score.score > 0.3
+            else "🟢 LOW"
         )
-        reauth = " (requires re-authentication)" if risk_score.requires_reauthentication else ""
-        print(f"   {risk_level} Risk Score: {risk_score.score:.2f} for {session_id}{reauth}")
+        reauth = (
+            " (requires re-authentication)"
+            if risk_score.requires_reauthentication
+            else ""
+        )
+        print(
+            f"   {risk_level} Risk Score: {risk_score.score:.2f} for {session_id}{reauth}"
+        )
 
     # Step 6: Generate Service Mesh Configuration
     print("\n6️⃣ Generating Service Mesh Configuration")
@@ -295,14 +330,20 @@ async def demonstrate_zero_trust_setup():
     print("\n9️⃣ Security Status Summary")
 
     print("   🔐 mTLS Status:")
-    print(f"      • CA Certificate: Valid until {mtls_manager.ca_cert.not_valid_after}")
+    print(
+        f"      • CA Certificate: Valid until {mtls_manager.ca_cert.not_valid_after}"
+    )
     print(f"      • Service Certificates: {len(certificates)} generated")
     print(f"      • Rotation Policies: {len(services)} configured")
 
     print("   🛡️  Access Control Status:")
     print(f"      • Service Policies: {len(service_policies)} configured")
-    print(f"      • Risk Scoring: Enabled with max score {proxy_config.max_risk_score}")
-    print(f"      • Session Timeout: {proxy_config.session_timeout_minutes} minutes")
+    print(
+        f"      • Risk Scoring: Enabled with max score {proxy_config.max_risk_score}"
+    )
+    print(
+        f"      • Session Timeout: {proxy_config.session_timeout_minutes} minutes"
+    )
 
     print("   🌐 Service Mesh Status:")
     print(f"      • Mesh Type: {mesh_config.mesh_type.value}")

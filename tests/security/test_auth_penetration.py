@@ -40,7 +40,12 @@ class PenetrationTestResults:
         self.blocked_attacks = []
 
     def add_attempt(
-        self, attack_type: str, target: str, payload: str, result: str, severity: str = "medium"
+        self,
+        attack_type: str,
+        target: str,
+        payload: str,
+        result: str,
+        severity: str = "medium",
     ):
         """Record an attack attempt."""
         attempt = {
@@ -131,20 +136,34 @@ class TestAuthenticationPenetration:
                 result = InputValidator.validate_sql_input(payload)
                 if result:
                     self.results.add_attempt(
-                        "SQL Injection", "username validation", payload, "blocked", "high"
+                        "SQL Injection",
+                        "username validation",
+                        payload,
+                        "blocked",
+                        "high",
                     )
                 else:
                     self.results.add_attempt(
-                        "SQL Injection", "username validation", payload, "blocked", "high"
+                        "SQL Injection",
+                        "username validation",
+                        payload,
+                        "blocked",
+                        "high",
                     )
             except Exception:
                 self.results.add_attempt(
-                    "SQL Injection", "username validation", payload, "blocked", "high"
+                    "SQL Injection",
+                    "username validation",
+                    payload,
+                    "blocked",
+                    "high",
                 )
 
         # All SQL injection attempts should be blocked
         sql_attacks = [
-            a for a in self.results.attempted_attacks if a["attack_type"] == "SQL Injection"
+            a
+            for a in self.results.attempted_attacks
+            if a["attack_type"] == "SQL Injection"
         ]
         assert all(a["result"] == "blocked" for a in sql_attacks)
 
@@ -178,10 +197,16 @@ class TestAuthenticationPenetration:
                         "XSS", "input validation", payload, "blocked", "medium"
                     )
             except Exception:
-                self.results.add_attempt("XSS", "input validation", payload, "blocked", "medium")
+                self.results.add_attempt(
+                    "XSS", "input validation", payload, "blocked", "medium"
+                )
 
         # All XSS attempts should be blocked
-        xss_attacks = [a for a in self.results.attempted_attacks if a["attack_type"] == "XSS"]
+        xss_attacks = [
+            a
+            for a in self.results.attempted_attacks
+            if a["attack_type"] == "XSS"
+        ]
         assert all(a["result"] == "blocked" for a in xss_attacks)
 
     def test_brute_force_attack_simulation(self):
@@ -211,15 +236,21 @@ class TestAuthenticationPenetration:
 
         self.auth_manager.users[username] = {
             "user": target_user,
-            "password_hash": self.auth_manager.hash_password("ActualSecurePassword123!"),
+            "password_hash": self.auth_manager.hash_password(
+                "ActualSecurePassword123!"
+            ),
         }
 
         # Simulate brute force attempts
-        for i, password in enumerate(common_passwords * 3):  # Try each password 3 times
+        for i, password in enumerate(
+            common_passwords * 3
+        ):  # Try each password 3 times
             try:
                 # Attempt login
                 stored = self.auth_manager.users.get(username)
-                if stored and self.auth_manager.verify_password(password, stored["password_hash"]):
+                if stored and self.auth_manager.verify_password(
+                    password, stored["password_hash"]
+                ):
                     self.results.add_attempt(
                         "Brute Force",
                         "login",
@@ -244,7 +275,8 @@ class TestAuthenticationPenetration:
         brute_force_success = [
             a
             for a in self.results.attempted_attacks
-            if a["attack_type"] == "Brute Force" and a["result"] == "successful"
+            if a["attack_type"] == "Brute Force"
+            and a["result"] == "successful"
         ]
         assert len(brute_force_success) == 0
 
@@ -256,10 +288,14 @@ class TestAuthenticationPenetration:
         # Attack 1: Algorithm confusion attack (try to use HS256 instead of RS256)
         try:
             # Decode token
-            unverified_payload = jwt.decode(valid_token, options={"verify_signature": False})
+            unverified_payload = jwt.decode(
+                valid_token, options={"verify_signature": False}
+            )
 
             # Try to create token with weak algorithm
-            fake_token = jwt.encode(unverified_payload, "secret", algorithm="HS256")
+            fake_token = jwt.encode(
+                unverified_payload, "secret", algorithm="HS256"
+            )
 
             # Try to verify
             try:
@@ -283,21 +319,33 @@ class TestAuthenticationPenetration:
             pass
 
         # Attack 2: Expired token reuse
-        expired_payload = jwt.decode(valid_token, options={"verify_signature": False})
-        expired_payload["exp"] = int((datetime.now(timezone.utc) - timedelta(hours=1)).timestamp())
+        expired_payload = jwt.decode(
+            valid_token, options={"verify_signature": False}
+        )
+        expired_payload["exp"] = int(
+            (datetime.now(timezone.utc) - timedelta(hours=1)).timestamp()
+        )
 
         try:
             # Sign with actual private key (if we had it)
             # In real test, this would fail
-            self.auth_manager.verify_token(valid_token)  # Would fail if actually expired
+            self.auth_manager.verify_token(
+                valid_token
+            )  # Would fail if actually expired
         except:
             self.results.add_attempt(
-                "Token Manipulation", "expired token reuse", "expired token", "blocked", "high"
+                "Token Manipulation",
+                "expired token reuse",
+                "expired token",
+                "blocked",
+                "high",
             )
 
         # Attack 3: Role escalation in token
         try:
-            payload = jwt.decode(valid_token, options={"verify_signature": False})
+            payload = jwt.decode(
+                valid_token, options={"verify_signature": False}
+            )
             payload["role"] = UserRole.ADMIN.value
 
             # Try to create escalated token (would need private key)
@@ -360,7 +408,9 @@ class TestAuthenticationPenetration:
         # Attack 1: Try to use observer token for admin actions
         observer_data = self.auth_manager.verify_token(observer_token)
 
-        admin_only_permissions = [p for p in observer_data.permissions if p.value == "admin_system"]
+        admin_only_permissions = [
+            p for p in observer_data.permissions if p.value == "admin_system"
+        ]
 
         if len(admin_only_permissions) > 0:
             self.results.add_attempt(
@@ -457,7 +507,9 @@ class TestAuthenticationPenetration:
             users.append(user)
             self.auth_manager.users[user.username] = {
                 "user": user,
-                "password_hash": self.auth_manager.hash_password(f"Pass{i}123!"),
+                "password_hash": self.auth_manager.hash_password(
+                    f"Pass{i}123!"
+                ),
             }
 
         # Test timing differences for valid vs invalid usernames
@@ -469,7 +521,9 @@ class TestAuthenticationPenetration:
             try:
                 stored = self.auth_manager.users.get("timinguser1")
                 if stored:
-                    self.auth_manager.verify_password("wrongpass", stored["password_hash"])
+                    self.auth_manager.verify_password(
+                        "wrongpass", stored["password_hash"]
+                    )
             except:
                 pass
             valid_user_time = time.time() - start
@@ -479,7 +533,9 @@ class TestAuthenticationPenetration:
             try:
                 stored = self.auth_manager.users.get("nonexistentuser")
                 if stored:
-                    self.auth_manager.verify_password("wrongpass", stored["password_hash"])
+                    self.auth_manager.verify_password(
+                        "wrongpass", stored["password_hash"]
+                    )
             except:
                 pass
             invalid_user_time = time.time() - start
@@ -493,7 +549,9 @@ class TestAuthenticationPenetration:
             )
 
         # Check if timing differences are significant
-        avg_difference = sum(r["difference"] for r in timing_results) / len(timing_results)
+        avg_difference = sum(r["difference"] for r in timing_results) / len(
+            timing_results
+        )
 
         if avg_difference > 0.001:  # 1ms difference
             self.results.add_attempt(
@@ -520,11 +578,19 @@ class TestAuthenticationPenetration:
         try:
             InputValidator.sanitize_gmn_spec(large_payload)
             self.results.add_attempt(
-                "Resource Exhaustion", "large payload", "1MB string", "successful", "medium"
+                "Resource Exhaustion",
+                "large payload",
+                "1MB string",
+                "successful",
+                "medium",
             )
         except ValueError:
             self.results.add_attempt(
-                "Resource Exhaustion", "large payload", "1MB string", "blocked", "medium"
+                "Resource Exhaustion",
+                "large payload",
+                "1MB string",
+                "blocked",
+                "medium",
             )
 
         # Attack 2: Deeply nested JSON
@@ -544,7 +610,11 @@ class TestAuthenticationPenetration:
             )
         except:
             self.results.add_attempt(
-                "Resource Exhaustion", "deeply nested JSON", "50 levels deep", "blocked", "medium"
+                "Resource Exhaustion",
+                "deeply nested JSON",
+                "50 levels deep",
+                "blocked",
+                "medium",
             )
 
         # Attack 3: Regex DoS (ReDoS)
@@ -577,24 +647,40 @@ class TestAuthenticationPenetration:
         # Attack 1: Token theft and reuse from different IP
         # This is simulated - real implementation would check IP
         self.results.add_attempt(
-            "Session Hijacking", "token theft", "reuse token from different IP", "blocked", "high"
+            "Session Hijacking",
+            "token theft",
+            "reuse token from different IP",
+            "blocked",
+            "high",
         )
 
         # Attack 2: Session fixation
         # Try to set a known session ID
         self.results.add_attempt(
-            "Session Hijacking", "session fixation", "force known session ID", "blocked", "high"
+            "Session Hijacking",
+            "session fixation",
+            "force known session ID",
+            "blocked",
+            "high",
         )
 
         # Attack 3: Cross-site request forgery (CSRF)
         # Check if CSRF protection exists
         if hasattr(self.auth_manager, "csrf_protection"):
             self.results.add_attempt(
-                "Session Hijacking", "CSRF attack", "cross-site request", "blocked", "high"
+                "Session Hijacking",
+                "CSRF attack",
+                "cross-site request",
+                "blocked",
+                "high",
             )
         else:
             self.results.add_attempt(
-                "Session Hijacking", "CSRF attack", "no CSRF protection", "successful", "high"
+                "Session Hijacking",
+                "CSRF attack",
+                "no CSRF protection",
+                "successful",
+                "high",
             )
 
     def test_command_injection_attempts(self):
@@ -617,20 +703,34 @@ class TestAuthenticationPenetration:
                 result = InputValidator.validate_command_injection(payload)
                 if result:
                     self.results.add_attempt(
-                        "Command Injection", "input validation", payload, "blocked", "critical"
+                        "Command Injection",
+                        "input validation",
+                        payload,
+                        "blocked",
+                        "critical",
                     )
                 else:
                     self.results.add_attempt(
-                        "Command Injection", "input validation", payload, "blocked", "critical"
+                        "Command Injection",
+                        "input validation",
+                        payload,
+                        "blocked",
+                        "critical",
                     )
             except:
                 self.results.add_attempt(
-                    "Command Injection", "input validation", payload, "blocked", "critical"
+                    "Command Injection",
+                    "input validation",
+                    payload,
+                    "blocked",
+                    "critical",
                 )
 
         # All command injection attempts should be blocked
         cmd_attacks = [
-            a for a in self.results.attempted_attacks if a["attack_type"] == "Command Injection"
+            a
+            for a in self.results.attempted_attacks
+            if a["attack_type"] == "Command Injection"
         ]
         assert all(a["result"] == "blocked" for a in cmd_attacks)
 
@@ -658,12 +758,16 @@ class TestAuthenticationPenetration:
         print(f"Total attack attempts: {report['summary']['total_attempts']}")
         print(f"Successful attacks: {report['summary']['successful_attacks']}")
         print(f"Blocked attacks: {report['summary']['blocked_attacks']}")
-        print(f"Vulnerabilities found: {report['summary']['vulnerabilities_found']}")
+        print(
+            f"Vulnerabilities found: {report['summary']['vulnerabilities_found']}"
+        )
 
         if report["vulnerabilities"]:
             print("\nVulnerabilities:")
             for vuln in report["vulnerabilities"]:
-                print(f"  - {vuln['type']} ({vuln['severity']}): {vuln['description']}")
+                print(
+                    f"  - {vuln['type']} ({vuln['severity']}): {vuln['description']}"
+                )
 
 
 class TestAdvancedPenetration:
@@ -741,7 +845,9 @@ class TestAdvancedPenetration:
         # Launch concurrent threads
         threads = []
         for i in range(10):
-            thread = threading.Thread(target=attempt_concurrent_login, args=(f"race-{i}",))
+            thread = threading.Thread(
+                target=attempt_concurrent_login, args=(f"race-{i}",)
+            )
             threads.append(thread)
             thread.start()
 

@@ -42,7 +42,9 @@ class MutationOperator(ABC):
     """Abstract base class for graph mutation operators."""
 
     @abstractmethod
-    def apply(self, graph: KnowledgeGraph, context: Dict[str, Any]) -> EvolutionMetrics:
+    def apply(
+        self, graph: KnowledgeGraph, context: Dict[str, Any]
+    ) -> EvolutionMetrics:
         """Apply mutation to the graph.
 
         Args:
@@ -55,7 +57,9 @@ class MutationOperator(ABC):
         pass
 
     @abstractmethod
-    def can_apply(self, graph: KnowledgeGraph, context: Dict[str, Any]) -> bool:
+    def can_apply(
+        self, graph: KnowledgeGraph, context: Dict[str, Any]
+    ) -> bool:
         """Check if this mutation can be applied.
 
         Args:
@@ -71,11 +75,15 @@ class MutationOperator(ABC):
 class ObservationIntegrator(MutationOperator):
     """Integrate new observations into the knowledge graph."""
 
-    def can_apply(self, graph: KnowledgeGraph, context: Dict[str, Any]) -> bool:
+    def can_apply(
+        self, graph: KnowledgeGraph, context: Dict[str, Any]
+    ) -> bool:
         """Check if observations are available to integrate."""
         return "observations" in context and len(context["observations"]) > 0
 
-    def apply(self, graph: KnowledgeGraph, context: Dict[str, Any]) -> EvolutionMetrics:
+    def apply(
+        self, graph: KnowledgeGraph, context: Dict[str, Any]
+    ) -> EvolutionMetrics:
         """Integrate observations into the graph."""
         metrics = EvolutionMetrics()
         observations = context.get("observations", [])
@@ -123,11 +131,15 @@ class ObservationIntegrator(MutationOperator):
 class BeliefUpdater(MutationOperator):
     """Update agent beliefs based on new evidence."""
 
-    def can_apply(self, graph: KnowledgeGraph, context: Dict[str, Any]) -> bool:
+    def can_apply(
+        self, graph: KnowledgeGraph, context: Dict[str, Any]
+    ) -> bool:
         """Check if belief updates are needed."""
         return "agent_id" in context and "evidence" in context
 
-    def apply(self, graph: KnowledgeGraph, context: Dict[str, Any]) -> EvolutionMetrics:
+    def apply(
+        self, graph: KnowledgeGraph, context: Dict[str, Any]
+    ) -> EvolutionMetrics:
         """Update beliefs based on evidence."""
         metrics = EvolutionMetrics()
         agent_id = context["agent_id"]
@@ -135,7 +147,9 @@ class BeliefUpdater(MutationOperator):
 
         # Find existing beliefs
         belief_nodes = [
-            n for n in graph.find_nodes_by_type(NodeType.BELIEF) if n.source == agent_id
+            n
+            for n in graph.find_nodes_by_type(NodeType.BELIEF)
+            if n.source == agent_id
         ]
 
         for belief in belief_nodes:
@@ -192,7 +206,9 @@ class BeliefUpdater(MutationOperator):
 
         return metrics
 
-    def _contradicts(self, belief: KnowledgeNode, evidence: Dict[str, Any]) -> bool:
+    def _contradicts(
+        self, belief: KnowledgeNode, evidence: Dict[str, Any]
+    ) -> bool:
         """Check if evidence contradicts a belief."""
         # Simplified contradiction check
         contradictions = evidence.get("contradictions", [])
@@ -206,13 +222,18 @@ class BeliefUpdater(MutationOperator):
                 return True
         return False
 
-    def _supports(self, belief: KnowledgeNode, evidence: Dict[str, Any]) -> bool:
+    def _supports(
+        self, belief: KnowledgeNode, evidence: Dict[str, Any]
+    ) -> bool:
         """Check if evidence supports a belief."""
         supports = evidence.get("supports", [])
         for support in supports:
             if belief.label == support.get("belief_label"):
                 return True
-            if all(belief.properties.get(k) == v for k, v in support.get("properties", {}).items()):
+            if all(
+                belief.properties.get(k) == v
+                for k, v in support.get("properties", {}).items()
+            ):
                 return True
         return False
 
@@ -220,7 +241,9 @@ class BeliefUpdater(MutationOperator):
 class ConceptGeneralizer(MutationOperator):
     """Generalize from specific instances to abstract concepts."""
 
-    def can_apply(self, graph: KnowledgeGraph, context: Dict[str, Any]) -> bool:
+    def can_apply(
+        self, graph: KnowledgeGraph, context: Dict[str, Any]
+    ) -> bool:
         """Check if there are enough instances to generalize."""
         min_instances = context.get("min_instances", 3)
         entity_nodes = graph.find_nodes_by_type(NodeType.ENTITY)
@@ -233,9 +256,13 @@ class ConceptGeneralizer(MutationOperator):
                 property_groups[key] = []
             property_groups[key].append(node)
 
-        return any(len(group) >= min_instances for group in property_groups.values())
+        return any(
+            len(group) >= min_instances for group in property_groups.values()
+        )
 
-    def apply(self, graph: KnowledgeGraph, context: Dict[str, Any]) -> EvolutionMetrics:
+    def apply(
+        self, graph: KnowledgeGraph, context: Dict[str, Any]
+    ) -> EvolutionMetrics:
         """Create concept nodes from similar entities."""
         metrics = EvolutionMetrics()
         min_instances = context.get("min_instances", 3)
@@ -299,7 +326,9 @@ class ConceptGeneralizer(MutationOperator):
 
         return clusters
 
-    def _calculate_similarity(self, node1: KnowledgeNode, node2: KnowledgeNode) -> float:
+    def _calculate_similarity(
+        self, node1: KnowledgeNode, node2: KnowledgeNode
+    ) -> float:
         """Calculate similarity between two nodes."""
         # Property key overlap
         keys1 = set(node1.properties.keys())
@@ -310,7 +339,9 @@ class ConceptGeneralizer(MutationOperator):
         common_keys = keys1 & keys2
         if common_keys:
             value_matches = sum(
-                1 for k in common_keys if node1.properties[k] == node2.properties[k]
+                1
+                for k in common_keys
+                if node1.properties[k] == node2.properties[k]
             )
             value_similarity = value_matches / len(common_keys)
         else:
@@ -320,9 +351,15 @@ class ConceptGeneralizer(MutationOperator):
         label_similarity = 1.0 if node1.label == node2.label else 0.0
 
         # Weighted average
-        return 0.3 * key_similarity + 0.5 * value_similarity + 0.2 * label_similarity
+        return (
+            0.3 * key_similarity
+            + 0.5 * value_similarity
+            + 0.2 * label_similarity
+        )
 
-    def _extract_common_properties(self, nodes: List[KnowledgeNode]) -> Dict[str, Any]:
+    def _extract_common_properties(
+        self, nodes: List[KnowledgeNode]
+    ) -> Dict[str, Any]:
         """Extract common properties from a cluster of nodes."""
         if not nodes:
             return {}
@@ -352,11 +389,18 @@ class ConceptGeneralizer(MutationOperator):
 class CausalLearner(MutationOperator):
     """Learn causal relationships from temporal patterns."""
 
-    def can_apply(self, graph: KnowledgeGraph, context: Dict[str, Any]) -> bool:
+    def can_apply(
+        self, graph: KnowledgeGraph, context: Dict[str, Any]
+    ) -> bool:
         """Check if there are temporal patterns to analyze."""
-        return "temporal_events" in context and len(context["temporal_events"]) > 1
+        return (
+            "temporal_events" in context
+            and len(context["temporal_events"]) > 1
+        )
 
-    def apply(self, graph: KnowledgeGraph, context: Dict[str, Any]) -> EvolutionMetrics:
+    def apply(
+        self, graph: KnowledgeGraph, context: Dict[str, Any]
+    ) -> EvolutionMetrics:
         """Identify and add causal relationships."""
         metrics = EvolutionMetrics()
         events = context.get("temporal_events", [])
@@ -374,7 +418,9 @@ class CausalLearner(MutationOperator):
             time_diff = event2["timestamp"] - event1["timestamp"]
             if time_diff < context.get("max_causal_delay", 10):
                 # Calculate causality confidence
-                confidence = self._calculate_causality_confidence(event1, event2, sorted_events)
+                confidence = self._calculate_causality_confidence(
+                    event1, event2, sorted_events
+                )
 
                 if confidence >= confidence_threshold:
                     # Create event nodes if needed
@@ -400,7 +446,10 @@ class CausalLearner(MutationOperator):
         return metrics
 
     def _calculate_causality_confidence(
-        self, event1: Dict[str, Any], event2: Dict[str, Any], all_events: List[Dict[str, Any]]
+        self,
+        event1: Dict[str, Any],
+        event2: Dict[str, Any],
+        all_events: List[Dict[str, Any]],
     ) -> float:
         """Calculate confidence in causal relationship."""
         # Count co-occurrences
@@ -422,7 +471,9 @@ class CausalLearner(MutationOperator):
         # Basic conditional probability
         return co_occurrences / event1_occurrences
 
-    def _events_match(self, event1: Dict[str, Any], event2: Dict[str, Any]) -> bool:
+    def _events_match(
+        self, event1: Dict[str, Any], event2: Dict[str, Any]
+    ) -> bool:
         """Check if two events match (same type and key properties)."""
         if event1.get("type") != event2.get("type"):
             return False
@@ -436,7 +487,9 @@ class CausalLearner(MutationOperator):
 
         return True
 
-    def _ensure_event_node(self, graph: KnowledgeGraph, event: Dict[str, Any]) -> Optional[str]:
+    def _ensure_event_node(
+        self, graph: KnowledgeGraph, event: Dict[str, Any]
+    ) -> Optional[str]:
         """Ensure event exists as node in graph."""
         # Check if event node already exists
         event_id = event.get("id")
@@ -465,7 +518,9 @@ class CausalLearner(MutationOperator):
 class ContradictionResolver(MutationOperator):
     """Resolve contradictions in the knowledge graph."""
 
-    def can_apply(self, graph: KnowledgeGraph, context: Dict[str, Any]) -> bool:
+    def can_apply(
+        self, graph: KnowledgeGraph, context: Dict[str, Any]
+    ) -> bool:
         """Check if there are contradictions to resolve."""
         # Simple check: look for nodes with conflicting properties
         nodes_by_subject = {}
@@ -483,10 +538,14 @@ class ContradictionResolver(MutationOperator):
 
         return False
 
-    def apply(self, graph: KnowledgeGraph, context: Dict[str, Any]) -> EvolutionMetrics:
+    def apply(
+        self, graph: KnowledgeGraph, context: Dict[str, Any]
+    ) -> EvolutionMetrics:
         """Resolve contradictions in the graph."""
         metrics = EvolutionMetrics()
-        resolution_strategy = context.get("resolution_strategy", "highest_confidence")
+        resolution_strategy = context.get(
+            "resolution_strategy", "highest_confidence"
+        )
 
         # Find contradictory nodes
         contradictions = self._find_contradictions(graph)
@@ -494,7 +553,9 @@ class ContradictionResolver(MutationOperator):
         for contradiction_set in contradictions:
             if resolution_strategy == "highest_confidence":
                 # Keep node with highest confidence
-                sorted_nodes = sorted(contradiction_set, key=lambda n: n.confidence, reverse=True)
+                sorted_nodes = sorted(
+                    contradiction_set, key=lambda n: n.confidence, reverse=True
+                )
                 keeper = sorted_nodes[0]
 
                 # Remove others
@@ -545,7 +606,9 @@ class ContradictionResolver(MutationOperator):
 
         return metrics
 
-    def _find_contradictions(self, graph: KnowledgeGraph) -> List[List[KnowledgeNode]]:
+    def _find_contradictions(
+        self, graph: KnowledgeGraph
+    ) -> List[List[KnowledgeNode]]:
         """Find sets of contradictory nodes."""
         contradictions = []
         processed = set()
@@ -576,7 +639,9 @@ class ContradictionResolver(MutationOperator):
                     return True
         return False
 
-    def _are_contradictory(self, node1: KnowledgeNode, node2: KnowledgeNode) -> bool:
+    def _are_contradictory(
+        self, node1: KnowledgeNode, node2: KnowledgeNode
+    ) -> bool:
         """Check if two nodes are contradictory."""
         # Same subject but conflicting properties
         subject1 = node1.properties.get("subject")
@@ -584,7 +649,9 @@ class ContradictionResolver(MutationOperator):
 
         if subject1 and subject1 == subject2:
             # Check for conflicting boolean properties
-            for key in set(node1.properties.keys()) & set(node2.properties.keys()):
+            for key in set(node1.properties.keys()) & set(
+                node2.properties.keys()
+            ):
                 val1 = node1.properties[key]
                 val2 = node2.properties[key]
 
@@ -623,7 +690,9 @@ class EvolutionEngine:
         """
         self.operators.append(operator)
 
-    def evolve(self, graph: KnowledgeGraph, context: Dict[str, Any]) -> EvolutionMetrics:
+    def evolve(
+        self, graph: KnowledgeGraph, context: Dict[str, Any]
+    ) -> EvolutionMetrics:
         """Evolve the knowledge graph based on context.
 
         Args:
@@ -648,14 +717,22 @@ class EvolutionEngine:
                     total_metrics.nodes_updated += metrics.nodes_updated
                     total_metrics.edges_added += metrics.edges_added
                     total_metrics.edges_removed += metrics.edges_removed
-                    total_metrics.confidence_changes += metrics.confidence_changes
-                    total_metrics.communities_merged += metrics.communities_merged
-                    total_metrics.contradictions_resolved += metrics.contradictions_resolved
+                    total_metrics.confidence_changes += (
+                        metrics.confidence_changes
+                    )
+                    total_metrics.communities_merged += (
+                        metrics.communities_merged
+                    )
+                    total_metrics.contradictions_resolved += (
+                        metrics.contradictions_resolved
+                    )
 
                     applied_operators.append(operator.__class__.__name__)
 
                 except Exception as e:
-                    logger.error(f"Error applying {operator.__class__.__name__}: {e}")
+                    logger.error(
+                        f"Error applying {operator.__class__.__name__}: {e}"
+                    )
 
         # Record evolution history
         self.evolution_history.append(
@@ -668,10 +745,14 @@ class EvolutionEngine:
             }
         )
 
-        logger.info(f"Evolution complete. Applied {len(applied_operators)} operators")
+        logger.info(
+            f"Evolution complete. Applied {len(applied_operators)} operators"
+        )
         return total_metrics
 
-    def suggest_evolution(self, graph: KnowledgeGraph, context: Dict[str, Any]) -> List[str]:
+    def suggest_evolution(
+        self, graph: KnowledgeGraph, context: Dict[str, Any]
+    ) -> List[str]:
         """Suggest which operators would be beneficial.
 
         Args:

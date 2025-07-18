@@ -163,7 +163,10 @@ def calculate(expression):
                                 "extra": {
                                     "severity": "ERROR",
                                     "message": "Eval usage is dangerous",
-                                    "metadata": {"category": "security", "owasp": ["A03:2021"]},
+                                    "metadata": {
+                                        "category": "security",
+                                        "owasp": ["A03:2021"],
+                                    },
                                 },
                             }
                         ]
@@ -244,7 +247,6 @@ def calculate(expression):
             patch.object(SemgrepScanner, "scan") as mock_semgrep,
             patch.object(SafetyScanner, "scan") as mock_safety,
         ):
-
             mock_bandit.return_value = [
                 Finding(
                     tool="bandit",
@@ -356,7 +358,9 @@ pandas==1.2.0
         )
         return req_file
 
-    def test_dependency_scanner_python(self, monitor_config, test_requirements):
+    def test_dependency_scanner_python(
+        self, monitor_config, test_requirements
+    ):
         """Test Python dependency scanning"""
         scanner = DependencyScanner(monitor_config)
 
@@ -373,7 +377,10 @@ pandas==1.2.0
                             {"name": "requests", "version": "2.25.0"},
                             {"name": "numpy", "version": "1.19.0"},
                             {"name": "pandas", "version": "1.2.0"},
-                            {"name": "urllib3", "version": "1.26.0"},  # Transitive
+                            {
+                                "name": "urllib3",
+                                "version": "1.26.0",
+                            },  # Transitive
                         ]
                     ),
                 )
@@ -493,10 +500,13 @@ pandas==1.2.0
 
         with (
             patch.object(monitor.scanner, "scan_dependencies") as mock_scan,
-            patch.object(VulnerabilityDatabase, "check_vulnerabilities") as mock_check_vulns,
-            patch.object(monitor.update_manager, "check_updates") as mock_check_updates,
+            patch.object(
+                VulnerabilityDatabase, "check_vulnerabilities"
+            ) as mock_check_vulns,
+            patch.object(
+                monitor.update_manager, "check_updates"
+            ) as mock_check_updates,
         ):
-
             mock_dependencies = [
                 Dependency(name="django", version="3.2.0", source="pip"),
                 Dependency(name="requests", version="2.25.0", source="pip"),

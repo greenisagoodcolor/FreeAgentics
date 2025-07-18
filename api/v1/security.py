@@ -144,7 +144,9 @@ class IncidentResponse(BaseModel):
 @router.get("/security/summary", response_model=SecuritySummaryResponse)
 @require_permission(Permission.ADMIN_SYSTEM)
 async def get_security_summary(
-    hours: int = Query(24, ge=1, le=168, description="Hours to look back (max 7 days)"),
+    hours: int = Query(
+        24, ge=1, le=168, description="Hours to look back (max 7 days)"
+    ),
     current_user: TokenData = Depends(get_current_user),
 ) -> SecuritySummaryResponse:
     """Get summary of security events.
@@ -173,12 +175,22 @@ async def get_security_summary(
 @router.get("/security/events", response_model=List[SecurityEventResponse])
 @require_permission(Permission.ADMIN_SYSTEM)
 async def get_security_events(
-    event_type: Optional[SecurityEventType] = Query(None, description="Filter by event type"),
-    severity: Optional[SecurityEventSeverity] = Query(None, description="Filter by severity"),
+    event_type: Optional[SecurityEventType] = Query(
+        None, description="Filter by event type"
+    ),
+    severity: Optional[SecurityEventSeverity] = Query(
+        None, description="Filter by severity"
+    ),
     user_id: Optional[str] = Query(None, description="Filter by user ID"),
-    ip_address: Optional[str] = Query(None, description="Filter by IP address"),
-    hours: int = Query(24, ge=1, le=168, description="Hours to look back (max 7 days)"),
-    limit: int = Query(100, ge=1, le=1000, description="Maximum events to return"),
+    ip_address: Optional[str] = Query(
+        None, description="Filter by IP address"
+    ),
+    hours: int = Query(
+        24, ge=1, le=168, description="Hours to look back (max 7 days)"
+    ),
+    limit: int = Query(
+        100, ge=1, le=1000, description="Maximum events to return"
+    ),
     current_user: TokenData = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> List[SecurityEventResponse]:
@@ -197,7 +209,9 @@ async def get_security_events(
         try:
             # Build query
             cutoff = datetime.utcnow() - timedelta(hours=hours)
-            query = audit_db.query(SecurityAuditLog).filter(SecurityAuditLog.timestamp >= cutoff)
+            query = audit_db.query(SecurityAuditLog).filter(
+                SecurityAuditLog.timestamp >= cutoff
+            )
 
             # Apply filters
             if event_type:
@@ -210,7 +224,11 @@ async def get_security_events(
                 query = query.filter(SecurityAuditLog.ip_address == ip_address)
 
             # Order by timestamp descending and limit
-            events = query.order_by(SecurityAuditLog.timestamp.desc()).limit(limit).all()
+            events = (
+                query.order_by(SecurityAuditLog.timestamp.desc())
+                .limit(limit)
+                .all()
+            )
 
             # Convert to response models
             return [
@@ -226,7 +244,9 @@ async def get_security_events(
                     method=event.method,
                     status_code=event.status_code,
                     message=event.message,
-                    details=json.loads(event.details) if event.details else None,
+                    details=json.loads(event.details)
+                    if event.details
+                    else None,
                 )
                 for event in events
             ]
@@ -253,10 +273,12 @@ async def get_suspicious_activity(
     return {
         "suspicious_ips": list(security_auditor.suspicious_ips),
         "failed_login_tracking": {
-            key: len(attempts) for key, attempts in security_auditor.failed_login_attempts.items()
+            key: len(attempts)
+            for key, attempts in security_auditor.failed_login_attempts.items()
         },
         "rate_limit_violations": {
-            ip: len(violations) for ip, violations in security_auditor.rate_limit_violations.items()
+            ip: len(violations)
+            for ip, violations in security_auditor.rate_limit_violations.items()
         },
     }
 
@@ -374,7 +396,8 @@ async def resolve_security_alert(
 
     if not success:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"Alert {alert_id} not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Alert {alert_id} not found",
         )
 
     # Log the resolution
@@ -394,7 +417,9 @@ async def resolve_security_alert(
 @require_permission(Permission.ADMIN_SYSTEM)
 async def mark_alert_false_positive(
     alert_id: str,
-    notes: str = Query("", description="Notes about why this is a false positive"),
+    notes: str = Query(
+        "", description="Notes about why this is a false positive"
+    ),
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, str]:
     """Mark a security alert as false positive.
@@ -405,7 +430,8 @@ async def mark_alert_false_positive(
 
     if not success:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"Alert {alert_id} not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Alert {alert_id} not found",
         )
 
     # Log the false positive marking
@@ -421,10 +447,14 @@ async def mark_alert_false_positive(
     return {"message": f"Alert {alert_id} marked as false positive"}
 
 
-@router.get("/security/vulnerabilities", response_model=List[VulnerabilityResponse])
+@router.get(
+    "/security/vulnerabilities", response_model=List[VulnerabilityResponse]
+)
 @require_permission(Permission.ADMIN_SYSTEM)
 async def get_vulnerabilities(
-    severity: Optional[SeverityLevel] = Query(None, description="Filter by severity"),
+    severity: Optional[SeverityLevel] = Query(
+        None, description="Filter by severity"
+    ),
     vuln_type: Optional[VulnerabilityType] = Query(
         None, description="Filter by vulnerability type"
     ),
@@ -434,7 +464,9 @@ async def get_vulnerabilities(
 
     Requires ADMIN_SYSTEM permission.
     """
-    vulnerabilities = vulnerability_scanner.get_vulnerabilities(severity, vuln_type)
+    vulnerabilities = vulnerability_scanner.get_vulnerabilities(
+        severity, vuln_type
+    )
 
     return [
         VulnerabilityResponse(
@@ -500,7 +532,9 @@ async def suppress_vulnerability(
 @require_permission(Permission.ADMIN_SYSTEM)
 async def mark_vulnerability_false_positive(
     vuln_id: str,
-    reason: str = Query("", description="Reason for marking as false positive"),
+    reason: str = Query(
+        "", description="Reason for marking as false positive"
+    ),
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, str]:
     """Mark a vulnerability as false positive.
@@ -525,7 +559,9 @@ async def mark_vulnerability_false_positive(
 @router.get("/security/incidents", response_model=List[IncidentResponse])
 @require_permission(Permission.ADMIN_SYSTEM)
 async def get_security_incidents(
-    limit: int = Query(20, ge=1, le=100, description="Number of incidents to return"),
+    limit: int = Query(
+        20, ge=1, le=100, description="Number of incidents to return"
+    ),
     current_user: TokenData = Depends(get_current_user),
 ) -> List[IncidentResponse]:
     """Get security incidents.
@@ -582,7 +618,8 @@ async def resolve_incident(
 
     if not success:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"Incident {incident_id} not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Incident {incident_id} not found",
         )
 
     # Log the resolution
@@ -592,7 +629,10 @@ async def resolve_incident(
         f"Security incident resolved: {incident_id}",
         user_id=current_user.user_id,
         username=current_user.username,
-        details={"incident_id": incident_id, "resolution_notes": resolution_notes},
+        details={
+            "incident_id": incident_id,
+            "resolution_notes": resolution_notes,
+        },
     )
 
     return {"message": f"Incident {incident_id} resolved successfully"}
@@ -602,7 +642,9 @@ async def resolve_incident(
 @require_permission(Permission.ADMIN_SYSTEM)
 async def mark_incident_false_positive(
     incident_id: str,
-    notes: str = Query("", description="Notes about why this is a false positive"),
+    notes: str = Query(
+        "", description="Notes about why this is a false positive"
+    ),
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, str]:
     """Mark a security incident as false positive.
@@ -613,7 +655,8 @@ async def mark_incident_false_positive(
 
     if not success:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"Incident {incident_id} not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Incident {incident_id} not found",
         )
 
     # Log the false positive marking
@@ -659,7 +702,10 @@ async def unblock_ip(
     success = incident_response.unblock_ip(ip)
 
     if not success:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"IP {ip} is not blocked")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"IP {ip} is not blocked",
+        )
 
     # Log the unblocking
     security_auditor.log_event(
@@ -699,11 +745,11 @@ async def trigger_security_scan(
     return {"message": "Security scan triggered successfully"}
 
 
-import asyncio
+import asyncio  # noqa: E402
 
 # Import json for parsing details
-import json
-import os
+import json  # noqa: E402
+import os  # noqa: E402
 
 
 class SSLHealthResponse(BaseModel):
@@ -796,7 +842,9 @@ async def get_ssl_health() -> SSLHealthResponse:
         )
 
 
-@router.get("/security/certificate-info", response_model=CertificateInfoResponse)
+@router.get(
+    "/security/certificate-info", response_model=CertificateInfoResponse
+)
 @require_permission(Permission.ADMIN_SYSTEM)
 async def get_certificate_info(
     current_user: TokenData = Depends(get_current_user),
@@ -809,13 +857,21 @@ async def get_certificate_info(
 
     if not Path(ssl_config.cert_path).exists():
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="SSL certificate not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="SSL certificate not found",
         )
 
     try:
         # Use openssl to get certificate info
         result = subprocess.run(
-            ["openssl", "x509", "-in", ssl_config.cert_path, "-noout", "-text"],
+            [
+                "openssl",
+                "x509",
+                "-in",
+                ssl_config.cert_path,
+                "-noout",
+                "-text",
+            ],
             capture_output=True,
             text=True,
             check=True,
@@ -826,8 +882,12 @@ async def get_certificate_info(
         # Parse certificate information (simplified)
         subject = "CN=freeagentics.com"  # Would parse from cert_text
         issuer = "Let's Encrypt Authority X3"  # Would parse from cert_text
-        valid_from = datetime.utcnow() - timedelta(days=10)  # Would parse from cert_text
-        valid_until = datetime.utcnow() + timedelta(days=80)  # Would parse from cert_text
+        valid_from = datetime.utcnow() - timedelta(
+            days=10
+        )  # Would parse from cert_text
+        valid_until = datetime.utcnow() + timedelta(
+            days=80
+        )  # Would parse from cert_text
         days_until_expiry = (valid_until - datetime.utcnow()).days
 
         return CertificateInfoResponse(
@@ -839,7 +899,10 @@ async def get_certificate_info(
             serial_number="12345678901234567890",  # Would parse from cert_text
             signature_algorithm="sha256WithRSAEncryption",  # Would parse from cert_text
             key_size=2048,  # Would parse from cert_text
-            san_domains=["freeagentics.com", "www.freeagentics.com"],  # Would parse from cert_text
+            san_domains=[
+                "freeagentics.com",
+                "www.freeagentics.com",
+            ],  # Would parse from cert_text
             is_wildcard=False,
             is_self_signed=False,
         )
@@ -866,7 +929,10 @@ async def trigger_ssl_renewal(
 
         # Check if renewal is needed
         time_until_expiry = cert_manager.check_certificate_expiry()
-        if time_until_expiry and time_until_expiry.days > ssl_config.cert_renewal_days:
+        if (
+            time_until_expiry
+            and time_until_expiry.days > ssl_config.cert_renewal_days
+        ):
             return {
                 "message": f"Certificate renewal not needed. {time_until_expiry.days} days remaining."
             }

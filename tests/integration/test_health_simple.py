@@ -38,8 +38,12 @@ class TestHealthEndpointIntegration:
 
         # SQLite database for testing
         SQLALCHEMY_DATABASE_URL = "sqlite:///./test_health.db"
-        engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
-        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        engine = create_engine(
+            SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+        )
+        SessionLocal = sessionmaker(
+            autocommit=False, autoflush=False, bind=engine
+        )
 
         def get_db():
             db = SessionLocal()
@@ -75,7 +79,11 @@ class TestHealthEndpointIntegration:
             if request.url.path == "/health":
                 return JSONResponse(
                     status_code=503,
-                    content={"status": "unhealthy", "db": "disconnected", "error": str(exc)},
+                    content={
+                        "status": "unhealthy",
+                        "db": "disconnected",
+                        "error": str(exc),
+                    },
                 )
             return JSONResponse(status_code=500, content={"detail": str(exc)})
 
@@ -114,8 +122,12 @@ class TestHealthEndpointIntegration:
         app = FastAPI()
 
         # Create a broken database connection
-        engine = create_engine("postgresql://invalid:invalid@invalid:5432/invalid")
-        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        engine = create_engine(
+            "postgresql://invalid:invalid@invalid:5432/invalid"
+        )
+        SessionLocal = sessionmaker(
+            autocommit=False, autoflush=False, bind=engine
+        )
 
         def get_db():
             db = SessionLocal()
@@ -151,7 +163,11 @@ class TestHealthEndpointIntegration:
             if request.url.path == "/health":
                 return JSONResponse(
                     status_code=503,
-                    content={"status": "unhealthy", "db": "disconnected", "error": str(exc)},
+                    content={
+                        "status": "unhealthy",
+                        "db": "disconnected",
+                        "error": str(exc),
+                    },
                 )
             return JSONResponse(status_code=500, content={"detail": str(exc)})
 

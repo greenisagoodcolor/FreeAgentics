@@ -62,23 +62,23 @@ fi
 # Generate the parameters
 if openssl dhparam -out "$OUTPUT_FILE" "$DH_SIZE"; then
     log "DH parameters generated successfully!"
-    
+
     # Show file information
     log "File location: $OUTPUT_FILE"
     log "File size: $(du -h "$OUTPUT_FILE" | cut -f1)"
     log "File permissions: $(ls -l "$OUTPUT_FILE" | cut -d' ' -f1)"
-    
+
     # Set proper permissions
     chmod 644 "$OUTPUT_FILE"
     log "Permissions set to 644"
-    
+
     # Verify the generated parameters
     if openssl dhparam -in "$OUTPUT_FILE" -text -noout > /dev/null 2>&1; then
         log "DH parameters verification: PASSED"
     else
         error "DH parameters verification: FAILED"
     fi
-    
+
     log "DH parameters are ready for use in nginx configuration"
 else
     error "Failed to generate DH parameters"

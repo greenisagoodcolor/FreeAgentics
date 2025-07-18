@@ -35,7 +35,11 @@ class MetricType(Enum):
 
 
 def record_metric(
-    name: str, value: float, source: MetricSource, type: MetricType, tags: Optional[Dict] = None
+    name: str,
+    value: float,
+    source: MetricSource,
+    type: MetricType,
+    tags: Optional[Dict] = None,
 ):
     """Simple metric recording for benchmarks."""
     pass  # For now, just pass - this would integrate with real metrics system
@@ -107,7 +111,9 @@ class EnhancedPerformanceBenchmark:
         # Record initial system state
         process = psutil.Process()
         self.metrics["initial_cpu_percent"] = process.cpu_percent()
-        self.metrics["initial_memory_mb"] = process.memory_info().rss / (1024 * 1024)
+        self.metrics["initial_memory_mb"] = process.memory_info().rss / (
+            1024 * 1024
+        )
 
     def end_benchmark(self):
         """End benchmark timing and calculate final metrics."""
@@ -118,12 +124,16 @@ class EnhancedPerformanceBenchmark:
         # Record final system state
         process = psutil.Process()
         self.metrics["final_cpu_percent"] = process.cpu_percent()
-        self.metrics["final_memory_mb"] = process.memory_info().rss / (1024 * 1024)
+        self.metrics["final_memory_mb"] = process.memory_info().rss / (
+            1024 * 1024
+        )
         self.metrics["memory_delta_mb"] = (
             self.metrics["final_memory_mb"] - self.metrics["initial_memory_mb"]
         )
 
-    def record_metric(self, name: str, value: float, tags: Optional[Dict] = None):
+    def record_metric(
+        self, name: str, value: float, tags: Optional[Dict] = None
+    ):
         """Record a metric to both internal storage and unified collector."""
         self.metrics[name] = value
 
@@ -150,7 +160,9 @@ class ComprehensiveSingleAgentBenchmark(EnhancedPerformanceBenchmark):
 
     def __init__(self):
         super().__init__(
-            "comprehensive_single_agent", "Comprehensive single agent performance analysis", "agent"
+            "comprehensive_single_agent",
+            "Comprehensive single agent performance analysis",
+            "agent",
         )
 
     def run(self) -> Dict[str, Any]:
@@ -159,7 +171,9 @@ class ComprehensiveSingleAgentBenchmark(EnhancedPerformanceBenchmark):
         self.start_benchmark()
 
         # Create test agent
-        agent = BasicExplorerAgent("benchmark-agent", "Benchmark Agent", grid_size=10)
+        agent = BasicExplorerAgent(
+            "benchmark-agent", "Benchmark Agent", grid_size=10
+        )
         agent.start()
 
         # Measure baseline system state
@@ -185,7 +199,9 @@ class ComprehensiveSingleAgentBenchmark(EnhancedPerformanceBenchmark):
 
         return results
 
-    def _run_inference_tests(self, agent, baseline_memory: float) -> Dict[str, Any]:
+    def _run_inference_tests(
+        self, agent, baseline_memory: float
+    ) -> Dict[str, Any]:
         """Run comprehensive inference performance tests."""
         # Test different observation patterns
         test_scenarios = [
@@ -193,7 +209,9 @@ class ComprehensiveSingleAgentBenchmark(EnhancedPerformanceBenchmark):
                 "name": "simple",
                 "observation": {
                     "position": [2, 2],
-                    "surroundings": np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]]),
+                    "surroundings": np.array(
+                        [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+                    ),
                 },
                 "iterations": 100,
             },
@@ -201,7 +219,9 @@ class ComprehensiveSingleAgentBenchmark(EnhancedPerformanceBenchmark):
                 "name": "complex",
                 "observation": {
                     "position": [5, 5],
-                    "surroundings": np.array([[1, 0, 1], [0, 1, 0], [1, 0, 1]]),
+                    "surroundings": np.array(
+                        [[1, 0, 1], [0, 1, 0], [1, 0, 1]]
+                    ),
                 },
                 "iterations": 50,
             },
@@ -245,7 +265,9 @@ class ComprehensiveSingleAgentBenchmark(EnhancedPerformanceBenchmark):
 
             # Calculate scenario statistics
             scenario_results[f"{scenario['name']}_avg_ms"] = np.mean(times)
-            scenario_results[f"{scenario['name']}_median_ms"] = np.median(times)
+            scenario_results[f"{scenario['name']}_median_ms"] = np.median(
+                times
+            )
             scenario_results[f"{scenario['name']}_std_ms"] = np.std(times)
             scenario_results[f"{scenario['name']}_min_ms"] = np.min(times)
             scenario_results[f"{scenario['name']}_max_ms"] = np.max(times)
@@ -266,7 +288,9 @@ class ComprehensiveSingleAgentBenchmark(EnhancedPerformanceBenchmark):
             **scenario_results,
         }
 
-    def _analyze_memory_usage(self, agent, baseline_memory: float) -> Dict[str, Any]:
+    def _analyze_memory_usage(
+        self, agent, baseline_memory: float
+    ) -> Dict[str, Any]:
         """Analyze memory usage patterns."""
         process = psutil.Process()
 
@@ -295,7 +319,9 @@ class ComprehensiveSingleAgentBenchmark(EnhancedPerformanceBenchmark):
 
         # Analyze memory growth trend
         if len(memory_samples) > 2:
-            memory_slope = np.polyfit(range(len(memory_samples)), memory_samples, 1)[0]
+            memory_slope = np.polyfit(
+                range(len(memory_samples)), memory_samples, 1
+            )[0]
         else:
             memory_slope = 0
 
@@ -351,11 +377,31 @@ class ComprehensiveSingleAgentBenchmark(EnhancedPerformanceBenchmark):
 
         # Performance validations
         validations = [
-            ("avg_inference_time_ms", "single_agent_inference_ms", "lower_is_better"),
-            ("p95_inference_time_ms", "single_agent_p95_ms", "lower_is_better"),
-            ("p99_inference_time_ms", "single_agent_p99_ms", "lower_is_better"),
-            ("memory_per_agent_mb", "single_agent_memory_mb", "lower_is_better"),
-            ("sustained_throughput_ops_sec", "single_agent_throughput_ops_sec", "higher_is_better"),
+            (
+                "avg_inference_time_ms",
+                "single_agent_inference_ms",
+                "lower_is_better",
+            ),
+            (
+                "p95_inference_time_ms",
+                "single_agent_p95_ms",
+                "lower_is_better",
+            ),
+            (
+                "p99_inference_time_ms",
+                "single_agent_p99_ms",
+                "lower_is_better",
+            ),
+            (
+                "memory_per_agent_mb",
+                "single_agent_memory_mb",
+                "lower_is_better",
+            ),
+            (
+                "sustained_throughput_ops_sec",
+                "single_agent_throughput_ops_sec",
+                "higher_is_better",
+            ),
         ]
 
         for metric_name, baseline_key, direction in validations:
@@ -378,7 +424,9 @@ class ComprehensiveSingleAgentBenchmark(EnhancedPerformanceBenchmark):
                         "metric": "memory_growth",
                         "severity": "critical",
                         "actual": slope,
-                        "threshold": PERFORMANCE_BASELINES["memory_leak_threshold_mb"],
+                        "threshold": PERFORMANCE_BASELINES[
+                            "memory_leak_threshold_mb"
+                        ],
                         "message": "Potential memory leak detected",
                     }
                 )
@@ -386,7 +434,12 @@ class ComprehensiveSingleAgentBenchmark(EnhancedPerformanceBenchmark):
         return validation
 
     def _validate_metric(
-        self, validation: Dict, metric_name: str, actual: float, baseline: float, direction: str
+        self,
+        validation: Dict,
+        metric_name: str,
+        actual: float,
+        baseline: float,
+        direction: str,
     ):
         """Validate a single metric against its baseline."""
         if direction == "lower_is_better":
@@ -435,7 +488,9 @@ class ScalabilityAnalysisBenchmark(EnhancedPerformanceBenchmark):
 
     def __init__(self):
         super().__init__(
-            "scalability_analysis", "Comprehensive multi-agent scalability analysis", "coordination"
+            "scalability_analysis",
+            "Comprehensive multi-agent scalability analysis",
+            "coordination",
         )
 
     def run(self) -> Dict[str, Any]:
@@ -491,7 +546,9 @@ class ScalabilityAnalysisBenchmark(EnhancedPerformanceBenchmark):
             # Record metrics
             self.record_metric(f"efficiency_{agent_count}_agents", efficiency)
             self.record_metric(f"throughput_{agent_count}_agents", throughput)
-            self.record_metric(f"memory_total_{agent_count}_agents", memory_total)
+            self.record_metric(
+                f"memory_total_{agent_count}_agents", memory_total
+            )
 
         # Calculate scalability metrics
         scalability_metrics = self._calculate_scalability_metrics(results)
@@ -506,7 +563,9 @@ class ScalabilityAnalysisBenchmark(EnhancedPerformanceBenchmark):
         """Test coordination performance with specified number of agents."""
         # Create agents
         agents = [
-            BasicExplorerAgent(f"scale-agent-{i}", f"Scale Agent {i}", grid_size=5)
+            BasicExplorerAgent(
+                f"scale-agent-{i}", f"Scale Agent {i}", grid_size=5
+            )
             for i in range(num_agents)
         ]
 
@@ -522,7 +581,9 @@ class ScalabilityAnalysisBenchmark(EnhancedPerformanceBenchmark):
             for _ in range(10):
                 obs = {
                     "position": [2, 2],
-                    "surroundings": np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]]),
+                    "surroundings": np.array(
+                        [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+                    ),
                 }
 
                 start_time = time.time()
@@ -544,7 +605,9 @@ class ScalabilityAnalysisBenchmark(EnhancedPerformanceBenchmark):
             for i in range(operations_per_agent):
                 obs = {
                     "position": [2, 2],
-                    "surroundings": np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]]),
+                    "surroundings": np.array(
+                        [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+                    ),
                 }
 
                 start_time = time.time()
@@ -563,7 +626,9 @@ class ScalabilityAnalysisBenchmark(EnhancedPerformanceBenchmark):
         coordination_start = time.time()
 
         with ThreadPoolExecutor(max_workers=num_agents) as executor:
-            futures = [executor.submit(agent_worker, agent) for agent in agents]
+            futures = [
+                executor.submit(agent_worker, agent) for agent in agents
+            ]
             all_results = [future.result() for future in futures]
 
         coordination_duration = time.time() - coordination_start
@@ -575,7 +640,9 @@ class ScalabilityAnalysisBenchmark(EnhancedPerformanceBenchmark):
 
         # Theoretical optimal time (perfect parallelism)
         theoretical_time = baseline_avg * operations_per_agent
-        coordination_efficiency = (theoretical_time / coordination_duration) * 100
+        coordination_efficiency = (
+            theoretical_time / coordination_duration
+        ) * 100
 
         # Throughput calculations
         total_throughput = total_operations / coordination_duration
@@ -600,15 +667,21 @@ class ScalabilityAnalysisBenchmark(EnhancedPerformanceBenchmark):
             "overhead_percent": 100 - coordination_efficiency,
         }
 
-    def _calculate_scalability_metrics(self, results: Dict[str, Any]) -> Dict[str, Any]:
+    def _calculate_scalability_metrics(
+        self, results: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Calculate overall scalability metrics."""
         efficiency_data = results["efficiency_curve"]
         throughput_data = results["throughput_curve"]
         memory_data = results["memory_scaling"]
 
         # Find efficiency at key points
-        efficiency_10 = next((d["efficiency"] for d in efficiency_data if d["agents"] == 10), 0)
-        efficiency_20 = next((d["efficiency"] for d in efficiency_data if d["agents"] == 20), 0)
+        efficiency_10 = next(
+            (d["efficiency"] for d in efficiency_data if d["agents"] == 10), 0
+        )
+        efficiency_20 = next(
+            (d["efficiency"] for d in efficiency_data if d["agents"] == 20), 0
+        )
 
         # Calculate efficiency degradation
         if len(efficiency_data) > 1:
@@ -621,7 +694,9 @@ class ScalabilityAnalysisBenchmark(EnhancedPerformanceBenchmark):
             efficiency_slope = 0
 
         # Memory scaling analysis
-        memory_per_agent_avg = np.mean([d["memory_per_agent"] for d in memory_data])
+        memory_per_agent_avg = np.mean(
+            [d["memory_per_agent"] for d in memory_data]
+        )
         memory_variance = np.var([d["memory_per_agent"] for d in memory_data])
 
         # Throughput scaling analysis
@@ -633,10 +708,14 @@ class ScalabilityAnalysisBenchmark(EnhancedPerformanceBenchmark):
             curr_agents = throughput_data[i]["agents"]
 
             if prev_throughput > 0:
-                scaling_factor = (curr_throughput / prev_throughput) / (curr_agents / prev_agents)
+                scaling_factor = (curr_throughput / prev_throughput) / (
+                    curr_agents / prev_agents
+                )
                 throughput_scaling.append(scaling_factor)
 
-        avg_scaling_factor = np.mean(throughput_scaling) if throughput_scaling else 1.0
+        avg_scaling_factor = (
+            np.mean(throughput_scaling) if throughput_scaling else 1.0
+        )
 
         return {
             "efficiency_at_10_agents": efficiency_10,
@@ -645,18 +724,26 @@ class ScalabilityAnalysisBenchmark(EnhancedPerformanceBenchmark):
             "memory_per_agent_avg_mb": memory_per_agent_avg,
             "memory_scaling_variance": memory_variance,
             "avg_throughput_scaling_factor": avg_scaling_factor,
-            "max_efficient_agents": self._find_max_efficient_agents(efficiency_data),
-            "scalability_rating": self._calculate_scalability_rating(efficiency_data),
+            "max_efficient_agents": self._find_max_efficient_agents(
+                efficiency_data
+            ),
+            "scalability_rating": self._calculate_scalability_rating(
+                efficiency_data
+            ),
         }
 
     def _find_max_efficient_agents(self, efficiency_data: List[Dict]) -> int:
         """Find maximum number of agents with acceptable efficiency."""
-        for data in sorted(efficiency_data, key=lambda x: x["agents"], reverse=True):
+        for data in sorted(
+            efficiency_data, key=lambda x: x["agents"], reverse=True
+        ):
             if data["efficiency"] >= 50:  # 50% efficiency threshold
                 return data["agents"]
         return 1
 
-    def _calculate_scalability_rating(self, efficiency_data: List[Dict]) -> str:
+    def _calculate_scalability_rating(
+        self, efficiency_data: List[Dict]
+    ) -> str:
         """Calculate overall scalability rating."""
         if not efficiency_data:
             return "unknown"
@@ -689,7 +776,9 @@ class ScalabilityAnalysisBenchmark(EnhancedPerformanceBenchmark):
         # Check efficiency at key points
         if "efficiency_at_10_agents" in results:
             efficiency_10 = results["efficiency_at_10_agents"]
-            baseline_10 = PERFORMANCE_BASELINES["coordination_efficiency_10_agents"]
+            baseline_10 = PERFORMANCE_BASELINES[
+                "coordination_efficiency_10_agents"
+            ]
 
             if efficiency_10 < baseline_10 * 0.75:  # 25% below baseline
                 validation["status"] = "fail"
@@ -741,7 +830,9 @@ class EnhancedCIBenchmarkSuite:
     """Enhanced CI benchmark suite with comprehensive analysis."""
 
     def __init__(self, output_dir: Optional[Path] = None):
-        self.output_dir = output_dir or Path("tests/performance/enhanced_ci_results")
+        self.output_dir = output_dir or Path(
+            "tests/performance/enhanced_ci_results"
+        )
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
         self.benchmarks = [
@@ -767,8 +858,11 @@ class EnhancedCIBenchmarkSuite:
                     "system": os.uname().sysname,
                     "python_version": os.sys.version,
                     "cpu_count": os.cpu_count(),
-                    "memory_total_gb": psutil.virtual_memory().total / (1024**3),
-                    "cpu_freq_max": psutil.cpu_freq().max if psutil.cpu_freq() else None,
+                    "memory_total_gb": psutil.virtual_memory().total
+                    / (1024**3),
+                    "cpu_freq_max": psutil.cpu_freq().max
+                    if psutil.cpu_freq()
+                    else None,
                 },
                 "baselines": PERFORMANCE_BASELINES,
                 "thresholds": REGRESSION_THRESHOLDS,
@@ -813,7 +907,9 @@ class EnhancedCIBenchmarkSuite:
                 # Update summary
                 self._update_summary(results, validation)
 
-                logger.info(f"Completed {benchmark.name}: {validation['status']}")
+                logger.info(
+                    f"Completed {benchmark.name}: {validation['status']}"
+                )
 
             except Exception as e:
                 logger.error(f"Error running {benchmark.name}: {e}")
@@ -832,7 +928,9 @@ class EnhancedCIBenchmarkSuite:
                 results["overall_status"] = "fail"
 
         # Generate performance analysis
-        results["performance_analysis"] = self._generate_performance_analysis(results)
+        results["performance_analysis"] = self._generate_performance_analysis(
+            results
+        )
 
         # Finalize results
         suite_duration = time.time() - suite_start
@@ -870,9 +968,13 @@ class EnhancedCIBenchmarkSuite:
             elif regression["severity"] == "warning":
                 results["summary"]["warning_regressions"] += 1
 
-        results["summary"]["total_improvements"] += len(validation.get("improvements", []))
+        results["summary"]["total_improvements"] += len(
+            validation.get("improvements", [])
+        )
 
-    def _generate_performance_analysis(self, results: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_performance_analysis(
+        self, results: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Generate comprehensive performance analysis."""
         analysis = {
             "overall_health": "unknown",
@@ -901,7 +1003,8 @@ class EnhancedCIBenchmarkSuite:
                             "benchmark": bench_name,
                             "metric": regression.get("metric", "unknown"),
                             "regression": regression.get(
-                                "regression_percent", regression.get("actual", 0)
+                                "regression_percent",
+                                regression.get("actual", 0),
                             ),
                             "impact": "high",
                         }
@@ -941,23 +1044,35 @@ class EnhancedCIBenchmarkSuite:
         # Generate detailed report
         self._generate_detailed_report(results, timestamp)
 
-    def _generate_detailed_report(self, results: Dict[str, Any], timestamp: str):
+    def _generate_detailed_report(
+        self, results: Dict[str, Any], timestamp: str
+    ):
         """Generate detailed performance report."""
-        report_path = self.output_dir / f"enhanced_performance_report_{timestamp}.md"
+        report_path = (
+            self.output_dir / f"enhanced_performance_report_{timestamp}.md"
+        )
 
         with open(report_path, "w") as f:
             f.write("# Enhanced CI Performance Report\n\n")
             f.write(f"**Generated**: {results['suite_info']['timestamp']}\n")
-            f.write(f"**Duration**: {results['suite_info']['duration_seconds']:.2f}s\n")
+            f.write(
+                f"**Duration**: {results['suite_info']['duration_seconds']:.2f}s\n"
+            )
             f.write(f"**Status**: {results['overall_status'].upper()}\n")
-            f.write(f"**Suite Version**: {results['suite_info']['suite_version']}\n\n")
+            f.write(
+                f"**Suite Version**: {results['suite_info']['suite_version']}\n\n"
+            )
 
             # Performance analysis
             analysis = results["performance_analysis"]
             f.write("## Performance Analysis\n\n")
             f.write(f"- **Overall Health**: {analysis['overall_health']}\n")
-            f.write(f"- **Production Readiness**: {analysis['production_readiness']}\n")
-            f.write(f"- **Critical Issues**: {len(analysis['critical_issues'])}\n\n")
+            f.write(
+                f"- **Production Readiness**: {analysis['production_readiness']}\n"
+            )
+            f.write(
+                f"- **Critical Issues**: {len(analysis['critical_issues'])}\n\n"
+            )
 
             if analysis["critical_issues"]:
                 f.write("### Critical Issues\n\n")
@@ -980,11 +1095,17 @@ class EnhancedCIBenchmarkSuite:
             for bench_name, bench_data in results["benchmarks"].items():
                 f.write(f"### {bench_name}\n\n")
                 f.write(f"**Category**: {bench_data.get('category', 'N/A')}\n")
-                f.write(f"**Description**: {bench_data.get('description', 'N/A')}\n")
-                f.write(f"**Duration**: {bench_data.get('duration_seconds', 0):.2f}s\n")
+                f.write(
+                    f"**Description**: {bench_data.get('description', 'N/A')}\n"
+                )
+                f.write(
+                    f"**Duration**: {bench_data.get('duration_seconds', 0):.2f}s\n"
+                )
 
                 validation = bench_data.get("validation", {})
-                f.write(f"**Status**: {validation.get('status', 'unknown').upper()}\n\n")
+                f.write(
+                    f"**Status**: {validation.get('status', 'unknown').upper()}\n\n"
+                )
 
                 # Performance metrics
                 result = bench_data.get("result", {})
@@ -1013,9 +1134,13 @@ class EnhancedCIBenchmarkSuite:
                     f.write("**Regressions**:\n")
                     for reg in validation["regressions"]:
                         metric = reg.get("metric", "unknown")
-                        regression = reg.get("regression_percent", reg.get("actual", 0))
+                        regression = reg.get(
+                            "regression_percent", reg.get("actual", 0)
+                        )
                         severity = reg.get("severity", "unknown")
-                        f.write(f"- {metric}: {regression:.1f}% ({severity})\n")
+                        f.write(
+                            f"- {metric}: {regression:.1f}% ({severity})\n"
+                        )
                     f.write("\n")
 
                 if validation.get("improvements"):
@@ -1034,10 +1159,18 @@ def main():
     """Run the enhanced CI performance benchmark suite."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Run enhanced CI performance benchmarks")
-    parser.add_argument("--output-dir", type=Path, help="Output directory for results")
-    parser.add_argument("--quick", action="store_true", help="Run in quick mode for CI")
-    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose logging")
+    parser = argparse.ArgumentParser(
+        description="Run enhanced CI performance benchmarks"
+    )
+    parser.add_argument(
+        "--output-dir", type=Path, help="Output directory for results"
+    )
+    parser.add_argument(
+        "--quick", action="store_true", help="Run in quick mode for CI"
+    )
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Verbose logging"
+    )
 
     args = parser.parse_args()
 

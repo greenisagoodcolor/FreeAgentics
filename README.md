@@ -39,11 +39,43 @@ FreeAgentics creates **AI agents** using **Active Inference** - a mathematical f
 ```bash
 git clone https://github.com/your-org/freeagentics.git
 cd freeagentics
+
+# Option 1: Use SQLite fallback (no PostgreSQL required)
+cp .env.development .env
 make install
 make dev
+
+# Option 2: Use PostgreSQL (recommended for production-like testing)
+# Set DATABASE_URL in .env first:
+# DATABASE_URL=postgresql://postgres:postgres@localhost:5432/freeagentics_dev
+make install
+make dev
+
 # Basic UI available at http://localhost:3000
 # API docs at http://localhost:8000/docs
 ```
+
+### **Development Environment Setup**
+
+The project now includes a SQLite fallback for easier development setup:
+
+1. **Copy the development environment file**:
+   ```bash
+   cp .env.development .env
+   ```
+
+2. **SQLite Fallback (Default for Development)**:
+   - When `DEVELOPMENT_MODE=true` and no `DATABASE_URL` is set, the system automatically uses SQLite
+   - Creates `freeagentics_dev.db` in the project root
+   - Perfect for quick prototyping and development
+   - **Note**: Not suitable for production or multi-agent testing
+
+3. **PostgreSQL Setup (Optional but Recommended)**:
+   - For full functionality and production-like testing
+   - Set `DATABASE_URL` in your `.env` file:
+     ```
+     DATABASE_URL=postgresql://postgres:postgres@localhost:5432/freeagentics_dev
+     ```
 
 ### **Try the Active Inference Demo**
 
@@ -75,6 +107,25 @@ make kill-ports       # Fix "port in use" errors
 make reset            # Nuclear option: clean restart
 make status           # See what's running where
 ```
+
+### **Dependency Installation Details**
+
+The `make install` command handles all dependencies automatically:
+
+1. **Python Dependencies**:
+   - Creates a virtual environment in `venv/`
+   - Installs from `requirements.txt` (including `inferactively-pymdp==0.0.7.1`)
+   - All Active Inference and PyMDP dependencies are pinned for stability
+
+2. **Node.js Dependencies**:
+   - Installs frontend dependencies in `web/node_modules/`
+   - Uses `npm install` with package-lock.json for reproducible builds
+
+3. **Common Installation Issues**:
+   - **"Module not found"**: Run `make clean && make install`
+   - **Python version mismatch**: Ensure Python 3.9+ is installed
+   - **Node version issues**: Requires Node.js 18+
+   - **Permission errors**: Don't use `sudo` with `make install`
 
 ## 📊 Implementation Status
 
@@ -178,13 +229,47 @@ Following Arch Linux principles of simplicity and clarity:
 **Python/AI Developers**: Check `agents/` and `inference/engine/` for Active Inference math  
 **Full-Stack Developers**: API layer in `api/main.py` and `websocket/` real-time updates
 
+## 🔧 Environment Configuration
+
+### **Environment Variables (.env file)**
+
+The project uses environment variables for configuration. A `.env.development` file is provided with sensible defaults:
+
+```bash
+# Required for development
+DEVELOPMENT_MODE=true              # Enables SQLite fallback and dev features
+DATABASE_URL=                      # Leave empty for SQLite, or set PostgreSQL URL
+SECRET_KEY=dev-secret-key         # Change in production!
+JWT_SECRET=dev-jwt-secret         # Change in production!
+
+# Optional services
+REDIS_URL=redis://localhost:6379/0  # Optional, uses in-memory fallback if not set
+
+# API Configuration
+API_HOST=0.0.0.0
+API_PORT=8000
+NEXT_PUBLIC_API_URL=http://localhost:8000
+
+# Debug settings
+DEBUG=true
+DEBUG_SQL=false                    # Set to true to see SQL queries
+LOG_LEVEL=DEBUG
+```
+
+### **Environment Setup Priority**
+
+1. **Development (Default)**: Copy `.env.development` to `.env` for quick start
+2. **Custom Development**: Modify `.env` with your PostgreSQL or Redis URLs
+3. **Production**: Never use `.env.development` values in production
+
 ## 🆘 Common Issues & Fixes
 
 **"Port already in use"** → `make kill-ports`  
 **"Module not found"** → `make clean && make install`  
 **"Tests failing"** → `make test-full --tb=long --vvv` (max verbosity)  
 **"White screen"** → `make dev-frontend` (check build errors)  
-**"Agents not responding"** → `make dev-backend` (check Python logs)
+**"Agents not responding"** → `make dev-backend` (check Python logs)  
+**"Database connection failed"** → Check `DATABASE_URL` in `.env` or use SQLite fallback
 
 ## 📊 Development Status & Quality Metrics
 

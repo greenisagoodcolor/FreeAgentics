@@ -33,7 +33,8 @@ from world.grid_world import GridWorld, GridWorldConfig, Position
 
 # Setup logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -45,7 +46,9 @@ def main():
 
     # Verify PyMDP is available
     if not PYMDP_AVAILABLE:
-        print("❌ PyMDP not available! This demo requires real Active Inference.")
+        print(
+            "❌ PyMDP not available! This demo requires real Active Inference."
+        )
         print("Install with: pip install inferactively-pymdp==0.0.7.1")
         return
 
@@ -68,7 +71,9 @@ def main():
     world.set_cell(Position(3, 3), -1)  # Obstacle
     world.set_cell(Position(1, 6), 1)  # Another goal
 
-    print(f"✅ Created {config.width}x{config.height} world with goals and obstacles")
+    print(
+        f"✅ Created {config.width}x{config.height} world with goals and obstacles"
+    )
     print()
 
     # Create agents with real Active Inference
@@ -79,10 +84,14 @@ def main():
     explorer.start()
 
     # Resource collector agent
-    collector = ResourceCollectorAgent("collector_1", "Resource Collector", grid_size=8)
+    collector = ResourceCollectorAgent(
+        "collector_1", "Resource Collector", grid_size=8
+    )
     collector.start()
 
-    print(f"✅ Created {len([explorer, collector])} agents with PyMDP Active Inference")
+    print(
+        f"✅ Created {len([explorer, collector])} agents with PyMDP Active Inference"
+    )
 
     # Show agent configurations
     print("\n🔧 Agent Configurations:")
@@ -109,7 +118,9 @@ def main():
         # Explorer agent step
         explorer_obs = {
             "position": explorer.position.copy(),
-            "surroundings": world.get_observation(explorer.position[0], explorer.position[1]),
+            "surroundings": world.get_observation(
+                explorer.position[0], explorer.position[1]
+            ),
         }
 
         explorer_action = explorer.step(explorer_obs)
@@ -117,14 +128,20 @@ def main():
 
         # Show Active Inference metrics
         if "belief_entropy" in explorer.metrics:
-            print(f"    Belief entropy: {explorer.metrics['belief_entropy']:.3f}")
+            print(
+                f"    Belief entropy: {explorer.metrics['belief_entropy']:.3f}"
+            )
         if "expected_free_energy" in explorer.metrics:
-            print(f"    Expected free energy: {explorer.metrics['expected_free_energy']:.3f}")
+            print(
+                f"    Expected free energy: {explorer.metrics['expected_free_energy']:.3f}"
+            )
 
         # Resource collector step
         collector_obs = {
             "position": collector.position.copy(),
-            "surroundings": world.get_observation(collector.position[0], collector.position[1]),
+            "surroundings": world.get_observation(
+                collector.position[0], collector.position[1]
+            ),
             "resources": {},
             "current_load": collector.current_load,
         }
@@ -208,15 +225,21 @@ def main():
     print(f"  Total steps: {explorer_status['total_steps']}")
     print(f"  Final position: {explorer.position}")
     if "belief_entropy" in explorer.metrics:
-        print(f"  Final belief entropy: {explorer.metrics['belief_entropy']:.3f}")
+        print(
+            f"  Final belief entropy: {explorer.metrics['belief_entropy']:.3f}"
+        )
     if "total_free_energy" in explorer.metrics:
-        print(f"  Total free energy: {explorer.metrics['total_free_energy']:.3f}")
+        print(
+            f"  Total free energy: {explorer.metrics['total_free_energy']:.3f}"
+        )
 
     print("\n📦 Resource Collector:")
     collector_status = collector.get_status()
     print(f"  Total steps: {collector_status['total_steps']}")
     print(f"  Final position: {collector.position}")
-    print(f"  Collection efficiency: {collector_status['collection_efficiency']}")
+    print(
+        f"  Collection efficiency: {collector_status['collection_efficiency']}"
+    )
     print(f"  Known resources: {collector_status['known_resources']}")
 
     print("\n🧠 Knowledge Graph:")
@@ -225,7 +248,9 @@ def main():
     print(f"  Graph version: {knowledge_graph.version}")
 
     print("\n✅ Demo Complete!")
-    print("🎉 FreeAgentics successfully demonstrated real Active Inference with PyMDP!")
+    print(
+        "🎉 FreeAgentics successfully demonstrated real Active Inference with PyMDP!"
+    )
 
     # Stop agents
     explorer.stop()

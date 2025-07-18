@@ -16,13 +16,13 @@ ALTER SYSTEM SET log_min_duration_statement = 1000;
 
 -- Create performance monitoring view
 CREATE OR REPLACE VIEW database_performance AS
-SELECT 
+SELECT
     schemaname,
     tablename,
     attname,
     n_distinct,
     correlation
-FROM pg_stats 
+FROM pg_stats
 WHERE schemaname NOT IN ('information_schema', 'pg_catalog');
 
 -- Grant necessary permissions
@@ -39,6 +39,6 @@ GRANT CONNECT ON DATABASE freeagentics TO monitoring;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO monitoring;
 
 -- Log initialization completion
-INSERT INTO pg_stat_statements_info 
+INSERT INTO pg_stat_statements_info
 SELECT 'Database initialized for production' AS note
 WHERE EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_stat_statements');

@@ -115,7 +115,9 @@ class TestGraphStorageEdgeCases:
             pytest.fail("Circular reference caused infinite recursion")
         except Exception as e:
             # Should handle with specific error
-            assert "circular" in str(e).lower() or "reference" in str(e).lower()
+            assert (
+                "circular" in str(e).lower() or "reference" in str(e).lower()
+            )
 
     def test_storage_with_very_large_data(self):
         """Test storage of very large data structures."""
@@ -350,9 +352,7 @@ class TestGMNParserEdgeCases:
         parser = GMNParser()
 
         # Test with unicode content
-        unicode_gmn = (
-            '{"nodes": [{"id": "节点_1", "名称": "测试节点", "description": "包含中文的节点"}]}'
-        )
+        unicode_gmn = '{"nodes": [{"id": "节点_1", "名称": "测试节点", "description": "包含中文的节点"}]}'
 
         try:
             result = parser.parse(unicode_gmn)
@@ -468,7 +468,14 @@ class TestBeliefCompressionEdgeCases:
         compressor = BeliefCompressor()
 
         # Test with extreme values
-        extreme_beliefs = [float("inf"), float("-inf"), float("nan"), 0.0, 1.0, -1.0]
+        extreme_beliefs = [
+            float("inf"),
+            float("-inf"),
+            float("nan"),
+            0.0,
+            1.0,
+            -1.0,
+        ]
 
         try:
             result = compressor.compress(extreme_beliefs)
@@ -602,7 +609,9 @@ class TestSecurityMiddlewareEdgeCases:
                 # Should not raise unhandled exceptions
             except Exception as e:
                 # Should handle with specific security error
-                assert "security" in str(e).lower() or "request" in str(e).lower()
+                assert (
+                    "security" in str(e).lower() or "request" in str(e).lower()
+                )
 
     def test_middleware_with_missing_headers(self):
         """Test security middleware with missing headers."""
@@ -685,7 +694,9 @@ class TestFileSystemEdgeCases:
             try:
                 # Try to create temporary file with invalid path
                 if path:
-                    with tempfile.NamedTemporaryFile(prefix=path, delete=False) as f:
+                    with tempfile.NamedTemporaryFile(
+                        prefix=path, delete=False
+                    ) as f:
                         f.write(b"test")
                         temp_path = f.name
 

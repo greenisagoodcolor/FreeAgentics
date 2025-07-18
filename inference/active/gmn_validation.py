@@ -23,7 +23,11 @@ from typing import Any, Dict, List, Optional
 
 import numpy as np
 
-from inference.active.gmn_parser import GMNEdgeType, GMNNodeType, GMNValidationError
+from inference.active.gmn_parser import (
+    GMNEdgeType,
+    GMNNodeType,
+    GMNValidationError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +64,10 @@ class ValidationResult:
     def add_error(self, validator: str, message: str, **kwargs):
         """Add an error to the validation result."""
         error = ValidationError(
-            validator=validator, level=ValidationLevel.ERROR, message=message, **kwargs
+            validator=validator,
+            level=ValidationLevel.ERROR,
+            message=message,
+            **kwargs,
         )
         self.errors.append(error)
         self.is_valid = False
@@ -68,7 +75,10 @@ class ValidationResult:
     def add_warning(self, validator: str, message: str, **kwargs):
         """Add a warning to the validation result."""
         warning = ValidationError(
-            validator=validator, level=ValidationLevel.WARNING, message=message, **kwargs
+            validator=validator,
+            level=ValidationLevel.WARNING,
+            message=message,
+            **kwargs,
         )
         self.warnings.append(warning)
 
@@ -91,7 +101,9 @@ class GMNSyntaxValidator:
         if not isinstance(spec, dict):
             raise GMNValidationError("Specification must be a dictionary")
 
-        result = ValidationResult(is_valid=True, errors=[], warnings=[], info=[])
+        result = ValidationResult(
+            is_valid=True, errors=[], warnings=[], info=[]
+        )
 
         # Validate top-level structure
         self._validate_top_level_structure(spec, result)
@@ -106,14 +118,21 @@ class GMNSyntaxValidator:
 
         # Hard failure on any errors
         if not result.is_valid:
-            error_messages = [f"{error.validator}: {error.message}" for error in result.errors]
-            raise GMNValidationError(f"Syntax validation failed: {'; '.join(error_messages)}")
+            error_messages = [
+                f"{error.validator}: {error.message}"
+                for error in result.errors
+            ]
+            raise GMNValidationError(
+                f"Syntax validation failed: {'; '.join(error_messages)}"
+            )
 
         return result
 
     def validate_text(self, text: str) -> ValidationResult:
         """Validate GMN text format syntax."""
-        result = ValidationResult(is_valid=True, errors=[], warnings=[], info=[])
+        result = ValidationResult(
+            is_valid=True, errors=[], warnings=[], info=[]
+        )
 
         lines = [line.strip() for line in text.split("\n") if line.strip()]
         current_section = None
@@ -146,20 +165,25 @@ class GMNSyntaxValidator:
 
         if not result.is_valid:
             error_messages = [
-                f"Line {error.context.get('line',
-                '?')}: {error.message}"
+                f"Line {error.context.get('line', '?')}: {error.message}"
                 for error in result.errors
             ]
-            raise GMNValidationError(f"Text format validation failed: {'; '.join(error_messages)}")
+            raise GMNValidationError(
+                f"Text format validation failed: {'; '.join(error_messages)}"
+            )
 
         return result
 
-    def _validate_top_level_structure(self, spec: Dict[str, Any], result: ValidationResult):
+    def _validate_top_level_structure(
+        self, spec: Dict[str, Any], result: ValidationResult
+    ):
         """Validate top-level specification structure."""
         # Check required fields
         for field in self.required_top_level_fields:
             if field not in spec:
-                result.add_error("SyntaxValidator", f"Missing required field: {field}")
+                result.add_error(
+                    "SyntaxValidator", f"Missing required field: {field}"
+                )
 
         # Validate nodes field type
         if "nodes" in spec and not isinstance(spec["nodes"], list):
@@ -169,7 +193,9 @@ class GMNSyntaxValidator:
         if "edges" in spec and not isinstance(spec["edges"], list):
             result.add_error("SyntaxValidator", "Field 'edges' must be a list")
 
-    def _validate_nodes_structure(self, nodes: List[Any], result: ValidationResult):
+    def _validate_nodes_structure(
+        self, nodes: List[Any], result: ValidationResult
+    ):
         """Validate nodes structure."""
         if not isinstance(nodes, list):
             result.add_error("SyntaxValidator", "Nodes must be a list")
@@ -179,20 +205,27 @@ class GMNSyntaxValidator:
 
         for i, node in enumerate(nodes):
             if not isinstance(node, dict):
-                result.add_error("SyntaxValidator", f"Node {i} must be a dictionary")
+                result.add_error(
+                    "SyntaxValidator", f"Node {i} must be a dictionary"
+                )
                 continue
 
             # Check required fields
             for field in self.required_node_fields:
                 if field not in node:
-                    result.add_error("SyntaxValidator", f"Node {i} missing required field: {field}")
+                    result.add_error(
+                        "SyntaxValidator",
+                        f"Node {i} missing required field: {field}",
+                    )
 
             # Validate node name
             if "name" in node:
                 name = node["name"]
                 if not name or not isinstance(name, str):
                     result.add_error(
-                        "SyntaxValidator", f"Node {i} name cannot be empty", node_name=name
+                        "SyntaxValidator",
+                        f"Node {i} name cannot be empty",
+                        node_name=name,
                     )
                 elif not self.valid_node_name_pattern.match(name):
                     result.add_error(
@@ -202,12 +235,16 @@ class GMNSyntaxValidator:
                     )
                 elif name in node_names:
                     result.add_error(
-                        "SyntaxValidator", f"Duplicate node name: {name}", node_name=name
+                        "SyntaxValidator",
+                        f"Duplicate node name: {name}",
+                        node_name=name,
                     )
                 else:
                     node_names.add(name)
 
-    def _validate_edges_structure(self, edges: List[Any], result: ValidationResult):
+    def _validate_edges_structure(
+        self, edges: List[Any], result: ValidationResult
+    ):
         """Validate edges structure."""
         if not isinstance(edges, list):
             result.add_error("SyntaxValidator", "Edges must be a list")
@@ -215,14 +252,18 @@ class GMNSyntaxValidator:
 
         for i, edge in enumerate(edges):
             if not isinstance(edge, dict):
-                result.add_error("SyntaxValidator", f"Edge {i} must be a dictionary")
+                result.add_error(
+                    "SyntaxValidator", f"Edge {i} must be a dictionary"
+                )
                 continue
 
             # Check required fields
             for field in self.required_edge_fields:
                 if field not in edge:
                     result.add_error(
-                        "SyntaxValidator", f"Edge {i} missing required field: {field}", edge_index=i
+                        "SyntaxValidator",
+                        f"Edge {i} missing required field: {field}",
+                        edge_index=i,
                     )
 
     def _validate_node_line_syntax(self, line: str) -> bool:
@@ -251,7 +292,9 @@ class GMNSemanticValidator:
 
     def validate(self, spec: Dict[str, Any]) -> ValidationResult:
         """Validate GMN specification semantics with hard failures."""
-        result = ValidationResult(is_valid=True, errors=[], warnings=[], info=[])
+        result = ValidationResult(
+            is_valid=True, errors=[], warnings=[], info=[]
+        )
 
         nodes_by_name = self._build_node_lookup(spec.get("nodes", []))
         edges = spec.get("edges", [])
@@ -266,19 +309,28 @@ class GMNSemanticValidator:
         self._validate_circular_dependencies(edges, result)
 
         # Validate required connections
-        self._validate_required_connections(spec.get("nodes", []), edges, result)
+        self._validate_required_connections(
+            spec.get("nodes", []), edges, result
+        )
 
         # Check for unreferenced nodes
         self._validate_node_usage(spec.get("nodes", []), edges, result)
 
         # Hard failure on any errors
         if not result.is_valid:
-            error_messages = [f"{error.validator}: {error.message}" for error in result.errors]
-            raise GMNValidationError(f"Semantic validation failed: {'; '.join(error_messages)}")
+            error_messages = [
+                f"{error.validator}: {error.message}"
+                for error in result.errors
+            ]
+            raise GMNValidationError(
+                f"Semantic validation failed: {'; '.join(error_messages)}"
+            )
 
         return result
 
-    def _build_node_lookup(self, nodes: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+    def _build_node_lookup(
+        self, nodes: List[Dict[str, Any]]
+    ) -> Dict[str, Dict[str, Any]]:
         """Build lookup table for nodes by name."""
         return {node.get("name"): node for node in nodes if "name" in node}
 
@@ -339,7 +391,10 @@ class GMNSemanticValidator:
                         f"Invalid dependency: state cannot depend on observation",
                         edge_index=i,
                     )
-                elif from_type == "action" and to_type in ["state", "observation"]:
+                elif from_type == "action" and to_type in [
+                    "state",
+                    "observation",
+                ]:
                     result.add_error(
                         "SemanticValidator",
                         f"Invalid dependency: action cannot depend on {to_type}",
@@ -394,12 +449,16 @@ class GMNSemanticValidator:
             if node not in visited:
                 if has_cycle(node):
                     result.add_error(
-                        "SemanticValidator", f"Circular dependency detected involving node: {node}"
+                        "SemanticValidator",
+                        f"Circular dependency detected involving node: {node}",
                     )
                     break
 
     def _validate_required_connections(
-        self, nodes: List[Dict[str, Any]], edges: List[Dict[str, Any]], result: ValidationResult
+        self,
+        nodes: List[Dict[str, Any]],
+        edges: List[Dict[str, Any]],
+        result: ValidationResult,
     ):
         """Validate that required connections exist."""
         # Build edge lookup
@@ -423,7 +482,10 @@ class GMNSemanticValidator:
                 connected_states = [
                     dep
                     for dep in dependencies.get(node_name, [])
-                    if any(n.get("name") == dep and n.get("type") == "state" for n in nodes)
+                    if any(
+                        n.get("name") == dep and n.get("type") == "state"
+                        for n in nodes
+                    )
                 ]
                 if not connected_states:
                     result.add_error(
@@ -433,7 +495,10 @@ class GMNSemanticValidator:
                     )
 
     def _validate_node_usage(
-        self, nodes: List[Dict[str, Any]], edges: List[Dict[str, Any]], result: ValidationResult
+        self,
+        nodes: List[Dict[str, Any]],
+        edges: List[Dict[str, Any]],
+        result: ValidationResult,
     ):
         """Validate that all nodes are properly used."""
         referenced_nodes = set()
@@ -459,7 +524,9 @@ class GMNSemanticValidator:
             ):
                 # This is a warning, not an error, as some nodes might be valid but unreferenced
                 result.add_warning(
-                    "SemanticValidator", f"Unreferenced node: {node_name}", node_name=node_name
+                    "SemanticValidator",
+                    f"Unreferenced node: {node_name}",
+                    node_name=node_name,
                 )
 
 
@@ -473,7 +540,9 @@ class GMNMathematicalValidator:
 
     def validate(self, spec: Dict[str, Any]) -> ValidationResult:
         """Validate GMN specification mathematics with hard failures."""
-        result = ValidationResult(is_valid=True, errors=[], warnings=[], info=[])
+        result = ValidationResult(
+            is_valid=True, errors=[], warnings=[], info=[]
+        )
 
         nodes = spec.get("nodes", [])
         edges = spec.get("edges", [])
@@ -492,8 +561,13 @@ class GMNMathematicalValidator:
 
         # Hard failure on any errors
         if not result.is_valid:
-            error_messages = [f"{error.validator}: {error.message}" for error in result.errors]
-            raise GMNValidationError(f"Mathematical validation failed: {'; '.join(error_messages)}")
+            error_messages = [
+                f"{error.validator}: {error.message}"
+                for error in result.errors
+            ]
+            raise GMNValidationError(
+                f"Mathematical validation failed: {'; '.join(error_messages)}"
+            )
 
         return result
 
@@ -588,23 +662,34 @@ class GMNMathematicalValidator:
                         )
 
     def _validate_dimensions(
-        self, nodes: List[Dict[str, Any]], edges: List[Dict[str, Any]], result: ValidationResult
+        self,
+        nodes: List[Dict[str, Any]],
+        edges: List[Dict[str, Any]],
+        result: ValidationResult,
     ):
         """Validate dimension consistency between connected nodes."""
         # Build node lookup
-        nodes_by_name = {node.get("name"): node for node in nodes if "name" in node}
+        nodes_by_name = {
+            node.get("name"): node for node in nodes if "name" in node
+        }
 
         for edge in edges:
             if edge.get("type") == "generates":
                 from_node_name = edge.get("from")
                 to_node_name = edge.get("to")
 
-                if from_node_name in nodes_by_name and to_node_name in nodes_by_name:
+                if (
+                    from_node_name in nodes_by_name
+                    and to_node_name in nodes_by_name
+                ):
                     from_node = nodes_by_name[from_node_name]
                     to_node = nodes_by_name[to_node_name]
 
                     # Check state -> observation mappings
-                    if from_node.get("type") == "state" and to_node.get("type") == "observation":
+                    if (
+                        from_node.get("type") == "state"
+                        and to_node.get("type") == "observation"
+                    ):
                         from_dim = from_node.get("num_states")
                         to_dim = to_node.get("num_observations")
 
@@ -612,16 +697,25 @@ class GMNMathematicalValidator:
                             result.add_error(
                                 "MathematicalValidator",
                                 f"Dimension mismatch: state has {from_dim} dimensions but observation has {to_dim}",
-                                context={"from_node": from_node_name, "to_node": to_node_name},
+                                context={
+                                    "from_node": from_node_name,
+                                    "to_node": to_node_name,
+                                },
                             )
 
-    def _validate_numerical_ranges(self, nodes: List[Dict[str, Any]], result: ValidationResult):
+    def _validate_numerical_ranges(
+        self, nodes: List[Dict[str, Any]], result: ValidationResult
+    ):
         """Validate numerical ranges for all numeric fields."""
         for node in nodes:
             node_name = node.get("name", "unnamed")
 
             # Validate dimension fields
-            dimension_fields = ["num_states", "num_observations", "num_actions"]
+            dimension_fields = [
+                "num_states",
+                "num_observations",
+                "num_actions",
+            ]
             for field in dimension_fields:
                 if field in node:
                     value = node[field]
@@ -644,7 +738,10 @@ class GMNMathematicalValidator:
                 # Precision must be positive
                 if "precision" in constraints:
                     precision = constraints["precision"]
-                    if not isinstance(precision, (int, float)) or precision <= 0:
+                    if (
+                        not isinstance(precision, (int, float))
+                        or precision <= 0
+                    ):
                         result.add_error(
                             "MathematicalValidator",
                             f"Precision must be positive, got: {precision}",
@@ -662,7 +759,9 @@ class GMNMathematicalValidator:
                             node_name=node_name,
                         )
 
-    def _validate_matrix_constraints(self, nodes: List[Dict[str, Any]], result: ValidationResult):
+    def _validate_matrix_constraints(
+        self, nodes: List[Dict[str, Any]], result: ValidationResult
+    ):
         """Validate matrix constraints for transition and likelihood matrices."""
         for node in nodes:
             node_name = node.get("name", "unnamed")
@@ -727,7 +826,9 @@ class GMNTypeValidator:
 
     def validate(self, spec: Dict[str, Any]) -> ValidationResult:
         """Validate GMN specification types with hard failures."""
-        result = ValidationResult(is_valid=True, errors=[], warnings=[], info=[])
+        result = ValidationResult(
+            is_valid=True, errors=[], warnings=[], info=[]
+        )
 
         nodes = spec.get("nodes", [])
         edges = spec.get("edges", [])
@@ -743,12 +844,19 @@ class GMNTypeValidator:
 
         # Hard failure on any errors
         if not result.is_valid:
-            error_messages = [f"{error.validator}: {error.message}" for error in result.errors]
-            raise GMNValidationError(f"Type validation failed: {'; '.join(error_messages)}")
+            error_messages = [
+                f"{error.validator}: {error.message}"
+                for error in result.errors
+            ]
+            raise GMNValidationError(
+                f"Type validation failed: {'; '.join(error_messages)}"
+            )
 
         return result
 
-    def _validate_node_types(self, nodes: List[Dict[str, Any]], result: ValidationResult):
+    def _validate_node_types(
+        self, nodes: List[Dict[str, Any]], result: ValidationResult
+    ):
         """Validate node types and required attributes."""
         for node in nodes:
             node_name = node.get("name", "unnamed")
@@ -757,7 +865,9 @@ class GMNTypeValidator:
             # Check valid node type
             if node_type and node_type not in self.valid_node_types:
                 result.add_error(
-                    "TypeValidator", f"Invalid node type: {node_type}", node_name=node_name
+                    "TypeValidator",
+                    f"Invalid node type: {node_type}",
+                    node_name=node_name,
                 )
                 continue
 
@@ -772,21 +882,34 @@ class GMNTypeValidator:
                             node_name=node_name,
                         )
 
-    def _validate_edge_types(self, edges: List[Dict[str, Any]], result: ValidationResult):
+    def _validate_edge_types(
+        self, edges: List[Dict[str, Any]], result: ValidationResult
+    ):
         """Validate edge types."""
         for i, edge in enumerate(edges):
             edge_type = edge.get("type")
 
             if edge_type and edge_type not in self.valid_edge_types:
-                result.add_error("TypeValidator", f"Invalid edge type: {edge_type}", edge_index=i)
+                result.add_error(
+                    "TypeValidator",
+                    f"Invalid edge type: {edge_type}",
+                    edge_index=i,
+                )
 
-    def _validate_attribute_types(self, nodes: List[Dict[str, Any]], result: ValidationResult):
+    def _validate_attribute_types(
+        self, nodes: List[Dict[str, Any]], result: ValidationResult
+    ):
         """Validate attribute data types."""
         for node in nodes:
             node_name = node.get("name", "unnamed")
 
             # Validate integer fields
-            int_fields = ["num_states", "num_observations", "num_actions", "preferred_observation"]
+            int_fields = [
+                "num_states",
+                "num_observations",
+                "num_actions",
+                "preferred_observation",
+            ]
             for field in int_fields:
                 if field in node and not isinstance(node[field], int):
                     result.add_error(
@@ -831,13 +954,21 @@ class GMNConstraintValidator:
 
     def __init__(self):
         """Initialize the constraint validator."""
-        self.max_action_space = 100000  # Business rule: reasonable action space limit
-        self.max_state_space = 100000  # Business rule: reasonable state space limit
-        self.max_observation_space = 100000  # Business rule: reasonable observation space limit
+        self.max_action_space = (
+            100000  # Business rule: reasonable action space limit
+        )
+        self.max_state_space = (
+            100000  # Business rule: reasonable state space limit
+        )
+        self.max_observation_space = (
+            100000  # Business rule: reasonable observation space limit
+        )
 
     def validate(self, spec: Dict[str, Any]) -> ValidationResult:
         """Validate GMN specification constraints with hard failures."""
-        result = ValidationResult(is_valid=True, errors=[], warnings=[], info=[])
+        result = ValidationResult(
+            is_valid=True, errors=[], warnings=[], info=[]
+        )
 
         nodes = spec.get("nodes", [])
 
@@ -852,12 +983,19 @@ class GMNConstraintValidator:
 
         # Hard failure on any errors
         if not result.is_valid:
-            error_messages = [f"{error.validator}: {error.message}" for error in result.errors]
-            raise GMNValidationError(f"Constraint validation failed: {'; '.join(error_messages)}")
+            error_messages = [
+                f"{error.validator}: {error.message}"
+                for error in result.errors
+            ]
+            raise GMNValidationError(
+                f"Constraint validation failed: {'; '.join(error_messages)}"
+            )
 
         return result
 
-    def _validate_business_rules(self, nodes: List[Dict[str, Any]], result: ValidationResult):
+    def _validate_business_rules(
+        self, nodes: List[Dict[str, Any]], result: ValidationResult
+    ):
         """Validate business rules for space sizes."""
         for node in nodes:
             node_name = node.get("name", "unnamed")
@@ -883,7 +1021,10 @@ class GMNConstraintValidator:
                     )
 
             # Observation space limits
-            if node.get("type") == "observation" and "num_observations" in node:
+            if (
+                node.get("type") == "observation"
+                and "num_observations" in node
+            ):
                 num_observations = node["num_observations"]
                 if num_observations > self.max_observation_space:
                     result.add_error(
@@ -899,13 +1040,20 @@ class GMNConstraintValidator:
         # Build observation space lookup
         obs_spaces = {}
         for node in nodes:
-            if node.get("type") == "observation" and "name" in node and "num_observations" in node:
+            if (
+                node.get("type") == "observation"
+                and "name" in node
+                and "num_observations" in node
+            ):
                 obs_spaces[node["name"]] = node["num_observations"]
 
         for node in nodes:
             node_name = node.get("name", "unnamed")
 
-            if node.get("type") == "preference" and "preferred_observation" in node:
+            if (
+                node.get("type") == "preference"
+                and "preferred_observation" in node
+            ):
                 preferred_obs = node["preferred_observation"]
 
                 # Find associated observation space
@@ -915,7 +1063,7 @@ class GMNConstraintValidator:
                 if isinstance(preferred_obs, int) and preferred_obs >= max_obs:
                     result.add_error(
                         "ConstraintValidator",
-                        f"Preferred observation index {preferred_obs} out of range (max: {max_obs-1})",
+                        f"Preferred observation index {preferred_obs} out of range (max: {max_obs - 1})",
                         node_name=node_name,
                     )
 
@@ -984,12 +1132,17 @@ class GMNValidationFramework:
 
         # Create comprehensive result
         result = ValidationResult(
-            is_valid=len(all_errors) == 0, errors=all_errors, warnings=all_warnings, info=all_info
+            is_valid=len(all_errors) == 0,
+            errors=all_errors,
+            warnings=all_warnings,
+            info=all_info,
         )
 
         return result
 
-    def validate_with_reality_checks(self, spec: Dict[str, Any]) -> ValidationResult:
+    def validate_with_reality_checks(
+        self, spec: Dict[str, Any]
+    ) -> ValidationResult:
         """Validate with additional reality checks for suspicious patterns."""
         # First run standard validation
         result = self.validate(spec)
@@ -1000,7 +1153,9 @@ class GMNValidationFramework:
 
         return result
 
-    def _add_reality_checks(self, nodes: List[Dict[str, Any]], result: ValidationResult):
+    def _add_reality_checks(
+        self, nodes: List[Dict[str, Any]], result: ValidationResult
+    ):
         """Add reality checks to catch suspicious patterns."""
         state_dims = []
         obs_dims = []
@@ -1008,7 +1163,10 @@ class GMNValidationFramework:
         for node in nodes:
             if node.get("type") == "state" and "num_states" in node:
                 state_dims.append(node["num_states"])
-            elif node.get("type") == "observation" and "num_observations" in node:
+            elif (
+                node.get("type") == "observation"
+                and "num_observations" in node
+            ):
                 obs_dims.append(node["num_observations"])
 
         # Check for suspicious dimension ratios
@@ -1016,7 +1174,9 @@ class GMNValidationFramework:
             min_state = min(state_dims)
             max_obs = max(obs_dims)
 
-            if max_obs / min_state > 100:  # Observation space 100x larger than state space
+            if (
+                max_obs / min_state > 100
+            ):  # Observation space 100x larger than state space
                 result.add_error(
                     "RealityCheckValidator",
                     f"Suspicious dimension ratio: observation space ({max_obs}) >> state space ({min_state})",
@@ -1025,5 +1185,6 @@ class GMNValidationFramework:
         # Check for trivial state spaces
         if any(dim == 1 for dim in state_dims):
             result.add_warning(
-                "RealityCheckValidator", "Trivial state space detected (dimension = 1)"
+                "RealityCheckValidator",
+                "Trivial state space detected (dimension = 1)",
             )

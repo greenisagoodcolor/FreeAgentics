@@ -5,13 +5,13 @@ global:
   smtp_auth_username: 'alerts@yourdomain.com'
   smtp_auth_password: 'REPLACE_WITH_SMTP_PASSWORD'
   smtp_require_tls: true
-  
+
   # Global Slack configuration
   slack_api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
-  
+
   # Global PagerDuty configuration
   pagerduty_url: 'https://events.pagerduty.com/v2/enqueue'
-  
+
   # Global notification settings
   resolve_timeout: 5m
   http_config:
@@ -29,7 +29,7 @@ route:
   group_interval: 10s
   repeat_interval: 1h
   receiver: 'default-receiver'
-  
+
   routes:
   # Critical alerts - immediate notification
   - match:
@@ -256,7 +256,7 @@ receivers:
     subject: '📊 SLO BREACH - FreeAgentics'
     body: |
       SLO Breach Alert
-      
+
       {{ range .Alerts }}
       Alert: {{ .Annotations.summary }}
       Description: {{ .Annotations.description }}
@@ -342,7 +342,7 @@ receivers:
     subject: '💼 Business Metric Alert - FreeAgentics'
     body: |
       Business Metric Alert
-      
+
       {{ range .Alerts }}
       Alert: {{ .Annotations.summary }}
       Description: {{ .Annotations.description }}
@@ -368,7 +368,7 @@ receivers:
     subject: '🔐 Security Alert - FreeAgentics'
     body: |
       Security Alert
-      
+
       {{ range .Alerts }}
       Alert: {{ .Annotations.summary }}
       Description: {{ .Annotations.description }}

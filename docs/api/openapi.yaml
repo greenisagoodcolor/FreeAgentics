@@ -2,36 +2,36 @@ openapi: 3.0.3
 info:
   title: FreeAgentics API
   description: |
-    The FreeAgentics API provides a comprehensive interface for managing multi-agent AI systems with Active Inference capabilities. 
-    
+    The FreeAgentics API provides a comprehensive interface for managing multi-agent AI systems with Active Inference capabilities.
+
     This API allows you to:
     - Create and manage AI agents with different templates
     - Run inference tasks with context-aware processing
     - Build and query knowledge graphs
     - Monitor system performance and agent metrics
     - Implement real-time communication via WebSockets
-    
+
     ## Authentication
-    
+
     All API endpoints require authentication using JWT tokens. Obtain tokens by registering or logging in, then include the access token in the Authorization header:
-    
+
     ```
     Authorization: Bearer <access_token>
     ```
-    
+
     ## Rate Limiting
-    
+
     The API implements rate limiting to ensure fair usage:
     - Auth endpoints: 3 requests per minute
     - API endpoints: 60 requests per minute
     - WebSocket connections: 100 messages per minute
-    
+
     Rate limit headers are included in all responses.
-    
+
     ## Error Handling
-    
+
     The API uses standard HTTP status codes and returns structured error responses:
-    
+
     ```json
     {
       "error": {

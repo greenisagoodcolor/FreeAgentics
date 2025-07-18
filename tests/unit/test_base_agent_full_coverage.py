@@ -53,7 +53,9 @@ class TestSafeArrayToInt:
     def test_empty_numpy_array(self):
         """Test empty numpy array raises ValueError."""
         value = np.array([])
-        with pytest.raises(ValueError, match="Empty array cannot be converted to integer"):
+        with pytest.raises(
+            ValueError, match="Empty array cannot be converted to integer"
+        ):
             safe_array_to_int(value)
 
     def test_list_input(self):
@@ -64,7 +66,9 @@ class TestSafeArrayToInt:
     def test_empty_list(self):
         """Test empty list raises ValueError."""
         value = []
-        with pytest.raises(ValueError, match="Empty array cannot be converted to integer"):
+        with pytest.raises(
+            ValueError, match="Empty array cannot be converted to integer"
+        ):
             safe_array_to_int(value)
 
     def test_tuple_input(self):
@@ -207,7 +211,9 @@ class TestActiveInferenceAgent:
     @patch("agents.base_agent.PYMDP_AVAILABLE", True)
     @patch("agents.base_agent.PyMDPAgent")
     @patch("agents.base_agent.validate_pymdp_matrices")
-    def test_agent_with_pymdp(self, mock_validate, mock_pymdp_agent, mock_agent_class):
+    def test_agent_with_pymdp(
+        self, mock_validate, mock_pymdp_agent, mock_agent_class
+    ):
         """Test agent initialization with PyMDP available."""
         mock_validate.return_value = True
         mock_instance = MagicMock()
@@ -222,7 +228,9 @@ class TestActiveInferenceAgent:
 
     @patch("agents.base_agent.PYMDP_AVAILABLE", True)
     @patch("agents.base_agent.validate_pymdp_matrices")
-    def test_agent_with_pymdp_validation_failure(self, mock_validate, mock_agent_class):
+    def test_agent_with_pymdp_validation_failure(
+        self, mock_validate, mock_agent_class
+    ):
         """Test agent initialization when PyMDP validation fails."""
         mock_validate.return_value = False
 
@@ -301,7 +309,9 @@ class TestActiveInferenceAgent:
         agent.action_history = [0, 1, 0]
 
         # Reset
-        with patch("agents.base_agent.record_agent_lifecycle_event") as mock_record:
+        with patch(
+            "agents.base_agent.record_agent_lifecycle_event"
+        ) as mock_record:
             agent.reset()
 
         assert agent.step_count == 0
@@ -327,7 +337,9 @@ class TestActiveInferenceAgent:
         agent = mock_agent_class("test_id", config)
 
         with patch("agents.base_agent.monitor_belief_state") as mock_monitor:
-            with patch("agents.base_agent.measure_belief_update") as mock_measure:
+            with patch(
+                "agents.base_agent.measure_belief_update"
+            ) as mock_measure:
                 agent.update_beliefs(1)
 
         assert 1 in agent.observation_history
@@ -380,7 +392,10 @@ class TestActiveInferenceAgent:
         config = AgentConfig(name="test")
         agent = mock_agent_class("test_id", config)
 
-        with patch("agents.base_agent.safe_pymdp_operation", side_effect=Exception("Test error")):
+        with patch(
+            "agents.base_agent.safe_pymdp_operation",
+            side_effect=Exception("Test error"),
+        ):
             action = agent.select_action()
 
         # Should return a valid action even on error
@@ -401,7 +416,9 @@ class TestActiveInferenceAgent:
         config = AgentConfig(name="test")
         agent = mock_agent_class("test_id", config)
 
-        with patch.object(agent, "update_beliefs", side_effect=Exception("Test error")):
+        with patch.object(
+            agent, "update_beliefs", side_effect=Exception("Test error")
+        ):
             agent.step(1)
 
         # Step count should still increment
@@ -476,7 +493,9 @@ class TestBasicExplorerAgent:
     def test_initialization(self):
         """Test BasicExplorerAgent initialization."""
         config = AgentConfig(name="explorer")
-        agent = BasicExplorerAgent("explorer_id", config, num_states=4, num_actions=2)
+        agent = BasicExplorerAgent(
+            "explorer_id", config, num_states=4, num_actions=2
+        )
 
         assert agent.agent_id == "explorer_id"
         assert agent.num_states == 4
@@ -489,7 +508,9 @@ class TestBasicExplorerAgent:
     def test_transition_matrix_normalization(self):
         """Test that transition matrices are properly normalized."""
         config = AgentConfig(name="explorer")
-        agent = BasicExplorerAgent("explorer", config, num_states=4, num_actions=2)
+        agent = BasicExplorerAgent(
+            "explorer", config, num_states=4, num_actions=2
+        )
 
         # Each column should sum to 1
         for action in range(agent.num_actions):
@@ -499,7 +520,9 @@ class TestBasicExplorerAgent:
     def test_act_method(self):
         """Test act method returns valid action."""
         config = AgentConfig(name="explorer")
-        agent = BasicExplorerAgent("explorer", config, num_states=4, num_actions=2)
+        agent = BasicExplorerAgent(
+            "explorer", config, num_states=4, num_actions=2
+        )
 
         action = agent.act(2)
         assert 0 <= action < agent.num_actions
@@ -508,7 +531,9 @@ class TestBasicExplorerAgent:
     def test_act_without_pymdp(self):
         """Test agent behavior when PyMDP is not available."""
         config = AgentConfig(name="explorer", use_pymdp=False)
-        agent = BasicExplorerAgent("explorer", config, num_states=4, num_actions=2)
+        agent = BasicExplorerAgent(
+            "explorer", config, num_states=4, num_actions=2
+        )
 
         action = agent.act(1)
         assert 0 <= action < agent.num_actions
@@ -516,16 +541,22 @@ class TestBasicExplorerAgent:
     def test_error_handling_in_act(self):
         """Test error handling in act method."""
         config = AgentConfig(name="explorer")
-        agent = BasicExplorerAgent("explorer", config, num_states=4, num_actions=2)
+        agent = BasicExplorerAgent(
+            "explorer", config, num_states=4, num_actions=2
+        )
 
-        with patch.object(agent, "update_beliefs", side_effect=Exception("Test error")):
+        with patch.object(
+            agent, "update_beliefs", side_effect=Exception("Test error")
+        ):
             action = agent.act(1)
             assert 0 <= action < agent.num_actions
 
     def test_act_with_invalid_observation(self):
         """Test act with out of bounds observation."""
         config = AgentConfig(name="explorer")
-        agent = BasicExplorerAgent("explorer", config, num_states=4, num_actions=2)
+        agent = BasicExplorerAgent(
+            "explorer", config, num_states=4, num_actions=2
+        )
 
         # Large observation index
         action = agent.act(999)
@@ -541,7 +572,9 @@ class TestObservabilityIntegration:
         config = AgentConfig(name="test")
         agent = BasicExplorerAgent("test", config, num_states=2, num_actions=1)
 
-        with patch("agents.base_agent.record_agent_lifecycle_event") as mock_record:
+        with patch(
+            "agents.base_agent.record_agent_lifecycle_event"
+        ) as mock_record:
             agent.reset()
             mock_record.assert_called_with(agent.agent_id, "reset")
 
@@ -582,16 +615,22 @@ class TestErrorHandling:
 
     def test_matrix_validation_error(self):
         """Test handling of invalid generative model matrices."""
-        with patch("agents.base_agent.validate_pymdp_matrices", return_value=False):
+        with patch(
+            "agents.base_agent.validate_pymdp_matrices", return_value=False
+        ):
             config = AgentConfig(name="test")
-            agent = BasicExplorerAgent("test", config, num_states=2, num_actions=1)
+            agent = BasicExplorerAgent(
+                "test", config, num_states=2, num_actions=1
+            )
             assert agent is not None
 
     def test_pymdp_import_error(self):
         """Test handling when PyMDP import fails."""
         with patch("agents.base_agent.PYMDP_AVAILABLE", False):
             config = AgentConfig(name="test", use_pymdp=True)
-            agent = BasicExplorerAgent("test", config, num_states=2, num_actions=1)
+            agent = BasicExplorerAgent(
+                "test", config, num_states=2, num_actions=1
+            )
             assert not hasattr(agent, "pymdp_agent")
 
     def test_step_with_monitoring_error(self):
@@ -599,6 +638,9 @@ class TestErrorHandling:
         config = AgentConfig(name="test")
         agent = BasicExplorerAgent("test", config, num_states=2, num_actions=1)
 
-        with patch("agents.base_agent.measure_agent_step", side_effect=Exception("Monitor error")):
+        with patch(
+            "agents.base_agent.measure_agent_step",
+            side_effect=Exception("Monitor error"),
+        ):
             agent.step(1)
             assert agent.step_count == 1

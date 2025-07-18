@@ -3,7 +3,7 @@
 max-line-length = 100
 
 # Error codes to ignore
-extend-ignore = 
+extend-ignore =
     # E203: whitespace before ':' (conflicts with black)
     E203,
     # W503: line break before binary operator (conflicts with black)
@@ -18,7 +18,7 @@ extend-ignore =
     W293
 
 # Exclude directories
-exclude = 
+exclude =
     .git,
     __pycache__,
     venv,

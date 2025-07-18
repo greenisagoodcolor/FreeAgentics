@@ -29,7 +29,8 @@ from agents.memory_optimization.lifecycle_manager import (
 
 # Set up logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -49,13 +50,21 @@ def demo_basic_lifecycle():
     print("\n1. Registering agents...")
     for agent_id in agent_ids:
         profile = register_agent_memory(agent_id, memory_limit_mb=30.0)
-        print(f"   Registered {agent_id} with {profile.memory_limit_mb}MB limit")
+        print(
+            f"   Registered {agent_id} with {profile.memory_limit_mb}MB limit"
+        )
 
     # Update memory usage for agents
     print("\n2. Updating memory usage...")
-    update_agent_memory_usage("explorer_001", belief_mb=8.0, matrix_mb=4.0, other_mb=2.0)
-    update_agent_memory_usage("collector_002", belief_mb=12.0, matrix_mb=6.0, other_mb=3.0)
-    update_agent_memory_usage("analyzer_003", belief_mb=15.0, matrix_mb=8.0, other_mb=4.0)
+    update_agent_memory_usage(
+        "explorer_001", belief_mb=8.0, matrix_mb=4.0, other_mb=2.0
+    )
+    update_agent_memory_usage(
+        "collector_002", belief_mb=12.0, matrix_mb=6.0, other_mb=3.0
+    )
+    update_agent_memory_usage(
+        "analyzer_003", belief_mb=15.0, matrix_mb=8.0, other_mb=4.0
+    )
 
     # Show memory statistics
     stats = get_memory_statistics()
@@ -96,7 +105,9 @@ def demo_memory_context_manager():
     print(f"\n1. Using managed agent memory context for {agent_id}...")
 
     with managed_agent_memory(agent_id, memory_limit_mb=25.0) as profile:
-        print(f"   Agent {profile.agent_id} created with {profile.memory_limit_mb}MB limit")
+        print(
+            f"   Agent {profile.agent_id} created with {profile.memory_limit_mb}MB limit"
+        )
         print(f"   Initial state: {profile.state}")
 
         # Simulate some memory operations
@@ -137,7 +148,9 @@ def demo_memory_pressure_cleanup():
         # Set agent to active state and old access time for some
         if random.random() > 0.5:
             profile.state = AgentLifecycleState.ACTIVE
-            profile.last_accessed = time.time() - random.uniform(70, 150)  # Old access
+            profile.last_accessed = time.time() - random.uniform(
+                70, 150
+            )  # Old access
 
     # Check memory pressure
     stats = get_memory_statistics()
@@ -153,7 +166,9 @@ def demo_memory_pressure_cleanup():
     final_stats = get_memory_statistics()
     print(f"\n3. Memory after cleanup:")
     print(f"   Total memory: {final_stats['global']['total_memory_mb']:.1f}MB")
-    print(f"   Memory pressure: {final_stats['global']['memory_pressure']:.1%}")
+    print(
+        f"   Memory pressure: {final_stats['global']['memory_pressure']:.1%}"
+    )
     print(f"   Agent states: {final_stats['agent_states']}")
 
 
@@ -186,14 +201,18 @@ def demo_lifecycle_events_tracking():
 
     # Show lifecycle events
     print(f"\n3. Lifecycle events for {agent_id}:")
-    for timestamp, event, metadata in profile.lifecycle_events[-10:]:  # Show last 10 events
+    for timestamp, event, metadata in profile.lifecycle_events[
+        -10:
+    ]:  # Show last 10 events
         event_time = time.strftime("%H:%M:%S", time.localtime(timestamp))
         print(f"   {event_time}: {event} - {metadata}")
 
     # Show memory snapshots
     print(f"\n4. Memory snapshots (last 3):")
     for snapshot in list(profile.memory_snapshots)[-3:]:
-        snapshot_time = time.strftime("%H:%M:%S", time.localtime(snapshot.timestamp))
+        snapshot_time = time.strftime(
+            "%H:%M:%S", time.localtime(snapshot.timestamp)
+        )
         print(
             f"   {snapshot_time}: {snapshot.total_memory_mb:.1f}MB (state: {snapshot.state.value})"
         )
@@ -233,7 +252,9 @@ def demo_agent_pool_simulation():
         other_mb = random.uniform(1, memory_limit * 0.2)
 
         update_agent_memory_usage(agent_id, belief_mb, matrix_mb, other_mb)
-        print(f"   Created {agent_id}: {belief_mb + matrix_mb + other_mb:.1f}MB/{memory_limit}MB")
+        print(
+            f"   Created {agent_id}: {belief_mb + matrix_mb + other_mb:.1f}MB/{memory_limit}MB"
+        )
 
     # Simulate agent activity over time
     print("\n2. Simulating agent activity...")
@@ -254,7 +275,9 @@ def demo_agent_pool_simulation():
                 matrix_mb = new_total * 0.3
                 other_mb = new_total * 0.2
 
-                update_agent_memory_usage(agent_id, belief_mb, matrix_mb, other_mb)
+                update_agent_memory_usage(
+                    agent_id, belief_mb, matrix_mb, other_mb
+                )
                 print(
                     f"     {agent_id}: {new_total:.1f}MB (efficiency: {profile.get_memory_efficiency():.1%})"
                 )
@@ -276,7 +299,9 @@ def demo_agent_pool_simulation():
         # Show current statistics
         stats = get_memory_statistics()
         print(f"     Total memory: {stats['global']['total_memory_mb']:.1f}MB")
-        print(f"     Memory pressure: {stats['global']['memory_pressure']:.1%}")
+        print(
+            f"     Memory pressure: {stats['global']['memory_pressure']:.1%}"
+        )
         print(f"     States: {stats['agent_states']}")
 
         # Pause between rounds

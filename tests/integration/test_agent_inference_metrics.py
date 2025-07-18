@@ -44,7 +44,9 @@ async def test_inference_metrics_collection(metrics_tracker):
 
     # Record the metric
     await record_inference_metric(
-        agent_id=agent.agent_id, inference_time_ms=inference_time_ms, success=True
+        agent_id=agent.agent_id,
+        inference_time_ms=inference_time_ms,
+        success=True,
     )
 
     # Allow time for metric collection
@@ -78,7 +80,9 @@ async def test_belief_update_metrics(metrics_tracker):
 
     # Record belief update metric
     await record_belief_metric(
-        agent_id=agent.agent_id, update_time_ms=update_time_ms, free_energy=free_energy
+        agent_id=agent.agent_id,
+        update_time_ms=update_time_ms,
+        free_energy=free_energy,
     )
 
     await asyncio.sleep(0.1)
@@ -106,7 +110,9 @@ async def test_agent_step_metrics(metrics_tracker):
     step_time_ms = (time.time() - start_time) * 1000
 
     # Record step metric
-    await record_step_metric(agent_id=agent.agent_id, step_time_ms=step_time_ms)
+    await record_step_metric(
+        agent_id=agent.agent_id, step_time_ms=step_time_ms
+    )
 
     await asyncio.sleep(0.1)
 
@@ -129,7 +135,9 @@ async def test_performance_alerts(metrics_tracker):
 
     # Simulate slow inference
     await record_inference_metric(
-        agent_id=agent.agent_id, inference_time_ms=10.0, success=True  # 10x baseline
+        agent_id=agent.agent_id,
+        inference_time_ms=10.0,
+        success=True,  # 10x baseline
     )
 
     # Force alert check
@@ -150,7 +158,10 @@ async def test_error_metrics_collection(metrics_tracker):
 
     # Record failed inference
     await record_inference_metric(
-        agent_id=agent.agent_id, inference_time_ms=5.0, success=False, error="Test error"
+        agent_id=agent.agent_id,
+        inference_time_ms=5.0,
+        success=False,
+        error="Test error",
     )
 
     await asyncio.sleep(0.1)
@@ -237,7 +248,9 @@ async def test_performance_snapshot(metrics_tracker):
     observation = {"grid": np.zeros((10, 10))}
     agent.step(observation)
 
-    await record_inference_metric(agent_id=agent.agent_id, inference_time_ms=5.0, success=True)
+    await record_inference_metric(
+        agent_id=agent.agent_id, inference_time_ms=5.0, success=True
+    )
 
     await asyncio.sleep(0.1)
 

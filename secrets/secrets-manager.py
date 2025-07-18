@@ -18,7 +18,9 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -28,9 +30,13 @@ class SecretsManager:
     def __init__(self, environment: str = "production"):
         self.environment = environment
         self.secrets_dir = Path(__file__).parent
-        self.config_file = self.secrets_dir / f"secrets_config_{environment}.json"
+        self.config_file = (
+            self.secrets_dir / f"secrets_config_{environment}.json"
+        )
 
-    def generate_secret(self, length: int = 32, include_symbols: bool = True) -> str:
+    def generate_secret(
+        self, length: int = 32, include_symbols: bool = True
+    ) -> str:
         """Generate a cryptographically secure random secret"""
         alphabet = string.ascii_letters + string.digits
         if include_symbols:
@@ -44,7 +50,9 @@ class SecretsManager:
         from cryptography.hazmat.primitives.asymmetric import rsa
 
         # Generate private key
-        private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        private_key = rsa.generate_private_key(
+            public_exponent=65537, key_size=2048
+        )
 
         # Serialize private key
         private_pem = private_key.private_bytes(
@@ -133,8 +141,12 @@ class SecretsManager:
         logger.info(f"Saving Docker environment file to {env_file}")
 
         with open(env_file, "w") as f:
-            f.write(f"# FreeAgentics {self.environment.title()} Environment Variables\n")
-            f.write(f"# Generated on {secrets.get('generated_at', 'unknown')}\n")
+            f.write(
+                f"# FreeAgentics {self.environment.title()} Environment Variables\n"
+            )
+            f.write(
+                f"# Generated on {secrets.get('generated_at', 'unknown')}\n"
+            )
             f.write("# DO NOT COMMIT THIS FILE TO VERSION CONTROL\n\n")
 
             for key, value in secrets.items():
@@ -157,7 +169,9 @@ class SecretsManager:
         encoded_secrets = {}
         for key, value in secrets.items():
             if isinstance(value, str) and not key.endswith("_path"):
-                encoded_secrets[key] = base64.b64encode(value.encode()).decode()
+                encoded_secrets[key] = base64.b64encode(
+                    value.encode()
+                ).decode()
 
         manifest = f"""apiVersion: v1
 kind: Secret
@@ -192,7 +206,9 @@ data:
         from cryptography.x509.oid import NameOID
 
         # Generate private key
-        private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        private_key = rsa.generate_private_key(
+            public_exponent=65537, key_size=2048
+        )
 
         # Create certificate
         subject = issuer = x509.Name(
@@ -212,7 +228,9 @@ data:
             .public_key(private_key.public_key())
             .serial_number(x509.random_serial_number())
             .not_valid_before(datetime.datetime.utcnow())
-            .not_valid_after(datetime.datetime.utcnow() + datetime.timedelta(days=365))
+            .not_valid_after(
+                datetime.datetime.utcnow() + datetime.timedelta(days=365)
+            )
             .add_extension(
                 x509.SubjectAlternativeName(
                     [
@@ -253,7 +271,9 @@ data:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="FreeAgentics Secrets Manager")
+    parser = argparse.ArgumentParser(
+        description="FreeAgentics Secrets Manager"
+    )
     parser.add_argument(
         "--environment",
         "-e",
@@ -268,8 +288,15 @@ def main():
         default="all",
         help="Output format",
     )
-    parser.add_argument("--domain", "-d", default="localhost", help="Domain for SSL certificate")
-    parser.add_argument("--generate-ssl", action="store_true", help="Generate SSL certificate")
+    parser.add_argument(
+        "--domain",
+        "-d",
+        default="localhost",
+        help="Domain for SSL certificate",
+    )
+    parser.add_argument(
+        "--generate-ssl", action="store_true", help="Generate SSL certificate"
+    )
 
     args = parser.parse_args()
 

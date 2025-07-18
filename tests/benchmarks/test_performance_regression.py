@@ -185,7 +185,10 @@ class TestPerformanceBaseline:
             # Load baseline
             baseline2 = PerformanceBaseline(baseline_path)
             assert "category1.test1" in baseline2.baseline_data
-            assert baseline2.baseline_data["category1.test1"]["duration_ms"] == 100
+            assert (
+                baseline2.baseline_data["category1.test1"]["duration_ms"]
+                == 100
+            )
 
     def test_baseline_update(self):
         """Test updating baseline with new results."""
@@ -265,7 +268,9 @@ class TestRegressionDetection:
                 )
             ]
 
-            regressions, improvements = detector.detect_regressions(current_results)
+            regressions, improvements = detector.detect_regressions(
+                current_results
+            )
 
             assert len(regressions) > 0
             assert any(r.regression_percent > 10 for r in regressions)
@@ -306,7 +311,9 @@ class TestRegressionDetection:
                 )
             ]
 
-            regressions, improvements = detector.detect_regressions(current_results)
+            regressions, improvements = detector.detect_regressions(
+                current_results
+            )
 
             assert len(improvements) > 0
             assert len(regressions) == 0
@@ -614,7 +621,9 @@ class TestReportGeneration:
                 ),
             ]
 
-            report = PerformanceReportGenerator.generate_report(metrics, output_dir)
+            report = PerformanceReportGenerator.generate_report(
+                metrics, output_dir
+            )
 
             assert report["summary"]["total_benchmarks"] == 3
             assert len(report["summary"]["categories"]) == 2
@@ -645,7 +654,9 @@ class TestEndToEndPerformance:
 
             # Generate report
             output_dir = Path(tmpdir)
-            report = PerformanceReportGenerator.generate_report(metrics, output_dir)
+            report = PerformanceReportGenerator.generate_report(
+                metrics, output_dir
+            )
 
             assert report["summary"]["total_benchmarks"] == 1
             assert "integration" in report["benchmarks"]

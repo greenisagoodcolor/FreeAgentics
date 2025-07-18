@@ -179,7 +179,12 @@ class TestFinalCoveragePush:
         from agents.base_agent import BasicExplorerAgent
 
         # Test agent with different configurations
-        configs = [{"grid_size": 5}, {"grid_size": 1}, {"actions": ["test"]}, {}]
+        configs = [
+            {"grid_size": 5},
+            {"grid_size": 1},
+            {"actions": ["test"]},
+            {},
+        ]
 
         for config in configs:
             try:

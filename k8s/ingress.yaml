@@ -16,26 +16,49 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
-    
+
     # Rate limiting
     nginx.ingress.kubernetes.io/rate-limit: "100"
     nginx.ingress.kubernetes.io/rate-limit-window: "1m"
     nginx.ingress.kubernetes.io/rate-limit-connections: "10"
-    
-    # Authentication rate limiting (stricter)
+
+    # Authentication rate limiting and caching
     nginx.ingress.kubernetes.io/server-snippet: |
       location /api/v1/auth/ {
         limit_req zone=auth burst=5 nodelay;
         limit_req_status 429;
       }
-      
+
       location /api/v1/websocket/ {
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
         proxy_read_timeout 86400s;
         proxy_send_timeout 86400s;
       }
-    
+
+      location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+      }
+
+      location ~* \.(html|htm)$ {
+        expires 1h;
+        add_header Cache-Control "public, max-age=3600";
+      }
+
+      location ~* \.(php|asp|aspx|jsp|cgi)$ {
+        return 404;
+      }
+
+      location ~* /\.(htaccess|htpasswd|env|git|svn) {
+        deny all;
+        return 404;
+      }
+
+      location ~* /(wp-admin|wp-login|admin|administrator|phpmyadmin) {
+        return 404;
+      }
+
     # Security headers
     nginx.ingress.kubernetes.io/configuration-snippet: |
       add_header X-Frame-Options "SAMEORIGIN" always;
@@ -44,41 +67,14 @@ metadata:
       add_header Referrer-Policy "strict-origin-when-cross-origin" always;
       add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' wss: https:; frame-ancestors 'self';" always;
       add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
-    
+
     # SSL Certificate management
     cert-manager.io/cluster-issuer: letsencrypt-prod
     cert-manager.io/acme-challenge-type: http01
-    
+
     # Monitoring
     nginx.ingress.kubernetes.io/enable-access-log: "true"
     nginx.ingress.kubernetes.io/enable-rewrite-log: "true"
-    
-    # Caching for static assets
-    nginx.ingress.kubernetes.io/server-snippet: |
-      location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-      }
-      
-      location ~* \.(html|htm)$ {
-        expires 1h;
-        add_header Cache-Control "public, max-age=3600";
-      }
-    
-    # Block common attack patterns
-    nginx.ingress.kubernetes.io/server-snippet: |
-      location ~* \.(php|asp|aspx|jsp|cgi)$ {
-        return 404;
-      }
-      
-      location ~* /\.(htaccess|htpasswd|env|git|svn) {
-        deny all;
-        return 404;
-      }
-      
-      location ~* /(wp-admin|wp-login|admin|administrator|phpmyadmin) {
-        return 404;
-      }
 
 spec:
   tls:
@@ -138,7 +134,7 @@ spec:
             name: frontend
             port:
               number: 3000
-  
+
   # API subdomain
   - host: api.yourdomain.com
     http:
@@ -150,7 +146,7 @@ spec:
             name: backend
             port:
               number: 8000
-  
+
   # WWW redirect
   - host: www.yourdomain.com
     http:

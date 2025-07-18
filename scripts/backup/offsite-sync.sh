@@ -42,12 +42,12 @@ send_notification() {
     local subject="$1"
     local message="$2"
     local status="${3:-info}"
-    
+
     if [[ -n "$SLACK_WEBHOOK" ]]; then
         local emoji="ℹ️"
         [[ "$status" == "error" ]] && emoji="❌"
         [[ "$status" == "success" ]] && emoji="✅"
-        
+
         curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\":\"$emoji *S3 Sync* - $subject\\n$message\"}" \
             "$SLACK_WEBHOOK" 2>/dev/null || true
@@ -57,31 +57,31 @@ send_notification() {
 # Check prerequisites
 check_prerequisites() {
     log "INFO" "Checking prerequisites..."
-    
+
     # Check AWS CLI
     if ! command -v aws >/dev/null 2>&1; then
         error_exit "AWS CLI not installed"
     fi
-    
+
     # Check AWS credentials
     if ! aws sts get-caller-identity >/dev/null 2>&1; then
         error_exit "AWS credentials not configured or invalid"
     fi
-    
+
     # Check S3 bucket access
     if ! aws s3 ls "s3://$S3_BUCKET" >/dev/null 2>&1; then
         error_exit "Cannot access S3 bucket: $S3_BUCKET"
     fi
-    
+
     log "INFO" "Prerequisites check passed"
 }
 
 # Setup S3 lifecycle policy
 setup_lifecycle_policy() {
     log "INFO" "Setting up S3 lifecycle policy..."
-    
+
     local policy_file="/tmp/s3-lifecycle-policy-$$.json"
-    
+
     cat > "$policy_file" << EOF
 {
     "Rules": [
@@ -106,7 +106,7 @@ setup_lifecycle_policy() {
     ]
 }
 EOF
-    
+
     if aws s3api put-bucket-lifecycle-configuration \
         --bucket "$S3_BUCKET" \
         --lifecycle-configuration "file://$policy_file" \
@@ -115,26 +115,26 @@ EOF
     else
         log "WARNING" "Failed to update lifecycle policy"
     fi
-    
+
     rm -f "$policy_file"
 }
 
 # Sync database backups
 sync_database_backups() {
     log "INFO" "Syncing database backups to S3..."
-    
+
     local sync_count=0
     local total_size=0
-    
+
     # Get list of local files not in S3
     while IFS= read -r local_file; do
         local filename=$(basename "$local_file")
         local s3_key="daily/$filename"
-        
+
         # Check if file exists in S3
         if ! aws s3 ls "s3://$S3_BUCKET/$s3_key" >/dev/null 2>&1; then
             log "INFO" "Uploading: $filename"
-            
+
             if aws s3 cp "$local_file" "s3://$S3_BUCKET/$s3_key" \
                 --storage-class STANDARD \
                 --metadata "backup-date=$(date -r "$local_file" +%Y-%m-%d)" \
@@ -148,14 +148,14 @@ sync_database_backups() {
             fi
         fi
     done < <(find "$BACKUP_ROOT/daily" -name "postgres_*.sql.gz" -mtime -7 -type f)
-    
+
     log "INFO" "Database sync complete: $sync_count files, $(numfmt --to=iec $total_size)"
 }
 
 # Sync Redis backups
 sync_redis_backups() {
     log "INFO" "Syncing Redis backups to S3..."
-    
+
     aws s3 sync "$BACKUP_ROOT/redis" "s3://$S3_BUCKET/redis/" \
         --exclude "*" \
         --include "redis_backup_*.tar.gz" \
@@ -168,7 +168,7 @@ sync_redis_backups() {
 # Sync configuration backups
 sync_config_backups() {
     log "INFO" "Syncing configuration backups to S3..."
-    
+
     # Encrypt sensitive configuration backups
     aws s3 sync "$BACKUP_ROOT/config" "s3://$S3_BUCKET/config/" \
         --exclude "*" \
@@ -183,11 +183,11 @@ sync_config_backups() {
 download_backup() {
     local s3_path="$1"
     local local_path="${2:-$BACKUP_ROOT/downloads}"
-    
+
     log "INFO" "Downloading backup from S3: $s3_path"
-    
+
     mkdir -p "$local_path"
-    
+
     if aws s3 cp "$s3_path" "$local_path/" \
         --region "$S3_REGION" \
         >> "$LOG_FILE" 2>&1; then
@@ -201,9 +201,9 @@ download_backup() {
 # List S3 backups
 list_s3_backups() {
     local backup_type="${1:-all}"
-    
+
     log "INFO" "Listing S3 backups (type: $backup_type)..."
-    
+
     case "$backup_type" in
         "database"|"db")
             aws s3 ls "s3://$S3_BUCKET/daily/" --recursive | grep "postgres_.*\.sql\.gz$" | sort -r
@@ -230,29 +230,29 @@ list_s3_backups() {
 # Verify S3 backup integrity
 verify_s3_backup() {
     local s3_path="$1"
-    
+
     log "INFO" "Verifying S3 backup: $s3_path"
-    
+
     # Get object metadata
     local metadata
     metadata=$(aws s3api head-object --bucket "$S3_BUCKET" --key "${s3_path#s3://$S3_BUCKET/}" 2>/dev/null)
-    
+
     if [[ -n "$metadata" ]]; then
         local size=$(echo "$metadata" | jq -r '.ContentLength')
         local etag=$(echo "$metadata" | jq -r '.ETag' | tr -d '"')
         local last_modified=$(echo "$metadata" | jq -r '.LastModified')
-        
+
         log "INFO" "Backup found:"
         log "INFO" "  Size: $(numfmt --to=iec $size)"
         log "INFO" "  ETag: $etag"
         log "INFO" "  Last Modified: $last_modified"
-        
+
         # Download and verify checksum
         local temp_file="/tmp/verify-$$"
         if aws s3 cp "$s3_path" "$temp_file" --quiet; then
             local local_md5=$(md5sum "$temp_file" | cut -d' ' -f1)
             rm -f "$temp_file"
-            
+
             if [[ "$local_md5" == "$etag" ]]; then
                 log "INFO" "✓ Checksum verification passed"
                 return 0
@@ -270,21 +270,21 @@ verify_s3_backup() {
 # Generate sync report
 generate_report() {
     log "INFO" "Generating sync report..."
-    
+
     local report_file="$BACKUP_ROOT/logs/s3-sync-report-$(date +%Y%m%d).txt"
-    
+
     {
         echo "S3 Offsite Sync Report"
         echo "====================="
         echo "Date: $(date)"
         echo "Bucket: s3://$S3_BUCKET"
         echo
-        
+
         # Storage usage
         echo "S3 Storage Usage:"
         aws s3 ls "s3://$S3_BUCKET" --recursive --summarize | tail -2
         echo
-        
+
         # Recent uploads
         echo "Recent Uploads (last 24 hours):"
         aws s3api list-objects-v2 \
@@ -292,16 +292,16 @@ generate_report() {
             --query "Contents[?LastModified>='$(date -u -d '24 hours ago' '+%Y-%m-%dT%H:%M:%S.000Z')'].{Key: Key, Size: Size, LastModified: LastModified}" \
             --output table
         echo
-        
+
         # Storage class distribution
         echo "Storage Class Distribution:"
         aws s3api list-objects-v2 \
             --bucket "$S3_BUCKET" \
             --query "Contents[].StorageClass" \
             --output text | sort | uniq -c
-            
+
     } > "$report_file"
-    
+
     log "INFO" "Report saved to: $report_file"
 }
 

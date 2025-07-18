@@ -30,7 +30,10 @@ def test_framework_components():
 
         # Test algorithm standards lookup
         sha256_standard = CryptographyStandards.HASH_ALGORITHMS.get("sha256")
-        if sha256_standard and sha256_standard.security_level == SecurityLevel.HIGH:
+        if (
+            sha256_standard
+            and sha256_standard.security_level == SecurityLevel.HIGH
+        ):
             print("   ✓ Algorithm standards configuration working")
         else:
             print("   ✗ Algorithm standards configuration failed")
@@ -41,7 +44,9 @@ def test_framework_components():
     # Test 2: Security Requirements
     print("\n2. Testing Security Requirements...")
     try:
-        from tests.security.cryptography_assessment_config import SecurityRequirements
+        from tests.security.cryptography_assessment_config import (
+            SecurityRequirements,
+        )
 
         requirements = SecurityRequirements.REQUIREMENTS
         if requirements and len(requirements) > 0:
@@ -55,11 +60,15 @@ def test_framework_components():
     # Test 3: Static Analysis Patterns
     print("\n3. Testing Static Analysis...")
     try:
-        from tests.security.crypto_static_analysis import CryptographicPatternMatcher
+        from tests.security.crypto_static_analysis import (
+            CryptographicPatternMatcher,
+        )
 
         matcher = CryptographicPatternMatcher()
         if matcher.patterns and len(matcher.patterns) > 0:
-            pattern_count = sum(len(patterns) for patterns in matcher.patterns.values())
+            pattern_count = sum(
+                len(patterns) for patterns in matcher.patterns.values()
+            )
             print(f"   ✓ {pattern_count} vulnerability patterns loaded")
         else:
             print("   ✗ Vulnerability patterns not loaded")
@@ -70,9 +79,15 @@ def test_framework_components():
     # Test 4: Scoring System
     print("\n4. Testing Scoring System...")
     try:
-        from tests.security.cryptography_assessment_config import calculate_security_score
+        from tests.security.cryptography_assessment_config import (
+            calculate_security_score,
+        )
 
-        test_findings = [{"severity": "critical"}, {"severity": "high"}, {"severity": "medium"}]
+        test_findings = [
+            {"severity": "critical"},
+            {"severity": "high"},
+            {"severity": "medium"},
+        ]
 
         score = calculate_security_score(test_findings)
         if score and "overall_score" in score:
@@ -89,8 +104,14 @@ def test_framework_components():
         # Create temporary directory for test reports
         with tempfile.TemporaryDirectory() as temp_dir:
             test_report = {
-                "assessment_metadata": {"assessment_type": "test", "platform": "test"},
-                "executive_summary": {"overall_risk_level": "LOW", "security_score": 95.0},
+                "assessment_metadata": {
+                    "assessment_type": "test",
+                    "platform": "test",
+                },
+                "executive_summary": {
+                    "overall_risk_level": "LOW",
+                    "security_score": 95.0,
+                },
             }
 
             # Test JSON report generation
@@ -114,7 +135,9 @@ def test_framework_components():
         )
 
         if COMPLIANCE_MAPPINGS and len(COMPLIANCE_MAPPINGS) > 0:
-            print(f"   ✓ {len(COMPLIANCE_MAPPINGS)} compliance standards mapped")
+            print(
+                f"   ✓ {len(COMPLIANCE_MAPPINGS)} compliance standards mapped"
+            )
         else:
             print("   ✗ Compliance mapping failed")
 
@@ -138,7 +161,9 @@ def test_cryptographic_implementations():
         test_data = b"test_data_for_validation"
         sha256_hash = hashlib.sha256(test_data).hexdigest()
 
-        if len(sha256_hash) == 64 and all(c in "0123456789abcdef" for c in sha256_hash):
+        if len(sha256_hash) == 64 and all(
+            c in "0123456789abcdef" for c in sha256_hash
+        ):
             print("   ✓ SHA-256 implementation correct")
         else:
             print("   ✗ SHA-256 implementation failed")
@@ -159,14 +184,20 @@ def test_cryptographic_implementations():
         import secrets
 
         from cryptography.hazmat.backends import default_backend
-        from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+        from cryptography.hazmat.primitives.ciphers import (
+            Cipher,
+            algorithms,
+            modes,
+        )
 
         # Test AES-256-GCM
         key = secrets.token_bytes(32)  # 256-bit key
         iv = secrets.token_bytes(12)  # 96-bit IV for GCM
         plaintext = b"test_encryption_data"
 
-        cipher = Cipher(algorithms.AES(key), modes.GCM(iv), backend=default_backend())
+        cipher = Cipher(
+            algorithms.AES(key), modes.GCM(iv), backend=default_backend()
+        )
 
         encryptor = cipher.encryptor()
         ciphertext = encryptor.update(plaintext) + encryptor.finalize()
@@ -174,7 +205,9 @@ def test_cryptographic_implementations():
 
         # Test decryption
         decryptor = Cipher(
-            algorithms.AES(key), modes.GCM(iv, auth_tag), backend=default_backend()
+            algorithms.AES(key),
+            modes.GCM(iv, auth_tag),
+            backend=default_backend(),
         ).decryptor()
 
         decrypted = decryptor.update(ciphertext) + decryptor.finalize()
@@ -203,7 +236,10 @@ def test_cryptographic_implementations():
         message = b"test_signature_data"
         signature = private_key.sign(
             message,
-            padding.PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.MAX_LENGTH),
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH,
+            ),
             hashes.SHA256(),
         )
 
@@ -211,7 +247,10 @@ def test_cryptographic_implementations():
             public_key.verify(
                 signature,
                 message,
-                padding.PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.MAX_LENGTH),
+                padding.PSS(
+                    mgf=padding.MGF1(hashes.SHA256()),
+                    salt_length=padding.PSS.MAX_LENGTH,
+                ),
                 hashes.SHA256(),
             )
             print("   ✓ RSA-2048 PSS signature/verification correct")

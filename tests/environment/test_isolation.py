@@ -29,7 +29,9 @@ class IsolationLevel(Enum):
 class DatabaseIsolation:
     """Database isolation for PostgreSQL tests."""
 
-    def __init__(self, host: str, port: int, user: str, password: str, database: str):
+    def __init__(
+        self, host: str, port: int, user: str, password: str, database: str
+    ):
         self.host = host
         self.port = port
         self.user = user
@@ -154,9 +156,7 @@ class DatabaseIsolation:
 
     def get_connection_url(self, schema: Optional[str] = None) -> str:
         """Get database connection URL."""
-        base_url = (
-            f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
-        )
+        base_url = f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
 
         if schema:
             base_url += f"?options=--search_path%3D{schema}"
@@ -265,7 +265,9 @@ class MessageQueueIsolation:
             self._vhosts.append(vhost)
             return vhost
         else:
-            raise Exception(f"Failed to create virtual host: {response.status_code}")
+            raise Exception(
+                f"Failed to create virtual host: {response.status_code}"
+            )
 
     def cleanup_virtual_host(self, vhost: str) -> None:
         """Clean up a virtual host."""
@@ -278,13 +280,18 @@ class MessageQueueIsolation:
             if vhost in self._vhosts:
                 self._vhosts.remove(vhost)
         else:
-            logger.warning(f"Failed to delete virtual host {vhost}: {response.status_code}")
+            logger.warning(
+                f"Failed to delete virtual host {vhost}: {response.status_code}"
+            )
 
     def get_connection_params(self, vhost: str) -> pika.ConnectionParameters:
         """Get connection parameters for a virtual host."""
         credentials = pika.PlainCredentials(self.user, self.password)
         return pika.ConnectionParameters(
-            host=self.host, port=self.port, virtual_host=vhost, credentials=credentials
+            host=self.host,
+            port=self.port,
+            virtual_host=vhost,
+            credentials=credentials,
         )
 
     @contextmanager
@@ -314,7 +321,9 @@ class FilesystemIsolation:
 
     def create_sandbox(self, prefix: str) -> Path:
         """Create an isolated filesystem sandbox."""
-        sandbox = Path(tempfile.mkdtemp(prefix=f"{prefix}_", dir=self.base_dir))
+        sandbox = Path(
+            tempfile.mkdtemp(prefix=f"{prefix}_", dir=self.base_dir)
+        )
         self._sandboxes.append(sandbox)
         return sandbox
 
@@ -329,7 +338,10 @@ class FilesystemIsolation:
             self._sandboxes.remove(sandbox_path)
 
     def copy_to_sandbox(
-        self, source: Union[str, Path], sandbox: Path, dest_name: Optional[str] = None
+        self,
+        source: Union[str, Path],
+        sandbox: Path,
+        dest_name: Optional[str] = None,
     ) -> Path:
         """Copy a file or directory to the sandbox."""
         source_path = Path(source)
@@ -380,7 +392,9 @@ class TestIsolation:
         if "redis" in config:
             redis_config = config["redis"]
             self.redis_isolation = RedisIsolation(
-                host=redis_config["host"], port=redis_config["port"], db=redis_config.get("db", 0)
+                host=redis_config["host"],
+                port=redis_config["port"],
+                db=redis_config.get("db", 0),
             )
         else:
             self.redis_isolation = None
@@ -441,10 +455,14 @@ class TestIsolation:
                 self.db_isolation.cleanup_database(db_context["database"])
 
         if "redis" in context:
-            self.redis_isolation.cleanup_namespace(context["redis"]["namespace"])
+            self.redis_isolation.cleanup_namespace(
+                context["redis"]["namespace"]
+            )
 
         if "rabbitmq" in context:
-            self.mq_isolation.cleanup_virtual_host(context["rabbitmq"]["vhost"])
+            self.mq_isolation.cleanup_virtual_host(
+                context["rabbitmq"]["vhost"]
+            )
 
         if "filesystem" in context:
             self.fs_isolation.cleanup_sandbox(context["filesystem"]["sandbox"])

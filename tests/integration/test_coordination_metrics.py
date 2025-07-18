@@ -98,7 +98,9 @@ async def test_coalition_efficiency_updates():
 
     # Update coalition efficiency
     await coordination_metrics.update_coalition_efficiency(
-        coalition_id=coalition_id, task_completed=True, coordination_overhead_ms=30.0
+        coalition_id=coalition_id,
+        task_completed=True,
+        coordination_overhead_ms=30.0,
     )
 
     # Check that metrics were updated
@@ -233,8 +235,16 @@ async def test_coordination_with_agent_integration(coordinator_agent):
     """Test coordination metrics with actual coordinator agent."""
     # Simulate agent discovering other agents
     coordinator_agent.known_agents = {
-        "agent-1": {"position": [1, 1], "type": "explorer", "status": "active"},
-        "agent-2": {"position": [2, 2], "type": "explorer", "status": "active"},
+        "agent-1": {
+            "position": [1, 1],
+            "type": "explorer",
+            "status": "active",
+        },
+        "agent-2": {
+            "position": [2, 2],
+            "type": "explorer",
+            "status": "active",
+        },
     }
 
     # Record coordination initiated by the agent
@@ -281,4 +291,7 @@ async def test_performance_threshold_warnings(caplog):
         )
 
     # Check that warning was logged
-    assert any("Slow coordination detected" in record.message for record in caplog.records)
+    assert any(
+        "Slow coordination detected" in record.message
+        for record in caplog.records
+    )

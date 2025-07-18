@@ -100,16 +100,27 @@ class PerformanceMetrics:
 
         def calculate_stats(values: List[float]) -> Dict[str, float]:
             if not values:
-                return {"min": 0, "max": 0, "avg": 0, "median": 0, "p95": 0, "p99": 0}
+                return {
+                    "min": 0,
+                    "max": 0,
+                    "avg": 0,
+                    "median": 0,
+                    "p95": 0,
+                    "p99": 0,
+                }
 
             return {
                 "min": min(values),
                 "max": max(values),
                 "avg": statistics.mean(values),
                 "median": statistics.median(values),
-                "p95": statistics.quantiles(values, n=20)[18] if len(values) >= 20 else max(values),
+                "p95": statistics.quantiles(values, n=20)[18]
+                if len(values) >= 20
+                else max(values),
                 "p99": (
-                    statistics.quantiles(values, n=100)[98] if len(values) >= 100 else max(values)
+                    statistics.quantiles(values, n=100)[98]
+                    if len(values) >= 100
+                    else max(values)
                 ),
             }
 
@@ -119,15 +130,23 @@ class PerformanceMetrics:
                 "successful_requests": self.metrics["successful_requests"],
                 "failed_requests": self.metrics["failed_requests"],
                 "success_rate": (
-                    (self.metrics["successful_requests"] / self.metrics["total_requests"] * 100)
+                    (
+                        self.metrics["successful_requests"]
+                        / self.metrics["total_requests"]
+                        * 100
+                    )
                     if self.metrics["total_requests"] > 0
                     else 0
                 ),
                 "rate_limit_hits": self.metrics["rate_limit_hits"],
             },
             "response_times": calculate_stats(self.metrics["response_times"]),
-            "token_generation": calculate_stats(self.metrics["token_generation_times"]),
-            "token_validation": calculate_stats(self.metrics["token_validation_times"]),
+            "token_generation": calculate_stats(
+                self.metrics["token_generation_times"]
+            ),
+            "token_validation": calculate_stats(
+                self.metrics["token_validation_times"]
+            ),
             "throughput": calculate_stats(self.metrics["throughput"]),
             "memory_usage": calculate_stats(self.metrics["memory_usage"]),
             "cpu_usage": calculate_stats(self.metrics["cpu_usage"]),
@@ -149,7 +168,9 @@ class SystemMonitor:
             while self.monitoring:
                 # Get memory usage
                 memory_info = psutil.virtual_memory()
-                self.metrics.record_memory_usage(memory_info.used / 1024 / 1024)  # MB
+                self.metrics.record_memory_usage(
+                    memory_info.used / 1024 / 1024
+                )  # MB
 
                 # Get CPU usage
                 cpu_percent = psutil.cpu_percent(interval=0.1)
@@ -203,7 +224,9 @@ class TestAuthenticationPerformance:
                 "username": f"perfuser{i}",
                 "email": f"perf{i}@example.com",
                 "password": f"PerfPass{i}123!",
-                "role": random.choice(["admin", "researcher", "agent_manager", "observer"]),
+                "role": random.choice(
+                    ["admin", "researcher", "agent_manager", "observer"]
+                ),
             }
             users.append(user_data)
 
@@ -218,7 +241,9 @@ class TestAuthenticationPerformance:
 
             self.auth_manager.users[user_data["username"]] = {
                 "user": user,
-                "password_hash": self.auth_manager.hash_password(user_data["password"]),
+                "password_hash": self.auth_manager.hash_password(
+                    user_data["password"]
+                ),
             }
 
         return users
@@ -232,7 +257,10 @@ class TestAuthenticationPerformance:
         for _ in range(10):
             response = self.client.post(
                 "/api/v1/auth/login",
-                json={"username": user["username"], "password": user["password"]},
+                json={
+                    "username": user["username"],
+                    "password": user["password"],
+                },
             )
             assert response.status_code == 200
 
@@ -241,7 +269,10 @@ class TestAuthenticationPerformance:
             start_time = time.time()
             response = self.client.post(
                 "/api/v1/auth/login",
-                json={"username": user["username"], "password": user["password"]},
+                json={
+                    "username": user["username"],
+                    "password": user["password"],
+                },
             )
             end_time = time.time()
 
@@ -261,8 +292,12 @@ class TestAuthenticationPerformance:
         print(f"  Requests per second: {100 / sum(response_times):.1f}")
 
         # Performance assertions
-        assert avg_response_time < 0.1, f"Average login time too slow: {avg_response_time:.3f}s"
-        assert p95_response_time < 0.2, f"95th percentile too slow: {p95_response_time:.3f}s"
+        assert (
+            avg_response_time < 0.1
+        ), f"Average login time too slow: {avg_response_time:.3f}s"
+        assert (
+            p95_response_time < 0.2
+        ), f"95th percentile too slow: {p95_response_time:.3f}s"
 
     def test_token_generation_performance(self):
         """Test token generation performance."""
@@ -291,8 +326,12 @@ class TestAuthenticationPerformance:
         print(f"  Tokens per second: {1000 / sum(generation_times):.1f}")
 
         # Performance assertions
-        assert avg_generation_time < 0.01, f"Token generation too slow: {avg_generation_time:.6f}s"
-        assert p95_generation_time < 0.02, f"95th percentile too slow: {p95_generation_time:.6f}s"
+        assert (
+            avg_generation_time < 0.01
+        ), f"Token generation too slow: {avg_generation_time:.6f}s"
+        assert (
+            p95_generation_time < 0.02
+        ), f"95th percentile too slow: {p95_generation_time:.6f}s"
 
     def test_token_validation_performance(self):
         """Test token validation performance."""
@@ -324,8 +363,12 @@ class TestAuthenticationPerformance:
         print(f"  Validations per second: {1000 / sum(validation_times):.1f}")
 
         # Performance assertions
-        assert avg_validation_time < 0.005, f"Token validation too slow: {avg_validation_time:.6f}s"
-        assert p95_validation_time < 0.01, f"95th percentile too slow: {p95_validation_time:.6f}s"
+        assert (
+            avg_validation_time < 0.005
+        ), f"Token validation too slow: {avg_validation_time:.6f}s"
+        assert (
+            p95_validation_time < 0.01
+        ), f"95th percentile too slow: {p95_validation_time:.6f}s"
 
     def test_concurrent_login_performance(self):
         """Test concurrent login performance."""
@@ -337,7 +380,10 @@ class TestAuthenticationPerformance:
                 start_time = time.time()
                 response = self.client.post(
                     "/api/v1/auth/login",
-                    json={"username": user_data["username"], "password": user_data["password"]},
+                    json={
+                        "username": user_data["username"],
+                        "password": user_data["password"],
+                    },
                 )
                 end_time = time.time()
 
@@ -367,7 +413,10 @@ class TestAuthenticationPerformance:
 
             # Execute concurrent logins
             with ThreadPoolExecutor(max_workers=concurrent_users) as executor:
-                futures = [executor.submit(login_worker, user) for user in selected_users]
+                futures = [
+                    executor.submit(login_worker, user)
+                    for user in selected_users
+                ]
                 results = [future.result() for future in as_completed(futures)]
 
             end_time = time.time()
@@ -395,7 +444,9 @@ class TestAuthenticationPerformance:
 
             # Performance assertions
             success_rate = successful_logins / len(results)
-            assert success_rate >= 0.95, f"Success rate too low: {success_rate:.2f}"
+            assert (
+                success_rate >= 0.95
+            ), f"Success rate too low: {success_rate:.2f}"
             assert (
                 avg_response_time < 1.0
             ), f"Average response time too slow: {avg_response_time:.3f}s"
@@ -409,7 +460,10 @@ class TestAuthenticationPerformance:
         for user_data in self.test_users[:50]:  # Use first 50 users
             response = self.client.post(
                 "/api/v1/auth/login",
-                json={"username": user_data["username"], "password": user_data["password"]},
+                json={
+                    "username": user_data["username"],
+                    "password": user_data["password"],
+                },
             )
             assert response.status_code == 200
             tokens.append(response.json()["refresh_token"])
@@ -419,7 +473,8 @@ class TestAuthenticationPerformance:
             try:
                 start_time = time.time()
                 response = self.client.post(
-                    "/api/v1/auth/refresh", json={"refresh_token": refresh_token}
+                    "/api/v1/auth/refresh",
+                    json={"refresh_token": refresh_token},
                 )
                 end_time = time.time()
 
@@ -437,7 +492,9 @@ class TestAuthenticationPerformance:
         start_time = time.time()
 
         with ThreadPoolExecutor(max_workers=25) as executor:
-            futures = [executor.submit(refresh_worker, token) for token in tokens]
+            futures = [
+                executor.submit(refresh_worker, token) for token in tokens
+            ]
             results = [future.result() for future in as_completed(futures)]
 
         end_time = time.time()
@@ -457,8 +514,12 @@ class TestAuthenticationPerformance:
 
         # Performance assertions
         success_rate = successful_refreshes / len(results)
-        assert success_rate >= 0.8, f"Token refresh success rate too low: {success_rate:.2f}"
-        assert avg_response_time < 0.5, f"Token refresh too slow: {avg_response_time:.3f}s"
+        assert (
+            success_rate >= 0.8
+        ), f"Token refresh success rate too low: {success_rate:.2f}"
+        assert (
+            avg_response_time < 0.5
+        ), f"Token refresh too slow: {avg_response_time:.3f}s"
 
         self.monitor.stop_monitoring()
 
@@ -500,7 +561,9 @@ class TestAuthenticationPerformance:
         for i in range(20):  # Rate limit is 10 per 5 minutes
             result = rate_limited_request()
             results.append(result)
-            self.metrics.increment_requests(result["status_code"] not in [429, 500])
+            self.metrics.increment_requests(
+                result["status_code"] not in [429, 500]
+            )
 
             if result["rate_limited"]:
                 self.metrics.increment_rate_limit_hits()
@@ -536,7 +599,10 @@ class TestAuthenticationPerformance:
             # Login
             response = self.client.post(
                 "/api/v1/auth/login",
-                json={"username": user["username"], "password": user["password"]},
+                json={
+                    "username": user["username"],
+                    "password": user["password"],
+                },
             )
 
             if response.status_code == 200:
@@ -549,7 +615,10 @@ class TestAuthenticationPerformance:
 
                 # Refresh token
                 refresh_token = response.json()["refresh_token"]
-                self.client.post("/api/v1/auth/refresh", json={"refresh_token": refresh_token})
+                self.client.post(
+                    "/api/v1/auth/refresh",
+                    json={"refresh_token": refresh_token},
+                )
 
         # Perform many operations
         for i in range(500):
@@ -557,7 +626,9 @@ class TestAuthenticationPerformance:
 
             # Check memory usage every 50 operations
             if i % 50 == 0:
-                current_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
+                current_memory = (
+                    psutil.Process().memory_info().rss / 1024 / 1024
+                )  # MB
                 self.metrics.record_memory_usage(current_memory)
 
                 # Force garbage collection
@@ -575,7 +646,9 @@ class TestAuthenticationPerformance:
         self.monitor.stop_monitoring()
 
         # Memory usage should not increase dramatically
-        assert memory_increase < 100, f"Memory usage increased too much: {memory_increase:.1f} MB"
+        assert (
+            memory_increase < 100
+        ), f"Memory usage increased too much: {memory_increase:.1f} MB"
 
     def test_database_connection_pool_performance(self):
         """Test database connection pool performance simulation."""
@@ -595,15 +668,21 @@ class TestAuthenticationPerformance:
 
             if stored_user:
                 # Simulate password verification
-                self.auth_manager.verify_password(user["password"], stored_user["password_hash"])
+                self.auth_manager.verify_password(
+                    user["password"], stored_user["password_hash"]
+                )
 
             end_time = time.time()
             return end_time - start_time
 
         # Test with concurrent database operations
         with ThreadPoolExecutor(max_workers=50) as executor:
-            futures = [executor.submit(simulate_db_operation) for _ in range(200)]
-            connection_times = [future.result() for future in as_completed(futures)]
+            futures = [
+                executor.submit(simulate_db_operation) for _ in range(200)
+            ]
+            connection_times = [
+                future.result() for future in as_completed(futures)
+            ]
 
         # Analyze results
         avg_connection_time = statistics.mean(connection_times)
@@ -649,7 +728,10 @@ class TestAuthenticationPerformance:
                     if operation == "login":
                         response = self.client.post(
                             "/api/v1/auth/login",
-                            json={"username": user["username"], "password": user["password"]},
+                            json={
+                                "username": user["username"],
+                                "password": user["password"],
+                            },
                         )
                         success = response.status_code == 200
 
@@ -657,12 +739,18 @@ class TestAuthenticationPerformance:
                         # First login to get refresh token
                         login_response = self.client.post(
                             "/api/v1/auth/login",
-                            json={"username": user["username"], "password": user["password"]},
+                            json={
+                                "username": user["username"],
+                                "password": user["password"],
+                            },
                         )
                         if login_response.status_code == 200:
-                            refresh_token = login_response.json()["refresh_token"]
+                            refresh_token = login_response.json()[
+                                "refresh_token"
+                            ]
                             response = self.client.post(
-                                "/api/v1/auth/refresh", json={"refresh_token": refresh_token}
+                                "/api/v1/auth/refresh",
+                                json={"refresh_token": refresh_token},
                             )
                             success = response.status_code == 200
                         else:
@@ -672,12 +760,21 @@ class TestAuthenticationPerformance:
                         # First login to get access token
                         login_response = self.client.post(
                             "/api/v1/auth/login",
-                            json={"username": user["username"], "password": user["password"]},
+                            json={
+                                "username": user["username"],
+                                "password": user["password"],
+                            },
                         )
                         if login_response.status_code == 200:
-                            access_token = login_response.json()["access_token"]
-                            headers = {"Authorization": f"Bearer {access_token}"}
-                            response = self.client.get("/api/v1/auth/me", headers=headers)
+                            access_token = login_response.json()[
+                                "access_token"
+                            ]
+                            headers = {
+                                "Authorization": f"Bearer {access_token}"
+                            }
+                            response = self.client.get(
+                                "/api/v1/auth/me", headers=headers
+                            )
                             success = response.status_code == 200
                         else:
                             success = False
@@ -686,7 +783,11 @@ class TestAuthenticationPerformance:
                     response_time = end_time - start_time
 
                     worker_results.append(
-                        {"operation": operation, "response_time": response_time, "success": success}
+                        {
+                            "operation": operation,
+                            "response_time": response_time,
+                            "success": success,
+                        }
                     )
 
                 except Exception as e:
@@ -708,7 +809,10 @@ class TestAuthenticationPerformance:
         start_time = time.time()
 
         with ThreadPoolExecutor(max_workers=max_concurrent_users) as executor:
-            futures = [executor.submit(stress_worker) for _ in range(max_concurrent_users)]
+            futures = [
+                executor.submit(stress_worker)
+                for _ in range(max_concurrent_users)
+            ]
 
             for future in as_completed(futures):
                 results.extend(future.result())
@@ -747,8 +851,12 @@ class TestAuthenticationPerformance:
                 self.metrics.increment_requests(result["success"])
 
             # Performance assertions
-            assert success_rate >= 0.90, f"Stress test success rate too low: {success_rate:.2%}"
-            assert throughput >= 50, f"Stress test throughput too low: {throughput:.1f} ops/sec"
+            assert (
+                success_rate >= 0.90
+            ), f"Stress test success rate too low: {success_rate:.2%}"
+            assert (
+                throughput >= 50
+            ), f"Stress test throughput too low: {throughput:.1f} ops/sec"
 
         else:
             pytest.fail("No operations completed during stress test")
@@ -775,7 +883,9 @@ class TestAuthenticationPerformance:
 
         print(f"\\nSUMMARY:")
         print(f"  Total Requests: {report['summary']['total_requests']}")
-        print(f"  Successful Requests: {report['summary']['successful_requests']}")
+        print(
+            f"  Successful Requests: {report['summary']['successful_requests']}"
+        )
         print(f"  Failed Requests: {report['summary']['failed_requests']}")
         print(f"  Success Rate: {report['summary']['success_rate']:.1f}%")
         print(f"  Rate Limit Hits: {report['summary']['rate_limit_hits']}")

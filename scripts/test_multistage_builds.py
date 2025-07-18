@@ -31,11 +31,17 @@ class MultiStageBuilder:
         """Log error message"""
         print(f"[ERROR] {message}")
 
-    def run_command(self, command: List[str], timeout: int = 600) -> Tuple[int, str, str]:
+    def run_command(
+        self, command: List[str], timeout: int = 600
+    ) -> Tuple[int, str, str]:
         """Run a command and return return code, stdout, stderr"""
         try:
             result = subprocess.run(
-                command, capture_output=True, text=True, timeout=timeout, cwd=self.project_root
+                command,
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                cwd=self.project_root,
             )
             return result.returncode, result.stdout, result.stderr
         except subprocess.TimeoutExpired:
@@ -57,7 +63,15 @@ class MultiStageBuilder:
         """Build a specific stage"""
         self.log_info(f"Building {stage_name} stage...")
 
-        build_command = ["docker", "build", "--target", stage_name, "-t", image_tag, "."]
+        build_command = [
+            "docker",
+            "build",
+            "--target",
+            stage_name,
+            "-t",
+            image_tag,
+            ".",
+        ]
 
         start_time = time.time()
         returncode, stdout, stderr = self.run_command(build_command)
@@ -71,7 +85,9 @@ class MultiStageBuilder:
                 "image_size": image_size,
                 "image_tag": image_tag,
             }
-            self.log_info(f"✓ {stage_name} stage built successfully in {build_time:.2f}s")
+            self.log_info(
+                f"✓ {stage_name} stage built successfully in {build_time:.2f}s"
+            )
             self.log_info(f"  Size: {image_size / (1024*1024):.1f} MB")
             return True
         else:
@@ -112,12 +128,22 @@ class MultiStageBuilder:
         self.log_info("Second build (warm cache)...")
         start_time = time.time()
         returncode, stdout, stderr = self.run_command(
-            ["docker", "build", "--target", "production", "-t", "freeagentics:cache-test-2", "."]
+            [
+                "docker",
+                "build",
+                "--target",
+                "production",
+                "-t",
+                "freeagentics:cache-test-2",
+                ".",
+            ]
         )
         warm_build_time = time.time() - start_time
 
         if returncode == 0:
-            cache_efficiency = (cold_build_time - warm_build_time) / cold_build_time * 100
+            cache_efficiency = (
+                (cold_build_time - warm_build_time) / cold_build_time * 100
+            )
             self.log_info(f"Cold build time: {cold_build_time:.2f}s")
             self.log_info(f"Warm build time: {warm_build_time:.2f}s")
             self.log_info(f"Cache efficiency: {cache_efficiency:.1f}%")
@@ -174,16 +200,23 @@ class MultiStageBuilder:
                 self.analyze_layer_structure(image_tag)
 
         # Compare sizes
-        if "development" in self.build_results and "production" in self.build_results:
+        if (
+            "development" in self.build_results
+            and "production" in self.build_results
+        ):
             dev_size = self.build_results["development"]["image_size"]
             prod_size = self.build_results["production"]["image_size"]
 
             if dev_size > 0 and prod_size > 0:
                 reduction = (dev_size - prod_size) / dev_size * 100
-                self.log_info(f"Size reduction from dev to prod: {reduction:.1f}%")
+                self.log_info(
+                    f"Size reduction from dev to prod: {reduction:.1f}%"
+                )
 
                 if reduction > 0:
-                    self.log_info("✓ Production stage provides size optimization")
+                    self.log_info(
+                        "✓ Production stage provides size optimization"
+                    )
                 else:
                     self.log_info("⚠ Production stage doesn't reduce size")
 
@@ -199,7 +232,9 @@ class MultiStageBuilder:
         if returncode == 0:
             user = stdout.strip()
             if user != "root":
-                self.log_info(f"✓ Production image runs as non-root user: {user}")
+                self.log_info(
+                    f"✓ Production image runs as non-root user: {user}"
+                )
             else:
                 self.log_info("⚠ Production image runs as root user")
         else:
@@ -217,7 +252,14 @@ class MultiStageBuilder:
 
         # Run container
         returncode, stdout, stderr = self.run_command(
-            ["docker", "run", "-d", "--name", container_name, "freeagentics:prod-test"]
+            [
+                "docker",
+                "run",
+                "-d",
+                "--name",
+                container_name,
+                "freeagentics:prod-test",
+            ]
         )
 
         if returncode == 0:
@@ -226,7 +268,13 @@ class MultiStageBuilder:
 
             # Check health status
             returncode, stdout, stderr = self.run_command(
-                ["docker", "inspect", container_name, "--format", "{{.State.Health.Status}}"]
+                [
+                    "docker",
+                    "inspect",
+                    container_name,
+                    "--format",
+                    "{{.State.Health.Status}}",
+                ]
             )
 
             if returncode == 0:
@@ -249,7 +297,11 @@ class MultiStageBuilder:
         """Clean up test images"""
         self.log_info("Cleaning up test images...")
 
-        test_images = ["freeagentics:base-test", "freeagentics:dev-test", "freeagentics:prod-test"]
+        test_images = [
+            "freeagentics:base-test",
+            "freeagentics:dev-test",
+            "freeagentics:prod-test",
+        ]
 
         for image in test_images:
             self.run_command(["docker", "rmi", image])
@@ -265,7 +317,10 @@ class MultiStageBuilder:
         }
 
         # Add recommendations based on results
-        if "development" in self.build_results and "production" in self.build_results:
+        if (
+            "development" in self.build_results
+            and "production" in self.build_results
+        ):
             dev_size = self.build_results["development"]["image_size"]
             prod_size = self.build_results["production"]["image_size"]
 
@@ -277,7 +332,9 @@ class MultiStageBuilder:
                     )
 
         if "caching" in self.build_results:
-            cache_efficiency = self.build_results["caching"]["cache_efficiency"]
+            cache_efficiency = self.build_results["caching"][
+                "cache_efficiency"
+            ]
             if cache_efficiency < 50:
                 report["recommendations"].append(
                     "Consider optimizing Dockerfile for better layer caching"
@@ -305,7 +362,9 @@ class MultiStageBuilder:
             if result.get("success"):
                 size_mb = result["image_size"] / (1024 * 1024)
                 build_time = result["build_time"]
-                print(f"{stage_name.upper()}: {size_mb:.1f} MB (built in {build_time:.2f}s)")
+                print(
+                    f"{stage_name.upper()}: {size_mb:.1f} MB (built in {build_time:.2f}s)"
+                )
             else:
                 print(f"{stage_name.upper()}: BUILD FAILED")
 

@@ -69,7 +69,9 @@ class ServicePolicy:
     source_service: str
     target_service: str
     allowed_operations: List[str]
-    allowed_methods: List[str] = field(default_factory=lambda: ["GET", "POST", "PUT", "DELETE"])
+    allowed_methods: List[str] = field(
+        default_factory=lambda: ["GET", "POST", "PUT", "DELETE"]
+    )
     mtls_required: bool = True
     conditions: Dict[str, Any] = field(default_factory=dict)
 
@@ -125,7 +127,9 @@ class ServiceMeshConfig:
     def add_service_policy(self, policy: ServicePolicy) -> None:
         """Add a service access policy."""
         self.service_policies.append(policy)
-        logger.info(f"Added service policy: {policy.source_service} -> {policy.target_service}")
+        logger.info(
+            f"Added service policy: {policy.source_service} -> {policy.target_service}"
+        )
 
     def set_encryption_policy(
         self,
@@ -318,7 +322,9 @@ def generate_istio_config(config: ServiceMeshConfig) -> Dict[str, Any]:
         # Add subsets for versions
         if service_name in config.routing_rules:
             subsets = []
-            for version in config.routing_rules[service_name]["version_weights"]:
+            for version in config.routing_rules[service_name][
+                "version_weights"
+            ]:
                 subsets.append(
                     {
                         "name": version,
@@ -464,7 +470,9 @@ def generate_linkerd_config(config: ServiceMeshConfig) -> Dict[str, Any]:
             # Add weighted routing
             for version, weight in routing["version_weights"].items():
                 rule = {
-                    "matches": [{"path": {"type": "PathPrefix", "value": "/"}}],
+                    "matches": [
+                        {"path": {"type": "PathPrefix", "value": "/"}}
+                    ],
                     "backendRefs": [
                         {
                             "name": f"{service_name}-{version}",

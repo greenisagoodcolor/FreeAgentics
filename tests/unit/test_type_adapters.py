@@ -234,12 +234,17 @@ class TestTypeHelpers:
 
     def test_get_coalition_attribute(self):
         """Test getting coalition attributes safely."""
-        coalition = Coalition("test_coalition", "Test Coalition", "Test objective")
+        coalition = Coalition(
+            "test_coalition", "Test Coalition", "Test objective"
+        )
         coalition.add_member("agent_1")
 
         # Standard attributes
         assert get_coalition_attribute(coalition, "name") == "Test Coalition"
-        assert get_coalition_attribute(coalition, "coalition_id") == "test_coalition"
+        assert (
+            get_coalition_attribute(coalition, "coalition_id")
+            == "test_coalition"
+        )
         assert get_coalition_attribute(coalition, "id") == "test_coalition"
 
         # Members

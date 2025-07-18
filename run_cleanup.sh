@@ -51,68 +51,68 @@ trap 'handle_error $LINENO' ERR
 # Check prerequisites
 check_prerequisites() {
     log_info "Checking prerequisites..."
-    
+
     # Check if we're in a git repository
     if ! git rev-parse --git-dir > /dev/null 2>&1; then
         log_error "Not in a git repository"
         exit 1
     fi
-    
+
     # Check if CLAUDE.md exists
     if [ ! -f "CLAUDE.md" ]; then
         log_error "CLAUDE.md not found - this is required for cleanup validation"
         exit 1
     fi
-    
+
     # Check if cleanup process document exists
     if [ ! -f "COMPREHENSIVE_CLEANUP_PROCESS.md" ]; then
         log_error "COMPREHENSIVE_CLEANUP_PROCESS.md not found"
         exit 1
     fi
-    
+
     # Check if validation script exists
     if [ ! -f "validate_cleanup.py" ]; then
         log_error "validate_cleanup.py not found"
         exit 1
     fi
-    
+
     log_success "Prerequisites check passed"
 }
 
 # Phase 1: Ultrathink Research & Planning
 phase_1_research_planning() {
     log_phase "1. ULTRATHINK RESEARCH & PLANNING"
-    
+
     # Step 1.1: Re-read CLAUDE.md
     log_info "Step 1.1: Re-reading CLAUDE.md guidelines (1159 lines)"
     local claude_lines=$(wc -l < CLAUDE.md)
     log_info "CLAUDE.md contains $claude_lines lines"
-    
+
     # Extract key principles
     log_info "Extracting key mandatory principles..."
     grep -n "MANDATORY\|BLOCKING\|NON-NEGOTIABLE\|ZERO TOLERANCE" CLAUDE.md > mandatory_principles.txt || true
-    
+
     # Step 1.2: Repository state analysis
     log_info "Step 1.2: Analyzing repository state..."
-    
+
     # File counts
     local python_files=$(find . -name "*.py" -type f | wc -l)
     local test_files=$(find . -name "*test*.py" -o -name "test_*.py" | wc -l)
     local doc_files=$(find . -name "*.md" -type f | wc -l)
     local modified_files=$(git status --porcelain | wc -l)
-    
+
     log_info "Repository metrics:"
     log_info "  Python files: $python_files"
     log_info "  Test files: $test_files"
     log_info "  Documentation files: $doc_files"
     log_info "  Modified files: $modified_files"
-    
+
     # Step 1.3: Create cleanup plan
     log_info "Step 1.3: Creating cleanup plan..."
-    
+
     local timestamp=$(date +%Y%m%d_%H%M%S)
     local plan_file="CLEANUP_PLAN_$timestamp.md"
-    
+
     cat > "$plan_file" << EOF
 # Cleanup Plan - $timestamp
 
@@ -139,38 +139,38 @@ phase_1_research_planning() {
 - [ ] Documentation consolidated and up-to-date
 - [ ] No obsolete files remaining
 EOF
-    
+
     log_success "Cleanup plan created: $plan_file"
 }
 
 # Phase 2: Repository Cleanup
 phase_2_repository_cleanup() {
     log_phase "2. REPOSITORY CLEANUP"
-    
+
     # Step 2.1: Remove obsolete files
     log_info "Step 2.1: Removing obsolete files..."
-    
+
     # Remove build artifacts
     log_info "Removing build artifacts..."
     rm -rf build/ dist/ *.egg-info/ .pytest_cache/ || true
     rm -rf node_modules/ .npm/ .yarn/ || true
     rm -rf .coverage htmlcov/ .nyc_output/ || true
-    
+
     # Remove IDE files
     log_info "Removing IDE files..."
     find . -name ".vscode" -type d -exec rm -rf {} + || true
     find . -name ".idea" -type d -exec rm -rf {} + || true
     find . -name "*.swp" -o -name "*.swo" -exec rm -f {} + || true
-    
+
     # Remove OS-specific files
     log_info "Removing OS-specific files..."
     find . -name ".DS_Store" -exec rm -f {} + || true
     find . -name "Thumbs.db" -exec rm -f {} + || true
-    
+
     # Remove temporary files
     log_info "Removing temporary files..."
     find . -name "*.bak" -o -name "*.tmp" -o -name "*.old" -o -name "*~" -exec rm -f {} + || true
-    
+
     # Step 2.2: Clean up test reports
     log_info "Step 2.2: Cleaning up test reports and artifacts..."
     find . -name "test-results" -type d -exec rm -rf {} + || true
@@ -178,27 +178,27 @@ phase_2_repository_cleanup() {
     find . -name "coverage-reports" -type d -exec rm -rf {} + || true
     find . -name "*.benchmark" -exec rm -f {} + || true
     find . -name "*.prof" -o -name "*.pstats" -exec rm -f {} + || true
-    
+
     # Step 2.3: Directory consolidation
     log_info "Step 2.3: Consolidating directories..."
-    
+
     # Consolidate test directories
     if [ -d "test" ] && [ -d "tests" ]; then
         log_info "Consolidating test directories..."
         mv test/* tests/ 2>/dev/null || true
         rmdir test 2>/dev/null || true
     fi
-    
+
     # Consolidate documentation directories
     if [ -d "doc" ] && [ -d "docs" ]; then
         log_info "Consolidating documentation directories..."
         mv doc/* docs/ 2>/dev/null || true
         rmdir doc 2>/dev/null || true
     fi
-    
+
     # Step 2.4: Remove unused code
     log_info "Step 2.4: Removing unused code..."
-    
+
     # Check if autoflake is available
     if command -v autoflake &> /dev/null; then
         log_info "Removing unused imports with autoflake..."
@@ -206,7 +206,7 @@ phase_2_repository_cleanup() {
     else
         log_warning "autoflake not available - skipping unused import removal"
     fi
-    
+
     # Commit cleanup phase
     log_info "Committing repository cleanup phase..."
     git add -A
@@ -217,29 +217,29 @@ phase_2_repository_cleanup() {
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
     fi
-    
+
     log_success "Repository cleanup completed"
 }
 
 # Phase 3: Documentation Consolidation
 phase_3_documentation_consolidation() {
     log_phase "3. DOCUMENTATION CONSOLIDATION"
-    
+
     log_info "Step 3.1: Analyzing documentation structure..."
-    
+
     # List all documentation files
     find . -name "*.md" -o -name "*.rst" -o -name "*.txt" | grep -E "(README|GUIDE|DOC)" > doc_inventory.txt || true
-    
+
     # Count documentation files
     local doc_count=$(find . -name "*.md" -type f | wc -l)
     log_info "Found $doc_count documentation files"
-    
+
     # Create docs directory if it doesn't exist
     mkdir -p docs/archive
-    
+
     # Step 3.2: Consolidate small documentation files
     log_info "Step 3.2: Consolidating small documentation files..."
-    
+
     # Move small documentation files to archive
     for doc_file in $(find . -name "*.md" -not -name "README.md" -not -name "CLAUDE.md" -not -name "COMPREHENSIVE_CLEANUP_PROCESS.md"); do
         if [ -f "$doc_file" ]; then
@@ -250,10 +250,10 @@ phase_3_documentation_consolidation() {
             fi
         fi
     done
-    
+
     # Step 3.3: Create documentation index
     log_info "Step 3.3: Creating documentation index..."
-    
+
     cat > docs/INDEX.md << 'EOF'
 # Documentation Index
 
@@ -277,7 +277,7 @@ phase_3_documentation_consolidation() {
 2. [PERFORMANCE_GUIDE.md](PERFORMANCE_GUIDE.md) - Performance optimization
 3. [CHANGELOG.md](CHANGELOG.md) - Version history
 EOF
-    
+
     # Commit documentation consolidation
     log_info "Committing documentation consolidation..."
     git add -A
@@ -288,17 +288,17 @@ EOF
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
     fi
-    
+
     log_success "Documentation consolidation completed"
 }
 
 # Phase 4: Code Quality Resolution
 phase_4_code_quality_resolution() {
     log_phase "4. CODE QUALITY RESOLUTION"
-    
+
     # Step 4.1: Fix type errors
     log_info "Step 4.1: Fixing type errors..."
-    
+
     # Check if mypy is available
     if command -v mypy &> /dev/null; then
         log_info "Running mypy type checking..."
@@ -311,28 +311,28 @@ phase_4_code_quality_resolution() {
     else
         log_warning "mypy not available - skipping type checking"
     fi
-    
+
     # Step 4.2: Fix pre-commit hooks
     log_info "Step 4.2: Fixing pre-commit hooks..."
-    
+
     # Check if pre-commit is available
     if command -v pre-commit &> /dev/null; then
         log_info "Installing pre-commit hooks..."
         pre-commit install || true
-        
+
         log_info "Running pre-commit hooks..."
         local max_attempts=5
         local attempt=1
-        
+
         while [ $attempt -le $max_attempts ]; do
             log_info "Pre-commit attempt $attempt/$max_attempts"
-            
+
             if pre-commit run --all-files; then
                 log_success "All pre-commit hooks passed"
                 break
             else
                 log_warning "Pre-commit hooks failed - attempting auto-fix..."
-                
+
                 # Auto-fix common issues
                 if command -v black &> /dev/null; then
                     black . || true
@@ -340,11 +340,11 @@ phase_4_code_quality_resolution() {
                 if command -v isort &> /dev/null; then
                     isort . || true
                 fi
-                
+
                 attempt=$((attempt + 1))
             fi
         done
-        
+
         if [ $attempt -gt $max_attempts ]; then
             log_error "Failed to fix pre-commit issues after $max_attempts attempts"
             exit 1
@@ -352,10 +352,10 @@ phase_4_code_quality_resolution() {
     else
         log_warning "pre-commit not available - skipping pre-commit checks"
     fi
-    
+
     # Step 4.3: Run automated checks
     log_info "Step 4.3: Running automated checks..."
-    
+
     # Check if Makefile exists
     if [ -f "Makefile" ]; then
         log_info "Running make format..."
@@ -365,7 +365,7 @@ phase_4_code_quality_resolution() {
             log_error "Format check failed"
             exit 1
         fi
-        
+
         log_info "Running make test..."
         if make test; then
             log_success "Test check passed"
@@ -373,7 +373,7 @@ phase_4_code_quality_resolution() {
             log_error "Test check failed"
             exit 1
         fi
-        
+
         log_info "Running make lint..."
         if make lint; then
             log_success "Lint check passed"
@@ -384,7 +384,7 @@ phase_4_code_quality_resolution() {
     else
         log_warning "Makefile not found - skipping make commands"
     fi
-    
+
     # Commit code quality fixes
     log_info "Committing code quality fixes..."
     git add -A
@@ -395,16 +395,16 @@ phase_4_code_quality_resolution() {
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
     fi
-    
+
     log_success "Code quality resolution completed"
 }
 
 # Phase 5: Git Workflow
 phase_5_git_workflow() {
     log_phase "5. GIT WORKFLOW"
-    
+
     log_info "Step 5.1: Final validation..."
-    
+
     # Run comprehensive validation
     log_info "Running comprehensive validation..."
     if python3 validate_cleanup.py; then
@@ -413,17 +413,17 @@ phase_5_git_workflow() {
         log_error "Validation failed - cleanup incomplete"
         exit 1
     fi
-    
+
     # Step 5.2: Verify git status
     log_info "Step 5.2: Verifying git status..."
-    
+
     if git diff --quiet && git diff --cached --quiet; then
         log_success "Git working directory is clean"
     else
         log_warning "Git working directory has uncommitted changes"
         git status --porcelain
     fi
-    
+
     # Step 5.3: Final commit
     log_info "Step 5.3: Creating final cleanup commit..."
     git add -A
@@ -440,7 +440,7 @@ phase_5_git_workflow() {
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
     fi
-    
+
     log_success "Git workflow completed"
 }
 
@@ -448,21 +448,21 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 main() {
     log_info "Starting Comprehensive Repository Cleanup"
     log_info "Following CLAUDE.md guidelines with zero tolerance for quality issues"
-    
+
     # Check prerequisites
     check_prerequisites
-    
+
     # Execute all phases
     phase_1_research_planning
     phase_2_repository_cleanup
     phase_3_documentation_consolidation
     phase_4_code_quality_resolution
     phase_5_git_workflow
-    
+
     log_success "🎉 COMPREHENSIVE CLEANUP COMPLETED SUCCESSFULLY!"
     log_success "Repository now meets all CLAUDE.md quality standards"
     log_success "All automated checks passing ✅"
-    
+
     # Final summary
     echo -e "\n${GREEN}========================================${NC}"
     echo -e "${GREEN}CLEANUP SUMMARY${NC}"
@@ -473,7 +473,7 @@ main() {
     echo -e "✅ Phase 4: Code Quality Resolution - Complete"
     echo -e "✅ Phase 5: Git Workflow - Complete"
     echo -e "\n${GREEN}Repository is now clean and optimized!${NC}"
-    
+
     # Show final validation report
     if [ -f "cleanup_validation_report.json" ]; then
         echo -e "\n${BLUE}Final validation report available in: cleanup_validation_report.json${NC}"

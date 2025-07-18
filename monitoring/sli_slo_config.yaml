@@ -16,7 +16,7 @@ slis:
     good_events: "HTTP 200 responses"
     total_events: "All HTTP responses"
     measurement_window: "5m"
-    
+
   latency:
     name: "Request Latency"
     description: "Percentage of requests served within acceptable latency"
@@ -25,7 +25,7 @@ slis:
     good_events: "Requests < 500ms"
     total_events: "All requests"
     measurement_window: "5m"
-    
+
   quality:
     name: "Request Quality"
     description: "Percentage of requests that are successful"
@@ -34,7 +34,7 @@ slis:
     good_events: "HTTP 2xx, 3xx, 4xx responses"
     total_events: "All HTTP responses"
     measurement_window: "5m"
-    
+
   coordination:
     name: "Agent Coordination Success"
     description: "Percentage of agent coordination requests that succeed"
@@ -43,7 +43,7 @@ slis:
     good_events: "Successful coordination requests"
     total_events: "All coordination requests"
     measurement_window: "5m"
-    
+
   memory_efficiency:
     name: "Memory Efficiency"
     description: "Percentage of agents operating within memory limits"
@@ -68,7 +68,7 @@ slos:
         threshold: 6.0   # 5% of monthly budget in 6 hours
       - window: "24h"
         threshold: 3.0   # 10% of monthly budget in 24 hours
-    
+
   latency:
     sli: "latency"
     target: 0.5  # P95 < 500ms
@@ -82,7 +82,7 @@ slos:
         threshold: 0.55  # 55% above target for 30 minutes
       - window: "2h"
         threshold: 0.6   # 60% above target for 2 hours
-    
+
   quality:
     sli: "quality"
     target: 0.99  # 99% success rate
@@ -96,7 +96,7 @@ slos:
         threshold: 0.15  # 15% error rate for 30 minutes
       - window: "2h"
         threshold: 0.10  # 10% error rate for 2 hours
-    
+
   coordination:
     sli: "coordination"
     target: 0.95  # 95% coordination success
@@ -110,7 +110,7 @@ slos:
         threshold: 0.15  # 15% failure rate for 30 minutes
       - window: "1h"
         threshold: 0.10  # 10% failure rate for 1 hour
-    
+
   memory_efficiency:
     sli: "memory_efficiency"
     target: 0.90  # 90% of agents within memory limits
@@ -132,31 +132,31 @@ alert_rules:
     severity: "critical"
     duration: "2m"
     description: "High burn rate detected for availability SLO"
-    
+
   - name: "SLO_Availability_BurnRate_Medium"
     condition: "burn_rate(availability) > 6.0"
     severity: "warning"
     duration: "15m"
     description: "Medium burn rate detected for availability SLO"
-    
+
   - name: "SLO_Latency_BurnRate_High"
     condition: "burn_rate(latency) > 0.5"
     severity: "critical"
     duration: "2m"
     description: "High burn rate detected for latency SLO"
-    
+
   - name: "SLO_Quality_BurnRate_High"
     condition: "burn_rate(quality) > 0.20"
     severity: "critical"
     duration: "2m"
     description: "High burn rate detected for quality SLO"
-    
+
   - name: "SLO_Coordination_BurnRate_High"
     condition: "burn_rate(coordination) > 0.20"
     severity: "critical"
     duration: "2m"
     description: "High burn rate detected for coordination SLO"
-    
+
   - name: "SLO_Memory_BurnRate_High"
     condition: "burn_rate(memory_efficiency) > 0.50"
     severity: "critical"
@@ -172,7 +172,7 @@ error_budget_policies:
       - "Page on-call engineer"
       - "Halt non-critical deployments"
       - "Escalate to engineering manager"
-    
+
   - name: "Slow Burn"
     description: "Gradual error budget consumption"
     condition: "error_budget_remaining < 0.25 AND burn_rate > 1x"
@@ -180,7 +180,7 @@ error_budget_policies:
       - "Notify development team"
       - "Review deployment frequency"
       - "Prioritize reliability improvements"
-    
+
   - name: "Budget Exhausted"
     description: "Error budget completely consumed"
     condition: "error_budget_remaining <= 0"
@@ -195,15 +195,15 @@ reporting:
   slo_dashboard:
     url: "https://grafana.freeagentics.com/d/slo-overview"
     refresh_interval: "1m"
-    
+
   daily_report:
     recipients: ["engineering@freeagentics.com", "sre@freeagentics.com"]
     schedule: "0 9 * * *"  # 9 AM daily
-    
+
   weekly_review:
     recipients: ["engineering-leads@freeagentics.com", "product@freeagentics.com"]
     schedule: "0 10 * * 1"  # 10 AM Mondays
-    
+
   monthly_analysis:
     recipients: ["leadership@freeagentics.com", "engineering@freeagentics.com"]
     schedule: "0 9 1 * *"  # 9 AM first day of month
@@ -215,72 +215,72 @@ performance_baselines:
       baseline: 1.5  # GB
       warning: 1.8   # GB
       critical: 2.0  # GB
-      
+
     cpu_usage:
       baseline: 40   # %
       warning: 70    # %
       critical: 90   # %
-      
+
     disk_usage:
       baseline: 60   # %
       warning: 80    # %
       critical: 90   # %
-  
+
   agent_coordination:
     active_agents:
       baseline: 15
       warning: 40
       critical: 50
-      
+
     coordination_duration_p95:
       baseline: 1.5  # seconds
       warning: 1.8   # seconds
       critical: 2.0  # seconds
-      
+
     timeout_rate:
       baseline: 0.02  # 2%
       warning: 0.03   # 3%
       critical: 0.05  # 5%
-  
+
   memory_usage:
     per_agent_avg:
       baseline: 20   # MB
       warning: 30    # MB
       critical: 34.5 # MB
-      
+
     per_agent_max:
       baseline: 30   # MB
       warning: 32    # MB
       critical: 34.5 # MB
-  
+
   api_performance:
     response_time_p95:
       baseline: 0.3  # seconds
       warning: 0.4   # seconds
       critical: 0.5  # seconds
-      
+
     error_rate:
       baseline: 0.01  # 1%
       warning: 0.05   # 5%
       critical: 0.10  # 10%
-  
+
   belief_system:
     free_energy:
       baseline: 2.5
       warning: 8
       critical: 10
-      
+
     accuracy:
       baseline: 0.8   # 80%
       warning: 0.75   # 75%
       critical: 0.7   # 70%
-  
+
   business_metrics:
     user_interaction_rate:
       baseline: 0.1   # per hour
       warning: 0.05   # per hour
       critical: 0.01  # per hour
-      
+
     response_quality:
       baseline: 0.75  # 75%
       warning: 0.7    # 70%
@@ -294,26 +294,26 @@ capacity_planning:
       "3_months": 25
       "6_months": 40
       "12_months": 60
-      
+
     memory:
       current: 300  # MB
       "3_months": 500  # MB
       "6_months": 1000  # MB
       "12_months": 2000  # MB
-      
+
     requests:
       current: 50     # per second
       "3_months": 100   # per second
       "6_months": 200   # per second
       "12_months": 500  # per second
-  
+
   scale_triggers:
     scale_up:
       agent_capacity: 0.8  # 80% of coordination limit
       memory_usage: 0.8    # 80% of available memory
       cpu_usage: 0.7       # 70% sustained for 30 minutes
       disk_usage: 0.8      # 80% of available disk
-      
+
     scale_down:
       agent_capacity: 0.3  # 30% of coordination limit
       memory_usage: 0.4    # 40% of available memory

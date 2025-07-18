@@ -174,7 +174,9 @@ class TestStorageBackend:
         for method in required_methods:
             if hasattr(StorageBackend, method):
                 method_attr = getattr(StorageBackend, method)
-                assert hasattr(method_attr, "__isabstractmethod__") or callable(method_attr)
+                assert hasattr(
+                    method_attr, "__isabstractmethod__"
+                ) or callable(method_attr)
 
 
 class TestFileStorageBackend:
@@ -213,9 +215,15 @@ class TestFileStorageBackend:
 
             # Create a test graph
             graph = KnowledgeGraph("test-graph")
-            node1 = KnowledgeNode("node1", NodeType.CONCEPT, "Node 1", {"prop": "value1"})
-            node2 = KnowledgeNode("node2", NodeType.CONCEPT, "Node 2", {"prop": "value2"})
-            edge = KnowledgeEdge("edge1", "node1", "node2", EdgeType.RELATES_TO, 0.8)
+            node1 = KnowledgeNode(
+                "node1", NodeType.CONCEPT, "Node 1", {"prop": "value1"}
+            )
+            node2 = KnowledgeNode(
+                "node2", NodeType.CONCEPT, "Node 2", {"prop": "value2"}
+            )
+            edge = KnowledgeEdge(
+                "edge1", "node1", "node2", EdgeType.RELATES_TO, 0.8
+            )
 
             graph.add_node(node1)
             graph.add_node(node2)
@@ -241,7 +249,9 @@ class TestFileStorageBackend:
             graph = KnowledgeGraph("test-graph")
 
             # Mock pickle.dump to raise exception
-            with patch("pickle.dump", side_effect=Exception("Serialization error")):
+            with patch(
+                "pickle.dump", side_effect=Exception("Serialization error")
+            ):
                 success = storage.save_graph(graph)
                 assert success is False
 
@@ -315,7 +325,9 @@ class TestFileStorageBackend:
         with tempfile.TemporaryDirectory() as temp_dir:
             storage = FileStorage(temp_dir)
 
-            node = KnowledgeNode("node1", NodeType.CONCEPT, "Test Node", {"prop": "value"})
+            node = KnowledgeNode(
+                "node1", NodeType.CONCEPT, "Test Node", {"prop": "value"}
+            )
 
             success = storage.save_node("test-graph", node)
             assert success is True
@@ -345,7 +357,9 @@ class TestFileStorageBackend:
             node = KnowledgeNode("node1", NodeType.CONCEPT, "Test Node")
 
             # Mock pickle.dump to raise exception
-            with patch("pickle.dump", side_effect=Exception("Serialization error")):
+            with patch(
+                "pickle.dump", side_effect=Exception("Serialization error")
+            ):
                 success = storage.save_node("test-graph", node)
                 assert success is False
 
@@ -355,7 +369,9 @@ class TestFileStorageBackend:
             storage = FileStorage(temp_dir)
 
             # Save a node first
-            original_node = KnowledgeNode("node1", NodeType.CONCEPT, "Test Node", {"prop": "value"})
+            original_node = KnowledgeNode(
+                "node1", NodeType.CONCEPT, "Test Node", {"prop": "value"}
+            )
             storage.save_node("test-graph", original_node)
 
             # Load the node
@@ -418,7 +434,9 @@ class TestFileStorageBackend:
         with tempfile.TemporaryDirectory() as temp_dir:
             storage = FileStorage(temp_dir)
 
-            edge = KnowledgeEdge("edge1", "node1", "node2", EdgeType.RELATES_TO, 0.8)
+            edge = KnowledgeEdge(
+                "edge1", "node1", "node2", EdgeType.RELATES_TO, 0.8
+            )
 
             success = storage.save_edge("test-graph", edge)
             assert success is True
@@ -432,7 +450,9 @@ class TestFileStorageBackend:
         with tempfile.TemporaryDirectory() as temp_dir:
             storage = FileStorage(temp_dir)
 
-            edge = KnowledgeEdge("edge1", "node1", "node2", EdgeType.RELATES_TO)
+            edge = KnowledgeEdge(
+                "edge1", "node1", "node2", EdgeType.RELATES_TO
+            )
 
             success = storage.save_edge("test-graph", edge)
             assert success is True
@@ -446,7 +466,9 @@ class TestFileStorageBackend:
             storage = FileStorage(temp_dir)
 
             # Save an edge first
-            original_edge = KnowledgeEdge("edge1", "node1", "node2", EdgeType.RELATES_TO, 0.8)
+            original_edge = KnowledgeEdge(
+                "edge1", "node1", "node2", EdgeType.RELATES_TO, 0.8
+            )
             storage.save_edge("test-graph", original_edge)
 
             # Load the edge
@@ -472,7 +494,9 @@ class TestFileStorageBackend:
             storage = FileStorage(temp_dir)
 
             # Save an edge first
-            edge = KnowledgeEdge("edge1", "node1", "node2", EdgeType.RELATES_TO)
+            edge = KnowledgeEdge(
+                "edge1", "node1", "node2", EdgeType.RELATES_TO
+            )
             storage.save_edge("test-graph", edge)
 
             # Verify file exists
@@ -498,20 +522,30 @@ class TestFileStorageBackend:
             storage = FileStorage(temp_dir)
 
             # Save some nodes
-            node1 = KnowledgeNode("node1", NodeType.CONCEPT, "Test Node 1", {"category": "A"})
-            node2 = KnowledgeNode("node2", NodeType.CONCEPT, "Test Node 2", {"category": "B"})
-            node3 = KnowledgeNode("node3", NodeType.ENTITY, "Test Entity", {"category": "A"})
+            node1 = KnowledgeNode(
+                "node1", NodeType.CONCEPT, "Test Node 1", {"category": "A"}
+            )
+            node2 = KnowledgeNode(
+                "node2", NodeType.CONCEPT, "Test Node 2", {"category": "B"}
+            )
+            node3 = KnowledgeNode(
+                "node3", NodeType.ENTITY, "Test Entity", {"category": "A"}
+            )
 
             storage.save_node("test-graph", node1)
             storage.save_node("test-graph", node2)
             storage.save_node("test-graph", node3)
 
             # Query by type
-            concept_nodes = storage.query_nodes("test-graph", {"type": NodeType.CONCEPT})
+            concept_nodes = storage.query_nodes(
+                "test-graph", {"type": NodeType.CONCEPT}
+            )
             assert len(concept_nodes) == 2
 
             # Query by property
-            category_a_nodes = storage.query_nodes("test-graph", {"properties.category": "A"})
+            category_a_nodes = storage.query_nodes(
+                "test-graph", {"properties.category": "A"}
+            )
             assert len(category_a_nodes) == 2
 
     def test_query_nodes_empty_result(self):
@@ -519,7 +553,9 @@ class TestFileStorageBackend:
         with tempfile.TemporaryDirectory() as temp_dir:
             storage = FileStorage(temp_dir)
 
-            nodes = storage.query_nodes("test-graph", {"type": NodeType.CONCEPT})
+            nodes = storage.query_nodes(
+                "test-graph", {"type": NodeType.CONCEPT}
+            )
             assert len(nodes) == 0
 
     def test_query_nodes_nonexistent_graph(self):
@@ -527,7 +563,9 @@ class TestFileStorageBackend:
         with tempfile.TemporaryDirectory() as temp_dir:
             storage = FileStorage(temp_dir)
 
-            nodes = storage.query_nodes("nonexistent-graph", {"type": NodeType.CONCEPT})
+            nodes = storage.query_nodes(
+                "nonexistent-graph", {"type": NodeType.CONCEPT}
+            )
             assert len(nodes) == 0
 
     def test_query_edges(self):
@@ -536,20 +574,30 @@ class TestFileStorageBackend:
             storage = FileStorage(temp_dir)
 
             # Save some edges
-            edge1 = KnowledgeEdge("edge1", "node1", "node2", EdgeType.RELATES_TO, 0.8)
-            edge2 = KnowledgeEdge("edge2", "node2", "node3", EdgeType.CAUSES, 0.6)
-            edge3 = KnowledgeEdge("edge3", "node1", "node3", EdgeType.RELATES_TO, 0.9)
+            edge1 = KnowledgeEdge(
+                "edge1", "node1", "node2", EdgeType.RELATES_TO, 0.8
+            )
+            edge2 = KnowledgeEdge(
+                "edge2", "node2", "node3", EdgeType.CAUSES, 0.6
+            )
+            edge3 = KnowledgeEdge(
+                "edge3", "node1", "node3", EdgeType.RELATES_TO, 0.9
+            )
 
             storage.save_edge("test-graph", edge1)
             storage.save_edge("test-graph", edge2)
             storage.save_edge("test-graph", edge3)
 
             # Query by type
-            relates_edges = storage.query_edges("test-graph", {"type": EdgeType.RELATES_TO})
+            relates_edges = storage.query_edges(
+                "test-graph", {"type": EdgeType.RELATES_TO}
+            )
             assert len(relates_edges) == 2
 
             # Query by source
-            from_node1_edges = storage.query_edges("test-graph", {"source_id": "node1"})
+            from_node1_edges = storage.query_edges(
+                "test-graph", {"source_id": "node1"}
+            )
             assert len(from_node1_edges) == 2
 
     def test_query_edges_empty_result(self):
@@ -557,7 +605,9 @@ class TestFileStorageBackend:
         with tempfile.TemporaryDirectory() as temp_dir:
             storage = FileStorage(temp_dir)
 
-            edges = storage.query_edges("test-graph", {"type": EdgeType.RELATES_TO})
+            edges = storage.query_edges(
+                "test-graph", {"type": EdgeType.RELATES_TO}
+            )
             assert len(edges) == 0
 
     def test_query_edges_nonexistent_graph(self):
@@ -565,7 +615,9 @@ class TestFileStorageBackend:
         with tempfile.TemporaryDirectory() as temp_dir:
             storage = FileStorage(temp_dir)
 
-            edges = storage.query_edges("nonexistent-graph", {"type": EdgeType.RELATES_TO})
+            edges = storage.query_edges(
+                "nonexistent-graph", {"type": EdgeType.RELATES_TO}
+            )
             assert len(edges) == 0
 
 
@@ -595,7 +647,9 @@ class TestSQLStorage:
         graph.add_edge(edge)
 
         # Mock session methods
-        mock_session.query.return_value.filter.return_value.first.return_value = None
+        mock_session.query.return_value.filter.return_value.first.return_value = (
+            None
+        )
         mock_session.commit.return_value = None
 
         success = storage.save_graph(graph)
@@ -666,7 +720,9 @@ class TestSQLStorage:
         storage = SQLStorage(mock_session)
 
         # Mock query returns
-        mock_session.query.return_value.filter.return_value.delete.return_value = 1
+        mock_session.query.return_value.filter.return_value.delete.return_value = (
+            1
+        )
 
         success = storage.delete_graph("test-graph")
         assert success is True
@@ -716,10 +772,14 @@ class TestSQLStorage:
         """Test saving a node to database."""
         storage = SQLStorage(mock_session)
 
-        node = KnowledgeNode("node1", NodeType.CONCEPT, "Test Node", {"key": "value"})
+        node = KnowledgeNode(
+            "node1", NodeType.CONCEPT, "Test Node", {"key": "value"}
+        )
 
         # Mock session methods
-        mock_session.query.return_value.filter.return_value.first.return_value = None
+        mock_session.query.return_value.filter.return_value.first.return_value = (
+            None
+        )
 
         success = storage.save_node("test-graph", node)
         assert success is True
@@ -732,11 +792,15 @@ class TestSQLStorage:
         """Test updating an existing node."""
         storage = SQLStorage(mock_session)
 
-        node = KnowledgeNode("node1", NodeType.CONCEPT, "Updated Node", {"key": "new_value"})
+        node = KnowledgeNode(
+            "node1", NodeType.CONCEPT, "Updated Node", {"key": "new_value"}
+        )
 
         # Mock existing node
         mock_existing = MagicMock()
-        mock_session.query.return_value.filter.return_value.first.return_value = mock_existing
+        mock_session.query.return_value.filter.return_value.first.return_value = (
+            mock_existing
+        )
 
         success = storage.save_node("test-graph", node)
         assert success is True
@@ -757,7 +821,9 @@ class TestSQLStorage:
         mock_node.label = "Test Node"
         mock_node.properties = {"key": "value"}
 
-        mock_session.query.return_value.filter.return_value.first.return_value = mock_node
+        mock_session.query.return_value.filter.return_value.first.return_value = (
+            mock_node
+        )
 
         node = storage.load_node("test-graph", "node1")
 
@@ -771,7 +837,9 @@ class TestSQLStorage:
         """Test loading a node that doesn't exist."""
         storage = SQLStorage(mock_session)
 
-        mock_session.query.return_value.filter.return_value.first.return_value = None
+        mock_session.query.return_value.filter.return_value.first.return_value = (
+            None
+        )
 
         node = storage.load_node("test-graph", "nonexistent-node")
         assert node is None
@@ -781,7 +849,9 @@ class TestSQLStorage:
         storage = SQLStorage(mock_session)
 
         # Mock successful deletion
-        mock_session.query.return_value.filter.return_value.delete.return_value = 1
+        mock_session.query.return_value.filter.return_value.delete.return_value = (
+            1
+        )
 
         success = storage.delete_node("test-graph", "node1")
         assert success is True
@@ -794,7 +864,9 @@ class TestSQLStorage:
         storage = SQLStorage(mock_session)
 
         # Mock no deletion
-        mock_session.query.return_value.filter.return_value.delete.return_value = 0
+        mock_session.query.return_value.filter.return_value.delete.return_value = (
+            0
+        )
 
         success = storage.delete_node("test-graph", "nonexistent-node")
         assert success is False
@@ -840,9 +912,13 @@ class TestSQLStorage:
         mock_edge1.weight = 0.8
         mock_edge1.properties = {}
 
-        mock_session.query.return_value.filter.return_value.all.return_value = [mock_edge1]
+        mock_session.query.return_value.filter.return_value.all.return_value = [
+            mock_edge1
+        ]
 
-        edges = storage.query_edges("test-graph", {"type": EdgeType.RELATES_TO})
+        edges = storage.query_edges(
+            "test-graph", {"type": EdgeType.RELATES_TO}
+        )
 
         assert len(edges) == 1
         assert edges[0].edge_id == "edge1"

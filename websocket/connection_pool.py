@@ -90,7 +90,9 @@ class PoolConfig:
 class PooledConnection:
     """Represents a pooled WebSocket connection."""
 
-    def __init__(self, connection_id: str, websocket: Any, created_at: datetime):
+    def __init__(
+        self, connection_id: str, websocket: Any, created_at: datetime
+    ):
         self.connection_id = connection_id
         self.websocket = websocket
         self.created_at = created_at
@@ -141,7 +143,9 @@ class PooledConnection:
         """Check if connection has been idle too long."""
         if self.state != ConnectionState.IDLE or not self.last_used:
             return False
-        return (datetime.utcnow() - self.last_used).total_seconds() > max_idle_time
+        return (
+            datetime.utcnow() - self.last_used
+        ).total_seconds() > max_idle_time
 
     async def close(self):
         """Close the WebSocket connection."""
@@ -202,7 +206,9 @@ class ConnectionMetrics:
         """Record a health check failure."""
         self.health_check_failures += 1
 
-    def calculate_utilization(self, in_use: int, available: int, total: int) -> float:
+    def calculate_utilization(
+        self, in_use: int, available: int, total: int
+    ) -> float:
         """Calculate pool utilization percentage."""
         if total == 0:
             return 0.0
@@ -225,7 +231,9 @@ class ConnectionMetrics:
 class ConnectionHealthMonitor:
     """Monitors health of connections in the pool."""
 
-    def __init__(self, pool: "WebSocketConnectionPool", check_interval: float = 30.0):
+    def __init__(
+        self, pool: "WebSocketConnectionPool", check_interval: float = 30.0
+    ):
         self.pool = pool
         self.check_interval = check_interval
         self.is_running = False
@@ -315,7 +323,9 @@ class WebSocketConnectionPool:
                 return
 
             self._url = url
-            logger.info(f"Initializing connection pool with min_size={self.config.min_size}")
+            logger.info(
+                f"Initializing connection pool with min_size={self.config.min_size}"
+            )
 
         # Create initial connections (outside lock to avoid deadlock)
         tasks = []
@@ -329,7 +339,9 @@ class WebSocketConnectionPool:
             self._health_monitor.start()
 
             self._initialized = True
-            logger.info(f"Connection pool initialized with {self.size} connections")
+            logger.info(
+                f"Connection pool initialized with {self.size} connections"
+            )
 
     async def _create_connection(self, url: str) -> PooledConnection:
         """Create a new WebSocket connection."""
@@ -339,7 +351,8 @@ class WebSocketConnectionPool:
         try:
             # Create WebSocket connection with timeout
             websocket = await asyncio.wait_for(
-                create_websocket_connection(url), timeout=self.config.connection_timeout
+                create_websocket_connection(url),
+                timeout=self.config.connection_timeout,
             )
 
             conn = PooledConnection(connection_id, websocket, created_at)
@@ -357,7 +370,9 @@ class WebSocketConnectionPool:
             logger.error(f"Failed to create connection {connection_id}: {e}")
             raise
 
-    async def _create_and_add_connection(self, url: str) -> Optional[PooledConnection]:
+    async def _create_and_add_connection(
+        self, url: str
+    ) -> Optional[PooledConnection]:
         """Create and add a new connection to the pool."""
         try:
             conn = await self._create_connection(url)
@@ -371,7 +386,9 @@ class WebSocketConnectionPool:
             return None
 
     async def acquire(
-        self, timeout: Optional[float] = None, prefer_metadata: Optional[Dict[str, Any]] = None
+        self,
+        timeout: Optional[float] = None,
+        prefer_metadata: Optional[Dict[str, Any]] = None,
     ) -> PooledConnection:
         """Acquire a connection from the pool."""
         start_time = time.time()
@@ -379,7 +396,9 @@ class WebSocketConnectionPool:
 
         try:
             # Wait for available connection
-            await asyncio.wait_for(self._acquire_semaphore.acquire(), timeout=timeout)
+            await asyncio.wait_for(
+                self._acquire_semaphore.acquire(), timeout=timeout
+            )
 
             try:
                 async with self._lock:
@@ -387,14 +406,19 @@ class WebSocketConnectionPool:
                     if prefer_metadata and self._idle_connections:
                         for conn in self._idle_connections:
                             matches = all(
-                                conn.get_metadata(k) == v for k, v in prefer_metadata.items()
+                                conn.get_metadata(k) == v
+                                for k, v in prefer_metadata.items()
                             )
                             if matches:
                                 self._idle_connections.remove(conn)
-                                self._in_use_connections[conn.connection_id] = conn
+                                self._in_use_connections[
+                                    conn.connection_id
+                                ] = conn
                                 conn.mark_in_use()
                                 wait_time = time.time() - start_time
-                                self._metrics.record_acquisition(wait_time, True)
+                                self._metrics.record_acquisition(
+                                    wait_time, True
+                                )
                                 return conn
 
                     # Get any available connection
@@ -420,7 +444,9 @@ class WebSocketConnectionPool:
                 self._acquire_semaphore.release()
                 wait_time = time.time() - start_time
                 self._metrics.record_acquisition(wait_time, False)
-                raise PoolExhaustedError("No connections available and pool at max size")
+                raise PoolExhaustedError(
+                    "No connections available and pool at max size"
+                )
 
             except Exception:
                 self._acquire_semaphore.release()
@@ -429,18 +455,25 @@ class WebSocketConnectionPool:
         except asyncio.TimeoutError:
             wait_time = time.time() - start_time
             self._metrics.record_acquisition(wait_time, False)
-            raise PoolExhaustedError(f"Timeout waiting for connection after {timeout}s")
+            raise PoolExhaustedError(
+                f"Timeout waiting for connection after {timeout}s"
+            )
 
     async def release(self, connection_id: str):
         """Release a connection back to the pool."""
         async with self._lock:
             if connection_id not in self._in_use_connections:
-                raise ConnectionNotFoundError(f"Connection {connection_id} not found in use")
+                raise ConnectionNotFoundError(
+                    f"Connection {connection_id} not found in use"
+                )
 
             conn = self._in_use_connections.pop(connection_id)
 
             # Check if connection is still healthy
-            if conn.state in [ConnectionState.DISCONNECTED, ConnectionState.ERROR]:
+            if conn.state in [
+                ConnectionState.DISCONNECTED,
+                ConnectionState.ERROR,
+            ]:
                 # Remove unhealthy connection
                 del self._connections[connection_id]
                 self._metrics.record_connection_destroyed()
@@ -448,7 +481,9 @@ class WebSocketConnectionPool:
 
                 # Create replacement if below min_size
                 if self.size < self.config.min_size:
-                    asyncio.create_task(self._create_and_add_connection(self._url))
+                    asyncio.create_task(
+                        self._create_and_add_connection(self._url)
+                    )
             else:
                 # Return to idle pool
                 conn.mark_idle()
@@ -466,7 +501,9 @@ class WebSocketConnectionPool:
             conn.health_check_failures = 0
             return True
         except Exception as e:
-            logger.warning(f"Health check failed for connection {conn.connection_id}: {e}")
+            logger.warning(
+                f"Health check failed for connection {conn.connection_id}: {e}"
+            )
             conn.health_check_failures += 1
             self._metrics.record_health_check_failure()
             return False
@@ -481,7 +518,9 @@ class WebSocketConnectionPool:
         for conn in connections_to_check:
             # Skip recently checked connections
             if conn.last_health_check:
-                time_since_check = (datetime.utcnow() - conn.last_health_check).total_seconds()
+                time_since_check = (
+                    datetime.utcnow() - conn.last_health_check
+                ).total_seconds()
                 if time_since_check < self.config.health_check_interval / 2:
                     continue
 
@@ -493,7 +532,9 @@ class WebSocketConnectionPool:
         if unhealthy_connections:
             async with self._lock:
                 for conn in unhealthy_connections:
-                    logger.info(f"Removing unhealthy connection {conn.connection_id}")
+                    logger.info(
+                        f"Removing unhealthy connection {conn.connection_id}"
+                    )
 
                     # Close and remove connection
                     await conn.close()
@@ -529,7 +570,10 @@ class WebSocketConnectionPool:
             for conn in self._idle_connections:
                 if conn.is_idle_timeout(self.config.max_idle_time):
                     # Don't remove if it would go below min_size
-                    if self.size - len(connections_to_remove) > self.config.min_size:
+                    if (
+                        self.size - len(connections_to_remove)
+                        > self.config.min_size
+                    ):
                         connections_to_remove.append(conn)
 
             for conn in connections_to_remove:
@@ -546,9 +590,14 @@ class WebSocketConnectionPool:
             self.in_use_connections, self.available_connections, self.size
         )
 
-        if utilization > self.config.scale_up_threshold and self.size < self.config.max_size:
+        if (
+            utilization > self.config.scale_up_threshold
+            and self.size < self.config.max_size
+        ):
             # Scale up
-            target_size = min(int(self.size * self.config.scale_factor), self.config.max_size)
+            target_size = min(
+                int(self.size * self.config.scale_factor), self.config.max_size
+            )
             connections_to_add = target_size - self.size
 
             logger.info(
@@ -561,9 +610,14 @@ class WebSocketConnectionPool:
 
             await asyncio.gather(*tasks, return_exceptions=True)
 
-        elif utilization < self.config.scale_down_threshold and self.size > self.config.min_size:
+        elif (
+            utilization < self.config.scale_down_threshold
+            and self.size > self.config.min_size
+        ):
             # Scale down
-            target_size = max(int(self.size / self.config.scale_factor), self.config.min_size)
+            target_size = max(
+                int(self.size / self.config.scale_factor), self.config.min_size
+            )
             connections_to_remove = self.size - target_size
 
             logger.info(
@@ -597,7 +651,10 @@ class WebSocketConnectionPool:
             timeout = 30.0  # Max wait time
             start_time = time.time()
 
-            while self.in_use_connections > 0 and (time.time() - start_time) < timeout:
+            while (
+                self.in_use_connections > 0
+                and (time.time() - start_time) < timeout
+            ):
                 await asyncio.sleep(0.1)
 
             if self.in_use_connections > 0:
@@ -627,7 +684,9 @@ class WebSocketConnectionPool:
                 "available_connections": self.available_connections,
                 "in_use_connections": self.in_use_connections,
                 "utilization": self._metrics.calculate_utilization(
-                    self.in_use_connections, self.available_connections, self.size
+                    self.in_use_connections,
+                    self.available_connections,
+                    self.size,
                 ),
             }
         )
@@ -643,7 +702,9 @@ class WebSocketConnectionPool:
                     "state": conn.state.value,
                     "created_at": conn.created_at.isoformat(),
                     "use_count": conn.use_count,
-                    "last_used": conn.last_used.isoformat() if conn.last_used else None,
+                    "last_used": conn.last_used.isoformat()
+                    if conn.last_used
+                    else None,
                     "metadata": conn.metadata,
                 }
             )

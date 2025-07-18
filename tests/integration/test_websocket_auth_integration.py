@@ -12,8 +12,18 @@ import pytest
 from fastapi import HTTPException, WebSocket
 from fastapi.websockets import WebSocketDisconnect
 
-from api.v1.websocket import handle_agent_command, handle_query, manager, websocket_auth
-from auth.security_implementation import AuthenticationManager, Permission, TokenData, UserRole
+from api.v1.websocket import (
+    handle_agent_command,
+    handle_query,
+    manager,
+    websocket_auth,
+)
+from auth.security_implementation import (
+    AuthenticationManager,
+    Permission,
+    TokenData,
+    UserRole,
+)
 
 
 @pytest.fixture
@@ -55,7 +65,11 @@ def valid_tokens(auth_manager):
     researcher_token = manager.create_access_token(researcher_user)
     observer_token = manager.create_access_token(observer_user)
 
-    return {"admin": admin_token, "researcher": researcher_token, "observer": observer_token}
+    return {
+        "admin": admin_token,
+        "researcher": researcher_token,
+        "observer": observer_token,
+    }
 
 
 class TestWebSocketAuthenticationIntegration:
@@ -77,8 +91,12 @@ class TestWebSocketAuthenticationIntegration:
         """Test WebSocket authentication with invalid token."""
         mock_websocket = AsyncMock(spec=WebSocket)
 
-        with patch("api.v1.websocket.auth_manager.verify_token") as mock_verify:
-            mock_verify.side_effect = HTTPException(status_code=401, detail="Invalid token")
+        with patch(
+            "api.v1.websocket.auth_manager.verify_token"
+        ) as mock_verify:
+            mock_verify.side_effect = HTTPException(
+                status_code=401, detail="Invalid token"
+            )
 
             with pytest.raises(WebSocketDisconnect) as exc_info:
                 await websocket_auth(mock_websocket, "invalid.token")
@@ -87,7 +105,9 @@ class TestWebSocketAuthenticationIntegration:
             mock_websocket.close.assert_called_once_with(code=4001)
 
     @pytest.mark.asyncio
-    async def test_websocket_auth_integration_with_valid_token(self, valid_tokens):
+    async def test_websocket_auth_integration_with_valid_token(
+        self, valid_tokens
+    ):
         """Test WebSocket authentication with valid token."""
         mock_websocket = AsyncMock(spec=WebSocket)
 
@@ -108,10 +128,14 @@ class TestWebSocketAuthenticationIntegration:
             exp=datetime.now(timezone.utc) + timedelta(minutes=15),
         )
 
-        with patch("api.v1.websocket.auth_manager.verify_token") as mock_verify:
+        with patch(
+            "api.v1.websocket.auth_manager.verify_token"
+        ) as mock_verify:
             mock_verify.return_value = expected_token_data
 
-            result = await websocket_auth(mock_websocket, valid_tokens["admin"])
+            result = await websocket_auth(
+                mock_websocket, valid_tokens["admin"]
+            )
 
             assert result == expected_token_data
             assert result.username == "admin_test"
@@ -152,7 +176,9 @@ class TestWebSocketAuthenticationIntegration:
         manager.disconnect(client_id)
         assert client_id not in manager.active_connections
         assert client_id not in manager.connection_metadata
-        assert client_id not in manager.subscriptions.get("agent:status_update", set())
+        assert client_id not in manager.subscriptions.get(
+            "agent:status_update", set()
+        )
 
 
 class TestWebSocketCommandAuthorizationIntegration:
@@ -178,9 +204,13 @@ class TestWebSocketCommandAuthorizationIntegration:
         client_id = "admin_client"
 
         # Test create command (should succeed)
-        with patch("api.v1.websocket.manager.send_personal_message") as mock_send:
+        with patch(
+            "api.v1.websocket.manager.send_personal_message"
+        ) as mock_send:
             await handle_agent_command(
-                client_id, {"command": "create", "agent_id": "new_agent"}, admin_user
+                client_id,
+                {"command": "create", "agent_id": "new_agent"},
+                admin_user,
             )
 
             mock_send.assert_called_once()
@@ -193,9 +223,13 @@ class TestWebSocketCommandAuthorizationIntegration:
             assert message["user"] == "admin"
 
         # Test delete command (should succeed)
-        with patch("api.v1.websocket.manager.send_personal_message") as mock_send:
+        with patch(
+            "api.v1.websocket.manager.send_personal_message"
+        ) as mock_send:
             await handle_agent_command(
-                client_id, {"command": "delete", "agent_id": "old_agent"}, admin_user
+                client_id,
+                {"command": "delete", "agent_id": "old_agent"},
+                admin_user,
             )
 
             mock_send.assert_called_once()
@@ -220,9 +254,13 @@ class TestWebSocketCommandAuthorizationIntegration:
         client_id = "observer_client"
 
         # Test create command (should fail)
-        with patch("api.v1.websocket.manager.send_personal_message") as mock_send:
+        with patch(
+            "api.v1.websocket.manager.send_personal_message"
+        ) as mock_send:
             await handle_agent_command(
-                client_id, {"command": "create", "agent_id": "new_agent"}, observer_user
+                client_id,
+                {"command": "create", "agent_id": "new_agent"},
+                observer_user,
             )
 
             mock_send.assert_called_once()
@@ -248,8 +286,12 @@ class TestWebSocketCommandAuthorizationIntegration:
         client_id = "researcher_client"
 
         # Test agent status query (should succeed)
-        with patch("api.v1.websocket.manager.send_personal_message") as mock_send:
-            await handle_query(client_id, {"query_type": "agent_status"}, researcher_user)
+        with patch(
+            "api.v1.websocket.manager.send_personal_message"
+        ) as mock_send:
+            await handle_query(
+                client_id, {"query_type": "agent_status"}, researcher_user
+            )
 
             mock_send.assert_called_once()
             args, _ = mock_send.call_args
@@ -260,8 +302,12 @@ class TestWebSocketCommandAuthorizationIntegration:
             assert message["data"]["user"] == "researcher"
 
         # Test world state query (should succeed)
-        with patch("api.v1.websocket.manager.send_personal_message") as mock_send:
-            await handle_query(client_id, {"query_type": "world_state"}, researcher_user)
+        with patch(
+            "api.v1.websocket.manager.send_personal_message"
+        ) as mock_send:
+            await handle_query(
+                client_id, {"query_type": "world_state"}, researcher_user
+            )
 
             mock_send.assert_called_once()
             args, _ = mock_send.call_args
@@ -285,8 +331,12 @@ class TestWebSocketCommandAuthorizationIntegration:
         client_id = "no_perm_client"
 
         # Test agent status query (should fail)
-        with patch("api.v1.websocket.manager.send_personal_message") as mock_send:
-            await handle_query(client_id, {"query_type": "agent_status"}, no_perm_user)
+        with patch(
+            "api.v1.websocket.manager.send_personal_message"
+        ) as mock_send:
+            await handle_query(
+                client_id, {"query_type": "agent_status"}, no_perm_user
+            )
 
             mock_send.assert_called_once()
             args, _ = mock_send.call_args
@@ -306,12 +356,22 @@ class TestWebSocketSecurityIntegration:
         mock_websocket = AsyncMock(spec=WebSocket)
 
         # Test various invalid token scenarios
-        invalid_tokens = [None, "", "malformed.token", "expired.jwt.token", "tampered.jwt.token"]
+        invalid_tokens = [
+            None,
+            "",
+            "malformed.token",
+            "expired.jwt.token",
+            "tampered.jwt.token",
+        ]
 
         for invalid_token in invalid_tokens:
-            with patch("api.v1.websocket.auth_manager.verify_token") as mock_verify:
+            with patch(
+                "api.v1.websocket.auth_manager.verify_token"
+            ) as mock_verify:
                 if invalid_token:
-                    mock_verify.side_effect = HTTPException(status_code=401, detail="Invalid token")
+                    mock_verify.side_effect = HTTPException(
+                        status_code=401, detail="Invalid token"
+                    )
 
                 with pytest.raises(WebSocketDisconnect) as exc_info:
                     await websocket_auth(mock_websocket, invalid_token)
@@ -341,8 +401,12 @@ class TestWebSocketSecurityIntegration:
         ]
 
         for command_data in privileged_commands:
-            with patch("api.v1.websocket.manager.send_personal_message") as mock_send:
-                await handle_agent_command(client_id, command_data, limited_user)
+            with patch(
+                "api.v1.websocket.manager.send_personal_message"
+            ) as mock_send:
+                await handle_agent_command(
+                    client_id, command_data, limited_user
+                )
 
                 # Should receive permission denied
                 mock_send.assert_called_once()
@@ -393,9 +457,13 @@ class TestWebSocketSecurityIntegration:
         client_id = "logging_client"
 
         # Test that command responses include user information for audit trails
-        with patch("api.v1.websocket.manager.send_personal_message") as mock_send:
+        with patch(
+            "api.v1.websocket.manager.send_personal_message"
+        ) as mock_send:
             await handle_agent_command(
-                client_id, {"command": "create", "agent_id": "audit_agent"}, admin_user
+                client_id,
+                {"command": "create", "agent_id": "audit_agent"},
+                admin_user,
             )
 
             mock_send.assert_called_once()

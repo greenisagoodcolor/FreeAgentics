@@ -62,7 +62,10 @@ class MetricsDashboard:
             self.app,
             defaults={
                 "*": aiohttp_cors.ResourceOptions(
-                    allow_credentials=True, expose_headers="*", allow_headers="*", allow_methods="*"
+                    allow_credentials=True,
+                    expose_headers="*",
+                    allow_headers="*",
+                    allow_methods="*",
                 )
             },
         )
@@ -71,7 +74,9 @@ class MetricsDashboard:
         for route in list(self.app.router.routes()):
             cors.add(route)
 
-        logger.info(f"Dashboard server initialized on {self.config.host}:{self.config.port}")
+        logger.info(
+            f"Dashboard server initialized on {self.config.host}:{self.config.port}"
+        )
 
     def _setup_routes(self):
         """Setup HTTP routes."""
@@ -81,14 +86,23 @@ class MetricsDashboard:
             self.app.router.add_static("/", static_dir, name="static")
 
         # API routes
-        self.app.router.add_get("/api/metrics/summary", self.handle_metrics_summary)
         self.app.router.add_get(
-            "/api/metrics/history/{source}/{metric}", self.handle_metric_history
+            "/api/metrics/summary", self.handle_metrics_summary
         )
-        self.app.router.add_get("/api/metrics/sources", self.handle_list_sources)
+        self.app.router.add_get(
+            "/api/metrics/history/{source}/{metric}",
+            self.handle_metric_history,
+        )
+        self.app.router.add_get(
+            "/api/metrics/sources", self.handle_list_sources
+        )
         self.app.router.add_get("/api/alerts", self.handle_get_alerts)
-        self.app.router.add_post("/api/alerts/rules", self.handle_add_alert_rule)
-        self.app.router.add_get("/api/export/{format}", self.handle_export_metrics)
+        self.app.router.add_post(
+            "/api/alerts/rules", self.handle_add_alert_rule
+        )
+        self.app.router.add_get(
+            "/api/export/{format}", self.handle_export_metrics
+        )
         self.app.router.add_get("/ws", self.websocket_handler)
 
         # Health check
@@ -117,7 +131,9 @@ class MetricsDashboard:
         site = web.TCPSite(runner, self.config.host, self.config.port)
         await site.start()
 
-        logger.info(f"Dashboard server started at http://{self.config.host}:{self.config.port}")
+        logger.info(
+            f"Dashboard server started at http://{self.config.host}:{self.config.port}"
+        )
 
     async def stop(self):
         """Stop the dashboard server."""
@@ -177,7 +193,9 @@ class MetricsDashboard:
     async def _prepare_update_data(self) -> Dict[str, Any]:
         """Prepare metrics update data for clients."""
         # Get recent metrics summary
-        summary = await self.metrics_collector.get_metrics_summary(window_seconds=60)
+        summary = await self.metrics_collector.get_metrics_summary(
+            window_seconds=60
+        )
 
         # Prepare data for different charts
         update_data = {"summary": summary, "charts": {}}
@@ -186,39 +204,69 @@ class MetricsDashboard:
         if MetricSource.DATABASE.value in summary["sources"]:
             db_metrics = summary["sources"][MetricSource.DATABASE.value]
             update_data["charts"]["database"] = {
-                "query_latency": self._extract_chart_data(db_metrics, "query_latency_ms"),
-                "connection_pool": self._extract_chart_data(db_metrics, "connection_pool_size"),
-                "transaction_rate": self._extract_chart_data(db_metrics, "transaction_rate"),
+                "query_latency": self._extract_chart_data(
+                    db_metrics, "query_latency_ms"
+                ),
+                "connection_pool": self._extract_chart_data(
+                    db_metrics, "connection_pool_size"
+                ),
+                "transaction_rate": self._extract_chart_data(
+                    db_metrics, "transaction_rate"
+                ),
             }
 
         # WebSocket metrics
         if MetricSource.WEBSOCKET.value in summary["sources"]:
             ws_metrics = summary["sources"][MetricSource.WEBSOCKET.value]
             update_data["charts"]["websocket"] = {
-                "connections_rate": self._extract_chart_data(ws_metrics, "connections_per_second"),
-                "messages_rate": self._extract_chart_data(ws_metrics, "messages_per_second"),
-                "latency": self._extract_chart_data(ws_metrics, "current_latency_ms"),
-                "error_rate": self._extract_chart_data(ws_metrics, "error_rate"),
+                "connections_rate": self._extract_chart_data(
+                    ws_metrics, "connections_per_second"
+                ),
+                "messages_rate": self._extract_chart_data(
+                    ws_metrics, "messages_per_second"
+                ),
+                "latency": self._extract_chart_data(
+                    ws_metrics, "current_latency_ms"
+                ),
+                "error_rate": self._extract_chart_data(
+                    ws_metrics, "error_rate"
+                ),
             }
 
         # Agent metrics
         if MetricSource.AGENT.value in summary["sources"]:
             agent_metrics = summary["sources"][MetricSource.AGENT.value]
             update_data["charts"]["agent"] = {
-                "inference_time": self._extract_chart_data(agent_metrics, "inference_time_ms"),
-                "active_agents": self._extract_chart_data(agent_metrics, "active_agents"),
-                "throughput": self._extract_chart_data(agent_metrics, "agent_throughput"),
-                "belief_updates": self._extract_chart_data(agent_metrics, "belief_updates_per_sec"),
+                "inference_time": self._extract_chart_data(
+                    agent_metrics, "inference_time_ms"
+                ),
+                "active_agents": self._extract_chart_data(
+                    agent_metrics, "active_agents"
+                ),
+                "throughput": self._extract_chart_data(
+                    agent_metrics, "agent_throughput"
+                ),
+                "belief_updates": self._extract_chart_data(
+                    agent_metrics, "belief_updates_per_sec"
+                ),
             }
 
         # System metrics
         if MetricSource.SYSTEM.value in summary["sources"]:
             sys_metrics = summary["sources"][MetricSource.SYSTEM.value]
             update_data["charts"]["system"] = {
-                "cpu_usage": self._extract_chart_data(sys_metrics, "cpu_usage_percent"),
-                "memory_usage": self._extract_chart_data(sys_metrics, "memory_usage_percent"),
-                "disk_io_read": self._extract_chart_data(sys_metrics, "disk_read_mb_per_sec"),
-                "disk_io_write": self._extract_chart_data(sys_metrics, "disk_write_mb_per_sec"),
+                "cpu_usage": self._extract_chart_data(
+                    sys_metrics, "cpu_usage_percent"
+                ),
+                "memory_usage": self._extract_chart_data(
+                    sys_metrics, "memory_usage_percent"
+                ),
+                "disk_io_read": self._extract_chart_data(
+                    sys_metrics, "disk_read_mb_per_sec"
+                ),
+                "disk_io_write": self._extract_chart_data(
+                    sys_metrics, "disk_write_mb_per_sec"
+                ),
             }
 
         # Add alerts
@@ -226,7 +274,9 @@ class MetricsDashboard:
 
         return update_data
 
-    def _extract_chart_data(self, metrics: Dict[str, Any], metric_name: str) -> Dict[str, Any]:
+    def _extract_chart_data(
+        self, metrics: Dict[str, Any], metric_name: str
+    ) -> Dict[str, Any]:
         """Extract chart-ready data from metrics."""
         for key, data in metrics.items():
             if metric_name in key:
@@ -254,7 +304,9 @@ class MetricsDashboard:
             }
         )
 
-    async def handle_metrics_summary(self, request: web.Request) -> web.Response:
+    async def handle_metrics_summary(
+        self, request: web.Request
+    ) -> web.Response:
         """Get metrics summary."""
         window = int(request.query.get("window", 300))
         source = request.query.get("source")
@@ -263,7 +315,9 @@ class MetricsDashboard:
             try:
                 source = MetricSource(source)
             except ValueError:
-                return web.json_response({"error": f"Invalid source: {source}"}, status=400)
+                return web.json_response(
+                    {"error": f"Invalid source: {source}"}, status=400
+                )
 
         summary = await self.metrics_collector.get_metrics_summary(
             source=source, window_seconds=window
@@ -271,7 +325,9 @@ class MetricsDashboard:
 
         return web.json_response(summary)
 
-    async def handle_metric_history(self, request: web.Request) -> web.Response:
+    async def handle_metric_history(
+        self, request: web.Request
+    ) -> web.Response:
         """Get historical data for a specific metric."""
         source = request.match_info["source"]
         metric = request.match_info["metric"]
@@ -280,12 +336,19 @@ class MetricsDashboard:
         try:
             source_enum = MetricSource(source)
         except ValueError:
-            return web.json_response({"error": f"Invalid source: {source}"}, status=400)
+            return web.json_response(
+                {"error": f"Invalid source: {source}"}, status=400
+            )
 
-        history = self.metrics_collector.get_metric_history(metric, source_enum, duration)
+        history = self.metrics_collector.get_metric_history(
+            metric, source_enum, duration
+        )
 
         # Convert to JSON-serializable format
-        data = [{"timestamp": ts.isoformat(), "value": value} for ts, value in history]
+        data = [
+            {"timestamp": ts.isoformat(), "value": value}
+            for ts, value in history
+        ]
 
         return web.json_response(
             {
@@ -314,21 +377,32 @@ class MetricsDashboard:
                 "alerts": alerts,
                 "rules": rules,
                 "total_alerts": len(alerts),
-                "active_rules": len([r for r in rules if r.get("enabled", True)]),
+                "active_rules": len(
+                    [r for r in rules if r.get("enabled", True)]
+                ),
             }
         )
 
-    async def handle_add_alert_rule(self, request: web.Request) -> web.Response:
+    async def handle_add_alert_rule(
+        self, request: web.Request
+    ) -> web.Response:
         """Add a new alert rule."""
         try:
             data = await request.json()
 
             # Validate required fields
-            required = ["name", "metric_name", "source", "condition", "threshold"]
+            required = [
+                "name",
+                "metric_name",
+                "source",
+                "condition",
+                "threshold",
+            ]
             missing = [f for f in required if f not in data]
             if missing:
                 return web.json_response(
-                    {"error": f"Missing required fields: {missing}"}, status=400
+                    {"error": f"Missing required fields: {missing}"},
+                    status=400,
                 )
 
             # Add the alert rule
@@ -344,31 +418,44 @@ class MetricsDashboard:
             )
 
             return web.json_response(
-                {"status": "success", "message": f"Alert rule '{data['name']}' added successfully"}
+                {
+                    "status": "success",
+                    "message": f"Alert rule '{data['name']}' added successfully",
+                }
             )
 
         except Exception as e:
             return web.json_response({"error": str(e)}, status=400)
 
-    async def handle_export_metrics(self, request: web.Request) -> web.Response:
+    async def handle_export_metrics(
+        self, request: web.Request
+    ) -> web.Response:
         """Export metrics in various formats."""
         format = request.match_info["format"]
 
         if format not in ["json", "prometheus"]:
-            return web.json_response({"error": f"Unsupported format: {format}"}, status=400)
+            return web.json_response(
+                {"error": f"Unsupported format: {format}"}, status=400
+            )
 
         try:
-            export_data = await self.metrics_collector.export_metrics(format=format)
+            export_data = await self.metrics_collector.export_metrics(
+                format=format
+            )
 
             if format == "json":
                 return web.json_response(json.loads(export_data))
             else:
-                return web.Response(text=export_data, content_type="text/plain")
+                return web.Response(
+                    text=export_data, content_type="text/plain"
+                )
 
         except Exception as e:
             return web.json_response({"error": str(e)}, status=500)
 
-    async def websocket_handler(self, request: web.Request) -> web.WebSocketResponse:
+    async def websocket_handler(
+        self, request: web.Request
+    ) -> web.WebSocketResponse:
         """Handle WebSocket connections for real-time updates."""
         ws = web.WebSocketResponse()
         await ws.prepare(request)
@@ -396,7 +483,12 @@ class MetricsDashboard:
                     data = json.loads(msg.data)
                     if data.get("type") == "ping":
                         await ws.send_str(
-                            json.dumps({"type": "pong", "timestamp": datetime.now().isoformat()})
+                            json.dumps(
+                                {
+                                    "type": "pong",
+                                    "timestamp": datetime.now().isoformat(),
+                                }
+                            )
                         )
                 elif msg.type == aiohttp.WSMsgType.ERROR:
                     logger.error(f"WebSocket error: {ws.exception()}")
@@ -409,7 +501,9 @@ class MetricsDashboard:
 
         return ws
 
-    async def handle_dashboard_html(self, request: web.Request) -> web.Response:
+    async def handle_dashboard_html(
+        self, request: web.Request
+    ) -> web.Response:
         """Serve the dashboard HTML page."""
         html_content = self._generate_dashboard_html()
         return web.Response(text=html_content, content_type="text/html")
@@ -861,7 +955,9 @@ async def start_dashboard(config: DashboardConfig = None):
 if __name__ == "__main__":
     # Run dashboard standalone
     async def main():
-        config = DashboardConfig(host="0.0.0.0", port=8090, update_interval=1.0)
+        config = DashboardConfig(
+            host="0.0.0.0", port=8090, update_interval=1.0
+        )
 
         dashboard = await start_dashboard(config)
 

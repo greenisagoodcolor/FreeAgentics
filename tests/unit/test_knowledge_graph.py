@@ -77,7 +77,9 @@ class TestKnowledgeNode:
     def test_node_to_dict(self):
         """Test converting node to dictionary."""
         node = KnowledgeNode(
-            type=NodeType.CONCEPT, label="test_concept", properties={"abstract": True}
+            type=NodeType.CONCEPT,
+            label="test_concept",
+            properties={"abstract": True},
         )
 
         node_dict = node.to_dict()
@@ -112,7 +114,9 @@ class TestKnowledgeEdge:
 
     def test_edge_to_dict(self):
         """Test converting edge to dictionary."""
-        edge = KnowledgeEdge(source_id="a", target_id="b", type=EdgeType.CAUSES)
+        edge = KnowledgeEdge(
+            source_id="a", target_id="b", type=EdgeType.CAUSES
+        )
 
         edge_dict = edge.to_dict()
 
@@ -159,14 +163,18 @@ class TestKnowledgeGraph:
         graph.add_node(node1)
         graph.add_node(node2)
 
-        edge = KnowledgeEdge(source_id=node1.id, target_id=node2.id, type=EdgeType.RELATED_TO)
+        edge = KnowledgeEdge(
+            source_id=node1.id, target_id=node2.id, type=EdgeType.RELATED_TO
+        )
 
         assert graph.add_edge(edge) is True
         assert len(graph.edges) == 1
 
         # Test invalid edge (missing nodes)
         bad_edge = KnowledgeEdge(
-            source_id="missing", target_id="also_missing", type=EdgeType.RELATED_TO
+            source_id="missing",
+            target_id="also_missing",
+            type=EdgeType.RELATED_TO,
         )
         assert graph.add_edge(bad_edge) is False
 
@@ -195,7 +203,9 @@ class TestKnowledgeGraph:
         graph.add_node(node1)
         graph.add_node(node2)
 
-        edge = KnowledgeEdge(source_id=node1.id, target_id=node2.id, type=EdgeType.RELATED_TO)
+        edge = KnowledgeEdge(
+            source_id=node1.id, target_id=node2.id, type=EdgeType.RELATED_TO
+        )
         graph.add_edge(edge)
 
         # Remove node should also remove connected edges
@@ -215,11 +225,19 @@ class TestKnowledgeGraph:
             nodes.append(node)
 
         graph.add_edge(
-            KnowledgeEdge(source_id=nodes[0].id, target_id=nodes[1].id, type=EdgeType.RELATED_TO)
+            KnowledgeEdge(
+                source_id=nodes[0].id,
+                target_id=nodes[1].id,
+                type=EdgeType.RELATED_TO,
+            )
         )
 
         graph.add_edge(
-            KnowledgeEdge(source_id=nodes[1].id, target_id=nodes[2].id, type=EdgeType.CAUSES)
+            KnowledgeEdge(
+                source_id=nodes[1].id,
+                target_id=nodes[2].id,
+                type=EdgeType.CAUSES,
+            )
         )
 
         # Test neighbors
@@ -244,11 +262,19 @@ class TestKnowledgeGraph:
             nodes.append(node)
 
         graph.add_edge(
-            KnowledgeEdge(source_id=nodes[0].id, target_id=nodes[1].id, type=EdgeType.RELATED_TO)
+            KnowledgeEdge(
+                source_id=nodes[0].id,
+                target_id=nodes[1].id,
+                type=EdgeType.RELATED_TO,
+            )
         )
 
         graph.add_edge(
-            KnowledgeEdge(source_id=nodes[1].id, target_id=nodes[2].id, type=EdgeType.RELATED_TO)
+            KnowledgeEdge(
+                source_id=nodes[1].id,
+                target_id=nodes[2].id,
+                type=EdgeType.RELATED_TO,
+            )
         )
 
         # Find path
@@ -279,7 +305,11 @@ class TestKnowledgeGraph:
             spokes.append(spoke)
 
             graph.add_edge(
-                KnowledgeEdge(source_id=hub.id, target_id=spoke.id, type=EdgeType.RELATED_TO)
+                KnowledgeEdge(
+                    source_id=hub.id,
+                    target_id=spoke.id,
+                    type=EdgeType.RELATED_TO,
+                )
             )
 
         # Calculate importance
@@ -294,7 +324,9 @@ class TestKnowledgeGraph:
         graph2 = KnowledgeGraph()
 
         # Add nodes to graph1
-        node1 = KnowledgeNode(type=NodeType.ENTITY, label="shared", confidence=0.7)
+        node1 = KnowledgeNode(
+            type=NodeType.ENTITY, label="shared", confidence=0.7
+        )
         node2 = KnowledgeNode(type=NodeType.ENTITY, label="unique1")
         graph1.add_node(node1)
         graph1.add_node(node2)
@@ -379,7 +411,10 @@ class TestEvolutionOperators:
             "agent_id": "agent_1",
             "evidence": {
                 "contradictions": [
-                    {"belief_label": "weather_sunny", "properties": {"weather": "rainy"}}
+                    {
+                        "belief_label": "weather_sunny",
+                        "properties": {"weather": "rainy"},
+                    }
                 ]
             },
         }
@@ -459,7 +494,11 @@ class TestEvolutionOperators:
                 }
             )
 
-        context = {"temporal_events": events, "causality_threshold": 0.7, "max_causal_delay": 5}
+        context = {
+            "temporal_events": events,
+            "causality_threshold": 0.7,
+            "max_causal_delay": 5,
+        }
 
         assert learner.can_apply(graph, context) is True
 
@@ -468,7 +507,9 @@ class TestEvolutionOperators:
         assert metrics.edges_added > 0  # Causal edges added
 
         # Check causal edges exist
-        causal_edges = [e for e in graph.edges.values() if e.type == EdgeType.CAUSES]
+        causal_edges = [
+            e for e in graph.edges.values() if e.type == EdgeType.CAUSES
+        ]
         assert len(causal_edges) > 0
 
     def test_contradiction_resolver(self):
@@ -526,7 +567,11 @@ class TestEvolutionEngine:
             "observer_id": "agent_1",
             "agent_id": "agent_1",
             "observations": [
-                {"entity_id": entity.id, "data": {"status": "active"}, "confidence": 0.9}
+                {
+                    "entity_id": entity.id,
+                    "data": {"status": "active"},
+                    "confidence": 0.9,
+                }
             ],
             "evidence": {
                 "facts": [
@@ -571,7 +616,9 @@ class TestQueryEngine:
         engine = QueryEngine(graph)
 
         # Query by type
-        query = GraphQuery(query_type=QueryType.NODE_LOOKUP, node_types=[NodeType.ENTITY])
+        query = GraphQuery(
+            query_type=QueryType.NODE_LOOKUP, node_types=[NodeType.ENTITY]
+        )
 
         result = engine.execute(query)
 
@@ -579,7 +626,9 @@ class TestQueryEngine:
         assert all(n.type == NodeType.ENTITY for n in result.nodes)
 
         # Query with confidence threshold
-        query = GraphQuery(query_type=QueryType.NODE_LOOKUP, confidence_threshold=0.7)
+        query = GraphQuery(
+            query_type=QueryType.NODE_LOOKUP, confidence_threshold=0.7
+        )
 
         result = engine.execute(query)
         assert all(n.confidence >= 0.7 for n in result.nodes)
@@ -597,14 +646,18 @@ class TestQueryEngine:
 
         for i in range(2):
             edge = KnowledgeEdge(
-                source_id=nodes[i].id, target_id=nodes[i + 1].id, type=EdgeType.RELATED_TO
+                source_id=nodes[i].id,
+                target_id=nodes[i + 1].id,
+                type=EdgeType.RELATED_TO,
             )
             graph.add_edge(edge)
 
         engine = QueryEngine(graph)
 
         query = GraphQuery(
-            query_type=QueryType.PATH_QUERY, source_id=nodes[0].id, target_id=nodes[2].id
+            query_type=QueryType.PATH_QUERY,
+            source_id=nodes[0].id,
+            target_id=nodes[2].id,
         )
 
         result = engine.execute(query)
@@ -622,18 +675,24 @@ class TestQueryEngine:
 
         neighbors = []
         for i in range(4):
-            neighbor = KnowledgeNode(type=NodeType.ENTITY, label=f"neighbor_{i}")
+            neighbor = KnowledgeNode(
+                type=NodeType.ENTITY, label=f"neighbor_{i}"
+            )
             graph.add_node(neighbor)
             neighbors.append(neighbor)
 
             edge = KnowledgeEdge(
-                source_id=center.id, target_id=neighbor.id, type=EdgeType.RELATED_TO
+                source_id=center.id,
+                target_id=neighbor.id,
+                type=EdgeType.RELATED_TO,
             )
             graph.add_edge(edge)
 
         engine = QueryEngine(graph)
 
-        query = GraphQuery(query_type=QueryType.NEIGHBORHOOD, center_id=center.id, radius=1)
+        query = GraphQuery(
+            query_type=QueryType.NEIGHBORHOOD, center_id=center.id, radius=1
+        )
 
         result = engine.execute(query)
 
@@ -715,7 +774,9 @@ class TestStorage:
         graph.add_node(node1)
         graph.add_node(node2)
 
-        edge = KnowledgeEdge(source_id=node1.id, target_id=node2.id, type=EdgeType.IS_A)
+        edge = KnowledgeEdge(
+            source_id=node1.id, target_id=node2.id, type=EdgeType.IS_A
+        )
         graph.add_edge(edge)
 
         assert storage.save_graph(graph) is True

@@ -12,7 +12,13 @@ from typing import Any, Dict, List, Optional
 
 from sqlalchemy.orm import Session
 
-from database.models import Agent, AgentStatus, Coalition, KnowledgeEdge, KnowledgeNode
+from database.models import (
+    Agent,
+    AgentStatus,
+    Coalition,
+    KnowledgeEdge,
+    KnowledgeNode,
+)
 
 
 class BaseFactory:
@@ -21,7 +27,9 @@ class BaseFactory:
     @staticmethod
     def random_string(length: int = 10) -> str:
         """Generate a random string."""
-        return "".join(random.choices(string.ascii_lowercase + string.digits, k=length))
+        return "".join(
+            random.choices(string.ascii_lowercase + string.digits, k=length)
+        )
 
     @staticmethod
     def random_uuid() -> str:
@@ -40,7 +48,13 @@ class AgentFactory(BaseFactory):
     """Factory for creating test agents."""
 
     # Agent type options
-    AGENT_TYPES = ["resource_collector", "explorer", "defender", "coordinator", "scout"]
+    AGENT_TYPES = [
+        "resource_collector",
+        "explorer",
+        "defender",
+        "coordinator",
+        "scout",
+    ]
 
     # Capability options
     CAPABILITIES = [
@@ -81,7 +95,9 @@ class AgentFactory(BaseFactory):
                 "lon": -122.4194 + random.uniform(-0.1, 0.1),
                 "elevation": random.uniform(0, 100),
             },
-            "capabilities": random.sample(cls.CAPABILITIES, k=random.randint(2, 5)),
+            "capabilities": random.sample(
+                cls.CAPABILITIES, k=random.randint(2, 5)
+            ),
             "parameters": {
                 "speed": random.uniform(0.5, 2.0),
                 "range": random.uniform(10, 100),
@@ -104,7 +120,9 @@ class AgentFactory(BaseFactory):
         return agent
 
     @classmethod
-    def create_batch(cls, session: Session, count: int = 10, **kwargs) -> List[Agent]:
+    def create_batch(
+        cls, session: Session, count: int = 10, **kwargs
+    ) -> List[Agent]:
         """Create multiple agents in a batch.
 
         Args:
@@ -159,7 +177,9 @@ class CoalitionFactory(BaseFactory):
     ]
 
     @classmethod
-    def create(cls, session: Session, agents: Optional[List[Agent]] = None, **kwargs) -> Coalition:
+    def create(
+        cls, session: Session, agents: Optional[List[Agent]] = None, **kwargs
+    ) -> Coalition:
         """Create a test coalition with agents.
 
         Args:
@@ -172,7 +192,9 @@ class CoalitionFactory(BaseFactory):
         """
         if agents is None:
             # Create some agents for the coalition
-            agents = AgentFactory.create_batch(session, count=random.randint(3, 7))
+            agents = AgentFactory.create_batch(
+                session, count=random.randint(3, 7)
+            )
 
         defaults = {
             "coalition_id": f"coalition_{cls.random_uuid()}",
@@ -209,7 +231,13 @@ class KnowledgeGraphFactory(BaseFactory):
     """Factory for creating test knowledge graphs."""
 
     NODE_TYPES = ["concept", "entity", "fact", "belie", "observation"]
-    EDGE_TYPES = ["relates_to", "causes", "contradicts", "supports", "derived_from"]
+    EDGE_TYPES = [
+        "relates_to",
+        "causes",
+        "contradicts",
+        "supports",
+        "derived_from",
+    ]
 
     @classmethod
     def create_node(cls, session: Session, **kwargs) -> KnowledgeNode:
@@ -230,9 +258,13 @@ class KnowledgeGraphFactory(BaseFactory):
                 "source": f"agent_{cls.random_string(6)}",
                 "confidence": random.uniform(0.5, 1.0),
                 "timestamp": datetime.utcnow().isoformat(),
-                "tags": random.sample(["physics", "behavior", "environment", "agent"], k=2),
+                "tags": random.sample(
+                    ["physics", "behavior", "environment", "agent"], k=2
+                ),
             },
-            "embedding": [random.random() for _ in range(128)],  # Mock embedding
+            "embedding": [
+                random.random() for _ in range(128)
+            ],  # Mock embedding
             "created_at": cls.random_timestamp(days_ago=14),
             "updated_at": datetime.utcnow(),
         }
@@ -246,7 +278,11 @@ class KnowledgeGraphFactory(BaseFactory):
 
     @classmethod
     def create_edge(
-        cls, session: Session, source_node: KnowledgeNode, target_node: KnowledgeNode, **kwargs
+        cls,
+        session: Session,
+        source_node: KnowledgeNode,
+        target_node: KnowledgeNode,
+        **kwargs,
     ) -> KnowledgeEdge:
         """Create a knowledge edge between two nodes.
 
@@ -360,7 +396,10 @@ class TestDataGenerator:
 
             coalition_agents = agents[start_idx:end_idx]
             coalition = CoalitionFactory.create(
-                session, agents=coalition_agents, name=f"TestCoalition_{i}", goal=f"test_goal_{i}"
+                session,
+                agents=coalition_agents,
+                name=f"TestCoalition_{i}",
+                goal=f"test_goal_{i}",
             )
             coalitions.append(coalition)
 
@@ -416,13 +455,19 @@ class TestDataGenerator:
                 num_new = random.randint(1, 5)
                 for _ in range(num_new):
                     node = KnowledgeGraphFactory.create_node(
-                        session, content=f"Evolution step {step}: {BaseFactory.random_string(10)}"
+                        session,
+                        content=f"Evolution step {step}: {BaseFactory.random_string(10)}",
                     )
                     new_nodes.append(node)
                     all_nodes.append(node)
 
                 history.append(
-                    {"step": step, "action": "add_nodes", "nodes_added": num_new, "edges_added": 0}
+                    {
+                        "step": step,
+                        "action": "add_nodes",
+                        "nodes_added": num_new,
+                        "edges_added": 0,
+                    }
                 )
 
             elif action == "add_edges" and len(all_nodes) > 1:
@@ -434,7 +479,9 @@ class TestDataGenerator:
                     source = random.choice(all_nodes)
                     target = random.choice(all_nodes)
                     if source.node_id != target.node_id:
-                        KnowledgeGraphFactory.create_edge(session, source, target)
+                        KnowledgeGraphFactory.create_edge(
+                            session, source, target
+                        )
                         edges_added += 1
 
                 history.append(
@@ -477,7 +524,11 @@ class TestDataGenerator:
 
 if __name__ == "__main__":
     # Example usage
-    from test_config import create_test_engine, setup_test_database, teardown_test_database
+    from test_config import (
+        create_test_engine,
+        setup_test_database,
+        teardown_test_database,
+    )
 
     print("Testing data factories...")
 
@@ -504,7 +555,9 @@ if __name__ == "__main__":
         # Test coalition creation
         print("\nCreating coalition...")
         coalition = CoalitionFactory.create(session, agents=agents[:3])
-        print(f"✅ Created coalition: {coalition.coalition_id} with {len(coalition.agents)} agents")
+        print(
+            f"✅ Created coalition: {coalition.coalition_id} with {len(coalition.agents)} agents"
+        )
 
         # Test knowledge graph
         print("\nCreating knowledge graph...")

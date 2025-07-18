@@ -17,13 +17,18 @@ from datetime import datetime
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from agents.base_agent import GMN_AVAILABLE, PYMDP_AVAILABLE, BasicExplorerAgent
+from agents.base_agent import (
+    GMN_AVAILABLE,
+    PYMDP_AVAILABLE,
+    BasicExplorerAgent,
+)
 from database.session import init_db
 from inference.active.gmn_parser import EXAMPLE_GMN_SPEC, GMNParser
 
 # Setup logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -80,7 +85,9 @@ position_belief -> position: depends_on
     try:
         # Parse GMN specification
         gmn_graph = parser.parse(simple_gmn_spec)
-        print(f"✅ Parsed GMN with {len(gmn_graph.nodes)} nodes and {len(gmn_graph.edges)} edges")
+        print(
+            f"✅ Parsed GMN with {len(gmn_graph.nodes)} nodes and {len(gmn_graph.edges)} edges"
+        )
 
         # Show parsed components
         print("\n📋 GMN Components:")
@@ -103,7 +110,9 @@ position_belief -> position: depends_on
     print("🤖 Creating GMN-Specified Agent...")
 
     # For now, create a basic agent and show how GMN could be integrated
-    agent = BasicExplorerAgent("gmn_explorer", "GMN Explorer Agent", grid_size=4)
+    agent = BasicExplorerAgent(
+        "gmn_explorer", "GMN Explorer Agent", grid_size=4
+    )
     agent.start()
 
     # Simulate loading GMN spec into agent
@@ -124,7 +133,11 @@ position_belief -> position: depends_on
     for step in range(3):
         observation = {
             "position": agent.position.copy(),
-            "surroundings": [[0, 0, 0], [0, 0, 0], [0, 0, 0]],  # Empty 3x3 grid
+            "surroundings": [
+                [0, 0, 0],
+                [0, 0, 0],
+                [0, 0, 0],
+            ],  # Empty 3x3 grid
         }
 
         action = agent.step(observation)

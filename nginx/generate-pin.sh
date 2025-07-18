@@ -48,7 +48,7 @@ fi
 generate_pin_from_cert() {
     local cert_file=$1
     local pin
-    
+
     if [ -f "$cert_file" ]; then
         pin=$(openssl x509 -in "$cert_file" -pubkey -noout | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -binary | openssl enc -base64)
         echo "$pin"
@@ -61,7 +61,7 @@ generate_pin_from_cert() {
 generate_pin_from_key() {
     local key_file=$1
     local pin
-    
+
     if [ -f "$key_file" ]; then
         pin=$(openssl rsa -in "$key_file" -pubout -outform der 2>/dev/null | openssl dgst -sha256 -binary | openssl enc -base64)
         echo "$pin"
@@ -75,7 +75,7 @@ generate_pin_from_remote() {
     local domain=$1
     local port=${2:-443}
     local pin
-    
+
     pin=$(openssl s_client -servername "$domain" -connect "$domain:$port" </dev/null 2>/dev/null | openssl x509 -pubkey -noout | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -binary | openssl enc -base64)
     echo "$pin"
 }
@@ -85,7 +85,7 @@ generate_backup_pin() {
     local domain=$1
     local port=${2:-443}
     local ca_pin
-    
+
     # Get the CA certificate from the chain
     ca_pin=$(openssl s_client -servername "$domain" -connect "$domain:$port" </dev/null 2>/dev/null | openssl x509 -pubkey -noout | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -binary | openssl enc -base64)
     echo "$ca_pin"
@@ -95,7 +95,7 @@ generate_backup_pin() {
 main() {
     log "Generating certificate pins for $DOMAIN..."
     echo ""
-    
+
     # Generate pin from local certificate
     if [ -f "$CERT_FILE" ]; then
         local cert_pin
@@ -104,7 +104,7 @@ main() {
     else
         warn "Local certificate file not found: $CERT_FILE"
     fi
-    
+
     # Generate pin from local private key
     if [ -f "$KEY_FILE" ]; then
         local key_pin
@@ -113,7 +113,7 @@ main() {
     else
         warn "Local private key file not found: $KEY_FILE"
     fi
-    
+
     # Generate pin from remote certificate
     log "Fetching remote certificate..."
     if command -v nc &> /dev/null && nc -z "$DOMAIN" 443 2>/dev/null; then
@@ -123,21 +123,21 @@ main() {
     else
         warn "Cannot connect to $DOMAIN:443. Remote pin generation skipped."
     fi
-    
+
     echo ""
     log "Certificate pinning configuration example:"
     echo ""
-    
+
     # Generate nginx configuration example
     echo "# Add to nginx server block:"
     echo "add_header Public-Key-Pins 'pin-sha256=\"$cert_pin\"; max-age=2592000; includeSubDomains' always;"
     echo ""
-    
+
     # Generate Apache configuration example
     echo "# Add to Apache virtual host:"
     echo "Header always set Public-Key-Pins 'pin-sha256=\"$cert_pin\"; max-age=2592000; includeSubDomains'"
     echo ""
-    
+
     # Generate security considerations
     warn "IMPORTANT SECURITY CONSIDERATIONS:"
     echo "1. Certificate pinning can lock users out if implemented incorrectly"
@@ -146,7 +146,7 @@ main() {
     echo "4. Monitor certificate expiration dates closely"
     echo "5. Have a rollback plan in case of issues"
     echo ""
-    
+
     # Generate backup pin recommendations
     log "Recommended backup pin strategies:"
     echo "1. Pin your CA's public key as a backup"
@@ -154,7 +154,7 @@ main() {
     echo "3. Use a shorter max-age during testing (e.g., 300 seconds)"
     echo "4. Consider using Report-Only mode first"
     echo ""
-    
+
     # Generate monitoring recommendations
     log "Monitoring recommendations:"
     echo "1. Monitor for HPKP violation reports"
@@ -162,7 +162,7 @@ main() {
     echo "3. Test pin validation regularly"
     echo "4. Keep track of all pinned certificates"
     echo ""
-    
+
     log "Certificate pinning setup completed!"
     log "Remember to test thoroughly before enabling in production!"
 }

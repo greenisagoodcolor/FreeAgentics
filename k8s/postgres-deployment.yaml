@@ -155,7 +155,7 @@ data:
     work_mem = 4MB
     min_wal_size = 1GB
     max_wal_size = 4GB
-    
+
     # Logging
     log_destination = 'stderr'
     logging_collector = on
@@ -167,17 +167,17 @@ data:
     log_min_duration_statement = 1000
     log_statement = 'all'
     log_line_prefix = '%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
-    
+
     # Security
     ssl = on
     ssl_cert_file = '/etc/ssl/certs/server.crt'
     ssl_key_file = '/etc/ssl/private/server.key'
-    
+
     # Performance
     fsync = on
     synchronous_commit = on
     full_page_writes = on
-    
+
     # Monitoring
     track_activities = on
     track_counts = on
@@ -200,17 +200,17 @@ data:
     CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
     CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
     CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-    
+
     -- Create monitoring user
     CREATE USER monitoring WITH PASSWORD 'monitoring_password';
     GRANT SELECT ON pg_stat_database TO monitoring;
     GRANT SELECT ON pg_stat_user_tables TO monitoring;
     GRANT SELECT ON pg_stat_user_indexes TO monitoring;
-    
+
     -- Create backup user
     CREATE USER backup WITH PASSWORD 'backup_password';
     GRANT SELECT ON ALL TABLES IN SCHEMA public TO backup;
-    
+
     -- Performance optimization
     ALTER DATABASE freeagentics SET shared_preload_libraries = 'pg_stat_statements';
     ALTER DATABASE freeagentics SET log_statement = 'all';

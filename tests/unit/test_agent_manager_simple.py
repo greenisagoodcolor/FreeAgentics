@@ -121,7 +121,9 @@ class TestAgentManagerCore:
 
     def test_create_agent_basic(self, agent_manager):
         """Test basic agent creation."""
-        with patch("agents.agent_manager.BasicExplorerAgent") as mock_agent_class:
+        with patch(
+            "agents.agent_manager.BasicExplorerAgent"
+        ) as mock_agent_class:
             with patch("agents.agent_manager.Position") as mock_position:
                 mock_agent = Mock()
                 mock_agent.id = "test_agent_1"
@@ -141,7 +143,9 @@ class TestAgentManagerCore:
 
     def test_create_agent_active_inference(self, agent_manager):
         """Test Active Inference agent creation."""
-        with patch("agents.agent_manager.ActiveInferenceAgent") as mock_agent_class:
+        with patch(
+            "agents.agent_manager.ActiveInferenceAgent"
+        ) as mock_agent_class:
             with patch("agents.agent_manager.Position") as mock_position:
                 mock_agent = Mock()
                 mock_agent.id = "ai_agent_1"
@@ -152,7 +156,9 @@ class TestAgentManagerCore:
                 mock_pos.y = 1
                 mock_position.return_value = mock_pos
 
-                agent_id = agent_manager.create_agent("active_inference", "AIAgent")
+                agent_id = agent_manager.create_agent(
+                    "active_inference", "AIAgent"
+                )
 
                 assert agent_id == "ai_agent_1"
                 assert agent_id in agent_manager.agents
@@ -270,12 +276,18 @@ class TestAgentManagerCore:
 
         def create_agents():
             try:
-                with patch("agents.agent_manager.BasicExplorerAgent") as mock_agent_class:
+                with patch(
+                    "agents.agent_manager.BasicExplorerAgent"
+                ) as mock_agent_class:
                     mock_agent = Mock()
-                    mock_agent.id = f"thread_agent_{threading.current_thread().ident}"
+                    mock_agent.id = (
+                        f"thread_agent_{threading.current_thread().ident}"
+                    )
                     mock_agent_class.return_value = mock_agent
 
-                    agent_id = agent_manager.create_agent("basic", "ThreadAgent")
+                    agent_id = agent_manager.create_agent(
+                        "basic", "ThreadAgent"
+                    )
                     results.append(agent_id)
             except Exception as e:
                 errors.append(e)
@@ -322,7 +334,9 @@ class TestAgentManagerCore:
         """Test that agent counter increments properly."""
         initial_count = agent_manager._agent_counter
 
-        with patch("agents.agent_manager.BasicExplorerAgent") as mock_agent_class:
+        with patch(
+            "agents.agent_manager.BasicExplorerAgent"
+        ) as mock_agent_class:
             mock_agent = Mock()
             mock_agent.id = "test_agent"
             mock_agent_class.return_value = mock_agent
@@ -341,7 +355,9 @@ class TestAgentManagerCore:
         agent_manager.set_world(mock_world)
 
         # Create agent
-        with patch("agents.agent_manager.BasicExplorerAgent") as mock_agent_class:
+        with patch(
+            "agents.agent_manager.BasicExplorerAgent"
+        ) as mock_agent_class:
             mock_agent = Mock()
             mock_agent.id = "world_test_agent"
             mock_agent_class.return_value = mock_agent
@@ -384,7 +400,9 @@ class TestAgentManagerErrorHandling:
 
     def test_create_agent_with_exception(self, agent_manager):
         """Test agent creation when constructor raises exception."""
-        with patch("agents.agent_manager.BasicExplorerAgent") as mock_agent_class:
+        with patch(
+            "agents.agent_manager.BasicExplorerAgent"
+        ) as mock_agent_class:
             mock_agent_class.side_effect = Exception("Agent creation failed")
 
             agent_id = agent_manager.create_agent("basic", "FailAgent")
@@ -425,12 +443,18 @@ class TestAgentManagerErrorHandling:
 
         def create_and_remove_agent():
             try:
-                with patch("agents.agent_manager.BasicExplorerAgent") as mock_agent_class:
+                with patch(
+                    "agents.agent_manager.BasicExplorerAgent"
+                ) as mock_agent_class:
                     mock_agent = Mock()
-                    mock_agent.id = f"concurrent_{threading.current_thread().ident}"
+                    mock_agent.id = (
+                        f"concurrent_{threading.current_thread().ident}"
+                    )
                     mock_agent_class.return_value = mock_agent
 
-                    agent_id = agent_manager.create_agent("basic", "ConcurrentAgent")
+                    agent_id = agent_manager.create_agent(
+                        "basic", "ConcurrentAgent"
+                    )
                     if agent_id:
                         time.sleep(0.01)  # Small delay
                         agent_manager.remove_agent(agent_id)
@@ -452,4 +476,6 @@ class TestAgentManagerErrorHandling:
 
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-v", "--cov=agents.agent_manager", "--cov-report=html"])
+    pytest.main(
+        [__file__, "-v", "--cov=agents.agent_manager", "--cov-report=html"]
+    )

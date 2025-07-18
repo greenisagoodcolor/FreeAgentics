@@ -22,7 +22,9 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -43,7 +45,9 @@ class SecurityValidator:
         self.security_warnings = []
         self.security_passes = []
 
-    def log_security_result(self, category: str, test_name: str, result: Dict[str, Any]):
+    def log_security_result(
+        self, category: str, test_name: str, result: Dict[str, Any]
+    ):
         """Log security test result"""
         if category not in self.results["security_audit"]:
             self.results["security_audit"][category] = {}
@@ -163,7 +167,8 @@ class SecurityValidator:
             # Check for security best practices
             security_checks = {
                 "privileged_containers": "privileged: true" in content,
-                "root_user": 'user: "0:0"' in content or "user: root" in content,
+                "root_user": 'user: "0:0"' in content
+                or "user: root" in content,
                 "host_network": "network_mode: host" in content,
                 "no_read_only": "read_only: true" not in content,
                 "no_resource_limits": "limits:" not in content,
@@ -197,9 +202,13 @@ class SecurityValidator:
             # Check for SSL best practices
             ssl_checks = {
                 "weak_protocols": any(
-                    protocol in content for protocol in ["SSLv2", "SSLv3", "TLSv1", "TLSv1.1"]
+                    protocol in content
+                    for protocol in ["SSLv2", "SSLv3", "TLSv1", "TLSv1.1"]
                 ),
-                "weak_ciphers": any(cipher in content for cipher in ["RC4", "DES", "3DES", "MD5"]),
+                "weak_ciphers": any(
+                    cipher in content
+                    for cipher in ["RC4", "DES", "3DES", "MD5"]
+                ),
                 "no_hsts": "Strict-Transport-Security" not in content,
                 "no_ocsp": "ssl_stapling" not in content,
                 "weak_dh": "ssl_dhparam" not in content,
@@ -232,7 +241,9 @@ class SecurityValidator:
             "api/middleware/security_monitoring.py",
         ]
 
-        missing_middleware = [f for f in middleware_files if not os.path.exists(f)]
+        missing_middleware = [
+            f for f in middleware_files if not os.path.exists(f)
+        ]
         if missing_middleware:
             api_issues.extend(missing_middleware)
 
@@ -251,7 +262,9 @@ class SecurityValidator:
             }
 
             missing_features = [
-                feature for feature, present in security_features.items() if not present
+                feature
+                for feature, present in security_features.items()
+                if not present
             ]
             if missing_features:
                 api_issues.extend(missing_features)
@@ -286,7 +299,9 @@ class SecurityValidator:
             }
 
             missing_settings = [
-                setting for setting, present in security_settings.items() if not present
+                setting
+                for setting, present in security_settings.items()
+                if not present
             ]
             if missing_settings:
                 db_issues.extend(missing_settings)
@@ -333,18 +348,27 @@ class SecurityValidator:
                 # Check for security features
                 security_features = {
                     "password_hashing": any(
-                        term in content for term in ["bcrypt", "scrypt", "pbkdf2"]
+                        term in content
+                        for term in ["bcrypt", "scrypt", "pbkdf2"]
                     ),
                     "rate_limiting": "rate_limit" in content.lower(),
                     "session_management": "session" in content.lower(),
-                    "jwt_validation": "jwt" in content.lower() and "verify" in content.lower(),
+                    "jwt_validation": "jwt" in content.lower()
+                    and "verify" in content.lower(),
                 }
 
                 missing_features = [
-                    feature for feature, present in security_features.items() if not present
+                    feature
+                    for feature, present in security_features.items()
+                    if not present
                 ]
                 if missing_features:
-                    auth_issues.extend([f"{auth_file}: {feature}" for feature in missing_features])
+                    auth_issues.extend(
+                        [
+                            f"{auth_file}: {feature}"
+                            for feature in missing_features
+                        ]
+                    )
 
         self.log_security_result(
             "authentication",
@@ -376,7 +400,9 @@ class SecurityValidator:
             }
 
             missing_features = [
-                feature for feature, present in security_features.items() if not present
+                feature
+                for feature, present in security_features.items()
+                if not present
             ]
             if missing_features:
                 monitoring_issues.extend(missing_features)
@@ -384,9 +410,13 @@ class SecurityValidator:
         # Check log security
         if os.path.exists("logs/security_audit.log"):
             # Check if log file has appropriate permissions
-            log_perms = stat.S_IMODE(os.stat("logs/security_audit.log").st_mode)
+            log_perms = stat.S_IMODE(
+                os.stat("logs/security_audit.log").st_mode
+            )
             if log_perms & 0o044:  # World or group readable
-                monitoring_issues.append("Security log file has overly permissive permissions")
+                monitoring_issues.append(
+                    "Security log file has overly permissive permissions"
+                )
 
         self.log_security_result(
             "monitoring",
@@ -476,7 +506,13 @@ class SecurityValidator:
         issues = []
 
         # Check for common default credentials in config files
-        default_patterns = ["admin:admin", "root:root", "admin:password", "user:user", "test:test"]
+        default_patterns = [
+            "admin:admin",
+            "root:root",
+            "admin:password",
+            "user:user",
+            "test:test",
+        ]
 
         config_files = [".env.production", "docker-compose.production.yml"]
 
@@ -487,7 +523,9 @@ class SecurityValidator:
 
                 for pattern in default_patterns:
                     if pattern in content:
-                        issues.append(f"Default credentials found in {config_file}: {pattern}")
+                        issues.append(
+                            f"Default credentials found in {config_file}: {pattern}"
+                        )
 
         return issues
 
@@ -531,7 +569,9 @@ class SecurityValidator:
                 content = f.read()
 
             if 'allow_origins=["*"]' in content:
-                issues.append("Insecure CORS configuration (allows all origins)")
+                issues.append(
+                    "Insecure CORS configuration (allows all origins)"
+                )
 
         return issues
 
@@ -542,7 +582,9 @@ class SecurityValidator:
         # Check for weak algorithms in code (only in security-related files)
         weak_algorithms = ["md5", "sha1", "des", "rc4"]
 
-        security_files = list(Path("auth").glob("**/*.py")) + list(Path("api").glob("**/*.py"))
+        security_files = list(Path("auth").glob("**/*.py")) + list(
+            Path("api").glob("**/*.py")
+        )
         for file_path in security_files:
             if file_path.is_file():
                 try:
@@ -579,7 +621,9 @@ class SecurityValidator:
 
         for owasp_id, issues in owasp_checks.items():
             if issues:
-                vulnerabilities.extend([f"{owasp_id}: {issue}" for issue in issues])
+                vulnerabilities.extend(
+                    [f"{owasp_id}: {issue}" for issue in issues]
+                )
 
         return vulnerabilities
 
@@ -610,7 +654,10 @@ class SecurityValidator:
             with open("auth/security_implementation.py", "r") as f:
                 content = f.read()
 
-            if "secrets.SystemRandom" not in content and "os.urandom" not in content:
+            if (
+                "secrets.SystemRandom" not in content
+                and "os.urandom" not in content
+            ):
                 issues.append("No secure random generation detected")
 
         return issues
@@ -708,7 +755,9 @@ class SecurityValidator:
                         and "validate" not in content.lower()
                         and "whitelist" not in content.lower()
                     ):
-                        issues.append(f"Potential SSRF vulnerability in {file_path}")
+                        issues.append(
+                            f"Potential SSRF vulnerability in {file_path}"
+                        )
                         break
                 except:
                     pass
@@ -718,7 +767,9 @@ class SecurityValidator:
     def calculate_security_score(self):
         """Calculate overall security score"""
         total_checks = (
-            len(self.security_passes) + len(self.security_warnings) + len(self.critical_issues)
+            len(self.security_passes)
+            + len(self.security_warnings)
+            + len(self.critical_issues)
         )
 
         if total_checks == 0:
@@ -742,12 +793,16 @@ class SecurityValidator:
         recommendations = []
 
         if self.critical_issues:
-            recommendations.append("🚨 CRITICAL: Address all critical security issues immediately")
+            recommendations.append(
+                "🚨 CRITICAL: Address all critical security issues immediately"
+            )
             for issue in self.critical_issues:
                 recommendations.append(f"  - Fix: {issue}")
 
         if self.security_warnings:
-            recommendations.append("⚠️ HIGH/MEDIUM: Review and address security warnings")
+            recommendations.append(
+                "⚠️ HIGH/MEDIUM: Review and address security warnings"
+            )
             for warning in self.security_warnings[:5]:  # Show first 5
                 recommendations.append(f"  - Review: {warning}")
 
@@ -823,7 +878,9 @@ class SecurityValidator:
         print(f"Security Warnings: {len(self.security_warnings)}")
         print(f"Security Passes: {len(self.security_passes)}")
         print(f"Vulnerabilities Found: {len(vulnerabilities)}")
-        print(f"Production Ready: {'YES' if len(self.critical_issues) == 0 else 'NO'}")
+        print(
+            f"Production Ready: {'YES' if len(self.critical_issues) == 0 else 'NO'}"
+        )
         print("=" * 60)
 
         if len(self.critical_issues) == 0:
@@ -841,16 +898,26 @@ class SecurityValidator:
         """Generate markdown security report"""
         with open(filename, "w") as f:
             f.write("# FreeAgentics Security Validation Report\n\n")
-            f.write(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(
+                f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+            )
             f.write(f"**Environment:** {self.results['environment']}\n")
-            f.write(f"**Security Score:** {self.results['security_score']}%\n\n")
+            f.write(
+                f"**Security Score:** {self.results['security_score']}%\n\n"
+            )
 
             # Executive Summary
             f.write("## Executive Summary\n\n")
             compliance = self.results["compliance_status"]
-            f.write(f"- **Critical Issues:** {compliance['critical_issues']}\n")
-            f.write(f"- **Security Warnings:** {compliance['security_warnings']}\n")
-            f.write(f"- **Security Passes:** {compliance['security_passes']}\n")
+            f.write(
+                f"- **Critical Issues:** {compliance['critical_issues']}\n"
+            )
+            f.write(
+                f"- **Security Warnings:** {compliance['security_warnings']}\n"
+            )
+            f.write(
+                f"- **Security Passes:** {compliance['security_passes']}\n"
+            )
             f.write(
                 f"- **Production Ready:** {'✅ YES' if compliance['production_ready'] else '❌ NO'}\n\n"
             )
@@ -888,7 +955,9 @@ class SecurityValidator:
                         "LOW": "🟢",
                         "PASS": "✅",
                     }.get(severity, "ℹ️")
-                    f.write(f"- {icon} **{test_name}**: {result.get('message', 'No message')}\n")
+                    f.write(
+                        f"- {icon} **{test_name}**: {result.get('message', 'No message')}\n"
+                    )
                 f.write("\n")
 
 

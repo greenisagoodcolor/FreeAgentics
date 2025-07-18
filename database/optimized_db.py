@@ -144,7 +144,9 @@ class OptimizedConnectionPool:
         self.query_cache = cachetools.TTLCache(
             maxsize=config.query_cache_size, ttl=config.query_cache_ttl
         )
-        self.prepared_statements = cachetools.LRUCache(maxsize=config.prepared_statement_cache_size)
+        self.prepared_statements = cachetools.LRUCache(
+            maxsize=config.prepared_statement_cache_size
+        )
 
         logger.info("OptimizedConnectionPool initialized")
 
@@ -235,7 +237,9 @@ class OptimizedConnectionPool:
 
         # Check write pool utilization
         if self.write_pool:
-            utilization = self.write_pool.get_size() / self.config.max_connections
+            utilization = (
+                self.write_pool.get_size() / self.config.max_connections
+            )
 
             if utilization > self.config.scale_up_threshold:
                 await self._scale_up_pool(self.write_pool, "write")
@@ -255,7 +259,9 @@ class OptimizedConnectionPool:
         """Scale up a connection pool."""
         current_size = pool.get_size()
         if current_size < self.config.max_connections:
-            logger.info(f"Scaling up {pool_name} pool from {current_size} connections")
+            logger.info(
+                f"Scaling up {pool_name} pool from {current_size} connections"
+            )
             # Note: asyncpg doesn't support dynamic scaling, so we log the intent
             # In production, you might recreate the pool with more connections
             self.last_scale_time = time.time()
@@ -264,7 +270,9 @@ class OptimizedConnectionPool:
         """Scale down a connection pool."""
         current_size = pool.get_size()
         if current_size > self.config.min_connections:
-            logger.info(f"Scaling down {pool_name} pool from {current_size} connections")
+            logger.info(
+                f"Scaling down {pool_name} pool from {current_size} connections"
+            )
             # Note: asyncpg doesn't support dynamic scaling, so we log the intent
             self.last_scale_time = time.time()
 
@@ -282,7 +290,9 @@ class OptimizedConnectionPool:
         template = re.sub(r"\d+", "?", template)
         return template
 
-    async def _get_connection(self, read_only: bool = False) -> asyncpg.Connection:
+    async def _get_connection(
+        self, read_only: bool = False
+    ) -> asyncpg.Connection:
         """Get a connection from the appropriate pool."""
         if read_only and self.read_pools:
             # Use round-robin for read connections
@@ -297,7 +307,9 @@ class OptimizedConnectionPool:
 
         return await pool.acquire()
 
-    async def _release_connection(self, connection: asyncpg.Connection, read_only: bool = False):
+    async def _release_connection(
+        self, connection: asyncpg.Connection, read_only: bool = False
+    ):
         """Release a connection back to the pool."""
         if read_only and self.read_pools:
             # Find the right pool to release to
@@ -311,7 +323,9 @@ class OptimizedConnectionPool:
             if self.write_pool:
                 await self.write_pool.release(connection)
 
-    async def _update_query_stats(self, query: str, execution_time: float, error: bool = False):
+    async def _update_query_stats(
+        self, query: str, execution_time: float, error: bool = False
+    ):
         """Update query execution statistics."""
         if not self.config.track_query_stats:
             return
@@ -329,7 +343,9 @@ class OptimizedConnectionPool:
 
         # Log slow queries
         if execution_time > self.config.slow_query_threshold:
-            logger.warning(f"Slow query detected: {execution_time:.3f}s - {query_template}")
+            logger.warning(
+                f"Slow query detected: {execution_time:.3f}s - {query_template}"
+            )
 
     @asynccontextmanager
     async def get_connection(self, read_only: bool = False):
@@ -353,7 +369,11 @@ class OptimizedConnectionPool:
                 pass  # Time is already measured above
 
     async def execute_query(
-        self, query: str, *args, read_only: bool = False, use_cache: bool = True
+        self,
+        query: str,
+        *args,
+        read_only: bool = False,
+        use_cache: bool = True,
     ) -> Any:
         """Execute a query with caching and performance monitoring."""
         start_time = time.perf_counter()
@@ -428,7 +448,9 @@ class OptimizedConnectionPool:
 
         return query_hash
 
-    async def execute_prepared(self, statement_hash: str, *args, read_only: bool = False) -> Any:
+    async def execute_prepared(
+        self, statement_hash: str, *args, read_only: bool = False
+    ) -> Any:
         """Execute a prepared statement."""
         if statement_hash not in self.prepared_statements:
             raise ValueError(f"Prepared statement not found: {statement_hash}")
@@ -447,7 +469,9 @@ class OptimizedConnectionPool:
 
         finally:
             execution_time = time.perf_counter() - start_time
-            await self._update_query_stats(f"prepared_{statement_hash}", execution_time, False)
+            await self._update_query_stats(
+                f"prepared_{statement_hash}", execution_time, False
+            )
 
     async def begin_transaction(self, read_only: bool = False):
         """Begin a database transaction."""
@@ -461,14 +485,19 @@ class OptimizedConnectionPool:
         async with self.stats_lock:
             # Query statistics
             top_queries = sorted(
-                self.query_stats.values(), key=lambda x: x.total_time, reverse=True
+                self.query_stats.values(),
+                key=lambda x: x.total_time,
+                reverse=True,
             )[:10]
 
             query_stats = {
                 "total_queries": len(self.query_stats),
-                "total_execution_time": sum(q.total_time for q in self.query_stats.values()),
+                "total_execution_time": sum(
+                    q.total_time for q in self.query_stats.values()
+                ),
                 "average_query_time": (
-                    sum(q.avg_time for q in self.query_stats.values()) / len(self.query_stats)
+                    sum(q.avg_time for q in self.query_stats.values())
+                    / len(self.query_stats)
                     if self.query_stats
                     else 0
                 ),
@@ -494,7 +523,9 @@ class OptimizedConnectionPool:
         pool_stats = {
             "write_pool": {
                 "size": self.write_pool.get_size() if self.write_pool else 0,
-                "available": self.write_pool.get_available_size() if self.write_pool else 0,
+                "available": self.write_pool.get_available_size()
+                if self.write_pool
+                else 0,
                 "max_size": self.config.max_connections,
             },
             "read_pools": [
@@ -568,7 +599,9 @@ async def initialize_optimized_db(config: DatabaseConfig):
 def get_optimized_db() -> OptimizedConnectionPool:
     """Get the global optimized database instance."""
     if _optimized_db is None:
-        raise RuntimeError("Database not initialized. Call initialize_optimized_db first.")
+        raise RuntimeError(
+            "Database not initialized. Call initialize_optimized_db first."
+        )
     return _optimized_db
 
 
@@ -581,13 +614,19 @@ async def close_optimized_db():
 
 
 # Convenience functions
-async def execute_query(query: str, *args, read_only: bool = False, use_cache: bool = True) -> Any:
+async def execute_query(
+    query: str, *args, read_only: bool = False, use_cache: bool = True
+) -> Any:
     """Execute a query using the global optimized database."""
     db = get_optimized_db()
-    return await db.execute_query(query, *args, read_only=read_only, use_cache=use_cache)
+    return await db.execute_query(
+        query, *args, read_only=read_only, use_cache=use_cache
+    )
 
 
-async def execute_many(query: str, args_list: List[Tuple], batch_size: int = 1000) -> None:
+async def execute_many(
+    query: str, args_list: List[Tuple], batch_size: int = 1000
+) -> None:
     """Execute a query with multiple parameter sets."""
     db = get_optimized_db()
     return await db.execute_many(query, args_list, batch_size)
@@ -666,7 +705,9 @@ async def benchmark_database_performance():
         print(f"\nDatabase Statistics:")
         print(f"  Pool utilization: {stats['pool_stats']}")
         print(f"  Cache stats: {stats['cache_stats']}")
-        print(f"  Query stats: {stats['query_stats']['total_queries']} queries")
+        print(
+            f"  Query stats: {stats['query_stats']['total_queries']} queries"
+        )
 
     except Exception as e:
         logger.error(f"Benchmark failed: {e}")

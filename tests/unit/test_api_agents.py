@@ -29,8 +29,12 @@ except ImportError:
 
 # Create test database
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+)
+TestingSessionLocal = sessionmaker(
+    autocommit=False, autoflush=False, bind=engine
+)
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -100,9 +104,15 @@ class TestAgentsAPI:
         """Test listing agents with data."""
         # Create test agents
         db = TestingSessionLocal()
-        agent1 = AgentModel(name="Agent 1", template="basic-explorer", status=AgentStatus.ACTIVE)
+        agent1 = AgentModel(
+            name="Agent 1",
+            template="basic-explorer",
+            status=AgentStatus.ACTIVE,
+        )
         agent2 = AgentModel(
-            name="Agent 2", template="resource-collector", status=AgentStatus.PENDING
+            name="Agent 2",
+            template="resource-collector",
+            status=AgentStatus.PENDING,
         )
         db.add(agent1)
         db.add(agent2)
@@ -152,13 +162,19 @@ class TestAgentsAPI:
         """Test updating agent status."""
         # Create test agent
         db = TestingSessionLocal()
-        agent = AgentModel(name="Test Agent", template="basic-explorer", status=AgentStatus.PENDING)
+        agent = AgentModel(
+            name="Test Agent",
+            template="basic-explorer",
+            status=AgentStatus.PENDING,
+        )
         db.add(agent)
         db.commit()
         agent_id = str(agent.id)
         db.close()
 
-        response = client.patch(f"/api/v1/agents/{agent_id}/status", params={"status": "active"})
+        response = client.patch(
+            f"/api/v1/agents/{agent_id}/status", params={"status": "active"}
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -166,7 +182,9 @@ class TestAgentsAPI:
 
         # Verify in database
         db = TestingSessionLocal()
-        updated_agent = db.query(AgentModel).filter(AgentModel.id == agent.id).first()
+        updated_agent = (
+            db.query(AgentModel).filter(AgentModel.id == agent.id).first()
+        )
         assert updated_agent.status == AgentStatus.ACTIVE
         assert updated_agent.last_active is not None
         db.close()
@@ -175,7 +193,11 @@ class TestAgentsAPI:
         """Test deleting an agent."""
         # Create test agent
         db = TestingSessionLocal()
-        agent = AgentModel(name="Test Agent", template="basic-explorer", status=AgentStatus.STOPPED)
+        agent = AgentModel(
+            name="Test Agent",
+            template="basic-explorer",
+            status=AgentStatus.STOPPED,
+        )
         db.add(agent)
         db.commit()
         agent_id = str(agent.id)
@@ -188,7 +210,9 @@ class TestAgentsAPI:
 
         # Verify agent is gone
         db = TestingSessionLocal()
-        deleted_agent = db.query(AgentModel).filter(AgentModel.id == agent.id).first()
+        deleted_agent = (
+            db.query(AgentModel).filter(AgentModel.id == agent.id).first()
+        )
         assert deleted_agent is None
         db.close()
 
@@ -221,9 +245,15 @@ class TestAgentsAPI:
         """Test filtering agents by status."""
         # Create agents with different statuses
         db = TestingSessionLocal()
-        active = AgentModel(name="Active", template="t1", status=AgentStatus.ACTIVE)
-        pending = AgentModel(name="Pending", template="t2", status=AgentStatus.PENDING)
-        stopped = AgentModel(name="Stopped", template="t3", status=AgentStatus.STOPPED)
+        active = AgentModel(
+            name="Active", template="t1", status=AgentStatus.ACTIVE
+        )
+        pending = AgentModel(
+            name="Pending", template="t2", status=AgentStatus.PENDING
+        )
+        stopped = AgentModel(
+            name="Stopped", template="t3", status=AgentStatus.STOPPED
+        )
         db.add_all([active, pending, stopped])
         db.commit()
         db.close()

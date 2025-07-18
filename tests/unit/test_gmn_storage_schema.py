@@ -129,7 +129,9 @@ class TestGMNVersionTracking:
         """Create GMN repository instance."""
         return MockGMNRepository(db_session)
 
-    def test_create_gmn_specification_with_version_tracking(self, gmn_repository, agent):
+    def test_create_gmn_specification_with_version_tracking(
+        self, gmn_repository, agent
+    ):
         """Test creating GMN specification with proper version tracking.
 
         This test will fail initially because we need to enhance the schema
@@ -155,7 +157,8 @@ class TestGMNVersionTracking:
         """
         # Create initial version
         v1_spec = gmn_repository.create_gmn_specification(
-            agent_id=agent.id, specification="goal: explore\nbeliefs: location_uniform"
+            agent_id=agent.id,
+            specification="goal: explore\nbeliefs: location_uniform",
         )
 
         # This should fail - enhanced versioning not implemented
@@ -244,7 +247,10 @@ class TestGMNAdvancedQuerying:
         # This should fail - complexity metrics not implemented
         with pytest.raises(Exception):
             specs = gmn_repository.get_by_complexity_range(
-                agent_id=agent.id, min_nodes=5, max_edges=20, complexity_score_range=(0.3, 0.8)
+                agent_id=agent.id,
+                min_nodes=5,
+                max_edges=20,
+                complexity_score_range=(0.3, 0.8),
             )
 
     def test_get_specifications_by_time_range(self, gmn_repository, agent):
@@ -302,7 +308,9 @@ class TestGMNDataIntegrity:
         # This should fail - integrity validation not implemented
         with pytest.raises(Exception):
             integrity_report = gmn_repository.validate_data_integrity(
-                agent_id=agent.id, check_version_consistency=True, check_parsed_data_sync=True
+                agent_id=agent.id,
+                check_version_consistency=True,
+                check_parsed_data_sync=True,
             )
 
     def test_detect_orphaned_versions(self, gmn_repository, agent):
@@ -323,7 +331,9 @@ class TestGMNDataIntegrity:
         """
         # This should fail - lineage repair not implemented
         with pytest.raises(Exception):
-            repair_result = gmn_repository.repair_version_lineage(agent_id=agent.id, dry_run=True)
+            repair_result = gmn_repository.repair_version_lineage(
+                agent_id=agent.id, dry_run=True
+            )
 
     def test_constraint_validation(self, gmn_repository, agent):
         """Test database constraint validation for GMN data.

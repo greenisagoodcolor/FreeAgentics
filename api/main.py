@@ -8,7 +8,16 @@ from api.middleware.security_monitoring import (
     SecurityHeadersMiddleware,
     SecurityMonitoringMiddleware,
 )
-from api.v1 import agents, auth, inference, mfa, monitoring, security, system, websocket
+from api.v1 import (
+    agents,
+    auth,
+    inference,
+    mfa,
+    monitoring,
+    security,
+    system,
+    websocket,
+)
 from api.v1.graphql_schema import graphql_app
 from auth.security_implementation import SecurityMiddleware
 
@@ -22,6 +31,20 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting FreeAgentics API...")
+
+    # Initialize database if in development mode
+    from database.session import DATABASE_URL, init_db
+
+    logger.info(f"Database URL: {DATABASE_URL}")
+
+    try:
+        init_db()
+        logger.info("Database initialized successfully")
+    except Exception as e:
+        logger.warning(
+            f"Database initialization skipped (may already exist): {e}"
+        )
+
     yield
     # Shutdown
     logger.info("Shutting down FreeAgentics API...")
@@ -50,7 +73,9 @@ app.add_middleware(SecurityMonitoringMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 
 # Include routers
-app.include_router(auth.router, prefix="/api/v1", tags=["auth"])  # Auth must be first
+app.include_router(
+    auth.router, prefix="/api/v1", tags=["auth"]
+)  # Auth must be first
 app.include_router(mfa.router, tags=["mfa"])  # MFA router has its own prefix
 app.include_router(agents.router, prefix="/api/v1", tags=["agents"])
 app.include_router(inference.router, prefix="/api/v1", tags=["inference"])

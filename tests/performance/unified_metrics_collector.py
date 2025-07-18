@@ -19,11 +19,18 @@ from typing import Any, Deque, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 
-from observability.performance_metrics import PerformanceSnapshot, RealTimePerformanceTracker
-from tests.db_infrastructure.performance_monitor import DatabasePerformanceMonitor
+from observability.performance_metrics import (
+    PerformanceSnapshot,
+    RealTimePerformanceTracker,
+)
+from tests.db_infrastructure.performance_monitor import (
+    DatabasePerformanceMonitor,
+)
 
 # Import metrics from different subsystems
-from tests.websocket_load.metrics_collector import MetricsCollector as WSMetricsCollector
+from tests.websocket_load.metrics_collector import (
+    MetricsCollector as WSMetricsCollector,
+)
 from tests.websocket_load.metrics_collector import WebSocketMetrics
 
 logger = logging.getLogger(__name__)
@@ -125,7 +132,12 @@ class UnifiedMetricsCollector:
             persistence_dir: Directory for metric persistence
         """
         self.buffer_size = buffer_size
-        self.aggregation_windows = aggregation_windows or [60, 300, 900, 3600]  # 1m, 5m, 15m, 1h
+        self.aggregation_windows = aggregation_windows or [
+            60,
+            300,
+            900,
+            3600,
+        ]  # 1m, 5m, 15m, 1h
         self.persistence_enabled = persistence_enabled
         self.persistence_dir = Path(persistence_dir)
 
@@ -217,7 +229,9 @@ class UnifiedMetricsCollector:
         # Start background tasks
         self._aggregation_task = asyncio.create_task(self._aggregation_loop())
         if self.persistence_enabled:
-            self._persistence_task = asyncio.create_task(self._persistence_loop())
+            self._persistence_task = asyncio.create_task(
+                self._persistence_loop()
+            )
 
         logger.info("Unified metrics collection started")
 
@@ -278,7 +292,9 @@ class UnifiedMetricsCollector:
         """Aggregate metrics for different time windows."""
         with self._lock:
             for window_seconds in self.aggregation_windows:
-                cutoff_time = datetime.now() - timedelta(seconds=window_seconds)
+                cutoff_time = datetime.now() - timedelta(
+                    seconds=window_seconds
+                )
 
                 # Process each metric
                 for metric_key, points in self._metrics.items():
@@ -286,7 +302,9 @@ class UnifiedMetricsCollector:
                         continue
 
                     # Filter points within window
-                    window_points = [p for p in points if p.timestamp >= cutoff_time]
+                    window_points = [
+                        p for p in points if p.timestamp >= cutoff_time
+                    ]
                     if not window_points:
                         continue
 
@@ -369,7 +387,9 @@ class UnifiedMetricsCollector:
                     window_aggregations = {}
 
                     for metric_key, points in self._metrics.items():
-                        window_points = [p for p in points if p.timestamp >= cutoff_time]
+                        window_points = [
+                            p for p in points if p.timestamp >= cutoff_time
+                        ]
                         if window_points:
                             values = [p.value for p in window_points]
                             agg = self._calculate_aggregates(
@@ -405,7 +425,9 @@ class UnifiedMetricsCollector:
                 # Extract timestamp from filename
                 try:
                     timestamp_str = filepath.stem.replace("metrics_", "")
-                    file_time = datetime.strptime(timestamp_str, "%Y%m%d_%H%M%S")
+                    file_time = datetime.strptime(
+                        timestamp_str, "%Y%m%d_%H%M%S"
+                    )
 
                     if file_time < cutoff_time:
                         filepath.unlink()
@@ -455,7 +477,6 @@ class UnifiedMetricsCollector:
                 and rule["source"] == metric.source
                 and rule["window_seconds"] == metric.window_seconds
             ):
-
                 # Evaluate condition
                 triggered = False
                 value = 0.0
@@ -489,7 +510,9 @@ class UnifiedMetricsCollector:
                 if triggered:
                     await self._emit_alert(rule, metric, value)
 
-    def _evaluate_condition(self, value: float, condition: str, threshold: float) -> bool:
+    def _evaluate_condition(
+        self, value: float, condition: str, threshold: float
+    ) -> bool:
         """Evaluate alert condition."""
         if ">" in condition:
             return value > threshold
@@ -503,7 +526,9 @@ class UnifiedMetricsCollector:
             return abs(value - threshold) < 0.001
         return False
 
-    async def _emit_alert(self, rule: Dict[str, Any], metric: AggregatedMetric, value: float):
+    async def _emit_alert(
+        self, rule: Dict[str, Any], metric: AggregatedMetric, value: float
+    ):
         """Emit an alert when rule is triggered."""
         alert = {
             "timestamp": datetime.now().isoformat(),
@@ -593,12 +618,17 @@ class UnifiedMetricsCollector:
         )
 
         self.record_metric(
-            "error_rate", ws_stats["error_rate"], MetricSource.WEBSOCKET, MetricType.GAUGE
+            "error_rate",
+            ws_stats["error_rate"],
+            MetricSource.WEBSOCKET,
+            MetricType.GAUGE,
         )
 
     async def collect_agent_metrics(self):
         """Collect metrics from agent operations."""
-        perf_snapshot = await self.perf_tracker.get_current_performance_snapshot()
+        perf_snapshot = (
+            await self.perf_tracker.get_current_performance_snapshot()
+        )
 
         # Record agent metrics
         self.record_metric(
@@ -609,11 +639,17 @@ class UnifiedMetricsCollector:
         )
 
         self.record_metric(
-            "active_agents", perf_snapshot.active_agents, MetricSource.AGENT, MetricType.GAUGE
+            "active_agents",
+            perf_snapshot.active_agents,
+            MetricSource.AGENT,
+            MetricType.GAUGE,
         )
 
         self.record_metric(
-            "agent_throughput", perf_snapshot.agent_throughput, MetricSource.AGENT, MetricType.RATE
+            "agent_throughput",
+            perf_snapshot.agent_throughput,
+            MetricSource.AGENT,
+            MetricType.RATE,
         )
 
         self.record_metric(
@@ -645,7 +681,10 @@ class UnifiedMetricsCollector:
         # Memory metrics
         memory = psutil.virtual_memory()
         self.record_metric(
-            "memory_usage_percent", memory.percent, MetricSource.SYSTEM, MetricType.GAUGE
+            "memory_usage_percent",
+            memory.percent,
+            MetricSource.SYSTEM,
+            MetricType.GAUGE,
         )
 
         self.record_metric(
@@ -694,12 +733,16 @@ class UnifiedMetricsCollector:
                     continue
 
                 # Filter by time window
-                window_points = [p for p in points if p.timestamp >= cutoff_time]
+                window_points = [
+                    p for p in points if p.timestamp >= cutoff_time
+                ]
                 if not window_points:
                     continue
 
                 # Group by source
-                source_key = metric_source.value if metric_source else "unknown"
+                source_key = (
+                    metric_source.value if metric_source else "unknown"
+                )
                 if source_key not in summary["sources"]:
                     summary["sources"][source_key] = {}
 
@@ -730,7 +773,10 @@ class UnifiedMetricsCollector:
         return summary
 
     def get_metric_history(
-        self, metric_name: str, source: MetricSource, duration_seconds: int = 3600
+        self,
+        metric_name: str,
+        source: MetricSource,
+        duration_seconds: int = 3600,
     ) -> List[Tuple[datetime, float]]:
         """Get historical values for a specific metric."""
         key = f"{source.value}.{metric_name}"
@@ -741,7 +787,9 @@ class UnifiedMetricsCollector:
                 return []
 
             return [
-                (p.timestamp, p.value) for p in self._metrics[key] if p.timestamp >= cutoff_time
+                (p.timestamp, p.value)
+                for p in self._metrics[key]
+                if p.timestamp >= cutoff_time
             ]
 
     async def export_metrics(
@@ -767,7 +815,9 @@ class UnifiedMetricsCollector:
             for source_name, metrics in data["sources"].items():
                 for metric_key, metric_data in metrics.items():
                     stats = metric_data["stats"]
-                    metric_name = metric_key.replace(".", "_").replace("-", "_")
+                    metric_name = metric_key.replace(".", "_").replace(
+                        "-", "_"
+                    )
 
                     # Export different statistics
                     lines.append(f"{metric_name}_avg {stats['avg']:.6f}")

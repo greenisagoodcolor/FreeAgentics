@@ -38,13 +38,13 @@ error() {
 # Check if Grafana is accessible
 check_grafana() {
     log "Checking Grafana accessibility at $GRAFANA_URL..."
-    
+
     if ! curl -s -f "$GRAFANA_URL/api/health" > /dev/null; then
         error "Grafana is not accessible at $GRAFANA_URL"
         error "Please ensure Grafana is running and accessible"
         exit 1
     fi
-    
+
     success "Grafana is accessible"
 }
 
@@ -52,9 +52,9 @@ check_grafana() {
 create_folder() {
     local folder_title="$1"
     local folder_uid="$2"
-    
+
     log "Creating folder: $folder_title"
-    
+
     local folder_json=$(cat <<EOF
 {
   "uid": "$folder_uid",
@@ -62,13 +62,13 @@ create_folder() {
 }
 EOF
 )
-    
+
     curl -s -X POST \
         -H "Content-Type: application/json" \
         -u "$GRAFANA_USER:$GRAFANA_PASSWORD" \
         -d "$folder_json" \
         "$GRAFANA_URL/api/folders" > /dev/null || true
-    
+
     success "Folder created: $folder_title"
 }
 
@@ -76,12 +76,12 @@ EOF
 deploy_dashboard() {
     local dashboard_file="$1"
     local dashboard_name=$(basename "$dashboard_file" .json)
-    
+
     log "Deploying dashboard: $dashboard_name"
-    
+
     # Read dashboard JSON
     local dashboard_json=$(cat "$dashboard_file")
-    
+
     # Wrap in dashboard object for import
     local import_json=$(cat <<EOF
 {
@@ -91,14 +91,14 @@ deploy_dashboard() {
 }
 EOF
 )
-    
+
     # Deploy dashboard
     local response=$(curl -s -X POST \
         -H "Content-Type: application/json" \
         -u "$GRAFANA_USER:$GRAFANA_PASSWORD" \
         -d "$import_json" \
         "$GRAFANA_URL/api/dashboards/db")
-    
+
     if echo "$response" | grep -q "success"; then
         success "Dashboard deployed successfully: $dashboard_name"
     else
@@ -111,10 +111,10 @@ EOF
 # Deploy all dashboards
 deploy_dashboards() {
     log "Deploying FreeAgentics dashboards..."
-    
+
     # Create main folder
     create_folder "FreeAgentics" "freeagentics-folder"
-    
+
     # Deploy each dashboard
     local dashboard_files=(
         "$DASHBOARD_DIR/freeagentics-system-overview.json"
@@ -123,7 +123,7 @@ deploy_dashboards() {
         "$DASHBOARD_DIR/freeagentics-api-performance.json"
         "$DASHBOARD_DIR/freeagentics-capacity-planning.json"
     )
-    
+
     for dashboard_file in "${dashboard_files[@]}"; do
         if [[ -f "$dashboard_file" ]]; then
             deploy_dashboard "$dashboard_file"
@@ -131,22 +131,22 @@ deploy_dashboards() {
             warning "Dashboard file not found: $dashboard_file"
         fi
     done
-    
+
     success "All dashboards deployed successfully"
 }
 
 # Verify deployment
 verify_deployment() {
     log "Verifying dashboard deployment..."
-    
+
     local dashboards=$(curl -s -u "$GRAFANA_USER:$GRAFANA_PASSWORD" \
         "$GRAFANA_URL/api/search?query=FreeAgentics")
-    
+
     local dashboard_count=$(echo "$dashboards" | jq length)
-    
+
     if [[ $dashboard_count -gt 0 ]]; then
         success "Found $dashboard_count FreeAgentics dashboards"
-        
+
         # List deployed dashboards
         echo "$dashboards" | jq -r '.[].title' | while read -r title; do
             log "  - $title"
@@ -160,7 +160,7 @@ verify_deployment() {
 # Create Grafana data source
 create_datasource() {
     log "Creating Prometheus datasource..."
-    
+
     local datasource_json=$(cat <<EOF
 {
   "name": "Prometheus",
@@ -179,20 +179,20 @@ create_datasource() {
 }
 EOF
 )
-    
+
     curl -s -X POST \
         -H "Content-Type: application/json" \
         -u "$GRAFANA_USER:$GRAFANA_PASSWORD" \
         -d "$datasource_json" \
         "$GRAFANA_URL/api/datasources" > /dev/null || true
-    
+
     success "Prometheus datasource created"
 }
 
 # Set up alerts
 setup_alerts() {
     log "Setting up Grafana alerts..."
-    
+
     # Create notification channel for Slack
     local notification_json=$(cat <<EOF
 {
@@ -208,44 +208,44 @@ setup_alerts() {
 }
 EOF
 )
-    
+
     curl -s -X POST \
         -H "Content-Type: application/json" \
         -u "$GRAFANA_USER:$GRAFANA_PASSWORD" \
         -d "$notification_json" \
         "$GRAFANA_URL/api/alert-notifications" > /dev/null || true
-    
+
     success "Alert notification channel created"
 }
 
 # Main deployment function
 main() {
     log "Starting FreeAgentics dashboard deployment..."
-    
+
     # Check dependencies
     if ! command -v curl &> /dev/null; then
         error "curl is required but not installed"
         exit 1
     fi
-    
+
     if ! command -v jq &> /dev/null; then
         error "jq is required but not installed"
         exit 1
     fi
-    
+
     # Check if dashboard files exist
     if [[ ! -d "$DASHBOARD_DIR" ]]; then
         error "Dashboard directory not found: $DASHBOARD_DIR"
         exit 1
     fi
-    
+
     # Run deployment steps
     check_grafana
     create_datasource
     deploy_dashboards
     setup_alerts
     verify_deployment
-    
+
     success "FreeAgentics dashboard deployment completed successfully!"
     log "Access your dashboards at: $GRAFANA_URL"
     log "Default credentials: $GRAFANA_USER/$GRAFANA_PASSWORD"

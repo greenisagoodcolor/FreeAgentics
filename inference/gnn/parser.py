@@ -62,7 +62,9 @@ class ConfigParser:
                 result.sections["layers"] = config["layers"]
 
             if "hyperparameters" in config:
-                hyper_node = self._parse_hyperparameters(config["hyperparameters"])
+                hyper_node = self._parse_hyperparameters(
+                    config["hyperparameters"]
+                )
                 root.children.append(hyper_node)
                 result.sections["hyperparameters"] = config["hyperparameters"]
 
@@ -91,7 +93,9 @@ class ConfigParser:
     def _parse_layers(self, layers: List[Dict[str, Any]]) -> ASTNode:
         """Parse layers configuration."""
         layers_node = ASTNode(
-            node_type="layers", line=self.current_line, column=self.current_column
+            node_type="layers",
+            line=self.current_line,
+            column=self.current_column,
         )
 
         for i, layer in enumerate(layers):
@@ -99,7 +103,11 @@ class ConfigParser:
                 node_type="layer",
                 line=self.current_line + i,
                 column=self.current_column,
-                attributes={"index": i, "type": layer.get("type", "unknown"), "config": layer},
+                attributes={
+                    "index": i,
+                    "type": layer.get("type", "unknown"),
+                    "config": layer,
+                },
             )
             layers_node.children.append(layer_node)
 

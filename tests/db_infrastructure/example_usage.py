@@ -11,7 +11,8 @@ from tests.db_infrastructure import (
 
 # Set up logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
 
@@ -27,13 +28,18 @@ def main():
     print("\n2. Generating test data...")
     generator = TestDataGenerator(seed=42)  # Use seed for reproducibility
     test_data = generator.generate_complete_dataset(
-        num_agents=50, num_coalitions=10, num_knowledge_nodes=500, num_edges=1000
+        num_agents=50,
+        num_coalitions=10,
+        num_knowledge_nodes=500,
+        num_edges=1000,
     )
     print(f"Generated {len(test_data['agents'])} agents")
 
     # 3. Get connection pool
     print("\n3. Setting up connection pool...")
-    pool = DatabasePool(database="freeagentics_test", min_connections=2, max_connections=10)
+    pool = DatabasePool(
+        database="freeagentics_test", min_connections=2, max_connections=10
+    )
 
     # 4. Insert test data
     print("\n4. Inserting test data...")

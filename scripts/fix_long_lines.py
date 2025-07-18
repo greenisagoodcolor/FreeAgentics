@@ -26,7 +26,9 @@ def split_long_string(line: str, max_length: int = 79) -> List[str]:
 
     # Calculate available space
     indent = len(prefix) - len(prefix.lstrip())
-    available = max_length - indent - 4  # Leave room for quotes and continuation
+    available = (
+        max_length - indent - 4
+    )  # Leave room for quotes and continuation
 
     if len(content) <= available:
         return [line]
@@ -37,7 +39,9 @@ def split_long_string(line: str, max_length: int = 79) -> List[str]:
         # Try to split at a space
         split_point = available
         space_idx = content[:split_point].rfind(" ")
-        if space_idx > available * 0.5:  # Only split at space if it's reasonable
+        if (
+            space_idx > available * 0.5
+        ):  # Only split at space if it's reasonable
             split_point = space_idx + 1
 
         parts.append(content[:split_point])
@@ -132,7 +136,9 @@ def split_import_statement(line: str, max_length: int = 79) -> List[str]:
     return [line]
 
 
-def fix_long_lines_in_file(filepath: str, max_length: int = 79) -> Tuple[int, int]:
+def fix_long_lines_in_file(
+    filepath: str, max_length: int = 79
+) -> Tuple[int, int]:
     """Fix long lines in a Python file."""
     if not os.path.exists(filepath):
         return 0, 0
@@ -152,11 +158,17 @@ def fix_long_lines_in_file(filepath: str, max_length: int = 79) -> Tuple[int, in
             if "http://" in line or "https://" in line:
                 new_lines.append(line)
             # Try different splitting strategies
-            elif " import " in line and line.strip().startswith(("from ", "import ")):
+            elif " import " in line and line.strip().startswith(
+                ("from ", "import ")
+            ):
                 split = split_import_statement(line, max_length)
                 new_lines.extend(split)
                 fixed_count += 1 if len(split) > 1 else 0
-            elif "(" in line and ")" in line and "=" not in line[: line.find("(")]:
+            elif (
+                "(" in line
+                and ")" in line
+                and "=" not in line[: line.find("(")]
+            ):
                 split = split_function_call(line, max_length)
                 new_lines.extend(split)
                 fixed_count += 1 if len(split) > 1 else 0
@@ -169,12 +181,16 @@ def fix_long_lines_in_file(filepath: str, max_length: int = 79) -> Tuple[int, in
                 if " and " in line:
                     parts = line.split(" and ", 1)
                     new_lines.append(parts[0] + " and")
-                    new_lines.append(" " * (len(line) - len(line.lstrip()) + 4) + parts[1])
+                    new_lines.append(
+                        " " * (len(line) - len(line.lstrip()) + 4) + parts[1]
+                    )
                     fixed_count += 1
                 elif " or " in line:
                     parts = line.split(" or ", 1)
                     new_lines.append(parts[0] + " or")
-                    new_lines.append(" " * (len(line) - len(line.lstrip()) + 4) + parts[1])
+                    new_lines.append(
+                        " " * (len(line) - len(line.lstrip()) + 4) + parts[1]
+                    )
                     fixed_count += 1
                 else:
                     new_lines.append(line)
@@ -195,9 +211,13 @@ def fix_long_lines_in_file(filepath: str, max_length: int = 79) -> Tuple[int, in
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Fix E501 line length violations")
+    parser = argparse.ArgumentParser(
+        description="Fix E501 line length violations"
+    )
     parser.add_argument("paths", nargs="+", help="Files or directories to fix")
-    parser.add_argument("--max-length", type=int, default=79, help="Maximum line length")
+    parser.add_argument(
+        "--max-length", type=int, default=79, help="Maximum line length"
+    )
 
     args = parser.parse_args()
 
@@ -221,11 +241,15 @@ def main():
     for filepath in sorted(files_to_fix):
         fixed, remaining = fix_long_lines_in_file(filepath, args.max_length)
         if fixed > 0:
-            print(f"  {filepath}: Fixed {fixed} long lines, {remaining} remaining")
+            print(
+                f"  {filepath}: Fixed {fixed} long lines, {remaining} remaining"
+            )
             total_fixed += fixed
             total_remaining += remaining
 
-    print(f"\nTotal: Fixed {total_fixed} long lines, {total_remaining} remaining")
+    print(
+        f"\nTotal: Fixed {total_fixed} long lines, {total_remaining} remaining"
+    )
 
 
 if __name__ == "__main__":

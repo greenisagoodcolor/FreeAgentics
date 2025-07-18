@@ -126,68 +126,68 @@ metadata:
 data:
   redis.conf: |
     # Redis Production Configuration
-    
+
     # Network
     bind 0.0.0.0
     port 6379
-    
+
     # Security
     requirepass ${REDIS_PASSWORD}
-    
+
     # Persistence
     save 900 1
     save 300 10
     save 60 10000
-    
+
     # AOF
     appendonly yes
     appendfsync everysec
     no-appendfsync-on-rewrite no
     auto-aof-rewrite-percentage 100
     auto-aof-rewrite-min-size 64mb
-    
+
     # Memory management
     maxmemory-policy allkeys-lru
     maxmemory 256mb
-    
+
     # Logging
     loglevel notice
     logfile ""
-    
+
     # Slow log
     slowlog-log-slower-than 10000
     slowlog-max-len 128
-    
+
     # Latency monitoring
     latency-monitor-threshold 100
-    
+
     # Client output buffer limits
     client-output-buffer-limit normal 0 0 0
     client-output-buffer-limit replica 256mb 64mb 60
     client-output-buffer-limit pubsub 32mb 8mb 60
-    
+
     # TCP keepalive
     tcp-keepalive 300
-    
+
     # Timeouts
     timeout 0
-    
+
     # Database
     databases 16
-    
+
     # Performance
     hz 10
-    
+
     # Security
     protected-mode no
-    
+
     # Replication
     repl-diskless-sync no
     repl-diskless-sync-delay 5
-    
+
     # Keyspace notifications
     notify-keyspace-events ""
-    
+
     # Advanced config
     hash-max-ziplist-entries 512
     hash-max-ziplist-value 64
@@ -200,6 +200,6 @@ data:
     stream-node-max-bytes 4096
     stream-node-max-entries 100
     activerehashing yes
-    
+
     # Jemalloc
     jemalloc-bg-thread yes

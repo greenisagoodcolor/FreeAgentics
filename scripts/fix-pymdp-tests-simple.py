@@ -87,7 +87,9 @@ def fix_test_file(filepath):
 def main():
     """Main function to fix PyMDP tests."""
     test_dir = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tests", "integration"
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "tests",
+        "integration",
     )
 
     pymdp_test_files = [

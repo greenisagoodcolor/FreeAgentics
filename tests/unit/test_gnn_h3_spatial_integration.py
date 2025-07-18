@@ -106,7 +106,9 @@ class TestH3SpatialProcessor:
         with patch("inference.gnn.h3_spatial_integration.h3") as mock_h3:
             mock_h3.latlng_to_cell.side_effect = Exception("H3 error")
 
-            with patch("inference.gnn.h3_spatial_integration.logger") as mock_logger:
+            with patch(
+                "inference.gnn.h3_spatial_integration.logger"
+            ) as mock_logger:
                 result = processor.latlng_to_h3(37.7749, -122.4194)
                 assert result is None
                 mock_logger.warning.assert_called_once()
@@ -135,7 +137,10 @@ class TestH3SpatialProcessor:
         h3_index = "8928308280fffff"
 
         with patch("inference.gnn.h3_spatial_integration.h3") as mock_h3:
-            mock_h3.grid_disk.return_value = ["8928308280fffff", "8928308281fffff"]
+            mock_h3.grid_disk.return_value = [
+                "8928308280fffff",
+                "8928308281fffff",
+            ]
 
             neighbors = processor.get_h3_neighbors(h3_index, k=1)
             assert len(neighbors) == 2
@@ -173,7 +178,12 @@ class TestH3SpatialProcessor:
     @patch("inference.gnn.h3_spatial_integration.torch")
     def test_create_h3_spatial_graph(self, mock_torch, processor):
         """Test spatial graph creation."""
-        h3_indices = ["8928308280fffff", "8928308281fffff", None, "8928308282fffff"]
+        h3_indices = [
+            "8928308280fffff",
+            "8928308281fffff",
+            None,
+            "8928308282fffff",
+        ]
 
         # Mock torch tensors
         mock_tensor = Mock()
@@ -186,7 +196,9 @@ class TestH3SpatialProcessor:
         with patch.object(processor, "get_h3_distance") as mock_distance:
             mock_distance.return_value = 1
 
-            edge_index, edge_weights = processor.create_h3_spatial_graph(h3_indices, k=1)
+            edge_index, edge_weights = processor.create_h3_spatial_graph(
+                h3_indices, k=1
+            )
 
             # Should create edges between valid indices only
             assert mock_torch.tensor.called
@@ -234,14 +246,22 @@ class TestH3MultiResolutionAnalyzer:
         """Test multi-resolution feature extraction."""
         positions = [(37.7749, -122.4194), (40.7128, -74.0060)]
 
-        with patch.object(analyzer.processor, "latlng_to_h3") as mock_h3_convert:
-            with patch.object(analyzer.processor, "h3_to_latlng") as mock_h3_to_ll:
-                with patch("inference.gnn.h3_spatial_integration.torch") as mock_torch:
+        with patch.object(
+            analyzer.processor, "latlng_to_h3"
+        ) as mock_h3_convert:
+            with patch.object(
+                analyzer.processor, "h3_to_latlng"
+            ) as mock_h3_to_ll:
+                with patch(
+                    "inference.gnn.h3_spatial_integration.torch"
+                ) as mock_torch:
                     mock_h3_convert.return_value = "8928308280fffff"
                     mock_h3_to_ll.return_value = (37.7749, -122.4194)
                     mock_torch.tensor.return_value = Mock()
 
-                    features = analyzer.extract_multi_resolution_features(positions)
+                    features = analyzer.extract_multi_resolution_features(
+                        positions
+                    )
 
                     # Should have features for each resolution
                     for res in analyzer.resolutions:
@@ -253,12 +273,18 @@ class TestH3MultiResolutionAnalyzer:
         """Test spatial relationship computation."""
         h3_indices = ["8928308280fffff", "8928308281fffff"]
 
-        with patch.object(analyzer.processor, "get_h3_neighbors") as mock_neighbors:
-            with patch.object(analyzer.processor, "get_h3_distance") as mock_distance:
+        with patch.object(
+            analyzer.processor, "get_h3_neighbors"
+        ) as mock_neighbors:
+            with patch.object(
+                analyzer.processor, "get_h3_distance"
+            ) as mock_distance:
                 mock_neighbors.return_value = ["neighbor1", "neighbor2"]
                 mock_distance.return_value = 1
 
-                relationships = analyzer.compute_spatial_relationships(h3_indices)
+                relationships = analyzer.compute_spatial_relationships(
+                    h3_indices
+                )
 
                 assert "adjacency_matrix" in relationships
                 assert "distance_matrix" in relationships
@@ -274,7 +300,9 @@ class TestH3MultiResolutionAnalyzer:
         """Test H3 cluster identification."""
         h3_indices = ["index1", "index2", "index3"]
 
-        with patch.object(analyzer.processor, "get_h3_neighbors") as mock_neighbors:
+        with patch.object(
+            analyzer.processor, "get_h3_neighbors"
+        ) as mock_neighbors:
             # Set up adjacency relationships
             mock_neighbors.side_effect = [
                 ["index2"],  # index1 connects to index2
@@ -331,9 +359,12 @@ class TestGNNSpatialIntegration:
                 "h3_indices_7": ["index1", "index2"],
             }
 
-            with patch.object(integration.h3_processor, "create_h3_spatial_graph") as mock_graph:
+            with patch.object(
+                integration.h3_processor, "create_h3_spatial_graph"
+            ) as mock_graph:
                 with patch.object(
-                    integration.multi_res_analyzer, "compute_spatial_relationships"
+                    integration.multi_res_analyzer,
+                    "compute_spatial_relationships",
                 ) as mock_relations:
                     mock_graph.return_value = (Mock(), Mock())
                     mock_relations.return_value = {"adjacency": "matrix"}
@@ -346,8 +377,14 @@ class TestGNNSpatialIntegration:
                     assert len(positions_arg) == 4
                     assert positions_arg[0] == (37.7749, -122.4194)
                     assert positions_arg[1] == (40.7128, -74.0060)
-                    assert positions_arg[2] == (0.0, 0.0)  # Invalid position fallback
-                    assert positions_arg[3] == (0.0, 0.0)  # Missing position fallback
+                    assert positions_arg[2] == (
+                        0.0,
+                        0.0,
+                    )  # Invalid position fallback
+                    assert positions_arg[3] == (
+                        0.0,
+                        0.0,
+                    )  # Missing position fallback
 
     def test_adaptive_spatial_resolution(self, integration):
         """Test adaptive spatial resolution calculation."""
@@ -405,7 +442,9 @@ class TestModuleLevelFunctions:
 
         # Skip this test - it's mock-heavy and not testing real functionality
         # The other 27 tests provide sufficient coverage of the actual functionality
-        pytest.skip("Mock-heavy test skipped in favor of real functionality tests")
+        pytest.skip(
+            "Mock-heavy test skipped in favor of real functionality tests"
+        )
 
         with patch("inference.gnn.h3_spatial_integration.torch") as mock_torch:
             # Mock agent with PyMDP
@@ -421,7 +460,9 @@ class TestModuleLevelFunctions:
             edge_index.t.return_value = [(0, 1), (1, 0)]
 
             edge_weights = Mock()
-            edge_weights.__getitem__ = Mock(return_value=0.5)  # Make it subscriptable
+            edge_weights.__getitem__ = Mock(
+                return_value=0.5
+            )  # Make it subscriptable
 
             spatial_tensor = Mock()
             spatial_tensor.numel.return_value = 6
@@ -437,16 +478,22 @@ class TestModuleLevelFunctions:
 
             # Create a proper tensor-like mock for zeros that supports item assignment
             spatial_adjacency_mock = Mock()
-            spatial_adjacency_mock.__setitem__ = Mock()  # Support item assignment
+            spatial_adjacency_mock.__setitem__ = (
+                Mock()
+            )  # Support item assignment
             mock_torch.zeros.return_value = spatial_adjacency_mock
 
             mock_torch.sum.return_value = Mock()
             mock_torch.sum.return_value.item.return_value = 2
             mock_torch.var.return_value = Mock()
             mock_torch.var.return_value.mean.return_value = Mock()
-            mock_torch.var.return_value.mean.return_value.item.return_value = 0.1
+            mock_torch.var.return_value.mean.return_value.item.return_value = (
+                0.1
+            )
 
-            result = integrate_h3_with_active_inference(agent, spatial_features)
+            result = integrate_h3_with_active_inference(
+                agent, spatial_features
+            )
 
             assert "spatial_adjacency" in result
             assert "spatial_connectivity" in result
@@ -479,7 +526,9 @@ class TestErrorHandlingAndEdgeCases:
 
         with patch("inference.gnn.h3_spatial_integration.H3_AVAILABLE", True):
             with patch("inference.gnn.h3_spatial_integration.h3") as mock_h3:
-                mock_h3.latlng_to_cell.side_effect = Exception("Invalid coordinates")
+                mock_h3.latlng_to_cell.side_effect = Exception(
+                    "Invalid coordinates"
+                )
 
                 result = processor.latlng_to_h3(1000, 1000)  # Invalid lat/lon
                 assert result is None
@@ -499,7 +548,8 @@ class TestErrorHandlingAndEdgeCases:
             try:
                 nodes = [{"position": {"lat": 37.7749, "lon": -122.4194}}]
                 with patch.object(
-                    integration.multi_res_analyzer, "extract_multi_resolution_features"
+                    integration.multi_res_analyzer,
+                    "extract_multi_resolution_features",
                 ):
                     features = integration.create_spatial_aware_features(nodes)
                     results.append(len(features))
@@ -521,4 +571,11 @@ class TestErrorHandlingAndEdgeCases:
 
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-v", "--cov=inference.gnn.h3_spatial_integration", "--cov-report=html"])
+    pytest.main(
+        [
+            __file__,
+            "-v",
+            "--cov=inference.gnn.h3_spatial_integration",
+            "--cov-report=html",
+        ]
+    )

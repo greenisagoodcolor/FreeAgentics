@@ -98,13 +98,19 @@ class TestDataManager:
             self._save_fixture(agent_fixture_path, self.agent_fixtures)
 
         # Load conversation fixtures
-        conversation_fixture_path = os.path.join(fixtures_dir, "conversations.json")
+        conversation_fixture_path = os.path.join(
+            fixtures_dir, "conversations.json"
+        )
         if os.path.exists(conversation_fixture_path):
             with open(conversation_fixture_path, "r") as f:
                 self.conversation_fixtures = json.load(f)
         else:
-            self.conversation_fixtures = self._create_default_conversation_fixtures()
-            self._save_fixture(conversation_fixture_path, self.conversation_fixtures)
+            self.conversation_fixtures = (
+                self._create_default_conversation_fixtures()
+            )
+            self._save_fixture(
+                conversation_fixture_path, self.conversation_fixtures
+            )
 
     async def _create_test_users(self):
         """Create test users"""
@@ -166,7 +172,10 @@ class TestDataManager:
         sample_files = [
             ("sample.txt", "This is a sample text file for testing"),
             ("sample.json", json.dumps({"test": "data", "number": 42})),
-            ("sample.csv", "name,age,email\nJohn,30,john@test.com\nJane,25,jane@test.com"),
+            (
+                "sample.csv",
+                "name,age,email\nJohn,30,john@test.com\nJane,25,jane@test.com",
+            ),
             ("sample.md", "# Test Document\n\nThis is a test markdown file."),
         ]
 
@@ -233,14 +242,18 @@ class TestDataManager:
         try:
             logger.debug(f"Deleted test coalition: {coalition_id}")
         except Exception as e:
-            logger.error(f"Failed to delete test coalition {coalition_id}: {e}")
+            logger.error(
+                f"Failed to delete test coalition {coalition_id}: {e}"
+            )
 
     async def _delete_conversation(self, conversation_id: str):
         """Delete a test conversation"""
         try:
             logger.debug(f"Deleted test conversation: {conversation_id}")
         except Exception as e:
-            logger.error(f"Failed to delete test conversation {conversation_id}: {e}")
+            logger.error(
+                f"Failed to delete test conversation {conversation_id}: {e}"
+            )
 
     def _create_default_user_fixtures(self) -> List[Dict[str, Any]]:
         """Create default user fixtures"""
@@ -300,7 +313,10 @@ class TestDataManager:
                 "participants": ["testuser2", "TestAgent2"],
                 "messages": [
                     {"role": "user", "content": "What can you do?"},
-                    {"role": "agent", "content": "I can help with various tasks."},
+                    {
+                        "role": "agent",
+                        "content": "I can help with various tasks.",
+                    },
                 ],
             },
         ]
@@ -386,10 +402,14 @@ class TestDataManager:
         """Get regular test user"""
         return self.get_test_user(self.config.test_user["username"])
 
-    def create_temporary_file(self, content: str, extension: str = ".txt") -> str:
+    def create_temporary_file(
+        self, content: str, extension: str = ".txt"
+    ) -> str:
         """Create temporary file with content"""
         temp_filename = f"temp_{uuid.uuid4().hex[:8]}{extension}"
-        temp_path = os.path.join(self.config.test_data_path, "files", temp_filename)
+        temp_path = os.path.join(
+            self.config.test_data_path, "files", temp_filename
+        )
 
         with open(temp_path, "w") as f:
             f.write(content)

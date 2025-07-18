@@ -85,7 +85,9 @@ class TestConcurrentAuthenticationLoad:
         test_subset = test_users[:50]
 
         with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [executor.submit(create_token, user) for user in test_subset]
+            futures = [
+                executor.submit(create_token, user) for user in test_subset
+            ]
 
             for future in as_completed(futures):
                 result = future.result()
@@ -117,7 +119,9 @@ class TestConcurrentAuthenticationLoad:
         def authenticate_user(user):
             try:
                 start_time = time.time()
-                authenticated_user = auth_manager.authenticate_user(user.username, "password123")
+                authenticated_user = auth_manager.authenticate_user(
+                    user.username, "password123"
+                )
                 end_time = time.time()
 
                 return {
@@ -134,7 +138,10 @@ class TestConcurrentAuthenticationLoad:
         test_subset = test_users[:30]
 
         with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [executor.submit(authenticate_user, user) for user in test_subset]
+            futures = [
+                executor.submit(authenticate_user, user)
+                for user in test_subset
+            ]
 
             for future in as_completed(futures):
                 result = future.result()
@@ -171,9 +178,10 @@ class TestConcurrentAuthenticationLoad:
             user, refresh_token = user_refresh_tuple
             try:
                 start_time = time.time()
-                new_access_token, new_refresh_token = auth_manager.refresh_access_token(
-                    refresh_token
-                )
+                (
+                    new_access_token,
+                    new_refresh_token,
+                ) = auth_manager.refresh_access_token(refresh_token)
                 end_time = time.time()
 
                 # Verify new tokens are valid
@@ -191,7 +199,9 @@ class TestConcurrentAuthenticationLoad:
                 return {"user_id": user.user_id, "success": False}
 
         with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = [executor.submit(refresh_token, rt) for rt in refresh_tokens]
+            futures = [
+                executor.submit(refresh_token, rt) for rt in refresh_tokens
+            ]
 
             for future in as_completed(futures):
                 result = future.result()
@@ -275,7 +285,9 @@ class TestConcurrentAuthenticationLoad:
         def make_request():
             try:
                 start_time = time.time()
-                is_limited = rate_limiter.is_rate_limited(identifier, rate_limit, window_minutes)
+                is_limited = rate_limiter.is_rate_limited(
+                    identifier, rate_limit, window_minutes
+                )
                 end_time = time.time()
 
                 return {
@@ -327,9 +339,10 @@ class TestConcurrentAuthenticationLoad:
                 access_token_data = auth_manager.verify_token(access_token)
 
                 # Refresh access token
-                new_access_token, new_refresh_token = auth_manager.refresh_access_token(
-                    refresh_token
-                )
+                (
+                    new_access_token,
+                    new_refresh_token,
+                ) = auth_manager.refresh_access_token(refresh_token)
 
                 # Logout (blacklist token)
                 auth_manager.logout(new_access_token)
@@ -349,7 +362,9 @@ class TestConcurrentAuthenticationLoad:
         test_subset = test_users[:15]
 
         with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = [executor.submit(manage_session, user) for user in test_subset]
+            futures = [
+                executor.submit(manage_session, user) for user in test_subset
+            ]
 
             for future in as_completed(futures):
                 result = future.result()
@@ -401,7 +416,9 @@ class TestConcurrentAuthenticationLoad:
                 return end_time - start_time
 
             with ThreadPoolExecutor(max_workers=min(count, 20)) as executor:
-                futures = [executor.submit(create_token, user) for user in users]
+                futures = [
+                    executor.submit(create_token, user) for user in users
+                ]
 
                 for future in as_completed(futures):
                     duration = future.result()
@@ -411,7 +428,9 @@ class TestConcurrentAuthenticationLoad:
                 "avg_duration": statistics.mean(durations),
                 "max_duration": max(durations),
                 "min_duration": min(durations),
-                "std_duration": statistics.stdev(durations) if len(durations) > 1 else 0,
+                "std_duration": statistics.stdev(durations)
+                if len(durations) > 1
+                else 0,
             }
 
         # Verify scalability - performance shouldn't degrade significantly
@@ -421,11 +440,19 @@ class TestConcurrentAuthenticationLoad:
 
         # Performance should scale reasonably
         # Allow some degradation but not excessive
-        ratio_50_to_10 = results[50]["avg_duration"] / results[10]["avg_duration"]
-        ratio_100_to_50 = results[100]["avg_duration"] / results[50]["avg_duration"]
+        ratio_50_to_10 = (
+            results[50]["avg_duration"] / results[10]["avg_duration"]
+        )
+        ratio_100_to_50 = (
+            results[100]["avg_duration"] / results[50]["avg_duration"]
+        )
 
-        assert ratio_50_to_10 < 3.0  # 50 users shouldn't be more than 3x slower than 10
-        assert ratio_100_to_50 < 3.0  # 100 users shouldn't be more than 3x slower than 50
+        assert (
+            ratio_50_to_10 < 3.0
+        )  # 50 users shouldn't be more than 3x slower than 10
+        assert (
+            ratio_100_to_50 < 3.0
+        )  # 100 users shouldn't be more than 3x slower than 50
 
     def test_memory_usage_under_load(self, auth_manager, test_users):
         """Test memory usage doesn't grow excessively under load."""
@@ -459,7 +486,9 @@ class TestConcurrentAuthenticationLoad:
                     return False
 
             with ThreadPoolExecutor(max_workers=10) as executor:
-                futures = [executor.submit(verify_token, token) for token in tokens]
+                futures = [
+                    executor.submit(verify_token, token) for token in tokens
+                ]
 
                 results = []
                 for future in as_completed(futures):
@@ -500,7 +529,9 @@ class TestConcurrentAuthenticationLoad:
                 # Get JTI from token
                 import jwt
 
-                payload = jwt.decode(token, options={"verify_signature": False})
+                payload = jwt.decode(
+                    token, options={"verify_signature": False}
+                )
                 jti = payload.get("jti")
 
                 if jti:
@@ -528,7 +559,9 @@ class TestConcurrentAuthenticationLoad:
                 return {"success": False}
 
         with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [executor.submit(blacklist_token, token) for token in tokens]
+            futures = [
+                executor.submit(blacklist_token, token) for token in tokens
+            ]
 
             for future in as_completed(futures):
                 result = future.result()
@@ -575,7 +608,9 @@ class TestConcurrentAuthenticationLoad:
 
                 # Full authentication flow
                 # 1. Authenticate
-                authenticated_user = auth_manager.authenticate_user(user.username, "password123")
+                authenticated_user = auth_manager.authenticate_user(
+                    user.username, "password123"
+                )
                 assert authenticated_user is not None
 
                 # 2. Create tokens
@@ -587,9 +622,10 @@ class TestConcurrentAuthenticationLoad:
                 assert token_data.user_id == user.user_id
 
                 # 4. Refresh tokens
-                new_access_token, new_refresh_token = auth_manager.refresh_access_token(
-                    refresh_token
-                )
+                (
+                    new_access_token,
+                    new_refresh_token,
+                ) = auth_manager.refresh_access_token(refresh_token)
 
                 # 5. Verify new access token
                 new_token_data = auth_manager.verify_token(new_access_token)
@@ -611,7 +647,9 @@ class TestConcurrentAuthenticationLoad:
 
         # Run stress test with moderate concurrency
         with ThreadPoolExecutor(max_workers=25) as executor:
-            futures = [executor.submit(stress_test_user, user) for user in users]
+            futures = [
+                executor.submit(stress_test_user, user) for user in users
+            ]
 
             for future in as_completed(futures):
                 result = future.result()

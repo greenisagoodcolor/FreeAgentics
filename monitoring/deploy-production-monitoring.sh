@@ -40,7 +40,7 @@ info() {
 # Function to check prerequisites
 check_prerequisites() {
     log "Checking monitoring deployment prerequisites..."
-    
+
     # Check required commands
     local required_commands=("kubectl" "curl" "jq" "yq")
     for cmd in "${required_commands[@]}"; do
@@ -49,82 +49,82 @@ check_prerequisites() {
             exit 1
         fi
     done
-    
+
     # Check kubectl connectivity
     if ! kubectl cluster-info &> /dev/null; then
         error "Cannot connect to Kubernetes cluster"
         exit 1
     fi
-    
+
     # Set kubectl context if specified
     if [[ -n "$KUBECTL_CONTEXT" ]]; then
         kubectl config use-context "$KUBECTL_CONTEXT"
     fi
-    
+
     # Check if main namespace exists
     if ! kubectl get namespace "$NAMESPACE" &> /dev/null; then
         error "Application namespace '$NAMESPACE' does not exist"
         exit 1
     fi
-    
+
     # Create monitoring namespace if it doesn't exist
     if ! kubectl get namespace "$MONITORING_NAMESPACE" &> /dev/null; then
         log "Creating monitoring namespace: $MONITORING_NAMESPACE"
         kubectl create namespace "$MONITORING_NAMESPACE"
     fi
-    
+
     # Check if Grafana admin password is set
     if [[ -z "$GRAFANA_ADMIN_PASSWORD" ]]; then
         GRAFANA_ADMIN_PASSWORD=$(openssl rand -base64 32)
         warn "Grafana admin password not set, generated: $GRAFANA_ADMIN_PASSWORD"
     fi
-    
+
     log "Prerequisites check completed successfully"
 }
 
 # Function to create monitoring secrets
 create_monitoring_secrets() {
     log "Creating monitoring secrets..."
-    
+
     # Create Grafana admin credentials
     kubectl create secret generic grafana-admin-secret \
         --from-literal=admin-password="$GRAFANA_ADMIN_PASSWORD" \
         -n "$MONITORING_NAMESPACE" \
         --dry-run=client -o yaml | kubectl apply -f -
-    
+
     # Create AlertManager configuration secret
     if [[ -n "$SLACK_WEBHOOK" ]]; then
         sed "s|YOUR/SLACK/WEBHOOK|${SLACK_WEBHOOK}|g" alertmanager-production.yml > /tmp/alertmanager-config.yml
     else
         cp alertmanager-production.yml /tmp/alertmanager-config.yml
     fi
-    
+
     if [[ -n "$PAGERDUTY_ROUTING_KEY" ]]; then
         sed -i "s|REPLACE_WITH_PAGERDUTY_ROUTING_KEY|${PAGERDUTY_ROUTING_KEY}|g" /tmp/alertmanager-config.yml
     fi
-    
+
     kubectl create secret generic alertmanager-config \
         --from-file=alertmanager.yml=/tmp/alertmanager-config.yml \
         -n "$MONITORING_NAMESPACE" \
         --dry-run=client -o yaml | kubectl apply -f -
-    
+
     # Create Prometheus configuration secret
     kubectl create secret generic prometheus-config \
         --from-file=prometheus.yml=prometheus-production.yml \
         --from-file=alerts.yml=prometheus-alerts.yml \
         -n "$MONITORING_NAMESPACE" \
         --dry-run=client -o yaml | kubectl apply -f -
-    
+
     # Cleanup temporary files
     rm -f /tmp/alertmanager-config.yml
-    
+
     log "Monitoring secrets created successfully"
 }
 
 # Function to deploy Prometheus
 deploy_prometheus() {
     log "Deploying Prometheus..."
-    
+
     cat <<EOF | kubectl apply -f -
 apiVersion: apps/v1
 kind: Deployment
@@ -285,17 +285,17 @@ subjects:
   name: prometheus
   namespace: $MONITORING_NAMESPACE
 EOF
-    
+
     # Wait for Prometheus to be ready
     kubectl wait --for=condition=Ready pod -l app=prometheus -n "$MONITORING_NAMESPACE" --timeout=300s
-    
+
     log "Prometheus deployed successfully"
 }
 
 # Function to deploy Grafana
 deploy_grafana() {
     log "Deploying Grafana..."
-    
+
     cat <<EOF | kubectl apply -f -
 apiVersion: apps/v1
 kind: Deployment
@@ -413,17 +413,17 @@ spec:
       storage: 10Gi
   storageClassName: fast-ssd
 EOF
-    
+
     # Wait for Grafana to be ready
     kubectl wait --for=condition=Ready pod -l app=grafana -n "$MONITORING_NAMESPACE" --timeout=300s
-    
+
     log "Grafana deployed successfully"
 }
 
 # Function to deploy AlertManager
 deploy_alertmanager() {
     log "Deploying AlertManager..."
-    
+
     cat <<EOF | kubectl apply -f -
 apiVersion: apps/v1
 kind: Deployment
@@ -525,17 +525,17 @@ spec:
       storage: 5Gi
   storageClassName: fast-ssd
 EOF
-    
+
     # Wait for AlertManager to be ready
     kubectl wait --for=condition=Ready pod -l app=alertmanager -n "$MONITORING_NAMESPACE" --timeout=300s
-    
+
     log "AlertManager deployed successfully"
 }
 
 # Function to create Grafana provisioning
 create_grafana_provisioning() {
     log "Creating Grafana provisioning configuration..."
-    
+
     cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: ConfigMap
@@ -591,27 +591,27 @@ data:
       group_interval: 10s
       repeat_interval: 1h
 EOF
-    
+
     log "Grafana provisioning configuration created"
 }
 
 # Function to deploy dashboards
 deploy_dashboards() {
     log "Deploying Grafana dashboards..."
-    
+
     # Create ConfigMap with dashboard files
     kubectl create configmap grafana-dashboards \
         --from-file=grafana/dashboards/ \
         -n "$MONITORING_NAMESPACE" \
         --dry-run=client -o yaml | kubectl apply -f -
-    
+
     log "Grafana dashboards deployed successfully"
 }
 
 # Function to create monitoring ingress
 create_monitoring_ingress() {
     log "Creating monitoring ingress..."
-    
+
     cat <<EOF | kubectl apply -f -
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -660,70 +660,70 @@ spec:
             port:
               number: 9093
 EOF
-    
+
     log "Monitoring ingress created successfully"
 }
 
 # Function to run post-deployment tests
 run_post_deployment_tests() {
     log "Running post-deployment tests..."
-    
+
     # Test Prometheus
     local prometheus_pod
     prometheus_pod=$(kubectl get pods -n "$MONITORING_NAMESPACE" -l app=prometheus -o jsonpath='{.items[0].metadata.name}')
-    
+
     if kubectl exec -n "$MONITORING_NAMESPACE" "$prometheus_pod" -- wget -q -O - http://localhost:9090/-/healthy | grep -q "Prometheus is Healthy"; then
         log "✅ Prometheus health check passed"
     else
         error "❌ Prometheus health check failed"
         return 1
     fi
-    
+
     # Test Grafana
     local grafana_pod
     grafana_pod=$(kubectl get pods -n "$MONITORING_NAMESPACE" -l app=grafana -o jsonpath='{.items[0].metadata.name}')
-    
+
     if kubectl exec -n "$MONITORING_NAMESPACE" "$grafana_pod" -- curl -s http://localhost:3000/api/health | grep -q "ok"; then
         log "✅ Grafana health check passed"
     else
         error "❌ Grafana health check failed"
         return 1
     fi
-    
+
     # Test AlertManager
     local alertmanager_pod
     alertmanager_pod=$(kubectl get pods -n "$MONITORING_NAMESPACE" -l app=alertmanager -o jsonpath='{.items[0].metadata.name}')
-    
+
     if kubectl exec -n "$MONITORING_NAMESPACE" "$alertmanager_pod" -- wget -q -O - http://localhost:9093/-/healthy | grep -q "OK"; then
         log "✅ AlertManager health check passed"
     else
         error "❌ AlertManager health check failed"
         return 1
     fi
-    
+
     log "All post-deployment tests passed successfully"
 }
 
 # Function to show deployment status
 show_deployment_status() {
     log "=== MONITORING DEPLOYMENT STATUS ==="
-    
+
     # Show pods
     log "Monitoring Pods:"
     kubectl get pods -n "$MONITORING_NAMESPACE" -o wide
-    
+
     # Show services
     log "Monitoring Services:"
     kubectl get services -n "$MONITORING_NAMESPACE"
-    
+
     # Show ingress
     log "Monitoring Ingress:"
     kubectl get ingress -n "$MONITORING_NAMESPACE"
-    
+
     # Show storage
     log "Monitoring Storage:"
     kubectl get pvc -n "$MONITORING_NAMESPACE"
-    
+
     # Show access information
     log "=== ACCESS INFORMATION ==="
     log "Grafana Admin Password: $GRAFANA_ADMIN_PASSWORD"
@@ -736,20 +736,20 @@ show_deployment_status() {
 main() {
     local start_time
     start_time=$(date +%s)
-    
+
     log "Starting monitoring stack deployment"
-    
+
     # Change to monitoring directory
     cd "$(dirname "$0")"
-    
+
     # Pre-deployment steps
     check_prerequisites
-    
+
     if [[ "$DRY_RUN" == "true" ]]; then
         log "DRY RUN MODE - No actual deployment will occur"
         exit 0
     fi
-    
+
     # Deployment steps
     create_monitoring_secrets
     create_grafana_provisioning
@@ -758,15 +758,15 @@ main() {
     deploy_alertmanager
     deploy_dashboards
     create_monitoring_ingress
-    
+
     # Post-deployment verification
     run_post_deployment_tests
     show_deployment_status
-    
+
     local end_time
     end_time=$(date +%s)
     local duration=$((end_time - start_time))
-    
+
     log "🎉 Monitoring stack deployment completed successfully in ${duration}s!"
 }
 

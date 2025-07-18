@@ -41,7 +41,12 @@ async def test_agent_failure_alert(setup_alerting):
 
     # Simulate agent failure
     await check_agent_alert(
-        agent_id, {"agent_id": agent_id, "agent_status": "failed", "error": "Test failure"}
+        agent_id,
+        {
+            "agent_id": agent_id,
+            "agent_status": "failed",
+            "error": "Test failure",
+        },
     )
 
     # Check that alert was created
@@ -49,7 +54,9 @@ async def test_agent_failure_alert(setup_alerting):
     assert len(alerts) > 0
 
     # Find the failure alert
-    failure_alerts = [a for a in alerts if a["type"] == AlertType.AGENT_FAILURE.value]
+    failure_alerts = [
+        a for a in alerts if a["type"] == AlertType.AGENT_FAILURE.value
+    ]
     assert len(failure_alerts) == 1
 
     alert = failure_alerts[0]
@@ -75,7 +82,11 @@ async def test_performance_degradation_alert(setup_alerting):
 
     # Check alerts
     alerts = get_active_alerts()
-    perf_alerts = [a for a in alerts if a["type"] == AlertType.PERFORMANCE_DEGRADATION.value]
+    perf_alerts = [
+        a
+        for a in alerts
+        if a["type"] == AlertType.PERFORMANCE_DEGRADATION.value
+    ]
     assert len(perf_alerts) == 1
 
     alert = perf_alerts[0]
@@ -127,7 +138,9 @@ async def test_belief_anomaly_alert(setup_alerting):
 
     # Check alerts
     alerts = get_active_alerts()
-    anomaly_alerts = [a for a in alerts if a["type"] == AlertType.BELIEF_ANOMALY.value]
+    anomaly_alerts = [
+        a for a in alerts if a["type"] == AlertType.BELIEF_ANOMALY.value
+    ]
     assert len(anomaly_alerts) == 1
 
     alert = anomaly_alerts[0]
@@ -140,12 +153,17 @@ async def test_resource_exhaustion_alert(setup_alerting):
     """Test resource exhaustion alerts."""
     # Simulate high memory usage
     await check_system_alert(
-        {"memory_usage_mb": 850, "cpu_usage_percent": 60}  # Above warning threshold
+        {
+            "memory_usage_mb": 850,
+            "cpu_usage_percent": 60,
+        }  # Above warning threshold
     )
 
     # Check alerts
     alerts = get_active_alerts()
-    resource_alerts = [a for a in alerts if a["type"] == AlertType.RESOURCE_EXHAUSTION.value]
+    resource_alerts = [
+        a for a in alerts if a["type"] == AlertType.RESOURCE_EXHAUSTION.value
+    ]
     assert len(resource_alerts) == 1
 
     alert = resource_alerts[0]
@@ -160,14 +178,24 @@ async def test_alert_cooldown(setup_alerting):
 
     # Generate first alert
     await check_agent_alert(
-        agent_id, {"agent_id": agent_id, "inference_time_ms": 150, "agent_status": "active"}
+        agent_id,
+        {
+            "agent_id": agent_id,
+            "inference_time_ms": 150,
+            "agent_status": "active",
+        },
     )
 
     initial_count = len(get_active_alerts())
 
     # Try to generate same alert immediately
     await check_agent_alert(
-        agent_id, {"agent_id": agent_id, "inference_time_ms": 160, "agent_status": "active"}
+        agent_id,
+        {
+            "agent_id": agent_id,
+            "inference_time_ms": 160,
+            "agent_status": "active",
+        },
     )
 
     # Should not create new alert due to cooldown
@@ -181,7 +209,12 @@ async def test_alert_resolution(setup_alerting):
 
     # Generate alert
     await check_agent_alert(
-        agent_id, {"agent_id": agent_id, "agent_status": "failed", "error": "Test error"}
+        agent_id,
+        {
+            "agent_id": agent_id,
+            "agent_status": "failed",
+            "error": "Test error",
+        },
     )
 
     alerts = get_active_alerts()
@@ -208,10 +241,13 @@ async def test_alert_statistics(setup_alerting):
     """Test alert statistics."""
     # Generate various alerts
     await check_agent_alert(
-        "agent-1", {"agent_id": "agent-1", "agent_status": "failed", "error": "Error 1"}
+        "agent-1",
+        {"agent_id": "agent-1", "agent_status": "failed", "error": "Error 1"},
     )
 
-    await check_agent_alert("agent-2", {"agent_id": "agent-2", "inference_time_ms": 150})
+    await check_agent_alert(
+        "agent-2", {"agent_id": "agent-2", "inference_time_ms": 150}
+    )
 
     await check_system_alert({"memory_usage_mb": 850})
 
@@ -232,7 +268,8 @@ async def test_alert_export(setup_alerting):
     # Generate some alerts
     for i in range(3):
         await check_agent_alert(
-            f"agent-{i}", {"agent_id": f"agent-{i}", "inference_time_ms": 100 + i * 50}
+            f"agent-{i}",
+            {"agent_id": f"agent-{i}", "inference_time_ms": 100 + i * 50},
         )
 
     # Export alerts
@@ -256,7 +293,9 @@ async def test_integration_with_agent(setup_alerting):
 
     # Simulate slow inference
     await record_inference_metric(
-        agent_id=agent.agent_id, inference_time_ms=220.0, success=True  # Above critical threshold
+        agent_id=agent.agent_id,
+        inference_time_ms=220.0,
+        success=True,  # Above critical threshold
     )
 
     # Wait for alert processing

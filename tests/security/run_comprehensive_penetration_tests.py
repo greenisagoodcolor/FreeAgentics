@@ -66,11 +66,15 @@ class ComprehensivePenetrationTestRunner:
         # Initialize all testers
         testers = {
             "error_handling_disclosure": ErrorHandlingTester(self.client),
-            "authentication_error_disclosure": AuthenticationErrorTester(self.client),
+            "authentication_error_disclosure": AuthenticationErrorTester(
+                self.client
+            ),
             "api_security_responses": APISecurityResponseTester(self.client),
             "production_hardening": ProductionHardeningTester(self.client),
             "file_upload_security": FileUploadSecurityTester(self.client),
-            "path_traversal_prevention": PathTraversalPreventionTester(self.client),
+            "path_traversal_prevention": PathTraversalPreventionTester(
+                self.client
+            ),
         }
 
         # Run each test suite
@@ -101,7 +105,9 @@ class ComprehensivePenetrationTestRunner:
                         method = getattr(tester, method_name)
                         result = method()
                     else:
-                        result = {"error": f"No runner method found for {test_name}"}
+                        result = {
+                            "error": f"No runner method found for {test_name}"
+                        }
 
                 self.test_results[test_name] = result
 
@@ -114,9 +120,13 @@ class ComprehensivePenetrationTestRunner:
                     print(f"  Pass Rate: {summary.get('pass_rate', 0):.1f}%")
 
                     if "critical_findings" in summary:
-                        print(f"  Critical Issues: {summary.get('critical_findings', 0)}")
+                        print(
+                            f"  Critical Issues: {summary.get('critical_findings', 0)}"
+                        )
                     if "high_findings" in summary:
-                        print(f"  High Issues: {summary.get('high_findings', 0)}")
+                        print(
+                            f"  High Issues: {summary.get('high_findings', 0)}"
+                        )
 
                 print()
 
@@ -159,13 +169,15 @@ class ComprehensivePenetrationTestRunner:
                 total_failed += summary.get("failed_tests", 0)
 
                 # Count issues by severity
-                critical_issues += summary.get("critical_findings", 0) + summary.get(
-                    "critical_failures", 0
+                critical_issues += summary.get(
+                    "critical_findings", 0
+                ) + summary.get("critical_failures", 0)
+                high_issues += summary.get("high_findings", 0) + summary.get(
+                    "high_failures", 0
                 )
-                high_issues += summary.get("high_findings", 0) + summary.get("high_failures", 0)
-                medium_issues += summary.get("medium_findings", 0) + summary.get(
-                    "medium_failures", 0
-                )
+                medium_issues += summary.get(
+                    "medium_findings", 0
+                ) + summary.get("medium_failures", 0)
 
                 # Collect recommendations
                 if "recommendations" in result:
@@ -180,12 +192,16 @@ class ComprehensivePenetrationTestRunner:
                 unique_recommendations.append(rec)
 
         # Calculate security scores
-        overall_pass_rate = (total_passed / total_tests * 100) if total_tests > 0 else 0
+        overall_pass_rate = (
+            (total_passed / total_tests * 100) if total_tests > 0 else 0
+        )
 
         # Penetration testing security score
         penetration_score = overall_pass_rate
         if critical_issues > 0:
-            penetration_score = max(0, penetration_score - critical_issues * 25)
+            penetration_score = max(
+                0, penetration_score - critical_issues * 25
+            )
         if high_issues > 0:
             penetration_score = max(0, penetration_score - high_issues * 15)
         if medium_issues > 0:
@@ -197,7 +213,9 @@ class ComprehensivePenetrationTestRunner:
             security_level = "CRITICAL"
             threat_level = "CRITICAL"
         elif high_issues > 3 or penetration_score < 60:
-            security_status = "HIGH RISK - SIGNIFICANT VULNERABILITIES DETECTED"
+            security_status = (
+                "HIGH RISK - SIGNIFICANT VULNERABILITIES DETECTED"
+            )
             security_level = "HIGH"
             threat_level = "HIGH"
         elif high_issues > 0 or medium_issues > 8 or penetration_score < 75:
@@ -214,16 +232,24 @@ class ComprehensivePenetrationTestRunner:
             threat_level = "LOW"
 
         # Check production readiness
-        production_ready = critical_issues == 0 and high_issues <= 1 and penetration_score >= 75
+        production_ready = (
+            critical_issues == 0
+            and high_issues <= 1
+            and penetration_score >= 75
+        )
 
         # Assess specific security domains
         domain_assessment = self._assess_security_domains()
 
         comprehensive_report = {
             "metadata": {
-                "test_execution_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "test_execution_time": datetime.now().strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                ),
                 "test_duration_seconds": (
-                    self.end_time - self.start_time if self.end_time and self.start_time else 0
+                    self.end_time - self.start_time
+                    if self.end_time and self.start_time
+                    else 0
                 ),
                 "platform": "FreeAgentics",
                 "test_version": "1.0.0",
@@ -237,7 +263,9 @@ class ComprehensivePenetrationTestRunner:
                 "penetration_score": round(penetration_score, 1),
                 "production_ready": production_ready,
                 "immediate_action_required": critical_issues > 0,
-                "total_vulnerabilities": critical_issues + high_issues + medium_issues,
+                "total_vulnerabilities": critical_issues
+                + high_issues
+                + medium_issues,
                 "critical_vulnerabilities": critical_issues,
                 "high_vulnerabilities": high_issues,
                 "medium_vulnerabilities": medium_issues,
@@ -259,15 +287,21 @@ class ComprehensivePenetrationTestRunner:
             "test_suite_results": test_suite_summaries,
             "detailed_results": self.test_results,
             "security_recommendations": {
-                "immediate_actions": self._get_immediate_actions(critical_issues, high_issues),
-                "all_recommendations": unique_recommendations[:25],  # Limit to top 25
+                "immediate_actions": self._get_immediate_actions(
+                    critical_issues, high_issues
+                ),
+                "all_recommendations": unique_recommendations[
+                    :25
+                ],  # Limit to top 25
                 "priority_recommendations": self._prioritize_recommendations(
                     unique_recommendations
                 ),
             },
             "security_domain_assessment": domain_assessment,
             "compliance_assessment": self._assess_compliance(),
-            "threat_assessment": self._assess_threats(critical_issues, high_issues, medium_issues),
+            "threat_assessment": self._assess_threats(
+                critical_issues, high_issues, medium_issues
+            ),
             "penetration_testing_summary": self._generate_penetration_summary(),
         }
 
@@ -281,7 +315,11 @@ class ComprehensivePenetrationTestRunner:
                 "score": 0,
                 "status": "unknown",
             },
-            "api_security": {"tests": ["api_security_responses"], "score": 0, "status": "unknown"},
+            "api_security": {
+                "tests": ["api_security_responses"],
+                "score": 0,
+                "status": "unknown",
+            },
             "file_security": {
                 "tests": ["file_upload_security", "path_traversal_prevention"],
                 "score": 0,
@@ -328,7 +366,9 @@ class ComprehensivePenetrationTestRunner:
 
         return domains
 
-    def _get_immediate_actions(self, critical_issues: int, high_issues: int) -> List[str]:
+    def _get_immediate_actions(
+        self, critical_issues: int, high_issues: int
+    ) -> List[str]:
         """Get immediate actions based on issue severity."""
         immediate_actions = []
 
@@ -360,7 +400,9 @@ class ComprehensivePenetrationTestRunner:
 
         return immediate_actions
 
-    def _prioritize_recommendations(self, recommendations: List[str]) -> Dict[str, List[str]]:
+    def _prioritize_recommendations(
+        self, recommendations: List[str]
+    ) -> Dict[str, List[str]]:
         """Prioritize recommendations by category and urgency."""
         categorized = {"critical": [], "high": [], "medium": [], "low": []}
 
@@ -396,7 +438,13 @@ class ComprehensivePenetrationTestRunner:
                 categorized["high"].append(rec)
             elif any(
                 medium_term in rec_lower
-                for medium_term in ["configure", "implement", "review", "update", "improve"]
+                for medium_term in [
+                    "configure",
+                    "implement",
+                    "review",
+                    "update",
+                    "improve",
+                ]
             ):
                 categorized["medium"].append(rec)
             else:
@@ -411,7 +459,10 @@ class ComprehensivePenetrationTestRunner:
     def _assess_compliance(self) -> Dict[str, Any]:
         """Assess compliance with security standards."""
         compliance_results = {
-            "owasp_top_10": {"issues_found": [], "compliance_level": "Unknown"},
+            "owasp_top_10": {
+                "issues_found": [],
+                "compliance_level": "Unknown",
+            },
             "nist_cybersecurity_framework": {
                 "identify": "Partial",
                 "protect": "Needs Review",
@@ -438,65 +489,112 @@ class ComprehensivePenetrationTestRunner:
                         for finding in findings:
                             issue = finding.get("issue", "").lower()
 
-                            if any(term in issue for term in ["injection", "sql", "command"]):
+                            if any(
+                                term in issue
+                                for term in ["injection", "sql", "command"]
+                            ):
                                 owasp_issues.append("A03:2021 – Injection")
-                            elif any(term in issue for term in ["authentication", "auth", "login"]):
+                            elif any(
+                                term in issue
+                                for term in ["authentication", "auth", "login"]
+                            ):
                                 owasp_issues.append(
                                     "A07:2021 – Identification and Authentication Failures"
                                 )
                             elif any(
-                                term in issue for term in ["disclosure", "information", "error"]
+                                term in issue
+                                for term in [
+                                    "disclosure",
+                                    "information",
+                                    "error",
+                                ]
                             ):
                                 owasp_issues.append(
                                     "A09:2021 – Security Logging and Monitoring Failures"
                                 )
                             elif any(
-                                term in issue for term in ["access", "authorization", "permission"]
+                                term in issue
+                                for term in [
+                                    "access",
+                                    "authorization",
+                                    "permission",
+                                ]
                             ):
-                                owasp_issues.append("A01:2021 – Broken Access Control")
+                                owasp_issues.append(
+                                    "A01:2021 – Broken Access Control"
+                                )
                             elif any(
-                                term in issue for term in ["configuration", "header", "server"]
+                                term in issue
+                                for term in [
+                                    "configuration",
+                                    "header",
+                                    "server",
+                                ]
                             ):
-                                owasp_issues.append("A05:2021 – Security Misconfiguration")
+                                owasp_issues.append(
+                                    "A05:2021 – Security Misconfiguration"
+                                )
 
-        compliance_results["owasp_top_10"]["issues_found"] = list(set(owasp_issues))
+        compliance_results["owasp_top_10"]["issues_found"] = list(
+            set(owasp_issues)
+        )
         compliance_results["owasp_top_10"]["compliance_level"] = (
             "Non-Compliant" if owasp_issues else "Compliant"
         )
 
         return compliance_results
 
-    def _assess_threats(self, critical: int, high: int, medium: int) -> Dict[str, Any]:
+    def _assess_threats(
+        self, critical: int, high: int, medium: int
+    ) -> Dict[str, Any]:
         """Assess threat levels for different attack vectors."""
         threat_assessment = {
             "external_attacks": {
-                "level": "HIGH" if critical > 0 else "MEDIUM" if high > 2 else "LOW",
+                "level": "HIGH"
+                if critical > 0
+                else "MEDIUM"
+                if high > 2
+                else "LOW",
                 "description": "Risk from external attackers exploiting web vulnerabilities",
             },
             "insider_threats": {
                 "level": (
                     "MEDIUM"
-                    if any("access" in str(result) for result in self.test_results.values())
+                    if any(
+                        "access" in str(result)
+                        for result in self.test_results.values()
+                    )
                     else "LOW"
                 ),
                 "description": "Risk from malicious or compromised internal users",
             },
             "data_exfiltration": {
-                "level": "HIGH" if critical > 0 else "MEDIUM" if high > 1 else "LOW",
+                "level": "HIGH"
+                if critical > 0
+                else "MEDIUM"
+                if high > 1
+                else "LOW",
                 "description": "Risk of sensitive data being accessed or stolen",
             },
             "system_compromise": {
                 "level": (
                     "CRITICAL"
                     if critical > 2
-                    else "HIGH" if critical > 0 else "MEDIUM" if high > 3 else "LOW"
+                    else "HIGH"
+                    if critical > 0
+                    else "MEDIUM"
+                    if high > 3
+                    else "LOW"
                 ),
                 "description": "Risk of complete system compromise",
             },
             "denial_of_service": {
                 "level": (
                     "MEDIUM"
-                    if any("rate" in str(result) for result in self.test_results.values())
+                    if any(
+                        "rate" in str(result)
+                        for result in self.test_results.values()
+                    )
                     else "LOW"
                 ),
                 "description": "Risk of service disruption or unavailability",
@@ -509,12 +607,16 @@ class ComprehensivePenetrationTestRunner:
         """Generate a summary of penetration testing results."""
         summary = {
             "test_coverage": {
-                "error_handling": "error_handling_disclosure" in self.test_results,
-                "authentication": "authentication_error_disclosure" in self.test_results,
+                "error_handling": "error_handling_disclosure"
+                in self.test_results,
+                "authentication": "authentication_error_disclosure"
+                in self.test_results,
                 "api_security": "api_security_responses" in self.test_results,
                 "file_security": "file_upload_security" in self.test_results,
-                "path_traversal": "path_traversal_prevention" in self.test_results,
-                "production_hardening": "production_hardening" in self.test_results,
+                "path_traversal": "path_traversal_prevention"
+                in self.test_results,
+                "production_hardening": "production_hardening"
+                in self.test_results,
             },
             "attack_vectors_tested": [
                 "Information disclosure through error messages",
@@ -536,7 +638,10 @@ class ComprehensivePenetrationTestRunner:
         return summary
 
     def save_report(
-        self, report: Dict[str, Any], output_format: str = "both", output_dir: str = None
+        self,
+        report: Dict[str, Any],
+        output_format: str = "both",
+        output_dir: str = None,
     ) -> List[str]:
         """Save the comprehensive penetration testing report."""
         if output_dir is None:
@@ -550,7 +655,8 @@ class ComprehensivePenetrationTestRunner:
         # Save JSON report
         if output_format in ["json", "both"]:
             json_file = os.path.join(
-                output_dir, f"comprehensive_penetration_test_report_{timestamp}.json"
+                output_dir,
+                f"comprehensive_penetration_test_report_{timestamp}.json",
             )
             try:
                 with open(json_file, "w") as f:
@@ -563,7 +669,8 @@ class ComprehensivePenetrationTestRunner:
         # Save HTML report
         if output_format in ["html", "both"]:
             html_file = os.path.join(
-                output_dir, f"comprehensive_penetration_test_report_{timestamp}.html"
+                output_dir,
+                f"comprehensive_penetration_test_report_{timestamp}.html",
             )
             try:
                 html_content = self._generate_html_report(report)
@@ -755,7 +862,7 @@ class ComprehensivePenetrationTestRunner:
             <div class="alert alert-{report['executive_summary']['security_level'].lower()}">
                 {report['executive_summary']['security_status']}
             </div>
-            
+
             <div class="metrics">
                 <div class="metric">
                     <div class="metric-value">{report['executive_summary']['penetration_score']}</div>
@@ -792,7 +899,9 @@ class ComprehensivePenetrationTestRunner:
                 <h3>🚨 Immediate Actions Required</h3>
                 <ul>
             """
-            for action in report["security_recommendations"]["immediate_actions"]:
+            for action in report["security_recommendations"][
+                "immediate_actions"
+            ]:
                 html += f"<li>{action}</li>"
             html += "</ul></div>"
 
@@ -803,7 +912,9 @@ class ComprehensivePenetrationTestRunner:
             <div class="domain-assessment">
         """
 
-        for domain_name, domain_data in report["security_domain_assessment"].items():
+        for domain_name, domain_data in report[
+            "security_domain_assessment"
+        ].items():
             status_class = f"score-{domain_data['status']}"
             html += f"""
                 <div class="domain">
@@ -866,7 +977,9 @@ class ComprehensivePenetrationTestRunner:
                 <h2>📋 Security Recommendations</h2>
                 <ul>
             """
-            for rec in report["security_recommendations"]["all_recommendations"][:15]:
+            for rec in report["security_recommendations"][
+                "all_recommendations"
+            ][:15]:
                 html += f"<li>{rec}</li>"
             html += "</ul></div>"
 
@@ -896,7 +1009,9 @@ class ComprehensivePenetrationTestRunner:
         print(f"Security Status: {exec_summary['security_status']}")
         print(f"Penetration Score: {exec_summary['penetration_score']}/100")
         print(f"Threat Level: {exec_summary['threat_level']}")
-        print(f"Production Ready: {'✅ YES' if exec_summary['production_ready'] else '❌ NO'}")
+        print(
+            f"Production Ready: {'✅ YES' if exec_summary['production_ready'] else '❌ NO'}"
+        )
         print()
 
         print("Test Statistics:")
@@ -913,7 +1028,9 @@ class ComprehensivePenetrationTestRunner:
         print()
 
         print("Security Domain Assessment:")
-        for domain_name, domain_data in report["security_domain_assessment"].items():
+        for domain_name, domain_data in report[
+            "security_domain_assessment"
+        ].items():
             status_icon = {
                 "excellent": "🟢",
                 "good": "🟢",
@@ -929,30 +1046,39 @@ class ComprehensivePenetrationTestRunner:
 
         if exec_summary["immediate_action_required"]:
             print("🚨 IMMEDIATE ACTION REQUIRED:")
-            for action in report["security_recommendations"]["immediate_actions"]:
+            for action in report["security_recommendations"][
+                "immediate_actions"
+            ]:
                 print(f"  • {action}")
             print()
 
         if report["security_recommendations"]["all_recommendations"]:
             print("Top Recommendations:")
             for i, rec in enumerate(
-                report["security_recommendations"]["all_recommendations"][:5], 1
+                report["security_recommendations"]["all_recommendations"][:5],
+                1,
             ):
                 print(f"  {i}. {rec}")
 
 
 def main():
     """Main function to run comprehensive penetration tests."""
-    parser = argparse.ArgumentParser(description="Run comprehensive penetration testing suite")
+    parser = argparse.ArgumentParser(
+        description="Run comprehensive penetration testing suite"
+    )
     parser.add_argument(
         "--output-format",
         choices=["json", "html", "both"],
         default="both",
         help="Output format for the report",
     )
-    parser.add_argument("--output-dir", default=None, help="Output directory for reports")
     parser.add_argument(
-        "--quiet", action="store_true", help="Suppress detailed output during testing"
+        "--output-dir", default=None, help="Output directory for reports"
+    )
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Suppress detailed output during testing",
     )
 
     args = parser.parse_args()
@@ -974,7 +1100,9 @@ def main():
     runner.print_summary(report)
 
     # Save reports
-    saved_files = runner.save_report(report, args.output_format, args.output_dir)
+    saved_files = runner.save_report(
+        report, args.output_format, args.output_dir
+    )
 
     if saved_files:
         print(f"\nReports saved:")
@@ -984,16 +1112,24 @@ def main():
     # Exit with appropriate code based on severity
     exec_summary = report["executive_summary"]
     if exec_summary["critical_vulnerabilities"] > 0:
-        print("\n❌ CRITICAL VULNERABILITIES DETECTED - Application not ready for production")
+        print(
+            "\n❌ CRITICAL VULNERABILITIES DETECTED - Application not ready for production"
+        )
         sys.exit(1)
     elif exec_summary["high_vulnerabilities"] > 3:
-        print("\n⚠️  HIGH RISK VULNERABILITIES DETECTED - Significant security remediation needed")
+        print(
+            "\n⚠️  HIGH RISK VULNERABILITIES DETECTED - Significant security remediation needed"
+        )
         sys.exit(2)
     elif not exec_summary["production_ready"]:
-        print("\n⚠️  APPLICATION NOT PRODUCTION READY - Address security issues before deployment")
+        print(
+            "\n⚠️  APPLICATION NOT PRODUCTION READY - Address security issues before deployment"
+        )
         sys.exit(3)
     else:
-        print("\n✅ PENETRATION TESTING COMPLETED - Application has acceptable security posture")
+        print(
+            "\n✅ PENETRATION TESTING COMPLETED - Application has acceptable security posture"
+        )
         sys.exit(0)
 
 

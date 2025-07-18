@@ -8,7 +8,14 @@ class SecureInputModel(BaseModel):
     def no_sql_injection(cls, v):
         if isinstance(v, str):
             # Check for common SQL injection patterns
-            sql_keywords = ["DROP", "DELETE", "INSERT", "UPDATE", "UNION", "SELECT"]
+            sql_keywords = [
+                "DROP",
+                "DELETE",
+                "INSERT",
+                "UPDATE",
+                "UNION",
+                "SELECT",
+            ]
             if any(keyword in v.upper() for keyword in sql_keywords):
                 # Allow these keywords only in specific fields
                 raise ValueError("Invalid input detected")

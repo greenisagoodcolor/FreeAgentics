@@ -109,7 +109,9 @@ class OptimizedThreadPoolManager:
         self.active_futures: Dict[Future, AgentTask] = {}
         self._futures_lock = Lock()
 
-        logger.info(f"Initialized OptimizedThreadPoolManager with {initial_workers} workers")
+        logger.info(
+            f"Initialized OptimizedThreadPoolManager with {initial_workers} workers"
+        )
 
     def register_agent(self, agent_id: str, agent: Any) -> None:
         """Register an agent for thread pool management."""
@@ -126,7 +128,10 @@ class OptimizedThreadPoolManager:
 
     def _scale_workers(self, current_load: float) -> None:
         """Dynamically scale worker threads based on load."""
-        if current_load > self.scaling_threshold and self.current_workers < self.max_workers:
+        if (
+            current_load > self.scaling_threshold
+            and self.current_workers < self.max_workers
+        ):
             # Scale up
             new_workers = min(self.current_workers * 2, self.max_workers)
             self._resize_pool(new_workers)
@@ -147,7 +152,11 @@ class OptimizedThreadPoolManager:
                 logger.info(f"Resized thread pool to {new_size} workers")
 
     def submit_task(
-        self, agent_id: str, operation: str, data: Dict[str, Any], priority: int = 0
+        self,
+        agent_id: str,
+        operation: str,
+        data: Dict[str, Any],
+        priority: int = 0,
     ) -> Future:
         """
         Submit a task for an agent with priority scheduling.
@@ -231,7 +240,9 @@ class OptimizedThreadPoolManager:
         return future
 
     def step_all_agents(
-        self, observations: Dict[str, Dict[str, Any]], timeout: Optional[float] = None
+        self,
+        observations: Dict[str, Dict[str, Any]],
+        timeout: Optional[float] = None,
     ) -> Dict[str, TaskResult]:
         """
         Step all registered agents concurrently.
@@ -248,7 +259,9 @@ class OptimizedThreadPoolManager:
         # Submit all agent steps
         for agent_id in self.agents:
             if agent_id in observations:
-                future = self.submit_task(agent_id, "step", {"observation": observations[agent_id]})
+                future = self.submit_task(
+                    agent_id, "step", {"observation": observations[agent_id]}
+                )
                 futures[agent_id] = future
 
         # Collect results
@@ -301,7 +314,9 @@ class OptimizedThreadPoolManager:
         return results
 
     def batch_execute(
-        self, tasks: List[Tuple[str, str, Dict[str, Any]]], timeout: Optional[float] = None
+        self,
+        tasks: List[Tuple[str, str, Dict[str, Any]]],
+        timeout: Optional[float] = None,
     ) -> List[TaskResult]:
         """
         Execute a batch of tasks across multiple agents.
@@ -346,7 +361,11 @@ class OptimizedThreadPoolManager:
         return results
 
     def _update_stats(
-        self, agent_id: str, success: bool, execution_time_ms: float, error: Optional[str] = None
+        self,
+        agent_id: str,
+        success: bool,
+        execution_time_ms: float,
+        error: Optional[str] = None,
     ) -> None:
         """Update performance statistics for an agent."""
         with self._stats_lock:
@@ -360,7 +379,9 @@ class OptimizedThreadPoolManager:
                 stats["last_error"] = error
 
             stats["total_time_ms"] += execution_time_ms
-            stats["avg_time_ms"] = stats["total_time_ms"] / stats["total_tasks"]
+            stats["avg_time_ms"] = (
+                stats["total_time_ms"] / stats["total_tasks"]
+            )
 
     def get_performance_stats(self) -> Dict[str, Dict[str, Any]]:
         """Get performance statistics for all agents."""
@@ -375,7 +396,9 @@ class OptimizedThreadPoolManager:
         return {
             "current_workers": self.current_workers,
             "active_tasks": active_tasks,
-            "load_factor": active_tasks / self.current_workers if self.current_workers > 0 else 0,
+            "load_factor": active_tasks / self.current_workers
+            if self.current_workers > 0
+            else 0,
             "total_agents": len(self.agents),
             "queue_size": self.priority_queue.qsize(),
         }
@@ -419,7 +442,9 @@ def benchmark_threadpool_manager():
     agent_counts = [10, 30, 50, 100]
     rounds = 5
 
-    manager = OptimizedThreadPoolManager(initial_workers=16, max_workers=64, min_workers=4)
+    manager = OptimizedThreadPoolManager(
+        initial_workers=16, max_workers=64, min_workers=4
+    )
 
     try:
         for num_agents in agent_counts:
@@ -433,7 +458,9 @@ def benchmark_threadpool_manager():
                 manager.register_agent(agent.agent_id, agent)
 
             # Create observations
-            observations = {f"agent-{i}": {"data": i} for i in range(num_agents)}
+            observations = {
+                f"agent-{i}": {"data": i} for i in range(num_agents)
+            }
 
             # Benchmark
             times = []
@@ -445,7 +472,9 @@ def benchmark_threadpool_manager():
 
                 # Count successes
                 successes = sum(1 for r in results.values() if r.success)
-                print(f"  Round {round_num + 1}: {duration:.3f}s, {successes}/{num_agents} success")
+                print(
+                    f"  Round {round_num + 1}: {duration:.3f}s, {successes}/{num_agents} success"
+                )
 
             avg_time = sum(times) / len(times)
             throughput = num_agents / avg_time

@@ -13,7 +13,11 @@ import pytest
 
 # Import the module under test
 try:
-    from coalitions.coalition import Coalition, CoalitionObjective, CoalitionRole
+    from coalitions.coalition import (
+        Coalition,
+        CoalitionObjective,
+        CoalitionRole,
+    )
     from coalitions.formation_strategies import (
         AgentProfile,
         FormationResult,
@@ -224,7 +228,9 @@ class TestFormationStrategy:
         assert hasattr(FormationStrategy, "form_coalitions")
 
         # This should be an abstract method
-        assert getattr(FormationStrategy.form_coalitions, "__isabstractmethod__", False)
+        assert getattr(
+            FormationStrategy.form_coalitions, "__isabstractmethod__", False
+        )
 
 
 class TestGreedyFormation:
@@ -299,9 +305,13 @@ class TestGreedyFormation:
         assert greedy_strategy.name == "Greedy Formation"
         assert hasattr(greedy_strategy, "form_coalitions")
 
-    def test_greedy_form_coalitions_basic(self, greedy_strategy, sample_agents, sample_objectives):
+    def test_greedy_form_coalitions_basic(
+        self, greedy_strategy, sample_agents, sample_objectives
+    ):
         """Test basic coalition formation with greedy strategy."""
-        result = greedy_strategy.form_coalitions(sample_agents, sample_objectives)
+        result = greedy_strategy.form_coalitions(
+            sample_agents, sample_objectives
+        )
 
         assert isinstance(result, FormationResult)
         assert isinstance(result.coalitions, list)
@@ -313,7 +323,9 @@ class TestGreedyFormation:
         # Should have some coalitions formed
         assert len(result.coalitions) > 0
 
-    def test_greedy_form_coalitions_empty_agents(self, greedy_strategy, sample_objectives):
+    def test_greedy_form_coalitions_empty_agents(
+        self, greedy_strategy, sample_objectives
+    ):
         """Test coalition formation with empty agent list."""
         result = greedy_strategy.form_coalitions([], sample_objectives)
 
@@ -322,18 +334,26 @@ class TestGreedyFormation:
         assert len(result.unassigned_agents) == 0
         assert result.objective_coverage == 0.0
 
-    def test_greedy_form_coalitions_empty_objectives(self, greedy_strategy, sample_agents):
+    def test_greedy_form_coalitions_empty_objectives(
+        self, greedy_strategy, sample_agents
+    ):
         """Test coalition formation with empty objectives list."""
         result = greedy_strategy.form_coalitions(sample_agents, [])
 
         assert isinstance(result, FormationResult)
         assert len(result.coalitions) == 0
         assert len(result.unassigned_agents) == len(sample_agents)
-        assert result.objective_coverage == 1.0  # No objectives means 100% coverage
+        assert (
+            result.objective_coverage == 1.0
+        )  # No objectives means 100% coverage
 
-    def test_greedy_formation_result(self, greedy_strategy, sample_agents, sample_objectives):
+    def test_greedy_formation_result(
+        self, greedy_strategy, sample_agents, sample_objectives
+    ):
         """Test formation result structure."""
-        result = greedy_strategy.form_coalitions(sample_agents, sample_objectives)
+        result = greedy_strategy.form_coalitions(
+            sample_agents, sample_objectives
+        )
 
         assert isinstance(result.formation_score, float)
         assert 0.0 <= result.formation_score
@@ -360,7 +380,9 @@ class TestGreedyFormation:
         exploration_objective.required_capabilities = ["exploration"]
         exploration_objective.priority = 1.0
 
-        result = greedy_strategy.form_coalitions([exploration_agent], [exploration_objective])
+        result = greedy_strategy.form_coalitions(
+            [exploration_agent], [exploration_objective]
+        )
 
         # Should form exactly one coalition
         assert len(result.coalitions) == 1
@@ -480,7 +502,9 @@ class TestHierarchicalFormation:
         assert hierarchical_strategy.name == "Hierarchical Formation"
         assert hasattr(hierarchical_strategy, "form_coalitions")
 
-    def test_hierarchical_reputation_consideration(self, hierarchical_strategy):
+    def test_hierarchical_reputation_consideration(
+        self, hierarchical_strategy
+    ):
         """Test that heuristic strategy considers agent reputation."""
         if not IMPORT_SUCCESS:
             pytest.skip("Coalition modules not available")
@@ -510,7 +534,9 @@ class TestHierarchicalFormation:
         objective.required_capabilities = ["leadership"]
         objective.priority = 1.0
 
-        result = hierarchical_strategy.form_coalitions([high_rep_agent, low_rep_agent], [objective])
+        result = hierarchical_strategy.form_coalitions(
+            [high_rep_agent, low_rep_agent], [objective]
+        )
 
         # Should prefer high reputation agent
         assert len(result.coalitions) == 1
@@ -660,4 +686,11 @@ class TestFormationPerformance:
 
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-v", "--cov=coalitions.formation_strategies", "--cov-report=html"])
+    pytest.main(
+        [
+            __file__,
+            "-v",
+            "--cov=coalitions.formation_strategies",
+            "--cov-report=html",
+        ]
+    )

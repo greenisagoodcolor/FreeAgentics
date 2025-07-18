@@ -20,13 +20,19 @@ def test_basic_encryption():
 
     # Test AES encryption directly
     from cryptography.hazmat.backends import default_backend
-    from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+    from cryptography.hazmat.primitives.ciphers import (
+        Cipher,
+        algorithms,
+        modes,
+    )
 
     key = os.urandom(32)  # 256-bit key
     nonce = os.urandom(12)  # 96-bit nonce for GCM
 
     # Create cipher
-    cipher = Cipher(algorithms.AES(key), modes.GCM(nonce), backend=default_backend())
+    cipher = Cipher(
+        algorithms.AES(key), modes.GCM(nonce), backend=default_backend()
+    )
     encryptor = cipher.encryptor()
 
     # Encrypt data
@@ -35,7 +41,9 @@ def test_basic_encryption():
 
     # Decrypt
     decryptor = Cipher(
-        algorithms.AES(key), modes.GCM(nonce, encryptor.tag), backend=default_backend()
+        algorithms.AES(key),
+        modes.GCM(nonce, encryptor.tag),
+        backend=default_backend(),
     ).decryptor()
     decrypted = decryptor.update(ciphertext) + decryptor.finalize()
 
@@ -77,7 +85,10 @@ def test_soar_actions():
         "action_id": "block_ip_1",
         "status": "success",
         "timestamp": datetime.utcnow().isoformat(),
-        "output": {"blocked_ips": ["192.168.1.100", "192.168.1.101"], "duration_hours": 24},
+        "output": {
+            "blocked_ips": ["192.168.1.100", "192.168.1.101"],
+            "duration_hours": 24,
+        },
     }
 
     assert action_result["status"] == "success"
@@ -149,7 +160,11 @@ def test_imports():
         # Test cryptography imports
         from cryptography.hazmat.backends import default_backend
         from cryptography.hazmat.primitives import hashes
-        from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+        from cryptography.hazmat.primitives.ciphers import (
+            Cipher,
+            algorithms,
+            modes,
+        )
 
         print("✓ Cryptography imports work")
 
@@ -185,8 +200,16 @@ def test_configuration():
 
     # Test FIPS compliance settings
     config = {
-        "encryption": {"algorithm": "AES-256-GCM", "key_size": 256, "fips_mode": True},
-        "soar": {"max_concurrent_executions": 10, "default_timeout": 300, "auto_triage": True},
+        "encryption": {
+            "algorithm": "AES-256-GCM",
+            "key_size": 256,
+            "fips_mode": True,
+        },
+        "soar": {
+            "max_concurrent_executions": 10,
+            "default_timeout": 300,
+            "auto_triage": True,
+        },
     }
 
     assert config["encryption"]["algorithm"] == "AES-256-GCM"

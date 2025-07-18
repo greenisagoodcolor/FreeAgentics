@@ -14,7 +14,11 @@ class TestHealthAPI:
     def test_import_health_module(self):
         """Test that health module can be imported."""
         try:
-            from api.v1.health import database_exception_handler, health_check, router
+            from api.v1.health import (
+                database_exception_handler,
+                health_check,
+                router,
+            )
 
             # Test that router is an APIRouter instance
             assert isinstance(router, APIRouter)
@@ -24,7 +28,9 @@ class TestHealthAPI:
             assert database_exception_handler is not None
 
         except ImportError as e:
-            pytest.skip(f"Cannot import api.v1.health due to dependency issues: {e}")
+            pytest.skip(
+                f"Cannot import api.v1.health due to dependency issues: {e}"
+            )
 
     def test_router_is_api_router(self):
         """Test that router is an APIRouter instance."""
@@ -34,7 +40,9 @@ class TestHealthAPI:
             assert isinstance(router, APIRouter)
 
         except ImportError as e:
-            pytest.skip(f"Cannot import api.v1.health due to dependency issues: {e}")
+            pytest.skip(
+                f"Cannot import api.v1.health due to dependency issues: {e}"
+            )
 
     @patch("api.v1.health.get_db")
     @patch("api.v1.health.text")
@@ -65,7 +73,9 @@ class TestHealthAPI:
             assert result == {"status": "healthy", "db": "connected"}
 
         except ImportError as e:
-            pytest.skip(f"Cannot import api.v1.health due to dependency issues: {e}")
+            pytest.skip(
+                f"Cannot import api.v1.health due to dependency issues: {e}"
+            )
 
     @pytest.mark.asyncio
     async def test_database_exception_handler(self):
@@ -75,7 +85,9 @@ class TestHealthAPI:
 
             # Mock request and exception
             mock_request = MagicMock()
-            mock_exc = OperationalError("Database connection failed", None, None)
+            mock_exc = OperationalError(
+                "Database connection failed", None, None
+            )
 
             # Call exception handler
             result = await database_exception_handler(mock_request, mock_exc)
@@ -88,7 +100,9 @@ class TestHealthAPI:
             # For now, just verify it's a JSONResponse
 
         except ImportError as e:
-            pytest.skip(f"Cannot import api.v1.health due to dependency issues: {e}")
+            pytest.skip(
+                f"Cannot import api.v1.health due to dependency issues: {e}"
+            )
 
     def test_health_check_function_attributes(self):
         """Test health_check function attributes."""
@@ -105,7 +119,9 @@ class TestHealthAPI:
             assert "Health check endpoint" in health_check.__doc__
 
         except ImportError as e:
-            pytest.skip(f"Cannot import api.v1.health due to dependency issues: {e}")
+            pytest.skip(
+                f"Cannot import api.v1.health due to dependency issues: {e}"
+            )
 
     def test_database_exception_handler_function_attributes(self):
         """Test database_exception_handler function attributes."""
@@ -119,10 +135,15 @@ class TestHealthAPI:
 
             # Test that it has a docstring
             assert database_exception_handler.__doc__ is not None
-            assert "Handle database operational errors" in database_exception_handler.__doc__
+            assert (
+                "Handle database operational errors"
+                in database_exception_handler.__doc__
+            )
 
         except ImportError as e:
-            pytest.skip(f"Cannot import api.v1.health due to dependency issues: {e}")
+            pytest.skip(
+                f"Cannot import api.v1.health due to dependency issues: {e}"
+            )
 
     def test_module_docstring(self):
         """Test that module has proper docstring."""
@@ -130,15 +151,26 @@ class TestHealthAPI:
             import api.v1.health
 
             assert api.v1.health.__doc__ is not None
-            assert "Health check endpoint following TDD principles" in api.v1.health.__doc__
+            assert (
+                "Health check endpoint following TDD principles"
+                in api.v1.health.__doc__
+            )
 
         except ImportError as e:
-            pytest.skip(f"Cannot import api.v1.health due to dependency issues: {e}")
+            pytest.skip(
+                f"Cannot import api.v1.health due to dependency issues: {e}"
+            )
 
     def test_imports_exist(self):
         """Test that required imports exist in module."""
         try:
-            from api.v1.health import APIRouter, JSONResponse, OperationalError, Session, text
+            from api.v1.health import (
+                APIRouter,
+                JSONResponse,
+                OperationalError,
+                Session,
+                text,
+            )
 
             # Test imports exist
             assert APIRouter is not None
@@ -148,7 +180,9 @@ class TestHealthAPI:
             assert Session is not None
 
         except ImportError as e:
-            pytest.skip(f"Cannot import api.v1.health due to dependency issues: {e}")
+            pytest.skip(
+                f"Cannot import api.v1.health due to dependency issues: {e}"
+            )
 
     def test_router_routes_exist(self):
         """Test that router has expected routes."""
@@ -162,4 +196,6 @@ class TestHealthAPI:
             assert len(router.routes) > 0
 
         except ImportError as e:
-            pytest.skip(f"Cannot import api.v1.health due to dependency issues: {e}")
+            pytest.skip(
+                f"Cannot import api.v1.health due to dependency issues: {e}"
+            )

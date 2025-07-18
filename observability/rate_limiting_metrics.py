@@ -26,7 +26,10 @@ rate_limit_violations_total = Counter(
 rate_limit_blocks_total = Counter(
     "freeagentics_rate_limit_blocks_total",
     "Total number of IP/user blocks",
-    ["block_type", "reason"],  # block_type: ip, user; reason: rate_limit, ddos, suspicious
+    [
+        "block_type",
+        "reason",
+    ],  # block_type: ip, user; reason: rate_limit, ddos, suspicious
 )
 
 # DDoS protection metrics
@@ -44,7 +47,9 @@ suspicious_patterns_detected_total = Counter(
 
 # Current state metrics
 active_blocks_gauge = Gauge(
-    "freeagentics_active_blocks_current", "Current number of active IP/user blocks", ["block_type"]
+    "freeagentics_active_blocks_current",
+    "Current number of active IP/user blocks",
+    ["block_type"],
 )
 
 rate_limit_remaining_gauge = Gauge(
@@ -78,7 +83,9 @@ class RateLimitingMetrics:
     @staticmethod
     def record_request(endpoint: str, method: str, result: str):
         """Record a rate limit check result."""
-        rate_limit_requests_total.labels(endpoint=endpoint, method=method, result=result).inc()
+        rate_limit_requests_total.labels(
+            endpoint=endpoint, method=method, result=result
+        ).inc()
 
     @staticmethod
     def record_violation(endpoint: str, identifier_type: str, reason: str):
@@ -90,7 +97,9 @@ class RateLimitingMetrics:
     @staticmethod
     def record_block(block_type: str, reason: str):
         """Record an IP/user block."""
-        rate_limit_blocks_total.labels(block_type=block_type, reason=reason).inc()
+        rate_limit_blocks_total.labels(
+            block_type=block_type, reason=reason
+        ).inc()
 
         # Update active blocks gauge
         active_blocks_gauge.labels(block_type=block_type).inc()
@@ -103,17 +112,25 @@ class RateLimitingMetrics:
     @staticmethod
     def record_ddos_attack(attack_type: str, source_ip: str):
         """Record a detected DDoS attack."""
-        ddos_attacks_detected_total.labels(attack_type=attack_type, source_ip=source_ip).inc()
+        ddos_attacks_detected_total.labels(
+            attack_type=attack_type, source_ip=source_ip
+        ).inc()
 
     @staticmethod
     def record_suspicious_pattern(pattern_type: str):
         """Record a detected suspicious pattern."""
-        suspicious_patterns_detected_total.labels(pattern_type=pattern_type).inc()
+        suspicious_patterns_detected_total.labels(
+            pattern_type=pattern_type
+        ).inc()
 
     @staticmethod
-    def update_remaining_requests(endpoint: str, identifier: str, remaining: int):
+    def update_remaining_requests(
+        endpoint: str, identifier: str, remaining: int
+    ):
         """Update the remaining requests gauge."""
-        rate_limit_remaining_gauge.labels(endpoint=endpoint, identifier=identifier).set(remaining)
+        rate_limit_remaining_gauge.labels(
+            endpoint=endpoint, identifier=identifier
+        ).set(remaining)
 
     @staticmethod
     def time_rate_limit_check(algorithm: str):
@@ -131,8 +148,12 @@ class RateLimitingMetrics:
         rate_limit_config_info.info(
             {
                 "redis_enabled": str(config.get("redis_enabled", False)),
-                "default_algorithm": config.get("default_algorithm", "sliding_window"),
-                "ddos_protection_enabled": str(config.get("ddos_protection_enabled", True)),
+                "default_algorithm": config.get(
+                    "default_algorithm", "sliding_window"
+                ),
+                "ddos_protection_enabled": str(
+                    config.get("ddos_protection_enabled", True)
+                ),
                 "environment": config.get("environment", "unknown"),
             }
         )
@@ -166,8 +187,12 @@ class RateLimitMetricsMiddleware:
                     if b"x-ratelimit-remaining" in headers:
                         remaining = int(headers[b"x-ratelimit-remaining"])
                         # Extract identifier from request somehow
-                        identifier = "unknown"  # This would need proper implementation
-                        self.metrics.update_remaining_requests(path, identifier, remaining)
+                        identifier = (
+                            "unknown"  # This would need proper implementation
+                        )
+                        self.metrics.update_remaining_requests(
+                            path, identifier, remaining
+                        )
 
                 await send(message)
 
@@ -177,7 +202,9 @@ class RateLimitMetricsMiddleware:
                 # Record metrics based on status
                 if status_code == 429:
                     self.metrics.record_request(path, method, "limited")
-                    self.metrics.record_violation(path, "unknown", "rate_limit_exceeded")
+                    self.metrics.record_violation(
+                        path, "unknown", "rate_limit_exceeded"
+                    )
                 elif status_code == 403:
                     self.metrics.record_request(path, method, "blocked")
                 else:

@@ -16,7 +16,9 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -35,12 +37,23 @@ def run_unit_tests():
         test_path = project_root / test_file
         if test_path.exists():
             try:
-                cmd = [sys.executable, "-m", "pytest", str(test_path), "-v", "--tb=short"]
+                cmd = [
+                    sys.executable,
+                    "-m",
+                    "pytest",
+                    str(test_path),
+                    "-v",
+                    "--tb=short",
+                ]
                 env = os.environ.copy()
                 env["PYTHONPATH"] = str(project_root)
 
                 result = subprocess.run(
-                    cmd, cwd=project_root, env=env, capture_output=True, text=True
+                    cmd,
+                    cwd=project_root,
+                    env=env,
+                    capture_output=True,
+                    text=True,
                 )
 
                 if result.returncode == 0:
@@ -65,7 +78,9 @@ def run_integration_tests():
     """Run integration tests for security headers."""
     print("\n🔗 Running Integration Tests...\n")
 
-    integration_test = project_root / "tests/integration/test_security_headers_simple.py"
+    integration_test = (
+        project_root / "tests/integration/test_security_headers_simple.py"
+    )
 
     if integration_test.exists():
         try:
@@ -147,12 +162,16 @@ def validate_security_configuration():
 
         config_data = {
             "example.com": {
-                "primary_pins": ["sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="],
+                "primary_pins": [
+                    "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+                ],
                 "max_age": 2592000,
             }
         }
 
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False
+        ) as f:
             json.dump(config_data, f)
             config_file = f.name
 
@@ -276,7 +295,9 @@ def generate_test_report():
     print(f"   Success Rate: {(passed_tests/total_tests)*100:.1f}%")
 
     if passed_tests == total_tests:
-        print("\n🎉 All tests passed! Security headers implementation is ready.")
+        print(
+            "\n🎉 All tests passed! Security headers implementation is ready."
+        )
         return True
     else:
         print(f"\n⚠️ Some tests failed. Please review the issues above.")
@@ -291,10 +312,14 @@ def main():
     success = generate_test_report()
 
     if success:
-        print("\n✅ Task #14.5 - Security Headers and SSL/TLS Configuration: COMPLETED")
+        print(
+            "\n✅ Task #14.5 - Security Headers and SSL/TLS Configuration: COMPLETED"
+        )
         sys.exit(0)
     else:
-        print("\n❌ Task #14.5 - Security Headers and SSL/TLS Configuration: NEEDS ATTENTION")
+        print(
+            "\n❌ Task #14.5 - Security Headers and SSL/TLS Configuration: NEEDS ATTENTION"
+        )
         sys.exit(1)
 
 

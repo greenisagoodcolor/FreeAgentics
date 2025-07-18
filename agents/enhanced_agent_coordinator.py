@@ -19,9 +19,7 @@ from agents.connection_pool_manager import (
     ResourceMonitor,
 )
 from agents.optimized_threadpool_manager import OptimizedThreadPoolManager
-from database.enhanced_connection_manager import (
-    get_enhanced_db_manager,
-)
+from database.enhanced_connection_manager import get_enhanced_db_manager
 
 logger = logging.getLogger(__name__)
 
@@ -49,13 +47,17 @@ class EnhancedAgentCoordinator:
     """Enhanced agent coordinator with connection pooling and resource monitoring."""
 
     def __init__(
-        self, config: Optional[ConnectionPoolConfig] = None, database_url: Optional[str] = None
+        self,
+        config: Optional[ConnectionPoolConfig] = None,
+        database_url: Optional[str] = None,
     ):
         """Initialize enhanced agent coordinator."""
         self.config = config or ConnectionPoolConfig()
 
         # Initialize connection pool manager
-        self.pool_manager = EnhancedConnectionPoolManager(self.config, database_url or "")
+        self.pool_manager = EnhancedConnectionPoolManager(
+            self.config, database_url or ""
+        )
 
         # Initialize optimized thread pool manager
         self.thread_pool_manager = OptimizedThreadPoolManager(
@@ -65,7 +67,9 @@ class EnhancedAgentCoordinator:
         )
 
         # Enhanced database connection manager
-        self.db_manager = get_enhanced_db_manager(database_url) if database_url else None
+        self.db_manager = (
+            get_enhanced_db_manager(database_url) if database_url else None
+        )
 
         # Resource monitoring
         self.resource_monitor = ResourceMonitor(self.config)
@@ -101,7 +105,9 @@ class EnhancedAgentCoordinator:
 
         logger.info("Enhanced agent coordinator fully initialized")
 
-    def register_agent(self, agent_id: str, agent: Any, metadata: Optional[Dict] = None) -> bool:
+    def register_agent(
+        self, agent_id: str, agent: Any, metadata: Optional[Dict] = None
+    ) -> bool:
         """Register an agent with enhanced coordination."""
         try:
             with self._agents_lock:
@@ -155,9 +161,13 @@ class EnhancedAgentCoordinator:
             logger.error(f"Failed to unregister agent {agent_id}: {e}")
             return False
 
-    async def coordinate_agents(self, coordination_request: Dict[str, Any]) -> Dict[str, Any]:
+    async def coordinate_agents(
+        self, coordination_request: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Coordinate multiple agents with enhanced resource management."""
-        coordination_id = coordination_request.get("coordination_id", f"coord_{int(time.time())}")
+        coordination_id = coordination_request.get(
+            "coordination_id", f"coord_{int(time.time())}"
+        )
         agent_ids = coordination_request.get("agent_ids", [])
         operation = coordination_request.get("operation", "step")
         coordination_data = coordination_request.get("data", {})
@@ -167,7 +177,11 @@ class EnhancedAgentCoordinator:
         try:
             # Use circuit breaker for coordination
             return await self.coordination_circuit_breaker.call(
-                self._execute_coordination, coordination_id, agent_ids, operation, coordination_data
+                self._execute_coordination,
+                coordination_id,
+                agent_ids,
+                operation,
+                coordination_data,
             )
 
         except Exception as e:
@@ -179,7 +193,9 @@ class EnhancedAgentCoordinator:
         finally:
             coordination_time = time.time() - start_time
             with self._metrics_lock:
-                self.coordination_metrics.coordination_times.append(coordination_time)
+                self.coordination_metrics.coordination_times.append(
+                    coordination_time
+                )
                 # Keep only last 100 coordination times
                 if len(self.coordination_metrics.coordination_times) > 100:
                     self.coordination_metrics.coordination_times.pop(0)
@@ -214,9 +230,13 @@ class EnhancedAgentCoordinator:
                     if agent_id in self.registered_agents:
                         valid_agents.append(agent_id)
                         self.agent_states[agent_id]["status"] = "coordinating"
-                        self.agent_states[agent_id]["last_activity"] = time.time()
+                        self.agent_states[agent_id][
+                            "last_activity"
+                        ] = time.time()
                     else:
-                        logger.warning(f"Agent {agent_id} not registered for coordination")
+                        logger.warning(
+                            f"Agent {agent_id} not registered for coordination"
+                        )
 
             if not valid_agents:
                 raise ValueError("No valid agents for coordination")
@@ -234,12 +254,18 @@ class EnhancedAgentCoordinator:
 
             # Collect results with timeout
             results = {}
-            timeout = coordination_data.get("timeout", self.config.agent_task_timeout)
+            timeout = coordination_data.get(
+                "timeout", self.config.agent_task_timeout
+            )
 
             for agent_id, future in futures:
                 try:
                     result = future.result(timeout=timeout)
-                    results[agent_id] = {"success": True, "result": result, "agent_id": agent_id}
+                    results[agent_id] = {
+                        "success": True,
+                        "result": result,
+                        "agent_id": agent_id,
+                    }
 
                     # Update agent performance metrics
                     with self._agents_lock:
@@ -250,26 +276,38 @@ class EnhancedAgentCoordinator:
                             self.agent_states[agent_id]["status"] = "idle"
 
                 except Exception as e:
-                    results[agent_id] = {"success": False, "error": str(e), "agent_id": agent_id}
+                    results[agent_id] = {
+                        "success": False,
+                        "error": str(e),
+                        "agent_id": agent_id,
+                    }
 
                     # Update agent performance metrics
                     with self._agents_lock:
                         if agent_id in self.agent_states:
-                            self.agent_states[agent_id]["performance_metrics"]["failed_tasks"] += 1
+                            self.agent_states[agent_id]["performance_metrics"][
+                                "failed_tasks"
+                            ] += 1
                             self.agent_states[agent_id]["status"] = "error"
 
                     logger.error(f"Agent {agent_id} coordination failed: {e}")
 
             # Calculate coordination efficiency
-            successful_agents = sum(1 for r in results.values() if r["success"])
+            successful_agents = sum(
+                1 for r in results.values() if r["success"]
+            )
             coordination_efficiency = (
-                (successful_agents / len(valid_agents)) * 100 if valid_agents else 0
+                (successful_agents / len(valid_agents)) * 100
+                if valid_agents
+                else 0
             )
 
             # Update metrics
             with self._metrics_lock:
                 self.coordination_metrics.successful_coordinations += 1
-                self.coordination_metrics.coordination_efficiency = coordination_efficiency
+                self.coordination_metrics.coordination_efficiency = (
+                    coordination_efficiency
+                )
 
             return {
                 "coordination_id": coordination_id,
@@ -371,11 +409,17 @@ class EnhancedAgentCoordinator:
         if self.db_manager:
             try:
                 db_health = await self.db_manager.health_check()
-                health_status["database"] = db_health.get("database_connection", False)
+                health_status["database"] = db_health.get(
+                    "database_connection", False
+                )
                 if not health_status["database"]:
-                    health_status["issues"].append("Database connection failed")
+                    health_status["issues"].append(
+                        "Database connection failed"
+                    )
             except Exception as e:
-                health_status["issues"].append(f"Database health check error: {e}")
+                health_status["issues"].append(
+                    f"Database health check error: {e}"
+                )
 
         # Check resource monitor
         try:
@@ -406,7 +450,9 @@ class EnhancedAgentCoordinator:
         timeout = 30  # 30 second timeout
         start_time = time.time()
 
-        while self.active_coordinations and (time.time() - start_time) < timeout:
+        while (
+            self.active_coordinations and (time.time() - start_time) < timeout
+        ):
             await asyncio.sleep(0.1)
 
         if self.active_coordinations:
@@ -432,7 +478,8 @@ _global_coordinator: Optional[EnhancedAgentCoordinator] = None
 
 
 def get_enhanced_coordinator(
-    config: Optional[ConnectionPoolConfig] = None, database_url: Optional[str] = None
+    config: Optional[ConnectionPoolConfig] = None,
+    database_url: Optional[str] = None,
 ) -> EnhancedAgentCoordinator:
     """Get global enhanced agent coordinator."""
     global _global_coordinator
@@ -444,7 +491,8 @@ def get_enhanced_coordinator(
 
 
 async def initialize_global_coordinator(
-    config: Optional[ConnectionPoolConfig] = None, database_url: Optional[str] = None
+    config: Optional[ConnectionPoolConfig] = None,
+    database_url: Optional[str] = None,
 ):
     """Initialize global enhanced agent coordinator."""
     coordinator = get_enhanced_coordinator(config, database_url)

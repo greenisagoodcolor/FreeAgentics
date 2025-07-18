@@ -63,7 +63,9 @@ class TestAuthenticationManager:
         assert auth_manager.verify_password("WrongPassword", hashed) is False
 
         # Verify case sensitivity
-        assert auth_manager.verify_password("securepassword123!", hashed) is False
+        assert (
+            auth_manager.verify_password("securepassword123!", hashed) is False
+        )
 
     def test_create_access_token(self, auth_manager, test_user):
         """Test access token creation."""
@@ -89,7 +91,9 @@ class TestAuthenticationManager:
         # Verify expiration time
         exp_time = datetime.fromtimestamp(payload["exp"])
         expected_exp = datetime.utcnow() + timedelta(minutes=30)
-        assert abs((exp_time - expected_exp).total_seconds()) < 7200  # Within 2 hours (lenient)
+        assert (
+            abs((exp_time - expected_exp).total_seconds()) < 7200
+        )  # Within 2 hours (lenient)
 
     def test_create_refresh_token(self, auth_manager, test_user):
         """Test refresh token creation."""
@@ -115,7 +119,9 @@ class TestAuthenticationManager:
         # Verify expiration time (7 days)
         exp_time = datetime.fromtimestamp(payload["exp"])
         expected_exp = datetime.utcnow() + timedelta(days=7)
-        assert abs((exp_time - expected_exp).total_seconds()) < 7200  # Within 2 hours (lenient)
+        assert (
+            abs((exp_time - expected_exp).total_seconds()) < 7200
+        )  # Within 2 hours (lenient)
 
     def test_verify_token_success(self, auth_manager, test_user):
         """Test successful token verification."""
@@ -143,7 +149,9 @@ class TestAuthenticationManager:
             "type": "access",
         }
 
-        expired_token = jwt.encode(expired_payload, auth_manager.private_key, algorithm="RS256")
+        expired_token = jwt.encode(
+            expired_payload, auth_manager.private_key, algorithm="RS256"
+        )
 
         # Verify raises exception
         with pytest.raises(Exception) as exc_info:
@@ -166,7 +174,13 @@ class TestAuthenticationManager:
             error_msg = str(exc_info.value).lower()
             assert any(
                 keyword in error_msg
-                for keyword in ["invalid", "token", "jwt", "decode", "signature"]
+                for keyword in [
+                    "invalid",
+                    "token",
+                    "jwt",
+                    "decode",
+                    "signature",
+                ]
             )
 
     def test_verify_token_wrong_type(self, auth_manager, test_user):
@@ -178,7 +192,10 @@ class TestAuthenticationManager:
             auth_manager.verify_token(refresh_token)
         # Check for type-related errors
         error_msg = str(exc_info.value).lower()
-        assert any(keyword in error_msg for keyword in ["invalid", "token", "type", "jwt"])
+        assert any(
+            keyword in error_msg
+            for keyword in ["invalid", "token", "type", "jwt"]
+        )
 
     def test_register_user_success(self, auth_manager):
         """Test successful user registration."""
@@ -251,12 +268,16 @@ class TestAuthenticationManager:
         )
 
         # Authenticate with wrong password
-        user = auth_manager.authenticate_user("auth_test_user", "WrongPassword123!")
+        user = auth_manager.authenticate_user(
+            "auth_test_user", "WrongPassword123!"
+        )
         assert user is None
 
     def test_authenticate_user_nonexistent(self, auth_manager):
         """Test authentication with nonexistent user."""
-        user = auth_manager.authenticate_user("nonexistent_user", "Password123!")
+        user = auth_manager.authenticate_user(
+            "nonexistent_user", "Password123!"
+        )
         assert user is None
 
 
@@ -275,7 +296,10 @@ class TestRateLimiter:
         # Make requests below limit
         for _ in range(5):
             assert (
-                rate_limiter.is_rate_limited(identifier, max_requests=10, window_minutes=1) is False
+                rate_limiter.is_rate_limited(
+                    identifier, max_requests=10, window_minutes=1
+                )
+                is False
             )
 
     def test_rate_limit_exceeded(self, rate_limiter):
@@ -285,11 +309,19 @@ class TestRateLimiter:
         # Make requests up to limit
         for _ in range(10):
             assert (
-                rate_limiter.is_rate_limited(identifier, max_requests=10, window_minutes=1) is False
+                rate_limiter.is_rate_limited(
+                    identifier, max_requests=10, window_minutes=1
+                )
+                is False
             )
 
         # Next request should be rate limited
-        assert rate_limiter.is_rate_limited(identifier, max_requests=10, window_minutes=1) is True
+        assert (
+            rate_limiter.is_rate_limited(
+                identifier, max_requests=10, window_minutes=1
+            )
+            is True
+        )
 
     def test_rate_limit_window_expiry(self, rate_limiter):
         """Test rate limit window expiry."""
@@ -300,7 +332,12 @@ class TestRateLimiter:
         rate_limiter.requests[identifier] = [old_time] * 10
 
         # Should not be rate limited as requests are outside window
-        assert rate_limiter.is_rate_limited(identifier, max_requests=5, window_minutes=1) is False
+        assert (
+            rate_limiter.is_rate_limited(
+                identifier, max_requests=5, window_minutes=1
+            )
+            is False
+        )
 
     def test_rate_limit_multiple_identifiers(self, rate_limiter):
         """Test rate limiting with multiple identifiers."""
@@ -310,13 +347,18 @@ class TestRateLimiter:
         for identifier in identifiers:
             for _ in range(5):
                 assert (
-                    rate_limiter.is_rate_limited(identifier, max_requests=5, window_minutes=1)
+                    rate_limiter.is_rate_limited(
+                        identifier, max_requests=5, window_minutes=1
+                    )
                     is False
                 )
 
             # 6th request should be limited
             assert (
-                rate_limiter.is_rate_limited(identifier, max_requests=5, window_minutes=1) is True
+                rate_limiter.is_rate_limited(
+                    identifier, max_requests=5, window_minutes=1
+                )
+                is True
             )
 
     def test_rate_limit_user_specific(self, rate_limiter):
@@ -326,13 +368,17 @@ class TestRateLimiter:
         # Test user rate limiting separately from IP rate limiting
         for _ in range(20):
             assert (
-                rate_limiter.is_rate_limited(f"user:{user_id}", max_requests=20, window_minutes=5)
+                rate_limiter.is_rate_limited(
+                    f"user:{user_id}", max_requests=20, window_minutes=5
+                )
                 is False
             )
 
         # Next request should be limited
         assert (
-            rate_limiter.is_rate_limited(f"user:{user_id}", max_requests=20, window_minutes=5)
+            rate_limiter.is_rate_limited(
+                f"user:{user_id}", max_requests=20, window_minutes=5
+            )
             is True
         )
 
@@ -408,7 +454,10 @@ class TestSecurityValidator:
         ]
 
         for injection in command_injections:
-            assert SecurityValidator.validate_command_injection(injection) is False
+            assert (
+                SecurityValidator.validate_command_injection(injection)
+                is False
+            )
 
     def test_validate_command_safe_input(self):
         """Test safe command input validation."""

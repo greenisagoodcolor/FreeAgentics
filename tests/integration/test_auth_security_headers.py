@@ -21,7 +21,10 @@ import pytest
 from fastapi import FastAPI, Request, Response
 from fastapi.testclient import TestClient
 
-from auth.security_headers import SecurityHeadersManager, SecurityHeadersMiddleware
+from auth.security_headers import (
+    SecurityHeadersManager,
+    SecurityHeadersMiddleware,
+)
 from auth.security_implementation import AuthenticationManager
 
 
@@ -91,7 +94,9 @@ class TestAuthenticationSecurityHeaders:
             "Expect-CT",
         }
 
-    def _validate_common_headers(self, headers: Dict[str, str], endpoint: str = None) -> List[str]:
+    def _validate_common_headers(
+        self, headers: Dict[str, str], endpoint: str = None
+    ) -> List[str]:
         """Validate common security headers."""
         issues = []
 
@@ -107,7 +112,9 @@ class TestAuthenticationSecurityHeaders:
 
         if "X-Frame-Options" in headers:
             if headers["X-Frame-Options"] not in ["DENY", "SAMEORIGIN"]:
-                issues.append("X-Frame-Options should be 'DENY' or 'SAMEORIGIN'")
+                issues.append(
+                    "X-Frame-Options should be 'DENY' or 'SAMEORIGIN'"
+                )
 
         if "Referrer-Policy" in headers:
             valid_policies = [
@@ -117,14 +124,17 @@ class TestAuthenticationSecurityHeaders:
                 "strict-origin-when-cross-origin",
             ]
             if headers["Referrer-Policy"] not in valid_policies:
-                issues.append(f"Invalid Referrer-Policy: {headers['Referrer-Policy']}")
+                issues.append(
+                    f"Invalid Referrer-Policy: {headers['Referrer-Policy']}"
+                )
 
         return issues
 
     def test_login_endpoint_headers(self):
         """Test security headers for login endpoint."""
         response = self.client.post(
-            "/auth/login", json={"username": "testuser", "password": "testpass"}
+            "/auth/login",
+            json={"username": "testuser", "password": "testpass"},
         )
 
         assert response.status_code == 200
@@ -141,7 +151,11 @@ class TestAuthenticationSecurityHeaders:
         """Test security headers for registration endpoint."""
         response = self.client.post(
             "/auth/register",
-            json={"username": "newuser", "email": "new@example.com", "password": "securepass123"},
+            json={
+                "username": "newuser",
+                "email": "new@example.com",
+                "password": "securepass123",
+            },
         )
 
         assert response.status_code == 200
@@ -152,7 +166,9 @@ class TestAuthenticationSecurityHeaders:
 
     def test_logout_endpoint_headers(self):
         """Test security headers for logout endpoint."""
-        response = self.client.post("/auth/logout", headers={"Authorization": "Bearer mock_token"})
+        response = self.client.post(
+            "/auth/logout", headers={"Authorization": "Bearer mock_token"}
+        )
 
         assert response.status_code == 200
 
@@ -162,7 +178,9 @@ class TestAuthenticationSecurityHeaders:
 
     def test_token_refresh_headers(self):
         """Test security headers for token refresh endpoint."""
-        response = self.client.post("/auth/refresh", json={"refresh_token": "mock_refresh_token"})
+        response = self.client.post(
+            "/auth/refresh", json={"refresh_token": "mock_refresh_token"}
+        )
 
         assert response.status_code == 200
 
@@ -172,17 +190,23 @@ class TestAuthenticationSecurityHeaders:
 
     def test_password_reset_headers(self):
         """Test security headers for password reset endpoint."""
-        response = self.client.post("/auth/password-reset", json={"email": "user@example.com"})
+        response = self.client.post(
+            "/auth/password-reset", json={"email": "user@example.com"}
+        )
 
         assert response.status_code == 200
 
         # Validate headers
-        issues = self._validate_common_headers(response.headers, "password-reset")
+        issues = self._validate_common_headers(
+            response.headers, "password-reset"
+        )
         assert len(issues) == 0, f"Header validation issues: {issues}"
 
     def test_token_verification_headers(self):
         """Test security headers for token verification endpoint."""
-        response = self.client.get("/auth/verify", headers={"Authorization": "Bearer mock_token"})
+        response = self.client.get(
+            "/auth/verify", headers={"Authorization": "Bearer mock_token"}
+        )
 
         assert response.status_code == 200
 
@@ -196,7 +220,8 @@ class TestAuthenticationSecurityHeaders:
             # Recreate client with production settings
             self.mock_api.security_headers_manager = SecurityHeadersManager()
             response = self.client.post(
-                "/auth/login", json={"username": "testuser", "password": "testpass"}
+                "/auth/login",
+                json={"username": "testuser", "password": "testpass"},
             )
 
             assert "Strict-Transport-Security" in response.headers
@@ -218,7 +243,8 @@ class TestAuthenticationSecurityHeaders:
         with patch.dict("os.environ", {"PRODUCTION": "true"}):
             self.mock_api.security_headers_manager = SecurityHeadersManager()
             response = self.client.post(
-                "/auth/login", json={"username": "testuser", "password": "testpass"}
+                "/auth/login",
+                json={"username": "testuser", "password": "testpass"},
             )
 
             if "Content-Security-Policy" in response.headers:
@@ -254,7 +280,10 @@ class TestAuthenticationSecurityHeaders:
 
             # Should have credentials support
             if "Access-Control-Allow-Credentials" in response.headers:
-                assert response.headers["Access-Control-Allow-Credentials"] == "true"
+                assert (
+                    response.headers["Access-Control-Allow-Credentials"]
+                    == "true"
+                )
 
     def test_cache_control_headers(self):
         """Test cache control headers for sensitive endpoints."""
@@ -268,20 +297,28 @@ class TestAuthenticationSecurityHeaders:
             if method == "POST":
                 response = self.client.post(endpoint, json={})
             else:
-                response = self.client.get(endpoint, headers={"Authorization": "Bearer mock_token"})
+                response = self.client.get(
+                    endpoint, headers={"Authorization": "Bearer mock_token"}
+                )
 
             # Sensitive endpoints should not be cached
             if "Cache-Control" in response.headers:
                 cache_control = response.headers["Cache-Control"]
                 assert any(
                     directive in cache_control
-                    for directive in ["no-store", "no-cache", "private", "max-age=0"]
+                    for directive in [
+                        "no-store",
+                        "no-cache",
+                        "private",
+                        "max-age=0",
+                    ]
                 )
 
     def test_permissions_policy_header(self):
         """Test Permissions-Policy (formerly Feature-Policy) header."""
         response = self.client.post(
-            "/auth/login", json={"username": "testuser", "password": "testpass"}
+            "/auth/login",
+            json={"username": "testuser", "password": "testpass"},
         )
 
         if "Permissions-Policy" in response.headers:
@@ -300,7 +337,10 @@ class TestAuthenticationSecurityHeaders:
             for feature in restricted_features:
                 # Feature should be restricted (either not mentioned or set to 'none' or 'self')
                 if feature in policy:
-                    assert f"{feature}=()" in policy or f"{feature}=(self)" in policy
+                    assert (
+                        f"{feature}=()" in policy
+                        or f"{feature}=(self)" in policy
+                    )
 
     def test_security_headers_consistency(self):
         """Test that security headers are consistent across all auth endpoints."""
@@ -309,7 +349,11 @@ class TestAuthenticationSecurityHeaders:
             (
                 "/auth/register",
                 "POST",
-                {"username": "new", "email": "new@test.com", "password": "test"},
+                {
+                    "username": "new",
+                    "email": "new@test.com",
+                    "password": "test",
+                },
             ),
             ("/auth/logout", "POST", {}),
             ("/auth/refresh", "POST", {"refresh_token": "token"}),
@@ -320,7 +364,9 @@ class TestAuthenticationSecurityHeaders:
 
         for endpoint, method, data in endpoints:
             response = self.client.request(method, endpoint, json=data)
-            all_headers.append({"endpoint": endpoint, "headers": dict(response.headers)})
+            all_headers.append(
+                {"endpoint": endpoint, "headers": dict(response.headers)}
+            )
 
         # Check consistency
         common_headers = None
@@ -328,7 +374,8 @@ class TestAuthenticationSecurityHeaders:
             endpoint_headers = set(
                 k
                 for k in entry["headers"].keys()
-                if k.startswith("X-") or k in ["Referrer-Policy", "Permissions-Policy"]
+                if k.startswith("X-")
+                or k in ["Referrer-Policy", "Permissions-Policy"]
             )
 
             if common_headers is None:
@@ -338,14 +385,19 @@ class TestAuthenticationSecurityHeaders:
                 missing = common_headers - endpoint_headers
                 endpoint_headers - common_headers
 
-                assert len(missing) == 0, f"{entry['endpoint']} missing headers: {missing}"
+                assert (
+                    len(missing) == 0
+                ), f"{entry['endpoint']} missing headers: {missing}"
 
     def test_certificate_pinning_headers(self):
         """Test certificate pinning headers in production."""
-        with patch.dict("os.environ", {"PRODUCTION": "true", "ENABLE_CERT_PINNING": "true"}):
+        with patch.dict(
+            "os.environ", {"PRODUCTION": "true", "ENABLE_CERT_PINNING": "true"}
+        ):
             self.mock_api.security_headers_manager = SecurityHeadersManager()
             response = self.client.post(
-                "/auth/login", json={"username": "testuser", "password": "testpass"}
+                "/auth/login",
+                json={"username": "testuser", "password": "testpass"},
             )
 
             # Check for Public-Key-Pins or Expect-CT header
@@ -389,7 +441,8 @@ class TestAuthenticationSecurityHeaders:
 
         for malicious_input in malicious_inputs:
             response = self.client.post(
-                "/auth/login", json={"username": malicious_input, "password": "test"}
+                "/auth/login",
+                json={"username": malicious_input, "password": "test"},
             )
 
             # Injected header should not appear
@@ -400,7 +453,9 @@ class TestAuthenticationSecurityHeaders:
         import time
 
         # Warm up
-        self.client.post("/auth/login", json={"username": "test", "password": "test"})
+        self.client.post(
+            "/auth/login", json={"username": "test", "password": "test"}
+        )
 
         # Measure with headers
         times_with_headers = []
@@ -422,7 +477,8 @@ class TestAuthenticationSecurityHeaders:
         with patch.dict("os.environ", {"PRODUCTION": str(production).lower()}):
             self.mock_api.security_headers_manager = SecurityHeadersManager()
             response = self.client.post(
-                "/auth/login", json={"username": "testuser", "password": "testpass"}
+                "/auth/login",
+                json={"username": "testuser", "password": "testpass"},
             )
 
             if production:
@@ -464,7 +520,8 @@ class TestSecurityHeadersIntegration:
 
         # 2. Login
         login_response = self.client.post(
-            "/auth/login", json={"username": "secureuser", "password": "SecurePass123!"}
+            "/auth/login",
+            json={"username": "secureuser", "password": "SecurePass123!"},
         )
         assert login_response.status_code == 200
         assert "X-Frame-Options" in login_response.headers
@@ -472,7 +529,9 @@ class TestSecurityHeadersIntegration:
         # 3. Verify token
         verify_response = self.client.get(
             "/auth/verify",
-            headers={"Authorization": f"Bearer {login_response.json()['access_token']}"},
+            headers={
+                "Authorization": f"Bearer {login_response.json()['access_token']}"
+            },
         )
         assert verify_response.status_code == 200
         assert "Referrer-Policy" in verify_response.headers
@@ -487,7 +546,9 @@ class TestSecurityHeadersIntegration:
         # 5. Logout
         logout_response = self.client.post(
             "/auth/logout",
-            headers={"Authorization": f"Bearer {login_response.json()['access_token']}"},
+            headers={
+                "Authorization": f"Bearer {login_response.json()['access_token']}"
+            },
         )
         assert logout_response.status_code == 200
         assert "X-Frame-Options" in logout_response.headers
@@ -503,7 +564,9 @@ class TestSecurityHeadersIntegration:
         def make_request(endpoint, method="POST"):
             """Make a request and check headers."""
             if method == "POST":
-                response = self.client.post(endpoint, json={"username": "test", "password": "test"})
+                response = self.client.post(
+                    endpoint, json={"username": "test", "password": "test"}
+                )
             else:
                 response = self.client.get(endpoint)
 
@@ -514,7 +577,10 @@ class TestSecurityHeadersIntegration:
                         "status": response.status_code,
                         "has_security_headers": all(
                             header in response.headers
-                            for header in ["X-Content-Type-Options", "X-Frame-Options"]
+                            for header in [
+                                "X-Content-Type-Options",
+                                "X-Frame-Options",
+                            ]
                         ),
                     }
                 )
@@ -524,7 +590,9 @@ class TestSecurityHeadersIntegration:
             futures = []
             for _ in range(50):
                 futures.append(executor.submit(make_request, "/auth/login"))
-                futures.append(executor.submit(make_request, "/auth/verify", "GET"))
+                futures.append(
+                    executor.submit(make_request, "/auth/verify", "GET")
+                )
 
             concurrent.futures.wait(futures)
 

@@ -1,12 +1,12 @@
 
 pipeline {
     agent any
-    
+
     environment {
         PYTHON_VERSION = '3.10'
         DATABASE_URL = 'postgresql://postgres:postgres@localhost/freeagentics_test'
     }
-    
+
     stages {
         stage('Setup') {
             steps {
@@ -19,7 +19,7 @@ pipeline {
                 '''
             }
         }
-        
+
         stage('Security Tests') {
             parallel {
                 stage('Unit Security Tests') {
@@ -30,7 +30,7 @@ pipeline {
                         '''
                     }
                 }
-                
+
                 stage('Penetration Tests') {
                     steps {
                         sh '''
@@ -39,7 +39,7 @@ pipeline {
                         '''
                     }
                 }
-                
+
                 stage('SAST Scanning') {
                     steps {
                         sh '''
@@ -49,7 +49,7 @@ pipeline {
                         '''
                     }
                 }
-                
+
                 stage('Dependency Scanning') {
                     steps {
                         sh '''
@@ -61,7 +61,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('OWASP ZAP Scan') {
             steps {
                 script {
@@ -73,7 +73,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Security Gate') {
             steps {
                 sh '''
@@ -83,7 +83,7 @@ pipeline {
             }
         }
     }
-    
+
     post {
         always {
             junit 'results/*-tests.xml'
@@ -97,7 +97,7 @@ pipeline {
             ])
             archiveArtifacts artifacts: 'results/*.json', fingerprint: true
         }
-        
+
         failure {
             emailext (
                 subject: "Security Gate Failed: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",

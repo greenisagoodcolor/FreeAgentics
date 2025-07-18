@@ -30,7 +30,7 @@ CLEANED_COUNT=0
 safe_remove() {
     local path="$1"
     local type="$2"
-    
+
     if [ -e "$path" ]; then
         rm -rf "$path"
         ((CLEANED_COUNT++))

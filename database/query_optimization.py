@@ -93,7 +93,9 @@ class QueryOptimizer:
                 await session.commit()
                 logger.info(f"Created extension: {ext}")
             except Exception as e:
-                logger.warning(f"Extension creation failed (may already exist): {e}")
+                logger.warning(
+                    f"Extension creation failed (may already exist): {e}"
+                )
                 await session.rollback()
 
         # Create indexes
@@ -103,11 +105,17 @@ class QueryOptimizer:
                 await session.commit()
                 logger.info(f"Created index: {index_sql}")
             except Exception as e:
-                logger.warning(f"Index creation failed (may already exist): {e}")
+                logger.warning(
+                    f"Index creation failed (may already exist): {e}"
+                )
                 await session.rollback()
 
     async def get_active_agents_optimized(
-        self, session: AsyncSession, limit: int = 100, offset: int = 0, include_metrics: bool = True
+        self,
+        session: AsyncSession,
+        limit: int = 100,
+        offset: int = 0,
+        include_metrics: bool = True,
     ) -> List[Agent]:
         """Get active agents with optimized query."""
         start_time = time.time()
@@ -117,7 +125,9 @@ class QueryOptimizer:
 
         if include_metrics:
             # Order by activity for better performance
-            query = query.order_by(desc(Agent.last_active), desc(Agent.created_at))
+            query = query.order_by(
+                desc(Agent.last_active), desc(Agent.created_at)
+            )
         else:
             # If metrics not needed, use simpler ordering
             query = query.order_by(desc(Agent.created_at))
@@ -134,7 +144,10 @@ class QueryOptimizer:
         return list(agents)
 
     async def get_agent_coalitions_optimized(
-        self, session: AsyncSession, agent_id: str, include_inactive: bool = False
+        self,
+        session: AsyncSession,
+        agent_id: str,
+        include_inactive: bool = False,
     ) -> List[Coalition]:
         """Get agent's coalitions with optimized joins."""
         start_time = time.time()
@@ -153,7 +166,9 @@ class QueryOptimizer:
             query = query.where(Coalition.status == CoalitionStatus.ACTIVE)
 
         # Order by performance and creation time
-        query = query.order_by(desc(Coalition.performance_score), desc(Coalition.created_at))
+        query = query.order_by(
+            desc(Coalition.performance_score), desc(Coalition.created_at)
+        )
 
         result = await session.execute(query)
         coalitions = result.scalars().all()
@@ -164,7 +179,10 @@ class QueryOptimizer:
         return list(coalitions)
 
     async def get_coalition_members_optimized(
-        self, session: AsyncSession, coalition_id: str, include_performance: bool = True
+        self,
+        session: AsyncSession,
+        coalition_id: str,
+        include_performance: bool = True,
     ) -> List[Dict[str, Any]]:
         """Get coalition members with role and performance data."""
         start_time = time.time()
@@ -183,7 +201,10 @@ class QueryOptimizer:
                 agent_coalition_association.c.contribution_score,
                 agent_coalition_association.c.trust_score,
             )
-            .join(agent_coalition_association, Agent.id == agent_coalition_association.c.agent_id)
+            .join(
+                agent_coalition_association,
+                Agent.id == agent_coalition_association.c.agent_id,
+            )
             .where(agent_coalition_association.c.coalition_id == coalition_id)
         )
 
@@ -206,7 +227,9 @@ class QueryOptimizer:
                     "agent_id": str(row.id),
                     "name": row.name,
                     "status": row.status.value,
-                    "last_active": row.last_active.isoformat() if row.last_active else None,
+                    "last_active": row.last_active.isoformat()
+                    if row.last_active
+                    else None,
                     "inference_count": row.inference_count,
                     "total_steps": row.total_steps,
                     "role": row.role.value,
@@ -222,7 +245,10 @@ class QueryOptimizer:
         return members
 
     async def get_top_performing_agents(
-        self, session: AsyncSession, limit: int = 10, metric: str = "inference_count"
+        self,
+        session: AsyncSession,
+        limit: int = 10,
+        metric: str = "inference_count",
     ) -> List[Agent]:
         """Get top performing agents by specified metric."""
         start_time = time.time()
@@ -267,17 +293,21 @@ class QueryOptimizer:
         # Single query to get all stats
         query = (
             select(
-                func.count(agent_coalition_association.c.agent_id).label("member_count"),
-                func.avg(agent_coalition_association.c.contribution_score).label(
-                    "avg_contribution"
+                func.count(agent_coalition_association.c.agent_id).label(
+                    "member_count"
                 ),
-                func.avg(agent_coalition_association.c.trust_score).label("avg_trust"),
-                func.max(agent_coalition_association.c.contribution_score).label(
-                    "max_contribution"
+                func.avg(
+                    agent_coalition_association.c.contribution_score
+                ).label("avg_contribution"),
+                func.avg(agent_coalition_association.c.trust_score).label(
+                    "avg_trust"
                 ),
-                func.min(agent_coalition_association.c.contribution_score).label(
-                    "min_contribution"
-                ),
+                func.max(
+                    agent_coalition_association.c.contribution_score
+                ).label("max_contribution"),
+                func.min(
+                    agent_coalition_association.c.contribution_score
+                ).label("min_contribution"),
                 func.sum(Agent.inference_count).label("total_inferences"),
                 func.sum(Agent.total_steps).label("total_steps"),
                 func.count(Agent.id.distinct())
@@ -305,7 +335,8 @@ class QueryOptimizer:
                 "min_contribution_score": float(row.min_contribution or 0),
                 "total_inferences": row.total_inferences or 0,
                 "total_steps": row.total_steps or 0,
-                "activity_ratio": (row.active_members or 0) / max(row.member_count or 1, 1),
+                "activity_ratio": (row.active_members or 0)
+                / max(row.member_count or 1, 1),
             }
         else:
             stats = {
@@ -321,7 +352,9 @@ class QueryOptimizer:
             }
 
         query_time = time.time() - start_time
-        self._track_query_performance("get_coalition_performance_stats", query_time)
+        self._track_query_performance(
+            "get_coalition_performance_stats", query_time
+        )
 
         return stats
 
@@ -347,7 +380,8 @@ class QueryOptimizer:
                     last_active=update_data.get("last_active", func.now()),
                     inference_count=Agent.inference_count
                     + update_data.get("inference_increment", 0),
-                    total_steps=Agent.total_steps + update_data.get("steps_increment", 0),
+                    total_steps=Agent.total_steps
+                    + update_data.get("steps_increment", 0),
                     updated_at=func.now(),
                 )
             )
@@ -393,14 +427,18 @@ class QueryOptimizer:
 
         return list(agents)
 
-    async def get_system_performance_metrics(self, session: AsyncSession) -> Dict[str, Any]:
+    async def get_system_performance_metrics(
+        self, session: AsyncSession
+    ) -> Dict[str, Any]:
         """Get system-wide performance metrics."""
         start_time = time.time()
 
         # Single query for multiple metrics
         query = select(
             func.count(Agent.id).label("total_agents"),
-            func.count(Agent.id).filter(Agent.status == AgentStatus.ACTIVE).label("active_agents"),
+            func.count(Agent.id)
+            .filter(Agent.status == AgentStatus.ACTIVE)
+            .label("active_agents"),
             func.count(Coalition.id).label("total_coalitions"),
             func.count(Coalition.id)
             .filter(Coalition.status == CoalitionStatus.ACTIVE)
@@ -408,9 +446,15 @@ class QueryOptimizer:
             func.avg(Agent.inference_count).label("avg_inferences_per_agent"),
             func.sum(Agent.inference_count).label("total_inferences"),
             func.sum(Agent.total_steps).label("total_steps"),
-            func.avg(Coalition.performance_score).label("avg_coalition_performance"),
-            func.count(agent_coalition_association.c.agent_id).label("total_memberships"),
-        ).select_from(Agent.outerjoin(Coalition).outerjoin(agent_coalition_association))
+            func.avg(Coalition.performance_score).label(
+                "avg_coalition_performance"
+            ),
+            func.count(agent_coalition_association.c.agent_id).label(
+                "total_memberships"
+            ),
+        ).select_from(
+            Agent.outerjoin(Coalition).outerjoin(agent_coalition_association)
+        )
 
         result = await session.execute(query)
         row = result.first()
@@ -420,18 +464,25 @@ class QueryOptimizer:
             "active_agents": row.active_agents or 0,
             "total_coalitions": row.total_coalitions or 0,
             "active_coalitions": row.active_coalitions or 0,
-            "avg_inferences_per_agent": float(row.avg_inferences_per_agent or 0),
+            "avg_inferences_per_agent": float(
+                row.avg_inferences_per_agent or 0
+            ),
             "total_inferences": row.total_inferences or 0,
             "total_steps": row.total_steps or 0,
-            "avg_coalition_performance": float(row.avg_coalition_performance or 0),
+            "avg_coalition_performance": float(
+                row.avg_coalition_performance or 0
+            ),
             "total_memberships": row.total_memberships or 0,
-            "agent_utilization": (row.active_agents or 0) / max(row.total_agents or 1, 1),
+            "agent_utilization": (row.active_agents or 0)
+            / max(row.total_agents or 1, 1),
             "coalition_utilization": (row.active_coalitions or 0)
             / max(row.total_coalitions or 1, 1),
         }
 
         query_time = time.time() - start_time
-        self._track_query_performance("get_system_performance_metrics", query_time)
+        self._track_query_performance(
+            "get_system_performance_metrics", query_time
+        )
 
         return metrics
 
@@ -449,14 +500,20 @@ class QueryOptimizer:
         # Track slow queries (>100ms)
         if query_time > 0.1:
             self.query_stats["slow_queries"].append(
-                {"query_name": query_name, "query_time": query_time, "timestamp": time.time()}
+                {
+                    "query_name": query_name,
+                    "query_time": query_time,
+                    "timestamp": time.time(),
+                }
             )
 
             # Keep only last 50 slow queries
             if len(self.query_stats["slow_queries"]) > 50:
                 self.query_stats["slow_queries"].pop(0)
 
-            logger.warning(f"Slow query detected: {query_name} took {query_time:.3f}s")
+            logger.warning(
+                f"Slow query detected: {query_name} took {query_time:.3f}s"
+            )
 
     def get_query_performance_report(self) -> Dict[str, Any]:
         """Get comprehensive query performance report."""
@@ -464,9 +521,12 @@ class QueryOptimizer:
             "total_queries": self.query_stats["total_queries"],
             "avg_query_time": self.query_stats["avg_query_time"],
             "slow_queries_count": len(self.query_stats["slow_queries"]),
-            "slow_queries": self.query_stats["slow_queries"][-10:],  # Last 10 slow queries
+            "slow_queries": self.query_stats["slow_queries"][
+                -10:
+            ],  # Last 10 slow queries
             "cache_hit_rate": (
-                self.query_stats["cache_hits"] / max(self.query_stats["total_queries"], 1)
+                self.query_stats["cache_hits"]
+                / max(self.query_stats["total_queries"], 1)
             )
             * 100,
         }
@@ -504,7 +564,10 @@ def cache_query(cache_key: str, ttl: int = 300):
             result = await func(*args, **kwargs)
 
             # Cache result
-            optimizer.query_cache[cache_key] = {"data": result, "timestamp": time.time()}
+            optimizer.query_cache[cache_key] = {
+                "data": result,
+                "timestamp": time.time(),
+            }
 
             optimizer.query_stats["cache_misses"] += 1
             return result

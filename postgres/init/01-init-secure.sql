@@ -72,12 +72,12 @@ RETURNS TABLE(
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
+    SELECT
         'healthy'::text as status,
         numbackends as connections,
         pg_size_pretty(pg_database_size(current_database())) as database_size,
         now() - pg_postmaster_start_time() as uptime
-    FROM pg_stat_database 
+    FROM pg_stat_database
     WHERE datname = current_database();
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -86,7 +86,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 GRANT EXECUTE ON FUNCTION health_check() TO freeagentics_monitor;
 
 -- Create function to safely reset statistics
-CREATE OR REPLACE FUNCTION reset_stats() 
+CREATE OR REPLACE FUNCTION reset_stats()
 RETURNS void AS $$
 BEGIN
     SELECT pg_stat_reset();

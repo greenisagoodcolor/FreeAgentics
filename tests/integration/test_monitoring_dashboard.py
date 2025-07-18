@@ -82,13 +82,31 @@ async def test_dashboard_metrics_collection(dashboard):
 async def test_metric_status_calculation(dashboard):
     """Test metric status calculation based on thresholds."""
     # Test status calculation - use the global instance
-    assert monitoring_dashboard._get_metric_status("inference_time_ms", 30) == "healthy"
-    assert monitoring_dashboard._get_metric_status("inference_time_ms", 60) == "warning"
-    assert monitoring_dashboard._get_metric_status("inference_time_ms", 110) == "critical"
+    assert (
+        monitoring_dashboard._get_metric_status("inference_time_ms", 30)
+        == "healthy"
+    )
+    assert (
+        monitoring_dashboard._get_metric_status("inference_time_ms", 60)
+        == "warning"
+    )
+    assert (
+        monitoring_dashboard._get_metric_status("inference_time_ms", 110)
+        == "critical"
+    )
 
-    assert monitoring_dashboard._get_metric_status("cpu_usage_percent", 50) == "healthy"
-    assert monitoring_dashboard._get_metric_status("cpu_usage_percent", 75) == "warning"
-    assert monitoring_dashboard._get_metric_status("cpu_usage_percent", 95) == "critical"
+    assert (
+        monitoring_dashboard._get_metric_status("cpu_usage_percent", 50)
+        == "healthy"
+    )
+    assert (
+        monitoring_dashboard._get_metric_status("cpu_usage_percent", 75)
+        == "warning"
+    )
+    assert (
+        monitoring_dashboard._get_metric_status("cpu_usage_percent", 95)
+        == "critical"
+    )
 
 
 @pytest.mark.asyncio
@@ -100,7 +118,9 @@ async def test_dashboard_alerts(dashboard):
 
     # Generate high latency metrics
     await record_inference_metric(
-        agent_id=agent.agent_id, inference_time_ms=150.0, success=True  # Above critical threshold
+        agent_id=agent.agent_id,
+        inference_time_ms=150.0,
+        success=True,  # Above critical threshold
     )
 
     # Wait for dashboard update
@@ -153,7 +173,9 @@ async def test_metric_history(dashboard):
 
     for i in range(5):
         await record_inference_metric(
-            agent_id=agent.agent_id, inference_time_ms=10.0 + i * 2, success=True
+            agent_id=agent.agent_id,
+            inference_time_ms=10.0 + i * 2,
+            success=True,
         )
         await asyncio.sleep(0.5)
 
@@ -184,7 +206,9 @@ async def test_dashboard_agent_details(dashboard):
 
         # Generate different metrics for each
         await record_inference_metric(
-            agent_id=agent.agent_id, inference_time_ms=10.0 * (i + 1), success=True
+            agent_id=agent.agent_id,
+            inference_time_ms=10.0 * (i + 1),
+            success=True,
         )
 
     # Wait for dashboard update

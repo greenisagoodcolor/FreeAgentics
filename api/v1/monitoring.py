@@ -69,17 +69,24 @@ class MetricsCollector:
         for metric in default_metrics:
             self.metrics[metric] = deque(maxlen=self.buffer_size)
 
-    def record_metric(self, metric_type: str, value: float, agent_id: Optional[str] = None):
+    def record_metric(
+        self, metric_type: str, value: float, agent_id: Optional[str] = None
+    ):
         """Record a metric value."""
         if metric_type not in self.metrics:
             self.metrics[metric_type] = deque(maxlen=self.buffer_size)
 
-        point = MetricPoint(value=value, agent_id=agent_id, metric_type=metric_type)
+        point = MetricPoint(
+            value=value, agent_id=agent_id, metric_type=metric_type
+        )
 
         self.metrics[metric_type].append(point)
 
     def get_metrics(
-        self, metric_type: str, duration: Optional[float] = None, agent_id: Optional[str] = None
+        self,
+        metric_type: str,
+        duration: Optional[float] = None,
+        agent_id: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Get metrics for a specific type and optional time window."""
         if metric_type not in self.metrics:
@@ -98,7 +105,9 @@ class MetricsCollector:
 
         return [m.dict() for m in metrics]
 
-    def get_summary(self, metric_type: str, duration: float = 60.0) -> Dict[str, float]:
+    def get_summary(
+        self, metric_type: str, duration: float = 60.0
+    ) -> Dict[str, float]:
         """Get summary statistics for a metric."""
         metrics = self.get_metrics(metric_type, duration)
 
@@ -144,7 +153,9 @@ class MonitoringManager:
         self.sessions: Dict[str, MonitoringSession] = {}
         self.active_streams: Dict[str, asyncio.Task] = {}
 
-    async def start_session(self, websocket: WebSocket, session: MonitoringSession):
+    async def start_session(
+        self, websocket: WebSocket, session: MonitoringSession
+    ):
         """Start a monitoring session."""
         self.sessions[session.session_id] = session
 
@@ -172,7 +183,9 @@ class MonitoringManager:
 
         logger.info(f"Stopped monitoring session {session_id}")
 
-    async def _stream_metrics(self, websocket: WebSocket, session: MonitoringSession):
+    async def _stream_metrics(
+        self, websocket: WebSocket, session: MonitoringSession
+    ):
         """Stream metrics to a WebSocket client."""
         try:
             while True:
@@ -182,7 +195,8 @@ class MonitoringManager:
                 for metric_type in session.metrics:
                     # Get recent metrics
                     metrics = self.collector.get_metrics(
-                        metric_type, duration=session.sample_rate * 10  # Last 10 samples
+                        metric_type,
+                        duration=session.sample_rate * 10,  # Last 10 samples
                     )
 
                     # Filter by agents if specified
@@ -190,7 +204,8 @@ class MonitoringManager:
                         metrics = [
                             m
                             for m in metrics
-                            if not m.get("agent_id") or m["agent_id"] in session.agents
+                            if not m.get("agent_id")
+                            or m["agent_id"] in session.agents
                         ]
 
                     if metrics:
@@ -211,7 +226,9 @@ class MonitoringManager:
                 await asyncio.sleep(session.sample_rate)
 
         except asyncio.CancelledError:
-            logger.info(f"Metric streaming cancelled for session {session.session_id}")
+            logger.info(
+                f"Metric streaming cancelled for session {session.session_id}"
+            )
         except Exception as e:
             logger.error(f"Error streaming metrics: {e}")
 
@@ -243,7 +260,9 @@ async def monitor_endpoint(websocket: WebSocket, client_id: str):
                     session = MonitoringSession(
                         session_id=session_id,
                         client_id=client_id,
-                        metrics=config.get("metrics", ["cpu_usage", "memory_usage"]),
+                        metrics=config.get(
+                            "metrics", ["cpu_usage", "memory_usage"]
+                        ),
                         agents=config.get("agents", []),
                         sample_rate=config.get("sample_rate", 1.0),
                         buffer_size=config.get("buffer_size", 1000),
@@ -276,7 +295,9 @@ async def monitor_endpoint(websocket: WebSocket, client_id: str):
                     duration = message.get("duration", 60.0)
 
                     if metric_type:
-                        summary = metrics_collector.get_summary(metric_type, duration)
+                        summary = metrics_collector.get_summary(
+                            metric_type, duration
+                        )
 
                         await websocket.send_json(
                             {
@@ -320,7 +341,9 @@ async def monitor_endpoint(websocket: WebSocket, client_id: str):
 # REST endpoints for metric access
 @router.get("/metrics/{metric_type}")
 async def get_metrics(
-    metric_type: str, duration: Optional[float] = 60.0, agent_id: Optional[str] = None
+    metric_type: str,
+    duration: Optional[float] = 60.0,
+    agent_id: Optional[str] = None,
 ):
     """Get metrics for a specific type."""
     metrics = metrics_collector.get_metrics(metric_type, duration, agent_id)
@@ -400,7 +423,9 @@ async def reset_agent_belief_monitoring(agent_id: str):
 async def get_coordination_stats():
     """Get coordination statistics for all agents."""
     try:
-        from observability.coordination_metrics import get_system_coordination_report
+        from observability.coordination_metrics import (
+            get_system_coordination_report,
+        )
 
         return get_system_coordination_report()
     except ImportError:
@@ -411,7 +436,9 @@ async def get_coordination_stats():
 async def get_agent_coordination_stats(agent_id: str):
     """Get coordination statistics for a specific agent."""
     try:
-        from observability.coordination_metrics import get_agent_coordination_stats
+        from observability.coordination_metrics import (
+            get_agent_coordination_stats,
+        )
 
         return get_agent_coordination_stats(agent_id)
     except ImportError:
@@ -431,7 +458,10 @@ async def get_coalition_statistics():
 
 # Simulation metrics recording functions
 async def record_agent_metric(
-    agent_id: str, metric_type: str, value: float, metadata: Optional[Dict[str, Any]] = None
+    agent_id: str,
+    metric_type: str,
+    value: float,
+    metadata: Optional[Dict[str, Any]] = None,
 ):
     """Record an agent-specific metric."""
     # Note: metadata parameter is accepted for compatibility but currently unused

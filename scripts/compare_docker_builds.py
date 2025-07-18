@@ -11,7 +11,9 @@ import time
 def run_command(command, timeout=300):
     """Run a command with timeout"""
     try:
-        result = subprocess.run(command, capture_output=True, text=True, timeout=timeout)
+        result = subprocess.run(
+            command, capture_output=True, text=True, timeout=timeout
+        )
         return result.returncode, result.stdout, result.stderr
     except subprocess.TimeoutExpired:
         return 1, "", f"Command timed out after {timeout} seconds"
@@ -47,7 +49,11 @@ def main():
     print("=== Docker Build Size Comparison ===")
 
     builds = [
-        {"name": "Original", "dockerfile": "Dockerfile", "tag": "freeagentics:original"},
+        {
+            "name": "Original",
+            "dockerfile": "Dockerfile",
+            "tag": "freeagentics:original",
+        },
         {
             "name": "Optimized",
             "dockerfile": "Dockerfile.optimized",
@@ -148,7 +154,14 @@ def main():
 
                     # Check if container is running
                     returncode, stdout, stderr = run_command(
-                        ["docker", "ps", "-f", f"name={container_name}", "--format", "{{.Status}}"]
+                        [
+                            "docker",
+                            "ps",
+                            "-f",
+                            f"name={container_name}",
+                            "--format",
+                            "{{.Status}}",
+                        ]
                     )
 
                     if returncode == 0 and stdout.strip():
@@ -169,7 +182,13 @@ def main():
             print(f"\n{build_name} layers:")
 
             returncode, stdout, stderr = run_command(
-                ["docker", "history", result["tag"], "--format", "table {{.CreatedBy}}\t{{.Size}}"]
+                [
+                    "docker",
+                    "history",
+                    result["tag"],
+                    "--format",
+                    "table {{.CreatedBy}}\t{{.Size}}",
+                ]
             )
 
             if returncode == 0:

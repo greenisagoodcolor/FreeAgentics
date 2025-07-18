@@ -241,7 +241,9 @@ class FileStorageBackend(StorageBackend):
 class DatabaseStorageBackend(StorageBackend):
     """Database-based storage backend using SQLAlchemy."""
 
-    def __init__(self, connection_string: str = "sqlite:///knowledge_graphs.db"):
+    def __init__(
+        self, connection_string: str = "sqlite:///knowledge_graphs.db"
+    ):
         """Initialize database storage.
 
         Args:
@@ -257,9 +259,15 @@ class DatabaseStorageBackend(StorageBackend):
         session = self.SessionLocal()
         try:
             # Delete existing graph data
-            session.query(NodeModel).filter_by(graph_id=graph.graph_id).delete()
-            session.query(EdgeModel).filter_by(graph_id=graph.graph_id).delete()
-            session.query(GraphMetadataModel).filter_by(graph_id=graph.graph_id).delete()
+            session.query(NodeModel).filter_by(
+                graph_id=graph.graph_id
+            ).delete()
+            session.query(EdgeModel).filter_by(
+                graph_id=graph.graph_id
+            ).delete()
+            session.query(GraphMetadataModel).filter_by(
+                graph_id=graph.graph_id
+            ).delete()
 
             # Save nodes
             for node in graph.nodes.values():
@@ -320,7 +328,11 @@ class DatabaseStorageBackend(StorageBackend):
         session = self.SessionLocal()
         try:
             # Check if graph exists
-            metadata = session.query(GraphMetadataModel).filter_by(graph_id=graph_id).first()
+            metadata = (
+                session.query(GraphMetadataModel)
+                .filter_by(graph_id=graph_id)
+                .first()
+            )
 
             if not metadata:
                 return None
@@ -368,7 +380,9 @@ class DatabaseStorageBackend(StorageBackend):
                     confidence=edge_model.confidence,  # type: ignore[arg-type]
                 )
                 graph.edges[edge.id] = edge
-                graph.graph.add_edge(edge.source_id, edge.target_id, key=edge.id, data=edge)
+                graph.graph.add_edge(
+                    edge.source_id, edge.target_id, key=edge.id, data=edge
+                )
 
             # Restore metadata
             graph.version = metadata.version  # type: ignore[assignment]
@@ -391,7 +405,9 @@ class DatabaseStorageBackend(StorageBackend):
             # Delete in order due to foreign keys
             session.query(EdgeModel).filter_by(graph_id=graph_id).delete()
             session.query(NodeModel).filter_by(graph_id=graph_id).delete()
-            session.query(GraphMetadataModel).filter_by(graph_id=graph_id).delete()
+            session.query(GraphMetadataModel).filter_by(
+                graph_id=graph_id
+            ).delete()
 
             session.commit()
             return True
@@ -432,7 +448,12 @@ class DatabaseStorageBackend(StorageBackend):
         """Check if graph exists in database."""
         session = self.SessionLocal()
         try:
-            exists = session.query(GraphMetadataModel).filter_by(graph_id=graph_id).count() > 0
+            exists = (
+                session.query(GraphMetadataModel)
+                .filter_by(graph_id=graph_id)
+                .count()
+                > 0
+            )
             return exists
 
         finally:

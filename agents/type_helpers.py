@@ -79,7 +79,9 @@ def match_agent_id(agent: Any, target_id: Union[str, uuid.UUID]) -> bool:
     return agent_id == target_str
 
 
-def match_coalition_id(coalition: Any, target_id: Union[str, uuid.UUID]) -> bool:
+def match_coalition_id(
+    coalition: Any, target_id: Union[str, uuid.UUID]
+) -> bool:
     """Check if coalition matches target ID, handling type conversions.
 
     Args:
@@ -97,7 +99,9 @@ def match_coalition_id(coalition: Any, target_id: Union[str, uuid.UUID]) -> bool
     return coalition_id == target_str
 
 
-def get_agent_attribute(agent: Any, attribute: str, default: Optional[Any] = None) -> Any:
+def get_agent_attribute(
+    agent: Any, attribute: str, default: Optional[Any] = None
+) -> Any:
     """Safely get an attribute from an agent object.
 
     Args:
@@ -137,7 +141,9 @@ def get_agent_attribute(agent: Any, attribute: str, default: Optional[Any] = Non
     return default
 
 
-def get_coalition_attribute(coalition: Any, attribute: str, default: Optional[Any] = None) -> Any:
+def get_coalition_attribute(
+    coalition: Any, attribute: str, default: Optional[Any] = None
+) -> Any:
     """Safely get an attribute from a coalition object.
 
     Args:

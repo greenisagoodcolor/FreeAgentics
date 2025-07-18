@@ -44,13 +44,18 @@ def create_agent(agent_id: str) -> BasicExplorerAgent:
     return agent
 
 
-def agent_step_workload(agent: BasicExplorerAgent, num_steps: int = 10) -> List[float]:
+def agent_step_workload(
+    agent: BasicExplorerAgent, num_steps: int = 10
+) -> List[float]:
     """Run agent through multiple steps and return timings."""
     agent.start()
     timings = []
 
     for i in range(num_steps):
-        observation = {"position": [i % 5, i % 5], "surroundings": np.zeros((3, 3))}
+        observation = {
+            "position": [i % 5, i % 5],
+            "surroundings": np.zeros((3, 3)),
+        }
 
         start = time.time()
         agent.step(observation)
@@ -75,7 +80,10 @@ def test_threading(num_agents: int = 5, num_steps: int = 10) -> Dict[str, Any]:
 
     # Run agents concurrently with threads
     with ThreadPoolExecutor(max_workers=num_agents) as executor:
-        futures = [executor.submit(agent_step_workload, agent, num_steps) for agent in agents]
+        futures = [
+            executor.submit(agent_step_workload, agent, num_steps)
+            for agent in agents
+        ]
         results = [future.result() for future in futures]
 
     total_time = time.time() - start_time
@@ -103,7 +111,9 @@ def process_worker(agent_id: str, num_steps: int) -> List[float]:
     return agent_step_workload(agent, num_steps)
 
 
-def test_multiprocessing(num_agents: int = 5, num_steps: int = 10) -> Dict[str, Any]:
+def test_multiprocessing(
+    num_agents: int = 5, num_steps: int = 10
+) -> Dict[str, Any]:
     """Test multiprocessing performance."""
     print(f"\n🔧 Testing MULTIPROCESSING with {num_agents} agents...")
 
@@ -116,7 +126,8 @@ def test_multiprocessing(num_agents: int = 5, num_steps: int = 10) -> Dict[str, 
     # Run agents in separate processes
     with ProcessPoolExecutor(max_workers=num_agents) as executor:
         futures = [
-            executor.submit(process_worker, f"proc_{i}", num_steps) for i in range(num_agents)
+            executor.submit(process_worker, f"proc_{i}", num_steps)
+            for i in range(num_agents)
         ]
         results = [future.result() for future in futures]
 
@@ -210,16 +221,28 @@ def main():
             mp_result = None
 
         # Store results
-        results[num_agents] = {"threading": thread_result, "multiprocessing": mp_result}
+        results[num_agents] = {
+            "threading": thread_result,
+            "multiprocessing": mp_result,
+        }
 
         # Quick comparison
         if thread_result and mp_result:
-            if thread_result["throughput_ops_sec"] > mp_result["throughput_ops_sec"]:
+            if (
+                thread_result["throughput_ops_sec"]
+                > mp_result["throughput_ops_sec"]
+            ):
                 winner = "Threading"
-                margin = thread_result["throughput_ops_sec"] / mp_result["throughput_ops_sec"]
+                margin = (
+                    thread_result["throughput_ops_sec"]
+                    / mp_result["throughput_ops_sec"]
+                )
             else:
                 winner = "Multiprocessing"
-                margin = mp_result["throughput_ops_sec"] / thread_result["throughput_ops_sec"]
+                margin = (
+                    mp_result["throughput_ops_sec"]
+                    / thread_result["throughput_ops_sec"]
+                )
 
             print(f"\n  🏆 Winner: {winner} ({margin:.2f}x faster)")
             print(
@@ -252,10 +275,14 @@ def main():
                 mp_wins += 1
 
     print(f"\nValid comparisons: {valid_comparisons}")
-    print(f"Performance wins: Threading={threading_wins}, Multiprocessing={mp_wins}")
+    print(
+        f"Performance wins: Threading={threading_wins}, Multiprocessing={mp_wins}"
+    )
 
     if threading_wins > mp_wins:
-        print("\n✅ THREADING is recommended for FreeAgentics Active Inference agents")
+        print(
+            "\n✅ THREADING is recommended for FreeAgentics Active Inference agents"
+        )
         print("   - Better performance for PyMDP computations")
         print("   - Lower memory overhead")
         print("   - Simpler shared memory model")
@@ -295,7 +322,9 @@ def main():
         for num_agents, result in results.items():
             if num_agents > 1 and result["threading"]:
                 single_throughput = (
-                    results[1]["threading"]["throughput_ops_sec"] if results[1]["threading"] else 0
+                    results[1]["threading"]["throughput_ops_sec"]
+                    if results[1]["threading"]
+                    else 0
                 )
                 actual_throughput = result["threading"]["throughput_ops_sec"]
                 scaling_efficiency = (
@@ -303,7 +332,9 @@ def main():
                     if single_throughput > 0
                     else 0
                 )
-                print(f"  {num_agents} agents threading: {scaling_efficiency:.1%} efficiency")
+                print(
+                    f"  {num_agents} agents threading: {scaling_efficiency:.1%} efficiency"
+                )
 
     print("\n🎯 RECOMMENDATION FOR FREEAGENTICS:")
     print("   Use threading for most Active Inference agent scenarios")

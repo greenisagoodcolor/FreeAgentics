@@ -19,8 +19,12 @@ class TestPyMDPImports:
             import pymdp
 
             # Verify this is inferactively-pymdp, not the old pymdp
-            assert hasattr(pymdp, "agent"), "pymdp package should have 'agent' module"
-            assert hasattr(pymdp, "utils"), "pymdp package should have 'utils' module"
+            assert hasattr(
+                pymdp, "agent"
+            ), "pymdp package should have 'agent' module"
+            assert hasattr(
+                pymdp, "utils"
+            ), "pymdp package should have 'utils' module"
         except ImportError as e:
             pytest.fail(f"PyMDP package not available: {e}")
 
@@ -41,7 +45,9 @@ class TestPyMDPImports:
         try:
             from pymdp import utils
 
-            assert hasattr(utils, "random_A_matrix"), "utils should have random_A_matrix function"
+            assert hasattr(
+                utils, "random_A_matrix"
+            ), "utils should have random_A_matrix function"
         except ImportError as e:
             pytest.fail(f"Cannot import utils from pymdp: {e}")
 
@@ -111,7 +117,9 @@ class TestPyMDPImports:
         import sys
 
         sys.path.insert(0, str(Path(__file__).parent.parent))
-        from agents.enhanced_active_inference_agent import EnhancedActiveInferenceAgent
+        from agents.enhanced_active_inference_agent import (
+            EnhancedActiveInferenceAgent,
+        )
 
         # Should import successfully after fixes
         assert EnhancedActiveInferenceAgent is not None
@@ -142,15 +150,25 @@ class TestPyMDPImports:
                 for i, line in enumerate(lines):
                     if "try:" in line:
                         pass
-                    elif "except ImportError:" in line or "except ModuleNotFoundError:" in line:
+                    elif (
+                        "except ImportError:" in line
+                        or "except ModuleNotFoundError:" in line
+                    ):
                         # Look back in try block for PyMDP imports
                         for j in range(max(0, i - 10), i):
-                            if "from pymdp" in lines[j] or "import pymdp" in lines[j]:
+                            if (
+                                "from pymdp" in lines[j]
+                                or "import pymdp" in lines[j]
+                            ):
                                 pytest.fail(
                                     f"Found PyMDP import in try/except block at line {j + 1} in {file_path}. "
                                     f"Hard failures required for PyMDP imports!"
                                 )
-                    elif "except" not in line and line.strip() and not line.strip().startswith("#"):
+                    elif (
+                        "except" not in line
+                        and line.strip()
+                        and not line.strip().startswith("#")
+                    ):
                         pass
 
     def test_all_pymdp_imports_use_correct_paths(self):
@@ -184,7 +202,10 @@ class TestPyMDPImports:
 
         # After fixes, this should be empty
         if found_issues:
-            pytest.fail("Found incorrect PyMDP import patterns:\n" + "\n".join(found_issues))
+            pytest.fail(
+                "Found incorrect PyMDP import patterns:\n"
+                + "\n".join(found_issues)
+            )
 
     def test_pymdp_version_compatibility(self):
         """Test that the installed PyMDP version is compatible."""

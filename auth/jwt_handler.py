@@ -33,8 +33,12 @@ TOKEN_ISSUER = "freeagentics-auth"
 TOKEN_AUDIENCE = "freeagentics-api"
 
 # Key paths
-PRIVATE_KEY_PATH = os.path.join(os.path.dirname(__file__), "keys", "jwt_private.pem")
-PUBLIC_KEY_PATH = os.path.join(os.path.dirname(__file__), "keys", "jwt_public.pem")
+PRIVATE_KEY_PATH = os.path.join(
+    os.path.dirname(__file__), "keys", "jwt_private.pem"
+)
+PUBLIC_KEY_PATH = os.path.join(
+    os.path.dirname(__file__), "keys", "jwt_public.pem"
+)
 
 # Key rotation configuration
 KEY_ROTATION_DAYS = 90  # Rotate keys every 90 days
@@ -69,14 +73,18 @@ class TokenBlacklist:
             return
 
         # Remove expired tokens
-        expired_tokens = [jti for jti, exp in self._blacklist.items() if exp < current_time]
+        expired_tokens = [
+            jti for jti, exp in self._blacklist.items() if exp < current_time
+        ]
         for jti in expired_tokens:
             del self._blacklist[jti]
 
         self._last_cleanup = current_time
 
         if expired_tokens:
-            logger.info(f"Cleaned up {len(expired_tokens)} expired tokens from blacklist")
+            logger.info(
+                f"Cleaned up {len(expired_tokens)} expired tokens from blacklist"
+            )
 
 
 class RefreshTokenStore:
@@ -89,7 +97,9 @@ class RefreshTokenStore:
         self._tokens = {}  # user_id -> {token_hash, family_id, created_at}
         self._token_families = {}  # family_id -> [token_hashes]
 
-    def store(self, user_id: str, token: str, family_id: Optional[str] = None) -> str:
+    def store(
+        self, user_id: str, token: str, family_id: Optional[str] = None
+    ) -> str:
         """Store refresh token and return family ID."""
         token_hash = self._hash_token(token)
 
@@ -143,7 +153,9 @@ class RefreshTokenStore:
                 if data.get("family_id") == family_id:
                     del self._tokens[user_id]
             del self._token_families[family_id]
-            logger.warning(f"Invalidated token family {family_id} due to possible theft")
+            logger.warning(
+                f"Invalidated token family {family_id} due to possible theft"
+            )
 
     def _hash_token(self, token: str) -> str:
         """Hash token for secure storage."""
@@ -163,7 +175,9 @@ class JWTHandler:
         """Load RSA keys from files."""
         try:
             with open(PRIVATE_KEY_PATH, "rb") as f:
-                self.private_key = serialization.load_pem_private_key(f.read(), password=None)
+                self.private_key = serialization.load_pem_private_key(
+                    f.read(), password=None
+                )
 
             with open(PUBLIC_KEY_PATH, "rb") as f:
                 self.public_key = serialization.load_pem_public_key(f.read())
@@ -220,12 +234,16 @@ class JWTHandler:
             key_age_days = (time.time() - key_stat.st_mtime) / 86400
 
             if key_age_days > KEY_ROTATION_DAYS:
-                logger.error(f"JWT keys are {key_age_days:.0f} days old - rotation required!")
-            elif key_age_days > (KEY_ROTATION_DAYS - KEY_ROTATION_WARNING_DAYS):
+                logger.error(
+                    f"JWT keys are {key_age_days:.0f} days old - rotation required!"
+                )
+            elif key_age_days > (
+                KEY_ROTATION_DAYS - KEY_ROTATION_WARNING_DAYS
+            ):
                 logger.warning(
                     f"JWT keys are {key_age_days:.0f} days old - rotation recommended soon"
                 )
-        except:
+        except Exception:
             pass
 
     def create_access_token(
@@ -290,7 +308,9 @@ class JWTHandler:
 
         return token, family_id
 
-    def verify_access_token(self, token: str, fingerprint: Optional[str] = None) -> Dict[str, Any]:
+    def verify_access_token(
+        self, token: str, fingerprint: Optional[str] = None
+    ) -> Dict[str, Any]:
         """Verify access token with fingerprint checking."""
         try:
             # Decode and verify
@@ -315,8 +335,10 @@ class JWTHandler:
             # Verify fingerprint if provided
             if fingerprint:
                 stored_fingerprint = payload.get("fingerprint")
-                if not stored_fingerprint or stored_fingerprint != self._hash_fingerprint(
-                    fingerprint
+                if (
+                    not stored_fingerprint
+                    or stored_fingerprint
+                    != self._hash_fingerprint(fingerprint)
                 ):
                     raise jwt.InvalidTokenError("Invalid token fingerprint")
 
@@ -324,16 +346,19 @@ class JWTHandler:
 
         except jwt.ExpiredSignatureError:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Access token expired"
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Access token expired",
             )
         except jwt.InvalidTokenError as e:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Invalid access token: {str(e)}"
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Invalid access token: {str(e)}",
             )
         except Exception as e:
             logger.error(f"Token verification error: {e}")
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Token verification failed"
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token verification failed",
             )
 
     def verify_refresh_token(self, token: str, user_id: str) -> Dict[str, Any]:
@@ -372,19 +397,24 @@ class JWTHandler:
 
         except jwt.ExpiredSignatureError:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token expired"
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Refresh token expired",
             )
         except jwt.InvalidTokenError as e:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Invalid refresh token: {str(e)}"
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Invalid refresh token: {str(e)}",
             )
         except Exception as e:
             logger.error(f"Refresh token verification error: {e}")
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Token verification failed"
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token verification failed",
             )
 
-    def rotate_refresh_token(self, old_token: str, user_id: str) -> Tuple[str, str, str]:
+    def rotate_refresh_token(
+        self, old_token: str, user_id: str
+    ) -> Tuple[str, str, str]:
         """Rotate refresh token and create new access token."""
         # Verify old token
         payload = self.verify_refresh_token(old_token, user_id)
@@ -392,7 +422,9 @@ class JWTHandler:
 
         # Revoke old token
         if payload.get("jti"):
-            self.blacklist.add(payload["jti"], datetime.fromtimestamp(payload["exp"]))
+            self.blacklist.add(
+                payload["jti"], datetime.fromtimestamp(payload["exp"])
+            )
 
         # Create new tokens
         # Note: In real implementation, fetch user details from database
@@ -450,7 +482,8 @@ class JWTHandler:
                 "key_size": self.private_key.key_size,
                 "key_age_days": round(key_age_days, 1),
                 "rotation_required": key_age_days > KEY_ROTATION_DAYS,
-                "rotation_warning": key_age_days > (KEY_ROTATION_DAYS - KEY_ROTATION_WARNING_DAYS),
+                "rotation_warning": key_age_days
+                > (KEY_ROTATION_DAYS - KEY_ROTATION_WARNING_DAYS),
             }
         except Exception as e:
             logger.error(f"Error getting key info: {e}")

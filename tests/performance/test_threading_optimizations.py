@@ -20,7 +20,12 @@ from unittest.mock import Mock, patch
 import numpy as np
 
 # Add parent directory to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(
+    0,
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ),
+)
 
 from agents.optimized_threadpool_manager import OptimizedThreadPoolManager
 from agents.performance_optimizer import AsyncInferenceEngine
@@ -62,7 +67,9 @@ class TestThreadPoolOptimization(unittest.TestCase):
     def test_adaptive_scaling_thresholds(self):
         """Test adaptive scaling behavior with optimized thresholds."""
         manager = OptimizedThreadPoolManager(
-            initial_workers=4, max_workers=16, scaling_threshold=0.7  # Optimized threshold
+            initial_workers=4,
+            max_workers=16,
+            scaling_threshold=0.7,  # Optimized threshold
         )
 
         # Register test agents
@@ -76,7 +83,9 @@ class TestThreadPoolOptimization(unittest.TestCase):
         futures = []
         for _ in range(50):
             for agent in self.test_agents:
-                future = manager.submit_task(agent.agent_id, "step", {"observation": {}})
+                future = manager.submit_task(
+                    agent.agent_id, "step", {"observation": {}}
+                )
                 futures.append(future)
 
         # Wait for some completion
@@ -85,7 +94,9 @@ class TestThreadPoolOptimization(unittest.TestCase):
         # Check if scaling occurred
         status = manager.get_pool_status()
         self.assertGreater(
-            status["load_factor"], 0.7, "Load factor should exceed scaling threshold"
+            status["load_factor"],
+            0.7,
+            "Load factor should exceed scaling threshold",
         )
 
         # Cleanup
@@ -112,7 +123,10 @@ class TestThreadPoolOptimization(unittest.TestCase):
 
             # Measure throughput
             start_time = time.time()
-            observations = {agent.agent_id: {"data": i} for i, agent in enumerate(self.test_agents)}
+            observations = {
+                agent.agent_id: {"data": i}
+                for i, agent in enumerate(self.test_agents)
+            }
 
             for _ in range(10):
                 results = manager.step_all_agents(observations)
@@ -126,7 +140,9 @@ class TestThreadPoolOptimization(unittest.TestCase):
         # Verify performance improves with better configuration
         throughputs = list(results.values())
         self.assertGreater(
-            throughputs[-1], throughputs[0], "Larger thread pools should show better throughput"
+            throughputs[-1],
+            throughputs[0],
+            "Larger thread pools should show better throughput",
         )
 
 
@@ -168,7 +184,11 @@ class TestGILAwareScheduling(unittest.TestCase):
         batch_time, seq_time = asyncio.run(measure_performance())
 
         # Batched should be significantly faster
-        self.assertLess(batch_time, seq_time * 0.5, "Batched I/O should be at least 2x faster")
+        self.assertLess(
+            batch_time,
+            seq_time * 0.5,
+            "Batched I/O should be at least 2x faster",
+        )
 
     def test_numpy_operation_batching(self):
         """Test NumPy operation batching for GIL release."""
@@ -178,7 +198,9 @@ class TestGILAwareScheduling(unittest.TestCase):
             # NumPy releases GIL for this operation
             return np.stack(matrices).sum(axis=0)
 
-        def sequential_matrix_operations(matrices: List[np.ndarray]) -> np.ndarray:
+        def sequential_matrix_operations(
+            matrices: List[np.ndarray],
+        ) -> np.ndarray:
             """Process matrices sequentially."""
             result = np.zeros_like(matrices[0])
             for matrix in matrices:
@@ -204,7 +226,11 @@ class TestGILAwareScheduling(unittest.TestCase):
         np.testing.assert_allclose(batch_result, seq_result, rtol=1e-10)
 
         # Batched should be faster
-        self.assertLess(batch_duration, seq_duration, "Batched NumPy operations should be faster")
+        self.assertLess(
+            batch_duration,
+            seq_duration,
+            "Batched NumPy operations should be faster",
+        )
 
 
 class TestMemoryAccessPatterns(unittest.TestCase):
@@ -251,7 +277,9 @@ class TestMemoryAccessPatterns(unittest.TestCase):
         # Cache-aligned should show some improvement
         # Note: Actual improvement depends on hardware
         self.assertLessEqual(
-            aligned_time, regular_time * 1.1, "Cache-aligned structures should not be slower"
+            aligned_time,
+            regular_time * 1.1,
+            "Cache-aligned structures should not be slower",
         )
 
     def test_read_write_lock_optimization(self):
@@ -319,7 +347,9 @@ class TestMemoryAccessPatterns(unittest.TestCase):
         duration = time.time() - start_time
 
         # Should complete quickly with minimal contention
-        self.assertLess(duration, 1.0, "Read-write lock should minimize contention")
+        self.assertLess(
+            duration, 1.0, "Read-write lock should minimize contention"
+        )
 
 
 class TestLockFreeDataStructures(unittest.TestCase):
@@ -371,7 +401,9 @@ class TestLockFreeDataStructures(unittest.TestCase):
 
         # Lock-free should be faster for single producer/consumer
         self.assertLess(
-            lock_free_time, standard_time * 1.2, "Lock-free queue should be competitive or faster"
+            lock_free_time,
+            standard_time * 1.2,
+            "Lock-free queue should be competitive or faster",
         )
 
     def test_atomic_counter(self):
@@ -402,7 +434,9 @@ class TestLockFreeDataStructures(unittest.TestCase):
                 counter.increment()
 
         # Create multiple threads
-        threads = [threading.Thread(target=increment_thread) for _ in range(10)]
+        threads = [
+            threading.Thread(target=increment_thread) for _ in range(10)
+        ]
 
         # Run threads
         start_time = time.time()
@@ -415,7 +449,9 @@ class TestLockFreeDataStructures(unittest.TestCase):
         duration = time.time() - start_time
 
         # Verify correctness
-        self.assertEqual(counter.get(), 10000, "Atomic counter should maintain consistency")
+        self.assertEqual(
+            counter.get(), 10000, "Atomic counter should maintain consistency"
+        )
 
         # Should be fast
         self.assertLess(duration, 0.5, "Atomic operations should be fast")
@@ -471,7 +507,9 @@ class TestWorkloadSpecificOptimizations(unittest.TestCase):
 
         # Batching should reduce overhead
         self.assertLess(
-            batch_duration, unbatch_duration * 1.5, "Batching should not add significant overhead"
+            batch_duration,
+            unbatch_duration * 1.5,
+            "Batching should not add significant overhead",
         )
 
     def test_vectorized_belief_updates(self):
@@ -514,7 +552,9 @@ class TestWorkloadSpecificOptimizations(unittest.TestCase):
             np.testing.assert_allclose(v, s, rtol=1e-10)
 
         # Vectorized should be faster
-        self.assertLess(vec_duration, seq_duration, "Vectorized updates should be faster")
+        self.assertLess(
+            vec_duration, seq_duration, "Vectorized updates should be faster"
+        )
 
 
 class TestIntegrationPerformance(unittest.TestCase):
@@ -525,7 +565,9 @@ class TestIntegrationPerformance(unittest.TestCase):
 
         # Create optimized thread pool manager
         manager = OptimizedThreadPoolManager(
-            initial_workers=mp.cpu_count(), max_workers=mp.cpu_count() * 4, scaling_threshold=0.7
+            initial_workers=mp.cpu_count(),
+            max_workers=mp.cpu_count() * 4,
+            scaling_threshold=0.7,
         )
 
         # Create async inference engine
@@ -546,7 +588,9 @@ class TestIntegrationPerformance(unittest.TestCase):
         # Run performance test
         start_time = time.time()
 
-        observations = {agent.agent_id: {"data": i} for i, agent in enumerate(agents)}
+        observations = {
+            agent.agent_id: {"data": i} for i, agent in enumerate(agents)
+        }
 
         # Run multiple rounds
         for _ in range(10):
@@ -568,7 +612,11 @@ class TestIntegrationPerformance(unittest.TestCase):
 
         # Check thread pool efficiency
         status = manager.get_pool_status()
-        self.assertGreater(status["load_factor"], 0.5, "Thread pool should be efficiently utilized")
+        self.assertGreater(
+            status["load_factor"],
+            0.5,
+            "Thread pool should be efficiently utilized",
+        )
 
         # Cleanup
         manager.shutdown()

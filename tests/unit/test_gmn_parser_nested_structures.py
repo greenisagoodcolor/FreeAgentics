@@ -130,7 +130,11 @@ class TestNestedStateSpaces:
                         },
                     ],
                     "cross_modal_dependencies": [
-                        {"modality": "visual", "influences": ["proprioceptive"], "strength": 0.3}
+                        {
+                            "modality": "visual",
+                            "influences": ["proprioceptive"],
+                            "strength": 0.3,
+                        }
                     ],
                 }
             ],
@@ -282,7 +286,10 @@ class TestNestedPolicyStructures:
                                         "stay",
                                     ],
                                     "constraints": [
-                                        {"type": "spatial", "condition": "boundary_check"}
+                                        {
+                                            "type": "spatial",
+                                            "condition": "boundary_check",
+                                        }
                                     ],
                                 },
                             },
@@ -292,11 +299,17 @@ class TestNestedPolicyStructures:
                                 "time_scale": 5,
                                 "action_space": {
                                     "type": "abstract",
-                                    "goals": ["explore", "exploit", "avoid_danger"],
+                                    "goals": [
+                                        "explore",
+                                        "exploit",
+                                        "avoid_danger",
+                                    ],
                                     "goal_decomposition": {
                                         "explore": ["move_to_unknown"],
                                         "exploit": ["move_to_resource"],
-                                        "avoid_danger": ["move_away_from_hazard"],
+                                        "avoid_danger": [
+                                            "move_away_from_hazard"
+                                        ],
                                     },
                                 },
                             },
@@ -362,12 +375,22 @@ class TestNestedPolicyStructures:
                             "role": "explorer",
                             "individual_policy": {
                                 "type": "individual",
-                                "action_space": ["move", "observe", "communicate"],
-                                "constraints": {"communication_range": 3, "energy_limit": 100},
+                                "action_space": [
+                                    "move",
+                                    "observe",
+                                    "communicate",
+                                ],
+                                "constraints": {
+                                    "communication_range": 3,
+                                    "energy_limit": 100,
+                                },
                             },
                             "coordination_policy": {
                                 "type": "message_passing",
-                                "protocols": ["information_sharing", "task_allocation"],
+                                "protocols": [
+                                    "information_sharing",
+                                    "task_allocation",
+                                ],
                             },
                         },
                         {
@@ -375,12 +398,22 @@ class TestNestedPolicyStructures:
                             "role": "collector",
                             "individual_policy": {
                                 "type": "individual",
-                                "action_space": ["move", "collect", "share_resources"],
-                                "constraints": {"carrying_capacity": 10, "collection_range": 1},
+                                "action_space": [
+                                    "move",
+                                    "collect",
+                                    "share_resources",
+                                ],
+                                "constraints": {
+                                    "carrying_capacity": 10,
+                                    "collection_range": 1,
+                                },
                             },
                             "coordination_policy": {
                                 "type": "negotiation",
-                                "protocols": ["resource_exchange", "priority_resolution"],
+                                "protocols": [
+                                    "resource_exchange",
+                                    "priority_resolution",
+                                ],
                             },
                         },
                     ],
@@ -440,8 +473,14 @@ class TestNestedValidationFramework:
                     "name": "nested_obs",
                     "type": "observation",
                     "modalities": [
-                        {"name": "modality_a", "dimensions": [4]},  # Should match factor_a
-                        {"name": "modality_b", "dimensions": [5]},  # Mismatch with factor_b
+                        {
+                            "name": "modality_a",
+                            "dimensions": [4],
+                        },  # Should match factor_a
+                        {
+                            "name": "modality_b",
+                            "dimensions": [5],
+                        },  # Mismatch with factor_b
                     ],
                 },
             ],
@@ -482,7 +521,11 @@ class TestNestedValidationFramework:
                                 {
                                     "name": "level1_factor",
                                     "precision": 2.0,
-                                    "initial_distribution": [0.5, 0.3, 0.2],  # Sum = 1.0
+                                    "initial_distribution": [
+                                        0.5,
+                                        0.3,
+                                        0.2,
+                                    ],  # Sum = 1.0
                                 }
                             ],
                         },
@@ -492,7 +535,10 @@ class TestNestedValidationFramework:
                                 {
                                     "name": "level2_factor",
                                     "precision": -1.0,  # Invalid negative precision
-                                    "initial_distribution": [0.7, 0.5],  # Sum > 1.0
+                                    "initial_distribution": [
+                                        0.7,
+                                        0.5,
+                                    ],  # Sum > 1.0
                                 }
                             ],
                         },
@@ -526,7 +572,11 @@ class TestNestedValidationFramework:
                                 "time_scale": 1,
                                 "horizon": 5,  # Should be consistent with global
                             },
-                            {"level": 2, "time_scale": 3, "horizon": 10},  # Exceeds global horizon
+                            {
+                                "level": 2,
+                                "time_scale": 3,
+                                "horizon": 10,
+                            },  # Exceeds global horizon
                         ],
                     },
                 }
@@ -538,7 +588,11 @@ class TestNestedValidationFramework:
 
         # Should detect temporal inconsistency
         assert is_valid is False
-        temporal_errors = [e for e in errors if "temporal" in e.lower() or "horizon" in e.lower()]
+        temporal_errors = [
+            e
+            for e in errors
+            if "temporal" in e.lower() or "horizon" in e.lower()
+        ]
         assert len(temporal_errors) > 0
 
 

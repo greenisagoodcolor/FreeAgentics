@@ -20,7 +20,9 @@ import psutil
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -62,13 +64,18 @@ class AgentMemoryAnalyzer:
                 num_controls = [4, 1]
 
                 # Observation model
-                A = utils.obj_array_zeros([[num_obs[f], num_states[f]] for f in range(2)])
+                A = utils.obj_array_zeros(
+                    [[num_obs[f], num_states[f]] for f in range(2)]
+                )
                 for f in range(2):
                     A[f] = np.eye(num_obs[f], num_states[f])
 
                 # Transition model
                 B = utils.obj_array_zeros(
-                    [[num_states[f], num_states[f], num_controls[f]] for f in range(2)]
+                    [
+                        [num_states[f], num_states[f], num_controls[f]]
+                        for f in range(2)
+                    ]
                 )
 
                 # Take snapshot after creation
@@ -99,13 +106,17 @@ class AgentMemoryAnalyzer:
                 memories = [m["memory_mb"] for m in memory_usage]
 
                 if len(sizes) > 1:
-                    growth_rate = (memories[-1] - memories[0]) / (sizes[-1] - sizes[0])
+                    growth_rate = (memories[-1] - memories[0]) / (
+                        sizes[-1] - sizes[0]
+                    )
                     analysis["memory_growth_rate"] = growth_rate
 
                     # Extrapolate to larger grids
                     analysis["projected_100x100_mb"] = growth_rate * 10000
 
-                    logger.info(f"\nMemory growth rate: {growth_rate:.4f} MB per state")
+                    logger.info(
+                        f"\nMemory growth rate: {growth_rate:.4f} MB per state"
+                    )
                     logger.info(
                         f"Projected 100x100 grid: {analysis['projected_100x100_mb']:.2f} MB"
                     )
@@ -128,18 +139,25 @@ class AgentMemoryAnalyzer:
         num_agents = 10
 
         # Belief states (current implementation)
-        beliefs_current = np.zeros((num_agents, grid_size, grid_size), dtype=np.float64)
+        beliefs_current = np.zeros(
+            (num_agents, grid_size, grid_size), dtype=np.float64
+        )
         beliefs_size = beliefs_current.nbytes / 1024 / 1024
 
         # Belief states (optimized - float32)
-        beliefs_optimized = np.zeros((num_agents, grid_size, grid_size), dtype=np.float32)
+        beliefs_optimized = np.zeros(
+            (num_agents, grid_size, grid_size), dtype=np.float32
+        )
         beliefs_optimized_size = beliefs_optimized.nbytes / 1024 / 1024
 
         analysis["data_structures"]["beliefs"] = {
             "current_size_mb": beliefs_size,
             "optimized_size_mb": beliefs_optimized_size,
             "savings_mb": beliefs_size - beliefs_optimized_size,
-            "savings_percent": ((beliefs_size - beliefs_optimized_size) / beliefs_size) * 100,
+            "savings_percent": (
+                (beliefs_size - beliefs_optimized_size) / beliefs_size
+            )
+            * 100,
         }
 
         logger.info(
@@ -150,19 +168,27 @@ class AgentMemoryAnalyzer:
         # Transition matrices
         num_actions = 4
         transitions_current = np.zeros(
-            (num_actions, grid_size * grid_size, grid_size * grid_size), dtype=np.float64
+            (num_actions, grid_size * grid_size, grid_size * grid_size),
+            dtype=np.float64,
         )
         transitions_size = transitions_current.nbytes / 1024 / 1024
 
         # Sparse representation (estimate 10% density)
-        sparse_elements = int(0.1 * num_actions * grid_size * grid_size * grid_size * grid_size)
-        sparse_size = (sparse_elements * 12) / 1024 / 1024  # 12 bytes per sparse element
+        sparse_elements = int(
+            0.1 * num_actions * grid_size * grid_size * grid_size * grid_size
+        )
+        sparse_size = (
+            (sparse_elements * 12) / 1024 / 1024
+        )  # 12 bytes per sparse element
 
         analysis["data_structures"]["transitions"] = {
             "current_size_mb": transitions_size,
             "sparse_size_mb": sparse_size,
             "savings_mb": transitions_size - sparse_size,
-            "savings_percent": ((transitions_size - sparse_size) / transitions_size) * 100,
+            "savings_percent": (
+                (transitions_size - sparse_size) / transitions_size
+            )
+            * 100,
         }
 
         logger.info(
@@ -229,7 +255,10 @@ class AgentMemoryAnalyzer:
             "individual_mb": individual_memory,
             "pooled_mb": pooled_memory,
             "savings_mb": individual_memory - pooled_memory,
-            "savings_percent": ((individual_memory - pooled_memory) / individual_memory) * 100,
+            "savings_percent": (
+                (individual_memory - pooled_memory) / individual_memory
+            )
+            * 100,
         }
 
     def identify_memory_hotspots(self) -> List[Dict[str, Any]]:
@@ -268,11 +297,15 @@ class AgentMemoryAnalyzer:
                 if ".copy()" in content:
                     copy_count = content.count(".copy()")
                     if copy_count > 3:
-                        issues.append(f"Frequent array copying ({copy_count} .copy() calls)")
+                        issues.append(
+                            f"Frequent array copying ({copy_count} .copy() calls)"
+                        )
 
                 # Large default values
                 if "dtype=np.float64" in content:
-                    issues.append("Using float64 (consider float32 for memory savings)")
+                    issues.append(
+                        "Using float64 (consider float32 for memory savings)"
+                    )
 
                 if issues:
                     hotspots.append({"file": file_path, "issues": issues})
@@ -367,7 +400,9 @@ class AgentMemoryAnalyzer:
         # Calculate expected savings
         current_memory_per_agent = 34.5  # MB (from requirements)
 
-        immediate_savings = 0.5 * 0.3 + 0.3 * 0.3 + 0.2 * 0.2  # weighted by impact
+        immediate_savings = (
+            0.5 * 0.3 + 0.3 * 0.3 + 0.2 * 0.2
+        )  # weighted by impact
         medium_savings = 0.8 * 0.4 + 0.3 * 0.2 + 0.6 * 0.3
 
         plan["expected_savings"] = {
@@ -377,8 +412,12 @@ class AgentMemoryAnalyzer:
             "new_footprint": f"{current_memory_per_agent * (1 - immediate_savings - medium_savings):.1f} MB/agent",
         }
 
-        logger.info(f"\nExpected memory reduction: {plan['expected_savings']['total_reduction']}")
-        logger.info(f"New footprint: {plan['expected_savings']['new_footprint']}")
+        logger.info(
+            f"\nExpected memory reduction: {plan['expected_savings']['total_reduction']}"
+        )
+        logger.info(
+            f"New footprint: {plan['expected_savings']['new_footprint']}"
+        )
 
         return plan
 
@@ -441,7 +480,9 @@ class AgentMemoryAnalyzer:
             ]
         )
 
-        for struct_name, struct_data in data_structure_analysis["data_structures"].items():
+        for struct_name, struct_data in data_structure_analysis[
+            "data_structures"
+        ].items():
             report.append(
                 f"- {struct_name}: {struct_data['current_size_mb']:.2f} MB -> "
                 f"{struct_data.get('optimized_size_mb', struct_data.get('sparse_size_mb', 0)):.2f} MB "
@@ -473,7 +514,9 @@ class AgentMemoryAnalyzer:
 
         for action in optimization_plan["immediate_actions"]:
             report.append(f"- {action['action']}")
-            report.append(f"  Effort: {action['effort']}, Impact: {action['impact']}")
+            report.append(
+                f"  Effort: {action['effort']}, Impact: {action['impact']}"
+            )
             report.append(f"  Savings: {action['savings']}")
 
         report.extend(
@@ -485,7 +528,9 @@ class AgentMemoryAnalyzer:
 
         for action in optimization_plan["medium_term_actions"]:
             report.append(f"- {action['action']}")
-            report.append(f"  Effort: {action['effort']}, Impact: {action['impact']}")
+            report.append(
+                f"  Effort: {action['effort']}, Impact: {action['impact']}"
+            )
             report.append(f"  Savings: {action['savings']}")
 
         report.extend(

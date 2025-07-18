@@ -28,7 +28,9 @@ class SecurityCleanup:
     def backup_file(self, file_path: Path, backup_suffix: str = ".backup"):
         """Backup a file before cleanup."""
         if file_path.exists():
-            backup_path = file_path.with_suffix(file_path.suffix + backup_suffix)
+            backup_path = file_path.with_suffix(
+                file_path.suffix + backup_suffix
+            )
             shutil.copy2(file_path, backup_path)
             self.backed_up_files.append((file_path, backup_path))
             logger.info(f"Backed up {file_path} to {backup_path}")
@@ -98,17 +100,23 @@ class SecurityCleanup:
                 if old_import in content:
                     self.backup_file(file_path)
                     content = content.replace(old_import, new_import)
-                    content = content.replace("SecurityMiddleware", "SecurityHeadersMiddleware")
+                    content = content.replace(
+                        "SecurityMiddleware", "SecurityHeadersMiddleware"
+                    )
                     file_path.write_text(content)
 
-                    self.cleanup_actions.append(f"Updated imports in {file_path.name}")
+                    self.cleanup_actions.append(
+                        f"Updated imports in {file_path.name}"
+                    )
 
     def remove_obsolete_test_files(self):
         """Remove obsolete and broken test files."""
         logger.info("🧪 Removing obsolete test files...")
 
         # The original integration test file has TestClient compatibility issues
-        obsolete_test = PROJECT_ROOT / "tests/integration/test_security_headers.py"
+        obsolete_test = (
+            PROJECT_ROOT / "tests/integration/test_security_headers.py"
+        )
 
         if obsolete_test.exists():
             self.backup_file(obsolete_test)
@@ -156,7 +164,9 @@ class SecurityCleanup:
                     cleaned_files.append(str(file_path))
 
         if cleaned_files:
-            self.cleanup_actions.append(f"Removed {len(cleaned_files)} temporary files")
+            self.cleanup_actions.append(
+                f"Removed {len(cleaned_files)} temporary files"
+            )
             logger.info(f"Cleaned {len(cleaned_files)} temporary files")
 
     def remove_duplicate_documentation(self):
@@ -176,7 +186,9 @@ class SecurityCleanup:
             if doc_path.exists():
                 self.backup_file(doc_path)
                 doc_path.unlink()
-                self.cleanup_actions.append(f"Removed obsolete documentation: {doc_file}")
+                self.cleanup_actions.append(
+                    f"Removed obsolete documentation: {doc_file}"
+                )
 
     def remove_redundant_security_configs(self):
         """Remove redundant security configuration files."""
@@ -193,7 +205,9 @@ class SecurityCleanup:
             if config_path.exists():
                 self.backup_file(config_path)
                 config_path.unlink()
-                self.cleanup_actions.append(f"Removed redundant config: {config_file}")
+                self.cleanup_actions.append(
+                    f"Removed redundant config: {config_file}"
+                )
 
     def consolidate_security_documentation(self):
         """Create unified security documentation."""
@@ -312,7 +326,9 @@ Environment variables for customization:
             print(f"  📁 {original} → {backup}")
 
         print("\n🎉 Comprehensive cleanup completed successfully!")
-        print("🔒 Security headers infrastructure is now pristine for VC inspection.")
+        print(
+            "🔒 Security headers infrastructure is now pristine for VC inspection."
+        )
 
 
 def main():

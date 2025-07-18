@@ -21,10 +21,14 @@ except ImportError:
     MONITORING_AVAILABLE = False
 
     # Mock monitoring functions
-    async def record_agent_metric(agent_id: str, metric: str, value: float, metadata: Dict = None):
+    async def record_agent_metric(
+        agent_id: str, metric: str, value: float, metadata: Dict = None
+    ):
         logger.debug(f"MOCK Agent {agent_id} - {metric}: {value}")
 
-    async def record_system_metric(metric: str, value: float, metadata: Dict = None):
+    async def record_system_metric(
+        metric: str, value: float, metadata: Dict = None
+    ):
         logger.debug(f"MOCK System - {metric}: {value}")
 
 
@@ -59,7 +63,9 @@ class PyMDPObservabilityIntegrator:
                     )
 
                     # Calculate inference time
-                    inference_time = (time.time() - start_time) * 1000  # Convert to ms
+                    inference_time = (
+                        time.time() - start_time
+                    ) * 1000  # Convert to ms
 
                     # Record performance metrics
                     await self.record_inference_metrics(
@@ -73,7 +79,8 @@ class PyMDPObservabilityIntegrator:
 
                     # Check for performance degradation
                     if (
-                        inference_time > self.performance_baselines["inference_time_ms"] * 5
+                        inference_time
+                        > self.performance_baselines["inference_time_ms"] * 5
                     ):  # 5x baseline
                         await record_system_metric(
                             "pymdp_performance_degradation",
@@ -81,7 +88,9 @@ class PyMDPObservabilityIntegrator:
                             {
                                 "agent_id": agent_id,
                                 "inference_time_ms": inference_time,
-                                "baseline_ms": self.performance_baselines["inference_time_ms"],
+                                "baseline_ms": self.performance_baselines[
+                                    "inference_time_ms"
+                                ],
                             },
                         )
                         logger.warning(
@@ -108,7 +117,9 @@ class PyMDPObservabilityIntegrator:
 
         return decorator
 
-    async def record_inference_metrics(self, agent_id: str, metrics: Dict[str, Any]):
+    async def record_inference_metrics(
+        self, agent_id: str, metrics: Dict[str, Any]
+    ):
         """Record PyMDP inference metrics."""
         if agent_id not in self.inference_metrics:
             self.inference_metrics[agent_id] = []
@@ -128,16 +139,25 @@ class PyMDPObservabilityIntegrator:
         else:
             await record_agent_metric(agent_id, "pymdp_inference_failure", 1.0)
             await record_agent_metric(
-                agent_id, "pymdp_inference_error", 1.0, {"error": metrics.get("error", "unknown")}
+                agent_id,
+                "pymdp_inference_error",
+                1.0,
+                {"error": metrics.get("error", "unknown")},
             )
 
     async def monitor_belief_update(
-        self, agent_id: str, beliefs_before: Dict, beliefs_after: Dict, free_energy: float = None
+        self,
+        agent_id: str,
+        beliefs_before: Dict,
+        beliefs_after: Dict,
+        free_energy: float = None,
     ):
         """Monitor PyMDP belief state updates."""
         try:
             # Calculate belief change magnitude
-            belief_change = self.calculate_belief_change(beliefs_before, beliefs_after)
+            belief_change = self.calculate_belief_change(
+                beliefs_before, beliefs_after
+            )
 
             # Calculate belief entropy (if possible)
             belief_entropy = self.calculate_belief_entropy(beliefs_after)
@@ -151,31 +171,43 @@ class PyMDPObservabilityIntegrator:
                 "belief_change_magnitude": belief_change,
                 "belief_entropy": belief_entropy,
                 "free_energy": free_energy,
-                "beliefs_size": len(beliefs_after) if isinstance(beliefs_after, dict) else 0,
+                "beliefs_size": len(beliefs_after)
+                if isinstance(beliefs_after, dict)
+                else 0,
             }
 
             self.belief_update_history[agent_id].append(belief_update)
 
             # Record metrics
-            await record_agent_metric(agent_id, "pymdp_belief_change", belief_change)
+            await record_agent_metric(
+                agent_id, "pymdp_belief_change", belief_change
+            )
 
             if belief_entropy is not None:
-                await record_agent_metric(agent_id, "pymdp_belief_entropy", belief_entropy)
+                await record_agent_metric(
+                    agent_id, "pymdp_belief_entropy", belief_entropy
+                )
 
             if free_energy is not None:
-                await record_agent_metric(agent_id, "pymdp_free_energy", free_energy)
+                await record_agent_metric(
+                    agent_id, "pymdp_free_energy", free_energy
+                )
 
                 # Store free energy history
                 if agent_id not in self.free_energy_history:
                     self.free_energy_history[agent_id] = []
                 self.free_energy_history[agent_id].append(
-                    {"timestamp": datetime.now().isoformat(), "free_energy": free_energy}
+                    {
+                        "timestamp": datetime.now().isoformat(),
+                        "free_energy": free_energy,
+                    }
                 )
 
                 # Check for free energy anomalies
                 if len(self.free_energy_history[agent_id]) > 10:
                     recent_fe = [
-                        fe["free_energy"] for fe in self.free_energy_history[agent_id][-10:]
+                        fe["free_energy"]
+                        for fe in self.free_energy_history[agent_id][-10:]
                     ]
                     avg_fe = sum(recent_fe) / len(recent_fe)
 
@@ -183,16 +215,24 @@ class PyMDPObservabilityIntegrator:
                         await record_system_metric(
                             "pymdp_free_energy_spike",
                             1.0,
-                            {"agent_id": agent_id, "current_fe": free_energy, "average_fe": avg_fe},
+                            {
+                                "agent_id": agent_id,
+                                "current_fe": free_energy,
+                                "average_fe": avg_fe,
+                            },
                         )
                         logger.warning(
                             f"⚠️ Free energy spike detected for agent {agent_id}: {free_energy:.2f} (avg: {avg_fe:.2f})"
                         )
 
         except Exception as e:
-            logger.error(f"Failed to monitor belief update for agent {agent_id}: {e}")
+            logger.error(
+                f"Failed to monitor belief update for agent {agent_id}: {e}"
+            )
 
-    def calculate_belief_change(self, beliefs_before: Dict, beliefs_after: Dict) -> float:
+    def calculate_belief_change(
+        self, beliefs_before: Dict, beliefs_after: Dict
+    ) -> float:
         """Calculate magnitude of belief state change."""
         try:
             if not beliefs_before or not beliefs_after:
@@ -206,7 +246,9 @@ class PyMDPObservabilityIntegrator:
                 before_val = beliefs_before.get(key, 0)
                 after_val = beliefs_after.get(key, 0)
 
-                if isinstance(before_val, (int, float)) and isinstance(after_val, (int, float)):
+                if isinstance(before_val, (int, float)) and isinstance(
+                    after_val, (int, float)
+                ):
                     total_change += abs(after_val - before_val)
                 elif before_val != after_val:
                     total_change += 1.0  # Discrete change
@@ -250,7 +292,9 @@ class PyMDPObservabilityIntegrator:
             logger.warning(f"Failed to calculate belief entropy: {e}")
             return None
 
-    async def monitor_agent_lifecycle(self, agent_id: str, event: str, metadata: Dict = None):
+    async def monitor_agent_lifecycle(
+        self, agent_id: str, event: str, metadata: Dict = None
+    ):
         """Monitor agent lifecycle events."""
         try:
             timestamp = datetime.now().isoformat()
@@ -258,39 +302,64 @@ class PyMDPObservabilityIntegrator:
             if agent_id not in self.agent_lifecycles:
                 self.agent_lifecycles[agent_id] = []
 
-            lifecycle_event = {"timestamp": timestamp, "event": event, "metadata": metadata or {}}
+            lifecycle_event = {
+                "timestamp": timestamp,
+                "event": event,
+                "metadata": metadata or {},
+            }
 
             self.agent_lifecycles[agent_id].append(lifecycle_event)
 
             # Record lifecycle metrics
-            await record_agent_metric(agent_id, f"lifecycle_{event}", 1.0, metadata)
+            await record_agent_metric(
+                agent_id, f"lifecycle_{event}", 1.0, metadata
+            )
 
             # Special handling for creation/termination
             if event == "created":
-                await record_system_metric("agents_created_total", 1.0, {"agent_id": agent_id})
+                await record_system_metric(
+                    "agents_created_total", 1.0, {"agent_id": agent_id}
+                )
             elif event == "terminated":
-                await record_system_metric("agents_terminated_total", 1.0, {"agent_id": agent_id})
+                await record_system_metric(
+                    "agents_terminated_total", 1.0, {"agent_id": agent_id}
+                )
 
                 # Calculate agent lifespan
                 if agent_id in self.agent_lifecycles:
                     creation_events = [
-                        e for e in self.agent_lifecycles[agent_id] if e["event"] == "created"
+                        e
+                        for e in self.agent_lifecycles[agent_id]
+                        if e["event"] == "created"
                     ]
                     if creation_events:
-                        creation_time = datetime.fromisoformat(creation_events[0]["timestamp"])
+                        creation_time = datetime.fromisoformat(
+                            creation_events[0]["timestamp"]
+                        )
                         termination_time = datetime.fromisoformat(timestamp)
-                        lifespan_seconds = (termination_time - creation_time).total_seconds()
+                        lifespan_seconds = (
+                            termination_time - creation_time
+                        ).total_seconds()
 
                         await record_agent_metric(
-                            agent_id, "agent_lifespan_seconds", lifespan_seconds
+                            agent_id,
+                            "agent_lifespan_seconds",
+                            lifespan_seconds,
                         )
-                        await record_system_metric("agent_avg_lifespan_seconds", lifespan_seconds)
+                        await record_system_metric(
+                            "agent_avg_lifespan_seconds", lifespan_seconds
+                        )
 
         except Exception as e:
-            logger.error(f"Failed to monitor agent lifecycle for {agent_id}: {e}")
+            logger.error(
+                f"Failed to monitor agent lifecycle for {agent_id}: {e}"
+            )
 
     async def monitor_multi_agent_coordination(
-        self, coordination_event: str, participants: List[str], metrics: Dict = None
+        self,
+        coordination_event: str,
+        participants: List[str],
+        metrics: Dict = None,
     ):
         """Monitor multi-agent coordination events."""
         try:
@@ -314,22 +383,35 @@ class PyMDPObservabilityIntegrator:
                     agent_id,
                     "coordination_participation",
                     1.0,
-                    {"event": coordination_event, "participant_count": len(participants)},
+                    {
+                        "event": coordination_event,
+                        "participant_count": len(participants),
+                    },
                 )
 
         except Exception as e:
-            logger.error(f"Failed to monitor coordination event {coordination_event}: {e}")
+            logger.error(
+                f"Failed to monitor coordination event {coordination_event}: {e}"
+            )
 
-    async def get_performance_summary(self, agent_id: str = None) -> Dict[str, Any]:
+    async def get_performance_summary(
+        self, agent_id: str = None
+    ) -> Dict[str, Any]:
         """Get performance summary for agent or system."""
         try:
             if agent_id:
                 # Agent-specific summary
                 summary = {
                     "agent_id": agent_id,
-                    "inference_count": len(self.inference_metrics.get(agent_id, [])),
-                    "belief_updates": len(self.belief_update_history.get(agent_id, [])),
-                    "lifecycle_events": len(self.agent_lifecycles.get(agent_id, [])),
+                    "inference_count": len(
+                        self.inference_metrics.get(agent_id, [])
+                    ),
+                    "belief_updates": len(
+                        self.belief_update_history.get(agent_id, [])
+                    ),
+                    "lifecycle_events": len(
+                        self.agent_lifecycles.get(agent_id, [])
+                    ),
                 }
 
                 # Calculate averages
@@ -340,25 +422,33 @@ class PyMDPObservabilityIntegrator:
                         if m["success"]
                     ]
                     if inference_times:
-                        summary["avg_inference_time_ms"] = sum(inference_times) / len(
+                        summary["avg_inference_time_ms"] = sum(
                             inference_times
-                        )
+                        ) / len(inference_times)
                         summary["max_inference_time_ms"] = max(inference_times)
                         summary["min_inference_time_ms"] = min(inference_times)
 
                 if agent_id in self.free_energy_history:
-                    free_energies = [fe["free_energy"] for fe in self.free_energy_history[agent_id]]
+                    free_energies = [
+                        fe["free_energy"]
+                        for fe in self.free_energy_history[agent_id]
+                    ]
                     if free_energies:
-                        summary["avg_free_energy"] = sum(free_energies) / len(free_energies)
+                        summary["avg_free_energy"] = sum(free_energies) / len(
+                            free_energies
+                        )
                         summary["latest_free_energy"] = free_energies[-1]
 
                 return summary
             else:
                 # System-wide summary
                 total_agents = len(self.agent_lifecycles)
-                total_inferences = sum(len(metrics) for metrics in self.inference_metrics.values())
+                total_inferences = sum(
+                    len(metrics) for metrics in self.inference_metrics.values()
+                )
                 total_belief_updates = sum(
-                    len(history) for history in self.belief_update_history.values()
+                    len(history)
+                    for history in self.belief_update_history.values()
                 )
 
                 return {
@@ -384,22 +474,35 @@ def monitor_pymdp_inference(agent_id: str):
 
 
 async def record_belief_update(
-    agent_id: str, beliefs_before: Dict, beliefs_after: Dict, free_energy: float = None
+    agent_id: str,
+    beliefs_before: Dict,
+    beliefs_after: Dict,
+    free_energy: float = None,
 ):
     """Record a PyMDP belief update event."""
-    await pymdp_observer.monitor_belief_update(agent_id, beliefs_before, beliefs_after, free_energy)
+    await pymdp_observer.monitor_belief_update(
+        agent_id, beliefs_before, beliefs_after, free_energy
+    )
 
 
-async def record_agent_lifecycle_event(agent_id: str, event: str, metadata: Dict = None):
+async def record_agent_lifecycle_event(
+    agent_id: str, event: str, metadata: Dict = None
+):
     """Record an agent lifecycle event."""
     await pymdp_observer.monitor_agent_lifecycle(agent_id, event, metadata)
 
 
-async def record_coordination_event(event: str, participants: List[str], metrics: Dict = None):
+async def record_coordination_event(
+    event: str, participants: List[str], metrics: Dict = None
+):
     """Record a multi-agent coordination event."""
-    await pymdp_observer.monitor_multi_agent_coordination(event, participants, metrics)
+    await pymdp_observer.monitor_multi_agent_coordination(
+        event, participants, metrics
+    )
 
 
-async def get_pymdp_performance_summary(agent_id: str = None) -> Dict[str, Any]:
+async def get_pymdp_performance_summary(
+    agent_id: str = None,
+) -> Dict[str, Any]:
     """Get PyMDP performance summary."""
     return await pymdp_observer.get_performance_summary(agent_id)

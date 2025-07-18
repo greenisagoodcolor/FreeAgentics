@@ -85,7 +85,9 @@ class SecurityMetricsDeployer:
                             "targets": ["localhost:8000"],
                             "labels": {
                                 "service": "freeagentics",
-                                "environment": os.getenv("ENVIRONMENT", "production"),
+                                "environment": os.getenv(
+                                    "ENVIRONMENT", "production"
+                                ),
                             },
                         }
                     ],
@@ -95,7 +97,9 @@ class SecurityMetricsDeployer:
                 }
             ],
             "alerting": {
-                "alertmanagers": [{"static_configs": [{"targets": ["alertmanager:9093"]}]}]
+                "alertmanagers": [
+                    {"static_configs": [{"targets": ["alertmanager:9093"]}]}
+                ]
             },
         }
 
@@ -134,7 +138,10 @@ class SecurityMetricsDeployer:
                 "receiver": "security-team",
                 "routes": [
                     {
-                        "match": {"severity": "critical", "category": "security"},
+                        "match": {
+                            "severity": "critical",
+                            "category": "security",
+                        },
                         "receiver": "security-critical",
                         "continue": True,
                     },
@@ -155,7 +162,9 @@ class SecurityMetricsDeployer:
                             "smarthost": "smtp.gmail.com:587",
                             "auth_username": "alerts@freeagentics.com",
                             "auth_password": os.getenv("SMTP_PASSWORD", ""),
-                            "headers": {"Subject": "Security Alert: {{ .GroupLabels.alertname }}"},
+                            "headers": {
+                                "Subject": "Security Alert: {{ .GroupLabels.alertname }}"
+                            },
                         }
                     ],
                 },
@@ -346,7 +355,7 @@ def track_api_request(func: Callable) -> Callable:
     async def wrapper(request, *args, **kwargs):
         start_time = time.time()
         status = 500
-        
+
         try:
             response = await func(request, *args, **kwargs)
             status = response.status_code
@@ -357,7 +366,7 @@ def track_api_request(func: Callable) -> Callable:
                 endpoint=request.url.path,
                 status=status
             ).inc()
-            
+
             # Check for suspicious patterns
             if any(pattern in str(request.url) for pattern in [
                 '../', '%2e%2e', 'UNION', 'SELECT', '<script'
@@ -366,7 +375,7 @@ def track_api_request(func: Callable) -> Callable:
                     type='injection',
                     endpoint=request.url.path
                 ).inc()
-    
+
     return wrapper
 
 def track_data_access(resource: str) -> Callable:
@@ -409,13 +418,18 @@ def track_data_access(resource: str) -> Callable:
 
         # Deploy Grafana datasource
         datasource_config = self.create_grafana_datasource()
-        with open("monitoring/grafana/provisioning/datasources/prometheus-security.yml", "w") as f:
+        with open(
+            "monitoring/grafana/provisioning/datasources/prometheus-security.yml",
+            "w",
+        ) as f:
             yaml.dump(datasource_config, f, default_flow_style=False)
         print("✓ Grafana datasource configuration deployed")
 
         # Deploy Alertmanager config
         alertmanager_config = self.create_alertmanager_config()
-        with open("monitoring/alertmanager/alertmanager-security.yml", "w") as f:
+        with open(
+            "monitoring/alertmanager/alertmanager-security.yml", "w"
+        ) as f:
             yaml.dump(alertmanager_config, f, default_flow_style=False)
         print("✓ Alertmanager configuration deployed")
 

@@ -105,7 +105,8 @@ class AuthenticationBypassTests(BasePenetrationTest):
         for payload in payloads:
             # Test in username field
             response = self.client.post(
-                "/api/v1/auth/login", json={"username": payload, "password": "any_password"}
+                "/api/v1/auth/login",
+                json={"username": payload, "password": "any_password"},
             )
 
             if self._detect_sql_injection_success(response, payload):
@@ -141,7 +142,8 @@ class AuthenticationBypassTests(BasePenetrationTest):
 
             # Test in password field
             response = self.client.post(
-                "/api/v1/auth/login", json={"username": "test_user", "password": payload}
+                "/api/v1/auth/login",
+                json={"username": "test_user", "password": payload},
             )
 
             if self._detect_sql_injection_success(response, payload):
@@ -182,7 +184,8 @@ class AuthenticationBypassTests(BasePenetrationTest):
         for payload in payloads:
             # Test MongoDB-style injection
             response = self.client.post(
-                "/api/v1/auth/login", json={"username": payload, "password": "any_password"}
+                "/api/v1/auth/login",
+                json={"username": payload, "password": "any_password"},
             )
 
             if self._detect_nosql_injection_success(response):
@@ -221,7 +224,8 @@ class AuthenticationBypassTests(BasePenetrationTest):
 
         for payload in payloads:
             response = self.client.post(
-                "/api/v1/auth/login", json={"username": payload, "password": "any_password"}
+                "/api/v1/auth/login",
+                json={"username": payload, "password": "any_password"},
             )
 
             if self._detect_ldap_injection_success(response):
@@ -260,11 +264,14 @@ class AuthenticationBypassTests(BasePenetrationTest):
         username, password, user_id = self.create_test_user()
 
         response = self.client.post(
-            "/api/v1/auth/login", json={"username": username, "password": password}
+            "/api/v1/auth/login",
+            json={"username": username, "password": password},
         )
 
         if response.status_code != 200:
-            logger.warning("Could not obtain valid JWT token for manipulation testing")
+            logger.warning(
+                "Could not obtain valid JWT token for manipulation testing"
+            )
             return
 
         token_data = response.json()
@@ -275,7 +282,9 @@ class AuthenticationBypassTests(BasePenetrationTest):
             return
 
         # Generate manipulation payloads
-        manipulation_payloads = generate_jwt_manipulation_payloads(original_token)
+        manipulation_payloads = generate_jwt_manipulation_payloads(
+            original_token
+        )
 
         for manipulated_token in manipulation_payloads:
             # Test if manipulated token is accepted
@@ -323,7 +332,9 @@ class AuthenticationBypassTests(BasePenetrationTest):
             import jwt as pyjwt
 
             # Decode the original token
-            payload = pyjwt.decode(original_token, options={"verify_signature": False})
+            payload = pyjwt.decode(
+                original_token, options={"verify_signature": False}
+            )
 
             # Try to sign with "none" algorithm
             none_token = pyjwt.encode(payload, "", algorithm="none")
@@ -366,7 +377,9 @@ class AuthenticationBypassTests(BasePenetrationTest):
             import jwt as pyjwt
 
             # Test with modified payload but original signature
-            payload = pyjwt.decode(original_token, options={"verify_signature": False})
+            payload = pyjwt.decode(
+                original_token, options={"verify_signature": False}
+            )
             pyjwt.get_unverified_header(original_token)
 
             # Modify role to admin
@@ -375,10 +388,14 @@ class AuthenticationBypassTests(BasePenetrationTest):
                 modified_payload["role"] = "admin"
 
                 # Create token with modified payload but try to keep original signature structure
-                modified_token = pyjwt.encode(modified_payload, "fake_secret", algorithm="HS256")
+                modified_token = pyjwt.encode(
+                    modified_payload, "fake_secret", algorithm="HS256"
+                )
 
                 headers = {"Authorization": f"Bearer {modified_token}"}
-                response = self.client.get("/api/v1/auth/permissions", headers=headers)
+                response = self.client.get(
+                    "/api/v1/auth/permissions", headers=headers
+                )
 
                 if response.status_code == 200:
                     perms = response.json()
@@ -495,7 +512,9 @@ class AuthenticationBypassTests(BasePenetrationTest):
                 if response.status_code != 429:  # Not rate limited
                     successful_attempts += 1
 
-        bypass_ratio = successful_attempts / total_attempts if total_attempts > 0 else 0
+        bypass_ratio = (
+            successful_attempts / total_attempts if total_attempts > 0 else 0
+        )
 
         if bypass_ratio > 0.5:  # More than 50% of attempts succeeded
             self.add_vulnerability(
@@ -540,7 +559,10 @@ class AuthenticationBypassTests(BasePenetrationTest):
 
         if response.status_code in [200, 201, 202]:
             # Test for information disclosure
-            if "not found" not in response.text.lower() and "invalid" not in response.text.lower():
+            if (
+                "not found" not in response.text.lower()
+                and "invalid" not in response.text.lower()
+            ):
                 self.add_vulnerability(
                     VulnerabilityFinding(
                         vulnerability_type=VulnerabilityType.AUTHENTICATION_BYPASS,
@@ -580,7 +602,8 @@ class AuthenticationBypassTests(BasePenetrationTest):
             # Time valid username with wrong password
             start_time = time.time()
             self.client.post(
-                "/api/v1/auth/login", json={"username": username, "password": "wrong_password"}
+                "/api/v1/auth/login",
+                json={"username": username, "password": "wrong_password"},
             )
             valid_times.append(time.time() - start_time)
 
@@ -588,7 +611,10 @@ class AuthenticationBypassTests(BasePenetrationTest):
             start_time = time.time()
             self.client.post(
                 "/api/v1/auth/login",
-                json={"username": f"nonexistent_user_{i}", "password": "wrong_password"},
+                json={
+                    "username": f"nonexistent_user_{i}",
+                    "password": "wrong_password",
+                },
             )
             invalid_times.append(time.time() - start_time)
 
@@ -699,12 +725,16 @@ class AuthenticationBypassTests(BasePenetrationTest):
 
         # Test login endpoint for different responses
         valid_response = self.client.post(
-            "/api/v1/auth/login", json={"username": username, "password": "wrong_password"}
+            "/api/v1/auth/login",
+            json={"username": username, "password": "wrong_password"},
         )
 
         invalid_response = self.client.post(
             "/api/v1/auth/login",
-            json={"username": "definitely_nonexistent_user_12345", "password": "wrong_password"},
+            json={
+                "username": "definitely_nonexistent_user_12345",
+                "password": "wrong_password",
+            },
         )
 
         # Compare responses for information leakage
@@ -712,7 +742,6 @@ class AuthenticationBypassTests(BasePenetrationTest):
             valid_response.status_code != invalid_response.status_code
             or valid_response.text != invalid_response.text
         ):
-
             self.add_vulnerability(
                 VulnerabilityFinding(
                     vulnerability_type=VulnerabilityType.AUTHENTICATION_BYPASS,
@@ -769,7 +798,9 @@ class AuthenticationBypassTests(BasePenetrationTest):
         ]
 
         response_text = response.text.lower()
-        return any(indicator in response_text for indicator in error_indicators)
+        return any(
+            indicator in response_text for indicator in error_indicators
+        )
 
     def _detect_nosql_injection_success(self, response) -> bool:
         """Detect if NoSQL injection was successful."""
@@ -782,7 +813,14 @@ class AuthenticationBypassTests(BasePenetrationTest):
                 pass
 
         # Check for MongoDB error messages
-        nosql_errors = ["mongodb", "bson", "objectid", "gridfs", "$where", "$regex"]
+        nosql_errors = [
+            "mongodb",
+            "bson",
+            "objectid",
+            "gridfs",
+            "$where",
+            "$regex",
+        ]
         response_text = response.text.lower()
         return any(error in response_text for error in nosql_errors)
 
@@ -797,14 +835,20 @@ class AuthenticationBypassTests(BasePenetrationTest):
                 pass
 
         # Check for LDAP error messages
-        ldap_errors = ["ldap", "distinguished name", "objectclass", "ldapexception"]
+        ldap_errors = [
+            "ldap",
+            "distinguished name",
+            "objectclass",
+            "ldapexception",
+        ]
         response_text = response.text.lower()
         return any(error in response_text for error in ldap_errors)
 
     def _get_payload_count(self) -> int:
         """Get total number of payloads tested."""
         return (
-            len(generate_sql_injection_payloads()) * 2  # username and password fields
+            len(generate_sql_injection_payloads())
+            * 2  # username and password fields
             + len(generate_nosql_injection_payloads())
             + len(generate_ldap_injection_payloads())
             + 10  # JWT manipulation attempts

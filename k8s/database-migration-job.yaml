@@ -134,7 +134,7 @@ spec:
             - -c
             - |
               apk add --no-cache openssl curl
-              
+
               # Check SSL certificate expiration
               DOMAIN="yourdomain.com"
               CERT_INFO=$(echo | openssl s_client -servername $DOMAIN -connect $DOMAIN:443 2>/dev/null | openssl x509 -noout -dates)
@@ -142,9 +142,9 @@ spec:
               EXPIRY_TIMESTAMP=$(date -d "$EXPIRY_DATE" +%s)
               CURRENT_TIMESTAMP=$(date +%s)
               DAYS_UNTIL_EXPIRY=$(( (EXPIRY_TIMESTAMP - CURRENT_TIMESTAMP) / 86400 ))
-              
+
               echo "SSL certificate for $DOMAIN expires in $DAYS_UNTIL_EXPIRY days"
-              
+
               if [ $DAYS_UNTIL_EXPIRY -lt 30 ]; then
                 echo "WARNING: SSL certificate expires in less than 30 days!"
                 # Send alert (implement your notification logic here)
@@ -152,7 +152,7 @@ spec:
                   --data "{\"text\":\"⚠️ SSL Certificate Warning: Certificate for $DOMAIN expires in $DAYS_UNTIL_EXPIRY days\"}" \
                   "$SLACK_WEBHOOK_URL"
               fi
-              
+
               if [ $DAYS_UNTIL_EXPIRY -lt 7 ]; then
                 echo "CRITICAL: SSL certificate expires in less than 7 days!"
                 exit 1
@@ -212,14 +212,14 @@ spec:
                     current_timestamp=$(date +%s)
                     age_seconds=$((current_timestamp - start_timestamp))
                     age_days=$((age_seconds / 86400))
-                    
+
                     if [[ $age_days -gt 1 ]]; then
                       echo "Deleting old completed pod: $pod_name (age: $age_days days)"
                       kubectl delete pod "$pod_name" -n freeagentics-prod
                     fi
                   fi
                 done
-              
+
               # Clean up failed pods older than 3 days
               kubectl get pods -n freeagentics-prod --field-selector=status.phase=Failed \
                 -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.startTime}{"\n"}{end}' | \
@@ -229,7 +229,7 @@ spec:
                     current_timestamp=$(date +%s)
                     age_seconds=$((current_timestamp - start_timestamp))
                     age_days=$((age_seconds / 86400))
-                    
+
                     if [[ $age_days -gt 3 ]]; then
                       echo "Deleting old failed pod: $pod_name (age: $age_days days)"
                       kubectl delete pod "$pod_name" -n freeagentics-prod

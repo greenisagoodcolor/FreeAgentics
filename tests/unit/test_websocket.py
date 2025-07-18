@@ -12,7 +12,11 @@ import pytest
 from fastapi import WebSocket
 from fastapi.testclient import TestClient
 
-from api.v1.websocket import ConnectionManager, WebSocketMessage, broadcast_agent_event
+from api.v1.websocket import (
+    ConnectionManager,
+    WebSocketMessage,
+    broadcast_agent_event,
+)
 
 
 class TestConnectionManager:
@@ -79,7 +83,9 @@ class TestConnectionManager:
         mock_websocket.send_json.assert_called_once_with(message)
 
     @pytest.mark.asyncio
-    async def test_send_personal_message_error_handling(self, manager, mock_websocket):
+    async def test_send_personal_message_error_handling(
+        self, manager, mock_websocket
+    ):
         """Test error handling when sending message fails."""
         client_id = "test_client"
         mock_websocket.send_json.side_effect = Exception("Connection error")
@@ -133,7 +139,9 @@ class TestConnectionManager:
 
         # Check only subscribers received the message
         for client_id in [f"subscribed_{i}" for i in range(2)]:
-            manager.active_connections[client_id].send_json.assert_called_once_with(message)
+            manager.active_connections[
+                client_id
+            ].send_json.assert_called_once_with(message)
 
         # Check non-subscriber didn't receive it
         other_websocket.send_json.assert_not_called()
@@ -188,7 +196,9 @@ class TestWebSocketEndpoint:
         from main import app
 
         with TestClient(app) as client:
-            with client.websocket_connect("/api/v1/ws/test_client") as websocket:
+            with client.websocket_connect(
+                "/api/v1/ws/test_client"
+            ) as websocket:
                 # Should receive connection acknowledgment
                 data = websocket.receive_json()
                 assert data["type"] == "connection_established"
@@ -200,19 +210,27 @@ class TestWebSocketEndpoint:
         from main import app
 
         with TestClient(app) as client:
-            with client.websocket_connect("/api/v1/ws/test_client") as websocket:
+            with client.websocket_connect(
+                "/api/v1/ws/test_client"
+            ) as websocket:
                 # Skip connection message
                 websocket.receive_json()
 
                 # Send subscription request
                 websocket.send_json(
-                    {"type": "subscribe", "event_types": ["agent:created", "agent:started"]}
+                    {
+                        "type": "subscribe",
+                        "event_types": ["agent:created", "agent:started"],
+                    }
                 )
 
                 # Should receive confirmation
                 data = websocket.receive_json()
                 assert data["type"] == "subscription_confirmed"
-                assert data["event_types"] == ["agent:created", "agent:started"]
+                assert data["event_types"] == [
+                    "agent:created",
+                    "agent:started",
+                ]
 
     @pytest.mark.asyncio
     async def test_websocket_ping_pong(self):
@@ -220,7 +238,9 @@ class TestWebSocketEndpoint:
         from main import app
 
         with TestClient(app) as client:
-            with client.websocket_connect("/api/v1/ws/test_client") as websocket:
+            with client.websocket_connect(
+                "/api/v1/ws/test_client"
+            ) as websocket:
                 # Skip connection message
                 websocket.receive_json()
 
@@ -242,8 +262,12 @@ class TestEventBroadcasting:
         from api.v1.websocket import manager
 
         # Mock the manager broadcast method
-        with patch.object(manager, "broadcast", new_callable=AsyncMock) as mock_broadcast:
-            await broadcast_agent_event("agent_123", "created", {"name": "TestAgent"})
+        with patch.object(
+            manager, "broadcast", new_callable=AsyncMock
+        ) as mock_broadcast:
+            await broadcast_agent_event(
+                "agent_123", "created", {"name": "TestAgent"}
+            )
 
             # Check broadcast was called correctly
             mock_broadcast.assert_called_once()

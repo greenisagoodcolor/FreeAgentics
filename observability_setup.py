@@ -14,7 +14,11 @@ from typing import Any, Dict, Optional
 
 import psutil
 
-from api.v1.monitoring import metrics_collector, record_agent_metric, record_system_metric
+from api.v1.monitoring import (
+    metrics_collector,
+    record_agent_metric,
+    record_system_metric,
+)
 
 
 class SystemMetricsCollector:
@@ -35,12 +39,18 @@ class SystemMetricsCollector:
             # Memory metrics
             memory = psutil.virtual_memory()
             await record_system_metric("memory_usage", memory.percent)
-            await record_system_metric("memory_available_gb", memory.available / (1024**3))
+            await record_system_metric(
+                "memory_available_gb", memory.available / (1024**3)
+            )
 
             # Process-specific metrics
             process_memory = self.process.memory_info()
-            await record_system_metric("process_memory_mb", process_memory.rss / (1024**2))
-            await record_system_metric("process_cpu_percent", self.process.cpu_percent())
+            await record_system_metric(
+                "process_memory_mb", process_memory.rss / (1024**2)
+            )
+            await record_system_metric(
+                "process_cpu_percent", self.process.cpu_percent()
+            )
 
             # Disk metrics
             disk = psutil.disk_usage("/")
@@ -75,12 +85,16 @@ class ActiveInferenceMetricsCollector:
 
                     if "belief_entropy" in metrics:
                         await record_agent_metric(
-                            agent_id, "belief_entropy", metrics["belief_entropy"]
+                            agent_id,
+                            "belief_entropy",
+                            metrics["belief_entropy"],
                         )
 
                     if "total_observations" in metrics:
                         await record_agent_metric(
-                            agent_id, "observations_count", metrics["total_observations"]
+                            agent_id,
+                            "observations_count",
+                            metrics["total_observations"],
                         )
 
                     if "total_actions" in metrics:
@@ -91,7 +105,9 @@ class ActiveInferenceMetricsCollector:
                     # PyMDP specific metrics
                     if "expected_free_energy" in metrics:
                         await record_agent_metric(
-                            agent_id, "expected_free_energy", metrics["expected_free_energy"]
+                            agent_id,
+                            "expected_free_energy",
+                            metrics["expected_free_energy"],
                         )
 
         except Exception as e:
@@ -122,7 +138,9 @@ class StructuredLogger:
 
                 # Add exception info if present
                 if record.exc_info:
-                    log_entry["exception"] = self.formatException(record.exc_info)
+                    log_entry["exception"] = self.formatException(
+                        record.exc_info
+                    )
 
                 # Add agent context if present
                 if hasattr(record, "agent_id"):
@@ -146,9 +164,13 @@ class StructuredLogger:
         # Keep console handler for development
         console_handler = logging.StreamHandler()
         console_handler.setFormatter(
-            logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+            logging.Formatter(
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+            )
         )
-        console_handler.setLevel(logging.WARNING)  # Only warnings/errors to console
+        console_handler.setLevel(
+            logging.WARNING
+        )  # Only warnings/errors to console
         root_logger.addHandler(console_handler)
 
         root_logger.setLevel(logging.INFO)
@@ -183,10 +205,14 @@ class AlertManager:
             summary = metrics_collector.get_summary(metric_type, duration=60.0)
 
             if summary and summary["latest"] > threshold:
-                await self._send_alert(metric_type, summary["latest"], threshold)
+                await self._send_alert(
+                    metric_type, summary["latest"], threshold
+                )
                 self.alert_cooldowns[metric_type] = current_time
 
-    async def _send_alert(self, metric_type: str, value: float, threshold: float):
+    async def _send_alert(
+        self, metric_type: str, value: float, threshold: float
+    ):
         """Send alert notification."""
         alert_message = {
             "type": "alert",
@@ -198,7 +224,9 @@ class AlertManager:
         }
 
         # Log the alert
-        logging.warning(f"ALERT: {metric_type} = {value:.2f} (threshold: {threshold})")
+        logging.warning(
+            f"ALERT: {metric_type} = {value:.2f} (threshold: {threshold})"
+        )
 
         # Record alert as metric
         await record_system_metric("alerts_triggered", 1)
@@ -219,7 +247,11 @@ class HealthChecker:
 
     async def check_health(self) -> Dict[str, Any]:
         """Perform comprehensive health check."""
-        health_status = {"timestamp": time.time(), "overall_status": "healthy", "components": {}}
+        health_status = {
+            "timestamp": time.time(),
+            "overall_status": "healthy",
+            "components": {},
+        }
 
         # Check database connectivity
         try:
@@ -236,13 +268,22 @@ class HealthChecker:
                     "message": "Database connection not available",
                 }
         except Exception as e:
-            health_status["components"]["database"] = {"status": "unhealthy", "error": str(e)}
+            health_status["components"]["database"] = {
+                "status": "unhealthy",
+                "error": str(e),
+            }
             health_status["overall_status"] = "degraded"
 
         # Check agent manager
         try:
             if self.agent_manager:
-                active_agents = len([a for a in self.agent_manager.agents.values() if a.is_active])
+                active_agents = len(
+                    [
+                        a
+                        for a in self.agent_manager.agents.values()
+                        if a.is_active
+                    ]
+                )
                 health_status["components"]["agent_manager"] = {
                     "status": "healthy",
                     "active_agents": active_agents,
@@ -254,7 +295,10 @@ class HealthChecker:
                     "message": "Agent manager not available",
                 }
         except Exception as e:
-            health_status["components"]["agent_manager"] = {"status": "unhealthy", "error": str(e)}
+            health_status["components"]["agent_manager"] = {
+                "status": "unhealthy",
+                "error": str(e),
+            }
             health_status["overall_status"] = "degraded"
 
         # Check system resources
@@ -370,7 +414,9 @@ class ObservabilityManager:
                     await record_system_metric("system_health", 0.0)
 
                 # Log health status
-                logging.info(f"Health check: {health_status['overall_status']}")
+                logging.info(
+                    f"Health check: {health_status['overall_status']}"
+                )
 
                 # Write detailed health status to file
                 os.makedirs("logs", exist_ok=True)
@@ -393,7 +439,9 @@ def get_observability_manager() -> Optional[ObservabilityManager]:
     return _observability_manager
 
 
-def initialize_observability(agent_manager=None, database=None) -> ObservabilityManager:
+def initialize_observability(
+    agent_manager=None, database=None
+) -> ObservabilityManager:
     """Initialize and return the global observability manager."""
     global _observability_manager
 

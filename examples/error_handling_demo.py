@@ -13,7 +13,9 @@ def demonstrate_error_recovery():
     print("=== FreeAgentics Error Handling Demonstration ===\n")
 
     # Create agent
-    agent = BasicExplorerAgent("demo_agent", "Error Recovery Demo", grid_size=5)
+    agent = BasicExplorerAgent(
+        "demo_agent", "Error Recovery Demo", grid_size=5
+    )
     agent.start()
 
     print(f"Agent {agent.agent_id} created and started")
@@ -30,7 +32,9 @@ def demonstrate_error_recovery():
 
     # Mock PyMDP agent to simulate failures
     mock_agent = MagicMock()
-    mock_agent.infer_policies.side_effect = Exception("Simulated PyMDP failure")
+    mock_agent.infer_policies.side_effect = Exception(
+        "Simulated PyMDP failure"
+    )
     agent.pymdp_agent = mock_agent
 
     # Agent should handle this gracefully
@@ -64,7 +68,9 @@ def demonstrate_error_recovery():
     print("\n5. Agent Status with Error Info:")
     status = agent.get_status()
     if "error_summary" in status:
-        print(f"   Agent handled {status['error_summary']['total_errors']} errors gracefully")
+        print(
+            f"   Agent handled {status['error_summary']['total_errors']} errors gracefully"
+        )
         print(f"   Agent completed {status['total_steps']} steps successfully")
 
     print("\n=== Demo Complete: Agent remained operational despite errors ===")
@@ -104,14 +110,19 @@ def demonstrate_error_recovery_strategies():
 
         if i == 2:  # After success, reset mock for normal operation
             mock_agent.infer_policies.side_effect = None
-            mock_agent.infer_policies.return_value = (np.array([0.2, 0.8]), None)
+            mock_agent.infer_policies.return_value = (
+                np.array([0.2, 0.8]),
+                None,
+            )
 
     print(f"   Total failures handled: {failure_count}")
 
     # Show recovery strategy status
     print("\n2. Recovery Strategy Status:")
     for name, strategy in agent.error_handler.recovery_strategies.items():
-        print(f"   {name}: {strategy.retry_count}/{strategy.max_retries} retries used")
+        print(
+            f"   {name}: {strategy.retry_count}/{strategy.max_retries} retries used"
+        )
 
 
 def demonstrate_concurrent_error_handling():
@@ -121,20 +132,30 @@ def demonstrate_concurrent_error_handling():
     # Create multiple agents with different failure modes
     agents = []
     for i in range(3):
-        agent = BasicExplorerAgent(f"concurrent_{i}", f"Agent {i}", grid_size=3)
+        agent = BasicExplorerAgent(
+            f"concurrent_{i}", f"Agent {i}", grid_size=3
+        )
         agent.start()
         agents.append(agent)
 
     # Set up different failure patterns
-    failure_patterns = ["inference_failure", "action_selection_failure", "normal_operation"]
+    failure_patterns = [
+        "inference_failure",
+        "action_selection_failure",
+        "normal_operation",
+    ]
 
     for i, (agent, pattern) in enumerate(zip(agents, failure_patterns)):
         if pattern != "normal_operation":
             mock_agent = MagicMock()
             if pattern == "inference_failure":
-                mock_agent.infer_states.side_effect = Exception("Inference failed")
+                mock_agent.infer_states.side_effect = Exception(
+                    "Inference failed"
+                )
             elif pattern == "action_selection_failure":
-                mock_agent.infer_policies.side_effect = Exception("Action selection failed")
+                mock_agent.infer_policies.side_effect = Exception(
+                    "Action selection failed"
+                )
             agent.pymdp_agent = mock_agent
 
         print(f"Agent {i}: {pattern}")

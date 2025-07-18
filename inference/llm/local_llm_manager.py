@@ -100,10 +100,13 @@ class OllamaProvider:
             model_names = [m.get("name", "") for m in models]
 
             if self.config.model_name not in model_names:
-                logger.warning(f"Model {self.config.model_name} not found in Ollama")
+                logger.warning(
+                    f"Model {self.config.model_name} not found in Ollama"
+                )
                 # Optionally pull the model
                 pull_response = self.session.post(
-                    f"{self.base_url}/api/pull", json={"name": self.config.model_name}
+                    f"{self.base_url}/api/pull",
+                    json={"name": self.config.model_name},
                 )
                 if pull_response.status_code != 200:
                     return False
@@ -121,7 +124,9 @@ class OllamaProvider:
                         except json.JSONDecodeError:
                             pass
 
-                logger.info(f"Successfully pulled model {self.config.model_name}")
+                logger.info(
+                    f"Successfully pulled model {self.config.model_name}"
+                )
 
             return True
 
@@ -129,7 +134,9 @@ class OllamaProvider:
             logger.error(f"Failed to load model in Ollama: {e}")
             return False
 
-    def generate(self, prompt: str, system_prompt: Optional[str] = None) -> LLMResponse:
+    def generate(
+        self, prompt: str, system_prompt: Optional[str] = None
+    ) -> LLMResponse:
         """Generate text using Ollama."""
         start_time = time.time()
 
@@ -150,7 +157,9 @@ class OllamaProvider:
             payload["system"] = system_prompt
 
         try:
-            response = self.session.post(f"{self.base_url}/api/generate", json=payload)
+            response = self.session.post(
+                f"{self.base_url}/api/generate", json=payload
+            )
             response.raise_for_status()
 
             result = response.json()
@@ -158,7 +167,9 @@ class OllamaProvider:
 
             return LLMResponse(
                 text=result.get("response", ""),
-                tokens_used=result.get("eval_count", 0),  # Use eval_count for tokens
+                tokens_used=result.get(
+                    "eval_count", 0
+                ),  # Use eval_count for tokens
                 generation_time=generation_time,
                 provider=LocalLLMProvider.OLLAMA,
                 metadata={
@@ -206,7 +217,10 @@ class LlamaCppProvider:
         """Check if llama.cpp is available."""
         try:
             result = subprocess.run(
-                [self.binary_path, "--version"], capture_output=True, text=True, timeout=5
+                [self.binary_path, "--version"],
+                capture_output=True,
+                text=True,
+                timeout=5,
             )
             return result.returncode == 0
         except Exception:
@@ -225,7 +239,9 @@ class LlamaCppProvider:
         self.model_loaded = True
         return True
 
-    def generate(self, prompt: str, system_prompt: Optional[str] = None) -> LLMResponse:
+    def generate(
+        self, prompt: str, system_prompt: Optional[str] = None
+    ) -> LLMResponse:
         """Generate text using llama.cpp."""
         if not self.model_loaded:
             raise RuntimeError("Model not loaded")
@@ -262,7 +278,9 @@ class LlamaCppProvider:
             cmd.extend(["--system", system_prompt])
 
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, timeout=60
+            )
 
             if result.returncode != 0:
                 raise RuntimeError(f"llama.cpp failed: {result.stderr}")
@@ -287,7 +305,10 @@ class LlamaCppProvider:
                 tokens_used=tokens_used,
                 generation_time=generation_time,
                 provider=LocalLLMProvider.LLAMA_CPP,
-                metadata={"model": self.config.model_path, "command": " ".join(cmd)},
+                metadata={
+                    "model": self.config.model_path,
+                    "command": " ".join(cmd),
+                },
             )
 
         except subprocess.TimeoutExpired:
@@ -301,24 +322,36 @@ class LlamaCppProvider:
 class ResponseCache:
     """Cache for LLM responses."""
 
-    def __init__(self, max_size_bytes: int = 100 * 1024 * 1024):  # 100MB default
+    def __init__(
+        self, max_size_bytes: int = 100 * 1024 * 1024
+    ):  # 100MB default
         """Initialize response cache."""
         self.max_size_bytes = max_size_bytes
         self.cache: Dict[str, LLMResponse] = {}
         self.cache_hits = 0
         self.cache_misses = 0
         self.lock = threading.Lock()
-        self.max_memory_entries = 1000  # Limit entries to prevent unbounded growth
+        self.max_memory_entries = (
+            1000  # Limit entries to prevent unbounded growth
+        )
 
     def _get_cache_key(
-        self, prompt: str, system_prompt: Optional[str], provider: str, model: str
+        self,
+        prompt: str,
+        system_prompt: Optional[str],
+        provider: str,
+        model: str,
     ) -> str:
         """Generate cache key from request parameters."""
         content = f"{provider}:{model}:{system_prompt or ''}:{prompt}"
         return hashlib.sha256(content.encode()).hexdigest()
 
     def get(
-        self, prompt: str, system_prompt: Optional[str], provider: str, model: str
+        self,
+        prompt: str,
+        system_prompt: Optional[str],
+        provider: str,
+        model: str,
     ) -> Optional[LLMResponse]:
         """Get cached response if available."""
         key = self._get_cache_key(prompt, system_prompt, provider, model)
@@ -364,7 +397,9 @@ class ResponseCache:
         """Get cache statistics."""
         with self.lock:
             total_requests = self.cache_hits + self.cache_misses
-            hit_rate = self.cache_hits / total_requests if total_requests > 0 else 0
+            hit_rate = (
+                self.cache_hits / total_requests if total_requests > 0 else 0
+            )
 
             return {
                 "cache_hits": self.cache_hits,
@@ -410,7 +445,9 @@ class FallbackResponder:
         # Determine response type
         if any(word in prompt_lower for word in ["hello", "hi", "greet"]):
             category = "greeting"
-        elif any(word in prompt_lower for word in ["explore", "search", "find"]):
+        elif any(
+            word in prompt_lower for word in ["explore", "search", "find"]
+        ):
             category = "exploration"
         elif any(word in prompt_lower for word in ["trade", "buy", "sell"]):
             category = "trading"
@@ -439,7 +476,9 @@ class LocalLLMManager:
         """Initialize the local LLM manager."""
         self.config = config
         self.providers: Dict[str, Union[OllamaProvider, LlamaCppProvider]] = {}
-        self.current_provider: Optional[Union[OllamaProvider, LlamaCppProvider]] = None
+        self.current_provider: Optional[
+            Union[OllamaProvider, LlamaCppProvider]
+        ] = None
         self.cache = ResponseCache()
         self.fallback_responder = FallbackResponder()
 
@@ -479,19 +518,27 @@ class LocalLLMManager:
                     logger.info(f"Loaded model with {name} provider")
                     return True
                 else:
-                    logger.warning(f"Failed to load model with {name} provider")
+                    logger.warning(
+                        f"Failed to load model with {name} provider"
+                    )
 
         logger.error("Failed to load model with any provider")
         return False
 
     def generate(
-        self, prompt: str, system_prompt: Optional[str] = None, use_cache: bool = True
+        self,
+        prompt: str,
+        system_prompt: Optional[str] = None,
+        use_cache: bool = True,
     ) -> LLMResponse:
         """Generate text with caching and fallback support."""
         # Check cache first
         if use_cache:
             cached_response = self.cache.get(
-                prompt, system_prompt, self.config.provider.value, self.config.model_name
+                prompt,
+                system_prompt,
+                self.config.provider.value,
+                self.config.model_name,
             )
             if cached_response:
                 return cached_response
@@ -524,9 +571,13 @@ class LocalLLMManager:
             logger.warning("All generation attempts failed, using fallback")
             return self.fallback_responder.get_fallback_response(prompt)
         else:
-            raise RuntimeError("All generation attempts failed and fallback is disabled")
+            raise RuntimeError(
+                "All generation attempts failed and fallback is disabled"
+            )
 
-    def _try_generate(self, prompt: str, system_prompt: Optional[str]) -> LLMResponse:
+    def _try_generate(
+        self, prompt: str, system_prompt: Optional[str]
+    ) -> LLMResponse:
         """Try to generate with available providers."""
         if not self.current_provider:
             self.load_model()
@@ -580,7 +631,9 @@ class LocalLLMManager:
 
             if torch.cuda.is_available():
                 self.config.gpu_layers = 20  # Use GPU layers
-                logger.info(f"GPU detected, using {self.config.gpu_layers} GPU layers")
+                logger.info(
+                    f"GPU detected, using {self.config.gpu_layers} GPU layers"
+                )
         except ImportError:
             pass
 
@@ -588,7 +641,9 @@ class LocalLLMManager:
         try:
             import psutil
 
-            available_memory_gb = psutil.virtual_memory().available / (1024**3)
+            available_memory_gb = psutil.virtual_memory().available / (
+                1024**3
+            )
             if available_memory_gb < 4:
                 self.config.context_size = 1024
                 self.config.cache_size_mb = 256
@@ -599,6 +654,8 @@ class LocalLLMManager:
                 self.config.context_size = 4096
                 self.config.cache_size_mb = 1024
 
-            logger.info(f"Optimized for {available_memory_gb:.1f}GB available memory")
+            logger.info(
+                f"Optimized for {available_memory_gb:.1f}GB available memory"
+            )
         except ImportError:
             pass

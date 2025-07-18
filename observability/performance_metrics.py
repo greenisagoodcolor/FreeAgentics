@@ -28,10 +28,14 @@ except ImportError:
     MONITORING_AVAILABLE = False
 
     # Mock monitoring functions
-    async def record_system_metric(metric: str, value: float, metadata: Dict = None):
+    async def record_system_metric(
+        metric: str, value: float, metadata: Dict = None
+    ):
         logger.debug(f"MOCK System - {metric}: {value}")
 
-    async def record_agent_metric(agent_id: str, metric: str, value: float, metadata: Dict = None):
+    async def record_agent_metric(
+        agent_id: str, metric: str, value: float, metadata: Dict = None
+    ):
         logger.debug(f"MOCK Agent {agent_id} - {metric}: {value}")
 
 
@@ -65,13 +69,29 @@ class MetricsBuffer:
         """Get statistical summary for recent window."""
         with self.lock:
             if not self.buffer:
-                return {"count": 0, "avg": 0.0, "min": 0.0, "max": 0.0, "latest": 0.0}
+                return {
+                    "count": 0,
+                    "avg": 0.0,
+                    "min": 0.0,
+                    "max": 0.0,
+                    "latest": 0.0,
+                }
 
             cutoff = datetime.now() - timedelta(seconds=window_seconds)
-            recent_values = [value for timestamp, value in self.buffer if timestamp >= cutoff]
+            recent_values = [
+                value
+                for timestamp, value in self.buffer
+                if timestamp >= cutoff
+            ]
 
             if not recent_values:
-                return {"count": 0, "avg": 0.0, "min": 0.0, "max": 0.0, "latest": 0.0}
+                return {
+                    "count": 0,
+                    "avg": 0.0,
+                    "min": 0.0,
+                    "max": 0.0,
+                    "latest": 0.0,
+                }
 
             return {
                 "count": len(recent_values),
@@ -205,21 +225,36 @@ class RealTimePerformanceTracker:
             # Calculate throughput metrics
             uptime_seconds = (timestamp - self.start_time).total_seconds()
             if uptime_seconds > 0:
-                inference_throughput = self.counters["total_inferences"] / uptime_seconds
-                belief_update_throughput = self.counters["total_belief_updates"] / uptime_seconds
-                agent_step_throughput = self.counters["total_agent_steps"] / uptime_seconds
+                inference_throughput = (
+                    self.counters["total_inferences"] / uptime_seconds
+                )
+                belief_update_throughput = (
+                    self.counters["total_belief_updates"] / uptime_seconds
+                )
+                agent_step_throughput = (
+                    self.counters["total_agent_steps"] / uptime_seconds
+                )
 
                 self.agent_throughput.add(agent_step_throughput, timestamp)
-                self.belief_update_rates.add(belief_update_throughput, timestamp)
+                self.belief_update_rates.add(
+                    belief_update_throughput, timestamp
+                )
 
             # Record to monitoring system
             if MONITORING_AVAILABLE:
                 await record_system_metric("performance_memory_mb", memory_mb)
-                await record_system_metric("performance_cpu_percent", cpu_percent)
-                await record_system_metric("performance_system_cpu", system_cpu)
-                await record_system_metric("performance_system_memory", system_memory)
                 await record_system_metric(
-                    "performance_agent_throughput", self.agent_throughput.get_stats(60)["latest"]
+                    "performance_cpu_percent", cpu_percent
+                )
+                await record_system_metric(
+                    "performance_system_cpu", system_cpu
+                )
+                await record_system_metric(
+                    "performance_system_memory", system_memory
+                )
+                await record_system_metric(
+                    "performance_agent_throughput",
+                    self.agent_throughput.get_stats(60)["latest"],
                 )
                 await record_system_metric(
                     "performance_belief_update_rate",
@@ -233,7 +268,11 @@ class RealTimePerformanceTracker:
             logger.error(f"Failed to collect system metrics: {e}")
 
     async def record_inference_performance(
-        self, agent_id: str, inference_time_ms: float, success: bool = True, error: str = None
+        self,
+        agent_id: str,
+        inference_time_ms: float,
+        success: bool = True,
+        error: str = None,
     ):
         """Record individual inference performance."""
         timestamp = datetime.now()
@@ -259,11 +298,15 @@ class RealTimePerformanceTracker:
                 {"success": success, "error": error},
             )
             await record_system_metric(
-                "performance_inference_time_avg", self.inference_times.get_stats(60)["avg"]
+                "performance_inference_time_avg",
+                self.inference_times.get_stats(60)["avg"],
             )
 
     async def record_belief_update(
-        self, agent_id: str, update_time_ms: float = None, free_energy: float = None
+        self,
+        agent_id: str,
+        update_time_ms: float = None,
+        free_energy: float = None,
     ):
         """Record belief update performance."""
         timestamp = datetime.now()
@@ -284,14 +327,19 @@ class RealTimePerformanceTracker:
         # Record to monitoring system
         if MONITORING_AVAILABLE:
             if update_time_ms:
-                await record_agent_metric(agent_id, "belief_update_time_ms", update_time_ms)
+                await record_agent_metric(
+                    agent_id, "belief_update_time_ms", update_time_ms
+                )
             if free_energy is not None:
                 await record_agent_metric(agent_id, "free_energy", free_energy)
                 await record_system_metric(
-                    "performance_avg_free_energy", self.free_energy_values.get_stats(60)["avg"]
+                    "performance_avg_free_energy",
+                    self.free_energy_values.get_stats(60)["avg"],
                 )
 
-    async def record_agent_step(self, agent_id: str, step_time_ms: float = None):
+    async def record_agent_step(
+        self, agent_id: str, step_time_ms: float = None
+    ):
         """Record agent step performance."""
         timestamp = datetime.now()
 
@@ -308,7 +356,9 @@ class RealTimePerformanceTracker:
         # Record to monitoring system
         if MONITORING_AVAILABLE:
             if step_time_ms:
-                await record_agent_metric(agent_id, "step_time_ms", step_time_ms)
+                await record_agent_metric(
+                    agent_id, "step_time_ms", step_time_ms
+                )
 
     async def _check_performance_alerts(self):
         """Check for performance threshold violations."""
@@ -318,7 +368,8 @@ class RealTimePerformanceTracker:
             # Check inference time
             if (
                 current_stats.inference_time_ms
-                > self.baselines["inference_time_ms"] * self.alert_thresholds["critical"]
+                > self.baselines["inference_time_ms"]
+                * self.alert_thresholds["critical"]
             ):
                 await self._emit_alert(
                     "critical",
@@ -328,7 +379,8 @@ class RealTimePerformanceTracker:
                 )
             elif (
                 current_stats.inference_time_ms
-                > self.baselines["inference_time_ms"] * self.alert_thresholds["warning"]
+                > self.baselines["inference_time_ms"]
+                * self.alert_thresholds["warning"]
             ):
                 await self._emit_alert(
                     "warning",
@@ -340,7 +392,8 @@ class RealTimePerformanceTracker:
             # Check memory usage
             if (
                 current_stats.memory_usage_mb
-                > self.baselines["memory_usage_mb"] * self.alert_thresholds["critical"]
+                > self.baselines["memory_usage_mb"]
+                * self.alert_thresholds["critical"]
             ):
                 await self._emit_alert(
                     "critical",
@@ -352,7 +405,8 @@ class RealTimePerformanceTracker:
             # Check CPU usage
             if (
                 current_stats.cpu_usage_percent
-                > self.baselines["cpu_usage_percent"] * self.alert_thresholds["warning"]
+                > self.baselines["cpu_usage_percent"]
+                * self.alert_thresholds["warning"]
             ):
                 await self._emit_alert(
                     "warning",
@@ -364,7 +418,9 @@ class RealTimePerformanceTracker:
         except Exception as e:
             logger.error(f"Failed to check performance alerts: {e}")
 
-    async def _emit_alert(self, level: str, metric: str, current_value: float, baseline: float):
+    async def _emit_alert(
+        self, level: str, metric: str, current_value: float, baseline: float
+    ):
         """Emit performance alert."""
         multiplier = current_value / baseline if baseline > 0 else 0
 
@@ -390,7 +446,9 @@ class RealTimePerformanceTracker:
 
         # Record alert to monitoring system
         if MONITORING_AVAILABLE:
-            await record_system_metric(f"performance_alert_{level}", 1.0, alert_data)
+            await record_system_metric(
+                f"performance_alert_{level}", 1.0, alert_data
+            )
 
     async def get_current_performance_snapshot(self) -> PerformanceSnapshot:
         """Get current performance snapshot."""
@@ -412,7 +470,9 @@ class RealTimePerformanceTracker:
             free_energy_avg=free_energy_stats["avg"],
         )
 
-    async def get_agent_performance_summary(self, agent_id: str) -> Dict[str, Any]:
+    async def get_agent_performance_summary(
+        self, agent_id: str
+    ) -> Dict[str, Any]:
         """Get performance summary for specific agent."""
         if agent_id not in self.agent_metrics:
             return {"error": f"No metrics found for agent {agent_id}"}
@@ -421,14 +481,22 @@ class RealTimePerformanceTracker:
 
         return {
             "agent_id": agent_id,
-            "inference_performance": agent_buffers["inference_times"].get_stats(
+            "inference_performance": agent_buffers[
+                "inference_times"
+            ].get_stats(
                 300
             ),  # 5 min window
-            "belief_update_rate": agent_buffers["belief_updates"].get_stats(300),
+            "belief_update_rate": agent_buffers["belief_updates"].get_stats(
+                300
+            ),
             "action_rate": agent_buffers["action_counts"].get_stats(300),
             "error_rate": agent_buffers["error_counts"].get_stats(300),
-            "total_steps": sum(1 for _, _ in agent_buffers["action_counts"].buffer),
-            "total_errors": sum(1 for _, _ in agent_buffers["error_counts"].buffer),
+            "total_steps": sum(
+                1 for _, _ in agent_buffers["action_counts"].buffer
+            ),
+            "total_errors": sum(
+                1 for _, _ in agent_buffers["error_counts"].buffer
+            ),
         }
 
     async def get_system_performance_report(self) -> Dict[str, Any]:
@@ -476,11 +544,17 @@ class RealTimePerformanceTracker:
                     "system_counters": self.counters,
                     "baselines": self.baselines,
                     "metrics_summary": {
-                        "inference_times": self.inference_times.get_stats(3600),  # 1 hour
+                        "inference_times": self.inference_times.get_stats(
+                            3600
+                        ),  # 1 hour
                         "memory_usage": self.memory_usage.get_stats(3600),
                         "cpu_usage": self.cpu_usage.get_stats(3600),
-                        "agent_throughput": self.agent_throughput.get_stats(3600),
-                        "belief_update_rates": self.belief_update_rates.get_stats(3600),
+                        "agent_throughput": self.agent_throughput.get_stats(
+                            3600
+                        ),
+                        "belief_update_rates": self.belief_update_rates.get_stats(
+                            3600
+                        ),
                         "free_energy": self.free_energy_values.get_stats(3600),
                     },
                     "agent_count": len(self.agent_metrics),
@@ -508,7 +582,10 @@ async def stop_performance_tracking():
 
 
 async def record_inference_metric(
-    agent_id: str, inference_time_ms: float, success: bool = True, error: str = None
+    agent_id: str,
+    inference_time_ms: float,
+    success: bool = True,
+    error: str = None,
 ):
     """Record inference performance metric."""
     await performance_tracker.record_inference_performance(
@@ -520,7 +597,9 @@ async def record_belief_metric(
     agent_id: str, update_time_ms: float = None, free_energy: float = None
 ):
     """Record belief update metric."""
-    await performance_tracker.record_belief_update(agent_id, update_time_ms, free_energy)
+    await performance_tracker.record_belief_update(
+        agent_id, update_time_ms, free_energy
+    )
 
 
 async def record_step_metric(agent_id: str, step_time_ms: float = None):

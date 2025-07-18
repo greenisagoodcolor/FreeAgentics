@@ -61,7 +61,9 @@ class TestPerformanceMetrics(unittest.TestCase):
 
         # Efficiency loss should be 100 - efficiency
         expected_loss = 100 - 28.4
-        self.assertAlmostEqual(metrics.efficiency_loss(), expected_loss, places=1)
+        self.assertAlmostEqual(
+            metrics.efficiency_loss(), expected_loss, places=1
+        )
 
     def test_total_memory_calculation(self):
         """Test calculating total memory for agent count."""
@@ -104,7 +106,9 @@ class TestPerformanceAnalyzer(unittest.TestCase):
         # Check bottleneck details
         coord_bottleneck = bottlenecks["coordination_overhead"]
         self.assertEqual(coord_bottleneck["severity"], "critical")
-        self.assertEqual(coord_bottleneck["efficiency_loss_at_50_agents"], 71.6)
+        self.assertEqual(
+            coord_bottleneck["efficiency_loss_at_50_agents"], 71.6
+        )
 
     def test_root_cause_analysis(self):
         """Test root cause analysis of performance issues."""
@@ -124,7 +128,9 @@ class TestPerformanceAnalyzer(unittest.TestCase):
 
     def test_generate_recommendations(self):
         """Test generating optimization recommendations."""
-        recommendations = self.analyzer.generate_recommendations(self.test_data)
+        recommendations = self.analyzer.generate_recommendations(
+            self.test_data
+        )
 
         # Should have immediate, medium-term, and long-term recommendations
         self.assertIn("immediate", recommendations)
@@ -151,7 +157,9 @@ class TestPerformanceChartGenerator(unittest.TestCase):
             "memory_usage": [34.5, 172.5, 345.0, 690.0, 1035.0, 1725.0],
         }
         self.temp_dir = tempfile.mkdtemp()
-        self.chart_generator = PerformanceChartGenerator(output_dir=self.temp_dir)
+        self.chart_generator = PerformanceChartGenerator(
+            output_dir=self.temp_dir
+        )
 
     def tearDown(self):
         """Clean up temp directory."""
@@ -161,7 +169,9 @@ class TestPerformanceChartGenerator(unittest.TestCase):
 
     def test_generate_efficiency_chart(self):
         """Test generating efficiency vs agent count chart."""
-        chart_path = self.chart_generator.generate_efficiency_chart(self.test_data)
+        chart_path = self.chart_generator.generate_efficiency_chart(
+            self.test_data
+        )
 
         # Chart file should be created
         self.assertTrue(os.path.exists(chart_path))
@@ -173,14 +183,18 @@ class TestPerformanceChartGenerator(unittest.TestCase):
 
     def test_generate_throughput_chart(self):
         """Test generating throughput comparison chart."""
-        chart_path = self.chart_generator.generate_throughput_chart(self.test_data)
+        chart_path = self.chart_generator.generate_throughput_chart(
+            self.test_data
+        )
 
         self.assertTrue(os.path.exists(chart_path))
         self.assertTrue(chart_path.endswith(".png"))
 
     def test_generate_memory_scaling_chart(self):
         """Test generating memory scaling chart."""
-        chart_path = self.chart_generator.generate_memory_scaling_chart(self.test_data)
+        chart_path = self.chart_generator.generate_memory_scaling_chart(
+            self.test_data
+        )
 
         self.assertTrue(os.path.exists(chart_path))
         self.assertTrue(chart_path.endswith(".png"))
@@ -198,7 +212,9 @@ class TestPerformanceChartGenerator(unittest.TestCase):
             ],
         }
 
-        chart_path = self.chart_generator.generate_bottleneck_heatmap(bottleneck_data)
+        chart_path = self.chart_generator.generate_bottleneck_heatmap(
+            bottleneck_data
+        )
         self.assertTrue(os.path.exists(chart_path))
 
 
@@ -208,7 +224,9 @@ class TestPerformanceDocumentationGenerator(unittest.TestCase):
     def setUp(self):
         """Set up test environment."""
         self.temp_dir = tempfile.mkdtemp()
-        self.doc_generator = PerformanceDocumentationGenerator(output_dir=self.temp_dir)
+        self.doc_generator = PerformanceDocumentationGenerator(
+            output_dir=self.temp_dir
+        )
 
         # Load test data from actual performance results
         self.test_results = {
@@ -241,7 +259,9 @@ class TestPerformanceDocumentationGenerator(unittest.TestCase):
 
     def test_generate_comprehensive_documentation(self):
         """Test generating complete performance documentation."""
-        doc_path = self.doc_generator.generate_comprehensive_documentation(self.test_results)
+        doc_path = self.doc_generator.generate_comprehensive_documentation(
+            self.test_results
+        )
 
         # Documentation file should be created
         self.assertTrue(os.path.exists(doc_path))
@@ -267,7 +287,9 @@ class TestPerformanceDocumentationGenerator(unittest.TestCase):
 
     def test_generate_benchmarking_methodology(self):
         """Test generating benchmarking methodology documentation."""
-        methodology_doc = self.doc_generator.generate_benchmarking_methodology()
+        methodology_doc = (
+            self.doc_generator.generate_benchmarking_methodology()
+        )
 
         # Should describe test setup
         self.assertIn("Test Environment", methodology_doc)
@@ -288,14 +310,19 @@ class TestPerformanceDocumentationGenerator(unittest.TestCase):
             html_content = f.read()
 
         self.assertIn("<html>", html_content)
-        self.assertIn("<h1>Multi-Agent Coordination Performance Analysis</h1>", html_content)
+        self.assertIn(
+            "<h1>Multi-Agent Coordination Performance Analysis</h1>",
+            html_content,
+        )
         self.assertIn("efficiency-chart.png", html_content)
         self.assertIn("memory-scaling-chart.png", html_content)
 
     def test_export_performance_data(self):
         """Test exporting performance data in various formats."""
         # Export as JSON
-        json_path = self.doc_generator.export_performance_data(self.test_results, format="json")
+        json_path = self.doc_generator.export_performance_data(
+            self.test_results, format="json"
+        )
         self.assertTrue(os.path.exists(json_path))
 
         # Verify JSON content
@@ -305,7 +332,9 @@ class TestPerformanceDocumentationGenerator(unittest.TestCase):
         self.assertIn("memory_analysis", data)
 
         # Export as CSV
-        csv_paths = self.doc_generator.export_performance_data(self.test_results, format="csv")
+        csv_paths = self.doc_generator.export_performance_data(
+            self.test_results, format="csv"
+        )
         self.assertIsInstance(csv_paths, list)
         self.assertGreater(len(csv_paths), 0)
 

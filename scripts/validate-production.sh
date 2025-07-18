@@ -73,13 +73,13 @@ run_test() {
     local test_name="$1"
     local test_command="$2"
     local is_critical="${3:-false}"
-    
+
     TESTS_RUN=$((TESTS_RUN + 1))
-    
+
     if [[ "$VERBOSE" == "true" ]]; then
         info "Running test: $test_name"
     fi
-    
+
     if eval "$test_command" >/dev/null 2>&1; then
         log "PASS: $test_name"
         TESTS_PASSED=$((TESTS_PASSED + 1))
@@ -98,7 +98,7 @@ run_test() {
 # Validate environment variables
 validate_environment_variables() {
     echo -e "\n${BOLD}=== VALIDATING ENVIRONMENT VARIABLES ===${NC}"
-    
+
     # Critical environment variables
     local critical_vars=(
         "DATABASE_URL"
@@ -107,7 +107,7 @@ validate_environment_variables() {
         "JWT_SECRET"
         "ALLOWED_HOSTS"
     )
-    
+
     # Optional but recommended variables
     local recommended_vars=(
         "SMTP_HOST"
@@ -117,21 +117,21 @@ validate_environment_variables() {
         "LOG_LEVEL"
         "BACKUP_RETENTION_DAYS"
     )
-    
+
     # Check for .env.production
     if [[ -f ".env.production" ]]; then
         log "Production environment file found"
-        
+
         # Load environment variables for testing
         set -a
         source .env.production
         set +a
-        
+
         # Check for development values
         if grep -q "dev_secret\|localhost:5432\|password123\|your_" .env.production 2>/dev/null; then
             critical "Development values found in production environment file!"
         fi
-        
+
         # Check file permissions
         local perms=$(stat -c "%a" .env.production 2>/dev/null || stat -f "%OLp" .env.production)
         if [[ "$perms" != "600" && "$perms" != "400" ]]; then
@@ -140,7 +140,7 @@ validate_environment_variables() {
     else
         critical ".env.production file not found!"
     fi
-    
+
     # Validate critical variables
     for var in "${critical_vars[@]}"; do
         if [[ -z "${!var:-}" ]]; then
@@ -149,7 +149,7 @@ validate_environment_variables() {
             log "Critical variable set: $var"
         fi
     done
-    
+
     # Check recommended variables
     for var in "${recommended_vars[@]}"; do
         if [[ -z "${!var:-}" ]]; then
@@ -158,14 +158,14 @@ validate_environment_variables() {
             log "Recommended variable set: $var"
         fi
     done
-    
+
     # Validate specific variable formats
     if [[ -n "${DATABASE_URL:-}" ]]; then
         if [[ ! "$DATABASE_URL" =~ ^postgresql:// ]]; then
             critical "DATABASE_URL must start with postgresql://"
         fi
     fi
-    
+
     if [[ -n "${JWT_SECRET:-}" ]]; then
         if [[ ${#JWT_SECRET} -lt 32 ]]; then
             critical "JWT_SECRET should be at least 32 characters long"
@@ -176,12 +176,12 @@ validate_environment_variables() {
 # Validate SSL/TLS configuration
 validate_ssl_tls() {
     echo -e "\n${BOLD}=== VALIDATING SSL/TLS CONFIGURATION ===${NC}"
-    
+
     # Check certificate files
     run_test "SSL certificate exists" "test -f nginx/ssl/cert.pem || test -f nginx/ssl/$DOMAIN.crt" true
     run_test "SSL private key exists" "test -f nginx/ssl/key.pem || test -f nginx/ssl/$DOMAIN.key" true
     run_test "DH parameters exist" "test -f nginx/dhparam.pem" false
-    
+
     # Validate certificate
     if [[ -f "nginx/ssl/cert.pem" ]]; then
         # Check certificate validity
@@ -190,7 +190,7 @@ validate_ssl_tls() {
         else
             critical "SSL certificate expires within 24 hours!"
         fi
-        
+
         # Check certificate and key match
         if [[ -f "nginx/ssl/key.pem" ]]; then
             local cert_modulus=$(openssl x509 -noout -modulus -in nginx/ssl/cert.pem 2>/dev/null | openssl md5)
@@ -201,11 +201,11 @@ validate_ssl_tls() {
                 critical "SSL certificate and key do not match!"
             fi
         fi
-        
+
         # Check certificate chain
         run_test "Certificate chain is valid" "openssl verify -CAfile nginx/ssl/ca.pem nginx/ssl/cert.pem 2>/dev/null || true" false
     fi
-    
+
     # Check nginx SSL configuration
     if [[ -f "nginx/nginx.conf" ]]; then
         # Check for modern TLS protocols
@@ -214,14 +214,14 @@ validate_ssl_tls() {
         else
             warn "TLS 1.2 and 1.3 should be configured"
         fi
-        
+
         # Check for strong ciphers
         if grep -q "ssl_ciphers.*ECDHE" nginx/nginx.conf; then
             log "Strong cipher suites configured"
         else
             warn "Strong cipher suites should be configured"
         fi
-        
+
         # Check for HSTS
         if grep -q "Strict-Transport-Security" nginx/nginx.conf; then
             log "HSTS header configured"
@@ -234,20 +234,20 @@ validate_ssl_tls() {
 # Validate database configuration and connections
 validate_database() {
     echo -e "\n${BOLD}=== VALIDATING DATABASE CONFIGURATION ===${NC}"
-    
+
     # Check PostgreSQL configuration
     if [[ -f "docker-compose.production.yml" ]]; then
         # Check if PostgreSQL service is defined
         if grep -q "postgres:" docker-compose.production.yml; then
             log "PostgreSQL service configured"
-            
+
             # Check for persistent volumes
             if grep -q "postgres_data:" docker-compose.production.yml; then
                 log "Database persistence configured"
             else
                 critical "Database persistence not configured!"
             fi
-            
+
             # Check for health checks
             if grep -q "healthcheck:" docker-compose.production.yml; then
                 log "Database health checks configured"
@@ -258,23 +258,23 @@ validate_database() {
             critical "PostgreSQL service not found in production configuration!"
         fi
     fi
-    
+
     # Test database connection if running
     if command -v psql &> /dev/null && [[ -n "${DATABASE_URL:-}" ]]; then
         if psql "$DATABASE_URL" -c "SELECT 1;" >/dev/null 2>&1; then
             log "Database connection successful"
-            
+
             # Check database size
             local db_size=$(psql "$DATABASE_URL" -t -c "SELECT pg_size_pretty(pg_database_size(current_database()));" 2>/dev/null | xargs)
             info "Database size: $db_size"
-            
+
             # Check table existence
             if psql "$DATABASE_URL" -t -c "\dt" 2>/dev/null | grep -q "agents\|coalitions\|knowledge"; then
                 log "Core tables exist"
             else
                 warn "Some core tables may be missing"
             fi
-            
+
             # Check for indexes
             local index_count=$(psql "$DATABASE_URL" -t -c "SELECT COUNT(*) FROM pg_indexes WHERE schemaname = 'public';" 2>/dev/null | xargs)
             info "Database indexes: $index_count"
@@ -282,11 +282,11 @@ validate_database() {
             error "Database connection failed"
         fi
     fi
-    
+
     # Check Alembic migrations
     if [[ -f "alembic.ini" ]]; then
         log "Alembic migrations configured"
-        
+
         if [[ -d "alembic/versions" ]]; then
             local migration_count=$(ls -1 alembic/versions/*.py 2>/dev/null | wc -l)
             info "Migration files found: $migration_count"
@@ -301,33 +301,33 @@ validate_database() {
 # Validate API endpoints
 validate_api_endpoints() {
     echo -e "\n${BOLD}=== VALIDATING API ENDPOINTS ===${NC}"
-    
+
     local api_base="http://localhost:$API_PORT"
     local timeout_flag="--max-time $TIMEOUT"
-    
+
     # Core endpoints
     run_test "API health endpoint" "curl -f -s $timeout_flag $api_base/health" true
     run_test "API docs endpoint" "curl -f -s $timeout_flag $api_base/docs" false
     run_test "OpenAPI schema" "curl -f -s $timeout_flag $api_base/openapi.json" false
-    
+
     # Authentication endpoints
     run_test "Auth health" "curl -f -s $timeout_flag $api_base/api/v1/auth/health" true
     run_test "Auth login endpoint" "curl -f -s $timeout_flag -X POST $api_base/api/v1/auth/login" false
     run_test "Auth refresh endpoint" "curl -f -s $timeout_flag -X POST $api_base/api/v1/auth/refresh" false
-    
+
     # Core API endpoints
     run_test "Agents API" "curl -f -s $timeout_flag $api_base/api/v1/agents" false
     run_test "Coalitions API" "curl -f -s $timeout_flag $api_base/api/v1/coalitions" false
     run_test "Knowledge API" "curl -f -s $timeout_flag $api_base/api/v1/knowledge" false
     run_test "Monitoring API" "curl -f -s $timeout_flag $api_base/api/v1/monitoring/metrics" false
-    
+
     # System endpoints
     run_test "System info" "curl -f -s $timeout_flag $api_base/api/v1/system/info" false
     run_test "System health" "curl -f -s $timeout_flag $api_base/api/v1/system/health" false
-    
+
     # WebSocket endpoint
     run_test "WebSocket endpoint" "curl -f -s $timeout_flag -H 'Upgrade: websocket' $api_base/ws/agents" false
-    
+
     # Security headers check
     if curl -f -s -I "$api_base/health" 2>/dev/null | grep -q "X-Content-Type-Options"; then
         log "Security headers present"
@@ -339,16 +339,16 @@ validate_api_endpoints() {
 # Validate security configurations
 validate_security() {
     echo -e "\n${BOLD}=== VALIDATING SECURITY CONFIGURATIONS ===${NC}"
-    
+
     # Check RBAC configuration
     run_test "RBAC module exists" "test -f auth/rbac_enhancements.py" true
     run_test "Security headers module" "test -f auth/security_headers.py" true
     run_test "Security implementation" "test -f auth/security_implementation.py" true
-    
+
     # Check JWT keys
     run_test "JWT private key exists" "test -f auth/keys/jwt_private.pem" true
     run_test "JWT public key exists" "test -f auth/keys/jwt_public.pem" true
-    
+
     # Check key permissions
     if [[ -f "auth/keys/jwt_private.pem" ]]; then
         local key_perms=$(stat -c "%a" auth/keys/jwt_private.pem 2>/dev/null || stat -f "%OLp" auth/keys/jwt_private.pem)
@@ -358,7 +358,7 @@ validate_security() {
             critical "JWT private key has insecure permissions: $key_perms"
         fi
     fi
-    
+
     # Check rate limiting
     if [[ -f "nginx/nginx.conf" ]]; then
         if grep -q "limit_req_zone" nginx/nginx.conf; then
@@ -367,7 +367,7 @@ validate_security() {
             warn "Rate limiting should be configured"
         fi
     fi
-    
+
     # Check for secure cookies configuration
     if [[ -f "api/main.py" ]]; then
         if grep -q "secure=True" api/main.py || grep -q "SESSION_COOKIE_SECURE" api/main.py; then
@@ -376,7 +376,7 @@ validate_security() {
             warn "Secure cookies should be enabled in production"
         fi
     fi
-    
+
     # Check for CORS configuration
     if grep -r "CORSMiddleware\|cors" api/ 2>/dev/null | grep -q "allow_origins"; then
         log "CORS configuration found"
@@ -388,12 +388,12 @@ validate_security() {
 # Validate monitoring and alerting
 validate_monitoring() {
     echo -e "\n${BOLD}=== VALIDATING MONITORING AND ALERTING ===${NC}"
-    
+
     # Check Prometheus configuration
     run_test "Prometheus config exists" "test -f monitoring/prometheus.yml || test -f monitoring/prometheus-production.yml" false
     run_test "Alert rules exist" "test -d monitoring/rules && ls monitoring/rules/*.yml >/dev/null 2>&1" false
     run_test "Alertmanager config" "test -f monitoring/alertmanager.yml" false
-    
+
     # Check Grafana dashboards
     if [[ -d "monitoring/grafana/dashboards" ]]; then
         local dashboard_count=$(ls -1 monitoring/grafana/dashboards/*.json 2>/dev/null | wc -l)
@@ -403,11 +403,11 @@ validate_monitoring() {
             warn "No Grafana dashboards found"
         fi
     fi
-    
+
     # Test Prometheus endpoint if running
     if curl -f -s --max-time 5 "http://localhost:$PROMETHEUS_PORT/api/v1/query" >/dev/null 2>&1; then
         log "Prometheus is accessible"
-        
+
         # Check for key metrics
         local metrics=(
             "up"
@@ -416,7 +416,7 @@ validate_monitoring() {
             "process_cpu_seconds_total"
             "process_resident_memory_bytes"
         )
-        
+
         for metric in "${metrics[@]}"; do
             if curl -f -s "http://localhost:$PROMETHEUS_PORT/api/v1/query?query=$metric" 2>/dev/null | grep -q "success"; then
                 log "Metric available: $metric"
@@ -427,7 +427,7 @@ validate_monitoring() {
     else
         warn "Prometheus not accessible"
     fi
-    
+
     # Check application metrics endpoint
     run_test "Application metrics endpoint" "curl -f -s --max-time 5 http://localhost:$API_PORT/metrics" false
 }
@@ -435,11 +435,11 @@ validate_monitoring() {
 # Validate backup and recovery
 validate_backup_recovery() {
     echo -e "\n${BOLD}=== VALIDATING BACKUP AND RECOVERY ===${NC}"
-    
+
     # Check backup scripts
     run_test "Database backup script" "test -x scripts/database-backup.sh" true
     run_test "Backup directory writable" "test -w backups || mkdir -p backups && test -w backups" false
-    
+
     # Check backup configuration
     if [[ -f "scripts/database-backup.sh" ]]; then
         # Check for encryption configuration
@@ -448,7 +448,7 @@ validate_backup_recovery() {
         else
             warn "Backup encryption should be configured"
         fi
-        
+
         # Check for retention policy
         if grep -q "retention\|days\|cleanup" scripts/database-backup.sh; then
             log "Backup retention policy configured"
@@ -456,7 +456,7 @@ validate_backup_recovery() {
             warn "Backup retention policy should be configured"
         fi
     fi
-    
+
     # Check for backup monitoring
     if [[ -f "monitoring/rules/alerts.yml" ]]; then
         if grep -q "backup" monitoring/rules/alerts.yml; then
@@ -465,7 +465,7 @@ validate_backup_recovery() {
             warn "Backup monitoring alerts should be configured"
         fi
     fi
-    
+
     # Test backup functionality (dry run)
     if [[ -x "scripts/database-backup.sh" ]] && [[ "${SKIP_BACKUP_TEST:-false}" != "true" ]]; then
         info "Testing backup functionality (dry run)..."
@@ -480,18 +480,18 @@ validate_backup_recovery() {
 # Validate disaster recovery
 validate_disaster_recovery() {
     echo -e "\n${BOLD}=== VALIDATING DISASTER RECOVERY ===${NC}"
-    
+
     # Check DR documentation
     run_test "DR procedures documented" "test -f docs/runbooks/EMERGENCY_PROCEDURES.md" false
     run_test "Incident response plan" "test -f docs/runbooks/INCIDENT_RESPONSE.md" false
-    
+
     # Check recovery scripts
     local recovery_scripts=(
         "scripts/restore-database.sh"
         "scripts/rollback-deployment.sh"
         "scripts/emergency-shutdown.sh"
     )
-    
+
     for script in "${recovery_scripts[@]}"; do
         if [[ -f "$script" ]]; then
             log "Recovery script found: $script"
@@ -499,14 +499,14 @@ validate_disaster_recovery() {
             warn "Recovery script missing: $script"
         fi
     done
-    
+
     # Check for health check automation
     if grep -r "health.*check\|healthcheck" deploy-production*.sh 2>/dev/null | grep -q "wait\|retry"; then
         log "Automated health checks in deployment"
     else
         warn "Deployment should include automated health checks"
     fi
-    
+
     # Validate rollback capability
     if [[ -f "deploy-production.sh" ]]; then
         if grep -q "rollback\|previous\|revert" deploy-production.sh; then
@@ -520,7 +520,7 @@ validate_disaster_recovery() {
 # Performance validation
 validate_performance() {
     echo -e "\n${BOLD}=== VALIDATING PERFORMANCE CONFIGURATION ===${NC}"
-    
+
     # Check resource limits in docker-compose
     if [[ -f "docker-compose.production.yml" ]]; then
         if grep -q "deploy:\|resources:\|limits:" docker-compose.production.yml; then
@@ -528,7 +528,7 @@ validate_performance() {
         else
             warn "Resource limits should be configured for production"
         fi
-        
+
         # Check for replicas configuration
         if grep -q "replicas:" docker-compose.production.yml; then
             log "Service replication configured"
@@ -536,16 +536,16 @@ validate_performance() {
             info "Consider configuring service replicas for high availability"
         fi
     fi
-    
+
     # Check caching configuration
     if grep -q "redis:" docker-compose.production.yml; then
         log "Redis caching configured"
-        
+
         # Test Redis connection if available
         if command -v redis-cli &> /dev/null && [[ -n "${REDIS_URL:-}" ]]; then
             if redis-cli -u "$REDIS_URL" ping >/dev/null 2>&1; then
                 log "Redis connection successful"
-                
+
                 # Check Redis memory
                 local redis_memory=$(redis-cli -u "$REDIS_URL" info memory 2>/dev/null | grep "used_memory_human" | cut -d: -f2 | tr -d '\r')
                 info "Redis memory usage: $redis_memory"
@@ -556,19 +556,19 @@ validate_performance() {
     else
         warn "Redis caching not configured"
     fi
-    
+
     # Check for database optimization
     if [[ -f "database/query_optimization.py" ]]; then
         log "Database query optimization module present"
     else
         warn "Consider implementing query optimization"
     fi
-    
+
     # Test API response times
     if curl -f -s "http://localhost:$API_PORT/health" >/dev/null 2>&1; then
         local response_time=$(curl -o /dev/null -s -w '%{time_total}' "http://localhost:$API_PORT/health")
         local response_ms=$(echo "$response_time * 1000" | bc | cut -d. -f1)
-        
+
         if [[ $response_ms -lt 200 ]]; then
             log "API response time acceptable: ${response_ms}ms"
         else
@@ -580,27 +580,27 @@ validate_performance() {
 # Integration testing
 validate_integration() {
     echo -e "\n${BOLD}=== VALIDATING SYSTEM INTEGRATION ===${NC}"
-    
+
     # Test full stack if services are running
     if curl -f -s "http://localhost:$API_PORT/health" >/dev/null 2>&1; then
         info "Testing full stack integration..."
-        
+
         # Test authentication flow
         local auth_test=$(curl -s -X POST "http://localhost:$API_PORT/api/v1/auth/login" \
             -H "Content-Type: application/json" \
             -d '{"username":"test","password":"test"}' 2>/dev/null || echo "{}")
-            
+
         if echo "$auth_test" | grep -q "error\|detail"; then
             log "Authentication endpoint responding correctly"
         else
             warn "Authentication endpoint may not be configured correctly"
         fi
-        
+
         # Test agent creation (dry run)
         local agent_test=$(curl -s -X POST "http://localhost:$API_PORT/api/v1/agents" \
             -H "Content-Type: application/json" \
             -d '{"name":"test","type":"test"}' 2>/dev/null || echo "{}")
-            
+
         if echo "$agent_test" | grep -q "error\|detail\|id"; then
             log "Agent API responding"
         else
@@ -615,13 +615,13 @@ validate_integration() {
 generate_report() {
     local end_time=$(date +%s)
     local duration=$((end_time - START_TIME))
-    
+
     # Calculate percentages
     local pass_rate=0
     if [[ $TESTS_RUN -gt 0 ]]; then
         pass_rate=$(( (TESTS_PASSED * 100) / TESTS_RUN ))
     fi
-    
+
     # Generate JSON report
     cat > "$REPORT_FILE" << EOF
 {
@@ -646,14 +646,14 @@ $(printf '      "%s"' "${CRITICAL_FAILURES[@]}" | sed 's/"$/",/')
   }
 }
 EOF
-    
+
     # Generate Markdown report
     cat > "$MARKDOWN_REPORT" << EOF
 # FreeAgentics Production Validation Report
 
-**Generated:** $(date)  
-**Environment:** $ENVIRONMENT  
-**Domain:** $DOMAIN  
+**Generated:** $(date)
+**Environment:** $ENVIRONMENT
+**Domain:** $DOMAIN
 **Duration:** ${duration}s
 
 ## Summary
@@ -695,7 +695,7 @@ else
     echo "4. Do not deploy until all critical issues are resolved"
 fi)
 EOF
-    
+
     info "Reports generated:"
     info "  - JSON: $REPORT_FILE"
     info "  - Markdown: $MARKDOWN_REPORT"
@@ -717,7 +717,7 @@ show_summary() {
     echo -e "Warnings: ${YELLOW}$TESTS_WARNING${NC}"
     echo -e "Critical Failures: ${RED}${BOLD}${#CRITICAL_FAILURES[@]}${NC}"
     echo ""
-    
+
     if [[ ${#CRITICAL_FAILURES[@]} -eq 0 ]]; then
         if [[ $TESTS_FAILED -eq 0 ]]; then
             success "✅ ALL TESTS PASSED - PRODUCTION READY!"
@@ -747,16 +747,16 @@ show_summary() {
 # Main function
 main() {
     START_TIME=$(date +%s)
-    
+
     echo -e "${BOLD}${CYAN}🔍 FreeAgentics Production Environment Configuration Validator${NC}"
     echo -e "${CYAN}Task 21: Comprehensive Production Validation${NC}"
     echo "Environment: $ENVIRONMENT"
     echo "Timestamp: $(date)"
     echo ""
-    
+
     # Create reports directory
     mkdir -p reports
-    
+
     # Run all validations
     validate_environment_variables
     validate_ssl_tls
@@ -768,10 +768,10 @@ main() {
     validate_disaster_recovery
     validate_performance
     validate_integration
-    
+
     # Generate reports
     generate_report
-    
+
     # Show summary and exit with appropriate code
     show_summary
 }

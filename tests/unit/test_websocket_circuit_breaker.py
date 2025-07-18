@@ -46,7 +46,10 @@ class TestCircuitBreaker(unittest.IsolatedAsyncioTestCase):
 
     def setUp(self):
         self.config = CircuitBreakerConfig(
-            failure_threshold=3, success_threshold=2, timeout=1.0, half_open_max_calls=2
+            failure_threshold=3,
+            success_threshold=2,
+            timeout=1.0,
+            half_open_max_calls=2,
         )
         self.breaker = CircuitBreaker("test-breaker", self.config)
 
@@ -227,7 +230,9 @@ class TestCircuitBreaker(unittest.IsolatedAsyncioTestCase):
         status = self.breaker.get_status()
 
         self.assertEqual(status["state"], CircuitState.OPEN)
-        self.assertEqual(status["failure_count"], self.config.failure_threshold)
+        self.assertEqual(
+            status["failure_count"], self.config.failure_threshold
+        )
         self.assertIsNotNone(status["last_failure_time"])
 
     def test_reset(self):
@@ -247,7 +252,9 @@ class TestCircuitBreaker(unittest.IsolatedAsyncioTestCase):
     def test_custom_exceptions(self):
         """Test handling specific exceptions differently."""
         # Configure to ignore certain exceptions
-        config = CircuitBreakerConfig(failure_threshold=3, excluded_exceptions=(ValueError,))
+        config = CircuitBreakerConfig(
+            failure_threshold=3, excluded_exceptions=(ValueError,)
+        )
         breaker = CircuitBreaker("test", config)
 
         # ValueError should not count as failure
@@ -261,7 +268,9 @@ class TestCircuitBreaker(unittest.IsolatedAsyncioTestCase):
         # Other exceptions should count
         for _ in range(config.failure_threshold):
             with self.assertRaises(RuntimeError):
-                breaker.call(lambda: (_ for _ in ()).throw(RuntimeError("Test")))
+                breaker.call(
+                    lambda: (_ for _ in ()).throw(RuntimeError("Test"))
+                )
 
         self.assertEqual(breaker.state, CircuitState.OPEN)
 
@@ -279,7 +288,10 @@ class TestCircuitBreaker(unittest.IsolatedAsyncioTestCase):
 
         # Should have state change
         self.assertEqual(len(state_changes), 1)
-        self.assertEqual(state_changes[0], (CircuitState.CLOSED, CircuitState.OPEN, "test-breaker"))
+        self.assertEqual(
+            state_changes[0],
+            (CircuitState.CLOSED, CircuitState.OPEN, "test-breaker"),
+        )
 
         # Transition to half-open
         time.sleep(self.config.timeout + 0.1)
@@ -287,7 +299,8 @@ class TestCircuitBreaker(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(len(state_changes), 2)
         self.assertEqual(
-            state_changes[1], (CircuitState.OPEN, CircuitState.HALF_OPEN, "test-breaker")
+            state_changes[1],
+            (CircuitState.OPEN, CircuitState.HALF_OPEN, "test-breaker"),
         )
 
     def _open_circuit(self):

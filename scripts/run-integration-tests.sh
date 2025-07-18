@@ -93,12 +93,12 @@ cleanup_containers() {
 check_services_health() {
     local max_attempts=30
     local attempt=0
-    
+
     echo -e "${BLUE}Waiting for services to be healthy...${NC}"
-    
+
     while [ $attempt -lt $max_attempts ]; do
         local all_healthy=true
-        
+
         # Check each service
         for service in test-postgres test-redis test-rabbitmq test-elasticsearch test-minio; do
             if ! docker-compose -f "$COMPOSE_FILE" ps | grep -q "${service}.*healthy"; then
@@ -106,17 +106,17 @@ check_services_health() {
                 break
             fi
         done
-        
+
         if [ "$all_healthy" = true ]; then
             echo -e "${GREEN}All services are healthy!${NC}"
             return 0
         fi
-        
+
         attempt=$((attempt + 1))
         echo -n "."
         sleep 2
     done
-    
+
     echo -e "\n${RED}Services failed to become healthy in time${NC}"
     return 1
 }
@@ -124,7 +124,7 @@ check_services_health() {
 # Function to create test database schema
 setup_test_database() {
     echo -e "${BLUE}Setting up test database schema...${NC}"
-    
+
     docker-compose -f "$COMPOSE_FILE" exec -T test-postgres psql -U test_user -d freeagentics_test <<EOF
 -- Create necessary extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -136,14 +136,14 @@ CREATE SCHEMA IF NOT EXISTS test;
 -- Grant permissions
 GRANT ALL ON SCHEMA test TO test_user;
 EOF
-    
+
     echo -e "${GREEN}Database schema setup complete${NC}"
 }
 
 # Function to run integration tests
 run_tests() {
     echo -e "\n${BLUE}Running integration tests...${NC}"
-    
+
     # Source test environment if it exists
     if [ -f "${PROJECT_ROOT}/.env.test" ]; then
         echo -e "${BLUE}Loading test environment from .env.test...${NC}"
@@ -151,35 +151,35 @@ run_tests() {
         source "${PROJECT_ROOT}/.env.test"
         set +a
     fi
-    
+
     # Build pytest command
     local pytest_cmd="pytest tests/integration/"
-    
+
     # Add verbose flag
     if [ "$VERBOSE" = true ]; then
         pytest_cmd="$pytest_cmd -vv"
     else
         pytest_cmd="$pytest_cmd -v"
     fi
-    
+
     # Add coverage flags
     if [ "$COVERAGE" = true ]; then
         pytest_cmd="$pytest_cmd --cov=. --cov-report=html --cov-report=term"
     fi
-    
+
     # Add parallel flag
     if [ "$PARALLEL" = true ]; then
         pytest_cmd="$pytest_cmd -n auto"
     fi
-    
+
     # Add timeout
     pytest_cmd="$pytest_cmd --timeout=$TEST_TIMEOUT"
-    
+
     # Add specific test if provided
     if [ -n "$SPECIFIC_TEST" ]; then
         pytest_cmd="$pytest_cmd -k $SPECIFIC_TEST"
     fi
-    
+
     # Run tests in container with environment
     docker-compose -f "$COMPOSE_FILE" run --rm \
         --env-file "${PROJECT_ROOT}/.env.test" \
@@ -190,64 +190,64 @@ run_tests() {
 main() {
     echo -e "${BLUE}FreeAgentics Integration Test Runner${NC}"
     echo -e "${BLUE}=====================================${NC}\n"
-    
+
     # Change to project root
     cd "$PROJECT_ROOT"
-    
+
     # Trap to ensure cleanup on exit
     if [ "$CLEANUP" = true ]; then
         trap cleanup_containers EXIT
     fi
-    
+
     # Check if Docker is running
     if ! docker info >/dev/null 2>&1; then
         echo -e "${RED}Error: Docker is not running${NC}"
         exit 1
     fi
-    
+
     # Check if docker-compose is available
     if ! command -v docker-compose &> /dev/null; then
         echo -e "${RED}Error: docker-compose is not installed${NC}"
         exit 1
     fi
-    
+
     # Stop any existing test containers
     echo -e "${YELLOW}Stopping any existing test containers...${NC}"
     docker-compose -f "$COMPOSE_FILE" down -v --remove-orphans 2>/dev/null || true
-    
+
     # Start test containers
     echo -e "\n${BLUE}Starting test containers...${NC}"
     docker-compose -f "$COMPOSE_FILE" up -d --build
-    
+
     # Wait for services to be healthy
     if ! check_services_health; then
         echo -e "${RED}Failed to start services${NC}"
         docker-compose -f "$COMPOSE_FILE" logs
         exit 1
     fi
-    
+
     # Setup test database
     setup_test_database
-    
+
     # Run the tests
     if run_tests; then
         echo -e "\n${GREEN}✓ Integration tests passed!${NC}"
-        
+
         if [ "$COVERAGE" = true ]; then
             echo -e "\n${BLUE}Coverage report available at: htmlcov/index.html${NC}"
         fi
-        
+
         exit 0
     else
         echo -e "\n${RED}✗ Integration tests failed!${NC}"
-        
+
         if [ "$CLEANUP" = false ]; then
             echo -e "\n${YELLOW}Containers are still running. To view logs:${NC}"
             echo "  docker-compose -f $COMPOSE_FILE logs"
             echo -e "\n${YELLOW}To stop containers manually:${NC}"
             echo "  docker-compose -f $COMPOSE_FILE down -v"
         fi
-        
+
         exit 1
     fi
 }

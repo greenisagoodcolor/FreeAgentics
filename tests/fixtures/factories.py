@@ -10,14 +10,10 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
-from database.models import (
-    Agent,
-)
+from database.models import Agent
 from database.models import AgentRole as DBAgentRole
 from database.models import AgentStatus as DBAgentStatus
-from database.models import (
-    Coalition,
-)
+from database.models import Coalition
 from database.models import CoalitionStatus as DBCoalitionStatus
 from database.models import (
     KnowledgeEdge,
@@ -25,11 +21,13 @@ from database.models import (
     agent_coalition_association,
 )
 
-from .builders import AgentBuilder, CoalitionBuilder, KnowledgeEdgeBuilder, KnowledgeNodeBuilder
-from .schemas import (
-    BatchAgentSchema,
-    PerformanceTestConfigSchema,
+from .builders import (
+    AgentBuilder,
+    CoalitionBuilder,
+    KnowledgeEdgeBuilder,
+    KnowledgeNodeBuilder,
 )
+from .schemas import BatchAgentSchema, PerformanceTestConfigSchema
 
 
 class AgentFactory:
@@ -111,7 +109,9 @@ class AgentFactory:
             count=count,
             template=common_overrides.get("template", "grid_world"),
             name_prefix=common_overrides.get("name_prefix", "Agent"),
-            distribute_positions=common_overrides.get("distribute_positions", True),
+            distribute_positions=common_overrides.get(
+                "distribute_positions", True
+            ),
             position_bounds=common_overrides.get("position_bounds"),
         )
 
@@ -121,9 +121,14 @@ class AgentFactory:
             overrides["name"] = f"{batch_config.name_prefix}_{i:04d}"
 
             # Distribute positions if requested
-            if batch_config.distribute_positions and batch_config.position_bounds:
+            if (
+                batch_config.distribute_positions
+                and batch_config.position_bounds
+            ):
                 builder = AgentBuilder()
-                builder = builder.with_random_position(batch_config.position_bounds)
+                builder = builder.with_random_position(
+                    batch_config.position_bounds
+                )
                 position_data = builder._data.get("position")
                 if position_data:
                     overrides["position"] = position_data
@@ -161,8 +166,12 @@ class AgentFactory:
         """
         # Calculate timestamps and statistics
         created_at = datetime.utcnow() - timedelta(days=days_active)
-        last_active = datetime.utcnow() - timedelta(hours=random.randint(0, 24))
-        total_inferences = days_active * inference_rate + random.randint(-10, 10)
+        last_active = datetime.utcnow() - timedelta(
+            hours=random.randint(0, 24)
+        )
+        total_inferences = days_active * inference_rate + random.randint(
+            -10, 10
+        )
         total_steps = total_inferences * random.randint(5, 15)
 
         # Build agent with history
@@ -194,7 +203,9 @@ class CoalitionFactory:
 
     @staticmethod
     def create(
-        session: Optional[Session] = None, agents: Optional[List[Agent]] = None, **overrides
+        session: Optional[Session] = None,
+        agents: Optional[List[Agent]] = None,
+        **overrides,
     ) -> Coalition:
         """Create a coalition with optional member agents.
 
@@ -287,11 +298,16 @@ class CoalitionFactory:
         """
         # Create agents first
         agents = AgentFactory.create_batch(
-            session, count=num_agents, template=agent_template, status=DBAgentStatus.ACTIVE
+            session,
+            count=num_agents,
+            template=agent_template,
+            status=DBAgentStatus.ACTIVE,
         )
 
         # Create coalition with agents
-        coalition = CoalitionFactory.create(session, agents=agents, **coalition_overrides)
+        coalition = CoalitionFactory.create(
+            session, agents=agents, **coalition_overrides
+        )
 
         return coalition, agents
 
@@ -319,7 +335,9 @@ class CoalitionFactory:
         # Create coalitions with their base agents
         for i in range(num_coalitions):
             coalition_name = f"NetworkCoalition_{i:02d}"
-            coalition_type = random.choice(["resource", "exploration", "defense"])
+            coalition_type = random.choice(
+                ["resource", "exploration", "defense"]
+            )
 
             coalition, agents = CoalitionFactory.create_with_agents(
                 session,
@@ -363,11 +381,17 @@ class CoalitionFactory:
             "total_agents": len(set(all_agents)),
             "network_stats": {
                 "num_coalitions": num_coalitions,
-                "avg_coalition_size": sum(len(c.agents) for c in coalitions) / num_coalitions,
+                "avg_coalition_size": sum(len(c.agents) for c in coalitions)
+                / num_coalitions,
                 "agents_in_multiple": sum(
                     1
                     for a in all_agents
-                    if sum(1 for c in coalitions if any(m.id == a.id for m in c.agents)) > 1
+                    if sum(
+                        1
+                        for c in coalitions
+                        if any(m.id == a.id for m in c.agents)
+                    )
+                    > 1
                 ),
             },
         }
@@ -377,7 +401,9 @@ class KnowledgeGraphFactory:
     """Factory for creating knowledge graph test data."""
 
     @staticmethod
-    def create_node(session: Optional[Session] = None, **overrides) -> KnowledgeNode:
+    def create_node(
+        session: Optional[Session] = None, **overrides
+    ) -> KnowledgeNode:
         """Create a single knowledge node.
 
         Args:
@@ -394,7 +420,9 @@ class KnowledgeGraphFactory:
         if node_type == "concept" and "label" in overrides:
             builder = builder.as_concept(overrides["label"])
         elif node_type == "entity" and "label" in overrides:
-            entity_type = overrides.get("properties", {}).get("entity_type", "generic")
+            entity_type = overrides.get("properties", {}).get(
+                "entity_type", "generic"
+            )
             builder = builder.as_entity(overrides["label"], entity_type)
         elif node_type == "observation":
             builder = builder.as_observation(
@@ -542,7 +570,9 @@ class KnowledgeGraphFactory:
                 "num_edges": len(edges),
                 "avg_degree": avg_degree,
                 "connectivity": (
-                    len(edges) / (num_nodes * (num_nodes - 1) / 2) if num_nodes > 1 else 0
+                    len(edges) / (num_nodes * (num_nodes - 1) / 2)
+                    if num_nodes > 1
+                    else 0
                 ),
                 "node_type_distribution": {
                     node_type: sum(1 for n in nodes if n.type == node_type)
@@ -557,7 +587,10 @@ class KnowledgeGraphFactory:
 
     @staticmethod
     def create_agent_knowledge_scenario(
-        session: Session, agent: Agent, num_observations: int = 10, num_inferences: int = 5
+        session: Session,
+        agent: Agent,
+        num_observations: int = 10,
+        num_inferences: int = 5,
     ) -> Dict[str, Any]:
         """Create a knowledge scenario for a specific agent.
 
@@ -600,7 +633,9 @@ class KnowledgeGraphFactory:
                 creator_agent_id=agent.id,
                 confidence=min(o.confidence for o in source_obs) * 0.9,
                 properties={
-                    "inference_type": random.choice(["deductive", "inductive", "abductive"]),
+                    "inference_type": random.choice(
+                        ["deductive", "inductive", "abductive"]
+                    ),
                     "certainty": random.uniform(0.5, 0.9),
                 },
             )
@@ -667,29 +702,39 @@ class PerformanceDataFactory:
                 session,
                 count=batch_size,
                 name_prefix=f"PerfAgent_B{batch_num//config.batch_size}",
-                template=random.choice(["grid_world", "resource_collector", "explorer"]),
+                template=random.choice(
+                    ["grid_world", "resource_collector", "explorer"]
+                ),
                 status=DBAgentStatus.ACTIVE,
                 distribute_positions=True,
                 position_bounds={"min": [0, 0], "max": [100, 100]},
             )
             results["agents"].extend(agents)
 
-        results["timing"]["agent_creation"] = (datetime.utcnow() - agent_start).total_seconds()
+        results["timing"]["agent_creation"] = (
+            datetime.utcnow() - agent_start
+        ).total_seconds()
 
         # Create coalitions with agent distribution
         coalition_start = datetime.utcnow()
         if config.num_coalitions > 0:
-            agents_per_coalition = max(3, config.num_agents // config.num_coalitions)
+            agents_per_coalition = max(
+                3, config.num_agents // config.num_coalitions
+            )
 
             for i in range(config.num_coalitions):
                 # Select agents for this coalition
                 start_idx = i * agents_per_coalition
-                end_idx = min(start_idx + agents_per_coalition, len(results["agents"]))
+                end_idx = min(
+                    start_idx + agents_per_coalition, len(results["agents"])
+                )
                 coalition_agents = results["agents"][start_idx:end_idx]
 
                 # Add some random agents from other coalitions (overlap)
                 if i > 0 and random.random() < 0.3:
-                    additional = random.sample(results["agents"][:start_idx], min(5, start_idx))
+                    additional = random.sample(
+                        results["agents"][:start_idx], min(5, start_idx)
+                    )
                     coalition_agents.extend(additional)
 
                 coalition = CoalitionFactory.create(
@@ -731,23 +776,32 @@ class PerformanceDataFactory:
             "total_agents": len(results["agents"]),
             "total_coalitions": len(results["coalitions"]),
             "avg_coalition_size": (
-                sum(len(c.agents) for c in results["coalitions"]) / len(results["coalitions"])
+                sum(len(c.agents) for c in results["coalitions"])
+                / len(results["coalitions"])
                 if results["coalitions"]
                 else 0
             ),
             "total_knowledge_nodes": (
-                len(results["knowledge_graph"]["nodes"]) if results["knowledge_graph"] else 0
+                len(results["knowledge_graph"]["nodes"])
+                if results["knowledge_graph"]
+                else 0
             ),
             "total_knowledge_edges": (
-                len(results["knowledge_graph"]["edges"]) if results["knowledge_graph"] else 0
+                len(results["knowledge_graph"]["edges"])
+                if results["knowledge_graph"]
+                else 0
             ),
-            "total_creation_time": (datetime.utcnow() - start_time).total_seconds(),
+            "total_creation_time": (
+                datetime.utcnow() - start_time
+            ).total_seconds(),
         }
 
         return results
 
     @staticmethod
-    def create_stress_test_data(session: Session, scale_factor: int = 10) -> Dict[str, Any]:
+    def create_stress_test_data(
+        session: Session, scale_factor: int = 10
+    ) -> Dict[str, Any]:
         """Create stress test data with configurable scale.
 
         Args:
@@ -766,4 +820,6 @@ class PerformanceDataFactory:
             enable_metrics=True,
         )
 
-        return PerformanceDataFactory.create_performance_scenario(session, config)
+        return PerformanceDataFactory.create_performance_scenario(
+            session, config
+        )

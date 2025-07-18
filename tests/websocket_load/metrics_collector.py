@@ -80,10 +80,18 @@ class WebSocketMetrics:
 
         # Calculate throughput
         if self.duration_seconds > 0:
-            self.messages_per_second_sent = self.messages_sent / self.duration_seconds
-            self.messages_per_second_received = self.messages_received / self.duration_seconds
-            self.bytes_per_second_sent = self.bytes_sent / self.duration_seconds
-            self.bytes_per_second_received = self.bytes_received / self.duration_seconds
+            self.messages_per_second_sent = (
+                self.messages_sent / self.duration_seconds
+            )
+            self.messages_per_second_received = (
+                self.messages_received / self.duration_seconds
+            )
+            self.bytes_per_second_sent = (
+                self.bytes_sent / self.duration_seconds
+            )
+            self.bytes_per_second_received = (
+                self.bytes_received / self.duration_seconds
+            )
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert metrics to dictionary format."""
@@ -130,13 +138,19 @@ class WebSocketMetrics:
                 "receive_errors": self.receive_errors,
                 "timeout_errors": self.timeout_errors,
                 "error_rate": (
-                    self.total_errors / self.messages_sent if self.messages_sent > 0 else 0.0
+                    self.total_errors / self.messages_sent
+                    if self.messages_sent > 0
+                    else 0.0
                 ),
             },
             "test_info": {
-                "start_time": datetime.fromtimestamp(self.start_time).isoformat(),
+                "start_time": datetime.fromtimestamp(
+                    self.start_time
+                ).isoformat(),
                 "end_time": (
-                    datetime.fromtimestamp(self.end_time).isoformat() if self.end_time else None
+                    datetime.fromtimestamp(self.end_time).isoformat()
+                    if self.end_time
+                    else None
                 ),
                 "duration_seconds": self.duration_seconds,
             },
@@ -183,15 +197,20 @@ class MetricsCollector:
         """Initialize Prometheus metrics."""
         # Connection metrics
         self.prom_connections_total = Counter(
-            "websocket_connections_total", "Total WebSocket connection attempts", ["status"]
+            "websocket_connections_total",
+            "Total WebSocket connection attempts",
+            ["status"],
         )
         self.prom_active_connections = Gauge(
-            "websocket_active_connections", "Currently active WebSocket connections"
+            "websocket_active_connections",
+            "Currently active WebSocket connections",
         )
 
         # Message metrics
         self.prom_messages_total = Counter(
-            "websocket_messages_total", "Total WebSocket messages", ["direction", "type"]
+            "websocket_messages_total",
+            "Total WebSocket messages",
+            ["direction", "type"],
         )
         self.prom_bytes_total = Counter(
             "websocket_bytes_total", "Total bytes transferred", ["direction"]
@@ -201,7 +220,19 @@ class MetricsCollector:
         self.prom_latency_seconds = Histogram(
             "websocket_latency_seconds",
             "WebSocket message round-trip latency",
-            buckets=[0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0],
+            buckets=[
+                0.001,
+                0.005,
+                0.01,
+                0.025,
+                0.05,
+                0.1,
+                0.25,
+                0.5,
+                1.0,
+                2.5,
+                5.0,
+            ],
         )
 
         # Error metrics
@@ -230,20 +261,28 @@ class MetricsCollector:
                 self.prom_errors_total.labels(error_type="connection").inc()
 
         # Update time series
-        self._record_time_series("connections_total", self.current_metrics.total_connections)
-        self._record_time_series("active_connections", self.current_metrics.active_connections)
+        self._record_time_series(
+            "connections_total", self.current_metrics.total_connections
+        )
+        self._record_time_series(
+            "active_connections", self.current_metrics.active_connections
+        )
 
     def record_connection_closed(self, duration_seconds: float):
         """Record a closed connection."""
         self.current_metrics.active_connections = max(
             0, self.current_metrics.active_connections - 1
         )
-        self.current_metrics.connection_duration_seconds.append(duration_seconds)
+        self.current_metrics.connection_duration_seconds.append(
+            duration_seconds
+        )
 
         if self.enable_prometheus:
             self.prom_active_connections.dec()
 
-        self._record_time_series("active_connections", self.current_metrics.active_connections)
+        self._record_time_series(
+            "active_connections", self.current_metrics.active_connections
+        )
 
     def record_message_sent(
         self,
@@ -257,7 +296,9 @@ class MetricsCollector:
             self.current_metrics.bytes_sent += size_bytes
 
             if self.enable_prometheus:
-                self.prom_messages_total.labels(direction="sent", type=message_type).inc()
+                self.prom_messages_total.labels(
+                    direction="sent", type=message_type
+                ).inc()
                 self.prom_bytes_total.labels(direction="sent").inc(size_bytes)
         else:
             self.current_metrics.message_send_failures += 1
@@ -267,7 +308,9 @@ class MetricsCollector:
             if self.enable_prometheus:
                 self.prom_errors_total.labels(error_type="send").inc()
 
-        self._record_time_series("messages_sent", self.current_metrics.messages_sent)
+        self._record_time_series(
+            "messages_sent", self.current_metrics.messages_sent
+        )
         self._record_time_series("bytes_sent", self.current_metrics.bytes_sent)
 
     def record_message_received(self, message_type: str, size_bytes: int):
@@ -276,11 +319,17 @@ class MetricsCollector:
         self.current_metrics.bytes_received += size_bytes
 
         if self.enable_prometheus:
-            self.prom_messages_total.labels(direction="received", type=message_type).inc()
+            self.prom_messages_total.labels(
+                direction="received", type=message_type
+            ).inc()
             self.prom_bytes_total.labels(direction="received").inc(size_bytes)
 
-        self._record_time_series("messages_received", self.current_metrics.messages_received)
-        self._record_time_series("bytes_received", self.current_metrics.bytes_received)
+        self._record_time_series(
+            "messages_received", self.current_metrics.messages_received
+        )
+        self._record_time_series(
+            "bytes_received", self.current_metrics.bytes_received
+        )
 
     def record_latency(self, latency_seconds: float):
         """Record message round-trip latency."""
@@ -309,7 +358,9 @@ class MetricsCollector:
         if self.enable_prometheus:
             self.prom_errors_total.labels(error_type=error_type).inc()
 
-        self._record_time_series("errors_total", self.current_metrics.total_errors)
+        self._record_time_series(
+            "errors_total", self.current_metrics.total_errors
+        )
 
     def _record_time_series(self, metric_name: str, value: float):
         """Record a time-series data point."""
@@ -318,13 +369,18 @@ class MetricsCollector:
 
         # Clean old data
         cutoff_time = timestamp - self.time_window_seconds
-        while self.time_series[metric_name] and self.time_series[metric_name][0][0] < cutoff_time:
+        while (
+            self.time_series[metric_name]
+            and self.time_series[metric_name][0][0] < cutoff_time
+        ):
             self.time_series[metric_name].popleft()
 
     async def start_real_time_stats(self, update_interval: float = 1.0):
         """Start calculating real-time statistics."""
         self._running = True
-        self._stats_task = asyncio.create_task(self._update_real_time_stats(update_interval))
+        self._stats_task = asyncio.create_task(
+            self._update_real_time_stats(update_interval)
+        )
 
     async def stop_real_time_stats(self):
         """Stop real-time statistics calculation."""
@@ -335,7 +391,10 @@ class MetricsCollector:
     async def _update_real_time_stats(self, update_interval: float):
         """Update real-time statistics periodically."""
         last_connections = self.current_metrics.total_connections
-        last_messages = self.current_metrics.messages_sent + self.current_metrics.messages_received
+        last_messages = (
+            self.current_metrics.messages_sent
+            + self.current_metrics.messages_received
+        )
         last_errors = self.current_metrics.total_errors
 
         while self._running:
@@ -344,7 +403,8 @@ class MetricsCollector:
             # Calculate rates
             current_connections = self.current_metrics.total_connections
             current_messages = (
-                self.current_metrics.messages_sent + self.current_metrics.messages_received
+                self.current_metrics.messages_sent
+                + self.current_metrics.messages_received
             )
             current_errors = self.current_metrics.total_errors
 
@@ -356,9 +416,9 @@ class MetricsCollector:
             ) / update_interval
 
             if current_messages > last_messages:
-                self.real_time_stats["error_rate"] = (current_errors - last_errors) / (
-                    current_messages - last_messages
-                )
+                self.real_time_stats["error_rate"] = (
+                    current_errors - last_errors
+                ) / (current_messages - last_messages)
 
             last_connections = current_connections
             last_messages = current_messages
@@ -416,7 +476,9 @@ class MetricsCollector:
 
         logger.info(f"Metrics saved to {filepath}")
 
-    def _flatten_dict(self, d: Dict[str, Any], parent_key: str = "") -> Dict[str, Any]:
+    def _flatten_dict(
+        self, d: Dict[str, Any], parent_key: str = ""
+    ) -> Dict[str, Any]:
         """Flatten nested dictionary for CSV export."""
         items = []
 

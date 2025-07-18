@@ -58,7 +58,9 @@ class GMNVersionedSpecification(Base):
     __tablename__ = "gmn_versioned_specifications"
 
     # Primary key
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
 
     # Foreign keys
     agent_id: Mapped[uuid.UUID] = mapped_column(
@@ -66,14 +68,20 @@ class GMNVersionedSpecification(Base):
     )
 
     # Version tracking (core enhancement)
-    version_number: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    version_number: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=1
+    )
     parent_version_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("gmn_versioned_specifications.id"), nullable=True
+        UUID(as_uuid=True),
+        ForeignKey("gmn_versioned_specifications.id"),
+        nullable=True,
     )
 
     # Specification content
     specification_text: Mapped[str] = mapped_column(Text, nullable=False)
-    parsed_specification: Mapped[Dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
+    parsed_specification: Mapped[Dict[str, Any]] = mapped_column(
+        JSON, nullable=False, default=dict
+    )
 
     # Metadata
     name: Mapped[str] = mapped_column(String(200), nullable=False)
@@ -110,19 +118,29 @@ class GMNVersionedSpecification(Base):
     )  # Stores rollback information if this version was created via rollback
 
     # Timestamps
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now()
+    )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), onupdate=func.now()
     )
-    activated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
-    deprecated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    activated_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime, nullable=True
+    )
+    deprecated_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime, nullable=True
+    )
 
     # Relationships
     agent: Mapped["Agent"] = relationship("Agent", foreign_keys=[agent_id])
 
     # Parent-child version relationships
-    parent_version: Mapped[Optional["GMNVersionedSpecification"]] = relationship(
-        "GMNVersionedSpecification", remote_side=[id], back_populates="child_versions"
+    parent_version: Mapped[
+        Optional["GMNVersionedSpecification"]
+    ] = relationship(
+        "GMNVersionedSpecification",
+        remote_side=[id],
+        back_populates="child_versions",
     )
     child_versions: Mapped[List["GMNVersionedSpecification"]] = relationship(
         "GMNVersionedSpecification", back_populates="parent_version"
@@ -147,12 +165,21 @@ class GMNVersionedSpecification(Base):
         # Checksum index for integrity queries
         Index("idx_gmn_versioned_checksum", "specification_checksum"),
         # Composite indexes for common queries
-        Index("idx_gmn_versioned_agent_status_version", "agent_id", "status", "version_number"),
+        Index(
+            "idx_gmn_versioned_agent_status_version",
+            "agent_id",
+            "status",
+            "version_number",
+        ),
         Index("idx_gmn_versioned_agent_created", "agent_id", "created_at"),
         # Data integrity constraints
         CheckConstraint("version_number > 0", name="ck_gmn_version_positive"),
-        CheckConstraint("node_count >= 0", name="ck_gmn_node_count_non_negative"),
-        CheckConstraint("edge_count >= 0", name="ck_gmn_edge_count_non_negative"),
+        CheckConstraint(
+            "node_count >= 0", name="ck_gmn_node_count_non_negative"
+        ),
+        CheckConstraint(
+            "edge_count >= 0", name="ck_gmn_edge_count_non_negative"
+        ),
         CheckConstraint(
             "complexity_score IS NULL OR (complexity_score >= 0.0 AND complexity_score <= 1.0)",
             name="ck_gmn_complexity_range",
@@ -165,7 +192,9 @@ class GMNVersionedSpecification(Base):
             "id": str(self.id),
             "agent_id": str(self.agent_id),
             "version_number": self.version_number,
-            "parent_version_id": str(self.parent_version_id) if self.parent_version_id else None,
+            "parent_version_id": str(self.parent_version_id)
+            if self.parent_version_id
+            else None,
             "name": self.name,
             "description": self.description,
             "version_tag": self.version_tag,
@@ -179,8 +208,12 @@ class GMNVersionedSpecification(Base):
             "specification_checksum": self.specification_checksum,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
-            "activated_at": self.activated_at.isoformat() if self.activated_at else None,
-            "deprecated_at": self.deprecated_at.isoformat() if self.deprecated_at else None,
+            "activated_at": self.activated_at.isoformat()
+            if self.activated_at
+            else None,
+            "deprecated_at": self.deprecated_at.isoformat()
+            if self.deprecated_at
+            else None,
         }
 
     def is_compatible_with(self, other: "GMNVersionedSpecification") -> bool:
@@ -220,30 +253,42 @@ class GMNVersionTransition(Base):
     __tablename__ = "gmn_version_transitions"
 
     # Primary key
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
 
     # Foreign keys
     agent_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("agents.id"), nullable=False
     )
     from_version_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("gmn_versioned_specifications.id"), nullable=True
+        UUID(as_uuid=True),
+        ForeignKey("gmn_versioned_specifications.id"),
+        nullable=True,
     )
     to_version_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("gmn_versioned_specifications.id"), nullable=False
+        UUID(as_uuid=True),
+        ForeignKey("gmn_versioned_specifications.id"),
+        nullable=False,
     )
 
     # Transition metadata
     transition_type: Mapped[str] = mapped_column(
         String(50), nullable=False
     )  # "create", "update", "rollback", "activate", "deprecate"
-    transition_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    transition_reason: Mapped[Optional[str]] = mapped_column(
+        Text, nullable=True
+    )
 
     # Change summary (minimal diff information)
-    changes_summary: Mapped[Dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
+    changes_summary: Mapped[Dict[str, Any]] = mapped_column(
+        JSON, nullable=False, default=dict
+    )
 
     # Timestamps
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now()
+    )
 
     # Relationships
     agent: Mapped["Agent"] = relationship("Agent", foreign_keys=[agent_id])
@@ -269,7 +314,9 @@ class GMNVersionTransition(Base):
         return {
             "id": str(self.id),
             "agent_id": str(self.agent_id),
-            "from_version_id": str(self.from_version_id) if self.from_version_id else None,
+            "from_version_id": str(self.from_version_id)
+            if self.from_version_id
+            else None,
             "to_version_id": str(self.to_version_id),
             "transition_type": self.transition_type,
             "transition_reason": self.transition_reason,

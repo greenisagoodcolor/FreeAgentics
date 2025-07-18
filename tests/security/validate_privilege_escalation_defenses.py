@@ -64,9 +64,15 @@ def run_test_suite(test_file, test_name):
 
 def analyze_security_posture(results):
     """Analyze overall security posture based on test results."""
-    total_tests = sum(r.get("summary", {}).get("total", 0) for r in results.values())
-    total_passed = sum(r.get("summary", {}).get("passed", 0) for r in results.values())
-    total_failed = sum(r.get("summary", {}).get("failed", 0) for r in results.values())
+    total_tests = sum(
+        r.get("summary", {}).get("total", 0) for r in results.values()
+    )
+    total_passed = sum(
+        r.get("summary", {}).get("passed", 0) for r in results.values()
+    )
+    total_failed = sum(
+        r.get("summary", {}).get("failed", 0) for r in results.values()
+    )
 
     if total_tests == 0:
         return "UNKNOWN", "No tests were run"
@@ -75,15 +81,30 @@ def analyze_security_posture(results):
 
     # Categorize security posture
     if success_rate == 100:
-        return "EXCELLENT", f"All {total_tests} privilege escalation tests passed"
+        return (
+            "EXCELLENT",
+            f"All {total_tests} privilege escalation tests passed",
+        )
     elif success_rate >= 95:
-        return "GOOD", f"{total_failed} potential vulnerabilities found in {total_tests} tests"
+        return (
+            "GOOD",
+            f"{total_failed} potential vulnerabilities found in {total_tests} tests",
+        )
     elif success_rate >= 80:
-        return "MODERATE", f"{total_failed} vulnerabilities found in {total_tests} tests"
+        return (
+            "MODERATE",
+            f"{total_failed} vulnerabilities found in {total_tests} tests",
+        )
     elif success_rate >= 60:
-        return "POOR", f"{total_failed} significant vulnerabilities found in {total_tests} tests"
+        return (
+            "POOR",
+            f"{total_failed} significant vulnerabilities found in {total_tests} tests",
+        )
     else:
-        return "CRITICAL", f"{total_failed} critical vulnerabilities found in {total_tests} tests"
+        return (
+            "CRITICAL",
+            f"{total_failed} critical vulnerabilities found in {total_tests} tests",
+        )
 
 
 def generate_recommendations(results):
@@ -94,7 +115,9 @@ def generate_recommendations(results):
         if not suite_results.get("success", True):
             # Analyze failures
             failed_tests = [
-                test for test in suite_results.get("tests", []) if test.get("outcome") == "failed"
+                test
+                for test in suite_results.get("tests", [])
+                if test.get("outcome") == "failed"
             ]
 
             for test in failed_tests:
@@ -110,7 +133,9 @@ def generate_recommendations(results):
                         "- Implement stronger JWT validation and consider token binding"
                     )
                 elif "cross_user" in test_name or "horizontal" in test_name:
-                    recommendations.append("- Enhance resource ownership checks and user isolation")
+                    recommendations.append(
+                        "- Enhance resource ownership checks and user isolation"
+                    )
                 elif "sql_injection" in test_name:
                     recommendations.append(
                         "- Implement parameterized queries and input sanitization"
@@ -125,9 +150,15 @@ def generate_recommendations(results):
 
     # Add general recommendations
     if len(recommendations) == 0:
-        recommendations.append("- Continue regular security testing and monitoring")
-        recommendations.append("- Implement security headers and rate limiting")
-        recommendations.append("- Regular security training for development team")
+        recommendations.append(
+            "- Continue regular security testing and monitoring"
+        )
+        recommendations.append(
+            "- Implement security headers and rate limiting"
+        )
+        recommendations.append(
+            "- Regular security training for development team"
+        )
 
     return recommendations
 
@@ -139,10 +170,22 @@ def main():
 
     # Test suites to run
     test_suites = [
-        ("tests/security/test_privilege_escalation_comprehensive.py", "comprehensive_escalation"),
-        ("tests/security/test_privilege_escalation_integration.py", "integration_escalation"),
-        ("tests/security/test_jwt_manipulation_vulnerabilities.py", "jwt_manipulation"),
-        ("tests/security/test_authorization_attacks.py", "authorization_attacks"),
+        (
+            "tests/security/test_privilege_escalation_comprehensive.py",
+            "comprehensive_escalation",
+        ),
+        (
+            "tests/security/test_privilege_escalation_integration.py",
+            "integration_escalation",
+        ),
+        (
+            "tests/security/test_jwt_manipulation_vulnerabilities.py",
+            "jwt_manipulation",
+        ),
+        (
+            "tests/security/test_authorization_attacks.py",
+            "authorization_attacks",
+        ),
     ]
 
     results = {}
@@ -194,7 +237,12 @@ def main():
                 test_name = test.get("nodeid", "").split("::")[-1]
                 if any(
                     critical in test_name
-                    for critical in ["admin", "elevation", "bypass", "injection"]
+                    for critical in [
+                        "admin",
+                        "elevation",
+                        "bypass",
+                        "injection",
+                    ]
                 ):
                     critical_failures.append(f"{suite_name}::{test_name}")
 

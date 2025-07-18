@@ -41,9 +41,9 @@ send_alert() {
     local subject="$1"
     local message="$2"
     local priority="${3:-info}"
-    
+
     log "ALERT" "[$priority] $subject: $message"
-    
+
     # Send to Slack if configured
     if [[ -n "${SLACK_WEBHOOK:-}" ]]; then
         local emoji="🚨"
@@ -51,7 +51,7 @@ send_alert() {
             --data "{\"text\":\"$emoji *DISASTER RECOVERY* - $subject\\n$message\"}" \
             "$SLACK_WEBHOOK" 2>/dev/null || true
     fi
-    
+
     # Send emergency email
     if command -v mail >/dev/null 2>&1; then
         echo "$message" | mail -s "EMERGENCY: FreeAgentics - $subject" \
@@ -72,7 +72,7 @@ Disaster Scenarios:
     ransomware         Ransomware attack recovery
     data-center-loss   Data center/infrastructure loss
     human-error        Accidental deletion recovery
-    
+
 Options:
     --point-in-time <timestamp>    Restore to specific point in time
     --dry-run                      Show what would be done without executing
@@ -93,27 +93,27 @@ EOF
 # Assess disaster impact
 assess_disaster() {
     local scenario="$1"
-    
+
     log "INFO" "===== DISASTER RECOVERY ASSESSMENT ====="
     log "INFO" "Scenario: $scenario"
     log "INFO" "Timestamp: $(date)"
     log "INFO" "Host: $(hostname)"
     log "INFO" "User: $(whoami)"
-    
+
     # Check system status
     local system_status="UNKNOWN"
     local database_status="UNKNOWN"
     local application_status="UNKNOWN"
-    
+
     # Check if Docker is running
     if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
         log "INFO" "✓ Docker is running"
-        
+
         # Check container status
         local running_containers
         running_containers=$(docker ps --format "table {{.Names}}" | grep -E "freeagentics|postgres|redis" | wc -l)
         log "INFO" "Running containers: $running_containers"
-        
+
         if [[ "$running_containers" -gt 0 ]]; then
             application_status="PARTIAL"
         else
@@ -123,7 +123,7 @@ assess_disaster() {
         log "WARNING" "Docker not available or not running"
         application_status="DOWN"
     fi
-    
+
     # Check database connectivity
     if pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" >/dev/null 2>&1; then
         log "INFO" "✓ Database is accessible"
@@ -132,7 +132,7 @@ assess_disaster() {
         log "WARNING" "Database not accessible"
         database_status="DOWN"
     fi
-    
+
     # Check file system
     if [[ -d "/home/green/FreeAgentics" ]]; then
         log "INFO" "✓ Application directory exists"
@@ -141,7 +141,7 @@ assess_disaster() {
         log "WARNING" "Application directory missing"
         system_status="DOWN"
     fi
-    
+
     # Check backup availability
     local backup_available=false
     if [[ -d "$BACKUP_ROOT" ]] && [[ -n "$(ls -A "$BACKUP_ROOT/daily" 2>/dev/null)" ]]; then
@@ -153,7 +153,7 @@ assess_disaster() {
     else
         log "ERROR" "No backups available"
     fi
-    
+
     # Generate assessment report
     cat > "$RECOVERY_TEMP/assessment.txt" << EOF
 DISASTER RECOVERY ASSESSMENT
@@ -174,7 +174,7 @@ $(get_recovery_strategy "$scenario" "$system_status" "$database_status" "$applic
 Estimated Recovery Time: $(get_recovery_time "$scenario")
 Estimated Data Loss: $(get_data_loss_estimate "$scenario")
 EOF
-    
+
     log "INFO" "Assessment complete - see $RECOVERY_TEMP/assessment.txt"
     cat "$RECOVERY_TEMP/assessment.txt"
 }
@@ -186,7 +186,7 @@ get_recovery_strategy() {
     local database_status="$3"
     local application_status="$4"
     local backup_available="$5"
-    
+
     case "$scenario" in
         "full-system")
             echo "1. Restore infrastructure"
@@ -225,7 +225,7 @@ get_recovery_strategy() {
 # Get recovery time estimate
 get_recovery_time() {
     local scenario="$1"
-    
+
     case "$scenario" in
         "full-system") echo "2-4 hours" ;;
         "database-corruption") echo "30-60 minutes" ;;
@@ -239,7 +239,7 @@ get_recovery_time() {
 # Get data loss estimate
 get_data_loss_estimate() {
     local scenario="$1"
-    
+
     case "$scenario" in
         "full-system") echo "< 15 minutes (WAL recovery)" ;;
         "database-corruption") echo "< 15 minutes (WAL recovery)" ;;
@@ -253,13 +253,13 @@ get_data_loss_estimate() {
 # Full system recovery
 recover_full_system() {
     local dry_run="${1:-false}"
-    
+
     log "INFO" "===== FULL SYSTEM RECOVERY ====="
-    
+
     if [[ "$dry_run" == "true" ]]; then
         log "INFO" "DRY RUN - No changes will be made"
     fi
-    
+
     # Step 1: Prepare recovery environment
     log "INFO" "Step 1: Preparing recovery environment..."
     if [[ "$dry_run" == "false" ]]; then
@@ -267,7 +267,7 @@ recover_full_system() {
         mkdir -p /home/green/FreeAgentics-recovery
         cd /home/green/FreeAgentics-recovery
     fi
-    
+
     # Step 2: Restore application code
     log "INFO" "Step 2: Restoring application code..."
     if [[ "$dry_run" == "false" ]]; then
@@ -281,19 +281,19 @@ recover_full_system() {
             mv /home/green/FreeAgentics-new /home/green/FreeAgentics
         fi
     fi
-    
+
     # Step 3: Restore configuration
     log "INFO" "Step 3: Restoring configuration..."
     if [[ "$dry_run" == "false" ]]; then
         restore_configuration
     fi
-    
+
     # Step 4: Restore database
     log "INFO" "Step 4: Restoring database..."
     if [[ "$dry_run" == "false" ]]; then
         restore_database_from_backup
     fi
-    
+
     # Step 5: Start services
     log "INFO" "Step 5: Starting services..."
     if [[ "$dry_run" == "false" ]]; then
@@ -302,32 +302,32 @@ recover_full_system() {
         sleep 30
         verify_system_health
     fi
-    
+
     log "INFO" "Full system recovery completed"
 }
 
 # Database corruption recovery
 recover_database_corruption() {
     local dry_run="${1:-false}"
-    
+
     log "INFO" "===== DATABASE CORRUPTION RECOVERY ====="
-    
+
     if [[ "$dry_run" == "true" ]]; then
         log "INFO" "DRY RUN - No changes will be made"
         return 0
     fi
-    
+
     # Stop application services
     log "INFO" "Stopping application services..."
     docker-compose stop backend-prod web worker || true
-    
+
     # Assess corruption
     log "INFO" "Assessing database corruption..."
     local corruption_level="UNKNOWN"
-    
+
     if PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "SELECT 1;" >/dev/null 2>&1; then
         log "INFO" "Database is accessible - checking for corruption..."
-        
+
         # Run basic checks
         if PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "SELECT COUNT(*) FROM pg_stat_database;" >/dev/null 2>&1; then
             corruption_level="MINOR"
@@ -337,9 +337,9 @@ recover_database_corruption() {
     else
         corruption_level="SEVERE"
     fi
-    
+
     log "INFO" "Corruption level: $corruption_level"
-    
+
     # Restore based on corruption level
     case "$corruption_level" in
         "MINOR")
@@ -351,68 +351,68 @@ recover_database_corruption() {
             restore_database_from_backup
             ;;
     esac
-    
+
     # Verify integrity
     verify_database_integrity
-    
+
     # Start services
     log "INFO" "Starting services..."
     docker-compose up -d backend-prod web worker
-    
+
     log "INFO" "Database corruption recovery completed"
 }
 
 # Ransomware recovery
 recover_ransomware() {
     local dry_run="${1:-false}"
-    
+
     log "INFO" "===== RANSOMWARE RECOVERY ====="
-    
+
     if [[ "$dry_run" == "true" ]]; then
         log "INFO" "DRY RUN - No changes will be made"
         return 0
     fi
-    
+
     # Immediate isolation
     log "INFO" "Isolating affected systems..."
     docker-compose down || true
-    
+
     # Check backup integrity
     log "INFO" "Verifying backup integrity..."
     if ! verify_backup_integrity; then
         error_exit "Backup integrity compromised - contact security team"
     fi
-    
+
     # Restore from clean backups
     log "INFO" "Restoring from clean backups..."
     restore_from_clean_backups
-    
+
     # Implement additional security
     log "INFO" "Implementing additional security measures..."
     implement_security_hardening
-    
+
     # Monitor for reinfection
     log "INFO" "Setting up monitoring for reinfection..."
     setup_enhanced_monitoring
-    
+
     log "INFO" "Ransomware recovery completed"
 }
 
 # Restore configuration from backup
 restore_configuration() {
     log "INFO" "Restoring configuration from backup..."
-    
+
     local latest_config_backup
     latest_config_backup=$(ls -t "$BACKUP_ROOT/config"/config_backup_*.tar.gz* 2>/dev/null | head -1)
-    
+
     if [[ -n "$latest_config_backup" ]]; then
         /home/green/FreeAgentics/scripts/backup/config-backup.sh restore "$latest_config_backup" "$RECOVERY_TEMP/config"
-        
+
         # Selectively restore critical configs
         if [[ -f "$RECOVERY_TEMP/config/app/.env" ]]; then
             cp "$RECOVERY_TEMP/config/app/.env" /home/green/FreeAgentics/
         fi
-        
+
         if [[ -f "$RECOVERY_TEMP/config/app/docker-compose.yml" ]]; then
             cp "$RECOVERY_TEMP/config/app/docker-compose.yml" /home/green/FreeAgentics/
         fi
@@ -424,9 +424,9 @@ restore_configuration() {
 # Restore database from backup
 restore_database_from_backup() {
     log "INFO" "Restoring database from backup..."
-    
+
     local point_in_time="${POINT_IN_TIME:-}"
-    
+
     if [[ -n "$point_in_time" ]]; then
         /home/green/FreeAgentics/scripts/backup/database-restore.sh pitr "$point_in_time"
     else
@@ -437,10 +437,10 @@ restore_database_from_backup() {
 # Verify system health
 verify_system_health() {
     log "INFO" "Verifying system health..."
-    
+
     local health_checks=0
     local passed_checks=0
-    
+
     # Check database
     ((health_checks++))
     if pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" >/dev/null 2>&1; then
@@ -449,7 +449,7 @@ verify_system_health() {
     else
         log "ERROR" "✗ Database health check failed"
     fi
-    
+
     # Check application
     ((health_checks++))
     if curl -f http://localhost:8000/health >/dev/null 2>&1; then
@@ -458,7 +458,7 @@ verify_system_health() {
     else
         log "ERROR" "✗ Application health check failed"
     fi
-    
+
     # Check Redis
     ((health_checks++))
     if redis-cli ping >/dev/null 2>&1; then
@@ -467,9 +467,9 @@ verify_system_health() {
     else
         log "ERROR" "✗ Redis health check failed"
     fi
-    
+
     log "INFO" "Health checks: $passed_checks/$health_checks passed"
-    
+
     if [[ "$passed_checks" -eq "$health_checks" ]]; then
         send_alert "Recovery Successful" "All health checks passed - system recovered" "success"
         return 0
@@ -482,7 +482,7 @@ verify_system_health() {
 # Additional helper functions
 verify_backup_integrity() {
     log "INFO" "Verifying backup integrity..."
-    
+
     # Check database backups
     if [[ -f "$BACKUP_ROOT/daily/postgres_latest.sql.gz" ]]; then
         if gzip -t "$BACKUP_ROOT/daily/postgres_latest.sql.gz"; then
@@ -492,7 +492,7 @@ verify_backup_integrity() {
             return 1
         fi
     fi
-    
+
     # Check S3 backups if available
     if command -v aws >/dev/null 2>&1; then
         if aws s3 ls "s3://$S3_BUCKET/daily/" >/dev/null 2>&1; then
@@ -501,28 +501,28 @@ verify_backup_integrity() {
             log "WARNING" "S3 backups not accessible"
         fi
     fi
-    
+
     return 0
 }
 
 verify_database_integrity() {
     log "INFO" "Verifying database integrity..."
-    
+
     local integrity_checks=0
     local passed_checks=0
-    
+
     # Check table count
     ((integrity_checks++))
     local table_count
     table_count=$(PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" | tr -d ' ')
-    
+
     if [[ "$table_count" -gt 0 ]]; then
         ((passed_checks++))
         log "INFO" "✓ Database contains $table_count tables"
     else
         log "ERROR" "✗ No tables found in database"
     fi
-    
+
     # Check for corruption
     ((integrity_checks++))
     if PGPASSWORD="$POSTGRES_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "SELECT 1;" >/dev/null 2>&1; then
@@ -531,7 +531,7 @@ verify_database_integrity() {
     else
         log "ERROR" "✗ Database queries failing"
     fi
-    
+
     log "INFO" "Integrity checks: $passed_checks/$integrity_checks passed"
     return $([[ "$passed_checks" -eq "$integrity_checks" ]] && echo 0 || echo 1)
 }

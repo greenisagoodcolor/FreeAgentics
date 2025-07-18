@@ -5,10 +5,7 @@ import numpy as np
 # PyMDP imports - must fail hard if not available
 from pymdp.agent import Agent
 
-from inference.active.gmn_parser import (
-    GMNParser,
-    GMNToPyMDPConverter,
-)
+from inference.active.gmn_parser import GMNParser, GMNToPyMDPConverter
 
 
 class TestGMNParserPyMDPIntegration:
@@ -20,7 +17,11 @@ class TestGMNParserPyMDPIntegration:
         gmn_spec = {
             "nodes": [
                 {"name": "location", "type": "state", "num_states": 4},
-                {"name": "observation", "type": "observation", "num_observations": 4},
+                {
+                    "name": "observation",
+                    "type": "observation",
+                    "num_observations": 4,
+                },
                 {"name": "move", "type": "action", "num_actions": 4},
                 {
                     "name": "location_belief",
@@ -29,7 +30,9 @@ class TestGMNParserPyMDPIntegration:
                     "initial_distribution": [0.25, 0.25, 0.25, 0.25],
                 },
             ],
-            "edges": [{"from": "location", "to": "observation", "type": "generates"}],
+            "edges": [
+                {"from": "location", "to": "observation", "type": "generates"}
+            ],
         }
 
         # Act
@@ -55,14 +58,18 @@ class TestGMNParserPyMDPIntegration:
         location_belief = belief_states["location_belief"]
         assert hasattr(location_belief, "values")
         assert np.allclose(location_belief.values, [0.25, 0.25, 0.25, 0.25])
-        assert np.allclose(location_belief.values.sum(), 1.0)  # Must be normalized
+        assert np.allclose(
+            location_belief.values.sum(), 1.0
+        )  # Must be normalized
 
         # Verify belief can be used with PyMDP agent
         agent = Agent(
             A=matrices["A"],
             B=matrices["B"],
             C=matrices["C"],
-            D=matrices["D"],  # Use D matrix from converter (which incorporates belief)
+            D=matrices[
+                "D"
+            ],  # Use D matrix from converter (which incorporates belief)
             control_fac_idx=[0],  # Control factor indices
         )
 
@@ -78,8 +85,16 @@ class TestGMNParserPyMDPIntegration:
         # Arrange - GMN with belief update rules
         gmn_spec = {
             "nodes": [
-                {"name": "health", "type": "state", "num_states": 3},  # healthy, injured, critical
-                {"name": "health_obs", "type": "observation", "num_observations": 3},
+                {
+                    "name": "health",
+                    "type": "state",
+                    "num_states": 3,
+                },  # healthy, injured, critical
+                {
+                    "name": "health_obs",
+                    "type": "observation",
+                    "num_observations": 3,
+                },
                 {
                     "name": "health_belief",
                     "type": "belief",
@@ -96,7 +111,9 @@ class TestGMNParserPyMDPIntegration:
                     ],
                 },
             ],
-            "edges": [{"from": "health", "to": "health_obs", "type": "generates"}],
+            "edges": [
+                {"from": "health", "to": "health_obs", "type": "generates"}
+            ],
         }
 
         # Act
@@ -113,20 +130,36 @@ class TestGMNParserPyMDPIntegration:
         update_fn = update_functions["health_belief"]
 
         # Simulate injured observation
-        updated_belief = update_fn(initial_belief, observation=1)  # 1 = injured
+        updated_belief = update_fn(
+            initial_belief, observation=1
+        )  # 1 = injured
 
         # Assert - verify belief was properly updated
-        assert updated_belief.values[0] < initial_belief.values[0]  # healthy decreased
-        assert updated_belief.values[1] > initial_belief.values[1]  # injured increased
-        assert np.allclose(updated_belief.values.sum(), 1.0)  # Still normalized
+        assert (
+            updated_belief.values[0] < initial_belief.values[0]
+        )  # healthy decreased
+        assert (
+            updated_belief.values[1] > initial_belief.values[1]
+        )  # injured increased
+        assert np.allclose(
+            updated_belief.values.sum(), 1.0
+        )  # Still normalized
 
     def test_gmn_multi_factor_beliefs(self):
         """Test GMN with multi-factor belief states for PyMDP."""
         # Arrange - GMN with multiple state factors
         gmn_spec = {
             "nodes": [
-                {"name": "position", "type": "state", "num_states": 9},  # 3x3 grid
-                {"name": "energy", "type": "state", "num_states": 3},  # low, medium, high
+                {
+                    "name": "position",
+                    "type": "state",
+                    "num_states": 9,
+                },  # 3x3 grid
+                {
+                    "name": "energy",
+                    "type": "state",
+                    "num_states": 3,
+                },  # low, medium, high
                 {
                     "name": "joint_belief",
                     "type": "belief",

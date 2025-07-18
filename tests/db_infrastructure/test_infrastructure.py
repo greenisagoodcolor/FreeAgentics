@@ -5,7 +5,12 @@ import os
 import sys
 
 # Add parent directories to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(
+    0,
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ),
+)
 
 from tests.db_infrastructure.db_reset import DatabaseReset
 from tests.db_infrastructure.pool_config import DatabasePool
@@ -112,7 +117,10 @@ def test_data_generation():
 
         # Generate dataset
         dataset = generator.generate_complete_dataset(
-            num_agents=10, num_coalitions=2, num_knowledge_nodes=20, num_edges=10
+            num_agents=10,
+            num_coalitions=2,
+            num_knowledge_nodes=20,
+            num_edges=10,
         )
 
         print("\n✓ Generated complete dataset:")

@@ -20,7 +20,12 @@ import psycopg2
 import redis
 
 # Add project root to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(
+    0,
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ),
+)
 
 
 @dataclass
@@ -54,7 +59,10 @@ class ObsoleteArtifactCleaner:
         self.stats = CleanupStats()
 
         # Setup logging
-        logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(asctime)s - %(levelname)s - %(message)s",
+        )
         self.logger = logging.getLogger(__name__)
 
     def cleanup_docker_containers(self, patterns: List[str]) -> int:
@@ -78,13 +86,17 @@ class ObsoleteArtifactCleaner:
                                     container.stop(timeout=10)
                                 container.remove()
                                 removed_count += 1
-                                self.logger.info(f"Removed container: {container.name}")
+                                self.logger.info(
+                                    f"Removed container: {container.name}"
+                                )
                             except Exception as e:
                                 self.stats.errors.append(
                                     f"Error removing container {container.name}: {e}"
                                 )
                         else:
-                            self.logger.info(f"Would remove container: {container.name}")
+                            self.logger.info(
+                                f"Would remove container: {container.name}"
+                            )
                             removed_count += 1
 
         except Exception as e:
@@ -115,13 +127,17 @@ class ObsoleteArtifactCleaner:
                                 volume.remove()
                                 removed_count += 1
                                 size_freed += size
-                                self.logger.info(f"Removed volume: {volume.name} ({size} bytes)")
+                                self.logger.info(
+                                    f"Removed volume: {volume.name} ({size} bytes)"
+                                )
                             except Exception as e:
                                 self.stats.errors.append(
                                     f"Error removing volume {volume.name}: {e}"
                                 )
                         else:
-                            self.logger.info(f"Would remove volume: {volume.name}")
+                            self.logger.info(
+                                f"Would remove volume: {volume.name}"
+                            )
                             removed_count += 1
 
         except Exception as e:
@@ -137,12 +153,13 @@ class ObsoleteArtifactCleaner:
             networks = self.docker_client.networks.list()
 
             for network in networks:
-                if self._matches_patterns(network.name, patterns) and network.name not in [
+                if self._matches_patterns(
+                    network.name, patterns
+                ) and network.name not in [
                     "bridge",
                     "host",
                     "none",
                 ]:
-
                     # Check if network is old enough
                     created_time = datetime.fromisoformat(
                         network.attrs["Created"].replace("Z", "+00:00")
@@ -153,13 +170,17 @@ class ObsoleteArtifactCleaner:
                             try:
                                 network.remove()
                                 removed_count += 1
-                                self.logger.info(f"Removed network: {network.name}")
+                                self.logger.info(
+                                    f"Removed network: {network.name}"
+                                )
                             except Exception as e:
                                 self.stats.errors.append(
                                     f"Error removing network {network.name}: {e}"
                                 )
                         else:
-                            self.logger.info(f"Would remove network: {network.name}")
+                            self.logger.info(
+                                f"Would remove network: {network.name}"
+                            )
                             removed_count += 1
 
         except Exception as e:
@@ -180,17 +201,23 @@ class ObsoleteArtifactCleaner:
                 for tag in tags:
                     if self._matches_patterns(tag, patterns):
                         # Check if image is old enough
-                        created_time = datetime.fromtimestamp(image.attrs["Created"])
+                        created_time = datetime.fromtimestamp(
+                            image.attrs["Created"]
+                        )
 
                         if created_time < self.cutoff_time:
                             if not self.dry_run:
                                 try:
-                                    self.docker_client.images.remove(image.id, force=True)
+                                    self.docker_client.images.remove(
+                                        image.id, force=True
+                                    )
                                     removed_count += 1
                                     self.logger.info(f"Removed image: {tag}")
                                     break
                                 except Exception as e:
-                                    self.stats.errors.append(f"Error removing image {tag}: {e}")
+                                    self.stats.errors.append(
+                                        f"Error removing image {tag}: {e}"
+                                    )
                             else:
                                 self.logger.info(f"Would remove image: {tag}")
                                 removed_count += 1
@@ -219,8 +246,8 @@ class ObsoleteArtifactCleaner:
             # Find test schemas
             cursor.execute(
                 """
-                SELECT schema_name 
-                FROM information_schema.schemata 
+                SELECT schema_name
+                FROM information_schema.schemata
                 WHERE schema_name LIKE 'test_%'
                 AND schema_name NOT IN ('information_schema', 'pg_catalog')
             """
@@ -231,12 +258,16 @@ class ObsoleteArtifactCleaner:
             for (schema_name,) in schemas:
                 if not self.dry_run:
                     try:
-                        cursor.execute(f"DROP SCHEMA IF EXISTS {schema_name} CASCADE")
+                        cursor.execute(
+                            f"DROP SCHEMA IF EXISTS {schema_name} CASCADE"
+                        )
                         conn.commit()
                         removed_count += 1
                         self.logger.info(f"Removed schema: {schema_name}")
                     except Exception as e:
-                        self.stats.errors.append(f"Error removing schema {schema_name}: {e}")
+                        self.stats.errors.append(
+                            f"Error removing schema {schema_name}: {e}"
+                        )
                         conn.rollback()
                 else:
                     self.logger.info(f"Would remove schema: {schema_name}")
@@ -264,11 +295,17 @@ class ObsoleteArtifactCleaner:
                     try:
                         client.delete(*test_keys)
                         removed_count = len(test_keys)
-                        self.logger.info(f"Removed {removed_count} Redis test keys")
+                        self.logger.info(
+                            f"Removed {removed_count} Redis test keys"
+                        )
                     except Exception as e:
-                        self.stats.errors.append(f"Error removing Redis keys: {e}")
+                        self.stats.errors.append(
+                            f"Error removing Redis keys: {e}"
+                        )
                 else:
-                    self.logger.info(f"Would remove {len(test_keys)} Redis test keys")
+                    self.logger.info(
+                        f"Would remove {len(test_keys)} Redis test keys"
+                    )
                     removed_count = len(test_keys)
 
         except Exception as e:
@@ -285,7 +322,9 @@ class ObsoleteArtifactCleaner:
 
             # List virtual hosts
             response = requests.get(
-                "http://localhost:15673/api/vhosts", auth=("test_user", "test_password"), timeout=10
+                "http://localhost:15673/api/vhosts",
+                auth=("test_user", "test_password"),
+                timeout=10,
             )
 
             if response.status_code == 200:
@@ -304,15 +343,21 @@ class ObsoleteArtifactCleaner:
 
                                 if delete_response.status_code in [204, 404]:
                                     removed_count += 1
-                                    self.logger.info(f"Removed RabbitMQ vhost: {vhost_name}")
+                                    self.logger.info(
+                                        f"Removed RabbitMQ vhost: {vhost_name}"
+                                    )
                                 else:
                                     self.stats.errors.append(
                                         f"Error removing vhost {vhost_name}: HTTP {delete_response.status_code}"
                                     )
                             except Exception as e:
-                                self.stats.errors.append(f"Error removing vhost {vhost_name}: {e}")
+                                self.stats.errors.append(
+                                    f"Error removing vhost {vhost_name}: {e}"
+                                )
                         else:
-                            self.logger.info(f"Would remove RabbitMQ vhost: {vhost_name}")
+                            self.logger.info(
+                                f"Would remove RabbitMQ vhost: {vhost_name}"
+                            )
                             removed_count += 1
 
         except Exception as e:
@@ -346,11 +391,17 @@ class ObsoleteArtifactCleaner:
                             else:
                                 pattern.unlink()
                             removed_count += 1
-                            self.logger.info(f"Removed filesystem artifact: {pattern}")
+                            self.logger.info(
+                                f"Removed filesystem artifact: {pattern}"
+                            )
                         except Exception as e:
-                            self.stats.errors.append(f"Error removing {pattern}: {e}")
+                            self.stats.errors.append(
+                                f"Error removing {pattern}: {e}"
+                            )
                     else:
-                        self.logger.info(f"Would remove filesystem artifact: {pattern}")
+                        self.logger.info(
+                            f"Would remove filesystem artifact: {pattern}"
+                        )
                         removed_count += 1
             else:
                 # Glob pattern
@@ -363,11 +414,17 @@ class ObsoleteArtifactCleaner:
                                 else:
                                     path.unlink()
                                 removed_count += 1
-                                self.logger.info(f"Removed filesystem artifact: {path}")
+                                self.logger.info(
+                                    f"Removed filesystem artifact: {path}"
+                                )
                             except Exception as e:
-                                self.stats.errors.append(f"Error removing {path}: {e}")
+                                self.stats.errors.append(
+                                    f"Error removing {path}: {e}"
+                                )
                         else:
-                            self.logger.info(f"Would remove filesystem artifact: {path}")
+                            self.logger.info(
+                                f"Would remove filesystem artifact: {path}"
+                            )
                             removed_count += 1
 
         return removed_count
@@ -420,11 +477,17 @@ class ObsoleteArtifactCleaner:
             ["freeagentics-test-*", "test_*", "*_test_*"]
         )
 
-        self.stats.volumes_removed = self.cleanup_docker_volumes(["test-*", "*_test_*"])
+        self.stats.volumes_removed = self.cleanup_docker_volumes(
+            ["test-*", "*_test_*"]
+        )
 
-        self.stats.networks_removed = self.cleanup_docker_networks(["test-*", "*_test_*"])
+        self.stats.networks_removed = self.cleanup_docker_networks(
+            ["test-*", "*_test_*"]
+        )
 
-        self.stats.images_removed = self.cleanup_docker_images(["test-*", "*:test-*"])
+        self.stats.images_removed = self.cleanup_docker_images(
+            ["test-*", "*:test-*"]
+        )
 
         # Database cleanup
         self.stats.schemas_removed = self.cleanup_database_schemas()
@@ -436,7 +499,9 @@ class ObsoleteArtifactCleaner:
         self.stats.rabbitmq_vhosts_removed = self.cleanup_rabbitmq_vhosts()
 
         # Filesystem cleanup
-        self.stats.filesystem_artifacts_removed = self.cleanup_filesystem_artifacts()
+        self.stats.filesystem_artifacts_removed = (
+            self.cleanup_filesystem_artifacts()
+        )
 
         self.logger.info("Cleanup completed")
         self._print_summary()
@@ -459,7 +524,9 @@ class ObsoleteArtifactCleaner:
         print(f"Database schemas removed: {self.stats.schemas_removed}")
         print(f"Redis keys removed: {self.stats.redis_keys_removed}")
         print(f"RabbitMQ vhosts removed: {self.stats.rabbitmq_vhosts_removed}")
-        print(f"Filesystem artifacts removed: {self.stats.filesystem_artifacts_removed}")
+        print(
+            f"Filesystem artifacts removed: {self.stats.filesystem_artifacts_removed}"
+        )
         print(f"Total errors: {len(self.stats.errors)}")
 
         if self.stats.errors:
@@ -472,7 +539,9 @@ class ObsoleteArtifactCleaner:
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(description="Clean up obsolete test environment artifacts")
+    parser = argparse.ArgumentParser(
+        description="Clean up obsolete test environment artifacts"
+    )
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -484,8 +553,14 @@ def main():
         default=24,
         help="Maximum age in hours for artifacts to be considered for cleanup",
     )
-    parser.add_argument("--force", action="store_true", help="Force cleanup without confirmation")
-    parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Force cleanup without confirmation",
+    )
+    parser.add_argument(
+        "--verbose", action="store_true", help="Enable verbose logging"
+    )
 
     args = parser.parse_args()
 
@@ -501,7 +576,9 @@ def main():
             print("Cleanup cancelled.")
             return
 
-    cleaner = ObsoleteArtifactCleaner(dry_run=args.dry_run, max_age_hours=args.max_age_hours)
+    cleaner = ObsoleteArtifactCleaner(
+        dry_run=args.dry_run, max_age_hours=args.max_age_hours
+    )
 
     stats = cleaner.run_cleanup()
 

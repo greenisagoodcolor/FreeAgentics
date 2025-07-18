@@ -30,7 +30,9 @@ def test_field_encryption():
 
     # Create encryptor
     encryptor = FieldEncryptor(
-        provider=MockProvider(), default_key_id="test-key", performance_monitoring=True
+        provider=MockProvider(),
+        default_key_id="test-key",
+        performance_monitoring=True,
     )
 
     # Test encryption/decryption
@@ -63,7 +65,9 @@ def test_quantum_resistant():
     assert keypair.algorithm == "Kyber3"
 
     encapsulated = kyber.encapsulate(keypair.public_key)
-    shared_secret = kyber.decapsulate(encapsulated.ciphertext, keypair.private_key)
+    shared_secret = kyber.decapsulate(
+        encapsulated.ciphertext, keypair.private_key
+    )
     assert len(shared_secret) == 32
     print("✓ Kyber KEM works")
 
@@ -100,11 +104,15 @@ async def test_soar_playbook():
 
     # Test IP block action
     action = IPBlockAction(
-        "test_block", {"ip_addresses": ["192.168.1.1", "192.168.1.2"], "duration_hours": 24}
+        "test_block",
+        {"ip_addresses": ["192.168.1.1", "192.168.1.2"], "duration_hours": 24},
     )
 
     context = PlaybookContext(
-        playbook_id="test", execution_id="exec-1", trigger=PlaybookTrigger.MANUAL, trigger_data={}
+        playbook_id="test",
+        execution_id="exec-1",
+        trigger=PlaybookTrigger.MANUAL,
+        trigger_data={},
     )
 
     result = await action.execute(context)
@@ -127,10 +135,16 @@ def test_incident_manager():
 
     import tempfile
 
-    from security.soar.incident_manager import IncidentManager, IncidentSeverity, IncidentType
+    from security.soar.incident_manager import (
+        IncidentManager,
+        IncidentSeverity,
+        IncidentType,
+    )
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        manager = IncidentManager(data_dir=tmpdir, auto_triage=False, auto_playbook_execution=False)
+        manager = IncidentManager(
+            data_dir=tmpdir, auto_triage=False, auto_playbook_execution=False
+        )
 
         # Create incident
         case = manager.create_incident(
@@ -138,7 +152,9 @@ def test_incident_manager():
             description="Test description",
             type=IncidentType.MALWARE,
             severity=IncidentSeverity.HIGH,
-            indicators=[{"type": "ip", "value": "192.168.1.100", "confidence": 0.9}],
+            indicators=[
+                {"type": "ip", "value": "192.168.1.100", "confidence": 0.9}
+            ],
         )
 
         assert case.case_id.startswith("INC-")
@@ -155,13 +171,20 @@ def test_encryption_at_rest():
     """Test encryption at rest."""
     print("\nTesting encryption at rest...")
 
-    from security.encryption.quantum_resistant import EncryptionAtRest, QuantumResistantCrypto
+    from security.encryption.quantum_resistant import (
+        EncryptionAtRest,
+        QuantumResistantCrypto,
+    )
 
     qrc = QuantumResistantCrypto()
     ear = EncryptionAtRest(qrc)
 
     # Test document encryption
-    document = {"id": "doc-123", "content": "sensitive content", "metadata": {"author": "user"}}
+    document = {
+        "id": "doc-123",
+        "content": "sensitive content",
+        "metadata": {"author": "user"},
+    }
 
     encrypted = ear.encrypt_document(document, ["content"])
     decrypted = ear.decrypt_document(encrypted, ["content"])

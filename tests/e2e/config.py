@@ -79,7 +79,9 @@ class E2ETestConfig:
     videos_path: str = "tests/e2e/videos"
 
     # Database configuration
-    test_db_url: str = "postgresql://test:test@localhost:5432/test_freeagentics"
+    test_db_url: str = (
+        "postgresql://test:test@localhost:5432/test_freeagentics"
+    )
     cleanup_db_after_tests: bool = True
 
     # Test execution settings
@@ -163,10 +165,14 @@ class E2ETestConfig:
 
         # Browser configuration
         if os.getenv("E2E_BROWSER"):
-            config.browser_config.browser_type = BrowserType(os.getenv("E2E_BROWSER"))
+            config.browser_config.browser_type = BrowserType(
+                os.getenv("E2E_BROWSER")
+            )
 
         if os.getenv("E2E_HEADLESS"):
-            config.browser_config.headless = os.getenv("E2E_HEADLESS").lower() == "true"
+            config.browser_config.headless = (
+                os.getenv("E2E_HEADLESS").lower() == "true"
+            )
 
         if os.getenv("E2E_PARALLEL_BROWSERS"):
             config.parallel_browsers = int(os.getenv("E2E_PARALLEL_BROWSERS"))
@@ -177,7 +183,9 @@ class E2ETestConfig:
 
         # Performance settings
         if os.getenv("E2E_PERFORMANCE_ENABLED"):
-            config.performance_enabled = os.getenv("E2E_PERFORMANCE_ENABLED").lower() == "true"
+            config.performance_enabled = (
+                os.getenv("E2E_PERFORMANCE_ENABLED").lower() == "true"
+            )
 
         return config
 

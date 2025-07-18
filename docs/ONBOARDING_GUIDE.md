@@ -135,16 +135,16 @@ sequenceDiagram
    python --version
    ```
 
-2. **Docker and Docker Compose**
+2. **Node.js 18+**
    ```bash
-   # Install Docker
-   docker --version
-   docker-compose --version
+   # Install Node.js 18 or higher
+   node --version
+   npm --version
    ```
 
-3. **PostgreSQL and Redis**
+3. **Optional: PostgreSQL and Redis** (for production-like setup)
    ```bash
-   # Using Docker
+   # Using Docker (optional)
    docker run -d --name postgres -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres:13
    docker run -d --name redis -p 6379:6379 redis:6
    ```
@@ -157,46 +157,65 @@ sequenceDiagram
    cd freeagentics
    ```
 
-2. **Set Up Python Environment**
+2. **Environment Configuration**
    ```bash
-   # Create virtual environment
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   # Use development configuration (includes SQLite fallback)
+   cp .env.development .env
    
-   # Install dependencies
-   pip install -r requirements.txt
-   pip install -r requirements-dev.txt
-   ```
-
-3. **Environment Configuration**
-   ```bash
-   # Copy environment template
-   cp .env.example .env
-   
-   # Edit configuration
+   # Optional: Edit configuration for custom setup
    vim .env
    ```
 
-4. **Database Setup**
+3. **Install Dependencies (One Command)**
    ```bash
-   # Run database migrations
-   alembic upgrade head
-   
-   # Create test database
-   createdb freeagentics_test
+   # Installs both Python and Node.js dependencies
+   make install
    ```
 
-5. **Verify Setup**
+   This command will:
+   - Create a Python virtual environment in `venv/`
+   - Install Python dependencies including `inferactively-pymdp==0.0.7.1`
+   - Install Node.js dependencies for the frontend
+
+4. **Database Setup**
+   ```bash
+   # Option 1: Use SQLite (automatic with DEVELOPMENT_MODE=true)
+   # No setup needed - database file created automatically
+   
+   # Option 2: Use PostgreSQL (if DATABASE_URL is set)
+   # Run database migrations
+   alembic upgrade head
+   ```
+
+5. **Start Development Servers**
+   ```bash
+   # Start both backend (8000) and frontend (3000)
+   make dev
+   
+   # Or start separately:
+   make dev-backend   # API at http://localhost:8000
+   make dev-frontend  # UI at http://localhost:3000
+   ```
+
+6. **Verify Setup**
    ```bash
    # Run tests
-   pytest tests/unit/ -v
+   make test
    
-   # Start development server
-   uvicorn main:app --reload
-   
-   # Check health endpoint
+   # Check API health
    curl http://localhost:8000/health
+   
+   # View API docs
+   open http://localhost:8000/docs
    ```
+
+### Development Environment Features
+
+- **SQLite Fallback**: When `DEVELOPMENT_MODE=true` and no `DATABASE_URL` is set, SQLite is used automatically
+- **In-Memory Redis Fallback**: If Redis is not available, an in-memory cache is used
+- **Hot Reload**: Both backend and frontend auto-reload on code changes
+- **Debug Logging**: Set `DEBUG=true` and `LOG_LEVEL=DEBUG` for detailed logs
+- **SQL Query Logging**: Set `DEBUG_SQL=true` to see all database queries
 
 ### Development Tools
 

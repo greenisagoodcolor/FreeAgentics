@@ -69,24 +69,24 @@ wait_for_service() {
     local service="$1"
     local timeout="${2:-60}"
     local count=0
-    
+
     info "Waiting for $service to be healthy..."
-    
+
     while [ $count -lt $timeout ]; do
         if docker-compose -f "$COMPOSE_FILE" ps "$service" | grep -q "healthy"; then
             test_pass "$service health check"
             return 0
         fi
-        
+
         if docker-compose -f "$COMPOSE_FILE" ps "$service" | grep -q "Up"; then
             test_pass "$service is running"
             return 0
         fi
-        
+
         sleep 1
         count=$((count + 1))
     done
-    
+
     test_fail "$service health check" "Service not healthy after ${timeout}s"
     return 1
 }
@@ -96,9 +96,9 @@ test_endpoint() {
     local url="$1"
     local expected_status="${2:-200}"
     local timeout="${3:-10}"
-    
+
     info "Testing endpoint: $url"
-    
+
     if curl -s --connect-timeout "$timeout" --max-time "$timeout" \
        -w "%{http_code}" -o /dev/null "$url" | grep -q "$expected_status"; then
         test_pass "HTTP $expected_status from $url"
@@ -113,9 +113,9 @@ test_endpoint() {
 test_ssl_endpoint() {
     local url="$1"
     local expected_status="${2:-200}"
-    
+
     info "Testing SSL endpoint: $url"
-    
+
     if curl -s -k --connect-timeout 10 --max-time 10 \
        -w "%{http_code}" -o /dev/null "$url" | grep -q "$expected_status"; then
         test_pass "HTTPS $expected_status from $url"
@@ -129,14 +129,14 @@ test_ssl_endpoint() {
 # Function to test database connectivity
 test_database() {
     info "Testing database connectivity..."
-    
+
     if docker-compose -f "$COMPOSE_FILE" exec -T postgres pg_isready -U freeagentics; then
         test_pass "Database connectivity"
     else
         test_fail "Database connectivity" "pg_isready failed"
         return 1
     fi
-    
+
     # Test database query
     if docker-compose -f "$COMPOSE_FILE" exec -T postgres psql -U freeagentics -d freeagentics -c "SELECT 1;" > /dev/null 2>&1; then
         test_pass "Database query execution"
@@ -149,7 +149,7 @@ test_database() {
 # Function to test Redis connectivity
 test_redis() {
     info "Testing Redis connectivity..."
-    
+
     if docker-compose -f "$COMPOSE_FILE" exec -T redis redis-cli -a "${REDIS_PASSWORD:-test}" ping | grep -q "PONG"; then
         test_pass "Redis connectivity"
     else
@@ -161,7 +161,7 @@ test_redis() {
 # Function to test SSL certificate
 test_ssl_certificate() {
     info "Testing SSL certificate..."
-    
+
     if [ -f "nginx/ssl/cert.pem" ]; then
         # Check certificate validity
         if openssl x509 -in nginx/ssl/cert.pem -noout -checkend 86400; then
@@ -169,11 +169,11 @@ test_ssl_certificate() {
         else
             test_fail "SSL certificate validity" "Certificate expires within 24 hours"
         fi
-        
+
         # Check certificate properties
         local cert_info
         cert_info=$(openssl x509 -in nginx/ssl/cert.pem -text -noout)
-        
+
         if echo "$cert_info" | grep -q "TLS Web Server Authentication"; then
             test_pass "SSL certificate purpose"
         else
@@ -187,10 +187,10 @@ test_ssl_certificate() {
 # Function to test deployment scripts
 test_deployment_scripts() {
     info "Testing deployment scripts..."
-    
+
     # Test script existence and permissions
     local scripts=("deploy-production.sh" "deploy-production-ssl.sh")
-    
+
     for script in "${scripts[@]}"; do
         if [ -f "$script" ] && [ -x "$script" ]; then
             test_pass "$script exists and is executable"
@@ -198,7 +198,7 @@ test_deployment_scripts() {
             test_fail "$script permissions" "Script not found or not executable"
         fi
     done
-    
+
     # Test script syntax
     if bash -n deploy-production.sh; then
         test_pass "deploy-production.sh syntax"
@@ -210,10 +210,10 @@ test_deployment_scripts() {
 # Function to test backup functionality
 test_backup_functionality() {
     info "Testing backup functionality..."
-    
+
     # Create test backup directory
     mkdir -p "$BACKUP_DIR"
-    
+
     # Test database backup script
     if [ -f "scripts/database-backup.sh" ]; then
         # Test backup script syntax
@@ -225,7 +225,7 @@ test_backup_functionality() {
     else
         test_fail "Database backup script" "scripts/database-backup.sh not found"
     fi
-    
+
     # Test backup directory permissions
     if [ -w "$BACKUP_DIR" ]; then
         test_pass "Backup directory writable"
@@ -237,7 +237,7 @@ test_backup_functionality() {
 # Function to test monitoring endpoints
 test_monitoring_endpoints() {
     info "Testing monitoring endpoints..."
-    
+
     # Test Prometheus configuration
     if [ -f "monitoring/prometheus-production.yml" ]; then
         # Validate YAML syntax
@@ -249,7 +249,7 @@ test_monitoring_endpoints() {
     else
         test_fail "Prometheus configuration" "monitoring/prometheus-production.yml not found"
     fi
-    
+
     # Test Grafana dashboard configuration
     if [ -d "monitoring/grafana/dashboards" ]; then
         test_pass "Grafana dashboards directory exists"
@@ -261,7 +261,7 @@ test_monitoring_endpoints() {
 # Function to test security configuration
 test_security_configuration() {
     info "Testing security configuration..."
-    
+
     # Test nginx security headers
     if [ -f "nginx/nginx.conf" ]; then
         local security_headers=(
@@ -271,7 +271,7 @@ test_security_configuration() {
             "Strict-Transport-Security"
             "Content-Security-Policy"
         )
-        
+
         for header in "${security_headers[@]}"; do
             if grep -q "$header" nginx/nginx.conf; then
                 test_pass "Security header: $header"
@@ -282,7 +282,7 @@ test_security_configuration() {
     else
         test_fail "Nginx configuration" "nginx/nginx.conf not found"
     fi
-    
+
     # Test rate limiting configuration
     if grep -q "limit_req_zone" nginx/nginx.conf; then
         test_pass "Rate limiting configured"
@@ -294,14 +294,14 @@ test_security_configuration() {
 # Function to test environment configuration
 test_environment_configuration() {
     info "Testing environment configuration..."
-    
+
     # Test environment template
     if [ -f ".env.production.ssl.template" ]; then
         test_pass "Environment template exists"
     else
         test_fail "Environment template" ".env.production.ssl.template not found"
     fi
-    
+
     # Test required environment variables
     local required_vars=(
         "DATABASE_URL"
@@ -309,7 +309,7 @@ test_environment_configuration() {
         "SECRET_KEY"
         "JWT_SECRET"
     )
-    
+
     for var in "${required_vars[@]}"; do
         if printenv "$var" >/dev/null 2>&1; then
             test_pass "Environment variable: $var"
@@ -322,7 +322,7 @@ test_environment_configuration() {
 # Function to test resource limits
 test_resource_limits() {
     info "Testing resource limits..."
-    
+
     # Parse docker-compose file for resource limits
     if [ -f "$COMPOSE_FILE" ]; then
         if grep -q "resources:" "$COMPOSE_FILE"; then
@@ -330,7 +330,7 @@ test_resource_limits() {
         else
             test_fail "Resource limits" "No resource limits found in compose file"
         fi
-        
+
         # Check for memory limits
         if grep -q "memory:" "$COMPOSE_FILE"; then
             test_pass "Memory limits configured"
@@ -345,7 +345,7 @@ test_resource_limits() {
 # Function to test image build
 test_image_build() {
     info "Testing Docker image build..."
-    
+
     # Test Dockerfile syntax
     if [ -f "Dockerfile.production" ]; then
         if docker build -f Dockerfile.production -t freeagentics-test --dry-run . 2>/dev/null; then
@@ -356,7 +356,7 @@ test_image_build() {
     else
         test_fail "Production Dockerfile" "Dockerfile.production not found"
     fi
-    
+
     # Test docker-compose config
     if docker-compose -f "$COMPOSE_FILE" config > /dev/null 2>&1; then
         test_pass "Docker Compose configuration"
@@ -368,10 +368,10 @@ test_image_build() {
 # Function to run full deployment test
 run_full_deployment_test() {
     info "Running full deployment test..."
-    
+
     # Stop any existing services
     docker-compose -f "$COMPOSE_FILE" down --remove-orphans 2>/dev/null || true
-    
+
     # Build images
     info "Building images..."
     if docker-compose -f "$COMPOSE_FILE" build --no-cache; then
@@ -380,7 +380,7 @@ run_full_deployment_test() {
         test_fail "Image build process" "Build failed"
         return 1
     fi
-    
+
     # Start services
     info "Starting services..."
     if docker-compose -f "$COMPOSE_FILE" up -d; then
@@ -389,7 +389,7 @@ run_full_deployment_test() {
         test_fail "Service startup" "Failed to start services"
         return 1
     fi
-    
+
     # Wait for services to be healthy
     local services=("postgres" "redis" "backend" "frontend" "nginx")
     for service in "${services[@]}"; do
@@ -398,26 +398,26 @@ run_full_deployment_test() {
             return 1
         fi
     done
-    
+
     # Test endpoints
     test_endpoint "http://localhost:8000/health" 200
     test_endpoint "http://localhost:3000" 200
-    
+
     # Test database and Redis
     test_database
     test_redis
-    
+
     # Clean up
     info "Cleaning up test deployment..."
     docker-compose -f "$COMPOSE_FILE" down --volumes --remove-orphans
-    
+
     test_pass "Full deployment test completed"
 }
 
 # Function to generate test report
 generate_test_report() {
     local report_file="production_deployment_test_report_$(date +%Y%m%d_%H%M%S).json"
-    
+
     cat > "$report_file" << EOF
 {
     "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
@@ -439,7 +439,7 @@ generate_test_report() {
     }
 }
 EOF
-    
+
     info "Test report generated: $report_file"
 }
 
@@ -447,10 +447,10 @@ EOF
 main() {
     log "Starting FreeAgentics Production Deployment Test"
     log "=============================================="
-    
+
     # Initialize log file
     echo "FreeAgentics Production Deployment Test - $(date)" > "$LOG_FILE"
-    
+
     # Run individual tests
     test_environment_configuration
     test_image_build
@@ -460,7 +460,7 @@ main() {
     test_monitoring_endpoints
     test_backup_functionality
     test_resource_limits
-    
+
     # Conditional full deployment test
     if [ "${FULL_TEST:-false}" = "true" ]; then
         warn "Running full deployment test - this will build and start services"
@@ -468,10 +468,10 @@ main() {
     else
         info "Skipping full deployment test (set FULL_TEST=true to run)"
     fi
-    
+
     # Generate report
     generate_test_report
-    
+
     # Print summary
     echo ""
     log "=============================================="
@@ -480,7 +480,7 @@ main() {
     log "Total Tests: $TESTS_TOTAL"
     log "Passed: $TESTS_PASSED"
     log "Failed: $TESTS_FAILED"
-    
+
     if [ $TESTS_FAILED -eq 0 ]; then
         success "🎉 All tests passed! Production deployment is ready."
         exit 0

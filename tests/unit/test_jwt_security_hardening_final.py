@@ -67,7 +67,9 @@ class TestJWTSecurityHardening:
 
         # Should be exactly 15 minutes
         duration = exp_time - iat_time
-        assert 890 <= duration.total_seconds() <= 910  # 15 minutes ± 10 seconds
+        assert (
+            890 <= duration.total_seconds() <= 910
+        )  # 15 minutes ± 10 seconds
 
     def test_refresh_token_expiration_7_days(self, test_user):
         """Verify refresh tokens expire in 7 days."""
@@ -82,7 +84,9 @@ class TestJWTSecurityHardening:
         # Should be exactly 7 days
         duration = exp_time - iat_time
         expected_seconds = 7 * 24 * 60 * 60
-        assert abs(duration.total_seconds() - expected_seconds) < 3600  # Within 1 hour
+        assert (
+            abs(duration.total_seconds() - expected_seconds) < 3600
+        )  # Within 1 hour
 
     def test_jwt_includes_all_required_claims(self, test_user):
         """Verify JWT includes all required claims."""
@@ -145,19 +149,25 @@ class TestJWTSecurityHardening:
         fingerprint = jwt_handler.generate_fingerprint()
 
         # Create token with fingerprint
-        token = auth_manager.create_access_token(test_user, client_fingerprint=fingerprint)
+        token = auth_manager.create_access_token(
+            test_user, client_fingerprint=fingerprint
+        )
 
         # Decode to verify fingerprint is included (as hash)
         payload = jwt.decode(token, options={"verify_signature": False})
         assert "fingerprint" in payload
 
         # Should succeed with correct fingerprint
-        token_data = auth_manager.verify_token(token, client_fingerprint=fingerprint)
+        token_data = auth_manager.verify_token(
+            token, client_fingerprint=fingerprint
+        )
         assert token_data.user_id == test_user.user_id
 
         # Should fail with wrong fingerprint
         with pytest.raises(HTTPException) as exc_info:
-            auth_manager.verify_token(token, client_fingerprint="wrong_fingerprint")
+            auth_manager.verify_token(
+                token, client_fingerprint="wrong_fingerprint"
+            )
         assert exc_info.value.status_code == 401
         assert "fingerprint" in str(exc_info.value.detail).lower()
 
@@ -171,13 +181,21 @@ class TestJWTSecurityHardening:
         assert len(csrf_token) >= 32
 
         # Validate correct token
-        assert csrf_protection.verify_csrf_token(session_id, csrf_token) is True
+        assert (
+            csrf_protection.verify_csrf_token(session_id, csrf_token) is True
+        )
 
         # Invalid token should fail
-        assert csrf_protection.verify_csrf_token(session_id, "wrong_token") is False
+        assert (
+            csrf_protection.verify_csrf_token(session_id, "wrong_token")
+            is False
+        )
 
         # Non-existent session should fail
-        assert csrf_protection.verify_csrf_token("wrong_session", csrf_token) is False
+        assert (
+            csrf_protection.verify_csrf_token("wrong_session", csrf_token)
+            is False
+        )
 
     def test_refresh_token_rotation(self, test_user):
         """Test refresh token rotation prevents reuse."""
@@ -186,14 +204,18 @@ class TestJWTSecurityHardening:
         refresh_token = auth_manager.create_refresh_token(test_user)
 
         # Use refresh token to get new tokens
-        new_access, new_refresh = auth_manager.refresh_access_token(refresh_token)
+        new_access, new_refresh = auth_manager.refresh_access_token(
+            refresh_token
+        )
 
         # New tokens should be different
         assert new_access != access_token
         assert new_refresh != refresh_token
 
         # Decode to verify new tokens are valid
-        new_access_payload = jwt.decode(new_access, options={"verify_signature": False})
+        new_access_payload = jwt.decode(
+            new_access, options={"verify_signature": False}
+        )
         assert new_access_payload["user_id"] == test_user.user_id
 
     def test_logout_revokes_tokens(self, test_user):
@@ -231,7 +253,9 @@ class TestJWTSecurityHardening:
         }
 
         # Create token with future NBF
-        future_token = jwt.encode(payload, jwt_handler.private_key, algorithm="RS256")
+        future_token = jwt.encode(
+            payload, jwt_handler.private_key, algorithm="RS256"
+        )
 
         # Should fail validation
         with pytest.raises(HTTPException) as exc_info:

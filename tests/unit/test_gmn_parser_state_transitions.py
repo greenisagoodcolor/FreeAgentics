@@ -12,10 +12,7 @@ Following strict TDD: These tests MUST fail initially and drive implementation.
 NO graceful fallbacks or try-except blocks allowed.
 """
 
-from inference.active.gmn_parser import (
-    GMNParser,
-    GMNSchemaValidator,
-)
+from inference.active.gmn_parser import GMNParser, GMNSchemaValidator
 
 
 class TestActionDependentTransitions:
@@ -71,12 +68,36 @@ class TestActionDependentTransitions:
                         "action_0": {  # up
                             "matrix_type": "sparse",
                             "deterministic_rules": [
-                                {"from_state": 3, "to_state": 0, "probability": 0.9},
-                                {"from_state": 4, "to_state": 1, "probability": 0.9},
-                                {"from_state": 5, "to_state": 2, "probability": 0.9},
-                                {"from_state": 6, "to_state": 3, "probability": 0.9},
-                                {"from_state": 7, "to_state": 4, "probability": 0.9},
-                                {"from_state": 8, "to_state": 5, "probability": 0.9},
+                                {
+                                    "from_state": 3,
+                                    "to_state": 0,
+                                    "probability": 0.9,
+                                },
+                                {
+                                    "from_state": 4,
+                                    "to_state": 1,
+                                    "probability": 0.9,
+                                },
+                                {
+                                    "from_state": 5,
+                                    "to_state": 2,
+                                    "probability": 0.9,
+                                },
+                                {
+                                    "from_state": 6,
+                                    "to_state": 3,
+                                    "probability": 0.9,
+                                },
+                                {
+                                    "from_state": 7,
+                                    "to_state": 4,
+                                    "probability": 0.9,
+                                },
+                                {
+                                    "from_state": 8,
+                                    "to_state": 5,
+                                    "probability": 0.9,
+                                },
                             ],
                             "boundary_behavior": "stay_in_place",
                             "noise_model": {
@@ -100,8 +121,16 @@ class TestActionDependentTransitions:
                 },
             ],
             "edges": [
-                {"from": "agent_location", "to": "spatial_transitions", "type": "depends_on"},
-                {"from": "movement_actions", "to": "spatial_transitions", "type": "depends_on"},
+                {
+                    "from": "agent_location",
+                    "to": "spatial_transitions",
+                    "type": "depends_on",
+                },
+                {
+                    "from": "movement_actions",
+                    "to": "spatial_transitions",
+                    "type": "depends_on",
+                },
             ],
         }
 
@@ -153,7 +182,10 @@ class TestActionDependentTransitions:
                         "type": "continuous_discretized",
                         "dimensions": 2,
                         "bounds": [[0, 10], [0, 10]],
-                        "discretization": {"method": "uniform_grid", "resolution": [4, 4]},
+                        "discretization": {
+                            "method": "uniform_grid",
+                            "resolution": [4, 4],
+                        },
                     },
                 },
                 {
@@ -180,7 +212,10 @@ class TestActionDependentTransitions:
                         "parameters": {
                             "A": [[1.0, 0.0], [0.0, 1.0]],  # Identity dynamics
                             "B": [[0.1, 0.0], [0.0, 0.1]],  # Control matrix
-                            "process_noise_covariance": [[0.01, 0.0], [0.0, 0.01]],
+                            "process_noise_covariance": [
+                                [0.01, 0.0],
+                                [0.0, 0.01],
+                            ],
                         },
                         "discretization": {
                             "method": "gaussian_approximation",
@@ -196,8 +231,16 @@ class TestActionDependentTransitions:
                 },
             ],
             "edges": [
-                {"from": "robot_pose", "to": "dynamics_model", "type": "depends_on"},
-                {"from": "velocity_control", "to": "dynamics_model", "type": "depends_on"},
+                {
+                    "from": "robot_pose",
+                    "to": "dynamics_model",
+                    "type": "depends_on",
+                },
+                {
+                    "from": "velocity_control",
+                    "to": "dynamics_model",
+                    "type": "depends_on",
+                },
             ],
         }
 
@@ -221,7 +264,10 @@ class TestActionDependentTransitions:
 
         dynamics_params = dynamics["dynamics"]
         assert dynamics_params["model_type"] == "linear_gaussian"
-        assert dynamics_params["state_equation"] == "x_{t+1} = A * x_t + B * u_t + w_t"
+        assert (
+            dynamics_params["state_equation"]
+            == "x_{t+1} = A * x_t + B * u_t + w_t"
+        )
 
         # Parameters
         params = dynamics_params["parameters"]
@@ -243,7 +289,13 @@ class TestActionDependentTransitions:
                     "name": "environmental_state",
                     "type": "state",
                     "num_states": 5,
-                    "state_labels": ["clear", "light_rain", "heavy_rain", "fog", "storm"],
+                    "state_labels": [
+                        "clear",
+                        "light_rain",
+                        "heavy_rain",
+                        "fog",
+                        "storm",
+                    ],
                 },
                 {
                     "name": "weather_transitions",
@@ -291,7 +343,11 @@ class TestActionDependentTransitions:
                 },
             ],
             "edges": [
-                {"from": "environmental_state", "to": "weather_transitions", "type": "depends_on"}
+                {
+                    "from": "environmental_state",
+                    "to": "weather_transitions",
+                    "type": "depends_on",
+                }
             ],
         }
 
@@ -350,7 +406,12 @@ class TestTemporalDynamics:
                     "name": "seasonal_behavior",
                     "type": "state",
                     "num_states": 4,
-                    "state_labels": ["foraging", "nesting", "migrating", "hibernating"],
+                    "state_labels": [
+                        "foraging",
+                        "nesting",
+                        "migrating",
+                        "hibernating",
+                    ],
                 },
                 {
                     "name": "temporal_transitions",
@@ -410,7 +471,11 @@ class TestTemporalDynamics:
                 },
             ],
             "edges": [
-                {"from": "seasonal_behavior", "to": "temporal_transitions", "type": "depends_on"}
+                {
+                    "from": "seasonal_behavior",
+                    "to": "temporal_transitions",
+                    "type": "depends_on",
+                }
             ],
         }
 
@@ -662,8 +727,14 @@ class TestHierarchicalTransitions:
                             "type": "global_dynamics",
                             "transition_speed": "slow",
                             "global_constraints": {
-                                "conservation_laws": ["total_mass", "total_energy"],
-                                "symmetry_constraints": ["translational", "rotational"],
+                                "conservation_laws": [
+                                    "total_mass",
+                                    "total_energy",
+                                ],
+                                "symmetry_constraints": [
+                                    "translational",
+                                    "rotational",
+                                ],
                             },
                         },
                     },
@@ -807,7 +878,10 @@ class TestTransitionLearning:
                         },
                         "meta_learning": {
                             "enabled": True,
-                            "meta_parameter_optimization": ["learning_rate", "forgetting_factor"],
+                            "meta_parameter_optimization": [
+                                "learning_rate",
+                                "forgetting_factor",
+                            ],
                             "optimization_method": "gradient_ascent",
                             "meta_objective": "predictive_accuracy",
                         },
@@ -939,7 +1013,9 @@ class TestTransitionLearning:
 
         # Verify contextual transitions
         contextual_trans = result["nodes"][0]
-        assert contextual_trans["transition_type"] == "context_dependent_adaptive"
+        assert (
+            contextual_trans["transition_type"] == "context_dependent_adaptive"
+        )
 
         # Context structure
         context_struct = contextual_trans["context_structure"]
@@ -1019,7 +1095,11 @@ class TestTransitionValidation:
 
         # Should detect invalid transition probabilities
         assert is_valid is False
-        prob_errors = [e for e in errors if "probability" in e.lower() or "sum" in e.lower()]
+        prob_errors = [
+            e
+            for e in errors
+            if "probability" in e.lower() or "sum" in e.lower()
+        ]
         assert len(prob_errors) > 0
 
     def test_validate_temporal_consistency_constraints(self):
@@ -1033,14 +1113,20 @@ class TestTransitionValidation:
                     "type": "transition",
                     "transition_type": "time_dependent",
                     "temporal_structure": {
-                        "time_discretization": {"period": 100, "resolution": "daily"},
+                        "time_discretization": {
+                            "period": 100,
+                            "resolution": "daily",
+                        },
                         "transition_schedule": {
                             "phase_1": {
                                 "time_range": [0, 60],
                                 "transition_matrix": "valid_matrix_1",
                             },
                             "phase_2": {
-                                "time_range": [40, 80],  # Overlaps with phase_1
+                                "time_range": [
+                                    40,
+                                    80,
+                                ],  # Overlaps with phase_1
                                 "transition_matrix": "valid_matrix_2",
                             },
                         },
@@ -1054,7 +1140,11 @@ class TestTransitionValidation:
 
         # Should detect temporal overlap
         assert is_valid is False
-        temporal_errors = [e for e in errors if "temporal" in e.lower() or "overlap" in e.lower()]
+        temporal_errors = [
+            e
+            for e in errors
+            if "temporal" in e.lower() or "overlap" in e.lower()
+        ]
         assert len(temporal_errors) > 0
 
     def test_validate_hierarchical_consistency_constraints(self):
@@ -1084,6 +1174,8 @@ class TestTransitionValidation:
         # Should detect hierarchical inconsistency
         assert is_valid is False
         hierarchy_errors = [
-            e for e in errors if "hierarchy" in e.lower() or "aggregation" in e.lower()
+            e
+            for e in errors
+            if "hierarchy" in e.lower() or "aggregation" in e.lower()
         ]
         assert len(hierarchy_errors) > 0

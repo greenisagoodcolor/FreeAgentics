@@ -12,10 +12,7 @@ Following strict TDD: These tests MUST fail initially and drive implementation.
 NO graceful fallbacks or try-except blocks allowed.
 """
 
-from inference.active.gmn_parser import (
-    GMNParser,
-    GMNSchemaValidator,
-)
+from inference.active.gmn_parser import GMNParser, GMNSchemaValidator
 
 
 class TestFreeEnergyCalculations:
@@ -34,7 +31,9 @@ class TestFreeEnergyCalculations:
                         "expression": "epistemic_value + pragmatic_value",
                         "epistemic_value": {
                             "formula": "-sum(q_pi * log(q_pi))",
-                            "variables": {"q_pi": "posterior_beliefs_over_states"},
+                            "variables": {
+                                "q_pi": "posterior_beliefs_over_states"
+                            },
                         },
                         "pragmatic_value": {
                             "formula": "sum(q_pi * log_preferences)",
@@ -94,8 +93,14 @@ class TestFreeEnergyCalculations:
                         },
                         "complexity": {
                             "formula": "KL(q_s || p_s)",
-                            "variables": {"q_s": "posterior_beliefs", "p_s": "prior_beliefs"},
-                            "kl_divergence": {"type": "categorical", "regularization": 1e-8},
+                            "variables": {
+                                "q_s": "posterior_beliefs",
+                                "p_s": "prior_beliefs",
+                            },
+                            "kl_divergence": {
+                                "type": "categorical",
+                                "regularization": 1e-8,
+                            },
                         },
                         "minimization": {
                             "method": "variational_message_passing",
@@ -208,7 +213,10 @@ class TestProbabilityDistributionOperations:
                             "formula": "exp(logits) / sum(exp(logits))",
                             "temperature": 1.0,
                         },
-                        "entropy": {"formula": "-sum(p * log(p))", "regularization": 1e-8},
+                        "entropy": {
+                            "formula": "-sum(p * log(p))",
+                            "regularization": 1e-8,
+                        },
                         "update": {
                             "method": "bayesian",
                             "formula": "posterior ∝ likelihood * prior",
@@ -220,7 +228,11 @@ class TestProbabilityDistributionOperations:
                             "gumbel_noise": False,
                         },
                     },
-                    "constraints": {"simplex": True, "non_negative": True, "sum_to_one": True},
+                    "constraints": {
+                        "simplex": True,
+                        "non_negative": True,
+                        "sum_to_one": True,
+                    },
                 }
             ],
             "edges": [],
@@ -264,7 +276,10 @@ class TestProbabilityDistributionOperations:
                     "name": "dirichlet_prior",
                     "type": "belief",
                     "distribution_type": "dirichlet",
-                    "parameters": {"alpha": [1.0, 1.0, 1.0, 1.0], "concentration": 4.0},
+                    "parameters": {
+                        "alpha": [1.0, 1.0, 1.0, 1.0],
+                        "concentration": 4.0,
+                    },
                     "operations": {
                         "expectation": {
                             "formula": "alpha_i / sum(alpha)",
@@ -275,7 +290,9 @@ class TestProbabilityDistributionOperations:
                         },
                         "variance": {
                             "formula": "(alpha_i * (sum(alpha) - alpha_i)) / (sum(alpha)^2 * (sum(alpha) + 1))",
-                            "variables": {"alpha_i": "concentration_parameter_i"},
+                            "variables": {
+                                "alpha_i": "concentration_parameter_i"
+                            },
                         },
                         "update": {
                             "method": "conjugate_bayesian",
@@ -330,7 +347,11 @@ class TestProbabilityDistributionOperations:
                     "name": "gaussian_belief",
                     "type": "belief",
                     "distribution_type": "gaussian",
-                    "parameters": {"mean": 0.0, "variance": 1.0, "precision": 1.0},
+                    "parameters": {
+                        "mean": 0.0,
+                        "variance": 1.0,
+                        "precision": 1.0,
+                    },
                     "operations": {
                         "pdf": {
                             "formula": "(1/sqrt(2*pi*sigma^2)) * exp(-(x-mu)^2/(2*sigma^2))",
@@ -404,12 +425,18 @@ class TestMatrixOperations:
                     "matrix_operations": {
                         "state_transition": {
                             "formula": "B @ s_t",
-                            "variables": {"B": "transition_matrix", "s_t": "state_at_time_t"},
+                            "variables": {
+                                "B": "transition_matrix",
+                                "s_t": "state_at_time_t",
+                            },
                             "dimensions": {"B": [4, 4], "s_t": [4, 1]},
                         },
                         "observation_likelihood": {
                             "formula": "A @ s_t",
-                            "variables": {"A": "observation_matrix", "s_t": "hidden_state"},
+                            "variables": {
+                                "A": "observation_matrix",
+                                "s_t": "hidden_state",
+                            },
                             "dimensions": {"A": [8, 4], "s_t": [4, 1]},
                         },
                         "policy_evaluation": {
@@ -550,12 +577,17 @@ class TestMatrixOperations:
                         },
                         "conditional_independence": {
                             "formula": "P(factor1, factor2 | factor3) = P(factor1 | factor3) * P(factor2 | factor3)",
-                            "assumptions": ["conditional_independence_given_factor3"],
+                            "assumptions": [
+                                "conditional_independence_given_factor3"
+                            ],
                         },
                         "tensor_contraction": {
                             "formula": "einsum('ijk,jkl->il', tensor_a, tensor_b)",
                             "notation": "einstein_summation",
-                            "variables": {"tensor_a": "first_tensor", "tensor_b": "second_tensor"},
+                            "variables": {
+                                "tensor_a": "first_tensor",
+                                "tensor_b": "second_tensor",
+                            },
                         },
                     },
                 }
@@ -576,11 +608,16 @@ class TestMatrixOperations:
         # Marginal distributions
         marginals = tensor_ops["marginal_distributions"]
         factor1_marg = marginals["factor1_marginal"]
-        assert "sum(joint_distribution, axes=[1, 2])" in factor1_marg["formula"]
+        assert (
+            "sum(joint_distribution, axes=[1, 2])" in factor1_marg["formula"]
+        )
 
         # Conditional independence
         cond_indep = tensor_ops["conditional_independence"]
-        assert "P(factor1 | factor3) * P(factor2 | factor3)" in cond_indep["formula"]
+        assert (
+            "P(factor1 | factor3) * P(factor2 | factor3)"
+            in cond_indep["formula"]
+        )
 
         # Tensor contraction
         contraction = tensor_ops["tensor_contraction"]
@@ -602,7 +639,10 @@ class TestInformationTheoreticMeasures:
                     "type": "analysis",
                     "mutual_information": {
                         "formula": "I(X; Y) = H(X) - H(X|Y)",
-                        "variables": {"X": "first_random_variable", "Y": "second_random_variable"},
+                        "variables": {
+                            "X": "first_random_variable",
+                            "Y": "second_random_variable",
+                        },
                         "alternative_formulations": {
                             "kl_divergence": "KL(P(X,Y) || P(X)P(Y))",
                             "joint_entropy": "H(X) + H(Y) - H(X,Y)",
@@ -682,7 +722,10 @@ class TestInformationTheoreticMeasures:
                     "excess_entropy": {
                         "formula": "E = sum_{k=1}^{inf} (H(X_k | X_{k-1}, ..., X_1) - h)",
                         "interpretation": "complexity_of_predictive_model",
-                        "finite_approximation": {"max_order": 10, "convergence_threshold": 1e-6},
+                        "finite_approximation": {
+                            "max_order": 10,
+                            "convergence_threshold": 1e-6,
+                        },
                     },
                 }
             ],
@@ -706,7 +749,10 @@ class TestInformationTheoreticMeasures:
 
         # Excess entropy
         excess_entropy = process_node["excess_entropy"]
-        assert excess_entropy["interpretation"] == "complexity_of_predictive_model"
+        assert (
+            excess_entropy["interpretation"]
+            == "complexity_of_predictive_model"
+        )
         finite_ee = excess_entropy["finite_approximation"]
         assert finite_ee["max_order"] == 10
 
@@ -736,7 +782,11 @@ class TestNumericalValidation:
 
         # Should detect syntax error in mathematical expression
         assert is_valid is False
-        syntax_errors = [e for e in errors if "syntax" in e.lower() or "formula" in e.lower()]
+        syntax_errors = [
+            e
+            for e in errors
+            if "syntax" in e.lower() or "formula" in e.lower()
+        ]
         assert len(syntax_errors) > 0
 
     def test_validate_dimensional_consistency_in_operations(self):
@@ -751,7 +801,10 @@ class TestNumericalValidation:
                     "matrix_operation": {
                         "formula": "A @ B",
                         "variables": {"A": "matrix_a", "B": "matrix_b"},
-                        "dimensions": {"A": [3, 4], "B": [5, 2]},  # Incompatible for multiplication
+                        "dimensions": {
+                            "A": [3, 4],
+                            "B": [5, 2],
+                        },  # Incompatible for multiplication
                     },
                 }
             ],
@@ -787,5 +840,9 @@ class TestNumericalValidation:
 
         # Should detect probability constraint violation
         assert is_valid is False
-        prob_errors = [e for e in errors if "probability" in e.lower() or "sum" in e.lower()]
+        prob_errors = [
+            e
+            for e in errors
+            if "probability" in e.lower() or "sum" in e.lower()
+        ]
         assert len(prob_errors) > 0

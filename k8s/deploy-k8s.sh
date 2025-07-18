@@ -42,7 +42,7 @@ send_notification() {
     local message="$1"
     local status="${2:-INFO}"
     local emoji="📢"
-    
+
     case $status in
         "SUCCESS") emoji="✅" ;;
         "ERROR") emoji="❌" ;;
@@ -50,9 +50,9 @@ send_notification() {
         "START") emoji="🚀" ;;
         "ROLLBACK") emoji="🔙" ;;
     esac
-    
+
     log "$message"
-    
+
     if [[ -n "$SLACK_WEBHOOK" ]]; then
         curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\":\"$emoji FreeAgentics K8s Deployment: $message\"}" \
@@ -63,7 +63,7 @@ send_notification() {
 # Function to check prerequisites
 check_prerequisites() {
     log "Checking deployment prerequisites..."
-    
+
     # Check required commands
     local required_commands=("kubectl" "curl" "jq")
     for cmd in "${required_commands[@]}"; do
@@ -72,31 +72,31 @@ check_prerequisites() {
             exit 1
         fi
     done
-    
+
     # Check kubectl connectivity
     if ! kubectl cluster-info &> /dev/null; then
         error "Cannot connect to Kubernetes cluster"
         exit 1
     fi
-    
+
     # Set kubectl context if specified
     if [[ -n "$KUBECTL_CONTEXT" ]]; then
         kubectl config use-context "$KUBECTL_CONTEXT"
     fi
-    
+
     # Check if namespace exists
     if ! kubectl get namespace "$NAMESPACE" &> /dev/null; then
         warn "Namespace '$NAMESPACE' does not exist, creating..."
         kubectl create namespace "$NAMESPACE"
     fi
-    
+
     log "Prerequisites check completed successfully"
 }
 
 # Function to validate manifests
 validate_manifests() {
     log "Validating Kubernetes manifests..."
-    
+
     local manifest_files=(
         "namespace.yaml"
         "secrets.yaml"
@@ -109,19 +109,19 @@ validate_manifests() {
         "monitoring-stack.yaml"
         "database-migration-job.yaml"
     )
-    
+
     for file in "${manifest_files[@]}"; do
         if [[ ! -f "$file" ]]; then
             error "Manifest file '$file' not found"
             exit 1
         fi
-        
+
         if ! kubectl apply --dry-run=client -f "$file" &> /dev/null; then
             error "Manifest file '$file' is invalid"
             exit 1
         fi
     done
-    
+
     log "All manifest files validated successfully"
 }
 
@@ -131,25 +131,25 @@ backup_current_state() {
         info "Backup skipped (BACKUP_BEFORE_DEPLOY=false)"
         return 0
     fi
-    
+
     log "Creating backup of current deployment state..."
-    
+
     local backup_dir="backup-$(date +%Y%m%d-%H%M%S)"
     mkdir -p "$backup_dir"
-    
+
     # Backup current deployments
     kubectl get deployments -n "$NAMESPACE" -o yaml > "$backup_dir/deployments.yaml" 2>/dev/null || true
     kubectl get services -n "$NAMESPACE" -o yaml > "$backup_dir/services.yaml" 2>/dev/null || true
     kubectl get configmaps -n "$NAMESPACE" -o yaml > "$backup_dir/configmaps.yaml" 2>/dev/null || true
     kubectl get secrets -n "$NAMESPACE" -o yaml > "$backup_dir/secrets.yaml" 2>/dev/null || true
     kubectl get ingress -n "$NAMESPACE" -o yaml > "$backup_dir/ingress.yaml" 2>/dev/null || true
-    
+
     # Backup database if possible
     if kubectl get pod -n "$NAMESPACE" -l component=postgres --field-selector=status.phase=Running &> /dev/null; then
         log "Creating database backup..."
         kubectl exec -n "$NAMESPACE" -l component=postgres -- pg_dump -U freeagentics -d freeagentics > "$backup_dir/database.sql" 2>/dev/null || warn "Database backup failed"
     fi
-    
+
     log "Backup completed in directory: $backup_dir"
     echo "$backup_dir" > .last_backup
 }
@@ -157,147 +157,147 @@ backup_current_state() {
 # Function to deploy infrastructure components
 deploy_infrastructure() {
     log "Deploying infrastructure components..."
-    
+
     # Deploy namespace
     kubectl apply -f namespace.yaml
-    
+
     # Deploy secrets and configmaps
     kubectl apply -f secrets.yaml
-    
+
     # Deploy persistent volumes
     kubectl apply -f persistent-volumes.yaml
-    
+
     # Wait for PVCs to be bound
     log "Waiting for persistent volumes to be bound..."
     kubectl wait --for=condition=Bound pvc --all -n "$NAMESPACE" --timeout=300s
-    
+
     log "Infrastructure components deployed successfully"
 }
 
 # Function to deploy database
 deploy_database() {
     log "Deploying database..."
-    
+
     kubectl apply -f postgres-deployment.yaml
-    
+
     # Wait for database to be ready
     log "Waiting for database to be ready..."
     kubectl wait --for=condition=Ready pod -l component=postgres -n "$NAMESPACE" --timeout=300s
-    
+
     # Run database migrations
     log "Running database migrations..."
     kubectl apply -f database-migration-job.yaml
-    
+
     # Wait for migration job to complete
     kubectl wait --for=condition=Complete job/database-migration -n "$NAMESPACE" --timeout=300s
-    
+
     log "Database deployed and migrated successfully"
 }
 
 # Function to deploy cache
 deploy_cache() {
     log "Deploying cache..."
-    
+
     kubectl apply -f redis-deployment.yaml
-    
+
     # Wait for cache to be ready
     log "Waiting for cache to be ready..."
     kubectl wait --for=condition=Ready pod -l component=redis -n "$NAMESPACE" --timeout=300s
-    
+
     log "Cache deployed successfully"
 }
 
 # Function to deploy application
 deploy_application() {
     log "Deploying application..."
-    
+
     # Deploy backend
     kubectl apply -f backend-deployment.yaml
-    
+
     # Wait for backend to be ready
     log "Waiting for backend to be ready..."
     kubectl wait --for=condition=Ready pod -l component=backend -n "$NAMESPACE" --timeout=300s
-    
+
     # Deploy frontend
     kubectl apply -f frontend-deployment.yaml
-    
+
     # Wait for frontend to be ready
     log "Waiting for frontend to be ready..."
     kubectl wait --for=condition=Ready pod -l component=frontend -n "$NAMESPACE" --timeout=300s
-    
+
     log "Application deployed successfully"
 }
 
 # Function to deploy ingress
 deploy_ingress() {
     log "Deploying ingress..."
-    
+
     kubectl apply -f ingress.yaml
-    
+
     # Wait for ingress to be ready
     log "Waiting for ingress to be ready..."
     sleep 30  # Give ingress controller time to process
-    
+
     log "Ingress deployed successfully"
 }
 
 # Function to deploy monitoring
 deploy_monitoring() {
     log "Deploying monitoring stack..."
-    
+
     kubectl apply -f monitoring-stack.yaml
-    
+
     # Wait for monitoring components to be ready
     log "Waiting for monitoring components to be ready..."
     kubectl wait --for=condition=Ready pod -l component=prometheus -n "$NAMESPACE" --timeout=300s
     kubectl wait --for=condition=Ready pod -l component=grafana -n "$NAMESPACE" --timeout=300s
     kubectl wait --for=condition=Ready pod -l component=alertmanager -n "$NAMESPACE" --timeout=300s
-    
+
     log "Monitoring stack deployed successfully"
 }
 
 # Function to run health checks
 run_health_checks() {
     log "Running health checks..."
-    
+
     # Check pod status
     local failed_pods
     failed_pods=$(kubectl get pods -n "$NAMESPACE" --field-selector=status.phase!=Running --no-headers | wc -l)
-    
+
     if [[ $failed_pods -gt 0 ]]; then
         error "Found $failed_pods failed pods:"
         kubectl get pods -n "$NAMESPACE" --field-selector=status.phase!=Running
         return 1
     fi
-    
+
     # Check service endpoints
     local services=("backend" "frontend" "postgres" "redis")
     for service in "${services[@]}"; do
         local endpoints
         endpoints=$(kubectl get endpoints "$service" -n "$NAMESPACE" -o jsonpath='{.subsets[*].addresses[*].ip}' | wc -w)
-        
+
         if [[ $endpoints -eq 0 ]]; then
             error "Service '$service' has no endpoints"
             return 1
         fi
-        
+
         log "Service '$service' has $endpoints endpoint(s)"
     done
-    
+
     # Test application endpoints
     local ingress_ip
     ingress_ip=$(kubectl get ingress freeagentics-ingress -n "$NAMESPACE" -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-    
+
     if [[ -n "$ingress_ip" ]]; then
         log "Testing application endpoints..."
-        
+
         # Test backend health
         if curl -f -s -k "https://$ingress_ip/health" &> /dev/null; then
             log "Backend health check passed"
         else
             warn "Backend health check failed"
         fi
-        
+
         # Test frontend
         if curl -f -s -k "https://$ingress_ip/" &> /dev/null; then
             log "Frontend health check passed"
@@ -307,59 +307,59 @@ run_health_checks() {
     else
         warn "Ingress IP not yet available, skipping endpoint tests"
     fi
-    
+
     log "Health checks completed"
 }
 
 # Function to rollback deployment
 rollback_deployment() {
     log "Starting deployment rollback..."
-    
+
     if [[ ! -f .last_backup ]]; then
         error "No backup found for rollback"
         return 1
     fi
-    
+
     local backup_dir
     backup_dir=$(cat .last_backup)
-    
+
     if [[ ! -d "$backup_dir" ]]; then
         error "Backup directory '$backup_dir' not found"
         return 1
     fi
-    
+
     warn "Rolling back to backup: $backup_dir"
-    
+
     # Rollback deployments
     if [[ -f "$backup_dir/deployments.yaml" ]]; then
         kubectl apply -f "$backup_dir/deployments.yaml" || true
     fi
-    
+
     # Rollback services
     if [[ -f "$backup_dir/services.yaml" ]]; then
         kubectl apply -f "$backup_dir/services.yaml" || true
     fi
-    
+
     # Rollback configmaps
     if [[ -f "$backup_dir/configmaps.yaml" ]]; then
         kubectl apply -f "$backup_dir/configmaps.yaml" || true
     fi
-    
+
     # Rollback ingress
     if [[ -f "$backup_dir/ingress.yaml" ]]; then
         kubectl apply -f "$backup_dir/ingress.yaml" || true
     fi
-    
+
     # Wait for rollback to complete
     log "Waiting for rollback to complete..."
     kubectl rollout status deployment/backend -n "$NAMESPACE" --timeout=300s || true
     kubectl rollout status deployment/frontend -n "$NAMESPACE" --timeout=300s || true
-    
+
     # Restore database if needed
     if [[ -f "$backup_dir/database.sql" ]]; then
         warn "Database restore not implemented in rollback - manual intervention required"
     fi
-    
+
     send_notification "Rollback completed to backup $backup_dir" "SUCCESS"
     log "Rollback completed"
 }
@@ -367,23 +367,23 @@ rollback_deployment() {
 # Function to show deployment status
 show_deployment_status() {
     log "=== DEPLOYMENT STATUS ==="
-    
+
     # Show pods
     log "Pods:"
     kubectl get pods -n "$NAMESPACE" -o wide
-    
+
     # Show services
     log "Services:"
     kubectl get services -n "$NAMESPACE"
-    
+
     # Show ingress
     log "Ingress:"
     kubectl get ingress -n "$NAMESPACE"
-    
+
     # Show resource usage
     log "Resource Usage:"
     kubectl top pods -n "$NAMESPACE" --no-headers | head -10 || true
-    
+
     # Show events
     log "Recent Events:"
     kubectl get events -n "$NAMESPACE" --sort-by=.metadata.creationTimestamp | tail -10
@@ -392,7 +392,7 @@ show_deployment_status() {
 # Function to cleanup old resources
 cleanup_old_resources() {
     log "Cleaning up old resources..."
-    
+
     # Delete completed jobs older than 1 day
     kubectl get jobs -n "$NAMESPACE" --field-selector=status.conditions[0].type=Complete \
         -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.completionTime}{"\n"}{end}' | \
@@ -402,14 +402,14 @@ cleanup_old_resources() {
                 current_timestamp=$(date +%s)
                 age_seconds=$((current_timestamp - completion_timestamp))
                 age_days=$((age_seconds / 86400))
-                
+
                 if [[ $age_days -gt 1 ]]; then
                     log "Deleting old completed job: $job_name (age: $age_days days)"
                     kubectl delete job "$job_name" -n "$NAMESPACE"
                 fi
             fi
         done
-    
+
     # Delete old replica sets
     kubectl get replicasets -n "$NAMESPACE" -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.spec.replicas}{" "}{.status.replicas}{"\n"}{end}' | \
         while read rs_name spec_replicas status_replicas; do
@@ -418,7 +418,7 @@ cleanup_old_resources() {
                 kubectl delete replicaset "$rs_name" -n "$NAMESPACE"
             fi
         done
-    
+
     log "Cleanup completed"
 }
 
@@ -426,15 +426,15 @@ cleanup_old_resources() {
 main() {
     local start_time
     start_time=$(date +%s)
-    
+
     send_notification "Starting Kubernetes deployment" "START"
-    
+
     # Trap for cleanup on exit
     trap 'echo "Deployment interrupted"; exit 1' INT TERM
-    
+
     # Change to k8s directory
     cd "$(dirname "$0")"
-    
+
     # Pre-deployment steps
     check_prerequisites
     validate_manifests
@@ -442,14 +442,14 @@ main() {
         error "Backup failed - aborting deployment"
         exit 1
     }
-    
+
     # Deployment steps
     if [[ "$DRY_RUN" == "true" ]]; then
         log "DRY RUN MODE - No actual deployment will occur"
         kubectl apply --dry-run=client -f .
         exit 0
     fi
-    
+
     deploy_infrastructure || {
         error "Infrastructure deployment failed"
         if [[ "$ROLLBACK_ON_FAILURE" == "true" ]]; then
@@ -457,7 +457,7 @@ main() {
         fi
         exit 1
     }
-    
+
     deploy_database || {
         error "Database deployment failed"
         if [[ "$ROLLBACK_ON_FAILURE" == "true" ]]; then
@@ -465,7 +465,7 @@ main() {
         fi
         exit 1
     }
-    
+
     deploy_cache || {
         error "Cache deployment failed"
         if [[ "$ROLLBACK_ON_FAILURE" == "true" ]]; then
@@ -473,7 +473,7 @@ main() {
         fi
         exit 1
     }
-    
+
     deploy_application || {
         error "Application deployment failed"
         if [[ "$ROLLBACK_ON_FAILURE" == "true" ]]; then
@@ -481,7 +481,7 @@ main() {
         fi
         exit 1
     }
-    
+
     deploy_ingress || {
         error "Ingress deployment failed"
         if [[ "$ROLLBACK_ON_FAILURE" == "true" ]]; then
@@ -489,7 +489,7 @@ main() {
         fi
         exit 1
     }
-    
+
     deploy_monitoring || {
         error "Monitoring deployment failed"
         if [[ "$ROLLBACK_ON_FAILURE" == "true" ]]; then
@@ -497,7 +497,7 @@ main() {
         fi
         exit 1
     }
-    
+
     # Post-deployment verification
     run_health_checks || {
         error "Health checks failed"
@@ -506,15 +506,15 @@ main() {
         fi
         exit 1
     }
-    
+
     # Cleanup and status
     cleanup_old_resources
     show_deployment_status
-    
+
     local end_time
     end_time=$(date +%s)
     local duration=$((end_time - start_time))
-    
+
     send_notification "Kubernetes deployment completed successfully in ${duration}s" "SUCCESS"
     log "🎉 Deployment completed successfully!"
 }

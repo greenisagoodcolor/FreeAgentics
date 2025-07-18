@@ -52,12 +52,20 @@ class TestRoleBasedAuthorizationBoundaries:
     def test_users(self):
         """Create test users with different roles."""
         users = {}
-        roles = [UserRole.ADMIN, UserRole.RESEARCHER, UserRole.AGENT_MANAGER, UserRole.OBSERVER]
+        roles = [
+            UserRole.ADMIN,
+            UserRole.RESEARCHER,
+            UserRole.AGENT_MANAGER,
+            UserRole.OBSERVER,
+        ]
 
         for role in roles:
             username = f"test_{role.value}"
             user = auth_manager.register_user(
-                username=username, email=f"{username}@test.com", password="Test123!@#", role=role
+                username=username,
+                email=f"{username}@test.com",
+                password="Test123!@#",
+                role=role,
             )
             token = auth_manager.create_access_token(user)
             users[role] = {
@@ -164,7 +172,11 @@ class TestRoleBasedAuthorizationBoundaries:
         response = client.post(
             "/api/v1/agents",
             headers=headers,
-            json={"name": "Unauthorized Agent", "template": "basic_agent", "parameters": {}},
+            json={
+                "name": "Unauthorized Agent",
+                "template": "basic_agent",
+                "parameters": {},
+            },
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
@@ -198,15 +210,22 @@ class TestRoleBasedAuthorizationBoundaries:
             response = client.get("/api/v1/system/config", headers=headers)
 
             # Reset mock
-            mock_verify.return_value = auth_manager.verify_token(observer_token)
+            mock_verify.return_value = auth_manager.verify_token(
+                observer_token
+            )
 
         # Attempt 2: Try to access admin functions through parameter injection
         headers = {"Authorization": f"Bearer {observer_token}"}
 
         # Try to inject admin role through query parameters
-        response = client.get("/api/v1/agents?role=admin&override=true", headers=headers)
+        response = client.get(
+            "/api/v1/agents?role=admin&override=true", headers=headers
+        )
         # Should still respect actual user role
-        assert response.status_code in [status.HTTP_200_OK, status.HTTP_403_FORBIDDEN]
+        assert response.status_code in [
+            status.HTTP_200_OK,
+            status.HTTP_403_FORBIDDEN,
+        ]
 
         # Attempt 3: Try to elevate through race condition
         elevation_attempts = []
@@ -221,7 +240,9 @@ class TestRoleBasedAuthorizationBoundaries:
             elevation_attempts.append(resp.status_code)
 
         # Launch multiple concurrent requests
-        threads = [threading.Thread(target=attempt_elevation) for _ in range(10)]
+        threads = [
+            threading.Thread(target=attempt_elevation) for _ in range(10)
+        ]
         for t in threads:
             t.start()
         for t in threads:
@@ -248,7 +269,11 @@ class TestResourceLevelAuthorization:
 
         # Create agents owned by different users
         for role, user_data in test_users.items():
-            if role in [UserRole.ADMIN, UserRole.RESEARCHER, UserRole.AGENT_MANAGER]:
+            if role in [
+                UserRole.ADMIN,
+                UserRole.RESEARCHER,
+                UserRole.AGENT_MANAGER,
+            ]:
                 agent_id = f"agent_{role.value}_{user_data['user'].user_id}"
                 resources["agents"][agent_id] = {
                     "id": agent_id,
@@ -257,7 +282,9 @@ class TestResourceLevelAuthorization:
                     "owner_role": role,
                     "created_at": datetime.now(timezone.utc),
                     "department": f"dept_{role.value}",
-                    "classification": "internal" if role != UserRole.ADMIN else "restricted",
+                    "classification": "internal"
+                    if role != UserRole.ADMIN
+                    else "restricted",
                 }
 
         # Create coalitions with different access levels
@@ -273,7 +300,9 @@ class TestResourceLevelAuthorization:
 
         return resources
 
-    def test_resource_ownership_validation(self, client, test_users, test_resources):
+    def test_resource_ownership_validation(
+        self, client, test_users, test_resources
+    ):
         """Test that resource ownership is properly validated."""
         # User 1 creates a resource
         user1 = test_users[UserRole.RESEARCHER]
@@ -300,7 +329,9 @@ class TestResourceLevelAuthorization:
 
             # Attempt to modify another user's agent
             response = client.patch(
-                f"/api/v1/agents/{agent_id}", headers=headers2, json={"name": "HijackedAgent"}
+                f"/api/v1/agents/{agent_id}",
+                headers=headers2,
+                json={"name": "HijackedAgent"},
             )
 
             # Should be forbidden unless admin
@@ -335,7 +366,9 @@ class TestResourceLevelAuthorization:
         )
 
         # Should be allowed due to same department rule
-        assert granted or "department" not in reason, "Same department access should be considered"
+        assert (
+            granted or "department" not in reason
+        ), "Same department access should be considered"
 
         # Test 2: Access to different department resources
         other_resource = ResourceContext(
@@ -389,7 +422,8 @@ class TestResourceLevelAuthorization:
 
         # Should be denied due to department/tenant isolation
         assert (
-            not granted or tenant1_context.department != tenant2_context.department
+            not granted
+            or tenant1_context.department != tenant2_context.department
         ), "Cross-tenant access should be isolated"
 
     def test_resource_hierarchy_permissions(self, test_resources):
@@ -409,7 +443,10 @@ class TestResourceLevelAuthorization:
             resource_type="agent",
             owner_id="admin_user",
             department="operations",
-            metadata={"hierarchy_level": "child", "parent_id": "parent_coalition"},
+            metadata={
+                "hierarchy_level": "child",
+                "parent_id": "parent_coalition",
+            },
         )
 
         # User with access to parent
@@ -432,7 +469,8 @@ class TestResourceLevelAuthorization:
 
         # Access patterns should be consistent within hierarchy
         assert (
-            parent_granted == child_granted or user_context.role == UserRole.ADMIN
+            parent_granted == child_granted
+            or user_context.role == UserRole.ADMIN
         ), "Hierarchical permissions should be consistent"
 
     def test_resource_specific_policies(self):
@@ -468,11 +506,19 @@ class TestResourceLevelAuthorization:
         )
 
         # Test access to sensitive resource
-        regular_granted, regular_reason, _ = enhanced_rbac_manager.evaluate_abac_access(
+        (
+            regular_granted,
+            regular_reason,
+            _,
+        ) = enhanced_rbac_manager.evaluate_abac_access(
             regular_context, sensitive_resource, "view"
         )
 
-        admin_granted, admin_reason, _ = enhanced_rbac_manager.evaluate_abac_access(
+        (
+            admin_granted,
+            admin_reason,
+            _,
+        ) = enhanced_rbac_manager.evaluate_abac_access(
             admin_context, sensitive_resource, "view"
         )
 
@@ -499,31 +545,63 @@ class TestAPIEndpointAuthorization:
         return {
             # Agent endpoints
             "/api/v1/agents": {
-                "GET": {"permission": Permission.VIEW_AGENTS, "roles": [UserRole.OBSERVER]},
-                "POST": {"permission": Permission.CREATE_AGENT, "roles": [UserRole.AGENT_MANAGER]},
+                "GET": {
+                    "permission": Permission.VIEW_AGENTS,
+                    "roles": [UserRole.OBSERVER],
+                },
+                "POST": {
+                    "permission": Permission.CREATE_AGENT,
+                    "roles": [UserRole.AGENT_MANAGER],
+                },
             },
             "/api/v1/agents/{agent_id}": {
-                "GET": {"permission": Permission.VIEW_AGENTS, "roles": [UserRole.OBSERVER]},
-                "PUT": {"permission": Permission.MODIFY_AGENT, "roles": [UserRole.AGENT_MANAGER]},
-                "DELETE": {"permission": Permission.DELETE_AGENT, "roles": [UserRole.ADMIN]},
+                "GET": {
+                    "permission": Permission.VIEW_AGENTS,
+                    "roles": [UserRole.OBSERVER],
+                },
+                "PUT": {
+                    "permission": Permission.MODIFY_AGENT,
+                    "roles": [UserRole.AGENT_MANAGER],
+                },
+                "DELETE": {
+                    "permission": Permission.DELETE_AGENT,
+                    "roles": [UserRole.ADMIN],
+                },
             },
             # Coalition endpoints
             "/api/v1/coalitions": {
-                "GET": {"permission": Permission.VIEW_AGENTS, "roles": [UserRole.OBSERVER]},
-                "POST": {"permission": Permission.CREATE_COALITION, "roles": [UserRole.RESEARCHER]},
+                "GET": {
+                    "permission": Permission.VIEW_AGENTS,
+                    "roles": [UserRole.OBSERVER],
+                },
+                "POST": {
+                    "permission": Permission.CREATE_COALITION,
+                    "roles": [UserRole.RESEARCHER],
+                },
             },
             # System endpoints
             "/api/v1/system/config": {
-                "GET": {"permission": Permission.ADMIN_SYSTEM, "roles": [UserRole.ADMIN]},
-                "PUT": {"permission": Permission.ADMIN_SYSTEM, "roles": [UserRole.ADMIN]},
+                "GET": {
+                    "permission": Permission.ADMIN_SYSTEM,
+                    "roles": [UserRole.ADMIN],
+                },
+                "PUT": {
+                    "permission": Permission.ADMIN_SYSTEM,
+                    "roles": [UserRole.ADMIN],
+                },
             },
             # Metrics endpoints
             "/api/v1/metrics": {
-                "GET": {"permission": Permission.VIEW_METRICS, "roles": [UserRole.OBSERVER]},
+                "GET": {
+                    "permission": Permission.VIEW_METRICS,
+                    "roles": [UserRole.OBSERVER],
+                },
             },
         }
 
-    def test_endpoint_permission_validation(self, client, test_users, api_endpoints):
+    def test_endpoint_permission_validation(
+        self, client, test_users, api_endpoints
+    ):
         """Test that each endpoint properly validates required permissions."""
         for endpoint, methods in api_endpoints.items():
             for method, requirements in methods.items():
@@ -535,17 +613,25 @@ class TestAPIEndpointAuthorization:
                     headers = {"Authorization": f"Bearer {user_data['token']}"}
 
                     # Prepare endpoint (replace placeholders)
-                    test_endpoint = endpoint.replace("{agent_id}", "test_agent_123")
+                    test_endpoint = endpoint.replace(
+                        "{agent_id}", "test_agent_123"
+                    )
 
                     # Make request based on method
                     if method == "GET":
                         response = client.get(test_endpoint, headers=headers)
                     elif method == "POST":
-                        response = client.post(test_endpoint, headers=headers, json={})
+                        response = client.post(
+                            test_endpoint, headers=headers, json={}
+                        )
                     elif method == "PUT":
-                        response = client.put(test_endpoint, headers=headers, json={})
+                        response = client.put(
+                            test_endpoint, headers=headers, json={}
+                        )
                     elif method == "DELETE":
-                        response = client.delete(test_endpoint, headers=headers)
+                        response = client.delete(
+                            test_endpoint, headers=headers
+                        )
 
                     # Check authorization
                     user_permissions = ROLE_PERMISSIONS.get(role, [])
@@ -574,12 +660,16 @@ class TestAPIEndpointAuthorization:
 
         # Should not be able to create agents
         response = client.post(
-            "/api/v1/agents", headers=headers, json={"name": "test", "template": "basic"}
+            "/api/v1/agents",
+            headers=headers,
+            json={"name": "test", "template": "basic"},
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
         # Should not be able to update agents
-        response = client.put("/api/v1/agents/some_id", headers=headers, json={"name": "updated"})
+        response = client.put(
+            "/api/v1/agents/some_id", headers=headers, json={"name": "updated"}
+        )
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_api_versioning_authorization(self, client, test_users):
@@ -595,7 +685,9 @@ class TestAPIEndpointAuthorization:
                 response = client.get(endpoint, headers=headers)
 
                 # Version should not affect authorization logic
-                has_permission = Permission.VIEW_AGENTS in ROLE_PERMISSIONS.get(role, [])
+                has_permission = (
+                    Permission.VIEW_AGENTS in ROLE_PERMISSIONS.get(role, [])
+                )
 
                 if has_permission:
                     assert response.status_code != status.HTTP_403_FORBIDDEN
@@ -614,7 +706,8 @@ class TestAPIEndpointAuthorization:
 
         # Sensitive parameters - might require admin
         response = client.get(
-            "/api/v1/agents?include_deleted=true&show_system=true", headers=headers
+            "/api/v1/agents?include_deleted=true&show_system=true",
+            headers=headers,
         )
         # System might restrict certain parameters
 
@@ -651,12 +744,16 @@ class TestAPIEndpointAuthorization:
         with patch("jwt.decode") as mock_decode:
             mock_decode.side_effect = jwt.ExpiredSignatureError()
 
-            headers = {"Authorization": f"Bearer {test_users[UserRole.OBSERVER]['token']}"}
+            headers = {
+                "Authorization": f"Bearer {test_users[UserRole.OBSERVER]['token']}"
+            }
             response = client.get("/api/v1/agents", headers=headers)
             assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
         # Test proper token flow
-        valid_headers = {"Authorization": f"Bearer {test_users[UserRole.OBSERVER]['token']}"}
+        valid_headers = {
+            "Authorization": f"Bearer {test_users[UserRole.OBSERVER]['token']}"
+        }
         response = client.get("/api/v1/agents", headers=valid_headers)
         assert response.status_code == status.HTTP_200_OK
 
@@ -677,7 +774,13 @@ class TestAdvancedAuthorizationScenarios:
                 subject_conditions={"role": ["researcher", "agent_manager"]},
                 resource_conditions={},
                 environment_conditions={
-                    "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+                    "days": [
+                        "Monday",
+                        "Tuesday",
+                        "Wednesday",
+                        "Thursday",
+                        "Friday",
+                    ]
                 },
                 effect=ABACEffect.ALLOW,
                 priority=100,
@@ -732,21 +835,32 @@ class TestAdvancedAuthorizationScenarios:
         )
 
         resource = ResourceContext(
-            resource_id="agent_001", resource_type="agent", classification="internal"
+            resource_id="agent_001",
+            resource_type="agent",
+            classification="internal",
         )
 
         # Mock weekend scenario
         with patch("datetime.datetime") as mock_datetime:
             # Set to Saturday
-            mock_datetime.now.return_value = datetime(2024, 1, 6, 12, 0, 0)  # Saturday
+            mock_datetime.now.return_value = datetime(
+                2024, 1, 6, 12, 0, 0
+            )  # Saturday
             mock_datetime.strftime = datetime.strftime
 
-            granted, reason, rules = enhanced_rbac_manager.evaluate_abac_access(
+            (
+                granted,
+                reason,
+                rules,
+            ) = enhanced_rbac_manager.evaluate_abac_access(
                 researcher_context, resource, "modify"
             )
 
             # Should be denied on weekend for non-admin
-            if "Weekend Access Restriction" in enhanced_rbac_manager.abac_rules:
+            if (
+                "Weekend Access Restriction"
+                in enhanced_rbac_manager.abac_rules
+            ):
                 assert not granted or researcher_context.role == UserRole.ADMIN
 
     def test_context_aware_authorization(self):
@@ -776,16 +890,26 @@ class TestAdvancedAuthorizationScenarios:
         )
 
         sensitive_resource = ResourceContext(
-            resource_id="sensitive_001", resource_type="system", sensitivity_level="restricted"
+            resource_id="sensitive_001",
+            resource_type="system",
+            sensitivity_level="restricted",
         )
 
         # Test high-risk access
-        high_risk_granted, high_risk_reason, _ = enhanced_rbac_manager.evaluate_abac_access(
+        (
+            high_risk_granted,
+            high_risk_reason,
+            _,
+        ) = enhanced_rbac_manager.evaluate_abac_access(
             high_risk_context, sensitive_resource, "view"
         )
 
         # Test low-risk access
-        low_risk_granted, low_risk_reason, _ = enhanced_rbac_manager.evaluate_abac_access(
+        (
+            low_risk_granted,
+            low_risk_reason,
+            _,
+        ) = enhanced_rbac_manager.evaluate_abac_access(
             low_risk_context, sensitive_resource, "view"
         )
 
@@ -806,7 +930,13 @@ class TestAdvancedAuthorizationScenarios:
             resource_conditions={},
             environment_conditions={
                 "time_range": {"start": "09:00", "end": "17:00"},
-                "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                "days": [
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday",
+                    "Friday",
+                ],
             },
             effect=ABACEffect.ALLOW,
             priority=100,
@@ -823,22 +953,32 @@ class TestAdvancedAuthorizationScenarios:
             permissions=list(ROLE_PERMISSIONS[UserRole.RESEARCHER]),
         )
 
-        financial_resource = ResourceContext(resource_id="fin_001", resource_type="financial_data")
+        financial_resource = ResourceContext(
+            resource_id="fin_001", resource_type="financial_data"
+        )
 
         # Test during business hours
         with patch("datetime.datetime") as mock_datetime:
             # Monday 10 AM
             mock_datetime.now.return_value = datetime(2024, 1, 1, 10, 0, 0)
-            mock_datetime.now().time.return_value = datetime(2024, 1, 1, 10, 0, 0).time()
+            mock_datetime.now().time.return_value = datetime(
+                2024, 1, 1, 10, 0, 0
+            ).time()
             mock_datetime.now().strftime.return_value = "Monday"
 
-            granted_business, _, _ = enhanced_rbac_manager.evaluate_abac_access(
+            (
+                granted_business,
+                _,
+                _,
+            ) = enhanced_rbac_manager.evaluate_abac_access(
                 user_context, financial_resource, "view"
             )
 
             # Saturday 10 AM
             mock_datetime.now.return_value = datetime(2024, 1, 6, 10, 0, 0)
-            mock_datetime.now().time.return_value = datetime(2024, 1, 6, 10, 0, 0).time()
+            mock_datetime.now().time.return_value = datetime(
+                2024, 1, 6, 10, 0, 0
+            ).time()
             mock_datetime.now().strftime.return_value = "Saturday"
 
             granted_weekend, _, _ = enhanced_rbac_manager.evaluate_abac_access(
@@ -870,14 +1010,20 @@ class TestAdvancedAuthorizationScenarios:
             ip_address="200.200.200.200",
         )
 
-        system_resource = ResourceContext(resource_id="sys_config", resource_type="system_config")
+        system_resource = ResourceContext(
+            resource_id="sys_config", resource_type="system_config"
+        )
 
         # Evaluate access for both contexts
         us_granted, us_reason, _ = enhanced_rbac_manager.evaluate_abac_access(
             us_context, system_resource, "modify"
         )
 
-        other_granted, other_reason, _ = enhanced_rbac_manager.evaluate_abac_access(
+        (
+            other_granted,
+            other_reason,
+            _,
+        ) = enhanced_rbac_manager.evaluate_abac_access(
             other_context, system_resource, "modify"
         )
 
@@ -913,7 +1059,9 @@ class TestAdvancedAuthorizationScenarios:
             time_anomaly=True,
             device_anomaly=True,
         )
-        assert high_risk_score > 0.5  # Anomalous activity should have high risk
+        assert (
+            high_risk_score > 0.5
+        )  # Anomalous activity should have high risk
 
         # Update context with calculated risk
         normal_context.risk_score = risk_score
@@ -953,7 +1101,10 @@ class TestAuthorizationAttackVectors:
             password="Attack123!",
             role=UserRole.OBSERVER,
         )
-        users["attacker"] = {"user": attacker, "token": auth_manager.create_access_token(attacker)}
+        users["attacker"] = {
+            "user": attacker,
+            "token": auth_manager.create_access_token(attacker),
+        }
 
         # Legitimate user
         legitimate = auth_manager.register_user(
@@ -969,9 +1120,15 @@ class TestAuthorizationAttackVectors:
 
         # Admin for comparison
         admin = auth_manager.register_user(
-            username="admin", email="admin@test.com", password="Admin123!", role=UserRole.ADMIN
+            username="admin",
+            email="admin@test.com",
+            password="Admin123!",
+            role=UserRole.ADMIN,
         )
-        users["admin"] = {"user": admin, "token": auth_manager.create_access_token(admin)}
+        users["admin"] = {
+            "user": admin,
+            "token": auth_manager.create_access_token(admin),
+        }
 
         return users
 
@@ -984,7 +1141,10 @@ class TestAuthorizationAttackVectors:
         headers = {"Authorization": f"Bearer {attacker['token']}"}
 
         # Attempt 1: Direct ID manipulation
-        response = client.get(f"/api/v1/users/{legitimate['user'].user_id}/agents", headers=headers)
+        response = client.get(
+            f"/api/v1/users/{legitimate['user'].user_id}/agents",
+            headers=headers,
+        )
         # Should be forbidden or return only public data
 
         # Attempt 2: Parameter pollution
@@ -998,7 +1158,9 @@ class TestAuthorizationAttackVectors:
         with patch.object(auth_manager, "verify_token") as mock_verify:
             # Simulate token with modified user_id
             tampered_token_data = TokenData(
-                user_id=legitimate["user"].user_id,  # Attempting to impersonate
+                user_id=legitimate[
+                    "user"
+                ].user_id,  # Attempting to impersonate
                 username=attacker["user"].username,
                 role=attacker["user"].role,
                 permissions=list(ROLE_PERMISSIONS[attacker["user"].role]),
@@ -1017,7 +1179,11 @@ class TestAuthorizationAttackVectors:
         headers = {"Authorization": f"Bearer {attacker['token']}"}
 
         # Attempt 1: Access admin endpoints directly
-        admin_endpoints = ["/api/v1/system/config", "/api/v1/users", "/api/v1/security/audit-log"]
+        admin_endpoints = [
+            "/api/v1/system/config",
+            "/api/v1/users",
+            "/api/v1/security/audit-log",
+        ]
 
         for endpoint in admin_endpoints:
             response = client.get(endpoint, headers=headers)
@@ -1048,7 +1214,9 @@ class TestAuthorizationAttackVectors:
         # Attempt 3: Chain multiple vulnerabilities
         # First, try to create a coalition (shouldn't work)
         response = client.post(
-            "/api/v1/coalitions", headers=headers, json={"name": "AttackerCoalition", "agents": []}
+            "/api/v1/coalitions",
+            headers=headers,
+            json={"name": "AttackerCoalition", "agents": []},
         )
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
@@ -1076,23 +1244,31 @@ class TestAuthorizationAttackVectors:
             attacker_headers = {"Authorization": f"Bearer {attacker['token']}"}
 
             # Attempt 1: Direct access
-            response = client.get(f"/api/v1/agents/{agent_id}", headers=attacker_headers)
+            response = client.get(
+                f"/api/v1/agents/{agent_id}", headers=attacker_headers
+            )
             # Might be allowed for viewing but should not expose private data
 
             # Attempt 2: Modification attempt
             response = client.put(
-                f"/api/v1/agents/{agent_id}", headers=attacker_headers, json={"name": "Hijacked"}
+                f"/api/v1/agents/{agent_id}",
+                headers=attacker_headers,
+                json={"name": "Hijacked"},
             )
             assert response.status_code == status.HTTP_403_FORBIDDEN
 
             # Attempt 3: Deletion attempt
-            response = client.delete(f"/api/v1/agents/{agent_id}", headers=attacker_headers)
+            response = client.delete(
+                f"/api/v1/agents/{agent_id}", headers=attacker_headers
+            )
             assert response.status_code == status.HTTP_403_FORBIDDEN
 
         # Test sequential ID enumeration
         base_id = "agent_"
         for i in range(1, 10):
-            response = client.get(f"/api/v1/agents/{base_id}{i}", headers=attacker_headers)
+            response = client.get(
+                f"/api/v1/agents/{base_id}{i}", headers=attacker_headers
+            )
             # Should either 404 or 403, not expose existence
 
     def test_authorization_bypass_attempts(self, client, attack_users):
@@ -1109,14 +1285,19 @@ class TestAuthorizationAttackVectors:
 
         for header_variant in case_variations:
             response = client.post(
-                "/api/v1/agents", headers=header_variant, json={"name": "test", "template": "basic"}
+                "/api/v1/agents",
+                headers=header_variant,
+                json={"name": "test", "template": "basic"},
             )
             # Should still enforce authorization
 
         # Attempt 2: HTTP method tampering
         # Try unusual HTTP methods
         response = client.request(
-            "PATCH", "/api/v1/system/config", headers=headers, json={"setting": "value"}
+            "PATCH",
+            "/api/v1/system/config",
+            headers=headers,
+            json={"setting": "value"},
         )
         # Should not bypass authorization
 
@@ -1141,7 +1322,9 @@ class TestAuthorizationAttackVectors:
             "template": "basic",
             "parameters": {"role": "%61%64%6d%69%6e"},  # "admin" encoded
         }
-        response = client.post("/api/v1/agents", headers=headers, json=encoded_payload)
+        response = client.post(
+            "/api/v1/agents", headers=headers, json=encoded_payload
+        )
         # Should not grant elevated privileges
 
     def test_token_manipulation_attacks(self, client, attack_users):
@@ -1156,7 +1339,9 @@ class TestAuthorizationAttackVectors:
         # Try to force HS256 instead of RS256
         try:
             # Decode without verification to get payload
-            payload = jwt.decode(attacker["token"], options={"verify_signature": False})
+            payload = jwt.decode(
+                attacker["token"], options={"verify_signature": False}
+            )
 
             # Modify payload
             payload["role"] = "admin"
@@ -1183,12 +1368,16 @@ class TestAuthorizationAttackVectors:
         with patch("datetime.datetime") as mock_datetime:
             # Create token that expires immediately
             mock_datetime.now.return_value = datetime.now(timezone.utc)
-            mock_datetime.now(timezone.utc).return_value = datetime.now(timezone.utc)
+            mock_datetime.now(timezone.utc).return_value = datetime.now(
+                timezone.utc
+            )
 
             expired_token = auth_manager.create_access_token(attacker["user"])
 
             # Move time forward
-            mock_datetime.now.return_value = datetime.now(timezone.utc) + timedelta(hours=2)
+            mock_datetime.now.return_value = datetime.now(
+                timezone.utc
+            ) + timedelta(hours=2)
 
             headers = {"Authorization": f"Bearer {expired_token}"}
             response = client.get("/api/v1/agents", headers=headers)
@@ -1204,9 +1393,9 @@ class TestAuthorizationAttackVectors:
             responses.append(response.status_code)
 
         # All requests should be handled consistently
-        assert all(status == status.HTTP_200_OK for status in responses) or all(
-            status != status.HTTP_200_OK for status in responses
-        )
+        assert all(
+            status == status.HTTP_200_OK for status in responses
+        ) or all(status != status.HTTP_200_OK for status in responses)
 
 
 class TestAuthorizationPerformanceAndConcurrency:
@@ -1221,7 +1410,12 @@ class TestAuthorizationPerformanceAndConcurrency:
     def load_test_users(self):
         """Create multiple users for load testing."""
         users = []
-        roles = [UserRole.ADMIN, UserRole.RESEARCHER, UserRole.AGENT_MANAGER, UserRole.OBSERVER]
+        roles = [
+            UserRole.ADMIN,
+            UserRole.RESEARCHER,
+            UserRole.AGENT_MANAGER,
+            UserRole.OBSERVER,
+        ]
 
         for i in range(20):  # 20 users, 5 per role
             role = roles[i % len(roles)]
@@ -1247,9 +1441,14 @@ class TestAuthorizationPerformanceAndConcurrency:
 
         # Launch concurrent requests
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [executor.submit(make_auth_request, user) for user in load_test_users]
+            futures = [
+                executor.submit(make_auth_request, user)
+                for user in load_test_users
+            ]
 
-            results = [f.result() for f in concurrent.futures.as_completed(futures)]
+            results = [
+                f.result() for f in concurrent.futures.as_completed(futures)
+            ]
 
         # Verify all requests were properly authorized
         for status_code, role in results:
@@ -1361,7 +1560,11 @@ class TestAuthorizationPerformanceAndConcurrency:
             context = contexts[i]
             resource = resources[i]
 
-            granted, reason, rules = enhanced_rbac_manager.evaluate_abac_access(
+            (
+                granted,
+                reason,
+                rules,
+            ) = enhanced_rbac_manager.evaluate_abac_access(
                 context, resource, "view"
             )
             decisions.append((granted, reason))
@@ -1369,7 +1572,9 @@ class TestAuthorizationPerformanceAndConcurrency:
         end_time = time.time()
         total_time = end_time - start_time
 
-        print(f"Authorization decisions under load: {total_time:.4f}s for 100 evaluations")
+        print(
+            f"Authorization decisions under load: {total_time:.4f}s for 100 evaluations"
+        )
         print(f"Average time per decision: {total_time/100:.4f}s")
 
         # Ensure decisions are still being made correctly
@@ -1434,7 +1639,9 @@ class TestComprehensiveAuthorizationIntegration:
                 "action": "*",
                 "subject_conditions": {"department": ["finance", "executive"]},
                 "resource_conditions": {},
-                "environment_conditions": {"time_range": {"start": "09:00", "end": "18:00"}},
+                "environment_conditions": {
+                    "time_range": {"start": "09:00", "end": "18:00"}
+                },
                 "effect": ABACEffect.ALLOW,
                 "priority": 120,
             },
@@ -1459,7 +1666,9 @@ class TestComprehensiveAuthorizationIntegration:
 
         return users, departments
 
-    def test_end_to_end_authorization_flow(self, client, complex_scenario_setup):
+    def test_end_to_end_authorization_flow(
+        self, client, complex_scenario_setup
+    ):
         """Test complete authorization flow from login to resource access."""
         users, departments = complex_scenario_setup
 
@@ -1468,7 +1677,8 @@ class TestComprehensiveAuthorizationIntegration:
 
         # 1. Login
         login_response = client.post(
-            "/api/v1/auth/login", json={"username": "research_admin", "password": "Complex123!"}
+            "/api/v1/auth/login",
+            json={"username": "research_admin", "password": "Complex123!"},
         )
 
         if login_response.status_code == status.HTTP_200_OK:
@@ -1476,11 +1686,15 @@ class TestComprehensiveAuthorizationIntegration:
             headers = {"Authorization": f"Bearer {token}"}
 
             # 2. Access own department resources
-            response = client.get("/api/v1/agents?department=research", headers=headers)
+            response = client.get(
+                "/api/v1/agents?department=research", headers=headers
+            )
             assert response.status_code == status.HTTP_200_OK
 
             # 3. Try to access other department resources
-            response = client.get("/api/v1/agents?department=finance", headers=headers)
+            response = client.get(
+                "/api/v1/agents?department=finance", headers=headers
+            )
             # Might be filtered or forbidden based on ABAC rules
 
             # 4. Create resource in own department
@@ -1493,7 +1707,10 @@ class TestComprehensiveAuthorizationIntegration:
                     "parameters": {"department": "research"},
                 },
             )
-            assert response.status_code in [status.HTTP_201_CREATED, status.HTTP_200_OK]
+            assert response.status_code in [
+                status.HTTP_201_CREATED,
+                status.HTTP_200_OK,
+            ]
 
     def test_multi_factor_authorization_decision(self, complex_scenario_setup):
         """Test authorization decisions involving multiple factors."""
@@ -1560,7 +1777,9 @@ class TestComprehensiveAuthorizationIntegration:
 
         # Resource creation
         response = client.post(
-            "/api/v1/agents", headers=headers, json={"name": "AuditTestAgent", "template": "basic"}
+            "/api/v1/agents",
+            headers=headers,
+            json={"name": "AuditTestAgent", "template": "basic"},
         )
 
         # Check audit log
@@ -1580,7 +1799,9 @@ class TestComprehensiveAuthorizationIntegration:
         # Generate audit report
         report = enhanced_rbac_manager.generate_access_report()
         assert "audit_statistics" in report
-        assert report["audit_statistics"]["total_access_decisions"] == len(audit_entries)
+        assert report["audit_statistics"]["total_access_decisions"] == len(
+            audit_entries
+        )
 
 
 # Test execution helpers

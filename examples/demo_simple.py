@@ -25,7 +25,9 @@ from agents.base_agent import PYMDP_AVAILABLE, BasicExplorerAgent
 from world.grid_world import GridWorld, GridWorldConfig
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, format="%(name)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -36,7 +38,9 @@ def main():
 
     # Verify PyMDP is available
     if not PYMDP_AVAILABLE:
-        print("❌ PyMDP not available! This demo requires real Active Inference.")
+        print(
+            "❌ PyMDP not available! This demo requires real Active Inference."
+        )
         print("Install with: pip install inferactively-pymdp==0.0.7.1")
         return
 
@@ -52,7 +56,9 @@ def main():
     world.set_cell(4, 4, 1)  # Goal
     world.set_cell(2, 2, -1)  # Obstacle
 
-    print(f"✅ Created {config.width}x{config.height} world with goals and obstacles")
+    print(
+        f"✅ Created {config.width}x{config.height} world with goals and obstacles"
+    )
     print()
 
     # Create agents with real Active Inference
@@ -86,7 +92,9 @@ def main():
         # Agent 1 step
         obs1 = {
             "position": agent1.position.copy(),
-            "surroundings": world.get_observation(agent1.position[0], agent1.position[1]),
+            "surroundings": world.get_observation(
+                agent1.position[0], agent1.position[1]
+            ),
         }
 
         action1 = agent1.step(obs1)
@@ -94,25 +102,37 @@ def main():
 
         # Show Active Inference metrics
         if "belief_entropy" in agent1.metrics:
-            print(f"    Belief entropy: {agent1.metrics['belief_entropy']:.3f}")
+            print(
+                f"    Belief entropy: {agent1.metrics['belief_entropy']:.3f}"
+            )
         if "expected_free_energy" in agent1.metrics:
-            print(f"    Expected free energy: {agent1.metrics['expected_free_energy']:.3f}")
+            print(
+                f"    Expected free energy: {agent1.metrics['expected_free_energy']:.3f}"
+            )
         if "total_free_energy" in agent1.metrics:
-            print(f"    Total free energy: {agent1.metrics['total_free_energy']:.3f}")
+            print(
+                f"    Total free energy: {agent1.metrics['total_free_energy']:.3f}"
+            )
 
         # Agent 2 step
         obs2 = {
             "position": agent2.position.copy(),
-            "surroundings": world.get_observation(agent2.position[0], agent2.position[1]),
+            "surroundings": world.get_observation(
+                agent2.position[0], agent2.position[1]
+            ),
         }
 
         action2 = agent2.step(obs2)
         print(f"🔍 Agent 2: pos={agent2.position}, action={action2}")
 
         if "belief_entropy" in agent2.metrics:
-            print(f"    Belief entropy: {agent2.metrics['belief_entropy']:.3f}")
+            print(
+                f"    Belief entropy: {agent2.metrics['belief_entropy']:.3f}"
+            )
         if "expected_free_energy" in agent2.metrics:
-            print(f"    Expected free energy: {agent2.metrics['expected_free_energy']:.3f}")
+            print(
+                f"    Expected free energy: {agent2.metrics['expected_free_energy']:.3f}"
+            )
 
         # Update positions based on actions
         def update_position(agent, action):
@@ -159,21 +179,31 @@ def main():
     print(f"  Total steps: {status1['total_steps']}")
     print(f"  Final position: {agent1.position}")
     if "belief_entropy" in agent1.metrics:
-        print(f"  Final belief entropy: {agent1.metrics['belief_entropy']:.3f}")
+        print(
+            f"  Final belief entropy: {agent1.metrics['belief_entropy']:.3f}"
+        )
     if "total_free_energy" in agent1.metrics:
-        print(f"  Total free energy: {agent1.metrics['total_free_energy']:.3f}")
+        print(
+            f"  Total free energy: {agent1.metrics['total_free_energy']:.3f}"
+        )
 
     print("\n🔍 Agent 2:")
     status2 = agent2.get_status()
     print(f"  Total steps: {status2['total_steps']}")
     print(f"  Final position: {agent2.position}")
     if "belief_entropy" in agent2.metrics:
-        print(f"  Final belief entropy: {agent2.metrics['belief_entropy']:.3f}")
+        print(
+            f"  Final belief entropy: {agent2.metrics['belief_entropy']:.3f}"
+        )
     if "total_free_energy" in agent2.metrics:
-        print(f"  Total free energy: {agent2.metrics['total_free_energy']:.3f}")
+        print(
+            f"  Total free energy: {agent2.metrics['total_free_energy']:.3f}"
+        )
 
     print("\n✅ Demo Complete!")
-    print("🎉 FreeAgentics successfully demonstrated real Active Inference with PyMDP!")
+    print(
+        "🎉 FreeAgentics successfully demonstrated real Active Inference with PyMDP!"
+    )
     print("\nKey Features Demonstrated:")
     print("• Real variational inference for belief updates")
     print("• Expected free energy minimization for action selection")

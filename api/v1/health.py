@@ -40,7 +40,11 @@ async def health_check(db: Session = Depends(get_db)):
         # Handle database operational errors with 503 status
         return JSONResponse(
             status_code=503,
-            content={"status": "unhealthy", "db": "disconnected", "error": str(exc)},
+            content={
+                "status": "unhealthy",
+                "db": "disconnected",
+                "error": str(exc),
+            },
         )
 
 
@@ -48,5 +52,10 @@ async def health_check(db: Session = Depends(get_db)):
 def database_exception_handler(request, exc):
     """Handle database operational errors with 503 status."""
     return JSONResponse(
-        status_code=503, content={"status": "unhealthy", "db": "disconnected", "error": str(exc)}
+        status_code=503,
+        content={
+            "status": "unhealthy",
+            "db": "disconnected",
+            "error": str(exc),
+        },
     )

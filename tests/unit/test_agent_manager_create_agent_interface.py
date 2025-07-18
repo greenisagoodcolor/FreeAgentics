@@ -39,7 +39,9 @@ class TestAgentManagerCreateAgentInterface:
         }
 
         # This should work according to docs but will fail with current implementation
-        with pytest.raises(TypeError, match="missing 1 required positional argument"):
+        with pytest.raises(
+            TypeError, match="missing 1 required positional argument"
+        ):
             self.manager.create_agent(config)
 
     def test_create_agent_with_async_interface_should_fail(self):
@@ -109,7 +111,11 @@ class TestAgentManagerCreateAgentInterface:
         """
         # Current implementation ignores PyMDP config completely
         agent_id = self.manager.create_agent(
-            "explorer", "TestAgent", num_states=[3], num_obs=[3], num_controls=[3]
+            "explorer",
+            "TestAgent",
+            num_states=[3],
+            num_obs=[3],
+            num_controls=[3],
         )
 
         # These PyMDP configs are completely ignored

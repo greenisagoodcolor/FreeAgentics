@@ -62,7 +62,13 @@ class TestOWASPValidation:
                     # Skip public endpoints
                     if any(
                         public in match.group(0)
-                        for public in ["/health", "/docs", "/redoc", "/openapi", "/favicon"]
+                        for public in [
+                            "/health",
+                            "/docs",
+                            "/redoc",
+                            "/openapi",
+                            "/favicon",
+                        ]
                     ):
                         continue
 
@@ -71,7 +77,10 @@ class TestOWASPValidation:
 
                     # Check for authentication in surrounding lines
                     protected = False
-                    for i in range(max(0, line_number - 5), min(len(lines), line_number + 10)):
+                    for i in range(
+                        max(0, line_number - 5),
+                        min(len(lines), line_number + 10),
+                    ):
                         if any(
                             auth in lines[i]
                             for auth in [
@@ -95,10 +104,12 @@ class TestOWASPValidation:
                         )
 
         # Assert that all endpoints are protected
-        assert (
-            len(unprotected_endpoints) == 0
-        ), f"Found {len(unprotected_endpoints)} unprotected endpoints:\n" + "\n".join(
-            f"  {ep['file']}:{ep['line']} - {ep['endpoint']}" for ep in unprotected_endpoints
+        assert len(unprotected_endpoints) == 0, (
+            f"Found {len(unprotected_endpoints)} unprotected endpoints:\n"
+            + "\n".join(
+                f"  {ep['file']}:{ep['line']} - {ep['endpoint']}"
+                for ep in unprotected_endpoints
+            )
         )
 
     def test_a02_no_hardcoded_secrets(self, project_root):
@@ -107,7 +118,12 @@ class TestOWASPValidation:
 
         # Check application files
         app_files = []
-        for pattern in ["api/**/*.py", "auth/**/*.py", "agents/**/*.py", "config/**/*.py"]:
+        for pattern in [
+            "api/**/*.py",
+            "auth/**/*.py",
+            "agents/**/*.py",
+            "config/**/*.py",
+        ]:
             app_files.extend(project_root.glob(pattern))
 
         app_files.extend(project_root.glob("*.py"))  # Root level files
@@ -155,7 +171,8 @@ class TestOWASPValidation:
         assert (
             len(secret_findings) == 0
         ), f"Found {len(secret_findings)} hardcoded secrets:\n" + "\n".join(
-            f"  {s['file']}:{s['line']} - {s['type']}: {s['evidence']}" for s in secret_findings
+            f"  {s['file']}:{s['line']} - {s['type']}: {s['evidence']}"
+            for s in secret_findings
         )
 
     def test_a03_no_sql_injection_patterns(self, project_root):
@@ -168,7 +185,10 @@ class TestOWASPValidation:
             db_files.extend(project_root.glob(pattern))
 
         injection_patterns = [
-            (r"cursor\.execute\([^)]*%[^)]*\)", "SQL injection via string formatting"),
+            (
+                r"cursor\.execute\([^)]*%[^)]*\)",
+                "SQL injection via string formatting",
+            ),
             (r"\.query\([^)]*%[^)]*\)", "SQL injection via query formatting"),
             (r"SELECT.*\+.*FROM", "SQL injection via string concatenation"),
             (r'f"SELECT.*\{[^}]*\}.*"', "SQL injection via f-string"),
@@ -207,7 +227,9 @@ class TestOWASPValidation:
         rate_limit_files.extend(project_root.glob("**/*rate*limit*.py"))
 
         # Filter application files
-        app_rate_limit_files = [f for f in rate_limit_files if self._is_application_file(f)]
+        app_rate_limit_files = [
+            f for f in rate_limit_files if self._is_application_file(f)
+        ]
 
         assert (
             len(app_rate_limit_files) > 0
@@ -227,7 +249,9 @@ class TestOWASPValidation:
                 rate_limit_usage = True
                 break
 
-        assert rate_limit_usage, "Rate limiting implementation found but not used in API endpoints"
+        assert (
+            rate_limit_usage
+        ), "Rate limiting implementation found but not used in API endpoints"
 
     def test_a05_debug_mode_disabled(self, project_root):
         """Test A05: Verify debug mode is properly configured."""
@@ -250,7 +274,11 @@ class TestOWASPValidation:
                 if line_number != -1:
                     line_number = content[:line_number].count("\n") + 1
                     debug_issues.append(
-                        {"file": str(file_path), "line": line_number, "issue": "DEBUG = True found"}
+                        {
+                            "file": str(file_path),
+                            "line": line_number,
+                            "issue": "DEBUG = True found",
+                        }
                     )
 
         assert (
@@ -314,17 +342,23 @@ class TestOWASPValidation:
                 for match in matches:
                     line_number = content[: match.start()].count("\n") + 1
                     weak_hashing_found.append(
-                        {"file": str(file_path), "line": line_number, "pattern": match.group(0)}
+                        {
+                            "file": str(file_path),
+                            "line": line_number,
+                            "pattern": match.group(0),
+                        }
                     )
 
         assert (
             secure_hashing_found
         ), "No secure password hashing implementation found (bcrypt, scrypt, argon2, PBKDF2)"
 
-        assert (
-            len(weak_hashing_found) == 0
-        ), f"Found {len(weak_hashing_found)} weak password hashing patterns:\n" + "\n".join(
-            f"  {w['file']}:{w['line']} - {w['pattern']}" for w in weak_hashing_found
+        assert len(weak_hashing_found) == 0, (
+            f"Found {len(weak_hashing_found)} weak password hashing patterns:\n"
+            + "\n".join(
+                f"  {w['file']}:{w['line']} - {w['pattern']}"
+                for w in weak_hashing_found
+            )
         )
 
     def test_a08_no_unsafe_deserialization(self, project_root):
@@ -337,7 +371,12 @@ class TestOWASPValidation:
         ]
 
         app_files = []
-        for pattern in ["api/**/*.py", "auth/**/*.py", "agents/**/*.py", "database/**/*.py"]:
+        for pattern in [
+            "api/**/*.py",
+            "auth/**/*.py",
+            "agents/**/*.py",
+            "database/**/*.py",
+        ]:
             app_files.extend(project_root.glob(pattern))
 
         unsafe_findings = []
@@ -361,10 +400,12 @@ class TestOWASPValidation:
                         }
                     )
 
-        assert (
-            len(unsafe_findings) == 0
-        ), f"Found {len(unsafe_findings)} unsafe deserialization patterns:\n" + "\n".join(
-            f"  {u['file']}:{u['line']} - {u['type']}: {u['evidence']}" for u in unsafe_findings
+        assert len(unsafe_findings) == 0, (
+            f"Found {len(unsafe_findings)} unsafe deserialization patterns:\n"
+            + "\n".join(
+                f"  {u['file']}:{u['line']} - {u['type']}: {u['evidence']}"
+                for u in unsafe_findings
+            )
         )
 
     def test_a09_security_logging_implemented(self, project_root):
@@ -375,9 +416,13 @@ class TestOWASPValidation:
         security_log_files.extend(project_root.glob("**/audit*.py"))
         security_log_files.extend(project_root.glob("observability/**/*.py"))
 
-        app_log_files = [f for f in security_log_files if self._is_application_file(f)]
+        app_log_files = [
+            f for f in security_log_files if self._is_application_file(f)
+        ]
 
-        assert len(app_log_files) > 0, "No security logging implementation found"
+        assert (
+            len(app_log_files) > 0
+        ), "No security logging implementation found"
 
         # Check for monitoring endpoints
         api_files = list(project_root.glob("api/**/*.py"))
@@ -390,7 +435,13 @@ class TestOWASPValidation:
             content = self._get_file_content(file_path)
 
             if any(
-                pattern in content for pattern in ["/health", "/metrics", "/monitoring", "/status"]
+                pattern in content
+                for pattern in [
+                    "/health",
+                    "/metrics",
+                    "/monitoring",
+                    "/status",
+                ]
             ):
                 monitoring_endpoints = True
                 break
@@ -400,7 +451,11 @@ class TestOWASPValidation:
     def test_a10_no_ssrf_vulnerabilities(self, project_root):
         """Test A10: Verify no SSRF vulnerabilities."""
         app_files = []
-        for pattern in ["api/**/*.py", "agents/**/*.py", "knowledge_graph/**/*.py"]:
+        for pattern in [
+            "api/**/*.py",
+            "agents/**/*.py",
+            "knowledge_graph/**/*.py",
+        ]:
             app_files.extend(project_root.glob(pattern))
 
         ssrf_findings = []
@@ -430,7 +485,14 @@ class TestOWASPValidation:
                         # Check if URL might be user-controlled
                         if any(
                             keyword in line_content.lower()
-                            for keyword in ["request.", "user", "input", "param", "args", "form"]
+                            for keyword in [
+                                "request.",
+                                "user",
+                                "input",
+                                "param",
+                                "args",
+                                "form",
+                            ]
                         ):
                             ssrf_findings.append(
                                 {
@@ -440,10 +502,12 @@ class TestOWASPValidation:
                                 }
                             )
 
-        assert (
-            len(ssrf_findings) == 0
-        ), f"Found {len(ssrf_findings)} potential SSRF vulnerabilities:\n" + "\n".join(
-            f"  {s['file']}:{s['line']} - {s['evidence']}" for s in ssrf_findings
+        assert len(ssrf_findings) == 0, (
+            f"Found {len(ssrf_findings)} potential SSRF vulnerabilities:\n"
+            + "\n".join(
+                f"  {s['file']}:{s['line']} - {s['evidence']}"
+                for s in ssrf_findings
+            )
         )
 
     def test_security_assessment_report_exists(self, project_root):
@@ -510,9 +574,13 @@ class TestSecurityCompliance:
             except Exception:
                 continue
 
-        assert validation_found, "No input validation framework found in API files"
+        assert (
+            validation_found
+        ), "No input validation framework found in API files"
 
-        assert len(validation_files) > 0, "Input validation framework not used in API endpoints"
+        assert (
+            len(validation_files) > 0
+        ), "Input validation framework not used in API endpoints"
 
     def _get_file_content(self, file_path):
         """Helper to get file content."""

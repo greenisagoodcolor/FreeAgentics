@@ -30,7 +30,10 @@ from tests.simulation.user_personas import (
     UserBehavior,
     create_behavior,
 )
-from tests.websocket_load.client_manager import WebSocketClient, WebSocketClientManager
+from tests.websocket_load.client_manager import (
+    WebSocketClient,
+    WebSocketClientManager,
+)
 from tests.websocket_load.message_generators import MessageGenerator
 from tests.websocket_load.metrics_collector import MetricsCollector
 
@@ -56,7 +59,9 @@ class SimulationConfig:
 
     # Database configuration
     db_url: str = Field(
-        default_factory=lambda: os.getenv("TEST_DATABASE_URL", "sqlite:///./test_simulation.db")
+        default_factory=lambda: os.getenv(
+            "TEST_DATABASE_URL", "sqlite:///./test_simulation.db"
+        )
     )
     db_pool_size: int = 20
     db_max_overflow: int = 10
@@ -76,7 +81,9 @@ class SimulationConfig:
     enable_monitoring: bool = True
     metrics_interval: float = 5.0
     export_results: bool = True
-    results_path: Path = field(default_factory=lambda: Path("simulation_results"))
+    results_path: Path = field(
+        default_factory=lambda: Path("simulation_results")
+    )
 
     def __post_init__(self):
         """Calculate total users if not specified."""
@@ -118,7 +125,9 @@ class SimulationMetrics:
     memory_usage: List[float] = field(default_factory=list)
 
     # Per-persona metrics
-    persona_metrics: Dict[str, Dict[str, Any]] = field(default_factory=lambda: defaultdict(dict))
+    persona_metrics: Dict[str, Dict[str, Any]] = field(
+        default_factory=lambda: defaultdict(dict)
+    )
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert metrics to dictionary."""
@@ -134,30 +143,47 @@ class SimulationMetrics:
                 "sent": self.messages_sent,
                 "received": self.messages_received,
                 "failed": self.messages_failed,
-                "success_rate": self.messages_received / max(self.messages_sent, 1),
+                "success_rate": self.messages_received
+                / max(self.messages_sent, 1),
             },
             "database": {
                 "operations": self.db_operations,
                 "errors": self.db_errors,
-                "avg_latency_ms": np.mean(self.db_latency_ms) if self.db_latency_ms else 0,
+                "avg_latency_ms": np.mean(self.db_latency_ms)
+                if self.db_latency_ms
+                else 0,
                 "p95_latency_ms": (
-                    np.percentile(self.db_latency_ms, 95) if self.db_latency_ms else 0
+                    np.percentile(self.db_latency_ms, 95)
+                    if self.db_latency_ms
+                    else 0
                 ),
             },
             "websocket": {
                 "connections": self.ws_connections,
                 "disconnections": self.ws_disconnections,
                 "errors": self.ws_errors,
-                "avg_latency_ms": np.mean(self.ws_latency_ms) if self.ws_latency_ms else 0,
+                "avg_latency_ms": np.mean(self.ws_latency_ms)
+                if self.ws_latency_ms
+                else 0,
                 "p95_latency_ms": (
-                    np.percentile(self.ws_latency_ms, 95) if self.ws_latency_ms else 0
+                    np.percentile(self.ws_latency_ms, 95)
+                    if self.ws_latency_ms
+                    else 0
                 ),
             },
             "system": {
-                "avg_cpu_usage": np.mean(self.cpu_usage) if self.cpu_usage else 0,
-                "max_cpu_usage": np.max(self.cpu_usage) if self.cpu_usage else 0,
-                "avg_memory_mb": np.mean(self.memory_usage) if self.memory_usage else 0,
-                "max_memory_mb": np.max(self.memory_usage) if self.memory_usage else 0,
+                "avg_cpu_usage": np.mean(self.cpu_usage)
+                if self.cpu_usage
+                else 0,
+                "max_cpu_usage": np.max(self.cpu_usage)
+                if self.cpu_usage
+                else 0,
+                "avg_memory_mb": np.mean(self.memory_usage)
+                if self.memory_usage
+                else 0,
+                "max_memory_mb": np.max(self.memory_usage)
+                if self.memory_usage
+                else 0,
             },
             "personas": dict(self.persona_metrics),
         }
@@ -271,7 +297,10 @@ class SimulatedUser:
             self.error_count += 1
 
             # Inject errors if configured
-            if self.config.enable_errors and np.random.random() < self.config.error_injection_rate:
+            if (
+                self.config.enable_errors
+                and np.random.random() < self.config.error_injection_rate
+            ):
                 raise e
 
             return None
@@ -333,7 +362,9 @@ class SimulatedUser:
 
                 if coalition_ids:
                     result = await self.db_session.execute(
-                        select(Coalition).where(Coalition.id.in_(coalition_ids))
+                        select(Coalition).where(
+                            Coalition.id.in_(coalition_ids)
+                        )
                     )
                     coalitions = result.scalars().all()
 
@@ -356,7 +387,9 @@ class SimulatedUser:
             self.error_count += 1
             return {"error": str(e)}
 
-    async def _process_command(self, command: Dict[str, Any]) -> Dict[str, Any]:
+    async def _process_command(
+        self, command: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Process command with database operations."""
         command_type = command.get("command")
 
@@ -367,7 +400,9 @@ class SimulatedUser:
                 # Create agent in database
                 agent_data = command.get("params", {})
                 agent = Agent(
-                    name=agent_data.get("name", f"Agent_{uuid.uuid4().hex[:8]}"),
+                    name=agent_data.get(
+                        "name", f"Agent_{uuid.uuid4().hex[:8]}"
+                    ),
                     template=agent_data.get("template", "default"),
                     status=AgentStatus.PENDING,
                     parameters=agent_data.get("parameters", {}),
@@ -397,7 +432,9 @@ class SimulatedUser:
                 # Create coalition in database
                 coalition_data = command.get("params", {})
                 coalition = Coalition(
-                    name=coalition_data.get("name", f"Coalition_{uuid.uuid4().hex[:8]}"),
+                    name=coalition_data.get(
+                        "name", f"Coalition_{uuid.uuid4().hex[:8]}"
+                    ),
                     goal=coalition_data.get("goal", "default_goal"),
                     status=CoalitionStatus.FORMING,
                     metadata=coalition_data,
@@ -406,7 +443,9 @@ class SimulatedUser:
                 await self.db_session.commit()
 
                 self.managed_coalitions.add(str(coalition.id))
-                self.behavior.state["managed_coalitions"].add(str(coalition.id))
+                self.behavior.state["managed_coalitions"].add(
+                    str(coalition.id)
+                )
 
                 # Send WebSocket command
                 await self.ws_client.send_message(
@@ -432,7 +471,9 @@ class SimulatedUser:
             await self.db_session.rollback()
             return {"error": str(e)}
 
-    async def _process_subscription(self, subscription: Dict[str, Any]) -> Dict[str, Any]:
+    async def _process_subscription(
+        self, subscription: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Process event subscription."""
         event_types = subscription.get("event_types", [])
 
@@ -445,7 +486,9 @@ class SimulatedUser:
 
         return {"subscribed": len(event_types)}
 
-    async def _process_monitoring(self, monitoring: Dict[str, Any]) -> Dict[str, Any]:
+    async def _process_monitoring(
+        self, monitoring: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Process monitoring configuration."""
         config = monitoring.get("config", {})
 
@@ -494,7 +537,8 @@ class SimulatedUser:
         }
 
         return persona_subscriptions.get(
-            self.behavior.profile.persona_type, ["agent:created", "agent:action"]
+            self.behavior.profile.persona_type,
+            ["agent:created", "agent:action"],
         )
 
     def get_metrics(self) -> Dict[str, Any]:
@@ -507,8 +551,12 @@ class SimulatedUser:
             "error_count": self.error_count,
             "owned_agents": len(self.owned_agents),
             "managed_coalitions": len(self.managed_coalitions),
-            "avg_action_latency_ms": np.mean(self.action_latencies) if self.action_latencies else 0,
-            "avg_db_latency_ms": np.mean(self.db_latencies) if self.db_latencies else 0,
+            "avg_action_latency_ms": np.mean(self.action_latencies)
+            if self.action_latencies
+            else 0,
+            "avg_db_latency_ms": np.mean(self.db_latencies)
+            if self.db_latencies
+            else 0,
         }
 
 
@@ -521,7 +569,9 @@ class ConcurrentSimulator:
         self.metrics = SimulationMetrics()
 
         # WebSocket manager
-        self.ws_manager = WebSocketClientManager(base_url=f"{config.ws_base_url}{config.ws_path}")
+        self.ws_manager = WebSocketClientManager(
+            base_url=f"{config.ws_base_url}{config.ws_path}"
+        )
 
         # Performance monitor
         self.perf_monitor = PerformanceMonitor()
@@ -541,7 +591,10 @@ class ConcurrentSimulator:
         logger.info(f"Setting up simulation: {self.config.name}")
 
         # Setup database
-        from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+        from sqlalchemy.ext.asyncio import (
+            async_sessionmaker,
+            create_async_engine,
+        )
 
         self.db_engine = create_async_engine(
             self.config.db_url,
@@ -568,7 +621,9 @@ class ConcurrentSimulator:
 
         # Wait for tasks to complete
         if self.user_tasks:
-            await asyncio.gather(*self.user_tasks.values(), return_exceptions=True)
+            await asyncio.gather(
+                *self.user_tasks.values(), return_exceptions=True
+            )
 
         # Disconnect all users
         for user in self.users.values():
@@ -610,7 +665,9 @@ class ConcurrentSimulator:
         logger.info(f"Starting warmup phase ({self.config.warmup_period}s)")
 
         warmup_start = time.time()
-        users_to_spawn = int(self.config.total_users * 0.3)  # 30% during warmup
+        users_to_spawn = int(
+            self.config.total_users * 0.3
+        )  # 30% during warmup
 
         spawn_task = asyncio.create_task(self._spawn_users(users_to_spawn))
         monitor_task = asyncio.create_task(self._monitor_metrics())
@@ -661,18 +718,24 @@ class ConcurrentSimulator:
         except asyncio.CancelledError:
             pass
 
-        logger.info(f"Main phase complete. Total messages: {self.metrics.messages_sent}")
+        logger.info(
+            f"Main phase complete. Total messages: {self.metrics.messages_sent}"
+        )
 
     async def _cooldown_phase(self):
         """Cooldown phase with gradual disconnection."""
-        logger.info(f"Starting cooldown phase ({self.config.cooldown_period}s)")
+        logger.info(
+            f"Starting cooldown phase ({self.config.cooldown_period}s)"
+        )
 
         cooldown_start = time.time()
         users_to_disconnect = list(self.users.keys())
         np.random.shuffle(users_to_disconnect)
 
         # Gradually disconnect users
-        disconnect_rate = len(users_to_disconnect) / self.config.cooldown_period
+        disconnect_rate = (
+            len(users_to_disconnect) / self.config.cooldown_period
+        )
 
         for i, user_id in enumerate(users_to_disconnect):
             if not self.is_running:
@@ -680,7 +743,9 @@ class ConcurrentSimulator:
 
             # Calculate when to disconnect this user
             disconnect_time = i / disconnect_rate
-            await asyncio.sleep(max(0, disconnect_time - (time.time() - cooldown_start)))
+            await asyncio.sleep(
+                max(0, disconnect_time - (time.time() - cooldown_start))
+            )
 
             # Disconnect user
             user = self.users.get(user_id)
@@ -705,7 +770,10 @@ class ConcurrentSimulator:
         diff = count - sum(persona_counts.values())
         if diff > 0:
             # Add remaining to most common persona
-            most_common = max(persona_counts.keys(), key=lambda p: self.config.user_distribution[p])
+            most_common = max(
+                persona_counts.keys(),
+                key=lambda p: self.config.user_distribution[p],
+            )
             persona_counts[most_common] += diff
 
         # Spawn users by persona
@@ -815,14 +883,20 @@ class ConcurrentSimulator:
                 if self.config.enable_monitoring:
                     stats = self.perf_monitor.get_current_stats()
                     self.metrics.cpu_usage.append(stats["cpu"]["percent"])
-                    self.metrics.memory_usage.append(stats["memory"]["used_mb"])
+                    self.metrics.memory_usage.append(
+                        stats["memory"]["used_mb"]
+                    )
 
                 # Collect user metrics
-                active_users = sum(1 for u in self.users.values() if u.connected)
+                active_users = sum(
+                    1 for u in self.users.values() if u.connected
+                )
                 self.metrics.users_active = active_users
 
                 # Collect database metrics
-                total_db_ops = sum(len(u.db_latencies) for u in self.users.values())
+                total_db_ops = sum(
+                    len(u.db_latencies) for u in self.users.values()
+                )
                 self.metrics.db_operations = total_db_ops
 
                 # Log progress
@@ -846,12 +920,18 @@ class ConcurrentSimulator:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
         # Export metrics
-        metrics_file = self.config.results_path / f"metrics_{self.config.name}_{timestamp}.json"
+        metrics_file = (
+            self.config.results_path
+            / f"metrics_{self.config.name}_{timestamp}.json"
+        )
         with open(metrics_file, "w") as f:
             json.dump(self.metrics.to_dict(), f, indent=2)
 
         # Export user behaviors
-        behaviors_file = self.config.results_path / f"behaviors_{self.config.name}_{timestamp}.json"
+        behaviors_file = (
+            self.config.results_path
+            / f"behaviors_{self.config.name}_{timestamp}.json"
+        )
         behaviors = {
             user_id: {
                 "metrics": user.get_metrics(),
@@ -866,7 +946,8 @@ class ConcurrentSimulator:
         # Export performance data
         if self.config.enable_monitoring:
             perf_file = (
-                self.config.results_path / f"performance_{self.config.name}_{timestamp}.json"
+                self.config.results_path
+                / f"performance_{self.config.name}_{timestamp}.json"
             )
             with open(perf_file, "w") as f:
                 json.dump(self.perf_monitor.get_summary(), f, indent=2)
@@ -880,7 +961,10 @@ class ConcurrentSimulator:
                 "name": self.config.name,
                 "duration": self.config.duration_seconds,
                 "total_users": self.config.total_users,
-                "distribution": {p.value: c for p, c in self.config.user_distribution.items()},
+                "distribution": {
+                    p.value: c
+                    for p, c in self.config.user_distribution.items()
+                },
             },
             "metrics": self.metrics.to_dict(),
             "users": {

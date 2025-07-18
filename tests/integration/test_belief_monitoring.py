@@ -28,7 +28,9 @@ async def test_belief_monitoring_basic(belief_monitor):
     beliefs = {"qs": [np.array([0.25, 0.25, 0.25, 0.25])]}  # Uniform beliefs
 
     # Record belief update
-    snapshot = await belief_monitor.record_belief_update(beliefs=beliefs, free_energy=1.5)
+    snapshot = await belief_monitor.record_belief_update(
+        beliefs=beliefs, free_energy=1.5
+    )
 
     assert snapshot.agent_id == "test-agent"
     assert snapshot.free_energy == 1.5
@@ -81,13 +83,22 @@ async def test_anomaly_detection(belief_monitor):
     for i in range(15):
         beliefs = {
             "qs": [
-                np.array([0.25 + i * 0.01, 0.25 - i * 0.003, 0.25 - i * 0.003, 0.25 - i * 0.004])
+                np.array(
+                    [
+                        0.25 + i * 0.01,
+                        0.25 - i * 0.003,
+                        0.25 - i * 0.003,
+                        0.25 - i * 0.004,
+                    ]
+                )
             ]
         }
         await belief_monitor.record_belief_update(beliefs)
 
     # Now add an anomalous update
-    anomalous_beliefs = {"qs": [np.array([0.01, 0.01, 0.01, 0.97])]}  # Sudden spike
+    anomalous_beliefs = {
+        "qs": [np.array([0.01, 0.01, 0.01, 0.97])]
+    }  # Sudden spike
 
     # Record current anomaly count
     initial_anomaly_count = belief_monitor.anomaly_count
@@ -107,7 +118,16 @@ async def test_belief_statistics(belief_monitor):
 
     for i, fe in enumerate(free_energies):
         beliefs = {
-            "qs": [np.array([0.25 + i * 0.05, 0.25 - i * 0.02, 0.25 - i * 0.02, 0.25 - i * 0.01])]
+            "qs": [
+                np.array(
+                    [
+                        0.25 + i * 0.05,
+                        0.25 - i * 0.02,
+                        0.25 - i * 0.02,
+                        0.25 - i * 0.01,
+                    ]
+                )
+            ]
         }
         await belief_monitor.record_belief_update(beliefs, free_energy=fe)
 
@@ -127,7 +147,9 @@ async def test_belief_monitoring_hooks():
 
     # Record belief updates through hooks
     beliefs1 = {"qs": [np.array([0.3, 0.3, 0.2, 0.2])]}
-    snapshot1 = await monitor_belief_update(agent_id, beliefs1, free_energy=1.2)
+    snapshot1 = await monitor_belief_update(
+        agent_id, beliefs1, free_energy=1.2
+    )
 
     assert snapshot1 is not None
     assert snapshot1.agent_id == agent_id
@@ -168,7 +190,9 @@ async def test_belief_monitoring_with_agent():
         free_energy = fe_components.get("total_free_energy")
 
         # Monitor the belief update
-        await monitor_belief_update(agent.agent_id, beliefs, free_energy=free_energy)
+        await monitor_belief_update(
+            agent.agent_id, beliefs, free_energy=free_energy
+        )
 
     # Update beliefs
     agent.update_beliefs()
@@ -179,7 +203,9 @@ async def test_belief_monitoring_with_agent():
         fe_components = agent.compute_free_energy()
         free_energy = fe_components.get("total_free_energy")
 
-        await monitor_belief_update(agent.agent_id, beliefs, free_energy=free_energy)
+        await monitor_belief_update(
+            agent.agent_id, beliefs, free_energy=free_energy
+        )
 
     # Check statistics
     stats = get_belief_statistics(agent.agent_id)
@@ -194,7 +220,16 @@ async def test_belief_history(belief_monitor):
     # Generate some belief updates
     for i in range(5):
         beliefs = {
-            "qs": [np.array([0.2 + i * 0.05, 0.3 - i * 0.02, 0.3 - i * 0.02, 0.2 - i * 0.01])]
+            "qs": [
+                np.array(
+                    [
+                        0.2 + i * 0.05,
+                        0.3 - i * 0.02,
+                        0.3 - i * 0.02,
+                        0.2 - i * 0.01,
+                    ]
+                )
+            ]
         }
         await belief_monitor.record_belief_update(beliefs)
 

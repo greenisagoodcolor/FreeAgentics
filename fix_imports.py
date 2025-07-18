@@ -128,7 +128,13 @@ def main():
     base_dir = "/home/green/FreeAgentics"
 
     # Directories to exclude
-    exclude_dirs = {"venv", "__pycache__", ".git", "node_modules", ".pytest_cache"}
+    exclude_dirs = {
+        "venv",
+        "__pycache__",
+        ".git",
+        "node_modules",
+        ".pytest_cache",
+    }
 
     fixed_count = 0
 

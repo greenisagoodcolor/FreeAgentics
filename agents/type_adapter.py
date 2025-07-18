@@ -43,7 +43,9 @@ class AgentTypeAdapter:
             if "agent_id" in agent:
                 return str(agent["agent_id"])
 
-        raise AttributeError(f"Agent object {type(agent)} has no 'id' or 'agent_id' attribute")
+        raise AttributeError(
+            f"Agent object {type(agent)} has no 'id' or 'agent_id' attribute"
+        )
 
     @staticmethod
     def get_name(agent: Any) -> str:
@@ -64,7 +66,9 @@ class AgentTypeAdapter:
         if isinstance(agent, dict) and "name" in agent:
             return str(agent["name"])
 
-        raise AttributeError(f"Agent object {type(agent)} has no 'name' attribute")
+        raise AttributeError(
+            f"Agent object {type(agent)} has no 'name' attribute"
+        )
 
     @staticmethod
     def get_status(agent: Any) -> str:
@@ -91,7 +95,9 @@ class AgentTypeAdapter:
         if isinstance(agent, dict):
             if "status" in agent:
                 status = agent["status"]
-                return status.value if hasattr(status, "value") else str(status)
+                return (
+                    status.value if hasattr(status, "value") else str(status)
+                )
             if "is_active" in agent:
                 return "active" if agent["is_active"] else "inactive"
 
@@ -226,7 +232,9 @@ class CoalitionTypeAdapter:
         if isinstance(coalition, dict) and "name" in coalition:
             return str(coalition["name"])
 
-        raise AttributeError(f"Coalition object {type(coalition)} has no 'name' attribute")
+        raise AttributeError(
+            f"Coalition object {type(coalition)} has no 'name' attribute"
+        )
 
     @staticmethod
     def get_members(coalition: Any) -> Union[list, dict]:
@@ -251,7 +259,9 @@ class CoalitionTypeAdapter:
                 members[agent_id] = {
                     "agent_id": agent_id,
                     "name": (
-                        AgentTypeAdapter.get_name(agent) if hasattr(agent, "name") else "Unknown"
+                        AgentTypeAdapter.get_name(agent)
+                        if hasattr(agent, "name")
+                        else "Unknown"
                     ),
                 }
             return members
@@ -347,7 +357,9 @@ class CoalitionTypeAdapter:
         else:
             result["member_count"] = str(len(members) if members else 0)
             result["member_ids"] = str(
-                [AgentTypeAdapter.get_id(m) for m in members] if members else []
+                [AgentTypeAdapter.get_id(m) for m in members]
+                if members
+                else []
             )
 
         # Leader

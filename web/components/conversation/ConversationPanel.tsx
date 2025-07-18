@@ -11,7 +11,7 @@ export interface ConversationMessage {
   timestamp: string;
   type: "user" | "agent" | "system";
   message_type: string; // snake_case for compatibility
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ConversationPanelProps {
@@ -23,7 +23,7 @@ export interface ConversationPanelProps {
 // Placeholder component - implement actual UI as needed
 export default function ConversationPanel({
   messages,
-  onSendMessage,
+  onSendMessage: _onSendMessage,
   isLoading = false,
 }: ConversationPanelProps) {
   return (

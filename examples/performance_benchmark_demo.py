@@ -234,7 +234,12 @@ def demo_report_generation():
     metrics = []
 
     # Simulate running multiple benchmarks
-    benchmark_names = ["agent_spawn", "message_pass", "database_query", "websocket_connect"]
+    benchmark_names = [
+        "agent_spawn",
+        "message_pass",
+        "database_query",
+        "websocket_connect",
+    ]
     categories = ["agents", "communication", "database", "websocket"]
 
     for name, category in zip(benchmark_names, categories):
@@ -256,12 +261,20 @@ def demo_report_generation():
 
     with TemporaryDirectory() as tmpdir:
         output_dir = Path(tmpdir)
-        report = PerformanceReportGenerator.generate_report(metrics, output_dir)
+        report = PerformanceReportGenerator.generate_report(
+            metrics, output_dir
+        )
 
-        print(f"Generated report for {report['summary']['total_benchmarks']} benchmarks")
+        print(
+            f"Generated report for {report['summary']['total_benchmarks']} benchmarks"
+        )
         print(f"Categories: {', '.join(report['summary']['categories'])}")
-        print(f"Total duration: {report['summary']['total_duration_ms']:.2f} ms")
-        print(f"Average memory growth: {report['summary']['avg_memory_growth_mb']:.2f} MB")
+        print(
+            f"Total duration: {report['summary']['total_duration_ms']:.2f} ms"
+        )
+        print(
+            f"Average memory growth: {report['summary']['avg_memory_growth_mb']:.2f} MB"
+        )
 
         # Show category breakdown
         print("\nCategory breakdown:")

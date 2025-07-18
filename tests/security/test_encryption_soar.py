@@ -120,7 +120,9 @@ class TestFieldEncryption:
 
         provider = AWSKMSProvider(region="us-east-1")
         encryptor = FieldEncryptor(
-            provider=provider, default_key_id=key_id, performance_monitoring=True
+            provider=provider,
+            default_key_id=key_id,
+            performance_monitoring=True,
         )
 
         # Test single field encryption
@@ -135,7 +137,9 @@ class TestFieldEncryption:
         end_time = time.perf_counter()
 
         encryption_time_ms = (end_time - start_time) * 1000
-        assert encryption_time_ms < 5, f"Encryption took {encryption_time_ms}ms"
+        assert (
+            encryption_time_ms < 5
+        ), f"Encryption took {encryption_time_ms}ms"
 
         # Test decryption performance
         start_time = time.perf_counter()
@@ -143,7 +147,9 @@ class TestFieldEncryption:
         end_time = time.perf_counter()
 
         decryption_time_ms = (end_time - start_time) * 1000
-        assert decryption_time_ms < 5, f"Decryption took {decryption_time_ms}ms"
+        assert (
+            decryption_time_ms < 5
+        ), f"Decryption took {decryption_time_ms}ms"
         assert decrypted == test_data["ssn"]
 
         # Check performance stats
@@ -227,7 +233,9 @@ class TestQuantumResistantCrypto:
         assert len(encapsulated.shared_secret) == 32
 
         # Test decapsulation
-        shared_secret = kyber.decapsulate(encapsulated.ciphertext, keypair.private_key)
+        shared_secret = kyber.decapsulate(
+            encapsulated.ciphertext, keypair.private_key
+        )
         assert len(shared_secret) == 32
 
     def test_dilithium_signatures(self):
@@ -291,7 +299,9 @@ class TestQuantumResistantCrypto:
         # Test encryption with signature
         data = b"Sensitive data to encrypt"
         encrypted = qrc.hybrid_encrypt(
-            data, keys["kem"].public_key, sign_with_private_key=keys["sign"].private_key
+            data,
+            keys["kem"].public_key,
+            sign_with_private_key=keys["sign"].private_key,
         )
 
         assert "encapsulated_key" in encrypted
@@ -301,7 +311,9 @@ class TestQuantumResistantCrypto:
 
         # Test decryption with verification
         decrypted = qrc.hybrid_decrypt(
-            encrypted, keys["kem"].private_key, verify_with_public_key=keys["sign"].public_key
+            encrypted,
+            keys["kem"].private_key,
+            verify_with_public_key=keys["sign"].public_key,
         )
 
         assert decrypted == data
@@ -382,7 +394,11 @@ class TestSOARPlaybookEngine:
     async def test_ip_block_action(self):
         """Test IP blocking action."""
         action = IPBlockAction(
-            "block_ip_1", {"ip_addresses": ["192.168.1.100", "192.168.1.101"], "duration_hours": 24}
+            "block_ip_1",
+            {
+                "ip_addresses": ["192.168.1.100", "192.168.1.101"],
+                "duration_hours": 24,
+            },
         )
 
         from security.soar.playbook_engine import PlaybookContext
@@ -403,7 +419,10 @@ class TestSOARPlaybookEngine:
     @pytest.mark.asyncio
     async def test_conditional_action(self):
         """Test conditional execution."""
-        from security.soar.playbook_engine import ConditionalAction, PlaybookContext
+        from security.soar.playbook_engine import (
+            ConditionalAction,
+            PlaybookContext,
+        )
 
         # Test true condition
         action = ConditionalAction("condition_1", {"condition": "5 > 3"})
@@ -429,7 +448,10 @@ class TestSOARPlaybookEngine:
     @pytest.mark.asyncio
     async def test_variable_resolution(self):
         """Test variable resolution in actions."""
-        from security.soar.playbook_engine import NotificationAction, PlaybookContext
+        from security.soar.playbook_engine import (
+            NotificationAction,
+            PlaybookContext,
+        )
 
         action = NotificationAction(
             "notify_1",
@@ -445,12 +467,18 @@ class TestSOARPlaybookEngine:
             execution_id="exec-1",
             trigger=PlaybookTrigger.ALERT,
             trigger_data={},
-            variables={"security_team": "security@example.com", "attacker_ip": "192.168.1.100"},
+            variables={
+                "security_team": "security@example.com",
+                "attacker_ip": "192.168.1.100",
+            },
         )
 
         result = await action.execute(context)
         assert result.status == ActionStatus.SUCCESS
-        assert result.output["notifications"][0]["recipient"] == "security@example.com"
+        assert (
+            result.output["notifications"][0]["recipient"]
+            == "security@example.com"
+        )
         assert "192.168.1.100" in result.output["notifications"][0]["message"]
 
     def test_playbook_metrics(self, playbook_engine):
@@ -512,7 +540,9 @@ class TestIncidentManager:
 
         # Update status
         success = incident_manager.update_incident_status(
-            case.case_id, IncidentStatus.IN_PROGRESS, notes="Started investigation"
+            case.case_id,
+            IncidentStatus.IN_PROGRESS,
+            notes="Started investigation",
         )
         assert success
 
@@ -584,11 +614,15 @@ class TestIncidentManager:
 
         # Simulate response
         time.sleep(0.1)
-        incident_manager.update_incident_status(case.case_id, IncidentStatus.IN_PROGRESS)
+        incident_manager.update_incident_status(
+            case.case_id, IncidentStatus.IN_PROGRESS
+        )
 
         # Simulate containment
         time.sleep(0.1)
-        incident_manager.update_incident_status(case.case_id, IncidentStatus.CONTAINED)
+        incident_manager.update_incident_status(
+            case.case_id, IncidentStatus.CONTAINED
+        )
 
         # Get metrics
         summary = incident_manager.get_incident_summary(case.case_id)

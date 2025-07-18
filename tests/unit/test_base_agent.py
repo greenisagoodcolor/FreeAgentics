@@ -28,7 +28,9 @@ with patch.dict(
 class ConcreteAgent(ActiveInferenceAgent):
     """Concrete implementation for testing."""
 
-    def __init__(self, agent_id: str, name: str, config: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self, agent_id: str, name: str, config: Optional[Dict[str, Any]] = None
+    ):
         """Initialize concrete agent."""
         super().__init__(agent_id, name, config)
 
@@ -43,7 +45,9 @@ class ConcreteAgent(ActiveInferenceAgent):
         self.C = np.array([1.0, 0.0])
         self.D = np.array([0.5, 0.5])
 
-    def _compute_expected_free_energy(self, qs: np.ndarray, actions: List[int]) -> np.ndarray:
+    def _compute_expected_free_energy(
+        self, qs: np.ndarray, actions: List[int]
+    ) -> np.ndarray:
         """Compute expected free energy for actions."""
         return np.random.rand(len(actions))
 
@@ -67,14 +71,20 @@ class ConcreteAgent(ActiveInferenceAgent):
         """Record observation in history."""
         from datetime import datetime
 
-        obs_record = {"observation": observation, "timestamp": datetime.now().isoformat()}
+        obs_record = {
+            "observation": observation,
+            "timestamp": datetime.now().isoformat(),
+        }
         self.observation_history.append(obs_record)
 
     def act(self, action: Any) -> None:
         """Record action in history."""
         from datetime import datetime
 
-        action_record = {"action": action, "timestamp": datetime.now().isoformat()}
+        action_record = {
+            "action": action,
+            "timestamp": datetime.now().isoformat(),
+        }
         self.action_history.append(action_record)
 
     def reset(self) -> None:
@@ -86,7 +96,10 @@ class ConcreteAgent(ActiveInferenceAgent):
 
     def get_history(self) -> Dict[str, Any]:
         """Get agent history."""
-        return {"actions": self.action_history, "observations": self.observation_history}
+        return {
+            "actions": self.action_history,
+            "observations": self.observation_history,
+        }
 
     def save_state(self, filepath: str) -> None:
         """Save agent state to file."""
@@ -94,7 +107,9 @@ class ConcreteAgent(ActiveInferenceAgent):
 
         state_data = {
             "state": self.state,
-            "beliefs": self.beliefs.tolist() if hasattr(self.beliefs, "tolist") else self.beliefs,
+            "beliefs": self.beliefs.tolist()
+            if hasattr(self.beliefs, "tolist")
+            else self.beliefs,
             "action_history": self.action_history,
             "observation_history": self.observation_history,
         }
@@ -120,9 +135,14 @@ class ConcreteAgent(ActiveInferenceAgent):
         return {
             "total_actions": len(self.action_history),
             "total_observations": len(self.observation_history),
-            "unique_actions": len(set(record["action"] for record in self.action_history)),
+            "unique_actions": len(
+                set(record["action"] for record in self.action_history)
+            ),
             "unique_observations": len(
-                set(str(record["observation"]) for record in self.observation_history)
+                set(
+                    str(record["observation"])
+                    for record in self.observation_history
+                )
             ),
         }
 
@@ -130,7 +150,9 @@ class ConcreteAgent(ActiveInferenceAgent):
         """Query LLM if available."""
         if self.llm_manager:
             response = self.llm_manager.generate(prompt)
-            return response.text if hasattr(response, "text") else str(response)
+            return (
+                response.text if hasattr(response, "text") else str(response)
+            )
         return None
 
 
@@ -189,7 +211,9 @@ class TestActiveInferenceAgent:
     def agent(self, agent_config):
         """Create test agent instance."""
         return ConcreteAgent(
-            "test_agent_id", agent_config.name, {"use_pymdp": agent_config.use_pymdp}
+            "test_agent_id",
+            agent_config.name,
+            {"use_pymdp": agent_config.use_pymdp},
         )
 
     def test_agent_initialization(self, agent, agent_config):
@@ -244,8 +268,16 @@ class TestActiveInferenceAgent:
         """Test initialization with GMN specification."""
         gmn_spec = {
             "nodes": [
-                {"id": "state1", "type": "state", "properties": {"num_states": 3}},
-                {"id": "obs1", "type": "observation", "properties": {"num_observations": 2}},
+                {
+                    "id": "state1",
+                    "type": "state",
+                    "properties": {"num_states": 3},
+                },
+                {
+                    "id": "obs1",
+                    "type": "observation",
+                    "properties": {"num_observations": 2},
+                },
             ],
             "edges": [],
         }
@@ -285,7 +317,10 @@ class TestActiveInferenceAgent:
         agent = ConcreteAgent("test_id", "test_agent", config)
 
         mock_pymdp_agent = Mock()
-        mock_pymdp_agent.infer_states.return_value = (np.array([0.7, 0.3]), None)
+        mock_pymdp_agent.infer_states.return_value = (
+            np.array([0.7, 0.3]),
+            None,
+        )
         agent.pymdp_agent = mock_pymdp_agent
 
         agent.update_beliefs()
@@ -366,7 +401,11 @@ class TestActiveInferenceAgent:
 
     def test_llm_integration(self):
         """Test LLM integration."""
-        llm_config = {"provider": "ollama", "model": "llama2", "temperature": 0.7}
+        llm_config = {
+            "provider": "ollama",
+            "model": "llama2",
+            "temperature": 0.7,
+        }
         config = {"llm_config": llm_config}
 
         with patch("agents.base_agent.LocalLLMManager") as mock_llm:
@@ -431,7 +470,9 @@ class TestActiveInferenceAgent:
 
         # The step method has error handling that returns "stay" on failure
         # So we don't expect the exception to propagate
-        with patch.object(agent, "update_beliefs", side_effect=Exception("Update failed")):
+        with patch.object(
+            agent, "update_beliefs", side_effect=Exception("Update failed")
+        ):
             action = agent.step({"observation": 1})
             # Should return fallback action instead of raising
             assert action == "stay"
@@ -489,9 +530,21 @@ class TestActiveInferenceAgentIntegration:
         """Test GMN and PyMDP integration."""
         gmn_spec = {
             "nodes": [
-                {"id": "location", "type": "state", "properties": {"num_states": 4}},
-                {"id": "obs_loc", "type": "observation", "properties": {"num_observations": 4}},
-                {"id": "move", "type": "action", "properties": {"num_actions": 5}},
+                {
+                    "id": "location",
+                    "type": "state",
+                    "properties": {"num_states": 4},
+                },
+                {
+                    "id": "obs_loc",
+                    "type": "observation",
+                    "properties": {"num_observations": 4},
+                },
+                {
+                    "id": "move",
+                    "type": "action",
+                    "properties": {"num_actions": 5},
+                },
             ],
             "edges": [],
         }

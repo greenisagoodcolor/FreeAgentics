@@ -11,7 +11,10 @@ from datetime import datetime
 # Field-level encryption examples
 def field_encryption_example():
     """Demonstrate field-level encryption with AWS KMS."""
-    from security.encryption import TransparentFieldEncryptor, create_field_encryptor
+    from security.encryption import (
+        TransparentFieldEncryptor,
+        create_field_encryptor,
+    )
 
     print("=== Field-Level Encryption Example ===\n")
 
@@ -61,7 +64,10 @@ def field_encryption_example():
 
 def transparent_encryption_example():
     """Demonstrate transparent encryption with decorators."""
-    from security.encryption import TransparentFieldEncryptor, create_field_encryptor
+    from security.encryption import (
+        TransparentFieldEncryptor,
+        create_field_encryptor,
+    )
 
     print("\n=== Transparent Encryption Example ===\n")
 
@@ -91,11 +97,18 @@ def transparent_encryption_example():
             self.pin = pin
 
     # Create customer - encryption happens automatically
-    customer = Customer(name="Jane Doe", ssn="987-65-4321", account_number="1234567890", pin="1234")
+    customer = Customer(
+        name="Jane Doe",
+        ssn="987-65-4321",
+        account_number="1234567890",
+        pin="1234",
+    )
 
     print(f"Customer name: {customer.name}")
     print(f"Customer SSN (transparently decrypted): {customer.ssn}")
-    print(f"Internal encrypted SSN exists: {hasattr(customer, '_encrypted_ssn')}")
+    print(
+        f"Internal encrypted SSN exists: {hasattr(customer, '_encrypted_ssn')}"
+    )
 
 
 def quantum_resistant_example():
@@ -117,10 +130,14 @@ def quantum_resistant_example():
     print(f"Generated Dilithium key (Signature): {keys['sign'].algorithm}")
 
     # Encrypt sensitive data
-    sensitive_data = b"Top secret information that needs quantum-resistant protection"
+    sensitive_data = (
+        b"Top secret information that needs quantum-resistant protection"
+    )
 
     encrypted = qrc.hybrid_encrypt(
-        sensitive_data, keys["kem"].public_key, sign_with_private_key=keys["sign"].private_key
+        sensitive_data,
+        keys["kem"].public_key,
+        sign_with_private_key=keys["sign"].private_key,
     )
 
     print(f"\nEncrypted data size: {len(encrypted['ciphertext'])} bytes")
@@ -129,7 +146,9 @@ def quantum_resistant_example():
 
     # Decrypt and verify
     decrypted = qrc.hybrid_decrypt(
-        encrypted, keys["kem"].private_key, verify_with_public_key=keys["sign"].public_key
+        encrypted,
+        keys["kem"].private_key,
+        verify_with_public_key=keys["sign"].public_key,
     )
 
     print(f"\nDecryption successful: {decrypted == sensitive_data}")
@@ -167,7 +186,9 @@ async def soar_playbook_example():
             "id": "ransomware_response",
             "name": "Ransomware Attack Response",
             "description": "Automated response to ransomware detection",
-            "triggers": [{"type": "alert", "conditions": [{"alert_type": "ransomware"}]}],
+            "triggers": [
+                {"type": "alert", "conditions": [{"alert_type": "ransomware"}]}
+            ],
             "actions": [
                 {
                     "id": "isolate_host",
@@ -185,12 +206,20 @@ async def soar_playbook_example():
                     "id": "collect_artifacts",
                     "type": "collect_forensics",
                     "targets": ["{{infected_host}}"],
-                    "data_types": ["memory_dump", "processes", "network_connections", "registry"],
+                    "data_types": [
+                        "memory_dump",
+                        "processes",
+                        "network_connections",
+                        "registry",
+                    ],
                 },
                 {
                     "id": "notify_team",
                     "type": "send_notification",
-                    "recipients": ["security@company.com", "incident-response@company.com"],
+                    "recipients": [
+                        "security@company.com",
+                        "incident-response@company.com",
+                    ],
                     "channels": ["email", "slack"],
                     "message": """CRITICAL: Ransomware detected
 Host: {{infected_host}}
@@ -234,7 +263,9 @@ Please begin manual investigation immediately.""",
 
         print(f"Playbook execution ID: {context.execution_id}")
         print(f"Status: {context.status.value}")
-        print(f"Duration: {(context.end_time - context.start_time).total_seconds():.2f}s")
+        print(
+            f"Duration: {(context.end_time - context.start_time).total_seconds():.2f}s"
+        )
         print(f"\nArtifacts collected:")
         for key, value in context.artifacts.items():
             print(f"  - {key}: {value}")
@@ -244,7 +275,12 @@ async def incident_management_example():
     """Demonstrate incident case management."""
     import tempfile
 
-    from security.soar import IncidentManager, IncidentSeverity, IncidentType, PlaybookEngine
+    from security.soar import (
+        IncidentManager,
+        IncidentSeverity,
+        IncidentType,
+        PlaybookEngine,
+    )
 
     print("\n=== Incident Management Example ===\n")
 
@@ -267,9 +303,16 @@ async def incident_management_example():
                     "type": "ip",
                     "value": "185.220.101.45",
                     "confidence": 0.95,
-                    "metadata": {"country": "Unknown", "reputation": "malicious"},
+                    "metadata": {
+                        "country": "Unknown",
+                        "reputation": "malicious",
+                    },
                 },
-                {"type": "user", "value": "contractor_account_07", "confidence": 0.85},
+                {
+                    "type": "user",
+                    "value": "contractor_account_07",
+                    "confidence": 0.85,
+                },
                 {
                     "type": "hash",
                     "value": "a1b2c3d4e5f6...",
@@ -277,7 +320,10 @@ async def incident_management_example():
                     "metadata": {"file": "suspicious_exfil.exe"},
                 },
             ],
-            affected_assets=["fileserver-01.company.local", "database-prod-02.company.local"],
+            affected_assets=[
+                "fileserver-01.company.local",
+                "database-prod-02.company.local",
+            ],
             custom_fields={
                 "data_volume_gb": 150,
                 "sensitive_data_types": ["customer_pii", "financial_records"],
@@ -387,7 +433,9 @@ def encryption_at_rest_example():
     print("\nEncrypted record:")
     print(f"  - username: {encrypted_record['username']} (not encrypted)")
     print(f"  - personal_info: <encrypted>")
-    print(f"  - encryption metadata: {encrypted_record['_encryption_metadata']}")
+    print(
+        f"  - encryption metadata: {encrypted_record['_encryption_metadata']}"
+    )
 
     # Decrypt for authorized access
     decrypted_record = ear.decrypt_document(
@@ -401,7 +449,10 @@ def encryption_at_rest_example():
 
 async def integrated_security_example():
     """Demonstrate integrated security workflow."""
-    from security.encryption import QuantumResistantCrypto, create_field_encryptor
+    from security.encryption import (
+        QuantumResistantCrypto,
+        create_field_encryptor,
+    )
     from security.soar import IncidentManager, IncidentSeverity, IncidentType
 
     print("\n=== Integrated Security Workflow ===\n")
@@ -409,7 +460,9 @@ async def integrated_security_example():
     # Setup encryption
     qrc = QuantumResistantCrypto()
     field_encryptor = create_field_encryptor(
-        provider_type="vault", vault_url="http://localhost:8200", vault_token="dev-token"
+        provider_type="vault",
+        vault_url="http://localhost:8200",
+        vault_token="dev-token",
     )
 
     # Detect security event
@@ -435,7 +488,8 @@ async def integrated_security_example():
 
         # Encrypt sensitive fields before storing
         encrypted_data = field_encryptor.bulk_encrypt_fields(
-            sensitive_incident_data, fields_to_encrypt=["compromised_credentials", "affected_data"]
+            sensitive_incident_data,
+            fields_to_encrypt=["compromised_credentials", "affected_data"],
         )
 
         case = manager.create_incident(
@@ -443,13 +497,21 @@ async def integrated_security_example():
             description="Anomalous API usage detected with valid but suspicious credentials",
             type=IncidentType.UNAUTHORIZED_ACCESS,
             severity=IncidentSeverity.HIGH,
-            indicators=[{"type": "ip", "value": encrypted_data["attacker_ip"], "confidence": 0.9}],
+            indicators=[
+                {
+                    "type": "ip",
+                    "value": encrypted_data["attacker_ip"],
+                    "confidence": 0.9,
+                }
+            ],
             custom_fields=encrypted_data,
         )
 
         print(f"\n2. Incident created: {case.case_id}")
         print("   - Sensitive data encrypted using field-level encryption")
-        print("   - Quantum-resistant encryption available for long-term storage")
+        print(
+            "   - Quantum-resistant encryption available for long-term storage"
+        )
 
         # Simulate automated response
         print("\n3. Automated response initiated:")
@@ -472,12 +534,15 @@ async def integrated_security_example():
 
         # Encrypt entire report with quantum-resistant encryption
         encrypted_report = qrc.hybrid_encrypt(
-            json.dumps(incident_report).encode(), qrc.generate_hybrid_keypair()["kem"].public_key
+            json.dumps(incident_report).encode(),
+            qrc.generate_hybrid_keypair()["kem"].public_key,
         )
 
         print("\n4. Incident report generated and encrypted")
         print(f"   - Report size: {len(json.dumps(incident_report))} bytes")
-        print(f"   - Encrypted size: {len(encrypted_report['ciphertext'])} bytes")
+        print(
+            f"   - Encrypted size: {len(encrypted_report['ciphertext'])} bytes"
+        )
         print(f"   - Using: {encrypted_report['algorithm']}")
 
 

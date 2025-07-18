@@ -116,7 +116,9 @@ class MockDriver(BrowserDriver):
             return {"mock": "result"}
         return None
 
-    async def get_element_attribute(self, selector: str, attribute: str) -> str:
+    async def get_element_attribute(
+        self, selector: str, attribute: str
+    ) -> str:
         """Get element attribute"""
         if not self.is_started:
             raise RuntimeError("Browser not started")
@@ -266,7 +268,9 @@ class MockDriver(BrowserDriver):
         # Simulate navigation wait
         await asyncio.sleep(0.1)
 
-    async def wait_for_load_state(self, state: str = "load", timeout: float = 10.0):
+    async def wait_for_load_state(
+        self, state: str = "load", timeout: float = 10.0
+    ):
         """Wait for specific load state"""
         if not self.is_started:
             raise RuntimeError("Browser not started")

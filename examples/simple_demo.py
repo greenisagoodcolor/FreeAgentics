@@ -11,7 +11,8 @@ from typing import List, Tuple
 
 # Set up logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -63,7 +64,9 @@ class SimpleAgent:
         else:
             return random.choice(possible_actions)
 
-    def execute_action(self, action: str, world_bounds: Tuple[int, int]) -> bool:
+    def execute_action(
+        self, action: str, world_bounds: Tuple[int, int]
+    ) -> bool:
         """Execute the chosen action."""
         x, y = self.position
         new_x, new_y = x, y
@@ -124,7 +127,10 @@ class SimpleWorld:
         for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
             nx, ny = x + dx, y + dy
             if 0 <= nx < self.width and 0 <= ny < self.height:
-                cell_info = {"position": (nx, ny), "has_resource": (nx, ny) in self.resources}
+                cell_info = {
+                    "position": (nx, ny),
+                    "has_resource": (nx, ny) in self.resources,
+                }
                 nearby_cells.append(cell_info)
 
         return {"nearby_cells": nearby_cells, "time_step": self.time_step}
@@ -149,7 +155,9 @@ class SimpleWorld:
             if agent.position in self.resources:
                 self.resources.remove(agent.position)
                 agent.energy = min(100, agent.energy + 30)
-                logger.info(f"{agent.name} collected a resource at {agent.position}!")
+                logger.info(
+                    f"{agent.name} collected a resource at {agent.position}!"
+                )
 
             # Log agent status
             logger.info(

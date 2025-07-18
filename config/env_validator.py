@@ -8,15 +8,9 @@ import os
 import re
 from typing import Optional
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-)
+from pydantic import BaseModel, ConfigDict, Field
 from pydantic import ValidationError as PydanticValidationError
-from pydantic import (
-    field_validator,
-)
+from pydantic import field_validator
 
 
 def validate_database_url(url: str) -> str:
@@ -28,7 +22,9 @@ def validate_database_url(url: str) -> str:
 
     # PostgreSQL URL pattern: postgresql://user:pass@host[:port]/dbname
     # Also accept postgres:// and postgresql+driver://
-    pattern = r"^(postgresql|postgres)(\+\w+)?://[^:]+:[^@]+@[^:/]+(?::\d+)?/\w+$"
+    pattern = (
+        r"^(postgresql|postgres)(\+\w+)?://[^:]+:[^@]+@[^:/]+(?::\d+)?/\w+$"
+    )
 
     if not re.match(pattern, url):
         raise ValueError("Invalid PostgreSQL DATABASE_URL")
@@ -90,7 +86,9 @@ class Settings(BaseModel):
     @classmethod
     def validate_not_empty(cls, v: str, info) -> str:
         """Ensure required fields are not empty or whitespace."""
-        field_name = info.field_name if hasattr(info, "field_name") else "Field"
+        field_name = (
+            info.field_name if hasattr(info, "field_name") else "Field"
+        )
 
         if not v or not v.strip():
             raise ValueError(f"{field_name} cannot be empty")

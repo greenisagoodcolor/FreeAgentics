@@ -136,15 +136,23 @@ class TestRBACAuthorizationMatrix:
         allowed_roles = ["admin", "researcher", "agent_manager"]
         for role in allowed_roles:
             headers = {"Authorization": f"Bearer {authenticated_tokens[role]}"}
-            response = client.post("/api/v1/agents", json=agent_config, headers=headers)
-            assert response.status_code == 201, f"Role {role} should be able to create agents"
+            response = client.post(
+                "/api/v1/agents", json=agent_config, headers=headers
+            )
+            assert (
+                response.status_code == 201
+            ), f"Role {role} should be able to create agents"
 
         # Test roles that should NOT be able to create agents
         forbidden_roles = ["observer"]
         for role in forbidden_roles:
             headers = {"Authorization": f"Bearer {authenticated_tokens[role]}"}
-            response = client.post("/api/v1/agents", json=agent_config, headers=headers)
-            assert response.status_code == 403, f"Role {role} should NOT be able to create agents"
+            response = client.post(
+                "/api/v1/agents", json=agent_config, headers=headers
+            )
+            assert (
+                response.status_code == 403
+            ), f"Role {role} should NOT be able to create agents"
 
     def test_agent_deletion_authorization(self, client, authenticated_tokens):
         """Test agent deletion authorization for different roles."""
@@ -155,8 +163,12 @@ class TestRBACAuthorizationMatrix:
             "parameters": {"exploration_rate": 0.3},
         }
 
-        admin_headers = {"Authorization": f"Bearer {authenticated_tokens['admin']}"}
-        create_response = client.post("/api/v1/agents", json=agent_config, headers=admin_headers)
+        admin_headers = {
+            "Authorization": f"Bearer {authenticated_tokens['admin']}"
+        }
+        create_response = client.post(
+            "/api/v1/agents", json=agent_config, headers=admin_headers
+        )
         assert create_response.status_code == 201
         agent_id = create_response.json()["id"]
 
@@ -164,8 +176,12 @@ class TestRBACAuthorizationMatrix:
         allowed_roles = ["admin"]
         for role in allowed_roles:
             headers = {"Authorization": f"Bearer {authenticated_tokens[role]}"}
-            response = client.delete(f"/api/v1/agents/{agent_id}", headers=headers)
-            assert response.status_code == 200, f"Role {role} should be able to delete agents"
+            response = client.delete(
+                f"/api/v1/agents/{agent_id}", headers=headers
+            )
+            assert (
+                response.status_code == 200
+            ), f"Role {role} should be able to delete agents"
 
             # Recreate agent for next test
             create_response = client.post(
@@ -178,8 +194,12 @@ class TestRBACAuthorizationMatrix:
         forbidden_roles = ["researcher", "agent_manager", "observer"]
         for role in forbidden_roles:
             headers = {"Authorization": f"Bearer {authenticated_tokens[role]}"}
-            response = client.delete(f"/api/v1/agents/{agent_id}", headers=headers)
-            assert response.status_code == 403, f"Role {role} should NOT be able to delete agents"
+            response = client.delete(
+                f"/api/v1/agents/{agent_id}", headers=headers
+            )
+            assert (
+                response.status_code == 403
+            ), f"Role {role} should NOT be able to delete agents"
 
     def test_agent_viewing_authorization(self, client, authenticated_tokens):
         """Test agent viewing authorization for different roles."""
@@ -190,8 +210,12 @@ class TestRBACAuthorizationMatrix:
             "parameters": {"exploration_rate": 0.3},
         }
 
-        admin_headers = {"Authorization": f"Bearer {authenticated_tokens['admin']}"}
-        create_response = client.post("/api/v1/agents", json=agent_config, headers=admin_headers)
+        admin_headers = {
+            "Authorization": f"Bearer {authenticated_tokens['admin']}"
+        }
+        create_response = client.post(
+            "/api/v1/agents", json=agent_config, headers=admin_headers
+        )
         assert create_response.status_code == 201
         agent_id = create_response.json()["id"]
 
@@ -202,13 +226,21 @@ class TestRBACAuthorizationMatrix:
 
             # Test list agents
             response = client.get("/api/v1/agents", headers=headers)
-            assert response.status_code == 200, f"Role {role} should be able to list agents"
+            assert (
+                response.status_code == 200
+            ), f"Role {role} should be able to list agents"
 
             # Test get specific agent
-            response = client.get(f"/api/v1/agents/{agent_id}", headers=headers)
-            assert response.status_code == 200, f"Role {role} should be able to view specific agent"
+            response = client.get(
+                f"/api/v1/agents/{agent_id}", headers=headers
+            )
+            assert (
+                response.status_code == 200
+            ), f"Role {role} should be able to view specific agent"
 
-    def test_agent_modification_authorization(self, client, authenticated_tokens):
+    def test_agent_modification_authorization(
+        self, client, authenticated_tokens
+    ):
         """Test agent modification authorization for different roles."""
         # Create an agent as admin
         agent_config = {
@@ -217,8 +249,12 @@ class TestRBACAuthorizationMatrix:
             "parameters": {"exploration_rate": 0.3},
         }
 
-        admin_headers = {"Authorization": f"Bearer {authenticated_tokens['admin']}"}
-        create_response = client.post("/api/v1/agents", json=agent_config, headers=admin_headers)
+        admin_headers = {
+            "Authorization": f"Bearer {authenticated_tokens['admin']}"
+        }
+        create_response = client.post(
+            "/api/v1/agents", json=agent_config, headers=admin_headers
+        )
         assert create_response.status_code == 201
         agent_id = create_response.json()["id"]
 
@@ -227,18 +263,26 @@ class TestRBACAuthorizationMatrix:
         for role in allowed_roles:
             headers = {"Authorization": f"Bearer {authenticated_tokens[role]}"}
             response = client.patch(
-                f"/api/v1/agents/{agent_id}/status", json={"status": "active"}, headers=headers
+                f"/api/v1/agents/{agent_id}/status",
+                json={"status": "active"},
+                headers=headers,
             )
-            assert response.status_code == 200, f"Role {role} should be able to modify agents"
+            assert (
+                response.status_code == 200
+            ), f"Role {role} should be able to modify agents"
 
         # Test roles that should NOT be able to modify agents
         forbidden_roles = ["observer"]
         for role in forbidden_roles:
             headers = {"Authorization": f"Bearer {authenticated_tokens[role]}"}
             response = client.patch(
-                f"/api/v1/agents/{agent_id}/status", json={"status": "paused"}, headers=headers
+                f"/api/v1/agents/{agent_id}/status",
+                json={"status": "paused"},
+                headers=headers,
             )
-            assert response.status_code == 403, f"Role {role} should NOT be able to modify agents"
+            assert (
+                response.status_code == 403
+            ), f"Role {role} should NOT be able to modify agents"
 
     def test_metrics_viewing_authorization(self, client, authenticated_tokens):
         """Test metrics viewing authorization for different roles."""
@@ -249,8 +293,12 @@ class TestRBACAuthorizationMatrix:
             "parameters": {"exploration_rate": 0.3},
         }
 
-        admin_headers = {"Authorization": f"Bearer {authenticated_tokens['admin']}"}
-        create_response = client.post("/api/v1/agents", json=agent_config, headers=admin_headers)
+        admin_headers = {
+            "Authorization": f"Bearer {authenticated_tokens['admin']}"
+        }
+        create_response = client.post(
+            "/api/v1/agents", json=agent_config, headers=admin_headers
+        )
         assert create_response.status_code == 201
         agent_id = create_response.json()["id"]
 
@@ -258,8 +306,12 @@ class TestRBACAuthorizationMatrix:
         all_roles = ["admin", "researcher", "agent_manager", "observer"]
         for role in all_roles:
             headers = {"Authorization": f"Bearer {authenticated_tokens[role]}"}
-            response = client.get(f"/api/v1/agents/{agent_id}/metrics", headers=headers)
-            assert response.status_code == 200, f"Role {role} should be able to view metrics"
+            response = client.get(
+                f"/api/v1/agents/{agent_id}/metrics", headers=headers
+            )
+            assert (
+                response.status_code == 200
+            ), f"Role {role} should be able to view metrics"
 
     def test_system_admin_authorization(self, client, authenticated_tokens):
         """Test system administration authorization for different roles."""
@@ -271,11 +323,15 @@ class TestRBACAuthorizationMatrix:
         ]
 
         # Test admin can access system endpoints
-        admin_headers = {"Authorization": f"Bearer {authenticated_tokens['admin']}"}
+        admin_headers = {
+            "Authorization": f"Bearer {authenticated_tokens['admin']}"
+        }
         for endpoint in system_endpoints:
             response = client.get(endpoint, headers=admin_headers)
             # Accept 200 or 404 (endpoint might not exist), but not 403
-            assert response.status_code != 403, f"Admin should be able to access {endpoint}"
+            assert (
+                response.status_code != 403
+            ), f"Admin should be able to access {endpoint}"
 
         # Test non-admin roles cannot access system endpoints
         non_admin_roles = ["researcher", "agent_manager", "observer"]
@@ -284,9 +340,13 @@ class TestRBACAuthorizationMatrix:
             for endpoint in system_endpoints:
                 response = client.get(endpoint, headers=headers)
                 if response.status_code != 404:  # If endpoint exists
-                    assert response.status_code == 403, f"Role {role} should NOT access {endpoint}"
+                    assert (
+                        response.status_code == 403
+                    ), f"Role {role} should NOT access {endpoint}"
 
-    def test_gmn_specification_authorization(self, client, authenticated_tokens):
+    def test_gmn_specification_authorization(
+        self, client, authenticated_tokens
+    ):
         """Test GMN specification authorization for different roles."""
         # Test GMN agent creation
         gmn_config = {
@@ -299,15 +359,21 @@ class TestRBACAuthorizationMatrix:
         allowed_roles = ["admin", "researcher", "agent_manager"]
         for role in allowed_roles:
             headers = {"Authorization": f"Bearer {authenticated_tokens[role]}"}
-            response = client.post("/api/v1/agents/from-gmn", json=gmn_config, headers=headers)
+            response = client.post(
+                "/api/v1/agents/from-gmn", json=gmn_config, headers=headers
+            )
             # Accept 201 or 400 (GMN parsing might fail), but not 403
-            assert response.status_code != 403, f"Role {role} should be able to create GMN agents"
+            assert (
+                response.status_code != 403
+            ), f"Role {role} should be able to create GMN agents"
 
         # Test roles that should NOT be able to create GMN agents
         forbidden_roles = ["observer"]
         for role in forbidden_roles:
             headers = {"Authorization": f"Bearer {authenticated_tokens[role]}"}
-            response = client.post("/api/v1/agents/from-gmn", json=gmn_config, headers=headers)
+            response = client.post(
+                "/api/v1/agents/from-gmn", json=gmn_config, headers=headers
+            )
             assert (
                 response.status_code == 403
             ), f"Role {role} should NOT be able to create GMN agents"
@@ -340,7 +406,9 @@ class TestRBACAuthorizationMatrix:
         }
 
         headers1 = {"Authorization": f"Bearer {token1}"}
-        create_response = client.post("/api/v1/agents", json=agent_config, headers=headers1)
+        create_response = client.post(
+            "/api/v1/agents", json=agent_config, headers=headers1
+        )
         assert create_response.status_code == 201
         agent_id = create_response.json()["id"]
 
@@ -353,13 +421,17 @@ class TestRBACAuthorizationMatrix:
 
         # User2 should be able to modify the agent (current implementation)
         response = client.patch(
-            f"/api/v1/agents/{agent_id}/status", json={"status": "active"}, headers=headers2
+            f"/api/v1/agents/{agent_id}/status",
+            json={"status": "active"},
+            headers=headers2,
         )
         assert (
             response.status_code == 200
         ), "Users can modify each other's agents in current implementation"
 
-    def test_concurrent_access_authorization(self, client, authenticated_tokens):
+    def test_concurrent_access_authorization(
+        self, client, authenticated_tokens
+    ):
         """Test concurrent access scenarios with different roles."""
         import threading
 
@@ -384,7 +456,9 @@ class TestRBACAuthorizationMatrix:
 
         # Verify all requests succeeded
         for role, status_code in results:
-            assert status_code == 200, f"Concurrent access failed for role {role}"
+            assert (
+                status_code == 200
+            ), f"Concurrent access failed for role {role}"
 
     def test_token_based_authorization(self, client, authenticated_tokens):
         """Test that authorization is properly token-based."""
@@ -410,7 +484,9 @@ class TestRBACAuthorizationMatrix:
     def test_permission_inheritance(self, client, authenticated_tokens):
         """Test that admin role inherits all permissions."""
         # Admin should be able to perform all operations
-        admin_headers = {"Authorization": f"Bearer {authenticated_tokens['admin']}"}
+        admin_headers = {
+            "Authorization": f"Bearer {authenticated_tokens['admin']}"
+        }
 
         # Create agent
         agent_config = {
@@ -419,26 +495,36 @@ class TestRBACAuthorizationMatrix:
             "parameters": {"exploration_rate": 0.3},
         }
 
-        response = client.post("/api/v1/agents", json=agent_config, headers=admin_headers)
+        response = client.post(
+            "/api/v1/agents", json=agent_config, headers=admin_headers
+        )
         assert response.status_code == 201
         agent_id = response.json()["id"]
 
         # View agent
-        response = client.get(f"/api/v1/agents/{agent_id}", headers=admin_headers)
+        response = client.get(
+            f"/api/v1/agents/{agent_id}", headers=admin_headers
+        )
         assert response.status_code == 200
 
         # Modify agent
         response = client.patch(
-            f"/api/v1/agents/{agent_id}/status", json={"status": "active"}, headers=admin_headers
+            f"/api/v1/agents/{agent_id}/status",
+            json={"status": "active"},
+            headers=admin_headers,
         )
         assert response.status_code == 200
 
         # View metrics
-        response = client.get(f"/api/v1/agents/{agent_id}/metrics", headers=admin_headers)
+        response = client.get(
+            f"/api/v1/agents/{agent_id}/metrics", headers=admin_headers
+        )
         assert response.status_code == 200
 
         # Delete agent
-        response = client.delete(f"/api/v1/agents/{agent_id}", headers=admin_headers)
+        response = client.delete(
+            f"/api/v1/agents/{agent_id}", headers=admin_headers
+        )
         assert response.status_code == 200
 
     def test_role_escalation_prevention(self, client, test_users):
@@ -459,7 +545,9 @@ class TestRBACAuthorizationMatrix:
             "parameters": {"exploration_rate": 0.3},
         }
 
-        response = client.post("/api/v1/agents", json=agent_config, headers=headers)
+        response = client.post(
+            "/api/v1/agents", json=agent_config, headers=headers
+        )
         assert response.status_code == 403
 
         # Should not be able to access system endpoints
@@ -516,15 +604,23 @@ class TestRBACAuthorizationMatrix:
             if permissions["create_agent"]:
                 response = client.post(
                     "/api/v1/agents",
-                    json={"name": f"{role} Agent", "template": "basic-explorer"},
+                    json={
+                        "name": f"{role} Agent",
+                        "template": "basic-explorer",
+                    },
                     headers=headers,
                 )
-                assert response.status_code == 201, f"Role {role} should be able to create agents"
+                assert (
+                    response.status_code == 201
+                ), f"Role {role} should be able to create agents"
                 agent_id = response.json()["id"]
             else:
                 response = client.post(
                     "/api/v1/agents",
-                    json={"name": f"{role} Agent", "template": "basic-explorer"},
+                    json={
+                        "name": f"{role} Agent",
+                        "template": "basic-explorer",
+                    },
                     headers=headers,
                 )
                 assert (
@@ -532,10 +628,15 @@ class TestRBACAuthorizationMatrix:
                 ), f"Role {role} should NOT be able to create agents"
 
                 # Create agent as admin for other tests
-                admin_headers = {"Authorization": f"Bearer {authenticated_tokens['admin']}"}
+                admin_headers = {
+                    "Authorization": f"Bearer {authenticated_tokens['admin']}"
+                }
                 response = client.post(
                     "/api/v1/agents",
-                    json={"name": f"{role} Test Agent", "template": "basic-explorer"},
+                    json={
+                        "name": f"{role} Test Agent",
+                        "template": "basic-explorer",
+                    },
                     headers=admin_headers,
                 )
                 assert response.status_code == 201
@@ -543,21 +644,35 @@ class TestRBACAuthorizationMatrix:
 
             # Test view_agent
             if permissions["view_agent"]:
-                response = client.get(f"/api/v1/agents/{agent_id}", headers=headers)
-                assert response.status_code == 200, f"Role {role} should be able to view agents"
+                response = client.get(
+                    f"/api/v1/agents/{agent_id}", headers=headers
+                )
+                assert (
+                    response.status_code == 200
+                ), f"Role {role} should be able to view agents"
             else:
-                response = client.get(f"/api/v1/agents/{agent_id}", headers=headers)
-                assert response.status_code == 403, f"Role {role} should NOT be able to view agents"
+                response = client.get(
+                    f"/api/v1/agents/{agent_id}", headers=headers
+                )
+                assert (
+                    response.status_code == 403
+                ), f"Role {role} should NOT be able to view agents"
 
             # Test modify_agent
             if permissions["modify_agent"]:
                 response = client.patch(
-                    f"/api/v1/agents/{agent_id}/status", json={"status": "active"}, headers=headers
+                    f"/api/v1/agents/{agent_id}/status",
+                    json={"status": "active"},
+                    headers=headers,
                 )
-                assert response.status_code == 200, f"Role {role} should be able to modify agents"
+                assert (
+                    response.status_code == 200
+                ), f"Role {role} should be able to modify agents"
             else:
                 response = client.patch(
-                    f"/api/v1/agents/{agent_id}/status", json={"status": "active"}, headers=headers
+                    f"/api/v1/agents/{agent_id}/status",
+                    json={"status": "active"},
+                    headers=headers,
                 )
                 assert (
                     response.status_code == 403
@@ -565,25 +680,39 @@ class TestRBACAuthorizationMatrix:
 
             # Test view_metrics
             if permissions["view_metrics"]:
-                response = client.get(f"/api/v1/agents/{agent_id}/metrics", headers=headers)
-                assert response.status_code == 200, f"Role {role} should be able to view metrics"
+                response = client.get(
+                    f"/api/v1/agents/{agent_id}/metrics", headers=headers
+                )
+                assert (
+                    response.status_code == 200
+                ), f"Role {role} should be able to view metrics"
             else:
-                response = client.get(f"/api/v1/agents/{agent_id}/metrics", headers=headers)
+                response = client.get(
+                    f"/api/v1/agents/{agent_id}/metrics", headers=headers
+                )
                 assert (
                     response.status_code == 403
                 ), f"Role {role} should NOT be able to view metrics"
 
             # Test delete_agent
             if permissions["delete_agent"]:
-                response = client.delete(f"/api/v1/agents/{agent_id}", headers=headers)
-                assert response.status_code == 200, f"Role {role} should be able to delete agents"
+                response = client.delete(
+                    f"/api/v1/agents/{agent_id}", headers=headers
+                )
+                assert (
+                    response.status_code == 200
+                ), f"Role {role} should be able to delete agents"
             else:
-                response = client.delete(f"/api/v1/agents/{agent_id}", headers=headers)
+                response = client.delete(
+                    f"/api/v1/agents/{agent_id}", headers=headers
+                )
                 assert (
                     response.status_code == 403
                 ), f"Role {role} should NOT be able to delete agents"
 
-    def test_permission_validation_edge_cases(self, client, authenticated_tokens):
+    def test_permission_validation_edge_cases(
+        self, client, authenticated_tokens
+    ):
         """Test edge cases in permission validation."""
         # Test with expired token
         from datetime import datetime, timedelta
@@ -602,7 +731,9 @@ class TestRBACAuthorizationMatrix:
         # Create expired token using auth manager's RSA key
         from auth.security_implementation import auth_manager
 
-        expired_token = jwt.encode(expired_token_data, auth_manager.private_key, algorithm="RS256")
+        expired_token = jwt.encode(
+            expired_token_data, auth_manager.private_key, algorithm="RS256"
+        )
         headers = {"Authorization": f"Bearer {expired_token}"}
         response = client.get("/api/v1/agents", headers=headers)
         assert response.status_code == 401, "Expired token should be rejected"
@@ -623,14 +754,18 @@ class TestRBACAuthorizationMatrix:
             "type": "access",
         }
 
-        minimal_token = jwt.encode(minimal_token_data, auth_manager.private_key, algorithm="RS256")
+        minimal_token = jwt.encode(
+            minimal_token_data, auth_manager.private_key, algorithm="RS256"
+        )
         headers = {"Authorization": f"Bearer {minimal_token}"}
         response = client.post(
             "/api/v1/agents",
             json={"name": "Test Agent", "template": "basic-explorer"},
             headers=headers,
         )
-        assert response.status_code == 403, "Token without required permission should be rejected"
+        assert (
+            response.status_code == 403
+        ), "Token without required permission should be rejected"
 
 
 class TestRBACSecurityBoundaries:
@@ -677,7 +812,9 @@ class TestRBACSecurityBoundaries:
 
         # SQL injection in agent ID
         malicious_agent_id = "1' OR '1'='1' --"
-        response = client.get(f"/api/v1/agents/{malicious_agent_id}", headers=headers)
+        response = client.get(
+            f"/api/v1/agents/{malicious_agent_id}", headers=headers
+        )
         # Should return 400 (bad request) or 404 (not found), not 200 or 500
         assert response.status_code in [400, 404]
 
@@ -707,12 +844,18 @@ class TestRBACSecurityBoundaries:
         for method, endpoint in methods_to_test:
             if method == "POST":
                 response = client.post(
-                    endpoint, json={"name": "Test", "template": "basic-explorer"}, headers=headers
+                    endpoint,
+                    json={"name": "Test", "template": "basic-explorer"},
+                    headers=headers,
                 )
             elif method == "PUT":
-                response = client.put(endpoint, json={"name": "Test"}, headers=headers)
+                response = client.put(
+                    endpoint, json={"name": "Test"}, headers=headers
+                )
             elif method == "PATCH":
-                response = client.patch(endpoint, json={"status": "active"}, headers=headers)
+                response = client.patch(
+                    endpoint, json={"status": "active"}, headers=headers
+                )
             elif method == "DELETE":
                 response = client.delete(endpoint, headers=headers)
 
@@ -746,8 +889,12 @@ class TestRBACSecurityBoundaries:
             "permissions": ["admin_system"],  # Try to inject permissions
         }
 
-        response = client.post("/api/v1/agents", json=agent_config, headers=headers)
-        assert response.status_code == 403, "Role tampering should be prevented"
+        response = client.post(
+            "/api/v1/agents", json=agent_config, headers=headers
+        )
+        assert (
+            response.status_code == 403
+        ), "Role tampering should be prevented"
 
     def test_session_hijacking_protection(self, client):
         """Test protection against session hijacking."""
@@ -773,7 +920,9 @@ class TestRBACSecurityBoundaries:
             "Authorization": f"Bearer {token}",
             "User-Agent": "Malicious-Client/1.0",
         }
-        response = client.get("/api/v1/agents", headers=headers_different_client)
+        response = client.get(
+            "/api/v1/agents", headers=headers_different_client
+        )
         # Current implementation doesn't have IP-based protection
         # But token should still work as it's the same token
         assert response.status_code == 200
@@ -808,7 +957,9 @@ class TestRBACSecurityBoundaries:
         for method, endpoint in escalation_attempts:
             if method == "POST":
                 response = client.post(
-                    endpoint, json={"name": "Test", "template": "basic-explorer"}, headers=headers
+                    endpoint,
+                    json={"name": "Test", "template": "basic-explorer"},
+                    headers=headers,
                 )
             elif method == "GET":
                 response = client.get(endpoint, headers=headers)

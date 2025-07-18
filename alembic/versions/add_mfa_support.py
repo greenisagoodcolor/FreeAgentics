@@ -57,15 +57,26 @@ def upgrade():
 
     # Create indexes for audit log
     op.create_index("ix_mfa_audit_log_user_id", "mfa_audit_log", ["user_id"])
-    op.create_index("ix_mfa_audit_log_timestamp", "mfa_audit_log", ["timestamp"])
-    op.create_index("ix_mfa_audit_log_event_type", "mfa_audit_log", ["event_type"])
+    op.create_index(
+        "ix_mfa_audit_log_timestamp", "mfa_audit_log", ["timestamp"]
+    )
+    op.create_index(
+        "ix_mfa_audit_log_event_type", "mfa_audit_log", ["event_type"]
+    )
 
     # Add MFA-related columns to users table (if it exists)
     # This assumes you have a users table; adjust as needed
     try:
-        op.add_column("users", sa.Column("mfa_enabled", sa.Boolean(), default=False))
-        op.add_column("users", sa.Column("mfa_enforced", sa.Boolean(), default=False))
-        op.add_column("users", sa.Column("last_mfa_verification", sa.DateTime(), nullable=True))
+        op.add_column(
+            "users", sa.Column("mfa_enabled", sa.Boolean(), default=False)
+        )
+        op.add_column(
+            "users", sa.Column("mfa_enforced", sa.Boolean(), default=False)
+        )
+        op.add_column(
+            "users",
+            sa.Column("last_mfa_verification", sa.DateTime(), nullable=True),
+        )
     except Exception:
         # Table might not exist or columns might already exist
         pass

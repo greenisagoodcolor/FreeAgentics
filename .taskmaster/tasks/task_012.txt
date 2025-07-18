@@ -172,4 +172,3 @@ Action Selection Test Infrastructure Cleanup Phase:
 
 This systematic cleanup ensures the action selection test infrastructure remains streamlined and focused on PyMDP validation without legacy artifacts that could interfere with proper active inference testing.
 </info added on 2025-07-14T10:44:23.379Z>
-

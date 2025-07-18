@@ -96,8 +96,12 @@ class EnhancedMemoryProfiler:
             hotspot_threshold_mb: Minimum size to consider as hotspot
             leak_detection_window: Number of snapshots for leak detection
         """
-        self.enable_tracemalloc = enable_tracemalloc and True  # Check availability
-        self.enable_memory_profiler = enable_memory_profiler and memory_usage is not None
+        self.enable_tracemalloc = (
+            enable_tracemalloc and True
+        )  # Check availability
+        self.enable_memory_profiler = (
+            enable_memory_profiler and memory_usage is not None
+        )
         self.enable_pympler = enable_pympler and muppy is not None
 
         self.snapshot_interval = snapshot_interval
@@ -196,7 +200,9 @@ class EnhancedMemoryProfiler:
                 return
 
             self._monitoring = True
-            self._monitor_thread = threading.Thread(target=self._monitor_loop, daemon=True)
+            self._monitor_thread = threading.Thread(
+                target=self._monitor_loop, daemon=True
+            )
             self._monitor_thread.start()
             logger.info("Started continuous memory monitoring")
 
@@ -249,14 +255,18 @@ class EnhancedMemoryProfiler:
                                     "line": frame.lineno,
                                     "size_mb": stat.size / 1024 / 1024,
                                     "count": stat.count,
-                                    "average_size": stat.size / stat.count if stat.count > 0 else 0,
+                                    "average_size": stat.size / stat.count
+                                    if stat.count > 0
+                                    else 0,
                                 }
                             )
 
                     snapshot["tracemalloc"] = {
                         "current_mb": current / 1024 / 1024,
                         "peak_mb": peak / 1024 / 1024,
-                        "total_size": sum(stat.size for stat in top_stats) / 1024 / 1024,
+                        "total_size": sum(stat.size for stat in top_stats)
+                        / 1024
+                        / 1024,
                         "total_count": sum(stat.count for stat in top_stats),
                         "top_allocations": top_allocations[:10],
                     }
@@ -272,7 +282,9 @@ class EnhancedMemoryProfiler:
                     snapshot["memory_profiler"] = {
                         "rss_mb": mem_info.rss / 1024 / 1024,
                         "vms_mb": mem_info.vms / 1024 / 1024,
-                        "available_mb": psutil.virtual_memory().available / 1024 / 1024,
+                        "available_mb": psutil.virtual_memory().available
+                        / 1024
+                        / 1024,
                         "percent": process.memory_percent(),
                         "num_threads": process.num_threads(),
                     }
@@ -299,7 +311,9 @@ class EnhancedMemoryProfiler:
 
                     snapshot["pympler"] = {
                         "total_objects": len(all_objects),
-                        "total_size_mb": sum(row[2] for row in sum_obj) / 1024 / 1024,
+                        "total_size_mb": sum(row[2] for row in sum_obj)
+                        / 1024
+                        / 1024,
                         "type_stats": type_stats,
                     }
 
@@ -337,7 +351,10 @@ class EnhancedMemoryProfiler:
             latest = self.snapshots[-1]
 
             # Analyze tracemalloc hotspots
-            if latest["tracemalloc"] and "top_allocations" in latest["tracemalloc"]:
+            if (
+                latest["tracemalloc"]
+                and "top_allocations" in latest["tracemalloc"]
+            ):
                 for alloc in latest["tracemalloc"]["top_allocations"]:
                     if alloc["size_mb"] >= self.hotspot_threshold_mb:
                         hotspots.append(
@@ -356,7 +373,9 @@ class EnhancedMemoryProfiler:
 
             # Analyze pympler type hotspots
             if latest["pympler"] and "type_stats" in latest["pympler"]:
-                for type_name, stats in latest["pympler"]["type_stats"].items():
+                for type_name, stats in latest["pympler"][
+                    "type_stats"
+                ].items():
                     if stats["size_mb"] >= self.hotspot_threshold_mb:
                         hotspots.append(
                             MemoryHotspot(
@@ -369,11 +388,15 @@ class EnhancedMemoryProfiler:
                         )
 
             # Sort by size
-            self.hotspots = sorted(hotspots, key=lambda x: x.size_mb, reverse=True)
+            self.hotspots = sorted(
+                hotspots, key=lambda x: x.size_mb, reverse=True
+            )
 
             # Track allocation trends for leak detection
             for hotspot in self.hotspots:
-                self._allocation_trends[hotspot.location].append(hotspot.size_mb)
+                self._allocation_trends[hotspot.location].append(
+                    hotspot.size_mb
+                )
 
             return self.hotspots
 
@@ -387,7 +410,9 @@ class EnhancedMemoryProfiler:
                     continue
 
                 # Check for consistent growth
-                growth_count = sum(1 for i in range(1, len(sizes)) if sizes[i] > sizes[i - 1])
+                growth_count = sum(
+                    1 for i in range(1, len(sizes)) if sizes[i] > sizes[i - 1]
+                )
 
                 if growth_count >= len(sizes) * 0.7:  # 70% growth trend
                     # Calculate growth rate
@@ -418,7 +443,9 @@ class EnhancedMemoryProfiler:
                 peak_memory_mb=initial_memory,
             )
 
-            logger.info(f"Registered agent {agent_id} with baseline memory {initial_memory:.2f} MB")
+            logger.info(
+                f"Registered agent {agent_id} with baseline memory {initial_memory:.2f} MB"
+            )
 
     def update_agent_memory(self, agent_id: str, agent_obj: Any):
         """Update memory tracking for an agent.
@@ -436,13 +463,17 @@ class EnhancedMemoryProfiler:
             current_memory = self._estimate_agent_memory(agent_obj)
 
             profile.current_memory_mb = current_memory
-            profile.peak_memory_mb = max(profile.peak_memory_mb, current_memory)
+            profile.peak_memory_mb = max(
+                profile.peak_memory_mb, current_memory
+            )
 
             # Calculate growth rate
             time_diff = time.time() - profile.last_updated
             if time_diff > 0:
                 memory_diff = current_memory - profile.baseline_memory_mb
-                profile.growth_rate_mb_per_hour = (memory_diff / time_diff) * 3600
+                profile.growth_rate_mb_per_hour = (
+                    memory_diff / time_diff
+                ) * 3600
 
             profile.last_updated = time.time()
 
@@ -458,14 +489,19 @@ class EnhancedMemoryProfiler:
         if self.enable_pympler and asizeof:
             try:
                 return asizeof.asizeof(agent_obj) / 1024 / 1024
-            except:
+            except Exception:
                 pass
 
         # Fallback to simple estimation
         total_bytes = sys.getsizeof(agent_obj)
 
         # Add major attributes
-        for attr in ["beliefs", "action_history", "observations", "transition_matrix"]:
+        for attr in [
+            "beliefs",
+            "action_history",
+            "observations",
+            "transition_matrix",
+        ]:
             if hasattr(agent_obj, attr):
                 value = getattr(agent_obj, attr)
                 if isinstance(value, np.ndarray):
@@ -506,7 +542,8 @@ class EnhancedMemoryProfiler:
                     "current_diff": tm2["current_mb"] - tm1["current_mb"],
                     "peak_diff": tm2["peak_mb"] - tm1["peak_mb"],
                     "total_size_diff": tm2["total_size"] - tm1["total_size"],
-                    "total_count_diff": tm2["total_count"] - tm1["total_count"],
+                    "total_count_diff": tm2["total_count"]
+                    - tm1["total_count"],
                 }
 
             # Compare memory_profiler
@@ -524,8 +561,10 @@ class EnhancedMemoryProfiler:
                 pm1 = snap1["pympler"]
                 pm2 = snap2["pympler"]
                 comparison["pympler_diff"] = {
-                    "object_count_diff": pm2["total_objects"] - pm1["total_objects"],
-                    "total_size_diff": pm2["total_size_mb"] - pm1["total_size_mb"],
+                    "object_count_diff": pm2["total_objects"]
+                    - pm1["total_objects"],
+                    "total_size_diff": pm2["total_size_mb"]
+                    - pm1["total_size_mb"],
                 }
 
             return comparison
@@ -557,11 +596,15 @@ class EnhancedMemoryProfiler:
             duration = end_time - start_time
             comparison = self.compare_snapshots(-2, -1)
 
-            logger.info(f"Operation '{operation_name}' completed in {duration:.2f}s")
+            logger.info(
+                f"Operation '{operation_name}' completed in {duration:.2f}s"
+            )
 
             if comparison.get("tracemalloc_diff"):
                 tm_diff = comparison["tracemalloc_diff"]
-                logger.info(f"  Tracemalloc: {tm_diff['current_diff']:+.2f} MB")
+                logger.info(
+                    f"  Tracemalloc: {tm_diff['current_diff']:+.2f} MB"
+                )
 
             if comparison.get("memory_profiler_diff"):
                 mp_diff = comparison["memory_profiler_diff"]
@@ -580,16 +623,22 @@ class EnhancedMemoryProfiler:
             report = ["=" * 60]
             report.append("Enhanced Memory Profiling Report")
             report.append("=" * 60)
-            report.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            report.append(
+                f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            )
             report.append("")
 
             # Tools status
             report.append("## Profiling Tools")
-            report.append(f"- Tracemalloc: {'Enabled' if self.tracemalloc_enabled else 'Disabled'}")
+            report.append(
+                f"- Tracemalloc: {'Enabled' if self.tracemalloc_enabled else 'Disabled'}"
+            )
             report.append(
                 f"- Memory Profiler: {'Enabled' if self.memory_profiler_enabled else 'Disabled'}"
             )
-            report.append(f"- Pympler: {'Enabled' if self.pympler_enabled else 'Disabled'}")
+            report.append(
+                f"- Pympler: {'Enabled' if self.pympler_enabled else 'Disabled'}"
+            )
             report.append("")
 
             # Summary statistics
@@ -605,15 +654,24 @@ class EnhancedMemoryProfiler:
                 # Memory growth
                 if first["tracemalloc"] and last["tracemalloc"]:
                     current_growth = (
-                        last["tracemalloc"]["current_mb"] - first["tracemalloc"]["current_mb"]
+                        last["tracemalloc"]["current_mb"]
+                        - first["tracemalloc"]["current_mb"]
                     )
-                    peak_growth = last["tracemalloc"]["peak_mb"] - first["tracemalloc"]["peak_mb"]
-                    report.append(f"Tracemalloc current growth: {current_growth:+.2f} MB")
-                    report.append(f"Tracemalloc peak growth: {peak_growth:+.2f} MB")
+                    peak_growth = (
+                        last["tracemalloc"]["peak_mb"]
+                        - first["tracemalloc"]["peak_mb"]
+                    )
+                    report.append(
+                        f"Tracemalloc current growth: {current_growth:+.2f} MB"
+                    )
+                    report.append(
+                        f"Tracemalloc peak growth: {peak_growth:+.2f} MB"
+                    )
 
                 if first["memory_profiler"] and last["memory_profiler"]:
                     rss_growth = (
-                        last["memory_profiler"]["rss_mb"] - first["memory_profiler"]["rss_mb"]
+                        last["memory_profiler"]["rss_mb"]
+                        - first["memory_profiler"]["rss_mb"]
                     )
                     report.append(f"RSS memory growth: {rss_growth:+.2f} MB")
 
@@ -641,7 +699,9 @@ class EnhancedMemoryProfiler:
             # Suspected memory leaks
             if self._suspected_leaks:
                 report.append("## Suspected Memory Leaks")
-                report.append(f"Found {len(self._suspected_leaks)} potential leaks")
+                report.append(
+                    f"Found {len(self._suspected_leaks)} potential leaks"
+                )
                 report.append("")
 
                 for location in sorted(self._suspected_leaks):
@@ -663,13 +723,19 @@ class EnhancedMemoryProfiler:
 
                 # Sort by current memory usage
                 sorted_agents = sorted(
-                    self.agent_profiles.items(), key=lambda x: x[1].current_memory_mb, reverse=True
+                    self.agent_profiles.items(),
+                    key=lambda x: x[1].current_memory_mb,
+                    reverse=True,
                 )
 
                 for agent_id, profile in sorted_agents[:10]:
                     report.append(f"Agent: {agent_id}")
-                    report.append(f"  Baseline: {profile.baseline_memory_mb:.2f} MB")
-                    report.append(f"  Current: {profile.current_memory_mb:.2f} MB")
+                    report.append(
+                        f"  Baseline: {profile.baseline_memory_mb:.2f} MB"
+                    )
+                    report.append(
+                        f"  Current: {profile.current_memory_mb:.2f} MB"
+                    )
                     report.append(f"  Peak: {profile.peak_memory_mb:.2f} MB")
 
                     if profile.growth_rate_mb_per_hour != 0:

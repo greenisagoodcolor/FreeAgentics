@@ -58,7 +58,13 @@ def run_privilege_escalation_tests():
     results = {
         "timestamp": datetime.now().isoformat(),
         "categories": {},
-        "summary": {"total_tests": 0, "passed": 0, "failed": 0, "errors": 0, "skipped": 0},
+        "summary": {
+            "total_tests": 0,
+            "passed": 0,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 0,
+        },
     }
 
     for category in test_categories:
@@ -109,7 +115,10 @@ def run_privilege_escalation_tests():
             results["summary"]["skipped"] += category_results["skipped"]
 
             # Extract failed test details
-            if category_results["failed"] > 0 or category_results["errors"] > 0:
+            if (
+                category_results["failed"] > 0
+                or category_results["errors"] > 0
+            ):
                 category_results["failures"] = []
                 for test in test_report.get("tests", []):
                     if test["outcome"] in ["failed", "error"]:
@@ -117,7 +126,9 @@ def run_privilege_escalation_tests():
                             {
                                 "test": test["nodeid"],
                                 "outcome": test["outcome"],
-                                "message": test.get("call", {}).get("longrepr", ""),
+                                "message": test.get("call", {}).get(
+                                    "longrepr", ""
+                                ),
                             }
                         )
 
@@ -143,7 +154,9 @@ def run_privilege_escalation_tests():
             print(f"  Errors: {cat_res['errors']}")
             print(f"  Duration: {cat_res['duration']:.2f}s")
         else:
-            print(f"  Error: {results['categories'][category['name']]['error']}")
+            print(
+                f"  Error: {results['categories'][category['name']]['error']}"
+            )
 
     # Generate final report
     print(f"\n{'=' * 80}")
@@ -157,24 +170,30 @@ def run_privilege_escalation_tests():
 
     # Calculate security score
     if results["summary"]["total_tests"] > 0:
-        success_rate = (results["summary"]["passed"] / results["summary"]["total_tests"]) * 100
+        success_rate = (
+            results["summary"]["passed"] / results["summary"]["total_tests"]
+        ) * 100
         print(f"\nSecurity Score: {success_rate:.1f}%")
 
         if success_rate == 100:
-            print("\n✅ EXCELLENT: All privilege escalation attempts were properly blocked!")
+            print(
+                "\n✅ EXCELLENT: All privilege escalation attempts were properly blocked!"
+            )
         elif success_rate >= 95:
             print(
                 "\n⚠️  GOOD: Most privilege escalation attempts blocked, but some vulnerabilities may exist."
             )
         elif success_rate >= 80:
-            print("\n⚠️  CONCERNING: Several privilege escalation vulnerabilities detected.")
+            print(
+                "\n⚠️  CONCERNING: Several privilege escalation vulnerabilities detected."
+            )
         else:
-            print("\n❌ CRITICAL: Significant privilege escalation vulnerabilities found!")
+            print(
+                "\n❌ CRITICAL: Significant privilege escalation vulnerabilities found!"
+            )
 
     # Save detailed report
-    report_path = (
-        f"privilege_escalation_test_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-    )
+    report_path = f"privilege_escalation_test_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
     with open(report_path, "w") as f:
         json.dump(results, f, indent=2)
 
@@ -194,7 +213,9 @@ def run_privilege_escalation_tests():
                     if failure["message"]:
                         print(f"    {failure['message'][:200]}...")
 
-    return results["summary"]["failed"] == 0 and results["summary"]["errors"] == 0
+    return (
+        results["summary"]["failed"] == 0 and results["summary"]["errors"] == 0
+    )
 
 
 def run_quick_security_check():

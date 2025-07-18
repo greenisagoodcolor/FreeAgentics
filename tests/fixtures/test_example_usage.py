@@ -17,7 +17,11 @@ from tests.fixtures import (
     generate_knowledge_graph,
     generate_performance_dataset,
 )
-from tests.fixtures.schemas import AgentStatus, CoalitionStatus, PerformanceTestConfigSchema
+from tests.fixtures.schemas import (
+    AgentStatus,
+    CoalitionStatus,
+    PerformanceTestConfigSchema,
+)
 
 
 class TestBuildersExample:
@@ -26,7 +30,11 @@ class TestBuildersExample:
     def test_simple_agent_builder(self):
         """Create a simple agent using builder."""
         agent = (
-            AgentBuilder().with_name("TestAgent001").with_template("grid_world").active().build()
+            AgentBuilder()
+            .with_name("TestAgent001")
+            .with_template("grid_world")
+            .active()
+            .build()
         )
 
         assert agent.name == "TestAgent001"
@@ -62,9 +70,17 @@ class TestBuildersExample:
             .with_name("Strategic Alliance")
             .with_description("Multi-objective coalition")
             .as_resource_coalition()
-            .with_objective("explore_north", "Explore northern territories", priority="high")
-            .with_objective("defend_base", "Defend home base", priority="critical")
-            .with_required_capabilities("exploration", "defense", "communication")
+            .with_objective(
+                "explore_north",
+                "Explore northern territories",
+                priority="high",
+            )
+            .with_objective(
+                "defend_base", "Defend home base", priority="critical"
+            )
+            .with_required_capabilities(
+                "exploration", "defense", "communication"
+            )
             .with_achieved_objectives("explore_north")
             .with_random_scores()
             .active()
@@ -93,7 +109,9 @@ class TestFactoriesExample:
 
         # Verify persistence
         assert agent.id is not None
-        db_agent = db_session.query(Agent).filter_by(name="FactoryAgent").first()
+        db_agent = (
+            db_session.query(Agent).filter_by(name="FactoryAgent").first()
+        )
         assert db_agent is not None
         assert db_agent.template == "resource_collector"
 
@@ -132,7 +150,8 @@ class TestFactoriesExample:
 
         # Verify roles are assigned correctly
         agent_roles = db_session.execute(
-            "SELECT role FROM agent_coalition WHERE coalition_id = :cid", {"cid": coalition.id}
+            "SELECT role FROM agent_coalition WHERE coalition_id = :cid",
+            {"cid": coalition.id},
         ).fetchall()
 
         roles = [r[0] for r in agent_roles]
@@ -164,7 +183,9 @@ class TestFactoriesExample:
 class TestFixturesExample:
     """Examples of using pytest fixtures."""
 
-    def test_agent_fixtures(self, active_agent, resource_collector_agent, explorer_agent):
+    def test_agent_fixtures(
+        self, active_agent, resource_collector_agent, explorer_agent
+    ):
         """Test with various agent fixtures."""
         # Active agent has full configuration
         assert active_agent.status == AgentStatus.ACTIVE
@@ -178,7 +199,9 @@ class TestFixturesExample:
         assert explorer_agent.template == "explorer"
         assert explorer_agent.parameters.get("exploration_rate", 0) > 0
 
-    def test_coalition_fixtures(self, coalition_with_agents, resource_coalition):
+    def test_coalition_fixtures(
+        self, coalition_with_agents, resource_coalition
+    ):
         """Test coalition fixtures."""
         # Coalition with agents
         assert len(coalition_with_agents.agents) > 0
@@ -227,7 +250,9 @@ class TestGeneratorsExample:
 
     def test_generate_agent_batch(self):
         """Generate agents without database."""
-        agents = generate_agent_batch(count=50, template="grid_world", status=AgentStatus.ACTIVE)
+        agents = generate_agent_batch(
+            count=50, template="grid_world", status=AgentStatus.ACTIVE
+        )
 
         assert len(agents) == 50
         assert all(a.template == "grid_world" for a in agents)
@@ -244,7 +269,9 @@ class TestGeneratorsExample:
         assert random_graph["properties"]["actual_connectivity"] < 0.2
 
         # Scale-free graph
-        scale_free_graph = generate_knowledge_graph(num_nodes=50, graph_type="scale_free")
+        scale_free_graph = generate_knowledge_graph(
+            num_nodes=50, graph_type="scale_free"
+        )
 
         assert len(scale_free_graph["nodes"]) == 50
         # Scale-free graphs have high-degree hubs
@@ -302,7 +329,8 @@ class TestValidationExample:
         agent = (
             AgentBuilder()
             .with_beliefs(
-                state_beliefs={"s1": 0.3, "s2": 0.3, "s3": 0.3}, confidence=0.8  # Sum = 0.9
+                state_beliefs={"s1": 0.3, "s2": 0.3, "s3": 0.3},
+                confidence=0.8,  # Sum = 0.9
             )
             .build()
         )
@@ -315,7 +343,9 @@ class TestValidationExample:
         """Test coalition capability validation."""
         with pytest.raises(ValueError):
             # Invalid capability
-            CoalitionBuilder().with_required_capabilities("invalid_capability").build()
+            CoalitionBuilder().with_required_capabilities(
+                "invalid_capability"
+            ).build()
 
 
 class TestPerformanceExample:

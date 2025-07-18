@@ -82,7 +82,9 @@ class TestMatrixCache:
 
         memory_usage = cache.get_memory_usage_mb()
         assert memory_usage > 0.0
-        assert memory_usage < 1.0  # Should be less than 1MB for 100x100 float64
+        assert (
+            memory_usage < 1.0
+        )  # Should be less than 1MB for 100x100 float64
 
 
 @pytest.mark.skipif(
@@ -115,7 +117,9 @@ class TestCachingBenchmarks:
 
     def test_intermediate_result_benchmark(self):
         """Test intermediate result caching benchmark."""
-        benchmark = IntermediateResultCachingBenchmark(complexity_level=2, cache_enabled=True)
+        benchmark = IntermediateResultCachingBenchmark(
+            complexity_level=2, cache_enabled=True
+        )
 
         benchmark.setup()
         result = benchmark.run_iteration()
@@ -155,7 +159,9 @@ class TestCachingBenchmarks:
 
     def test_benchmark_configuration(self):
         """Test benchmark configuration reporting."""
-        benchmark = IntermediateResultCachingBenchmark(complexity_level=3, cache_enabled=True)
+        benchmark = IntermediateResultCachingBenchmark(
+            complexity_level=3, cache_enabled=True
+        )
 
         config = benchmark.get_configuration()
 
@@ -186,7 +192,9 @@ class TestCachingBenchmarksWithoutPyMDP:
 
         finally:
             # Restore original value
-            matrix_caching_benchmarks.PYMDP_AVAILABLE = original_pymdp_available
+            matrix_caching_benchmarks.PYMDP_AVAILABLE = (
+                original_pymdp_available
+            )
 
 
 if __name__ == "__main__":

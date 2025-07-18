@@ -29,7 +29,14 @@ def upgrade() -> None:
         sa.Column("template", sa.String(length=50), nullable=False),
         sa.Column(
             "status",
-            sa.Enum("PENDING", "ACTIVE", "PAUSED", "STOPPED", "ERROR", name="agentstatus"),
+            sa.Enum(
+                "PENDING",
+                "ACTIVE",
+                "PAUSED",
+                "STOPPED",
+                "ERROR",
+                name="agentstatus",
+            ),
             nullable=True,
         ),
         sa.Column("gmn_spec", sa.Text(), nullable=True),
@@ -39,9 +46,19 @@ def upgrade() -> None:
         sa.Column("position", sa.JSON(), nullable=True),
         sa.Column("metrics", sa.JSON(), nullable=True),
         sa.Column("parameters", sa.JSON(), nullable=True),
-        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=True),
+        sa.Column(
+            "created_at",
+            sa.DateTime(),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
         sa.Column("last_active", sa.DateTime(), nullable=True),
-        sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=True),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
         sa.Column("inference_count", sa.Integer(), nullable=True),
         sa.Column("total_steps", sa.Integer(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
@@ -53,7 +70,13 @@ def upgrade() -> None:
         sa.Column("description", sa.Text(), nullable=True),
         sa.Column(
             "status",
-            sa.Enum("FORMING", "ACTIVE", "DISBANDING", "DISSOLVED", name="coalitionstatus"),
+            sa.Enum(
+                "FORMING",
+                "ACTIVE",
+                "DISBANDING",
+                "DISSOLVED",
+                name="coalitionstatus",
+            ),
             nullable=True,
         ),
         sa.Column("objectives", sa.JSON(), nullable=True),
@@ -61,9 +84,19 @@ def upgrade() -> None:
         sa.Column("achieved_objectives", sa.JSON(), nullable=True),
         sa.Column("performance_score", sa.Float(), nullable=True),
         sa.Column("cohesion_score", sa.Float(), nullable=True),
-        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=True),
+        sa.Column(
+            "created_at",
+            sa.DateTime(),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
         sa.Column("dissolved_at", sa.DateTime(), nullable=True),
-        sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=True),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
@@ -72,10 +105,17 @@ def upgrade() -> None:
         sa.Column("coalition_id", sa.UUID(), nullable=False),
         sa.Column(
             "role",
-            sa.Enum("LEADER", "COORDINATOR", "MEMBER", "OBSERVER", name="agentrole"),
+            sa.Enum(
+                "LEADER", "COORDINATOR", "MEMBER", "OBSERVER", name="agentrole"
+            ),
             nullable=True,
         ),
-        sa.Column("joined_at", sa.DateTime(), server_default=sa.text("now()"), nullable=True),
+        sa.Column(
+            "joined_at",
+            sa.DateTime(),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
         sa.Column("contribution_score", sa.Float(), nullable=True),
         sa.Column("trust_score", sa.Float(), nullable=True),
         sa.ForeignKeyConstraint(
@@ -99,8 +139,18 @@ def upgrade() -> None:
         sa.Column("confidence", sa.Float(), nullable=True),
         sa.Column("source", sa.String(length=100), nullable=True),
         sa.Column("creator_agent_id", sa.UUID(), nullable=True),
-        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=True),
-        sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=True),
+        sa.Column(
+            "created_at",
+            sa.DateTime(),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
         sa.ForeignKeyConstraint(
             ["creator_agent_id"],
             ["agents.id"],
@@ -115,7 +165,12 @@ def upgrade() -> None:
         sa.Column("type", sa.String(length=50), nullable=False),
         sa.Column("properties", sa.JSON(), nullable=True),
         sa.Column("confidence", sa.Float(), nullable=True),
-        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=True),
+        sa.Column(
+            "created_at",
+            sa.DateTime(),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
         sa.ForeignKeyConstraint(
             ["source_id"],
             ["knowledge_nodes.id"],

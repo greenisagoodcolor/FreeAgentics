@@ -173,7 +173,9 @@ class TestAuthorizationMatrix:
 
         # Verify admin has all permissions
         admin_permissions = role_matrix[UserRole.ADMIN]
-        assert all(admin_permissions.values()), "Admin should have all permissions"
+        assert all(
+            admin_permissions.values()
+        ), "Admin should have all permissions"
 
         # Verify observer has minimal permissions
         observer_permissions = role_matrix[UserRole.OBSERVER]
@@ -191,7 +193,9 @@ class TestAuthorizationMatrix:
 
             for permission, should_have in expected_permissions.items():
                 if should_have:
-                    assert permission in actual_permissions, f"Role {role} should have {permission}"
+                    assert (
+                        permission in actual_permissions
+                    ), f"Role {role} should have {permission}"
                 else:
                     assert (
                         permission not in actual_permissions
@@ -234,7 +238,9 @@ class TestAuthorizationMatrix:
                 for role in UserRole:
                     headers = {"Authorization": f"Bearer {tokens[role]}"}
                     role_permissions = ROLE_PERMISSIONS.get(role, [])
-                    should_have_access = required_permission in role_permissions
+                    should_have_access = (
+                        required_permission in role_permissions
+                    )
 
                     # Make request
                     if method == "GET":
@@ -243,14 +249,21 @@ class TestAuthorizationMatrix:
                         if "agents" in endpoint:
                             response = client.post(
                                 endpoint,
-                                json={"name": "Test", "template": "basic-explorer"},
+                                json={
+                                    "name": "Test",
+                                    "template": "basic-explorer",
+                                },
                                 headers=headers,
                             )
                         else:
-                            response = client.post(endpoint, json={}, headers=headers)
+                            response = client.post(
+                                endpoint, json={}, headers=headers
+                            )
                     elif method == "PATCH":
                         response = client.patch(
-                            endpoint, json={"status": "active"}, headers=headers
+                            endpoint,
+                            json={"status": "active"},
+                            headers=headers,
                         )
                     elif method == "DELETE":
                         response = client.delete(endpoint, headers=headers)
@@ -299,7 +312,13 @@ class TestAuthorizationMatrix:
                 403,
             ),
             # Agent manager should not be able to delete agents
-            (UserRole.AGENT_MANAGER, "DELETE", "/api/v1/agents/test-id", {}, 403),
+            (
+                UserRole.AGENT_MANAGER,
+                "DELETE",
+                "/api/v1/agents/test-id",
+                {},
+                403,
+            ),
             # Researcher should not be able to admin system
             (UserRole.RESEARCHER, "GET", "/api/v1/system/health", {}, 403),
             # Admin should be able to do everything
@@ -372,12 +391,18 @@ class TestAuthorizationMatrix:
 
         # In current implementation, users can view each other's agents
         # This test documents the current behavior
-        view_response = client.get(f"/api/v1/agents/{agent_id}", headers=headers2)
-        assert view_response.status_code == 200, "Current implementation allows cross-user viewing"
+        view_response = client.get(
+            f"/api/v1/agents/{agent_id}", headers=headers2
+        )
+        assert (
+            view_response.status_code == 200
+        ), "Current implementation allows cross-user viewing"
 
         # User2 tries to modify User1's agent
         modify_response = client.patch(
-            f"/api/v1/agents/{agent_id}/status", json={"status": "active"}, headers=headers2
+            f"/api/v1/agents/{agent_id}/status",
+            json={"status": "active"},
+            headers=headers2,
         )
         assert (
             modify_response.status_code == 200
@@ -409,7 +434,10 @@ class TestAuthorizationMatrix:
             try:
                 response = client.post(
                     "/api/v1/agents",
-                    json={"name": f"Agent_{user_id}", "template": "basic-explorer"},
+                    json={
+                        "name": f"Agent_{user_id}",
+                        "template": "basic-explorer",
+                    },
                     headers=headers,
                 )
                 results.append((user_id, response.status_code))
@@ -419,7 +447,9 @@ class TestAuthorizationMatrix:
         # Start concurrent threads
         threads = []
         for i, token in enumerate(tokens):
-            thread = threading.Thread(target=make_concurrent_request, args=(token, i))
+            thread = threading.Thread(
+                target=make_concurrent_request, args=(token, i)
+            )
             threads.append(thread)
             thread.start()
 
@@ -429,7 +459,9 @@ class TestAuthorizationMatrix:
 
         # Verify all requests succeeded
         for user_id, status in results:
-            assert status == 201, f"Concurrent request for user {user_id} failed: {status}"
+            assert (
+                status == 201
+            ), f"Concurrent request for user {user_id} failed: {status}"
 
     def test_authorization_performance_under_load(self, client):
         """Test authorization performance under load."""
@@ -485,7 +517,9 @@ class TestAuthorizationMatrix:
         assert admin_response.status_code == 200
         admin_token = admin_response.json()["access_token"]
 
-        observer_response = client.post("/api/v1/auth/register", json=observer_data)
+        observer_response = client.post(
+            "/api/v1/auth/register", json=observer_data
+        )
         assert observer_response.status_code == 200
         observer_token = observer_response.json()["access_token"]
 
@@ -494,18 +528,25 @@ class TestAuthorizationMatrix:
         for i in range(3):
             response = client.post(
                 "/api/v1/agents",
-                json={"name": f"Admin Agent {i}", "template": "basic-explorer"},
+                json={
+                    "name": f"Admin Agent {i}",
+                    "template": "basic-explorer",
+                },
                 headers=admin_headers,
             )
             assert response.status_code == 201
 
         # Both users list agents
-        admin_list_response = client.get("/api/v1/agents", headers=admin_headers)
+        admin_list_response = client.get(
+            "/api/v1/agents", headers=admin_headers
+        )
         assert admin_list_response.status_code == 200
         admin_agents = admin_list_response.json()
 
         observer_headers = {"Authorization": f"Bearer {observer_token}"}
-        observer_list_response = client.get("/api/v1/agents", headers=observer_headers)
+        observer_list_response = client.get(
+            "/api/v1/agents", headers=observer_headers
+        )
         assert observer_list_response.status_code == 200
         observer_agents = observer_list_response.json()
 
@@ -565,7 +606,10 @@ class TestAuthorizationMatrix:
             elif method == "POST":
                 response = client.post(
                     endpoint,
-                    json={"name": "Hierarchy Test", "template": "basic-explorer"},
+                    json={
+                        "name": "Hierarchy Test",
+                        "template": "basic-explorer",
+                    },
                     headers=headers,
                 )
             elif method == "DELETE":
@@ -573,7 +617,10 @@ class TestAuthorizationMatrix:
                 if role == UserRole.ADMIN:
                     create_response = client.post(
                         "/api/v1/agents",
-                        json={"name": "Delete Test", "template": "basic-explorer"},
+                        json={
+                            "name": "Delete Test",
+                            "template": "basic-explorer",
+                        },
                         headers=headers,
                     )
                     if create_response.status_code == 201:
@@ -645,13 +692,19 @@ class TestAuthorizationAttackVectors:
 
         # Current implementation allows this - documenting behavior
         response = client.get(f"/api/v1/agents/{agent_id}", headers=headers2)
-        assert response.status_code == 200, "Current implementation allows horizontal access"
+        assert (
+            response.status_code == 200
+        ), "Current implementation allows horizontal access"
 
         # User2 tries to modify User1's agent
         response = client.patch(
-            f"/api/v1/agents/{agent_id}/status", json={"status": "active"}, headers=headers2
+            f"/api/v1/agents/{agent_id}/status",
+            json={"status": "active"},
+            headers=headers2,
         )
-        assert response.status_code == 200, "Current implementation allows horizontal modification"
+        assert (
+            response.status_code == 200
+        ), "Current implementation allows horizontal modification"
 
     def test_vertical_privilege_escalation(self, client):
         """Test protection against vertical privilege escalation."""
@@ -671,7 +724,11 @@ class TestAuthorizationAttackVectors:
         # Try to escalate privileges through various attack vectors
         escalation_attempts = [
             # Try to create agent (should fail)
-            ("POST", "/api/v1/agents", {"name": "Escalation Agent", "template": "basic-explorer"}),
+            (
+                "POST",
+                "/api/v1/agents",
+                {"name": "Escalation Agent", "template": "basic-explorer"},
+            ),
             # Try to access admin endpoints (should fail)
             ("GET", "/api/v1/system/health", {}),
             ("GET", "/api/v1/system/metrics", {}),
@@ -752,7 +809,8 @@ class TestAuthorizationAttackVectors:
 
         # Login again to get new token
         login_response = client.post(
-            "/api/v1/auth/login", json={"username": "session_user", "password": "Password123!"}
+            "/api/v1/auth/login",
+            json={"username": "session_user", "password": "Password123!"},
         )
         assert login_response.status_code == 200
         token2 = login_response.json()["access_token"]
@@ -796,7 +854,10 @@ class TestAuthorizationAttackVectors:
                 try:
                     response = client.post(
                         "/api/v1/agents",
-                        json={"name": f"Attack{attack_id}_{i}", "template": "basic-explorer"},
+                        json={
+                            "name": f"Attack{attack_id}_{i}",
+                            "template": "basic-explorer",
+                        },
                         headers=headers,
                     )
                     results.append((attack_id, i, response.status_code))
@@ -808,7 +869,9 @@ class TestAuthorizationAttackVectors:
         # Start multiple attack threads
         threads = []
         for attack_id in range(3):
-            thread = threading.Thread(target=concurrent_attack, args=(attack_id,))
+            thread = threading.Thread(
+                target=concurrent_attack, args=(attack_id,)
+            )
             threads.append(thread)
             thread.start()
 
@@ -826,7 +889,9 @@ class TestAuthorizationAttackVectors:
         # Some requests might fail due to rate limiting (this is good)
         # But the system should remain stable
         error_count = len([r for r in results if isinstance(r[2], str)])
-        assert error_count == 0, "No system errors should occur during concurrent attacks"
+        assert (
+            error_count == 0
+        ), "No system errors should occur during concurrent attacks"
 
 
 # Cleanup functions

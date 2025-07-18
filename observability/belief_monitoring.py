@@ -23,8 +23,12 @@ except ImportError:
     MONITORING_AVAILABLE = False
 
     # Mock monitoring function
-    async def record_agent_metric(agent_id: str, metric: str, value: float, metadata: Dict = None):
-        logger.debug(f"MOCK Belief Metric - Agent {agent_id} - {metric}: {value}")
+    async def record_agent_metric(
+        agent_id: str, metric: str, value: float, metadata: Dict = None
+    ):
+        logger.debug(
+            f"MOCK Belief Metric - Agent {agent_id} - {metric}: {value}"
+        )
 
 
 @dataclass
@@ -105,7 +109,9 @@ class BeliefMonitor:
             await self._record_metrics(snapshot, is_anomaly)
 
         # Update last beliefs
-        self.last_beliefs = beliefs.copy() if isinstance(beliefs, dict) else beliefs
+        self.last_beliefs = (
+            beliefs.copy() if isinstance(beliefs, dict) else beliefs
+        )
 
         return snapshot
 
@@ -129,18 +135,25 @@ class BeliefMonitor:
                             # Normalize to ensure valid probability distribution
                             qs_norm = qs / (qs.sum() + 1e-10)
                             # Compute Shannon entropy
-                            entropy = -np.sum(qs_norm * np.log(qs_norm + 1e-10))
+                            entropy = -np.sum(
+                                qs_norm * np.log(qs_norm + 1e-10)
+                            )
                             total_entropy += entropy
                     return total_entropy
 
                 # If beliefs are direct probability distributions
-                elif all(isinstance(v, (float, int, np.ndarray)) for v in beliefs.values()):
+                elif all(
+                    isinstance(v, (float, int, np.ndarray))
+                    for v in beliefs.values()
+                ):
                     values = np.array(list(beliefs.values()))
                     if values.ndim == 1:
                         # Normalize
                         values_norm = values / (values.sum() + 1e-10)
                         # Compute entropy
-                        return -np.sum(values_norm * np.log(values_norm + 1e-10))
+                        return -np.sum(
+                            values_norm * np.log(values_norm + 1e-10)
+                        )
 
             # If beliefs are numpy array
             elif isinstance(beliefs, np.ndarray):
@@ -154,7 +167,9 @@ class BeliefMonitor:
             return 0.0
 
     def _compute_kl_divergence(
-        self, beliefs_new: Dict[str, Any], beliefs_old: Optional[Dict[str, Any]]
+        self,
+        beliefs_new: Dict[str, Any],
+        beliefs_old: Optional[Dict[str, Any]],
     ) -> float:
         """Compute KL divergence between belief updates.
 
@@ -173,8 +188,12 @@ class BeliefMonitor:
             if isinstance(beliefs_new, dict) and "qs" in beliefs_new:
                 if isinstance(beliefs_old, dict) and "qs" in beliefs_old:
                     total_kl = 0.0
-                    for i, (qs_new, qs_old) in enumerate(zip(beliefs_new["qs"], beliefs_old["qs"])):
-                        if isinstance(qs_new, np.ndarray) and isinstance(qs_old, np.ndarray):
+                    for i, (qs_new, qs_old) in enumerate(
+                        zip(beliefs_new["qs"], beliefs_old["qs"])
+                    ):
+                        if isinstance(qs_new, np.ndarray) and isinstance(
+                            qs_old, np.ndarray
+                        ):
                             # Normalize distributions
                             p = qs_new / (qs_new.sum() + 1e-10)
                             q = qs_old / (qs_old.sum() + 1e-10)
@@ -184,7 +203,9 @@ class BeliefMonitor:
                     return total_kl
 
             # Handle direct numpy arrays
-            elif isinstance(beliefs_new, np.ndarray) and isinstance(beliefs_old, np.ndarray):
+            elif isinstance(beliefs_new, np.ndarray) and isinstance(
+                beliefs_old, np.ndarray
+            ):
                 p = beliefs_new / (beliefs_new.sum() + 1e-10)
                 q = beliefs_old / (beliefs_old.sum() + 1e-10)
                 return np.sum(p * np.log((p + 1e-10) / (q + 1e-10)))
@@ -209,7 +230,9 @@ class BeliefMonitor:
 
         # Get recent KL divergences
         recent_kls = [
-            s.kl_divergence for s in list(self.belief_history)[-10:] if s.kl_divergence is not None
+            s.kl_divergence
+            for s in list(self.belief_history)[-10:]
+            if s.kl_divergence is not None
         ]
 
         if not recent_kls or snapshot.kl_divergence is None:
@@ -250,7 +273,9 @@ class BeliefMonitor:
                 },
             )
 
-    async def _record_metrics(self, snapshot: BeliefSnapshot, is_anomaly: bool):
+    async def _record_metrics(
+        self, snapshot: BeliefSnapshot, is_anomaly: bool
+    ):
         """Record belief metrics to monitoring system.
 
         Args:
@@ -261,7 +286,10 @@ class BeliefMonitor:
             # Record entropy
             if snapshot.entropy is not None:
                 await record_agent_metric(
-                    self.agent_id, "belief_entropy", snapshot.entropy, {"is_anomaly": is_anomaly}
+                    self.agent_id,
+                    "belief_entropy",
+                    snapshot.entropy,
+                    {"is_anomaly": is_anomaly},
                 )
 
             # Record KL divergence
@@ -285,7 +313,9 @@ class BeliefMonitor:
         except Exception as e:
             logger.error(f"Failed to record belief metrics: {e}")
 
-    def get_belief_history(self, limit: Optional[int] = None) -> List[BeliefSnapshot]:
+    def get_belief_history(
+        self, limit: Optional[int] = None
+    ) -> List[BeliefSnapshot]:
         """Get belief history.
 
         Args:
@@ -306,20 +336,34 @@ class BeliefMonitor:
             Dictionary with belief statistics
         """
         if not self.belief_history:
-            return {"total_updates": 0, "anomaly_count": 0, "anomaly_rate": 0.0}
+            return {
+                "total_updates": 0,
+                "anomaly_count": 0,
+                "anomaly_rate": 0.0,
+            }
 
         # Compute statistics from history
-        entropies = [s.entropy for s in self.belief_history if s.entropy is not None]
-        kl_divergences = [
-            s.kl_divergence for s in self.belief_history if s.kl_divergence is not None
+        entropies = [
+            s.entropy for s in self.belief_history if s.entropy is not None
         ]
-        free_energies = [s.free_energy for s in self.belief_history if s.free_energy is not None]
+        kl_divergences = [
+            s.kl_divergence
+            for s in self.belief_history
+            if s.kl_divergence is not None
+        ]
+        free_energies = [
+            s.free_energy
+            for s in self.belief_history
+            if s.free_energy is not None
+        ]
 
         stats = {
             "total_updates": self.total_updates,
             "anomaly_count": self.anomaly_count,
             "anomaly_rate": (
-                self.anomaly_count / self.total_updates if self.total_updates > 0 else 0.0
+                self.anomaly_count / self.total_updates
+                if self.total_updates > 0
+                else 0.0
             ),
             "entropy": {
                 "mean": np.mean(entropies) if entropies else 0.0,
@@ -394,7 +438,9 @@ class BeliefMonitoringHooks:
             return None
 
         monitor = self.get_monitor(agent_id)
-        return await monitor.record_belief_update(beliefs, free_energy, metadata)
+        return await monitor.record_belief_update(
+            beliefs, free_energy, metadata
+        )
 
     def get_agent_statistics(self, agent_id: str) -> Dict[str, Any]:
         """Get belief statistics for an agent.
@@ -416,7 +462,8 @@ class BeliefMonitoringHooks:
             Dictionary mapping agent IDs to their statistics
         """
         return {
-            agent_id: monitor.get_belief_statistics() for agent_id, monitor in self.monitors.items()
+            agent_id: monitor.get_belief_statistics()
+            for agent_id, monitor in self.monitors.items()
         }
 
     def reset_agent_monitor(self, agent_id: str):
@@ -457,7 +504,9 @@ async def monitor_belief_update(
     Returns:
         BeliefSnapshot if monitoring enabled
     """
-    return await belief_monitoring_hooks.on_belief_update(agent_id, beliefs, free_energy, metadata)
+    return await belief_monitoring_hooks.on_belief_update(
+        agent_id, beliefs, free_energy, metadata
+    )
 
 
 def get_belief_statistics(agent_id: str) -> Dict[str, Any]:

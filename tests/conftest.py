@@ -12,9 +12,16 @@ os.environ["TESTING"] = "true"
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 os.environ["ASYNC_DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 os.environ["ENVIRONMENT"] = "test"
+os.environ["SECRET_KEY"] = "test_secret_key_for_testing_only"
+os.environ["JWT_SECRET"] = "test_jwt_secret_for_testing_only"
+os.environ["API_KEY"] = "test_api_key"
+os.environ["DEVELOPMENT_MODE"] = "false"
+os.environ["PRODUCTION"] = "false"
 
 # Add project root to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+)
 
 
 @pytest.fixture(scope="session")
@@ -48,7 +55,11 @@ def mock_database():
 @pytest.fixture
 async def async_mock_database():
     """Async mock database for testing."""
-    from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+    from sqlalchemy.ext.asyncio import (
+        AsyncSession,
+        async_sessionmaker,
+        create_async_engine,
+    )
 
     from database.base import Base
 
@@ -58,7 +69,9 @@ async def async_mock_database():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-    async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    async_session_maker = async_sessionmaker(
+        engine, class_=AsyncSession, expire_on_commit=False
+    )
 
     async with async_session_maker() as session:
         yield session
@@ -89,3 +102,32 @@ def mock_storage_manager():
 
 # Configure pytest-asyncio
 pytest_plugins = ["pytest_asyncio"]
+
+
+@pytest.fixture
+def client():
+    """Create a test client with mocked dependencies."""
+    from fastapi.testclient import TestClient
+
+    from api.main import app
+    from auth.security_implementation import get_current_user
+    from database.session import get_db
+    from tests.test_helpers.auth_helpers import mock_auth_dependency
+    from tests.test_helpers.db_helpers import get_test_db
+
+    # Override dependencies
+    app.dependency_overrides[get_db] = get_test_db
+    app.dependency_overrides[get_current_user] = mock_auth_dependency
+
+    with TestClient(app) as test_client:
+        yield test_client
+
+    # Clean up overrides
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def authenticated_client(client):
+    """Create a test client with authentication headers."""
+    client.headers["Authorization"] = "Bearer test_token"
+    return client

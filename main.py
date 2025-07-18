@@ -19,7 +19,10 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 
 from api.middleware.ddos_protection import DDoSProtectionMiddleware
-from api.middleware.rate_limiter import RateLimitMiddleware, create_rate_limiter
+from api.middleware.rate_limiter import (
+    RateLimitMiddleware,
+    create_rate_limiter,
+)
 
 # SECURITY: Import authentication and security components
 from auth import SecurityMiddleware
@@ -30,7 +33,10 @@ from auth.security_headers import SecurityHeadersMiddleware, SecurityPolicy
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler("freeagentics.log")],
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+        logging.FileHandler("freeagentics.log"),
+    ],
 )
 
 logger = logging.getLogger(__name__)
@@ -60,7 +66,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         agent_manager = None  # Will be initialized properly in production
         database = None  # Will be initialized properly in production
 
-        observability_manager = initialize_observability(agent_manager, database)
+        observability_manager = initialize_observability(
+            agent_manager, database
+        )
         observability_tasks = await observability_manager.start()
 
         logger.info("✅ Observability system started successfully")
@@ -141,14 +149,17 @@ ssl_config = SSLConfiguration(
     enable_letsencrypt=is_production,
     letsencrypt_email=os.getenv("LETSENCRYPT_EMAIL", "admin@freeagentics.com"),
     letsencrypt_domains=(
-        os.getenv("LETSENCRYPT_DOMAINS", "").split(",") if os.getenv("LETSENCRYPT_DOMAINS") else []
+        os.getenv("LETSENCRYPT_DOMAINS", "").split(",")
+        if os.getenv("LETSENCRYPT_DOMAINS")
+        else []
     ),
     hsts_enabled=True,
     hsts_max_age=31536000,  # 1 year
     hsts_include_subdomains=True,
     hsts_preload=is_production,
     secure_cookies=True,
-    behind_load_balancer=os.getenv("BEHIND_LOAD_BALANCER", "false").lower() == "true",
+    behind_load_balancer=os.getenv("BEHIND_LOAD_BALANCER", "false").lower()
+    == "true",
     trusted_proxies=os.getenv("TRUSTED_PROXIES", "127.0.0.1,::1").split(","),
 )
 
@@ -172,10 +183,14 @@ app.add_middleware(SecurityHeadersMiddleware, security_manager=security_policy)
 
 # SECURITY: Add comprehensive rate limiting and DDoS protection
 redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
-config_file = os.path.join(os.path.dirname(__file__), "config", "rate_limiting.yaml")
+config_file = os.path.join(
+    os.path.dirname(__file__), "config", "rate_limiting.yaml"
+)
 
 # Create rate limiter instance
-rate_limiter = create_rate_limiter(redis_url=redis_url, config_file=config_file)
+rate_limiter = create_rate_limiter(
+    redis_url=redis_url, config_file=config_file
+)
 
 
 # Function to extract user ID from request (for authenticated rate limiting)
@@ -197,7 +212,9 @@ async def get_user_id_from_request(request):
 
 # Add rate limiting middleware
 app.add_middleware(
-    RateLimitMiddleware, rate_limiter=rate_limiter, get_user_id=get_user_id_from_request
+    RateLimitMiddleware,
+    rate_limiter=rate_limiter,
+    get_user_id=get_user_id_from_request,
 )
 
 # Alternative: Use DDoS protection middleware (includes rate limiting)
@@ -216,7 +233,9 @@ app.add_middleware(
 
 # Global Exception Handler - Clean Architecture Error Management
 @app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+async def global_exception_handler(
+    request: Request, exc: Exception
+) -> JSONResponse:
     """Global exception handler following clean architecture principles"""
     logger.error(f"Global exception: {exc}", exc_info=True)
     return JSONResponse(
@@ -257,17 +276,23 @@ async def get_metrics():
         content_type = get_prometheus_content_type()
 
         return Response(
-            content=metrics_data, media_type=content_type, headers={"Cache-Control": "no-cache"}
+            content=metrics_data,
+            media_type=content_type,
+            headers={"Cache-Control": "no-cache"},
         )
     except ImportError:
         logger.warning("Prometheus metrics not available")
         return Response(
-            content="# Prometheus metrics not available\n", media_type="text/plain", status_code=503
+            content="# Prometheus metrics not available\n",
+            media_type="text/plain",
+            status_code=503,
         )
     except Exception as e:
         logger.error(f"Error getting Prometheus metrics: {e}")
         return Response(
-            content=f"# Error getting metrics: {e}\n", media_type="text/plain", status_code=500
+            content=f"# Error getting metrics: {e}\n",
+            media_type="text/plain",
+            status_code=500,
         )
 
 
@@ -302,15 +327,25 @@ try:
     from api.v1.websocket import router as websocket_router
 
     # SECURITY: Auth routes (no authentication required)
-    app.include_router(auth_router, prefix="/api/v1/auth", tags=["authentication"])
+    app.include_router(
+        auth_router, prefix="/api/v1/auth", tags=["authentication"]
+    )
 
     # Protected API routes
     app.include_router(agents_router, prefix="/api/v1", tags=["agents"])
-    app.include_router(system_router, prefix="/api/v1/system", tags=["system", "monitoring"])
-    app.include_router(websocket_router, prefix="/api/v1", tags=["websocket", "real-time"])
-    app.include_router(knowledge_router, prefix="/api/v1/knowledge", tags=["knowledge-graph"])
+    app.include_router(
+        system_router, prefix="/api/v1/system", tags=["system", "monitoring"]
+    )
+    app.include_router(
+        websocket_router, prefix="/api/v1", tags=["websocket", "real-time"]
+    )
+    app.include_router(
+        knowledge_router, prefix="/api/v1/knowledge", tags=["knowledge-graph"]
+    )
 
-    logger.info("✅ API v1 routers registered successfully (with authentication)")
+    logger.info(
+        "✅ API v1 routers registered successfully (with authentication)"
+    )
 
 except ImportError as e:
     logger.error(f"❌ Failed to import API routers: {e}")
@@ -348,17 +383,27 @@ except ImportError as e:
 
 # WebSocket routers (existing)
 try:
-    from api.websocket.coalition_monitoring import router as coalition_ws_router
-    from api.websocket.markov_blanket_monitoring import router as markov_ws_router
+    from api.websocket.coalition_monitoring import (
+        router as coalition_ws_router,
+    )
+    from api.websocket.markov_blanket_monitoring import (
+        router as markov_ws_router,
+    )
     from api.websocket.real_time_updates import router as websocket_router
 
     app.include_router(websocket_router, prefix="/ws", tags=["websockets"])
 
     app.include_router(
-        coalition_ws_router, prefix="/ws/coalitions", tags=["websockets", "coalitions"]
+        coalition_ws_router,
+        prefix="/ws/coalitions",
+        tags=["websockets", "coalitions"],
     )
 
-    app.include_router(markov_ws_router, prefix="/ws/markov-blanket", tags=["websockets", "safety"])
+    app.include_router(
+        markov_ws_router,
+        prefix="/ws/markov-blanket",
+        tags=["websockets", "safety"],
+    )
 
     logger.info("✅ WebSocket routers registered successfully")
 
@@ -371,4 +416,6 @@ if __name__ == "__main__":
     import uvicorn
 
     logger.info("🔧 Starting development server...")
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True, log_level="info")
+    uvicorn.run(
+        "main:app", host="0.0.0.0", port=8000, reload=True, log_level="info"
+    )

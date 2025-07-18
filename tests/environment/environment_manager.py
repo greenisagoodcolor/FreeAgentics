@@ -80,7 +80,9 @@ class PortAllocator:
 class ServiceHealth:
     """Health checking for various services."""
 
-    def check_postgres(self, host: str, port: int, user: str, password: str, database: str) -> bool:
+    def check_postgres(
+        self, host: str, port: int, user: str, password: str, database: str
+    ) -> bool:
         """Check PostgreSQL health."""
         try:
             conn = psycopg2.connect(
@@ -100,7 +102,9 @@ class ServiceHealth:
     def check_redis(self, host: str, port: int) -> bool:
         """Check Redis health."""
         try:
-            client = redis.Redis(host=host, port=port, socket_connect_timeout=5)
+            client = redis.Redis(
+                host=host, port=port, socket_connect_timeout=5
+            )
             client.ping()
             client.close()
             return True
@@ -108,7 +112,9 @@ class ServiceHealth:
             logger.debug(f"Redis health check failed: {e}")
             return False
 
-    def check_rabbitmq(self, host: str, port: int, user: str, password: str, vhost: str) -> bool:
+    def check_rabbitmq(
+        self, host: str, port: int, user: str, password: str, vhost: str
+    ) -> bool:
         """Check RabbitMQ health."""
         try:
             credentials = pika.PlainCredentials(user, password)
@@ -136,7 +142,9 @@ class ServiceHealth:
             logger.debug(f"Elasticsearch health check failed: {e}")
             return False
 
-    def check_minio(self, endpoint_url: str, access_key: str, secret_key: str) -> bool:
+    def check_minio(
+        self, endpoint_url: str, access_key: str, secret_key: str
+    ) -> bool:
         """Check MinIO health."""
         try:
             s3 = boto3.client(
@@ -159,7 +167,11 @@ class ServiceHealth:
         if "postgres" in config:
             pg = config["postgres"]
             results["postgres"] = self.check_postgres(
-                pg["host"], pg["port"], pg["user"], pg["password"], pg["database"]
+                pg["host"],
+                pg["port"],
+                pg["user"],
+                pg["password"],
+                pg["database"],
             )
 
         if "redis" in config:
@@ -169,7 +181,11 @@ class ServiceHealth:
         if "rabbitmq" in config:
             rmq = config["rabbitmq"]
             results["rabbitmq"] = self.check_rabbitmq(
-                rmq["host"], rmq["port"], rmq["user"], rmq["password"], rmq["vhost"]
+                rmq["host"],
+                rmq["port"],
+                rmq["user"],
+                rmq["password"],
+                rmq["vhost"],
             )
 
         if "elasticsearch" in config:
@@ -209,7 +225,9 @@ class EnvironmentManager:
             self._docker_client = docker.from_env()
         return self._docker_client
 
-    def _run_compose_command(self, command: List[str]) -> subprocess.CompletedProcess:
+    def _run_compose_command(
+        self, command: List[str]
+    ) -> subprocess.CompletedProcess:
         """Run a docker-compose command."""
         full_command = [
             "docker-compose",
@@ -221,7 +239,9 @@ class EnvironmentManager:
 
         logger.debug(f"Running: {' '.join(full_command)}")
 
-        return subprocess.run(full_command, cwd=self.work_dir, capture_output=True, text=True)
+        return subprocess.run(
+            full_command, cwd=self.work_dir, capture_output=True, text=True
+        )
 
     def start(self, services: Optional[List[str]] = None) -> bool:
         """Start the test environment."""
@@ -379,7 +399,9 @@ class EnvironmentManager:
 
     def get_logs(self, service: str, lines: int = 100) -> str:
         """Get logs from a service."""
-        result = self._run_compose_command(["logs", f"--tail={lines}", service])
+        result = self._run_compose_command(
+            ["logs", f"--tail={lines}", service]
+        )
 
         return result.stdout if result.returncode == 0 else result.stderr
 

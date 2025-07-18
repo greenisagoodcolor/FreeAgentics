@@ -40,7 +40,9 @@ class PyMDPMathematicalValidator:
         A[0][1, 1] = 0.9  # High probability of observing 1 when in state 1
 
         # Create B matrix (transition model)
-        B = utils.obj_array_zeros([(s, s, num_controls[i]) for i, s in enumerate(num_states)])
+        B = utils.obj_array_zeros(
+            [(s, s, num_controls[i]) for i, s in enumerate(num_states)]
+        )
         # Action 0: Stay in same state (deterministic)
         B[0][0, 0, 0] = 1.0
         B[0][1, 0, 0] = 0.0
@@ -97,7 +99,9 @@ class PyMDPMathematicalValidator:
                 ), f"Belief state not normalized: {belief_sum}"
 
                 # Check no negative probabilities
-                assert (belief >= 0).all(), "Negative probabilities in belief state"
+                assert (
+                    belief >= 0
+                ).all(), "Negative probabilities in belief state"
 
         print("✅ Belief states are correctly normalized")
 
@@ -150,7 +154,9 @@ class PyMDPMathematicalValidator:
         assert (q_pi >= 0).all(), "Negative policy probabilities"
 
         # Check that G (expected free energy) has reasonable values
-        assert np.isfinite(G).all(), "Non-finite values in expected free energy"
+        assert np.isfinite(
+            G
+        ).all(), "Non-finite values in expected free energy"
 
         print("✅ Policy evaluation produces correct results")
 
@@ -171,10 +177,15 @@ class PyMDPMathematicalValidator:
             actions_sampled.append(action)
 
             # Check action is valid
-            assert isinstance(action, (list, np.ndarray)), "Action not in correct format"
+            assert isinstance(
+                action, (list, np.ndarray)
+            ), "Action not in correct format"
             if isinstance(action, list):
                 assert len(action) == 1, "Incorrect action dimensionality"
-                assert action[0] in [0, 1], f"Invalid action value: {action[0]}"
+                assert action[0] in [
+                    0,
+                    1,
+                ], f"Invalid action value: {action[0]}"
 
         print("✅ Action sampling produces valid actions")
 
@@ -234,7 +245,9 @@ class PyMDPMathematicalValidator:
             diff = np.abs(results[0] - results[i])
             assert (
                 diff < self.tolerance
-            ).all(), f"Inconsistent results across runs: max diff = {diff.max()}"
+            ).all(), (
+                f"Inconsistent results across runs: max diff = {diff.max()}"
+            )
 
         print("✅ Mathematical operations are consistent")
 

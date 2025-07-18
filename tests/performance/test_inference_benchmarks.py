@@ -69,7 +69,11 @@ def test_inference_profiling_benchmark():
 
     # Should have timing breakdowns
     if metrics:  # Only if PyMDP available
-        for key in ["state_inference_ms", "policy_inference_ms", "action_selection_ms"]:
+        for key in [
+            "state_inference_ms",
+            "policy_inference_ms",
+            "action_selection_ms",
+        ]:
             if key in metrics:
                 assert metrics[key] >= 0
 

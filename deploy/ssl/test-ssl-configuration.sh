@@ -15,7 +15,7 @@ print_result() {
     local test_name=$1
     local result=$2
     local details=$3
-    
+
     if [ "$result" = "PASS" ]; then
         echo "✓ ${test_name}: PASS"
     else

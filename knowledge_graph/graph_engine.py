@@ -57,7 +57,9 @@ class KnowledgeNode:
     updated_at: datetime = field(default_factory=datetime.now)
     version: int = 1
     confidence: float = 1.0  # Confidence in this knowledge
-    source: Optional[str] = None  # Source of this knowledge (agent_id, sensor, etc.)
+    source: Optional[
+        str
+    ] = None  # Source of this knowledge (agent_id, sensor, etc.)
 
     def update(self, properties: Dict[str, Any]):
         """Update node properties and increment version."""
@@ -176,7 +178,10 @@ class KnowledgeGraph:
         Returns:
             True if edge was added successfully
         """
-        if edge.source_id not in self.nodes or edge.target_id not in self.nodes:
+        if (
+            edge.source_id not in self.nodes
+            or edge.target_id not in self.nodes
+        ):
             logger.error("Source or target node not found")
             return False
 
@@ -185,7 +190,9 @@ class KnowledgeGraph:
             return False
 
         # Add to graph
-        self.graph.add_edge(edge.source_id, edge.target_id, key=edge.id, data=edge)
+        self.graph.add_edge(
+            edge.source_id, edge.target_id, key=edge.id, data=edge
+        )
         self.edges[edge.id] = edge
 
         # Initialize history
@@ -274,7 +281,9 @@ class KnowledgeGraph:
         """
         return self.nodes.get(node_id)
 
-    def get_neighbors(self, node_id: str, edge_type: Optional[EdgeType] = None) -> List[str]:
+    def get_neighbors(
+        self, node_id: str, edge_type: Optional[EdgeType] = None
+    ) -> List[str]:
         """Get neighboring nodes.
 
         Args:
@@ -288,7 +297,9 @@ class KnowledgeGraph:
             return []
 
         neighbors = []
-        for _, target, key, data in self.graph.out_edges(node_id, keys=True, data=True):
+        for _, target, key, data in self.graph.out_edges(
+            node_id, keys=True, data=True
+        ):
             edge = data["data"]
             if edge_type is None or edge.type == edge_type:
                 neighbors.append(target)
@@ -338,7 +349,9 @@ class KnowledgeGraph:
         except nx.NetworkXNoPath:
             return None
 
-    def get_subgraph(self, node_ids: List[str], include_edges: bool = True) -> "KnowledgeGraph":
+    def get_subgraph(
+        self, node_ids: List[str], include_edges: bool = True
+    ) -> "KnowledgeGraph":
         """Extract a subgraph containing specified nodes.
 
         Args:
@@ -369,7 +382,9 @@ class KnowledgeGraph:
 
         return subgraph
 
-    def merge(self, other: "KnowledgeGraph", conflict_resolution: str = "newer"):
+    def merge(
+        self, other: "KnowledgeGraph", conflict_resolution: str = "newer"
+    ):
         """Merge another knowledge graph into this one.
 
         Args:
@@ -402,7 +417,10 @@ class KnowledgeGraph:
         for edge in other.edges.values():
             if edge.id not in self.edges:
                 # Check if nodes exist
-                if edge.source_id in self.nodes and edge.target_id in self.nodes:
+                if (
+                    edge.source_id in self.nodes
+                    and edge.target_id in self.nodes
+                ):
                     import copy
 
                     self.add_edge(copy.deepcopy(edge))
@@ -468,7 +486,10 @@ class KnowledgeGraph:
             "statistics": {
                 "node_count": len(self.nodes),
                 "edge_count": len(self.edges),
-                "node_types": {nt.value: len(self.type_index.get(nt, [])) for nt in NodeType},
+                "node_types": {
+                    nt.value: len(self.type_index.get(nt, []))
+                    for nt in NodeType
+                },
             },
         }
 

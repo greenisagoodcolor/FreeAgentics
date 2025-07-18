@@ -14,10 +14,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from api.main import app
-from auth.security_implementation import (
-    UserRole,
-    auth_manager,
-)
+from auth.security_implementation import UserRole, auth_manager
 from database.models import User
 from database.session import SessionLocal
 
@@ -43,10 +40,14 @@ class TestProductionPrivilegeEscalation:
         yield
         # Clean up test users
         db_session.query(User).filter(User.username.like("test_%")).delete()
-        db_session.query(User).filter(User.username.like("escalation_%")).delete()
+        db_session.query(User).filter(
+            User.username.like("escalation_%")
+        ).delete()
         db_session.commit()
 
-    def test_concurrent_privilege_escalation_attempts(self, client, db_session):
+    def test_concurrent_privilege_escalation_attempts(
+        self, client, db_session
+    ):
         """Test system behavior under concurrent escalation attempts."""
         # Create test user
         user = auth_manager.register_user(
@@ -61,9 +62,15 @@ class TestProductionPrivilegeEscalation:
 
         # Define escalation attempts
         escalation_attempts = [
-            lambda: client.put(f"/api/v1/users/{user.id}", headers=headers, json={"role": "admin"}),
+            lambda: client.put(
+                f"/api/v1/users/{user.id}",
+                headers=headers,
+                json={"role": "admin"},
+            ),
             lambda: client.post(
-                "/api/v1/users/elevate", headers=headers, json={"target_role": "admin"}
+                "/api/v1/users/elevate",
+                headers=headers,
+                json={"target_role": "admin"},
             ),
             lambda: client.patch(
                 "/api/v1/users/me",
@@ -135,7 +142,9 @@ class TestProductionPrivilegeEscalation:
         # Attacker attempts to bypass ownership
         bypass_attempts = [
             # Direct access attempt
-            lambda: client.get(f"/api/v1/agents/{victim_agent_id}", headers=headers),
+            lambda: client.get(
+                f"/api/v1/agents/{victim_agent_id}", headers=headers
+            ),
             # Bulk operations
             lambda: client.post(
                 "/api/v1/agents/bulk",
@@ -143,7 +152,11 @@ class TestProductionPrivilegeEscalation:
                 json={"agent_ids": [victim_agent_id], "action": "delete"},
             ),
             # Join-based access
-            lambda: client.get("/api/v1/agents", headers=headers, params={"user_id": victim.id}),
+            lambda: client.get(
+                "/api/v1/agents",
+                headers=headers,
+                params={"user_id": victim.id},
+            ),
             # Subquery injection
             lambda: client.get(
                 "/api/v1/agents",
@@ -158,7 +171,9 @@ class TestProductionPrivilegeEscalation:
             if response.status_code == 200:
                 data = response.json()
                 if isinstance(data, list):
-                    assert not any("Victim's Secret Agent" in str(item) for item in data)
+                    assert not any(
+                        "Victim's Secret Agent" in str(item) for item in data
+                    )
                 else:
                     assert "Victim's Secret Agent" not in str(data)
                     assert "confidential_data" not in str(data)
@@ -257,7 +272,9 @@ class TestProductionPrivilegeEscalation:
 
         for attack in persistence_attacks:
             if attack["method"] == "POST":
-                response = client.post(attack["endpoint"], headers=headers, json=attack["json"])
+                response = client.post(
+                    attack["endpoint"], headers=headers, json=attack["json"]
+                )
 
             # Should be blocked
             assert response.status_code in [401, 403, 404]
@@ -266,7 +283,9 @@ class TestProductionPrivilegeEscalation:
         db_session.refresh(user)
         assert user.role == UserRole.OBSERVER
 
-    def test_privilege_escalation_via_coalition_features(self, client, db_session):
+    def test_privilege_escalation_via_coalition_features(
+        self, client, db_session
+    ):
         """Test escalation through coalition management features."""
         # Create users with different roles
         observer = auth_manager.register_user(
@@ -310,7 +329,9 @@ class TestProductionPrivilegeEscalation:
             coalition_id = response.json()["id"]
 
             # Verify coalition doesn't grant admin permissions
-            response = client.get(f"/api/v1/coalitions/{coalition_id}", headers=headers)
+            response = client.get(
+                f"/api/v1/coalitions/{coalition_id}", headers=headers
+            )
             if response.status_code == 200:
                 coalition = response.json()
                 assert "admin_system" not in coalition.get("permissions", [])
@@ -373,7 +394,9 @@ class TestProductionPrivilegeEscalation:
             # Rapid requests
             for i in range(20):
                 response = client.put(
-                    f"/api/v1/users/{user.id}", headers=headers, json={"role": "admin"}
+                    f"/api/v1/users/{user.id}",
+                    headers=headers,
+                    json={"role": "admin"},
                 )
 
                 # Should either rate limit or reject
@@ -436,7 +459,9 @@ class TestProductionPrivilegeEscalation:
         for error in error_messages:
             error_str = json.dumps(error).lower()
             # Should use generic error messages
-            assert not any(pattern.lower() in error_str for pattern in sensitive_patterns)
+            assert not any(
+                pattern.lower() in error_str for pattern in sensitive_patterns
+            )
 
 
 class TestPrivilegeEscalationMonitoring:
@@ -495,7 +520,11 @@ class TestPrivilegeEscalationMonitoring:
         # Various escalation attempts
         escalation_attempts = [
             # Role modification
-            lambda: client.put(f"/api/v1/users/{user.id}", headers=headers, json={"role": "admin"}),
+            lambda: client.put(
+                f"/api/v1/users/{user.id}",
+                headers=headers,
+                json={"role": "admin"},
+            ),
             # Permission injection
             lambda: client.post(
                 "/api/v1/permissions",
@@ -526,11 +555,17 @@ class TestPrivilegeEscalationMonitoring:
 
         # Verify severity
         high_severity_logs = [
-            log for log in escalation_logs if log["severity"] in ["HIGH", "CRITICAL"]
+            log
+            for log in escalation_logs
+            if log["severity"] in ["HIGH", "CRITICAL"]
         ]
-        assert len(high_severity_logs) > 0, "Escalation attempts should be high severity"
+        assert (
+            len(high_severity_logs) > 0
+        ), "Escalation attempts should be high severity"
 
-    def test_repeated_escalation_pattern_detection(self, client, monitoring_setup):
+    def test_repeated_escalation_pattern_detection(
+        self, client, monitoring_setup
+    ):
         """Test detection of repeated escalation patterns."""
         # Create attacker
         attacker = auth_manager.register_user(
@@ -546,14 +581,22 @@ class TestPrivilegeEscalationMonitoring:
         # Simulate pattern of escalation attempts
         for i in range(5):
             # Try different escalation techniques
-            client.put(f"/api/v1/users/{attacker.id}", headers=headers, json={"role": "admin"})
+            client.put(
+                f"/api/v1/users/{attacker.id}",
+                headers=headers,
+                json={"role": "admin"},
+            )
 
             client.get("/api/v1/admin/users", headers=headers)
 
             time.sleep(0.1)
 
         # Check for pattern detection in logs
-        user_logs = [log for log in monitoring_setup if log.get("user_id") == attacker.id]
+        user_logs = [
+            log
+            for log in monitoring_setup
+            if log.get("user_id") == attacker.id
+        ]
 
         # Should have multiple escalation attempts logged
         assert len(user_logs) >= 5
