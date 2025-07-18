@@ -1,5 +1,4 @@
 import * as React from "react";
-import Image from "next/image";
 
 const Avatar = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
@@ -16,7 +15,8 @@ const AvatarImage = React.forwardRef<HTMLImageElement, React.ImgHTMLAttributes<H
   ({ className, src, alt, ...props }, ref) => {
     if (src) {
       return (
-        <Image
+        <img
+          ref={ref}
           src={src}
           alt={alt || "Avatar"}
           width={40}

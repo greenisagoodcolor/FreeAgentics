@@ -1,0 +1,446 @@
+# FreeAgentics Production Monitoring Configuration
+# Comprehensive monitoring setup with alert thresholds and escalation policies
+
+version: "2.0"
+service: "freeagentics"
+environment: "production"
+updated: "2025-01-18"
+
+# Global Configuration
+global:
+  evaluation_interval: 15s
+  scrape_interval: 15s
+  retention_days: 90
+
+# Alert Thresholds Configuration
+alert_thresholds:
+  # API Performance Thresholds
+  api_performance:
+    response_time:
+      p50:
+        warning: 100   # ms
+        critical: 200  # ms
+      p95:
+        warning: 500   # ms
+        critical: 1000 # ms
+      p99:
+        warning: 1000  # ms
+        critical: 2000 # ms
+
+    error_rate:
+      warning: 0.01   # 1%
+      critical: 0.05  # 5%
+      page: 0.10      # 10% - page on-call
+
+    rate_limiting:
+      warning: 100    # requests/min/IP
+      critical: 500   # requests/min/IP
+      block: 1000     # requests/min/IP - auto-block
+
+  # Agent Performance Thresholds
+  agent_performance:
+    inference_time:
+      warning: 100    # ms
+      critical: 200   # ms
+      timeout: 1000   # ms
+
+    memory_usage:
+      per_agent:
+        warning: 25   # MB
+        critical: 30  # MB
+        kill: 35      # MB - kill agent
+
+      total:
+        warning: 1500  # MB
+        critical: 2000 # MB
+        oom: 2500      # MB - OOM risk
+
+    cpu_usage:
+      per_agent:
+        warning: 20    # %
+        critical: 30   # %
+
+      total:
+        warning: 70    # %
+        critical: 85   # %
+        throttle: 95   # % - throttle new agents
+
+    belief_accuracy:
+      warning: 0.75    # 75%
+      critical: 0.60   # 60%
+      restart: 0.50    # 50% - restart agent
+
+    free_energy:
+      warning: 5.0
+      critical: 8.0
+      divergence: 10.0 # agent divergence
+
+  # System Resource Thresholds
+  system_resources:
+    database:
+      connections:
+        warning: 150
+        critical: 180
+        max: 200       # connection pool limit
+
+      query_time:
+        warning: 100   # ms
+        critical: 500  # ms
+        slow_log: 1000 # ms
+
+      replication_lag:
+        warning: 1     # seconds
+        critical: 5    # seconds
+        page: 10       # seconds
+
+    redis:
+      memory_usage:
+        warning: 0.80  # 80%
+        critical: 0.90 # 90%
+        eviction: 0.95 # 95% - start eviction
+
+      hit_rate:
+        warning: 0.80  # 80%
+        critical: 0.70 # 70%
+        review: 0.60   # 60% - review cache strategy
+
+      latency:
+        warning: 10    # ms
+        critical: 50   # ms
+
+    disk:
+      usage:
+        warning: 0.70  # 70%
+        critical: 0.85 # 85%
+        emergency: 0.95 # 95%
+
+      iops:
+        warning: 5000
+        critical: 8000
+        throttle: 10000
+
+    network:
+      bandwidth:
+        warning: 800   # Mbps
+        critical: 900  # Mbps
+        limit: 1000    # Mbps
+
+      packet_loss:
+        warning: 0.001 # 0.1%
+        critical: 0.01 # 1%
+        page: 0.05     # 5%
+
+  # Security Thresholds
+  security:
+    authentication:
+      failed_attempts:
+        warning: 10    # per minute per IP
+        critical: 50   # per minute per IP
+        block: 100     # per minute per IP
+
+      concurrent_sessions:
+        warning: 5     # per user
+        critical: 10   # per user
+        terminate: 20  # per user
+
+    ddos_protection:
+      requests_per_second:
+        warning: 1000
+        critical: 5000
+        activate_mitigation: 10000
+
+      unique_ips_per_minute:
+        warning: 1000
+        critical: 5000
+        cloudflare_activate: 10000
+
+    ssl_certificate:
+      expiry_days:
+        warning: 30
+        critical: 14
+        emergency: 7
+
+  # Business Metrics Thresholds
+  business_metrics:
+    active_users:
+      minimum:
+        warning: 100
+        critical: 50
+        alert_product: 25
+
+      drop_rate:
+        warning: 0.10  # 10% drop in 5 min
+        critical: 0.25 # 25% drop in 5 min
+        page: 0.50     # 50% drop in 5 min
+
+    task_completion:
+      success_rate:
+        warning: 0.90  # 90%
+        critical: 0.80 # 80%
+        review: 0.70   # 70%
+
+      time_to_complete:
+        p95:
+          warning: 30  # seconds
+          critical: 60 # seconds
+          timeout: 120 # seconds
+
+    coalition_formation:
+      success_rate:
+        warning: 0.85  # 85%
+        critical: 0.75 # 75%
+        disable: 0.60  # 60%
+
+      formation_time:
+        warning: 5     # seconds
+        critical: 10   # seconds
+        timeout: 30    # seconds
+
+# Alert Routing Configuration
+alert_routing:
+  # Define teams and their responsibilities
+  teams:
+    platform:
+      email: "platform@freeagentics.com"
+      slack: "#platform-alerts"
+      pagerduty: "platform-oncall"
+
+    security:
+      email: "security@freeagentics.com"
+      slack: "#security-alerts"
+      pagerduty: "security-oncall"
+
+    product:
+      email: "product@freeagentics.com"
+      slack: "#product-alerts"
+
+    engineering_leads:
+      email: "eng-leads@freeagentics.com"
+      slack: "#engineering-leadership"
+
+  # Route alerts to appropriate teams
+  routes:
+    - match:
+        severity: "critical"
+        service: "api"
+      receiver: "platform"
+      continue: true
+
+    - match:
+        severity: "critical"
+        category: "security"
+      receiver: "security"
+      continue: true
+
+    - match:
+        severity: "warning"
+        category: "business"
+      receiver: "product"
+
+    - match:
+        severity: "emergency"
+      receiver: "engineering_leads"
+      continue: true
+
+  # Escalation policies
+  escalation_policies:
+    standard:
+      - wait: 5m
+        notify: ["slack"]
+      - wait: 15m
+        notify: ["email", "slack"]
+      - wait: 30m
+        notify: ["pagerduty", "email", "slack"]
+
+    critical:
+      - wait: 0m
+        notify: ["pagerduty", "slack"]
+      - wait: 5m
+        notify: ["engineering_leads"]
+      - wait: 15m
+        notify: ["cto"]
+
+    security:
+      - wait: 0m
+        notify: ["security", "pagerduty"]
+      - wait: 5m
+        notify: ["ciso", "engineering_leads"]
+
+# Automated Response Configuration
+automated_responses:
+  # Memory pressure response
+  high_memory_usage:
+    trigger: "system_resources.memory.total > critical"
+    actions:
+      - type: "scale_out"
+        target: "agent_pool"
+        increment: 2
+      - type: "gc_aggressive"
+        target: "all_agents"
+      - type: "cache_clear"
+        target: "redis"
+        preserve: ["session", "auth"]
+
+  # High error rate response
+  high_error_rate:
+    trigger: "api_performance.error_rate > critical"
+    actions:
+      - type: "circuit_breaker"
+        target: "failing_endpoints"
+        duration: "5m"
+      - type: "rollback"
+        condition: "recent_deployment < 30m"
+      - type: "scale_out"
+        target: "api_servers"
+        increment: 3
+
+  # DDoS response
+  ddos_detected:
+    trigger: "security.ddos_protection.requests_per_second > activate_mitigation"
+    actions:
+      - type: "rate_limit_aggressive"
+        multiplier: 0.1
+      - type: "cloudflare_enable"
+        mode: "under_attack"
+      - type: "block_suspicious_ips"
+        threshold: 100
+      - type: "notify"
+        targets: ["security", "platform"]
+
+  # Database issues response
+  database_issues:
+    trigger: "system_resources.database.connections > critical OR system_resources.database.query_time > critical"
+    actions:
+      - type: "connection_pool_reset"
+        preserve_ratio: 0.5
+      - type: "query_cache_enable"
+        duration: "30m"
+      - type: "read_replica_failover"
+        condition: "primary_unhealthy"
+
+# Health Check Configuration
+health_checks:
+  endpoints:
+    api:
+      url: "https://api.freeagentics.com/health"
+      interval: 10s
+      timeout: 5s
+      success_threshold: 2
+      failure_threshold: 3
+
+    agent_coordinator:
+      url: "https://api.freeagentics.com/api/v1/coordination/health"
+      interval: 30s
+      timeout: 10s
+      success_threshold: 1
+      failure_threshold: 2
+
+    belief_system:
+      url: "https://api.freeagentics.com/api/v1/beliefs/health"
+      interval: 60s
+      timeout: 15s
+      success_threshold: 1
+      failure_threshold: 3
+
+  synthetic_monitoring:
+    user_journey:
+      - name: "Create Agent"
+        endpoint: "/api/v1/agents"
+        method: "POST"
+        interval: 5m
+        timeout: 30s
+
+      - name: "Agent Inference"
+        endpoint: "/api/v1/inference"
+        method: "POST"
+        interval: 5m
+        timeout: 10s
+
+      - name: "Coalition Formation"
+        endpoint: "/api/v1/coalitions"
+        method: "POST"
+        interval: 10m
+        timeout: 30s
+
+# Dashboard Configuration
+dashboards:
+  overview:
+    refresh: 10s
+    default_timerange: "1h"
+    sections:
+      - name: "System Health"
+        panels: ["uptime", "error_rate", "latency", "throughput"]
+      - name: "Agent Performance"
+        panels: ["active_agents", "inference_time", "belief_accuracy", "memory_usage"]
+      - name: "Business Metrics"
+        panels: ["active_users", "task_completion", "user_satisfaction"]
+
+  agent_details:
+    refresh: 5s
+    default_timerange: "30m"
+    sections:
+      - name: "Agent State"
+        panels: ["belief_state", "free_energy", "action_history"]
+      - name: "Performance"
+        panels: ["inference_histogram", "memory_timeline", "cpu_usage"]
+
+  security:
+    refresh: 5s
+    default_timerange: "6h"
+    sections:
+      - name: "Authentication"
+        panels: ["auth_attempts", "failed_logins", "active_sessions"]
+      - name: "Threats"
+        panels: ["rate_limiting", "blocked_ips", "anomaly_detection"]
+
+# Retention Policies
+retention_policies:
+  metrics:
+    raw: 7d
+    5m_aggregates: 30d
+    1h_aggregates: 90d
+    1d_aggregates: 365d
+
+  logs:
+    application: 30d
+    security: 90d
+    audit: 365d
+    debug: 7d
+
+  alerts:
+    active: 90d
+    resolved: 30d
+    acknowledged: 180d
+
+# Integration Configuration
+integrations:
+  prometheus:
+    endpoint: "http://prometheus:9090"
+    scrape_configs:
+      - job_name: "freeagentics"
+        metrics_path: "/metrics"
+        targets: ["api:8000", "agent-coordinator:8001"]
+
+  grafana:
+    endpoint: "http://grafana:3000"
+    api_key: "${GRAFANA_API_KEY}"
+
+  alertmanager:
+    endpoint: "http://alertmanager:9093"
+
+  elasticsearch:
+    endpoint: "http://elasticsearch:9200"
+    indices:
+      logs: "freeagentics-logs-*"
+      metrics: "freeagentics-metrics-*"
+
+  pagerduty:
+    api_key: "${PAGERDUTY_API_KEY}"
+    routing_key: "${PAGERDUTY_ROUTING_KEY}"
+
+  slack:
+    webhook_url: "${SLACK_WEBHOOK_URL}"
+
+  datadog:
+    api_key: "${DATADOG_API_KEY}"
+    site: "datadoghq.com"

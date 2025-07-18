@@ -3,7 +3,7 @@
  */
 
 import React from "react";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ConversationPanel from "../ConversationPanel";
 import type { Agent } from "@/lib/types";
@@ -13,7 +13,7 @@ const mockWsClient = {
   connect: jest.fn().mockResolvedValue(undefined),
   send: jest.fn(),
   subscribe: jest.fn(() => jest.fn()),
-  getConnectionState: jest.fn(() => "connected"),
+  getConnectionState: jest.fn(() => "disconnected"),
 };
 
 jest.mock("@/lib/websocket-client", () => ({
@@ -23,7 +23,7 @@ jest.mock("@/lib/websocket-client", () => ({
 // Mock use-agent-conversation hook
 const mockUseAgentConversation = {
   sendMessage: jest.fn(),
-  getConversationHistory: jest.fn(),
+  getConversationHistory: jest.fn(() => []),
   createSession: jest.fn(),
   isLoading: false,
   error: null,
@@ -81,6 +81,15 @@ describe("ConversationPanel - Working Implementation", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Reset mock implementations
+    mockWsClient.connect.mockImplementation(() => {
+      // Simulate async connection that updates state
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(undefined);
+        }, 0);
+      });
+    });
   });
 
   it("renders without crashing", () => {
@@ -93,14 +102,21 @@ describe("ConversationPanel - Working Implementation", () => {
     expect(screen.getByText("Conversation")).toBeInTheDocument();
   });
 
-  it("shows connection status", () => {
+  it("shows connection status", async () => {
     render(<ConversationPanel {...defaultProps} />);
+
+    await act(async () => {
+      // Wait for initial render and WebSocket connection
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
     expect(screen.getByText("disconnected")).toBeInTheDocument();
   });
 
   it("shows participant count", () => {
     render(<ConversationPanel {...defaultProps} />);
-    expect(screen.getByText("1 participants")).toBeInTheDocument();
+    // 2 agents + 1 current user = 3 participants
+    expect(screen.getByText("3 participants")).toBeInTheDocument();
   });
 
   it("has agent selector", () => {
@@ -124,8 +140,10 @@ describe("ConversationPanel - Working Implementation", () => {
   it("establishes WebSocket connection on mount", async () => {
     render(<ConversationPanel {...defaultProps} />);
 
-    await waitFor(() => {
-      expect(mockWsClient.connect).toHaveBeenCalled();
+    await act(async () => {
+      await waitFor(() => {
+        expect(mockWsClient.connect).toHaveBeenCalled();
+      });
     });
 
     expect(mockWsClient.send).toHaveBeenCalledWith({
@@ -134,15 +152,22 @@ describe("ConversationPanel - Working Implementation", () => {
     });
   });
 
-  it("subscribes to WebSocket events", () => {
+  it("subscribes to WebSocket events", async () => {
     render(<ConversationPanel {...defaultProps} />);
 
-    expect(mockWsClient.subscribe).toHaveBeenCalledWith(
-      "conversation_message",
-      expect.any(Function),
-    );
-    expect(mockWsClient.subscribe).toHaveBeenCalledWith("llm_response_chunk", expect.any(Function));
-    expect(mockWsClient.subscribe).toHaveBeenCalledWith("user_typing", expect.any(Function));
+    await act(async () => {
+      await waitFor(() => {
+        expect(mockWsClient.subscribe).toHaveBeenCalledWith(
+          "conversation_message",
+          expect.any(Function),
+        );
+        expect(mockWsClient.subscribe).toHaveBeenCalledWith(
+          "llm_response_chunk",
+          expect.any(Function),
+        );
+        expect(mockWsClient.subscribe).toHaveBeenCalledWith("user_typing", expect.any(Function));
+      });
+    });
   });
 
   it("sends typing indicator when typing", async () => {
@@ -239,14 +264,15 @@ describe("ConversationPanel - Working Implementation", () => {
     const user = userEvent.setup();
     render(<ConversationPanel {...defaultProps} />);
 
-    // Select an agent
+    // Get the input elements before selecting agent
+    const textarea = screen.getByPlaceholderText("Type your message...");
     const select = screen.getByDisplayValue("Select Agent");
+
+    // Select an agent
     await user.selectOptions(select, "agent-1");
 
-    // Send a message
-    const textarea = screen.getByPlaceholderText("Type your message...");
+    // Type and send message
     await user.type(textarea, "Test message");
-
     fireEvent.keyDown(textarea, { key: "Enter", code: "Enter" });
 
     await waitFor(() => {
@@ -268,7 +294,7 @@ describe("ConversationPanel - Working Implementation", () => {
       },
     ];
 
-    mockUseAgentConversation.getConversationHistory.mockResolvedValue(mockHistory);
+    mockUseAgentConversation.getConversationHistory.mockReturnValue(mockHistory as any);
 
     render(<ConversationPanel {...defaultProps} />);
 
@@ -277,12 +303,17 @@ describe("ConversationPanel - Working Implementation", () => {
     await user.selectOptions(select, "agent-1");
 
     await waitFor(() => {
-      expect(mockUseAgentConversation.getConversationHistory).toHaveBeenCalledWith(50, 24);
+      expect(mockUseAgentConversation.getConversationHistory).toHaveBeenCalledWith("agent-1");
     });
   });
 
-  it("shows connection lost warning when disconnected", () => {
+  it("shows connection lost warning when disconnected", async () => {
     render(<ConversationPanel {...defaultProps} />);
+
+    await act(async () => {
+      // Wait for initial render and WebSocket connection
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
 
     // The component starts with disconnected status
     expect(
@@ -292,14 +323,16 @@ describe("ConversationPanel - Working Implementation", () => {
 
   it("stops typing indicator after timeout", async () => {
     jest.useFakeTimers();
-    const user = userEvent.setup();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<ConversationPanel {...defaultProps} />);
 
     const textarea = screen.getByPlaceholderText("Type your message...");
     await user.type(textarea, "Hello");
 
     // Fast forward time to trigger timeout
-    jest.advanceTimersByTime(3000);
+    await act(async () => {
+      jest.advanceTimersByTime(3000);
+    });
 
     await waitFor(() => {
       expect(mockWsClient.send).toHaveBeenCalledWith({

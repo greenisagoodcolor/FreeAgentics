@@ -1,0 +1,320 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "freeagentics-overview",
+    "title": "FreeAgentics System Overview",
+    "tags": ["freeagentics", "overview", "production"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 0,
+    "refresh": "10s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "templating": {
+      "list": [
+        {
+          "name": "datasource",
+          "type": "datasource",
+          "query": "prometheus",
+          "current": {
+            "text": "Prometheus",
+            "value": "Prometheus"
+          }
+        },
+        {
+          "name": "environment",
+          "type": "custom",
+          "current": {
+            "text": "production",
+            "value": "production"
+          },
+          "options": [
+            {"text": "production", "value": "production"},
+            {"text": "staging", "value": "staging"},
+            {"text": "development", "value": "development"}
+          ]
+        }
+      ]
+    },
+    "panels": [
+      {
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0},
+        "id": 1,
+        "title": "System Uptime",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "avg(up{job=\"freeagentics-app\"})",
+            "format": "time_series",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "orientation": "auto",
+          "textMode": "auto",
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 0.95},
+                {"color": "green", "value": 0.99}
+              ]
+            },
+            "unit": "percentunit"
+          }
+        }
+      },
+      {
+        "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0},
+        "id": 2,
+        "title": "Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total{job=\"freeagentics-app\",status=~\"5..\"}[5m])) / sum(rate(http_requests_total{job=\"freeagentics-app\"}[5m]))",
+            "format": "time_series",
+            "legendFormat": "Error Rate",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percentunit",
+            "max": 0.1,
+            "min": 0
+          }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [0.05],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": ["A", "5m", "now"]
+              },
+              "reducer": {
+                "params": [],
+                "type": "avg"
+              },
+              "type": "query"
+            }
+          ],
+          "noDataState": "no_data",
+          "executionErrorState": "alerting",
+          "frequency": "60s",
+          "handler": 1,
+          "name": "High Error Rate Alert",
+          "message": "Error rate exceeded 5%"
+        }
+      },
+      {
+        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0},
+        "id": 3,
+        "title": "Request Latency (P95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"freeagentics-app\"}[5m])) by (le))",
+            "format": "time_series",
+            "legendFormat": "P95 Latency",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "s",
+            "label": "Response Time"
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 0.5,
+            "color": "rgba(234, 112, 112, 0.22)"
+          }
+        ]
+      },
+      {
+        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0},
+        "id": 4,
+        "title": "Requests Per Second",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total{job=\"freeagentics-app\"}[5m]))",
+            "format": "time_series",
+            "legendFormat": "RPS",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "reqps",
+            "label": "Requests/sec"
+          }
+        ]
+      },
+      {
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "id": 5,
+        "title": "Active Agents",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "freeagentics_system_active_agents_total",
+            "format": "time_series",
+            "legendFormat": "Active Agents",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "short",
+            "label": "Count"
+          }
+        ]
+      },
+      {
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "id": 6,
+        "title": "Memory Usage by Component",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "freeagentics_system_memory_usage_bytes / 1024 / 1024",
+            "format": "time_series",
+            "legendFormat": "System Total",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(freeagentics_agent_memory_usage_bytes) by (agent_id) / 1024 / 1024",
+            "format": "time_series",
+            "legendFormat": "Agent {{agent_id}}",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "decmbytes",
+            "label": "Memory (MB)"
+          }
+        ]
+      },
+      {
+        "gridPos": {"h": 8, "w": 8, "x": 0, "y": 16},
+        "id": 7,
+        "title": "Agent Inference Time Distribution",
+        "type": "heatmap",
+        "targets": [
+          {
+            "expr": "sum(rate(freeagentics_agent_inference_duration_seconds_bucket[5m])) by (le)",
+            "format": "heatmap",
+            "legendFormat": "{{le}}",
+            "refId": "A"
+          }
+        ],
+        "dataFormat": "timeseries",
+        "cards": {
+          "cardPadding": null,
+          "cardRound": null
+        },
+        "color": {
+          "cardColor": "#b4ff00",
+          "colorScale": "sqrt",
+          "colorScheme": "interpolateOranges",
+          "exponent": 0.5,
+          "mode": "spectrum"
+        },
+        "heatmap": {},
+        "tooltip": {
+          "show": true,
+          "showHistogram": false
+        },
+        "xAxis": {
+          "show": true
+        },
+        "yAxis": {
+          "format": "s",
+          "decimals": null,
+          "logBase": 1,
+          "splitFactor": null,
+          "show": true
+        },
+        "yBucketBound": "auto"
+      },
+      {
+        "gridPos": {"h": 8, "w": 8, "x": 8, "y": 16},
+        "id": 8,
+        "title": "Database Performance",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "pg_stat_database_numbackends{datname=\"freeagentics\"}",
+            "format": "time_series",
+            "legendFormat": "Active Connections",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(pg_stat_database_xact_commit{datname=\"freeagentics\"}[5m])",
+            "format": "time_series",
+            "legendFormat": "Commits/sec",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "short",
+            "label": "Count"
+          }
+        ]
+      },
+      {
+        "gridPos": {"h": 8, "w": 8, "x": 16, "y": 16},
+        "id": 9,
+        "title": "Cache Hit Rate",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "rate(redis_keyspace_hits_total[5m]) / (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m]))",
+            "format": "time_series",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "orientation": "auto",
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 0.7},
+                {"color": "green", "value": 0.8}
+              ]
+            },
+            "unit": "percentunit",
+            "min": 0,
+            "max": 1
+          }
+        }
+      }
+    ]
+  }
+}

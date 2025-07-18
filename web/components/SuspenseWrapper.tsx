@@ -2,7 +2,7 @@
 
 import React, { Suspense, ComponentType, ReactNode } from "react";
 import { ErrorBoundary } from "./ErrorBoundary";
-import LoadingState from "./LoadingState";
+import { LoadingState } from "./LoadingState";
 import { Skeleton, SkeletonContainer } from "./Skeleton";
 
 interface SuspenseWrapperProps {
@@ -83,7 +83,7 @@ export function lazyWithPreload<T extends ComponentType<Record<string, unknown>>
 
   const WrappedComponent = (props: React.ComponentProps<T>) => (
     <SuspenseWrapper fallback={options?.fallback} errorFallback={options?.errorFallback}>
-      <LazyComponent {...props} />
+      <LazyComponent {...(props as any)} />
     </SuspenseWrapper>
   );
 

@@ -1,0 +1,354 @@
+# FreeAgentics Automated Incident Response Configuration
+# Defines automated responses to various system conditions
+
+version: "1.0"
+service: "freeagentics"
+environment: "production"
+
+# Incident Response Playbooks
+playbooks:
+  # High Memory Usage Response
+  high_memory_usage:
+    name: "High Memory Usage Response"
+    description: "Automated response to high memory usage conditions"
+    triggers:
+      - metric: "freeagentics_system_memory_usage_bytes"
+        condition: "> 2000 * 1024 * 1024"  # 2GB
+        duration: "5m"
+
+    steps:
+      - name: "Collect Diagnostics"
+        type: "diagnostic"
+        actions:
+          - command: "collect_memory_profile"
+            timeout: "30s"
+          - command: "list_top_memory_consumers"
+            timeout: "10s"
+
+      - name: "Aggressive Garbage Collection"
+        type: "remediation"
+        actions:
+          - command: "trigger_gc_all_agents"
+            params:
+              mode: "aggressive"
+          - wait: "30s"
+
+      - name: "Kill High Memory Agents"
+        type: "remediation"
+        condition: "memory_still_high"
+        actions:
+          - command: "kill_agents_above_memory_threshold"
+            params:
+              threshold_mb: 35
+              preserve_critical: true
+
+      - name: "Clear Non-Essential Caches"
+        type: "remediation"
+        actions:
+          - command: "clear_redis_cache"
+            params:
+              preserve: ["session", "auth", "rate_limit"]
+          - command: "clear_query_cache"
+
+      - name: "Scale Out If Needed"
+        type: "scaling"
+        condition: "memory_usage > 1800MB after remediation"
+        actions:
+          - command: "scale_out_agent_pool"
+            params:
+              increment: 2
+              max_total: 50
+
+      - name: "Notify Teams"
+        type: "notification"
+        actions:
+          - notify:
+              teams: ["platform"]
+              severity: "warning"
+              message: "High memory usage detected and mitigated"
+              include_diagnostics: true
+
+  # API Performance Degradation
+  api_performance_degradation:
+    name: "API Performance Degradation Response"
+    description: "Handle degraded API performance"
+    triggers:
+      - metric: "http_request_duration_seconds"
+        percentile: 95
+        condition: "> 1.0"  # 1 second
+        duration: "3m"
+
+    steps:
+      - name: "Enable Circuit Breaker"
+        type: "protection"
+        actions:
+          - command: "enable_circuit_breaker"
+            params:
+              endpoints: ["auto_detect_slow"]
+              threshold_ms: 1000
+              failure_rate: 0.5
+              duration: "5m"
+
+      - name: "Enable Query Cache"
+        type: "optimization"
+        actions:
+          - command: "enable_aggressive_caching"
+            params:
+              ttl_seconds: 300
+              endpoints: ["all_read_endpoints"]
+
+      - name: "Scale API Servers"
+        type: "scaling"
+        condition: "load_balancer_queue_depth > 100"
+        actions:
+          - command: "scale_api_servers"
+            params:
+              increment: 3
+              max_total: 20
+
+      - name: "Shed Non-Critical Load"
+        type: "protection"
+        condition: "p95_latency > 2s"
+        actions:
+          - command: "enable_load_shedding"
+            params:
+              priority_threshold: "high"
+              reject_percentage: 0.1
+
+  # Database Connection Exhaustion
+  database_connection_exhaustion:
+    name: "Database Connection Exhaustion Response"
+    description: "Handle database connection pool exhaustion"
+    triggers:
+      - metric: "pg_stat_database_numbackends"
+        condition: "> 180"
+        duration: "1m"
+
+    steps:
+      - name: "Kill Idle Connections"
+        type: "remediation"
+        priority: 1
+        actions:
+          - command: "kill_idle_db_connections"
+            params:
+              idle_time_seconds: 300
+              preserve_count: 50
+
+      - name: "Reset Connection Pool"
+        type: "remediation"
+        priority: 2
+        actions:
+          - command: "reset_connection_pool"
+            params:
+              preserve_ratio: 0.5
+              gradual: true
+
+      - name: "Enable Read Replica"
+        type: "scaling"
+        actions:
+          - command: "route_reads_to_replica"
+            params:
+              percentage: 0.7
+              health_check_first: true
+
+      - name: "Reduce Connection Limits"
+        type: "protection"
+        actions:
+          - command: "reduce_max_connections_per_service"
+            params:
+              reduction_factor: 0.8
+              duration: "30m"
+
+  # Security Incident Response
+  ddos_attack:
+    name: "DDoS Attack Response"
+    description: "Automated DDoS mitigation"
+    triggers:
+      - metric: "http_requests_total"
+        condition: "rate > 10000"
+        duration: "30s"
+      - metric: "unique_source_ips"
+        condition: "> 5000"
+        duration: "1m"
+
+    steps:
+      - name: "Enable Cloudflare Protection"
+        type: "protection"
+        priority: 1
+        actions:
+          - command: "cloudflare_under_attack_mode"
+            params:
+              enable: true
+              challenge_threshold: "medium"
+
+      - name: "Aggressive Rate Limiting"
+        type: "protection"
+        priority: 1
+        actions:
+          - command: "set_rate_limits"
+            params:
+              global_rps: 100
+              per_ip_rps: 10
+              burst_multiplier: 1.5
+
+      - name: "Block Suspicious IPs"
+        type: "protection"
+        actions:
+          - command: "analyze_and_block_ips"
+            params:
+              threshold_rps: 100
+              pattern_detection: true
+              geoip_filtering: true
+
+      - name: "Scale Protection Layer"
+        type: "scaling"
+        actions:
+          - command: "scale_edge_nodes"
+            params:
+              regions: ["us-east", "us-west", "eu-central"]
+              increment: 2
+
+      - name: "Emergency Notification"
+        type: "notification"
+        actions:
+          - notify:
+              teams: ["security", "platform", "leadership"]
+              severity: "critical"
+              channels: ["pagerduty", "slack", "email", "sms"]
+              message: "DDoS attack detected and mitigation activated"
+
+  # Agent Coordination Failure
+  coordination_failure:
+    name: "Agent Coordination Failure Response"
+    description: "Handle widespread coordination failures"
+    triggers:
+      - metric: "freeagentics_agent_coordination_errors_total"
+        condition: "rate > 10"
+        duration: "2m"
+
+    steps:
+      - name: "Reset Coordination State"
+        type: "remediation"
+        actions:
+          - command: "reset_coordination_locks"
+            params:
+              force: false
+              preserve_active: true
+
+      - name: "Restart Failed Coordinators"
+        type: "remediation"
+        actions:
+          - command: "restart_failed_coordinators"
+            params:
+              health_check_first: true
+              staggered_restart: true
+              delay_seconds: 10
+
+      - name: "Reduce Coordination Complexity"
+        type: "degradation"
+        actions:
+          - command: "simplify_coordination"
+            params:
+              max_agents_per_coalition: 3
+              disable_complex_strategies: true
+
+      - name: "Failover to Backup Coordinator"
+        type: "failover"
+        condition: "primary_coordinator_unhealthy"
+        actions:
+          - command: "promote_backup_coordinator"
+            params:
+              verify_state_sync: true
+              graceful_transition: true
+
+# Response Automation Rules
+automation_rules:
+  # Auto-scaling rules
+  auto_scaling:
+    agent_pool:
+      scale_up:
+        condition: "avg(agent_utilization) > 0.8 for 5m"
+        action: "scale_out"
+        increment: 2
+        cooldown: "5m"
+
+      scale_down:
+        condition: "avg(agent_utilization) < 0.3 for 30m"
+        action: "scale_in"
+        decrement: 1
+        cooldown: "10m"
+        min_instances: 5
+
+    api_servers:
+      scale_up:
+        condition: "avg(cpu_usage) > 0.7 OR avg(request_queue) > 100"
+        action: "scale_out"
+        increment: 2
+        cooldown: "3m"
+
+      scale_down:
+        condition: "avg(cpu_usage) < 0.3 AND avg(request_queue) < 10 for 20m"
+        action: "scale_in"
+        decrement: 1
+        cooldown: "10m"
+        min_instances: 3
+
+  # Circuit breaker rules
+  circuit_breakers:
+    api_endpoints:
+      failure_threshold: 0.5  # 50% failure rate
+      request_volume_threshold: 20
+      sleep_window: "30s"
+      timeout: "5s"
+
+    agent_operations:
+      failure_threshold: 0.3
+      request_volume_threshold: 10
+      sleep_window: "60s"
+      timeout: "10s"
+
+    external_services:
+      failure_threshold: 0.6
+      request_volume_threshold: 5
+      sleep_window: "120s"
+      timeout: "3s"
+
+# Notification Channels
+notification_channels:
+  pagerduty:
+    integration_key: "${PAGERDUTY_INTEGRATION_KEY}"
+    severity_mapping:
+      critical: "critical"
+      warning: "warning"
+      info: "info"
+
+  slack:
+    webhook_url: "${SLACK_WEBHOOK_URL}"
+    channels:
+      critical: "#incidents-critical"
+      warning: "#incidents-warning"
+      info: "#incidents-info"
+
+  email:
+    smtp_server: "smtp.freeagentics.com"
+    from_address: "alerts@freeagentics.com"
+    templates:
+      critical: "critical_incident_template"
+      warning: "warning_incident_template"
+
+  sms:
+    provider: "twilio"
+    account_sid: "${TWILIO_ACCOUNT_SID}"
+    auth_token: "${TWILIO_AUTH_TOKEN}"
+    from_number: "${TWILIO_FROM_NUMBER}"
+    on_call_numbers: "${ON_CALL_NUMBERS}"
+
+# Runbook URLs
+runbooks:
+  base_url: "https://runbooks.freeagentics.com"
+  categories:
+    memory: "/memory-issues"
+    performance: "/performance-degradation"
+    database: "/database-problems"
+    security: "/security-incidents"
+    coordination: "/agent-coordination"

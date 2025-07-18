@@ -1,0 +1,234 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "freeagentics-agents",
+    "title": "FreeAgentics Agent Performance",
+    "tags": ["freeagentics", "agents", "performance"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 0,
+    "refresh": "5s",
+    "time": {
+      "from": "now-30m",
+      "to": "now"
+    },
+    "templating": {
+      "list": [
+        {
+          "name": "agent_id",
+          "type": "query",
+          "datasource": "Prometheus",
+          "query": "label_values(freeagentics_agent_steps_total, agent_id)",
+          "current": {
+            "text": "All",
+            "value": "$__all"
+          },
+          "multi": true,
+          "includeAll": true
+        }
+      ]
+    },
+    "panels": [
+      {
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "id": 1,
+        "title": "Belief State Evolution",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "freeagentics_belief_free_energy_current{agent_id=~\"$agent_id\"}",
+            "format": "time_series",
+            "legendFormat": "Agent {{agent_id}} - Free Energy",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "short",
+            "label": "Free Energy"
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 8,
+            "color": "rgba(234, 112, 112, 0.22)"
+          }
+        ]
+      },
+      {
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "id": 2,
+        "title": "Belief Accuracy",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "freeagentics_belief_accuracy_ratio{agent_id=~\"$agent_id\"}",
+            "format": "time_series",
+            "legendFormat": "Agent {{agent_id}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percentunit",
+            "label": "Accuracy",
+            "min": 0,
+            "max": 1
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 0.75,
+            "color": "rgba(234, 112, 112, 0.22)",
+            "op": "lt"
+          }
+        ]
+      },
+      {
+        "gridPos": {"h": 8, "w": 8, "x": 0, "y": 8},
+        "id": 3,
+        "title": "Inference Time by Agent",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(freeagentics_agent_inference_duration_seconds_bucket{agent_id=~\"$agent_id\"}[5m])) by (agent_id, le))",
+            "format": "time_series",
+            "legendFormat": "Agent {{agent_id}} P95",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "s",
+            "label": "Inference Time"
+          }
+        ]
+      },
+      {
+        "gridPos": {"h": 8, "w": 8, "x": 8, "y": 8},
+        "id": 4,
+        "title": "Agent Memory Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "freeagentics_agent_memory_usage_bytes{agent_id=~\"$agent_id\"} / 1024 / 1024",
+            "format": "time_series",
+            "legendFormat": "Agent {{agent_id}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "decmbytes",
+            "label": "Memory (MB)"
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 30,
+            "color": "rgba(234, 112, 112, 0.22)"
+          }
+        ]
+      },
+      {
+        "gridPos": {"h": 8, "w": 8, "x": 16, "y": 8},
+        "id": 5,
+        "title": "Agent CPU Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "freeagentics_agent_cpu_usage_percent{agent_id=~\"$agent_id\"}",
+            "format": "time_series",
+            "legendFormat": "Agent {{agent_id}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percent",
+            "label": "CPU Usage",
+            "min": 0,
+            "max": 100
+          }
+        ]
+      },
+      {
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+        "id": 6,
+        "title": "Agent Steps and Errors",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(freeagentics_agent_steps_total{agent_id=~\"$agent_id\",success=\"true\"}[5m])) by (agent_id)",
+            "format": "time_series",
+            "legendFormat": "{{agent_id}} - Success",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(freeagentics_agent_steps_total{agent_id=~\"$agent_id\",success=\"false\"}[5m])) by (agent_id)",
+            "format": "time_series",
+            "legendFormat": "{{agent_id}} - Failed",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "ops",
+            "label": "Steps/sec"
+          }
+        ]
+      },
+      {
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+        "id": 7,
+        "title": "Coordination Performance",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(freeagentics_agent_coordination_duration_seconds_bucket{agent_id=~\"$agent_id\"}[5m])) by (agent_id, coordination_type, le))",
+            "format": "time_series",
+            "legendFormat": "{{agent_id}} - {{coordination_type}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "s",
+            "label": "Duration"
+          }
+        ]
+      },
+      {
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 24},
+        "id": 8,
+        "title": "Agent Error Analysis",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "topk(10, sum(increase(freeagentics_agent_errors_total{agent_id=~\"$agent_id\"}[5m])) by (agent_id, error_type, severity))",
+            "format": "table",
+            "instant": true,
+            "refId": "A"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true
+              },
+              "indexByName": {},
+              "renameByName": {
+                "agent_id": "Agent ID",
+                "error_type": "Error Type",
+                "severity": "Severity",
+                "Value": "Count (5m)"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

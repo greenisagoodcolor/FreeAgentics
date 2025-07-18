@@ -5,10 +5,7 @@ interface LoadingStateProps {
   size?: "small" | "medium" | "large";
 }
 
-export default function LoadingState({
-  message = "Loading...",
-  size = "medium",
-}: LoadingStateProps) {
+export function LoadingState({ message = "Loading...", size = "medium" }: LoadingStateProps) {
   const sizeClasses = {
     small: "w-4 h-4",
     medium: "w-8 h-8",

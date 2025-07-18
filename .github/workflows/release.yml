@@ -1,0 +1,402 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., v1.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  packages: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  validate-release:
+    name: Validate Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION="${{ github.event.inputs.version }}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Validate version format
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          if ! [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$ ]]; then
+            echo "Invalid version format: $VERSION"
+            echo "Expected format: vX.Y.Z or vX.Y.Z-suffix"
+            exit 1
+          fi
+
+      - name: Check if tag exists
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if git rev-parse "${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "Tag ${{ steps.version.outputs.version }} already exists"
+            exit 1
+          fi
+
+  run-tests:
+    name: Run Release Tests
+    needs: validate-release
+    uses: ./.github/workflows/ci-cd-pipeline.yml
+    secrets: inherit
+
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [validate-release, run-tests]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create tag if needed
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git tag -a "${{ needs.validate-release.outputs.version }}" -m "Release ${{ needs.validate-release.outputs.version }}"
+          git push origin "${{ needs.validate-release.outputs.version }}"
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          VERSION="${{ needs.validate-release.outputs.version }}"
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 $VERSION^ 2>/dev/null || echo "")
+
+          if [ -z "$PREVIOUS_TAG" ]; then
+            echo "First release, including all commits"
+            COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges)
+          else
+            echo "Generating changelog from $PREVIOUS_TAG to $VERSION"
+            COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges $PREVIOUS_TAG..$VERSION)
+          fi
+
+          # Generate changelog
+          cat > CHANGELOG.md << EOF
+          # Release $VERSION
+
+          ## What's Changed
+
+          ### Features
+          $(echo "$COMMITS" | grep -i "feat:" | sed 's/feat://i' || echo "No new features")
+
+          ### Bug Fixes
+          $(echo "$COMMITS" | grep -i "fix:" | sed 's/fix://i' || echo "No bug fixes")
+
+          ### Documentation
+          $(echo "$COMMITS" | grep -i "docs:" | sed 's/docs://i' || echo "No documentation changes")
+
+          ### Performance
+          $(echo "$COMMITS" | grep -i "perf:" | sed 's/perf://i' || echo "No performance improvements")
+
+          ### Other Changes
+          $(echo "$COMMITS" | grep -v -i -E "feat:|fix:|docs:|perf:" || echo "No other changes")
+
+          ## Contributors
+          $(git log --format="%aN" $PREVIOUS_TAG..$VERSION | sort -u | sed 's/^/- @/')
+
+          **Full Changelog**: https://github.com/${{ github.repository }}/compare/$PREVIOUS_TAG...$VERSION
+          EOF
+
+          # Save changelog for release notes
+          echo 'changelog<<EOF' >> $GITHUB_OUTPUT
+          cat CHANGELOG.md >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.validate-release.outputs.version }}
+          name: Release ${{ needs.validate-release.outputs.version }}
+          body: ${{ steps.changelog.outputs.changelog }}
+          draft: false
+          prerelease: ${{ contains(needs.validate-release.outputs.version, '-') }}
+          generate_release_notes: true
+
+  build-release-artifacts:
+    name: Build Release Artifacts
+    runs-on: ubuntu-latest
+    needs: [validate-release, run-tests]
+    strategy:
+      matrix:
+        component: [backend, frontend, cli]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push release image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.component == 'frontend' && './web' || '.' }}
+          file: ${{ matrix.component == 'backend' && './Dockerfile' || (matrix.component == 'frontend' && './web/Dockerfile' || './Dockerfile.cli') }}
+          target: production
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}-${{ matrix.component }}:${{ needs.validate-release.outputs.version }}
+            ghcr.io/${{ github.repository }}-${{ matrix.component }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=${{ needs.validate-release.outputs.version }}
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            VCS_REF=${{ github.sha }}
+
+  generate-sbom:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    needs: [validate-release, build-release-artifacts]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate Python SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: ./
+          format: spdx-json
+          output-file: sbom-python.spdx.json
+
+      - name: Generate Node.js SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: ./web
+          format: spdx-json
+          output-file: sbom-nodejs.spdx.json
+
+      - name: Generate Container SBOM
+        run: |
+          # Install syft
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+
+          # Generate SBOM for containers
+          syft ghcr.io/${{ github.repository }}-backend:${{ needs.validate-release.outputs.version }} \
+            -o spdx-json > sbom-backend-container.spdx.json
+
+          syft ghcr.io/${{ github.repository }}-frontend:${{ needs.validate-release.outputs.version }} \
+            -o spdx-json > sbom-frontend-container.spdx.json
+
+      - name: Upload SBOMs to release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.validate-release.outputs.version }}
+          files: |
+            sbom-python.spdx.json
+            sbom-nodejs.spdx.json
+            sbom-backend-container.spdx.json
+            sbom-frontend-container.spdx.json
+
+  sign-release:
+    name: Sign Release
+    runs-on: ubuntu-latest
+    needs: [validate-release, build-release-artifacts]
+
+    steps:
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Sign container images
+        env:
+          COSIGN_EXPERIMENTAL: 1
+        run: |
+          # Sign backend image
+          cosign sign --yes \
+            ghcr.io/${{ github.repository }}-backend:${{ needs.validate-release.outputs.version }}
+
+          # Sign frontend image
+          cosign sign --yes \
+            ghcr.io/${{ github.repository }}-frontend:${{ needs.validate-release.outputs.version }}
+
+      - name: Verify signatures
+        run: |
+          # Verify backend image
+          cosign verify \
+            ghcr.io/${{ github.repository }}-backend:${{ needs.validate-release.outputs.version }} \
+            --certificate-identity-regexp "https://github.com/${{ github.repository }}/*" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com
+
+          # Verify frontend image
+          cosign verify \
+            ghcr.io/${{ github.repository }}-frontend:${{ needs.validate-release.outputs.version }} \
+            --certificate-identity-regexp "https://github.com/${{ github.repository }}/*" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com
+
+  deploy-release:
+    name: Deploy Release
+    runs-on: ubuntu-latest
+    needs: [validate-release, create-release, build-release-artifacts, sign-release]
+    environment:
+      name: production
+      url: https://freeagentics.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy to production
+        run: |
+          # Update task definitions with new images
+          VERSION="${{ needs.validate-release.outputs.version }}"
+
+          # Deploy backend
+          aws ecs update-service \
+            --cluster freeagentics-production \
+            --service freeagentics-api \
+            --task-definition freeagentics-production:$VERSION \
+            --desired-count 4 \
+            --deployment-configuration "maximumPercent=200,minimumHealthyPercent=100,deploymentCircuitBreaker={enable=true,rollback=true}"
+
+          # Deploy frontend
+          aws ecs update-service \
+            --cluster freeagentics-production \
+            --service freeagentics-frontend \
+            --task-definition freeagentics-frontend-production:$VERSION \
+            --desired-count 4 \
+            --deployment-configuration "maximumPercent=200,minimumHealthyPercent=100,deploymentCircuitBreaker={enable=true,rollback=true}"
+
+          # Wait for stability
+          aws ecs wait services-stable \
+            --cluster freeagentics-production \
+            --services freeagentics-api freeagentics-frontend
+
+      - name: Run post-deployment tests
+        run: |
+          ./scripts/deployment/smoke-tests.sh production
+          ./scripts/deployment/performance-tests.sh production
+
+      - name: Update release notes
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.validate-release.outputs.version }}
+          body: |
+            ## Deployment Status
+
+            ✅ Successfully deployed to production
+
+            - Backend: `ghcr.io/${{ github.repository }}-backend:${{ needs.validate-release.outputs.version }}`
+            - Frontend: `ghcr.io/${{ github.repository }}-frontend:${{ needs.validate-release.outputs.version }}`
+
+            ### Verification
+            - ✅ Container signatures verified
+            - ✅ SBOM generated and attached
+            - ✅ Smoke tests passed
+            - ✅ Performance tests passed
+
+            ### Links
+            - [Production Site](https://freeagentics.com)
+            - [API Documentation](https://api.freeagentics.com/docs)
+            - [Container Registry](https://github.com/${{ github.repository }}/pkgs)
+
+  announce-release:
+    name: Announce Release
+    runs-on: ubuntu-latest
+    needs: [validate-release, deploy-release]
+
+    steps:
+      - name: Send Slack notification
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        run: |
+          VERSION="${{ needs.validate-release.outputs.version }}"
+          curl -X POST $SLACK_WEBHOOK \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "text": "🎉 FreeAgentics '$VERSION' has been released!",
+              "attachments": [{
+                "color": "good",
+                "fields": [
+                  {
+                    "title": "Version",
+                    "value": "'$VERSION'",
+                    "short": true
+                  },
+                  {
+                    "title": "Environment",
+                    "value": "Production",
+                    "short": true
+                  },
+                  {
+                    "title": "Release Notes",
+                    "value": "<https://github.com/${{ github.repository }}/releases/tag/'$VERSION'|View Release>"
+                  }
+                ]
+              }]
+            }'
+
+      - name: Create announcement issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const version = '${{ needs.validate-release.outputs.version }}';
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🎉 Release ${version} Deployed`,
+              body: `## Release ${version} Successfully Deployed
+
+              The new version has been deployed to production and is now live.
+
+              ### What's Included
+              - View the [Release Notes](https://github.com/${{ github.repository }}/releases/tag/${version})
+              - Check the [Production Site](https://freeagentics.com)
+              - Review the [API Documentation](https://api.freeagentics.com/docs)
+
+              ### Next Steps
+              - Monitor production metrics
+              - Gather user feedback
+              - Plan next release items
+
+              cc: @freeagentics/release-team`,
+              labels: ['release', 'announcement']
+            });

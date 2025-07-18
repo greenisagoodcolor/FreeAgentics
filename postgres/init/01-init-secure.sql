@@ -72,12 +72,12 @@ RETURNS TABLE(
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
+    SELECT
         'healthy'::text as status,
         numbackends as connections,
         pg_size_pretty(pg_database_size(current_database())) as database_size,
         now() - pg_postmaster_start_time() as uptime
-    FROM pg_stat_database 
+    FROM pg_stat_database
     WHERE datname = current_database();
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -86,7 +86,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 GRANT EXECUTE ON FUNCTION health_check() TO freeagentics_monitor;
 
 -- Create function to safely reset statistics
-CREATE OR REPLACE FUNCTION reset_stats() 
+CREATE OR REPLACE FUNCTION reset_stats()
 RETURNS void AS $$
 BEGIN
     SELECT pg_stat_reset();
@@ -96,3 +96,104 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Only superuser can reset stats
 REVOKE EXECUTE ON FUNCTION reset_stats() FROM PUBLIC;
+
+-- Create monitoring schema for performance tracking
+CREATE SCHEMA IF NOT EXISTS monitoring;
+GRANT USAGE ON SCHEMA monitoring TO freeagentics;
+GRANT USAGE ON SCHEMA monitoring TO freeagentics_monitor;
+
+-- Create table for storing query performance metrics
+CREATE TABLE IF NOT EXISTS monitoring.slow_queries (
+    id SERIAL PRIMARY KEY,
+    query_text TEXT,
+    execution_time FLOAT,
+    calls BIGINT,
+    mean_time FLOAT,
+    max_time FLOAT,
+    total_time FLOAT,
+    captured_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create index usage monitoring table
+CREATE TABLE IF NOT EXISTS monitoring.index_usage (
+    id SERIAL PRIMARY KEY,
+    schemaname TEXT,
+    tablename TEXT,
+    indexname TEXT,
+    idx_scan BIGINT,
+    idx_tup_read BIGINT,
+    idx_tup_fetch BIGINT,
+    idx_size TEXT,
+    captured_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create table size monitoring
+CREATE TABLE IF NOT EXISTS monitoring.table_sizes (
+    id SERIAL PRIMARY KEY,
+    schemaname TEXT,
+    tablename TEXT,
+    row_count BIGINT,
+    total_size TEXT,
+    table_size TEXT,
+    indexes_size TEXT,
+    captured_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Grant permissions on monitoring tables
+GRANT SELECT ON ALL TABLES IN SCHEMA monitoring TO freeagentics_monitor;
+GRANT ALL ON ALL TABLES IN SCHEMA monitoring TO freeagentics;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA monitoring TO freeagentics;
+
+-- Create helper function for coalition performance calculations
+CREATE OR REPLACE FUNCTION calculate_coalition_performance(
+    agent_count INTEGER,
+    objectives_completed INTEGER,
+    total_objectives INTEGER,
+    cohesion_score FLOAT
+) RETURNS FLOAT AS $$
+BEGIN
+    IF total_objectives = 0 THEN
+        RETURN cohesion_score;
+    END IF;
+
+    RETURN (
+        (objectives_completed::FLOAT / total_objectives) * 0.6 +  -- 60% weight on objectives
+        (cohesion_score * 0.3) +                                  -- 30% weight on cohesion
+        (LEAST(agent_count / 5.0, 1.0) * 0.1)                   -- 10% weight on size (max at 5 agents)
+    );
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+-- Create notification triggers for real-time updates
+CREATE OR REPLACE FUNCTION notify_agent_status_change()
+RETURNS TRIGGER AS $$
+BEGIN
+    PERFORM pg_notify(
+        'agent_status_changed',
+        json_build_object(
+            'agent_id', NEW.id,
+            'old_status', OLD.status,
+            'new_status', NEW.status,
+            'timestamp', CURRENT_TIMESTAMP
+        )::text
+    );
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create notification function for coalition changes
+CREATE OR REPLACE FUNCTION notify_coalition_change()
+RETURNS TRIGGER AS $$
+BEGIN
+    PERFORM pg_notify(
+        'coalition_changed',
+        json_build_object(
+            'coalition_id', NEW.id,
+            'status', NEW.status,
+            'performance_score', NEW.performance_score,
+            'timestamp', CURRENT_TIMESTAMP
+        )::text
+    );
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;

@@ -39,7 +39,11 @@ export function OptimizedImage({
 
   return (
     <div
-      className={cn("relative overflow-hidden", aspectRatio && "aspect-ratio-container", className)}
+      className={cn(
+        "relative overflow-hidden",
+        aspectRatio ? "aspect-ratio-container" : undefined,
+        className,
+      )}
       style={aspectRatio ? { paddingBottom: `${(1 / aspectRatio) * 100}%` } : undefined}
     >
       <Image
@@ -48,7 +52,7 @@ export function OptimizedImage({
         className={cn(
           "transition-opacity duration-300",
           isLoading && showLoader ? "opacity-0" : "opacity-100",
-          aspectRatio && "absolute inset-0 w-full h-full object-cover",
+          aspectRatio ? "absolute inset-0 w-full h-full object-cover" : undefined,
         )}
         quality={quality}
         sizes={defaultSizes}
@@ -167,7 +171,7 @@ export function Avatar({
   fallbackInitials?: string;
   className?: string;
 }) {
-  const [error, setError] = useState(false);
+  const [error] = useState(false);
 
   const sizeClasses = {
     sm: "w-8 h-8 text-xs",
@@ -197,7 +201,6 @@ export function Avatar({
       width={size === "sm" ? 32 : size === "md" ? 48 : size === "lg" ? 64 : 96}
       height={size === "sm" ? 32 : size === "md" ? 48 : size === "lg" ? 64 : 96}
       className={cn("rounded-full object-cover", sizeClasses[size], className)}
-      onError={() => setError(true)}
       showLoader={false}
     />
   );

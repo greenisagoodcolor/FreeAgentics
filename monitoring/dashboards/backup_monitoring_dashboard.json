@@ -1,0 +1,601 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "freeagentics-backup-monitoring",
+    "title": "FreeAgentics Backup Monitoring",
+    "tags": ["backup", "disaster-recovery", "monitoring"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "30s",
+    "panels": [
+      {
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        },
+        "id": 1,
+        "title": "Backup Status Overview",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "freeagentics_backup_status",
+            "legendFormat": "{{backup_type}}"
+          }
+        ],
+        "options": {
+          "orientation": "auto",
+          "textMode": "auto",
+          "colorMode": "background",
+          "graphMode": "area",
+          "justifyMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {
+                "type": "value",
+                "value": 1,
+                "text": "Success",
+                "color": "green"
+              },
+              {
+                "type": "value",
+                "value": 0,
+                "text": "Failed",
+                "color": "red"
+              }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "red",
+                  "value": 0
+                },
+                {
+                  "color": "green",
+                  "value": 1
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        },
+        "id": 2,
+        "title": "Backup Size Trend",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "freeagentics_backup_size_bytes",
+            "legendFormat": "{{backup_type}}"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "bytes",
+            "label": "Size",
+            "show": true
+          },
+          {
+            "show": false
+          }
+        ],
+        "xaxis": {
+          "show": true
+        }
+      },
+      {
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        },
+        "id": 3,
+        "title": "Backup Duration",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "freeagentics_backup_duration_seconds",
+            "legendFormat": "{{backup_type}}"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "s",
+            "label": "Duration",
+            "show": true
+          },
+          {
+            "show": false
+          }
+        ]
+      },
+      {
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        },
+        "id": 4,
+        "title": "Storage Utilization",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "freeagentics_backup_storage_used_bytes / freeagentics_backup_storage_total_bytes * 100",
+            "legendFormat": "{{location}}"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percent",
+            "label": "Usage %",
+            "show": true,
+            "min": 0,
+            "max": 100
+          },
+          {
+            "show": false
+          }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [85],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": ["A", "5m", "now"]
+              },
+              "reducer": {
+                "params": [],
+                "type": "avg"
+              },
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "for": "5m",
+          "frequency": "1m",
+          "handler": 1,
+          "name": "High Storage Utilization",
+          "noDataState": "no_data",
+          "notifications": []
+        }
+      },
+      {
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 16
+        },
+        "id": 5,
+        "title": "Backup Schedule Status",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "freeagentics_backup_schedule_status",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "options": {
+          "showHeader": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto",
+              "displayMode": "auto"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Status"
+              },
+              "properties": [
+                {
+                  "id": "custom.displayMode",
+                  "value": "color-background"
+                },
+                {
+                  "id": "mappings",
+                  "value": [
+                    {
+                      "type": "value",
+                      "value": "completed",
+                      "text": "Completed",
+                      "color": "green"
+                    },
+                    {
+                      "type": "value",
+                      "value": "running",
+                      "text": "Running",
+                      "color": "yellow"
+                    },
+                    {
+                      "type": "value",
+                      "value": "failed",
+                      "text": "Failed",
+                      "color": "red"
+                    },
+                    {
+                      "type": "value",
+                      "value": "pending",
+                      "text": "Pending",
+                      "color": "blue"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 24
+        },
+        "id": 6,
+        "title": "Offsite Sync Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "freeagentics_backup_offsite_sync_status",
+            "legendFormat": "{{provider}}"
+          }
+        ],
+        "options": {
+          "orientation": "horizontal",
+          "textMode": "name",
+          "colorMode": "background",
+          "graphMode": "none",
+          "justifyMode": "center"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {
+                "type": "value",
+                "value": 1,
+                "text": "Synced",
+                "color": "green"
+              },
+              {
+                "type": "value",
+                "value": 0,
+                "text": "Failed",
+                "color": "red"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 24
+        },
+        "id": 7,
+        "title": "Recovery Test Results",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "freeagentics_backup_recovery_test_status",
+            "legendFormat": "Last Test"
+          }
+        ],
+        "options": {
+          "orientation": "auto",
+          "textMode": "auto",
+          "colorMode": "background",
+          "graphMode": "none",
+          "justifyMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {
+                "type": "value",
+                "value": 1,
+                "text": "Passed",
+                "color": "green"
+              },
+              {
+                "type": "value",
+                "value": 0,
+                "text": "Failed",
+                "color": "red"
+              }
+            ],
+            "unit": "dateTimeFromNow"
+          }
+        }
+      },
+      {
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 32
+        },
+        "id": 8,
+        "title": "Backup History",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "freeagentics_backup_history",
+            "format": "table",
+            "instant": false
+          }
+        ],
+        "options": {
+          "showHeader": true,
+          "sortBy": [
+            {
+              "desc": true,
+              "displayName": "Timestamp"
+            }
+          ]
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto",
+              "displayMode": "auto"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Size"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "bytes"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Duration"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "s"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 0,
+          "y": 40
+        },
+        "id": 9,
+        "title": "RPO Status",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "time() - freeagentics_last_successful_backup_timestamp",
+            "legendFormat": "Time Since Last Backup"
+          }
+        ],
+        "options": {
+          "orientation": "auto",
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                },
+                {
+                  "color": "yellow",
+                  "value": 900
+                },
+                {
+                  "color": "red",
+                  "value": 1800
+                }
+              ]
+            },
+            "max": 3600,
+            "min": 0
+          }
+        }
+      },
+      {
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 8,
+          "y": 40
+        },
+        "id": 10,
+        "title": "RTO Compliance",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "freeagentics_last_recovery_test_duration_seconds",
+            "legendFormat": "Recovery Time"
+          }
+        ],
+        "options": {
+          "orientation": "auto",
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                },
+                {
+                  "color": "yellow",
+                  "value": 1200
+                },
+                {
+                  "color": "red",
+                  "value": 1800
+                }
+              ]
+            },
+            "max": 3600,
+            "min": 0
+          }
+        }
+      },
+      {
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 16,
+          "y": 40
+        },
+        "id": 11,
+        "title": "3-2-1 Compliance",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "freeagentics_backup_321_compliance",
+            "legendFormat": ""
+          }
+        ],
+        "options": {
+          "orientation": "auto",
+          "textMode": "auto",
+          "colorMode": "background",
+          "graphMode": "none",
+          "justifyMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {
+                "type": "value",
+                "value": 3,
+                "text": "Compliant",
+                "color": "green"
+              },
+              {
+                "type": "value",
+                "value": 2,
+                "text": "Partial",
+                "color": "yellow"
+              },
+              {
+                "type": "value",
+                "value": 1,
+                "text": "Non-Compliant",
+                "color": "red"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "allValue": null,
+          "current": {
+            "selected": true,
+            "text": "All",
+            "value": "$__all"
+          },
+          "datasource": "Prometheus",
+          "definition": "label_values(freeagentics_backup_status, backup_type)",
+          "hide": 0,
+          "includeAll": true,
+          "label": "Backup Type",
+          "multi": false,
+          "name": "backup_type",
+          "options": [],
+          "query": "label_values(freeagentics_backup_status, backup_type)",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "tagValuesQuery": "",
+          "tags": [],
+          "tagsQuery": "",
+          "type": "query",
+          "useTags": false
+        },
+        {
+          "allValue": null,
+          "current": {
+            "selected": true,
+            "text": "production",
+            "value": "production"
+          },
+          "datasource": "Prometheus",
+          "definition": "label_values(freeagentics_backup_status, environment)",
+          "hide": 0,
+          "includeAll": false,
+          "label": "Environment",
+          "multi": false,
+          "name": "environment",
+          "options": [],
+          "query": "label_values(freeagentics_backup_status, environment)",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "tagValuesQuery": "",
+          "tags": [],
+          "tagsQuery": "",
+          "type": "query",
+          "useTags": false
+        }
+      ]
+    },
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    }
+  }
+}

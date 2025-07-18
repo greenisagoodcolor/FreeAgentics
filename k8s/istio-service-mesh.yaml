@@ -1,0 +1,428 @@
+# Istio Service Mesh Configuration for FreeAgentics
+# This configures traffic management, security, and observability
+
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: freeagentics-gateway
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    version: v1.0.0
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: freeagentics-tls
+    hosts:
+    - "freeagentics.com"
+    - "*.freeagentics.com"
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "freeagentics.com"
+    - "*.freeagentics.com"
+    tls:
+      httpsRedirect: true
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: freeagentics-vs
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    version: v1.0.0
+spec:
+  hosts:
+  - "freeagentics.com"
+  - "*.freeagentics.com"
+  gateways:
+  - freeagentics-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /api/v1/
+    route:
+    - destination:
+        host: backend
+        port:
+          number: 8000
+    timeout: 30s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s
+      retryOn: gateway-error,connect-failure,refused-stream
+  - match:
+    - uri:
+        prefix: /health
+    route:
+    - destination:
+        host: backend
+        port:
+          number: 8000
+    timeout: 5s
+  - match:
+    - uri:
+        prefix: /metrics
+    route:
+    - destination:
+        host: backend
+        port:
+          number: 8000
+    timeout: 10s
+  - match:
+    - uri:
+        prefix: /docs
+    route:
+    - destination:
+        host: backend
+        port:
+          number: 8000
+    timeout: 15s
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: frontend
+        port:
+          number: 3000
+    timeout: 15s
+    retries:
+      attempts: 2
+      perTryTimeout: 10s
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: backend-dr
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    version: v1.0.0
+spec:
+  host: backend
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    connectionPool:
+      tcp:
+        maxConnections: 100
+        connectTimeout: 30s
+        tcpKeepalive:
+          time: 7200s
+          interval: 75s
+      http:
+        http1MaxPendingRequests: 100
+        http2MaxRequests: 1000
+        maxRequestsPerConnection: 10
+        maxRetries: 3
+        consecutiveGatewayErrors: 5
+        interval: 30s
+        baseEjectionTime: 30s
+        maxEjectionPercent: 50
+        minHealthPercent: 50
+    loadBalancer:
+      simple: LEAST_CONN
+    outlierDetection:
+      consecutiveGatewayErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+      minHealthPercent: 50
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+    trafficPolicy:
+      connectionPool:
+        tcp:
+          maxConnections: 50
+  - name: v2
+    labels:
+      version: v2
+    trafficPolicy:
+      connectionPool:
+        tcp:
+          maxConnections: 50
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: frontend-dr
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    version: v1.0.0
+spec:
+  host: frontend
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    connectionPool:
+      tcp:
+        maxConnections: 200
+        connectTimeout: 30s
+      http:
+        http1MaxPendingRequests: 200
+        http2MaxRequests: 1000
+        maxRequestsPerConnection: 10
+        maxRetries: 2
+    loadBalancer:
+      simple: ROUND_ROBIN
+    outlierDetection:
+      consecutiveGatewayErrors: 3
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: postgres-dr
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    version: v1.0.0
+spec:
+  host: postgres
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    connectionPool:
+      tcp:
+        maxConnections: 50
+        connectTimeout: 30s
+        tcpKeepalive:
+          time: 7200s
+          interval: 75s
+    loadBalancer:
+      simple: ROUND_ROBIN
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: redis-dr
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    version: v1.0.0
+spec:
+  host: redis
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    connectionPool:
+      tcp:
+        maxConnections: 100
+        connectTimeout: 5s
+        tcpKeepalive:
+          time: 7200s
+          interval: 75s
+    loadBalancer:
+      simple: ROUND_ROBIN
+
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    version: v1.0.0
+spec:
+  mtls:
+    mode: STRICT
+
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: freeagentics-authz
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    version: v1.0.0
+spec:
+  selector:
+    matchLabels:
+      app: freeagentics
+      component: backend
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/freeagentics-prod/sa/frontend"]
+    - source:
+        principals: ["cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"]
+    to:
+    - operation:
+        methods: ["GET", "POST", "PUT", "DELETE"]
+  - from:
+    - source:
+        principals: ["cluster.local/ns/freeagentics-prod/sa/prometheus"]
+    to:
+    - operation:
+        methods: ["GET"]
+        paths: ["/metrics", "/health"]
+
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: postgres-authz
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    version: v1.0.0
+spec:
+  selector:
+    matchLabels:
+      app: freeagentics
+      component: postgres
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/freeagentics-prod/sa/backend"]
+    - source:
+        principals: ["cluster.local/ns/freeagentics-prod/sa/migration"]
+
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: redis-authz
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    version: v1.0.0
+spec:
+  selector:
+    matchLabels:
+      app: freeagentics
+      component: redis
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/freeagentics-prod/sa/backend"]
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: backend-canary
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    version: v1.0.0
+spec:
+  hosts:
+  - backend
+  http:
+  - match:
+    - headers:
+        canary:
+          exact: "true"
+    route:
+    - destination:
+        host: backend
+        subset: v2
+      weight: 100
+  - route:
+    - destination:
+        host: backend
+        subset: v1
+      weight: 90
+    - destination:
+        host: backend
+        subset: v2
+      weight: 10
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: EnvoyFilter
+metadata:
+  name: freeagentics-rate-limit
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    version: v1.0.0
+spec:
+  workloadSelector:
+    labels:
+      app: freeagentics
+      component: backend
+  configPatches:
+  - applyTo: HTTP_FILTER
+    match:
+      context: SIDECAR_INBOUND
+      listener:
+        filterChain:
+          filter:
+            name: "envoy.filters.network.http_connection_manager"
+    patch:
+      operation: INSERT_BEFORE
+      value:
+        name: envoy.filters.http.local_ratelimit
+        typed_config:
+          "@type": type.googleapis.com/udpa.type.v1.TypedStruct
+          type_url: type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit
+          value:
+            stat_prefix: local_rate_limiter
+            token_bucket:
+              max_tokens: 1000
+              tokens_per_fill: 1000
+              fill_interval: 60s
+            filter_enabled:
+              runtime_key: local_rate_limit_enabled
+              default_value:
+                numerator: 100
+                denominator: HUNDRED
+            filter_enforced:
+              runtime_key: local_rate_limit_enforced
+              default_value:
+                numerator: 100
+                denominator: HUNDRED
+
+---
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: freeagentics-telemetry
+  namespace: freeagentics-prod
+  labels:
+    app: freeagentics
+    version: v1.0.0
+spec:
+  metrics:
+  - providers:
+    - name: prometheus
+  - overrides:
+    - match:
+        metric: ALL_METRICS
+      tagOverrides:
+        destination_service_name:
+          value: "freeagentics-backend"
+        destination_service_namespace:
+          value: "freeagentics-prod"
+  tracing:
+  - providers:
+    - name: jaeger
+  accessLogging:
+  - providers:
+    - name: otel
+    - name: envoy

@@ -1,0 +1,4 @@
+cryptography==45.0.5
+fastapi==0.116.1
+python-jose==3.5.0
+starlette==0.47.1

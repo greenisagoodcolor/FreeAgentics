@@ -3,7 +3,7 @@
  */
 
 import React from "react";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import AgentChat from "../AgentChat";
 import type { Agent } from "@/lib/types";
@@ -276,27 +276,34 @@ describe("AgentChat - Working Implementation", () => {
     });
   });
 
-  it("subscribes to WebSocket events", () => {
+  it("subscribes to WebSocket events", async () => {
     render(<AgentChat {...defaultProps} />);
 
-    expect(mockWsClient.subscribe).toHaveBeenCalledWith("agent_chat_message", expect.any(Function));
-    expect(mockWsClient.subscribe).toHaveBeenCalledWith(
-      "agent_presence_update",
-      expect.any(Function),
-    );
-    expect(mockWsClient.subscribe).toHaveBeenCalledWith("agent_typing", expect.any(Function));
+    await waitFor(() => {
+      expect(mockWsClient.subscribe).toHaveBeenCalledWith(
+        "agent_chat_message",
+        expect.any(Function),
+      );
+      expect(mockWsClient.subscribe).toHaveBeenCalledWith(
+        "agent_presence_update",
+        expect.any(Function),
+      );
+      expect(mockWsClient.subscribe).toHaveBeenCalledWith("agent_typing", expect.any(Function));
+    });
   });
 
   it("stops typing indicator after timeout", async () => {
     jest.useFakeTimers();
-    const user = userEvent.setup();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<AgentChat {...defaultProps} />);
 
     const textarea = screen.getByPlaceholderText("Type a message...");
     await user.type(textarea, "Hello");
 
     // Fast forward time to trigger timeout
-    jest.advanceTimersByTime(3000);
+    await act(async () => {
+      jest.advanceTimersByTime(3000);
+    });
 
     await waitFor(() => {
       expect(mockWsClient.send).toHaveBeenCalledWith({

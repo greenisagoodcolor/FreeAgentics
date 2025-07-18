@@ -58,7 +58,7 @@ repos:
     rev: v1.3.0
     hooks:
       - id: mypy
-        additional_dependencies: [types-all]
+        additional_dependencies: [types-requests, types-pyyaml, types-setuptools]
         exclude: ^(web/|tests/|examples/|\.archive/)
         args: [--ignore-missing-imports, --no-strict-optional]
 

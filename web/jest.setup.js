@@ -1,5 +1,26 @@
 import "@testing-library/jest-dom";
 
+// Mock HTMLCanvasElement
+HTMLCanvasElement.prototype.getContext = jest.fn(() => ({
+  clearRect: jest.fn(),
+  fillRect: jest.fn(),
+  strokeRect: jest.fn(),
+  fillText: jest.fn(),
+  beginPath: jest.fn(),
+  moveTo: jest.fn(),
+  lineTo: jest.fn(),
+  arc: jest.fn(),
+  stroke: jest.fn(),
+  fill: jest.fn(),
+  scale: jest.fn(),
+  setLineDash: jest.fn(),
+  save: jest.fn(),
+  restore: jest.fn(),
+  fillStyle: "",
+  strokeStyle: "",
+  lineWidth: 1,
+}));
+
 // Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {
   constructor() {}

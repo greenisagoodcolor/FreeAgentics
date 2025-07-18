@@ -1,0 +1,94 @@
+{
+  "generated_at": "2025-07-17T14:28:19.545495",
+  "flake8": {
+    "passed": false,
+    "total_errors": 817,
+    "error_types": {
+      "E226": 90,
+      "E228": 2,
+      "E302": 24,
+      "E305": 5,
+      "E402": 112,
+      "E712": 10,
+      "E722": 2,
+      "E731": 7,
+      "E741": 4,
+      "E999": 13,
+      "F402": 3,
+      "F541": 1,
+      "F601": 4,
+      "F811": 73,
+      "F821": 105,
+      "F841": 344,
+      "W291": 4,
+      "W292": 7,
+      "W504": 7
+    },
+    "top_errors": [
+      [
+        "F841",
+        344
+      ],
+      [
+        "E402",
+        112
+      ],
+      [
+        "F821",
+        105
+      ],
+      [
+        "E226",
+        90
+      ],
+      [
+        "F811",
+        73
+      ],
+      [
+        "E302",
+        24
+      ],
+      [
+        "E999",
+        13
+      ],
+      [
+        "E712",
+        10
+      ],
+      [
+        "E731",
+        7
+      ],
+      [
+        "W292",
+        7
+      ]
+    ]
+  },
+  "mypy": {
+    "passed": false,
+    "total_errors": 1,
+    "error_categories": {
+      "no-any-return": 0,
+      "var-annotated": 0,
+      "arg-type": 0,
+      "assignment": 0,
+      "other": 1
+    }
+  },
+  "tests": {
+    "passed": false,
+    "tests_passed": 0,
+    "tests_failed": 0,
+    "errors": 39,
+    "collection_errors": 0
+  },
+  "frontend": {
+    "passed": true,
+    "warnings": 26,
+    "errors": 0
+  },
+  "overall_passed": false
+}

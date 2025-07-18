@@ -1,0 +1,508 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+    tags: ['v*']
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      deploy_environment:
+        description: 'Environment to deploy to'
+        required: false
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '18'
+
+jobs:
+  # 1. Code Quality and Testing
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        test-suite: [unit, integration, performance]
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_freeagentics
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+          pip install -r requirements-production.txt
+
+      - name: Install Node dependencies
+        run: |
+          npm ci
+          cd web && npm ci
+
+      - name: Run ${{ matrix.test-suite }} tests
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_freeagentics
+          REDIS_URL: redis://localhost:6379
+          SECRET_KEY: test_secret_key
+          JWT_SECRET: test_jwt_secret
+        run: |
+          if [ "${{ matrix.test-suite }}" = "unit" ]; then
+            pytest tests/unit --cov=. --cov-report=xml --cov-report=html
+            cd web && npm test -- --coverage
+          elif [ "${{ matrix.test-suite }}" = "integration" ]; then
+            pytest tests/integration -v --tb=short
+          elif [ "${{ matrix.test-suite }}" = "performance" ]; then
+            pytest tests/performance -v --benchmark-only
+          fi
+
+      - name: Upload coverage reports
+        if: matrix.test-suite == 'unit'
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml,./web/coverage/lcov.info
+          flags: ${{ matrix.test-suite }}
+
+  # 2. Security Scanning
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      # SAST - Static Application Security Testing
+      - name: Run Bandit Security Scan
+        run: |
+          pip install bandit[toml]
+          bandit -r . -f json -o bandit-report.json || true
+
+      - name: Run Semgrep SAST
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/python
+            p/javascript
+            p/typescript
+            p/docker
+            p/owasp-top-ten
+
+      # Dependency Scanning
+      - name: Run Safety Check
+        run: |
+          pip install safety
+          safety check --json > safety-report.json || true
+
+      - name: Run npm audit
+        run: |
+          npm audit --json > npm-audit.json || true
+          cd web && npm audit --json > ../web-npm-audit.json || true
+
+      # Secret Scanning
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Container Scanning
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      # DAST preparation (actual DAST runs in deployment stage)
+      - name: Prepare DAST configuration
+        run: |
+          cat > dast-config.yml << EOF
+          targets:
+            - url: https://staging.freeagentics.com
+              authentication:
+                type: jwt
+                token_endpoint: /api/v1/auth/login
+          scans:
+            - type: api
+              openapi_spec: /api/v1/openapi.json
+            - type: web
+              spider_depth: 3
+          EOF
+
+      - name: Upload security artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            bandit-report.json
+            safety-report.json
+            npm-audit.json
+            web-npm-audit.json
+            dast-config.yml
+
+  # 3. Build and Push Container Images
+  build:
+    name: Build Container Images
+    runs-on: ubuntu-latest
+    needs: [test, security-scan]
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        component: [backend, frontend, nginx]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.component }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.component == 'frontend' && './web' || '.' }}
+          file: ${{ matrix.component == 'backend' && './Dockerfile' || (matrix.component == 'frontend' && './web/Dockerfile' || './nginx/Dockerfile') }}
+          target: ${{ matrix.component == 'backend' && 'production' || '' }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            VCS_REF=${{ github.sha }}
+            VERSION=${{ steps.meta.outputs.version }}
+
+  # 4. Deploy to Staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/develop' || github.event.inputs.deploy_environment == 'staging'
+    environment:
+      name: staging
+      url: https://staging.freeagentics.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy to ECS (Blue-Green)
+        run: |
+          # Update task definition with new image
+          aws ecs describe-task-definition \
+            --task-definition freeagentics-staging \
+            --query 'taskDefinition' > task-def.json
+
+          # Update container images
+          NEW_IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}"
+          jq '.containerDefinitions[0].image = "'$NEW_IMAGE'"' task-def.json > updated-task-def.json
+
+          # Register new task definition
+          TASK_ARN=$(aws ecs register-task-definition \
+            --cli-input-json file://updated-task-def.json \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+
+          # Update service with blue-green deployment
+          aws ecs update-service \
+            --cluster freeagentics-staging \
+            --service freeagentics-api \
+            --task-definition $TASK_ARN \
+            --deployment-configuration "maximumPercent=200,minimumHealthyPercent=100,deploymentCircuitBreaker={enable=true,rollback=true}"
+
+      - name: Run smoke tests
+        run: |
+          # Wait for deployment to stabilize
+          sleep 30
+
+          # Run smoke tests
+          ./scripts/deployment/smoke-tests.sh staging
+
+      - name: Run DAST scan
+        uses: zaproxy/action-full-scan@v0.10.0
+        with:
+          target: 'https://staging.freeagentics.com'
+          cmd_options: '-a -j'
+          issue_title: 'DAST Security Report - Staging'
+
+  # 5. Deploy to Production
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build, deploy-staging]
+    if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.deploy_environment == 'production'
+    environment:
+      name: production
+      url: https://freeagentics.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Create deployment backup
+        run: |
+          # Backup current production state
+          aws ecs describe-services \
+            --cluster freeagentics-production \
+            --services freeagentics-api \
+            > production-backup-${{ github.run_id }}.json
+
+          # Upload backup to S3
+          aws s3 cp production-backup-${{ github.run_id }}.json \
+            s3://freeagentics-deployments/backups/
+
+      - name: Deploy to Production (Blue-Green)
+        id: deploy
+        run: |
+          # Similar to staging but with production cluster
+          # Update task definition
+          aws ecs describe-task-definition \
+            --task-definition freeagentics-production \
+            --query 'taskDefinition' > task-def.json
+
+          # Update with production images
+          NEW_BACKEND="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}"
+          NEW_FRONTEND="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}"
+
+          jq '.containerDefinitions[0].image = "'$NEW_BACKEND'"' task-def.json | \
+          jq '.containerDefinitions[1].image = "'$NEW_FRONTEND'"' > updated-task-def.json
+
+          # Register and deploy
+          TASK_ARN=$(aws ecs register-task-definition \
+            --cli-input-json file://updated-task-def.json \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+
+          # Blue-green deployment with automated rollback
+          aws ecs update-service \
+            --cluster freeagentics-production \
+            --service freeagentics-api \
+            --task-definition $TASK_ARN \
+            --deployment-configuration "maximumPercent=200,minimumHealthyPercent=100,deploymentCircuitBreaker={enable=true,rollback=true}" \
+            --enable-execute-command
+
+          echo "deployment_id=${{ github.run_id }}" >> $GITHUB_OUTPUT
+
+      - name: Monitor deployment health
+        run: |
+          # Monitor deployment for 5 minutes
+          ./scripts/deployment/monitor-deployment.sh production 300
+
+      - name: Run production smoke tests
+        run: |
+          ./scripts/deployment/smoke-tests.sh production
+
+      - name: Update deployment status
+        if: always()
+        run: |
+          STATUS=${{ job.status }}
+          DEPLOYMENT_ID=${{ steps.deploy.outputs.deployment_id }}
+
+          # Send deployment notification
+          curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "text": "Production deployment '$DEPLOYMENT_ID' completed with status: '$STATUS'",
+              "attachments": [{
+                "color": "'$([ "$STATUS" = "success" ] && echo "good" || echo "danger")'",
+                "fields": [
+                  {"title": "Version", "value": "'${{ github.ref_name }}'", "short": true},
+                  {"title": "Deployer", "value": "'${{ github.actor }}'", "short": true}
+                ]
+              }]
+            }'
+
+  # 6. Rollback Automation
+  rollback:
+    name: Automated Rollback
+    runs-on: ubuntu-latest
+    if: failure() && (needs.deploy-staging.result == 'failure' || needs.deploy-production.result == 'failure')
+    needs: [deploy-staging, deploy-production]
+
+    steps:
+      - name: Determine environment
+        id: env
+        run: |
+          if [ "${{ needs.deploy-production.result }}" = "failure" ]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+          else
+            echo "environment=staging" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Execute rollback
+        run: |
+          ENV=${{ steps.env.outputs.environment }}
+
+          # Get previous stable task definition
+          PREVIOUS_TASK=$(aws ecs describe-services \
+            --cluster freeagentics-$ENV \
+            --services freeagentics-api \
+            --query 'services[0].deployments[1].taskDefinition' \
+            --output text)
+
+          if [ -n "$PREVIOUS_TASK" ]; then
+            # Rollback to previous version
+            aws ecs update-service \
+              --cluster freeagentics-$ENV \
+              --service freeagentics-api \
+              --task-definition $PREVIOUS_TASK \
+              --force-new-deployment
+
+            echo "Rolled back to $PREVIOUS_TASK"
+          else
+            echo "No previous version found for rollback"
+            exit 1
+          fi
+
+      - name: Notify rollback
+        if: always()
+        run: |
+          curl -X POST ${{ secrets.SLACK_WEBHOOK }} \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "text": ":warning: Automated rollback executed for '${{ steps.env.outputs.environment }}' environment",
+              "attachments": [{
+                "color": "warning",
+                "fields": [
+                  {"title": "Triggered by", "value": "'${{ github.event_name }}'", "short": true},
+                  {"title": "Commit", "value": "'${{ github.sha }}'", "short": true}
+                ]
+              }]
+            }'
+
+  # 7. Post-deployment validation
+  validate-deployment:
+    name: Validate Deployment
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production]
+    if: success()
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run full integration test suite
+        run: |
+          # Determine environment
+          if [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+            ENV_URL="https://staging.freeagentics.com"
+          else
+            ENV_URL="https://freeagentics.com"
+          fi
+
+          # Run comprehensive tests
+          npm run test:e2e -- --env-url=$ENV_URL
+
+      - name: Performance validation
+        run: |
+          # Run performance benchmarks
+          ./scripts/performance/run-benchmarks.sh --url=$ENV_URL --threshold=95
+
+      - name: Security validation
+        run: |
+          # Run security checks
+          ./scripts/security/post-deployment-scan.sh $ENV_URL

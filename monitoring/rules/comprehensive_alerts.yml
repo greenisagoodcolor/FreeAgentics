@@ -1,0 +1,483 @@
+groups:
+# ============================================================================
+# SYSTEM PERFORMANCE ALERTS
+# ============================================================================
+- name: freeagentics_performance
+  interval: 30s
+  rules:
+  # API Response Time Alerts
+  - alert: APIHighResponseTime_P50
+    expr: histogram_quantile(0.5, sum(rate(http_request_duration_seconds_bucket{job="freeagentics-app"}[5m])) by (le)) > 0.1
+    for: 5m
+    labels:
+      severity: warning
+      category: performance
+      service: api
+      percentile: "50"
+    annotations:
+      summary: "API P50 response time exceeds 100ms"
+      description: "50th percentile response time is {{ $value | humanizeDuration }} (threshold: 100ms)"
+      runbook_url: "https://runbooks.freeagentics.com/api-performance#p50-latency"
+      dashboard_url: "https://grafana.freeagentics.com/d/freeagentics-overview"
+
+  - alert: APIHighResponseTime_P95
+    expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="freeagentics-app"}[5m])) by (le)) > 0.5
+    for: 3m
+    labels:
+      severity: critical
+      category: performance
+      service: api
+      percentile: "95"
+    annotations:
+      summary: "API P95 response time exceeds 500ms"
+      description: "95th percentile response time is {{ $value | humanizeDuration }} (threshold: 500ms)"
+      impact: "User experience degraded for 5% of requests"
+      runbook_url: "https://runbooks.freeagentics.com/api-performance#p95-latency"
+
+  - alert: APIHighResponseTime_P99
+    expr: histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job="freeagentics-app"}[5m])) by (le)) > 1.0
+    for: 2m
+    labels:
+      severity: critical
+      category: performance
+      service: api
+      percentile: "99"
+    annotations:
+      summary: "API P99 response time exceeds 1 second"
+      description: "99th percentile response time is {{ $value | humanizeDuration }} (threshold: 1s)"
+      impact: "Severe performance degradation affecting 1% of users"
+      runbook_url: "https://runbooks.freeagentics.com/api-performance#p99-latency"
+
+# ============================================================================
+# AGENT PERFORMANCE ALERTS
+# ============================================================================
+- name: freeagentics_agents
+  interval: 30s
+  rules:
+  # Agent Inference Performance
+  - alert: AgentSlowInference
+    expr: histogram_quantile(0.95, sum(rate(freeagentics_agent_inference_duration_seconds_bucket[5m])) by (agent_id, le)) > 0.2
+    for: 5m
+    labels:
+      severity: warning
+      category: agents
+      subsystem: inference
+    annotations:
+      summary: "Agent {{ $labels.agent_id }} inference time exceeds 200ms"
+      description: "P95 inference time: {{ $value | humanizeDuration }} (threshold: 200ms)"
+      runbook_url: "https://runbooks.freeagentics.com/agents#slow-inference"
+
+  - alert: AgentInferenceTimeout
+    expr: histogram_quantile(0.99, sum(rate(freeagentics_agent_inference_duration_seconds_bucket[5m])) by (agent_id, le)) > 1.0
+    for: 2m
+    labels:
+      severity: critical
+      category: agents
+      subsystem: inference
+    annotations:
+      summary: "Agent {{ $labels.agent_id }} inference approaching timeout"
+      description: "P99 inference time: {{ $value | humanizeDuration }} (timeout: 1s)"
+      impact: "Agent may become unresponsive"
+      action: "Consider restarting agent or reducing workload"
+
+  # Agent Memory Usage
+  - alert: AgentHighMemoryUsage
+    expr: freeagentics_agent_memory_usage_bytes / 1024 / 1024 > 25
+    for: 5m
+    labels:
+      severity: warning
+      category: agents
+      subsystem: memory
+    annotations:
+      summary: "Agent {{ $labels.agent_id }} memory usage exceeds 25MB"
+      description: "Current usage: {{ $value | humanize }}MB (warning: 25MB)"
+      runbook_url: "https://runbooks.freeagentics.com/agents#high-memory"
+
+  - alert: AgentCriticalMemoryUsage
+    expr: freeagentics_agent_memory_usage_bytes / 1024 / 1024 > 30
+    for: 2m
+    labels:
+      severity: critical
+      category: agents
+      subsystem: memory
+    annotations:
+      summary: "Agent {{ $labels.agent_id }} memory usage critical"
+      description: "Current usage: {{ $value | humanize }}MB (critical: 30MB)"
+      impact: "Agent at risk of being killed by memory manager"
+      action: "Immediate memory optimization or agent restart required"
+
+  - alert: AgentMemoryKillThreshold
+    expr: freeagentics_agent_memory_usage_bytes / 1024 / 1024 > 35
+    for: 1m
+    labels:
+      severity: emergency
+      category: agents
+      subsystem: memory
+    annotations:
+      summary: "Agent {{ $labels.agent_id }} exceeds kill threshold"
+      description: "Current usage: {{ $value | humanize }}MB (kill threshold: 35MB)"
+      impact: "Agent will be terminated by memory manager"
+      action: "Agent termination imminent"
+
+  # Belief System Health
+  - alert: BeliefAccuracyLow
+    expr: freeagentics_belief_accuracy_ratio < 0.75
+    for: 10m
+    labels:
+      severity: warning
+      category: agents
+      subsystem: beliefs
+    annotations:
+      summary: "Agent {{ $labels.agent_id }} belief accuracy below 75%"
+      description: "Current accuracy: {{ $value | humanizePercentage }} (threshold: 75%)"
+      impact: "Agent decision quality degraded"
+      runbook_url: "https://runbooks.freeagentics.com/agents#belief-accuracy"
+
+  - alert: BeliefAccuracyCritical
+    expr: freeagentics_belief_accuracy_ratio < 0.60
+    for: 5m
+    labels:
+      severity: critical
+      category: agents
+      subsystem: beliefs
+    annotations:
+      summary: "Agent {{ $labels.agent_id }} belief accuracy critical"
+      description: "Current accuracy: {{ $value | humanizePercentage }} (critical: 60%)"
+      impact: "Agent making poor decisions"
+      action: "Consider agent reset or retraining"
+
+  - alert: BeliefFreeEnergyHigh
+    expr: freeagentics_belief_free_energy_current > 8.0
+    for: 5m
+    labels:
+      severity: warning
+      category: agents
+      subsystem: beliefs
+    annotations:
+      summary: "Agent {{ $labels.agent_id }} free energy elevated"
+      description: "Current free energy: {{ $value }} (threshold: 8.0)"
+      impact: "Agent experiencing high uncertainty"
+
+  - alert: BeliefDivergence
+    expr: freeagentics_belief_free_energy_current > 10.0
+    for: 2m
+    labels:
+      severity: critical
+      category: agents
+      subsystem: beliefs
+    annotations:
+      summary: "Agent {{ $labels.agent_id }} belief divergence detected"
+      description: "Free energy: {{ $value }} indicates belief system divergence"
+      impact: "Agent unable to form coherent world model"
+      action: "Agent restart recommended"
+
+# ============================================================================
+# SYSTEM RESOURCE ALERTS
+# ============================================================================
+- name: freeagentics_resources
+  interval: 30s
+  rules:
+  # Database Connection Alerts
+  - alert: DatabaseConnectionsHigh
+    expr: pg_stat_database_numbackends{datname="freeagentics"} > 150
+    for: 5m
+    labels:
+      severity: warning
+      category: database
+      resource: connections
+    annotations:
+      summary: "Database connections approaching limit"
+      description: "Active connections: {{ $value }} (warning: 150, max: 200)"
+      runbook_url: "https://runbooks.freeagentics.com/database#high-connections"
+
+  - alert: DatabaseConnectionsCritical
+    expr: pg_stat_database_numbackends{datname="freeagentics"} > 180
+    for: 2m
+    labels:
+      severity: critical
+      category: database
+      resource: connections
+    annotations:
+      summary: "Database connections critical"
+      description: "Active connections: {{ $value }} (critical: 180, max: 200)"
+      impact: "New connections will be rejected"
+      action: "Kill idle connections or scale connection pool"
+
+  - alert: DatabaseConnectionsExhausted
+    expr: pg_stat_database_numbackends{datname="freeagentics"} >= 200
+    for: 1m
+    labels:
+      severity: emergency
+      category: database
+      resource: connections
+    annotations:
+      summary: "Database connections exhausted"
+      description: "Connection limit reached: {{ $value }}/200"
+      impact: "Application unable to connect to database"
+      action: "IMMEDIATE: Reset connection pool"
+
+  # Query Performance
+  - alert: DatabaseSlowQueries
+    expr: pg_stat_statements_mean_exec_time_ms > 100
+    for: 5m
+    labels:
+      severity: warning
+      category: database
+      resource: performance
+    annotations:
+      summary: "Database queries running slow"
+      description: "Average query time: {{ $value }}ms (threshold: 100ms)"
+      runbook_url: "https://runbooks.freeagentics.com/database#slow-queries"
+
+  # Redis Cache Alerts
+  - alert: RedisCacheMemoryHigh
+    expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.8
+    for: 5m
+    labels:
+      severity: warning
+      category: cache
+      resource: memory
+    annotations:
+      summary: "Redis memory usage above 80%"
+      description: "Memory usage: {{ $value | humanizePercentage }}"
+      impact: "Cache evictions may increase"
+
+  - alert: RedisCacheMemoryCritical
+    expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+    for: 2m
+    labels:
+      severity: critical
+      category: cache
+      resource: memory
+    annotations:
+      summary: "Redis memory usage critical"
+      description: "Memory usage: {{ $value | humanizePercentage }}"
+      impact: "Frequent evictions degrading performance"
+      action: "Increase Redis memory or optimize cache usage"
+
+  - alert: RedisCacheLowHitRate
+    expr: |
+      rate(redis_keyspace_hits_total[5m]) /
+      (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m])) < 0.8
+    for: 10m
+    labels:
+      severity: warning
+      category: cache
+      resource: performance
+    annotations:
+      summary: "Redis cache hit rate below 80%"
+      description: "Hit rate: {{ $value | humanizePercentage }}"
+      impact: "Increased database load due to cache misses"
+      action: "Review cache key strategy"
+
+# ============================================================================
+# SECURITY ALERTS
+# ============================================================================
+- name: freeagentics_security
+  interval: 30s
+  rules:
+  # Authentication Failures
+  - alert: HighAuthenticationFailureRate
+    expr: sum(rate(freeagentics_security_authentication_attempts_total{outcome="failed"}[5m])) > 10
+    for: 5m
+    labels:
+      severity: warning
+      category: security
+      threat_type: authentication
+    annotations:
+      summary: "High authentication failure rate detected"
+      description: "Failed attempts: {{ $value | humanize }} per second"
+      runbook_url: "https://runbooks.freeagentics.com/security#auth-failures"
+
+  - alert: PossibleBruteForceAttack
+    expr: sum(rate(freeagentics_security_authentication_attempts_total{outcome="failed"}[5m])) by (client_ip) > 50
+    for: 2m
+    labels:
+      severity: critical
+      category: security
+      threat_type: brute_force
+    annotations:
+      summary: "Possible brute force attack from {{ $labels.client_ip }}"
+      description: "Failed attempts: {{ $value | humanize }} per second from single IP"
+      impact: "Potential security breach attempt"
+      action: "Block IP address {{ $labels.client_ip }}"
+
+  # Rate Limiting
+  - alert: RateLimitingTriggeredHigh
+    expr: sum(rate(http_requests_total{status="429"}[5m])) > 100
+    for: 5m
+    labels:
+      severity: warning
+      category: security
+      threat_type: rate_limit
+    annotations:
+      summary: "High rate of rate-limited requests"
+      description: "Rate limited requests: {{ $value | humanize }} per second"
+      impact: "Legitimate users may be affected"
+
+  # DDoS Detection
+  - alert: PossibleDDoSAttack
+    expr: |
+      sum(rate(http_requests_total[1m])) > 1000 AND
+      sum(rate(http_requests_total{status="429"}[1m])) > 100
+    for: 1m
+    labels:
+      severity: emergency
+      category: security
+      threat_type: ddos
+    annotations:
+      summary: "Possible DDoS attack detected"
+      description: "Request rate: {{ $value | humanize }}/s with high rate limiting"
+      impact: "Service availability at risk"
+      action: "Enable DDoS mitigation immediately"
+
+  # SSL Certificate Expiry
+  - alert: SSLCertificateExpiringSoon
+    expr: (probe_ssl_earliest_cert_expiry - time()) / 86400 < 30
+    for: 1h
+    labels:
+      severity: warning
+      category: security
+      resource: ssl
+    annotations:
+      summary: "SSL certificate expiring in {{ $value | humanize }} days"
+      description: "Certificate for {{ $labels.domain }} expires soon"
+      action: "Renew SSL certificate"
+
+  - alert: SSLCertificateExpiringCritical
+    expr: (probe_ssl_earliest_cert_expiry - time()) / 86400 < 7
+    for: 1h
+    labels:
+      severity: critical
+      category: security
+      resource: ssl
+    annotations:
+      summary: "SSL certificate expires in {{ $value | humanize }} days!"
+      description: "Certificate for {{ $labels.domain }} about to expire"
+      impact: "HTTPS will stop working when certificate expires"
+      action: "URGENT: Renew SSL certificate immediately"
+
+# ============================================================================
+# BUSINESS METRICS ALERTS
+# ============================================================================
+- name: freeagentics_business
+  interval: 30s
+  rules:
+  # User Activity
+  - alert: LowActiveUsers
+    expr: freeagentics_business_active_users_total < 100
+    for: 15m
+    labels:
+      severity: warning
+      category: business
+      metric: users
+    annotations:
+      summary: "Active user count below threshold"
+      description: "Active users: {{ $value }} (threshold: 100)"
+      impact: "Low platform engagement"
+
+  - alert: UserActivityDropped
+    expr: |
+      (freeagentics_business_active_users_total -
+       freeagentics_business_active_users_total offset 5m) /
+       freeagentics_business_active_users_total offset 5m < -0.25
+    for: 5m
+    labels:
+      severity: critical
+      category: business
+      metric: users
+    annotations:
+      summary: "Active users dropped by {{ $value | humanizePercentage }}"
+      description: "Significant drop in user activity detected"
+      impact: "Potential service issue affecting users"
+      action: "Investigate service health and recent changes"
+
+  # Task Completion
+  - alert: LowTaskCompletionRate
+    expr: |
+      sum(rate(freeagentics_business_task_completion_total{status="success"}[5m])) /
+      sum(rate(freeagentics_business_task_completion_total[5m])) < 0.90
+    for: 10m
+    labels:
+      severity: warning
+      category: business
+      metric: tasks
+    annotations:
+      summary: "Task completion rate below 90%"
+      description: "Success rate: {{ $value | humanizePercentage }}"
+      impact: "User satisfaction may be affected"
+
+  # Coalition Formation
+  - alert: CoalitionFormationFailures
+    expr: |
+      sum(rate(freeagentics_agent_coordination_requests_total{
+        coordination_type="coalition_formation",
+        status="failed"
+      }[5m])) > 0.15
+    for: 10m
+    labels:
+      severity: warning
+      category: business
+      metric: coalitions
+    annotations:
+      summary: "High coalition formation failure rate"
+      description: "Failure rate: {{ $value | humanize }} per second"
+      impact: "Multi-agent coordination degraded"
+
+# ============================================================================
+# SLO VIOLATION ALERTS
+# ============================================================================
+- name: freeagentics_slo
+  interval: 30s
+  rules:
+  # Availability SLO
+  - alert: AvailabilitySLOBurnRateHigh
+    expr: |
+      (1 - (
+        sum(rate(http_requests_total{status!~"5.."}[5m])) /
+        sum(rate(http_requests_total[5m]))
+      )) > 0.001 * 14.4
+    for: 2m
+    labels:
+      severity: critical
+      category: slo
+      slo: availability
+    annotations:
+      summary: "Availability SLO burn rate critical"
+      description: "Burning {{ $value | humanize }}x monthly error budget"
+      impact: "At this rate, monthly SLO will be violated in hours"
+      action: "Immediate action required to restore availability"
+
+  # Latency SLO
+  - alert: LatencySLOViolation
+    expr: |
+      histogram_quantile(0.95,
+        sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
+      ) > 0.5
+    for: 5m
+    labels:
+      severity: critical
+      category: slo
+      slo: latency
+    annotations:
+      summary: "Latency SLO violated"
+      description: "P95 latency: {{ $value | humanizeDuration }} (SLO: 500ms)"
+      impact: "User experience degraded beyond acceptable levels"
+
+  # Error Budget Exhausted
+  - alert: ErrorBudgetNearlyExhausted
+    expr: |
+      (
+        sum(increase(http_requests_total{status=~"5.."}[30d])) /
+        sum(increase(http_requests_total[30d]))
+      ) > 0.009
+    for: 1h
+    labels:
+      severity: critical
+      category: slo
+      budget: error
+    annotations:
+      summary: "Error budget nearly exhausted"
+      description: "{{ $value | humanizePercentage }} of error budget used"
+      impact: "No room for additional errors this month"
+      action: "Halt non-critical deployments, focus on reliability"
