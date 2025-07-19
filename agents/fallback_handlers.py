@@ -10,6 +10,11 @@ class ErrorHandlerFallback:
     """Fallback error handler implementation."""
 
     def __init__(self, agent_id: str) -> None:
+        """Initialize the fallback error handler.
+        
+        Args:
+            agent_id: Unique identifier for the agent.
+        """
         self.agent_id = agent_id
         self.error_count: int = 0
 
@@ -48,6 +53,12 @@ class PyMDPErrorHandlerFallback:
     """Fallback PyMDP error handler implementation."""
 
     def __init__(self, agent_id: str, max_recovery_attempts: int = 3) -> None:
+        """Initialize the PyMDP fallback error handler.
+        
+        Args:
+            agent_id: Unique identifier for the agent.
+            max_recovery_attempts: Maximum number of recovery attempts.
+        """
         self.agent_id = agent_id
         self.max_recovery_attempts = max_recovery_attempts
         self.error_count: int = 0
@@ -120,7 +131,7 @@ def safe_array_index_fallback(
 def safe_pymdp_operation_fallback(
     operation_name: str, default_value: Optional[Any] = None
 ):
-    """Decorator for safe PyMDP operations."""
+    """Create a decorator for safe PyMDP operations."""
 
     def decorator(func):
         def wrapper(*args, **kwargs):
@@ -136,14 +147,14 @@ def safe_pymdp_operation_fallback(
 
 
 def validate_observation_fallback(observation: Any) -> Any:
-    """Basic observation validation."""
+    """Validate observation data."""
     return observation
 
 
 def validate_pymdp_matrices_fallback(
     A: Any, B: Any, C: Any, D: Any
 ) -> Tuple[bool, str]:
-    """Basic matrix validation."""
+    """Validate PyMDP matrix inputs."""
     try:
         # Basic validation - just check if they exist
         if A is None or B is None or C is None or D is None:
@@ -156,7 +167,7 @@ def validate_pymdp_matrices_fallback(
 def with_error_handling_fallback(
     operation_name: str, fallback_result: Optional[Any] = None
 ):
-    """Decorator for error handling with fallback result."""
+    """Create a decorator for error handling with fallback result."""
 
     def decorator(func):
         def wrapper(*args, **kwargs):

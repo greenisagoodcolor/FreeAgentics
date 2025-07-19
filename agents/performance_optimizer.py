@@ -37,6 +37,11 @@ class MatrixCache:
     """Thread-safe matrix cache for PyMDP operations."""
 
     def __init__(self, max_size: int = 1000):
+        """Initialize the matrix cache.
+        
+        Args:
+            max_size: Maximum number of cached items.
+        """
         self.cache = {}
         self.access_times = {}
         self.max_size = max_size
@@ -75,6 +80,11 @@ class AgentPool:
     """Memory-efficient agent pooling to reduce 34.5MB per agent footprint."""
 
     def __init__(self, max_agents: int = 100):
+        """Initialize the agent pool.
+        
+        Args:
+            max_agents: Maximum number of agents in the pool.
+        """
         self.max_agents = max_agents
         self.available_agents = []
         self.active_agents = {}
@@ -105,6 +115,11 @@ class AsyncInferenceEngine:
     """Asynchronous PyMDP inference for concurrent multi-agent processing."""
 
     def __init__(self, max_workers: int = 4):
+        """Initialize the async inference engine.
+        
+        Args:
+            max_workers: Maximum number of worker threads.
+        """
         self.max_workers = max_workers
         self.executor = ThreadPoolExecutor(max_workers=max_workers)
         self.matrix_cache = MatrixCache()
@@ -135,7 +150,7 @@ class AsyncInferenceEngine:
             return None, {"error": str(e)}
 
     def _sync_inference(self, agent, observation: Any) -> Any:
-        """Synchronous inference wrapper for thread execution."""
+        """Execute synchronous inference wrapped for thread execution."""
         # Update beliefs
         belief_start = time.time()
         agent.perceive(observation)
@@ -162,7 +177,7 @@ class AsyncInferenceEngine:
 
 
 def performance_monitor(operation_name: str):
-    """Decorator to monitor operation performance."""
+    """Create a decorator to monitor operation performance."""
 
     def decorator(func):
         @wraps(func)
@@ -250,6 +265,7 @@ class PerformanceOptimizer:
     """Central performance optimization coordinator."""
 
     def __init__(self):
+        """Initialize the performance optimizer."""
         self.async_engine = AsyncInferenceEngine()
         self.matrix_cache = MatrixCache()
         self.benchmarks = {}
