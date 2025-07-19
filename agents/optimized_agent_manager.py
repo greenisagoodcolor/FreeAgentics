@@ -1,5 +1,5 @@
 """
-Advanced Optimized Agent Manager with Threading, Memory, and Performance Optimizations
+Advanced Optimized Agent Manager with Threading, Memory, and Performance Optimizations.
 
 This module implements all the identified threading optimizations from the performance analysis:
 1. CPU topology-aware thread pool sizing
@@ -75,6 +75,7 @@ class WorkStealingQueue:
     """Lock-free work stealing queue implementation."""
 
     def __init__(self):
+        """Initialize the work-stealing queue."""
         self.queue = deque()
         self.lock = threading.Lock()
         self.steal_count = 0
@@ -116,6 +117,11 @@ class AdaptiveThreadPool:
     """Adaptive thread pool with workload detection and work stealing."""
 
     def __init__(self, config: OptimizationConfig):
+        """Initialize the adaptive thread pool.
+        
+        Args:
+            config: Configuration for optimization parameters.
+        """
         self.config = config
         self.num_workers = self._calculate_optimal_workers()
         self.workers = []
@@ -177,7 +183,7 @@ class AdaptiveThreadPool:
             self.workers.append(worker)
 
     def _worker_loop(self, worker_id: int):
-        """Main worker loop with work stealing."""
+        """Execute main worker loop with work stealing."""
         my_queue = self.work_queues[worker_id]
 
         while not self.shutdown_event.is_set():
@@ -317,6 +323,11 @@ class LockFreeAgentRegistry:
     """Lock-free agent registry using sharding to reduce contention."""
 
     def __init__(self, num_shards: int = 16):
+        """Initialize lock-free agent registry.
+        
+        Args:
+            num_shards: Number of shards to distribute agents across.
+        """
         self.num_shards = num_shards
         self.shards = [dict() for _ in range(num_shards)]
         self.shard_locks = [threading.RLock() for _ in range(num_shards)]
@@ -382,6 +393,12 @@ class MemoryPool:
     """Memory pool for agent states to reduce allocation overhead."""
 
     def __init__(self, pool_size: int = 100, state_size: int = 1024):
+        """Initialize memory pool for agent states.
+        
+        Args:
+            pool_size: Number of pre-allocated memory blocks.
+            state_size: Size of each memory block in bytes.
+        """
         self.pool_size = pool_size
         self.state_size = state_size
         self.available = queue.Queue(maxsize=pool_size)
@@ -434,6 +451,11 @@ class OptimizedAgentManager:
     """Advanced optimized agent manager with all performance optimizations."""
 
     def __init__(self, config: OptimizationConfig = None):
+        """Initialize the optimized agent manager.
+        
+        Args:
+            config: Configuration for optimization parameters.
+        """
         self.config = config or OptimizationConfig()
         self.performance_monitor = get_performance_monitor()
 
@@ -498,7 +520,7 @@ class OptimizedAgentManager:
         self.batch_processor.start()
 
     def _batch_processing_loop(self):
-        """Main batch processing loop."""
+        """Process agent batches in a continuous loop."""
         current_batch = []
         last_batch_time = time.time()
 

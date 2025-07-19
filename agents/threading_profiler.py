@@ -1,4 +1,4 @@
-"""Threading Performance Profiler for Multi-Agent Systems
+"""Threading Performance Profiler for Multi-Agent Systems.
 
 Comprehensive profiling tool to identify threading bottlenecks and optimization
 opportunities in the FreeAgentics multi-agent system.
@@ -37,6 +37,7 @@ class ThreadMetrics:
     tasks_completed: int = 0
 
     def __post_init__(self):
+        """Initialize timing metrics after dataclass initialization."""
         self.start_time = time.perf_counter()
         self.start_cpu_time = time.process_time()
 
@@ -72,11 +73,26 @@ class InstrumentedLock:
     """Instrumented lock for profiling lock contention."""
 
     def __init__(self, lock_id: str, profiler: "ThreadingProfiler"):
+        """Initialize instrumented lock.
+        
+        Args:
+            lock_id: Unique identifier for this lock.
+            profiler: ThreadingProfiler instance for recording metrics.
+        """
         self._lock = threading.RLock()
         self.lock_id = lock_id
         self.profiler = profiler
 
     def acquire(self, blocking: bool = True, timeout: float = -1):
+        """Acquire the lock while recording profiling metrics.
+        
+        Args:
+            blocking: Whether to block until lock is available.
+            timeout: Maximum time to wait for lock acquisition.
+            
+        Returns:
+            bool: True if lock was acquired, False otherwise.
+        """
         thread_id = threading.get_ident()
         start_time = time.perf_counter()
 
@@ -92,13 +108,16 @@ class InstrumentedLock:
         return acquired
 
     def release(self):
+        """Release the lock."""
         self._lock.release()
 
     def __enter__(self):
+        """Enter context manager by acquiring lock."""
         self.acquire()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """Exit context manager by releasing lock."""
         self.release()
 
 
@@ -106,6 +125,7 @@ class ThreadingProfiler:
     """Comprehensive threading performance profiler."""
 
     def __init__(self):
+        """Initialize the threading profiler."""
         self.thread_metrics: Dict[int, ThreadMetrics] = {}
         self.lock_metrics: Dict[str, LockMetrics] = {}
         self._metrics_lock = threading.Lock()
