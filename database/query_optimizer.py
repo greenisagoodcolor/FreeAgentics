@@ -1,5 +1,5 @@
 """
-Enhanced Database Query Optimizer for Multi-Agent Systems
+Enhanced Database Query Optimizer for Multi-Agent Systems.
 
 Implements advanced PostgreSQL optimization techniques including:
 - Query plan analysis with EXPLAIN ANALYZE
@@ -42,6 +42,7 @@ class PreparedStatementManager:
     """Manages prepared statements for frequently used queries."""
 
     def __init__(self):
+        """Initialize the prepared statement manager."""
         self.prepared_statements: Dict[str, str] = {}
         self.statement_usage: Dict[str, int] = defaultdict(int)
         self.statement_performance: Dict[str, List[float]] = defaultdict(list)
@@ -105,6 +106,7 @@ class QueryPlanAnalyzer:
     """Analyzes query execution plans for optimization opportunities."""
 
     def __init__(self):
+        """Initialize the query plan analyzer."""
         self.slow_query_threshold = 0.1  # 100ms
         self.query_plans: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
         self.optimization_suggestions: Dict[str, Set[str]] = defaultdict(set)
@@ -249,6 +251,11 @@ class BatchOperationManager:
     """Manages batch operations for efficient bulk inserts and updates."""
 
     def __init__(self, batch_size: int = 1000):
+        """Initialize the batch operation manager.
+        
+        Args:
+            batch_size: Maximum number of operations per batch.
+        """
         self.batch_size = batch_size
         self.pending_inserts: Dict[str, List[Dict[str, Any]]] = defaultdict(
             list
@@ -439,6 +446,12 @@ class EnhancedQueryOptimizer:
     """Enhanced query optimizer with all advanced features."""
 
     def __init__(self, database_url: str, enable_pgbouncer: bool = True):
+        """Initialize the query optimizer.
+        
+        Args:
+            database_url: PostgreSQL connection URL.
+            enable_pgbouncer: Whether to enable PgBouncer connection pooling.
+        """
         self.database_url = database_url
         self.enable_pgbouncer = enable_pgbouncer
 
@@ -541,7 +554,7 @@ class EnhancedQueryOptimizer:
         return self._async_engine
 
     def _setup_engine_monitoring(self, engine):
-        """Setup event listeners for query monitoring."""
+        """Set up event listeners for query monitoring."""
 
         @event.listens_for(engine, "before_cursor_execute")
         def before_cursor_execute(
@@ -756,7 +769,7 @@ class EnhancedQueryOptimizer:
         }
 
     async def setup_monitoring(self, session: AsyncSession):
-        """Setup database monitoring and slow query logging."""
+        """Set up database monitoring and slow query logging."""
         monitoring_configs = [
             # Enable query logging for slow queries
             "ALTER SYSTEM SET log_min_duration_statement = 100",  # Log queries > 100ms

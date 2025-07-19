@@ -1,5 +1,5 @@
 """
-Example Usage of Database Query Optimization for Multi-Agent Systems
+Example Usage of Database Query Optimization for Multi-Agent Systems.
 
 This example demonstrates how to use the optimization features:
 1. Setting up optimized database connections
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 async def setup_optimized_database():
-    """Setup database with all optimizations enabled."""
+    """Set up database with all optimizations enabled."""
     # Database URL - configure for your environment
     # For production with PgBouncer:
     # database_url = "postgresql://user:pass@pgbouncer:6432/dbname"
@@ -71,7 +71,7 @@ async def setup_optimized_database():
 
 
 async def example_batch_operations(optimizer):
-    """Example of using batch operations for better performance."""
+    """Demonstrate using batch operations for better performance."""
     logger.info("\n=== Batch Operations Example ===")
 
     async with optimizer.optimized_session() as session:
@@ -137,7 +137,7 @@ async def example_batch_operations(optimizer):
 
 
 async def example_prepared_statements(optimizer):
-    """Example of using prepared statements for repeated queries."""
+    """Demonstrate using prepared statements for repeated queries."""
     logger.info("\n=== Prepared Statements Example ===")
 
     async with optimizer.optimized_session() as session:
@@ -211,7 +211,7 @@ async def example_prepared_statements(optimizer):
 
 
 async def example_query_caching(optimizer):
-    """Example of using query result caching."""
+    """Demonstrate using query result caching."""
     logger.info("\n=== Query Caching Example ===")
 
     async with optimizer.optimized_session() as session:
@@ -247,7 +247,7 @@ async def example_query_caching(optimizer):
 
 
 async def example_query_analysis(optimizer):
-    """Example of analyzing query performance."""
+    """Analyze query performance."""
     logger.info("\n=== Query Analysis Example ===")
 
     async with optimizer.optimized_session() as session:
@@ -298,7 +298,7 @@ async def example_query_analysis(optimizer):
 
 
 async def example_maintenance_scheduling(indexing_strategy):
-    """Example of scheduling index maintenance."""
+    """Schedule index maintenance."""
     logger.info("\n=== Maintenance Scheduling Example ===")
 
     async with indexing_strategy.maintenance_scheduler as scheduler:
@@ -373,7 +373,7 @@ async def generate_performance_report(optimizer, indexing_strategy):
 
 
 async def main():
-    """Main example execution."""
+    """Execute main example."""
     logger.info("Starting Database Optimization Examples...")
 
     # Setup optimized database
