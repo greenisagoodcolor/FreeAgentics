@@ -1,5 +1,5 @@
 """
-API Performance Optimization Middleware
+API Performance Optimization Middleware.
 
 This module implements comprehensive API performance optimizations:
 1. Response caching with TTL and invalidation
@@ -120,6 +120,11 @@ class ResponseCache:
     """High-performance response cache with TTL and invalidation."""
 
     def __init__(self, config: CacheConfig):
+        """Initialize the response cache.
+
+        Args:
+            config: Cache configuration settings.
+        """
         self.config = config
         self.cache = cachetools.TTLCache(
             maxsize=config.max_size, ttl=config.default_ttl
@@ -146,7 +151,9 @@ class ResponseCache:
 
         # Generate hash
         key_string = "|".join(key_parts)
-        return hashlib.md5(key_string.encode()).hexdigest()
+        return hashlib.md5(
+            key_string.encode(), usedforsecurity=False
+        ).hexdigest()
 
     def _get_ttl(self, request: Request) -> int:
         """Get TTL for specific endpoint."""
@@ -230,6 +237,11 @@ class RequestDeduplicator:
     """Deduplicates identical requests within a time window."""
 
     def __init__(self, window_seconds: int = 10):
+        """Initialize the request deduplicator.
+
+        Args:
+            window_seconds: Time window for deduplication in seconds.
+        """
         self.window_seconds = window_seconds
         self.pending_requests: Dict[str, asyncio.Future] = {}
         self.request_timestamps: Dict[str, float] = {}
@@ -249,7 +261,9 @@ class RequestDeduplicator:
         if hasattr(request, "_body_hash"):
             key_parts.append(request._body_hash)
 
-        return hashlib.md5("|".join(key_parts).encode()).hexdigest()
+        return hashlib.md5(
+            "|".join(key_parts).encode(), usedforsecurity=False
+        ).hexdigest()
 
     def _cleanup_expired(self):
         """Clean up expired requests."""
@@ -311,6 +325,11 @@ class ResponseCompressor:
     """Compresses responses using various algorithms."""
 
     def __init__(self, config: CompressionConfig):
+        """Initialize the response compressor.
+
+        Args:
+            config: Compression configuration settings.
+        """
         self.config = config
         self.compression_count = 0
         self.bytes_saved = 0
@@ -423,6 +442,12 @@ class PerformanceMiddleware(BaseHTTPMiddleware):
     """Comprehensive API performance middleware."""
 
     def __init__(self, app: FastAPI, config: PerformanceConfig = None):
+        """Initialize the performance middleware.
+
+        Args:
+            app: The FastAPI application instance.
+            config: Performance configuration settings.
+        """
         super().__init__(app)
         self.config = config or PerformanceConfig()
         self.performance_monitor = get_performance_monitor()
@@ -455,7 +480,7 @@ class PerformanceMiddleware(BaseHTTPMiddleware):
     async def dispatch(
         self, request: Request, call_next: Callable
     ) -> Response:
-        """Main middleware dispatch method."""
+        """Process incoming requests through the performance middleware pipeline."""
         start_time = time.perf_counter()
 
         # Increment request count
@@ -464,7 +489,9 @@ class PerformanceMiddleware(BaseHTTPMiddleware):
         # Add body hash for POST/PUT requests (for deduplication)
         if request.method in ["POST", "PUT", "PATCH"]:
             body = await request.body()
-            request._body_hash = hashlib.md5(body).hexdigest()
+            request._body_hash = hashlib.md5(
+                body, usedforsecurity=False
+            ).hexdigest()
             # Reset body for downstream processing
             request._body = body
 
@@ -607,6 +634,11 @@ class StreamingResponseOptimizer:
     """Optimizes streaming responses for large data."""
 
     def __init__(self, threshold_bytes: int = 1024 * 1024):
+        """Initialize the stream optimizer.
+
+        Args:
+            threshold_bytes: Size threshold for streaming responses.
+        """
         self.threshold_bytes = threshold_bytes
         self.streaming_count = 0
 
@@ -654,7 +686,7 @@ performance_middleware: Optional[PerformanceMiddleware] = None
 def setup_performance_middleware(
     app: FastAPI, config: PerformanceConfig = None
 ) -> PerformanceMiddleware:
-    """Setup performance middleware for FastAPI app."""
+    """Set up performance middleware for FastAPI app."""
     global performance_middleware
 
     performance_middleware = PerformanceMiddleware(app, config)
@@ -715,7 +747,7 @@ async def benchmark_api_performance():
     start_time = time.perf_counter()
 
     # Simulate processing
-    for i in range(num_requests):
+    for _ in range(num_requests):
         # Simulate request processing time
         await asyncio.sleep(0.001)
 
@@ -727,7 +759,7 @@ async def benchmark_api_performance():
 
     # Print statistics
     stats = middleware.get_statistics()
-    print(f"\nMiddleware Statistics:")
+    print("\nMiddleware Statistics:")
     print(f"  Average response time: {stats['avg_response_time']:.3f}s")
     print(f"  Slow requests: {stats['slow_request_count']}")
     print(f"  Cache stats: {stats.get('cache', 'N/A')}")

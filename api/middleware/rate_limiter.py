@@ -75,6 +75,14 @@ class RateLimitConfig:
         algorithm: RateLimitAlgorithm = RateLimitAlgorithm.SLIDING_WINDOW,
         burst_size: Optional[int] = None,
     ):
+        """Initialize rate limit configuration.
+
+        Args:
+            max_requests: Maximum number of requests allowed.
+            window_seconds: Time window in seconds.
+            algorithm: Rate limiting algorithm to use.
+            burst_size: Maximum burst size for token bucket algorithm.
+        """
         self.max_requests = max_requests
         self.window_seconds = window_seconds
         self.algorithm = algorithm
@@ -91,6 +99,14 @@ class EndpointConfig:
         authenticated_limit: RateLimitConfig,
         priority: int = 0,
     ):
+        """Initialize endpoint-specific rate limit configuration.
+
+        Args:
+            path_pattern: URL path pattern to match.
+            anonymous_limit: Rate limit configuration for anonymous users.
+            authenticated_limit: Rate limit configuration for authenticated users.
+            priority: Priority for matching (higher values are checked first).
+        """
         self.path_pattern = path_pattern
         self.anonymous_limit = anonymous_limit
         self.authenticated_limit = authenticated_limit
@@ -101,6 +117,7 @@ class SuspiciousPatternDetector:
     """Detects suspicious request patterns for DDoS protection."""
 
     def __init__(self):
+        """Initialize suspicious pattern detector with predefined patterns."""
         self.patterns = {
             "rapid_404": {
                 "threshold": 10,
@@ -154,6 +171,14 @@ class RateLimiter:
         default_anonymous_limit: RateLimitConfig = None,
         default_authenticated_limit: RateLimitConfig = None,
     ):
+        """Initialize the Redis-based rate limiter.
+
+        Args:
+            redis_url: Redis connection URL.
+            config_file: Path to configuration file.
+            default_anonymous_limit: Default limits for anonymous users.
+            default_authenticated_limit: Default limits for authenticated users.
+        """
         self.redis_url = redis_url
         self.redis_client: Optional[redis.Redis] = None
         self.config_file = config_file
@@ -653,6 +678,13 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         rate_limiter: RateLimiter,
         get_user_id: Optional[callable] = None,
     ):
+        """Initialize the rate limiting middleware.
+
+        Args:
+            app: The ASGI application.
+            rate_limiter: The rate limiter instance.
+            get_user_id: Optional function to extract user ID from request.
+        """
         super().__init__(app)
         self.rate_limiter = rate_limiter
         self.get_user_id = get_user_id
@@ -740,7 +772,7 @@ def rate_limit(
     window_seconds: int = 60,
     algorithm: RateLimitAlgorithm = RateLimitAlgorithm.SLIDING_WINDOW,
 ):
-    """Decorator for rate limiting individual endpoints."""
+    """Create a decorator for rate limiting individual endpoints."""
 
     def decorator(func):
         async def wrapper(request: Request, *args, **kwargs):

@@ -1,3 +1,5 @@
+"""Main FastAPI application module for FreeAgentics API."""
+
 import logging
 from contextlib import asynccontextmanager
 
@@ -29,6 +31,16 @@ logger = logging.getLogger(__name__)
 # Lifespan manager for startup/shutdown events
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Manage application lifecycle events.
+
+    Handles startup and shutdown operations for the FastAPI application.
+
+    Args:
+        app: The FastAPI application instance.
+
+    Yields:
+        None: Control is yielded back to FastAPI during application runtime.
+    """
     # Startup
     logger.info("Starting FreeAgentics API...")
 
