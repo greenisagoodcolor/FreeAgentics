@@ -45,17 +45,17 @@ jobs:
     - name: Run Bandit (Python Security)
       id: bandit
       run: |
-        bandit -r . -f json -o bandit-report.json || true
+        bandit -r . -f json -o bandit-report.json 
 
     - name: Run Safety (Dependency Check)
       id: safety
       run: |
-        safety check --json --output safety-report.json || true
+        safety check --json --output safety-report.json 
 
     - name: Run Semgrep
       id: semgrep
       run: |
-        semgrep --config=auto --json --output=semgrep-report.json . || true
+        semgrep --config=auto --json --output=semgrep-report.json . 
 
     - name: Run custom SAST scanner
       run: |
@@ -107,12 +107,12 @@ jobs:
     - name: Run npm audit
       if: hashFiles('package-lock.json') != ''
       run: |
-        npm audit --json > npm-audit-report.json || true
+        npm audit --json > npm-audit-report.json 
 
     - name: Run pip-audit
       run: |
         pip install pip-audit
-        pip-audit --format json --output pip-audit-report.json || true
+        pip-audit --format json --output pip-audit-report.json 
 
     - name: Upload dependency scan results
       uses: actions/upload-artifact@v3
@@ -147,7 +147,7 @@ jobs:
     - name: Run Grype scan
       run: |
         curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
-        grype freeagentics:scan -o json > grype-results.json || true
+        grype freeagentics:scan -o json > grype-results.json 
 
     - name: Upload container scan results
       uses: actions/upload-artifact@v3
@@ -200,7 +200,7 @@ jobs:
     - name: License Finder
       run: |
         gem install license_finder
-        license_finder report --format=json > license-report.json || true
+        license_finder report --format=json > license-report.json 
 
     - name: Upload license scan results
       uses: actions/upload-artifact@v3
@@ -344,7 +344,7 @@ jobs:
       if: always()
       run: |
         if [ ! -z "$APP_PID" ]; then
-          kill $APP_PID || true
+          kill $APP_PID 
         fi
 
     - name: Upload DAST results

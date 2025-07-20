@@ -110,8 +110,9 @@ class SingleAgentInferenceBenchmark(PerformanceBenchmark):
             inference_time = (time.time() - start_time) * 1000  # ms
             inference_times.append(inference_time)
 
-            # Brief pause to prevent overwhelming the system
-            time.sleep(0.001)
+            # Brief CPU work to prevent overwhelming the system
+            from tests.performance.performance_utils import cpu_work
+            cpu_work(0.001, "light")
 
         # Measure peak memory
         peak_memory = process.memory_info().rss / (1024 * 1024)  # MB
@@ -605,8 +606,9 @@ class MemoryRegressionBenchmark(PerformanceBenchmark):
             current_memory = process.memory_info().rss / (1024 * 1024)  # MB
             memory_samples.append(current_memory)
 
-            # Brief pause to allow garbage collection
-            time.sleep(0.1)
+            # CPU work to allow garbage collection
+            from tests.performance.performance_utils import cpu_work
+            cpu_work(0.1, "light")
 
         # Final memory measurement
         final_memory = process.memory_info().rss / (1024 * 1024)  # MB

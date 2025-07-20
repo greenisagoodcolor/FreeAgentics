@@ -61,14 +61,14 @@ class TestAgentManagerCreateAgentInterface:
 
     def test_create_agent_with_active_inference_type_should_fail(self):
         """
-        RED: Tests expect 'active_inference' type but implementation only supports 'explorer'.
+        Tests that 'active_inference' type is now supported.
 
-        The test_simple_validation.py uses type='active_inference' but AgentManager
-        only handles 'explorer' type.
+        Previously this raised ValueError, but now it should work.
         """
-        # This should work but fails because 'active_inference' type not supported
-        with pytest.raises(ValueError, match="Unknown agent type"):
-            self.manager.create_agent("active_inference", "TestAgent")
+        # Active inference type is now supported
+        agent_id = self.manager.create_agent("active_inference", "TestAgent")
+        assert agent_id is not None
+        assert agent_id.startswith("ai_agent_")  # Active inference agents get "ai_agent_" prefix
 
     def test_create_agent_current_working_interface(self):
         """
@@ -79,7 +79,7 @@ class TestAgentManagerCreateAgentInterface:
         # This is the current working interface
         agent_id = self.manager.create_agent("explorer", "TestAgent")
         assert agent_id is not None
-        assert agent_id.startswith("agent_")
+        assert agent_id.startswith("test_agent_")
 
         # Verify agent was created
         assert agent_id in self.manager.agents
@@ -118,9 +118,12 @@ class TestAgentManagerCreateAgentInterface:
             num_controls=[3],
         )
 
-        # These PyMDP configs are completely ignored
+        # PyMDP configs should be properly passed to the agent
         agent = self.manager.agents[agent_id]
-        # Agent should have PyMDP configuration but it doesn't
-        assert not hasattr(agent, "num_states")  # This passes but shouldn't
-        assert not hasattr(agent, "num_obs")  # This passes but shouldn't
-        assert not hasattr(agent, "num_controls")  # This passes but shouldn't
+        # Agent should have PyMDP configuration
+        assert hasattr(agent, "num_states")
+        assert hasattr(agent, "num_obs")
+        assert hasattr(agent, "num_controls")
+        assert agent.num_states == [3]
+        assert agent.num_obs == [3]
+        assert agent.num_controls == [3]

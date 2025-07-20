@@ -20,6 +20,7 @@ from database.models import (
     KnowledgeNode,
     agent_coalition_association,
 )
+from database.utils import serialize_for_json
 
 from .builders import (
     AgentBuilder,
@@ -76,6 +77,10 @@ class AgentFactory:
         agent_data["beliefs"] = agent_data.get("beliefs", {})
         agent_data["preferences"] = agent_data.get("preferences", {})
         agent_data["pymdp_config"] = agent_data.get("pymdp_config", {})
+        
+        # Ensure status is the string value, not the enum
+        if "status" in agent_data and hasattr(agent_data["status"], "value"):
+            agent_data["status"] = agent_data["status"].value
 
         # Create model instance
         agent = Agent(**agent_data)
@@ -133,7 +138,7 @@ class AgentFactory:
                 if position_data:
                     overrides["position"] = position_data
 
-            # Create agent
+            # Create agent (without persisting yet)
             agent = AgentFactory.create(None, **overrides)
             agents.append(agent)
 
@@ -243,7 +248,18 @@ class CoalitionFactory:
 
         # Create coalition
         schema = builder.build()
-        coalition = Coalition(**schema.dict())
+        coalition_data = schema.dict()
+        
+        # Ensure status is the string value, not the enum
+        if "status" in coalition_data and hasattr(coalition_data["status"], "value"):
+            coalition_data["status"] = coalition_data["status"].value
+        
+        # Serialize any datetime objects in JSON fields
+        for json_field in ["objectives", "achieved_objectives", "required_capabilities"]:
+            if json_field in coalition_data:
+                coalition_data[json_field] = serialize_for_json(coalition_data[json_field])
+            
+        coalition = Coalition(**coalition_data)
 
         # Handle persistence and agent relationships
         if session:
@@ -301,7 +317,7 @@ class CoalitionFactory:
             session,
             count=num_agents,
             template=agent_template,
-            status=DBAgentStatus.ACTIVE,
+            status=DBAgentStatus.ACTIVE.value,
         )
 
         # Create coalition with agents
@@ -710,7 +726,7 @@ class PerformanceDataFactory:
                 template=random.choice(
                     ["grid_world", "resource_collector", "explorer"]
                 ),
-                status=DBAgentStatus.ACTIVE,
+                status=DBAgentStatus.ACTIVE.value,
                 distribute_positions=True,
                 position_bounds={"min": [0, 0], "max": [100, 100]},
             )
@@ -746,7 +762,7 @@ class PerformanceDataFactory:
                     session,
                     agents=coalition_agents,
                     name=f"PerfCoalition_{i:03d}",
-                    status=DBCoalitionStatus.ACTIVE,
+                    status=DBCoalitionStatus.ACTIVE.value,
                 )
                 results["coalitions"].append(coalition)
 

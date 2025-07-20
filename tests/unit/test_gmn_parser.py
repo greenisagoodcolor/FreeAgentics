@@ -31,7 +31,7 @@ class TestGMNNodeType:
         assert GMNNodeType.STATE.value == "state"
         assert GMNNodeType.OBSERVATION.value == "observation"
         assert GMNNodeType.ACTION.value == "action"
-        assert GMNNodeType.BELIEF.value == "belie"
+        assert GMNNodeType.BELIEF.value == "belief"
         assert GMNNodeType.PREFERENCE.value == "preference"
         assert GMNNodeType.TRANSITION.value == "transition"
         assert GMNNodeType.LIKELIHOOD.value == "likelihood"
@@ -158,33 +158,53 @@ class TestGMNParser:
                     "type": "observation",
                     "properties": {"num_observations": 2},
                 },
+                {
+                    "id": "action1",
+                    "type": "action",
+                    "properties": {"num_actions": 2},
+                },
             ],
             "edges": [
-                {"source": "state1", "target": "obs1", "type": "generates"}
+                {"source": "state1", "target": "obs1", "type": "generates"},
+                {"source": "action1", "target": "state1", "type": "influences"}
             ],
             "metadata": {"version": "1.0"},
         }
 
         graph = parser.parse(spec)
 
-        assert len(graph.nodes) == 2
-        assert len(graph.edges) == 1
+        assert len(graph.nodes) == 3
+        assert len(graph.edges) == 2
         assert graph.metadata["version"] == "1.0"
         assert "state1" in graph.nodes
         assert "obs1" in graph.nodes
+        assert "action1" in graph.nodes
         assert graph.nodes["state1"].type == GMNNodeType.STATE
         assert graph.nodes["obs1"].type == GMNNodeType.OBSERVATION
+        assert graph.nodes["action1"].type == GMNNodeType.ACTION
 
     def test_parse_string_spec(self, parser):
         """Test parsing string specification."""
         spec_str = json.dumps(
-            {"nodes": [{"id": "location", "type": "state"}], "edges": []}
+            {
+                "nodes": [
+                    {"id": "location", "type": "state"},
+                    {"id": "obs_location", "type": "observation"},
+                    {"id": "move", "type": "action"}
+                ], 
+                "edges": [
+                    {"source": "location", "target": "obs_location", "type": "generates"},
+                    {"source": "move", "target": "location", "type": "influences"}
+                ]
+            }
         )
 
         graph = parser.parse(spec_str)
 
-        assert len(graph.nodes) == 1
+        assert len(graph.nodes) == 3
         assert "location" in graph.nodes
+        assert "obs_location" in graph.nodes
+        assert "move" in graph.nodes
 
     def test_parse_gmn_format(self, parser):
         """Test parsing custom GMN format."""
@@ -192,18 +212,22 @@ class TestGMNParser:
         [nodes]
         location: state {num_states: 4}
         obs_location: observation {num_observations: 4}
+        move: action {num_actions: 5}
 
         [edges]
         location -> obs_location: generates
+        move -> location: influences
         """
 
         graph = parser.parse(spec)
 
-        assert len(graph.nodes) == 2
-        assert len(graph.edges) == 1
+        assert len(graph.nodes) == 3
+        assert len(graph.edges) == 2
         assert graph.nodes["location"].properties["num_states"] == 4
-        assert graph.edges[0].source == "location"
-        assert graph.edges[0].target == "obs_location"
+        # Check first edge
+        location_edge = next(e for e in graph.edges if e.source == "location")
+        assert location_edge.target == "obs_location"
+        assert location_edge.type == GMNEdgeType.GENERATES
 
     def test_validation_errors(self, parser):
         """Test validation error detection."""
@@ -274,7 +298,7 @@ class TestGMNToPyMDP:
                     "type": "action",
                     "properties": {"num_actions": 5},
                 },
-                {"id": "belie", "type": "belief"},
+                {"id": "belief1", "type": "belief"},
                 {
                     "id": "pre",
                     "type": "preference",
@@ -306,7 +330,7 @@ class TestGMNToPyMDP:
                 },
                 {"source": "pre", "target": "obs_loc", "type": "depends_on"},
                 {
-                    "source": "belie",
+                    "source": "belief1",
                     "target": "location",
                     "type": "depends_on",
                 },
@@ -533,8 +557,8 @@ class TestExampleSpec:
             "location",
             "obs_location",
             "move",
-            "location_belie",
-            "location_pre",
+            "location_belief",
+            "location_pref",
             "location_likelihood",
             "location_transition",
             "llm_policy",

@@ -19,6 +19,7 @@ from unittest.mock import Mock, patch
 
 import numpy as np
 
+from tests.performance.performance_utils import replace_sleep, cpu_work
 # Add parent directory to path
 sys.path.insert(
     0,
@@ -89,7 +90,7 @@ class TestThreadPoolOptimization(unittest.TestCase):
                 futures.append(future)
 
         # Wait for some completion
-        time.sleep(0.1)
+        replace_sleep(0.1)
 
         # Check if scaling occurred
         status = manager.get_pool_status()
@@ -308,7 +309,7 @@ class TestMemoryAccessPatterns(unittest.TestCase):
                 """Write operation (exclusive access)."""
                 with self._lock:
                     while self._readers > 0:
-                        time.sleep(0.0001)
+                        replace_sleep(0.0001)
                     self._data[key] = value
 
         # Test concurrent access

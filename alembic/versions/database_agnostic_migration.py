@@ -8,7 +8,7 @@ Create Date: 2025-01-13 12:00:00.000000
 
 from typing import Optional, Sequence, Union
 
-from alembic import op  # type: ignore[attr-defined]
+from alembic import op  
 
 # revision identifiers, used by Alembic.
 revision: str = "database_agnostic_001"

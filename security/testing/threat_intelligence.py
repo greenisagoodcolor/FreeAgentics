@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from urllib.parse import urlparse
 
 import aiohttp
-import redis.asyncio as redis  # type: ignore[import-untyped]
+import redis.asyncio as redis  
 from bloom_filter2 import BloomFilter
 
 # Configure logging
@@ -139,7 +139,7 @@ class ThreatFeedManager:
                     f"Error fetching from feed {self.feeds[i].__class__.__name__}: {result}"
                 )
             else:
-                all_indicators.extend(result)  # type: ignore[arg-type]
+                all_indicators.extend(result)  
 
         # Deduplicate indicators
         unique_indicators = self._deduplicate_indicators(all_indicators)
@@ -202,7 +202,7 @@ class OTXFeed:
 
             async with aiohttp.ClientSession() as session:
                 # Fetch subscribed pulses
-                async with session.get(  # type: ignore[attr-defined]
+                async with session.get(  
                     f"{self.api_url}/pulses/subscribed",
                     headers=headers,
                     params={"limit": 100},
@@ -342,7 +342,7 @@ class AbuseIPDBFeed:
                 # Fetch blacklist
                 params = {"confidenceMinimum": 75, "limit": 10000}
 
-                async with session.get(  # type: ignore[attr-defined]
+                async with session.get(  
                     f"{self.api_url}/blacklist", headers=headers, params=params
                 ) as response:
                     if response.status == 200:
@@ -477,7 +477,7 @@ class CustomFeed:
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(self.feed_url) as response:  # type: ignore[attr-defined]
+                async with session.get(self.feed_url) as response:  
                     if response.status == 200:
                         content = await response.text()
                         indicators = self._parse_feed(content)
@@ -683,7 +683,7 @@ class ThreatIntelligenceEngine:
             threat_info = json.loads(data)
             threat_info["indicator"] = indicator
             threat_info["indicator_type"] = indicator_type
-            return threat_info  # type: ignore[no-any-return]
+            return threat_info  
 
         return None
 

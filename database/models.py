@@ -27,6 +27,7 @@ from sqlalchemy.sql import func
 
 from database.base import Base
 from database.types import GUID
+from database.json_encoder import dumps, loads
 
 
 # Enums for database columns
@@ -66,7 +67,7 @@ agent_coalition_association = Table(
     Column(
         "coalition_id", GUID(), ForeignKey("coalitions.id"), primary_key=True
     ),
-    Column("role", Enum(AgentRole), default=AgentRole.MEMBER),
+    Column("role", Enum(AgentRole, values_callable=lambda x: [e.value for e in x]), default=AgentRole.MEMBER.value),
     Column("joined_at", DateTime, server_default=func.now()),
     Column("contribution_score", Float, default=0.0),
     Column("trust_score", Float, default=1.0),
@@ -88,7 +89,8 @@ class Agent(Base):
     name = Column(String(100), nullable=False)
     template = Column(String(50), nullable=False)
     status: Column[AgentStatus] = Column(
-        Enum(AgentStatus), default=AgentStatus.PENDING
+        Enum(AgentStatus, values_callable=lambda x: [e.value for e in x]), 
+        default=AgentStatus.PENDING.value
     )
 
     # Active Inference specific
@@ -159,7 +161,8 @@ class Coalition(Base):
     name = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
     status: Column[CoalitionStatus] = Column(
-        Enum(CoalitionStatus), default=CoalitionStatus.FORMING
+        Enum(CoalitionStatus, values_callable=lambda x: [e.value for e in x]), 
+        default=CoalitionStatus.FORMING.value
     )
 
     # Coalition objectives and capabilities

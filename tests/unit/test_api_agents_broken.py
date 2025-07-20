@@ -59,6 +59,7 @@ app.dependency_overrides[get_db] = override_get_db
 
 # Create a test client using compatibility wrapper
 from tests.test_client_compat import TestClient
+from tests.helpers import get_auth_headers
 
 # Create global test client
 client = TestClient(app)
@@ -90,7 +91,7 @@ class TestAgentsAPI:
             "parameters": {"grid_size": 10},
         }
 
-        response = client.post("/api/v1/agents", json=agent_data)
+        response = client.post("/api/v1/agents", json=agent_data, headers=get_auth_headers())
 
         assert response.status_code == 201
         data = response.json()
@@ -102,7 +103,7 @@ class TestAgentsAPI:
 
     def test_list_agents_empty(self):
         """Test listing agents when none exist."""
-        response = client.get("/api/v1/agents")
+        response = client.get("/api/v1/agents", headers=get_auth_headers())
 
         assert response.status_code == 200
         data = response.json()
@@ -127,7 +128,7 @@ class TestAgentsAPI:
         db.commit()
         db.close()
 
-        response = client.get("/api/v1/agents")
+        response = client.get("/api/v1/agents", headers=get_auth_headers())
 
         assert response.status_code == 200
         data = response.json()
@@ -150,7 +151,7 @@ class TestAgentsAPI:
         agent_id = str(agent.id)
         db.close()
 
-        response = client.get(f"/api/v1/agents/{agent_id}")
+        response = client.get(f"/api/v1/agents/{agent_id}", headers=get_auth_headers())
 
         assert response.status_code == 200
         data = response.json()
@@ -161,7 +162,7 @@ class TestAgentsAPI:
     def test_get_agent_not_found(self):
         """Test getting non-existent agent."""
         fake_id = str(uuid.uuid4())
-        response = client.get(f"/api/v1/agents/{fake_id}")
+        response = client.get(f"/api/v1/agents/{fake_id}", headers=get_auth_headers())
 
         assert response.status_code == 404
         assert "not found" in response.json()["detail"]
@@ -181,7 +182,7 @@ class TestAgentsAPI:
         db.close()
 
         response = client.patch(
-            f"/api/v1/agents/{agent_id}/status", params={"status": "active"}
+            f"/api/v1/agents/{agent_id}/status?status=active", headers=get_auth_headers()
         )
 
         assert response.status_code == 200
@@ -211,7 +212,7 @@ class TestAgentsAPI:
         agent_id = str(agent.id)
         db.close()
 
-        response = client.delete(f"/api/v1/agents/{agent_id}")
+        response = client.delete(f"/api/v1/agents/{agent_id}", headers=get_auth_headers())
 
         assert response.status_code == 200
         assert "deleted successfully" in response.json()["message"]
@@ -240,7 +241,7 @@ class TestAgentsAPI:
         agent_id = str(agent.id)
         db.close()
 
-        response = client.get(f"/api/v1/agents/{agent_id}/metrics")
+        response = client.get(f"/api/v1/agents/{agent_id}/metrics", headers=get_auth_headers())
 
         assert response.status_code == 200
         data = response.json()
@@ -267,7 +268,7 @@ class TestAgentsAPI:
         db.close()
 
         # Filter for active agents
-        response = client.get("/api/v1/agents?status=active")
+        response = client.get("/api/v1/agents?status=active", headers=get_auth_headers())
 
         assert response.status_code == 200
         data = response.json()
@@ -283,5 +284,5 @@ class TestAgentsAPI:
             "template": "invalid-template",
         }
 
-        response = client.post("/api/v1/agents", json=invalid_data)
+        response = client.post("/api/v1/agents", json=invalid_data, headers=get_auth_headers())
         assert response.status_code == 422  # Validation error

@@ -10,7 +10,7 @@ from agents.coalition_coordinator import CoalitionCoordinatorAgent
 from agents.resource_collector import ResourceCollectorAgent
 
 
-@pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available")
+
 class TestPyMDPArrayIntegration:
     """Test that PyMDP array handling works in real agent scenarios."""
 
@@ -176,7 +176,7 @@ class TestPyMDPArrayIntegration:
         assert isinstance(fe_components["total_free_energy"], float)
 
 
-@pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available")
+
 class TestEdgeCases:
     """Test edge cases in PyMDP array handling."""
 

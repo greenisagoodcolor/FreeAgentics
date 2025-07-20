@@ -11,6 +11,7 @@ import unittest
 import numpy as np
 import psutil
 
+from tests.performance.performance_utils import replace_sleep, cpu_work
 from agents.memory_optimization.matrix_pooling import (
     get_global_pool,
     pooled_dot,
@@ -177,7 +178,7 @@ class MatrixPoolingPerformanceTest(unittest.TestCase):
         # Clear
         no_pool_results.clear()
         gc.collect()
-        time.sleep(0.1)
+        replace_sleep(0.1)
 
         # Measure memory with pooling
         gc.collect()

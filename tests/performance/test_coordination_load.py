@@ -28,6 +28,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import psutil
 
+from tests.performance.performance_utils import replace_sleep, cpu_work
 from agents.async_agent_manager import AsyncAgentManager
 from agents.base_agent import PYMDP_AVAILABLE, BasicExplorerAgent
 from agents.coalition_coordinator import CoalitionCoordinatorAgent
@@ -190,7 +191,7 @@ class CoordinationAgent(BasicExplorerAgent):
                     ):
                         self.handoff_success += 1
                         return True
-                time.sleep(0.01)
+                replace_sleep(0.01)
 
             self.handoff_failure += 1
             return False
@@ -288,7 +289,7 @@ class CoordinationLoadTester:
                 for msg in messages:
                     receiver.handle_coordination_message(msg)
 
-            time.sleep(0.01)  # Small delay between rounds
+            replace_sleep(0.01)  # Small delay between rounds
 
         return {
             "total_handoffs": handoff_count,
@@ -343,7 +344,7 @@ class CoordinationLoadTester:
                     )
 
                     # Wait for response
-                    time.sleep(0.05)
+                    replace_sleep(0.05)
                     messages = agent.check_messages()
                     for msg in messages:
                         if msg["message"]["type"] == "resource_release":
@@ -361,7 +362,7 @@ class CoordinationLoadTester:
 
                 if try_acquire_resource(agent, resource_id):
                     # Use resource briefly then release
-                    time.sleep(random.uniform(0.01, 0.05))
+                    replace_sleep(random.uniform(0.01, 0.05))
                     with resource_locks[resource_id]:
                         if resources[resource_id] == agent.agent_id:
                             resources[resource_id] = None
@@ -411,7 +412,7 @@ class CoordinationLoadTester:
                 agent.participate_consensus(consensus_id, vote)
 
             # Allow time for message propagation
-            time.sleep(0.1)
+            replace_sleep(0.1)
 
             # Collect votes
             all_votes = {}
@@ -543,7 +544,7 @@ class CoordinationLoadTester:
                 start_time = time.time()
 
                 # Other agents detect failures through missing messages
-                time.sleep(0.1)
+                replace_sleep(0.1)
 
                 # Recover failed agents
                 for agent in failed_agents:

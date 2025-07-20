@@ -64,7 +64,7 @@ def fix_with_black(directory: str) -> bool:
             directory,
             "--line-length",
             "79",
-            "--skip-string-normalization",
+            "",
         ]
         result = subprocess.run(cmd, capture_output=True, text=True)
 

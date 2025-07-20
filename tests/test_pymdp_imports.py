@@ -55,21 +55,21 @@ class TestPyMDPImports:
         """Test Categorical import - Categorical doesn't exist in pymdp v0.0.7.1."""
         # Direct import should fail
         with pytest.raises(ImportError):
-            from pymdp import Categorical  # noqa: F401
+            from pymdp import Categorical  
 
         # Alternative locations should also fail
         with pytest.raises(ImportError):
-            from pymdp.maths import Categorical  # noqa: F401
+            from pymdp.maths import Categorical  
 
         with pytest.raises(ImportError):
-            from pymdp.agent import Categorical  # noqa: F401
+            from pymdp.agent import Categorical  
 
         # This is correct behavior - Categorical is not available in this version
 
     def test_no_direct_pymdp_agent_import(self):
         """Test that 'from pymdp import Agent' should fail."""
         with pytest.raises(ImportError):
-            from pymdp import Agent  # noqa: F401
+            from pymdp import Agent  
 
     def test_inference_active_pymdp_integration_imports(self):
         """Test imports in inference/active/pymdp_integration.py are correct."""

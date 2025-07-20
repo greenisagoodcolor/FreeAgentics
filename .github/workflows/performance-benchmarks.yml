@@ -73,7 +73,7 @@ jobs:
         python tests/performance/ci_performance_benchmarks.py \
           --output-dir tests/performance/ci_results \
           --verbose
-      continue-on-error: true
+      continue-on-error: false
 
     - name: Parse benchmark results
       id: parse_results

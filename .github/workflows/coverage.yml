@@ -33,7 +33,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install -r requirements-dev.txt || true
+        pip install -r requirements-dev.txt 
 
     - name: Run coverage analysis
       env:
@@ -65,7 +65,7 @@ jobs:
         file: ./test-reports/coverage/coverage.xml
         flags: unittests
         name: codecov-freeagentics
-        fail_ci_if_error: false
+        fail_ci_if_error: true
 
     - name: Comment PR with coverage summary
       if: github.event_name == 'pull_request'
@@ -151,5 +151,5 @@ jobs:
       uses: EndBug/add-and-commit@v9
       with:
         add: 'coverage-history'
-        message: 'Update coverage history [skip ci]'
+        message: 'Update coverage history '
         default_author: github_actions

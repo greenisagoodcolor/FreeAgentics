@@ -61,14 +61,14 @@ class AgentMetrics(BaseModel):
     last_update: datetime
 
 
-from fastapi import Depends  # noqa: E402
+from fastapi import Depends  
 
 # Database imports - NO IN-MEMORY STORAGE
-from sqlalchemy.orm import Session  # noqa: E402
+from sqlalchemy.orm import Session  
 
-from database.models import Agent as AgentModel  # noqa: E402
-from database.models import AgentStatus as DBAgentStatus  # noqa: E402
-from database.session import get_db  # noqa: E402
+from database.models import Agent as AgentModel  
+from database.models import AgentStatus as DBAgentStatus  
+from database.session import get_db  
 
 # Import agent manager
 try:

@@ -56,7 +56,7 @@ class TestComprehensivePyMDPPipeline:
     belief updates, planning, and action selection.
     """
 
-    @pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available")
+    
     def test_full_pipeline_with_real_pymdp_agent(self):
         """
         NEMESIS TEST: Full active inference pipeline with real PyMDP mathematics.
@@ -136,7 +136,7 @@ class TestComprehensivePyMDPPipeline:
         ), "Agent ID should be preserved"
         # Position may have changed during the test cycles - this is expected behavior
 
-    @pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available")
+    
     def test_mathematical_correctness_through_agent_interface(self):
         """
         NEMESIS TEST: Verify PyMDP mathematics through the agent interface.

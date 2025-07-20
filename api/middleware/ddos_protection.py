@@ -10,7 +10,7 @@ import time
 from datetime import datetime, timedelta
 from typing import Callable, Dict, Optional, Set, Tuple
 
-import redis.asyncio as aioredis  # type: ignore[import-untyped]
+import redis.asyncio as aioredis  
 from fastapi import Request, Response, status
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware

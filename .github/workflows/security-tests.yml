@@ -43,11 +43,11 @@ jobs:
         project: FreeAgentics
     - name: Run Bandit Security Scan
       run: "\n                                pip install bandit\n               \
-        \                 bandit -r . -f json -o bandit-report.json || true\n    \
+        \                 bandit -r . -f json -o bandit-report.json \n    \
         \                        "
     - name: Run Safety Check
       run: "\n                                pip install safety\n               \
-        \                 safety check --json > safety-report.json || true\n     \
+        \                 safety check --json > safety-report.json \n     \
         \                       "
     - name: OWASP ZAP Baseline Scan
       uses: zaproxy/action-baseline@v0.7.0

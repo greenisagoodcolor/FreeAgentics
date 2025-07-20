@@ -128,34 +128,34 @@ if STRAWBERRY_AVAILABLE:
 
 else:
     # Dummy classes when strawberry is not available
-    class Agent:  # type: ignore[no-redef]
+    class Agent:  
         pass
 
-    class Coalition:  # type: ignore[no-redef]
+    class Coalition:  
         pass
 
-    class Objective:  # type: ignore[no-redef]
+    class Objective:  
         pass
 
-    class WorldState:  # type: ignore[no-redef]
+    class WorldState:  
         pass
 
-    class SystemMetrics:  # type: ignore[no-redef]
+    class SystemMetrics:  
         pass
 
-    class InferenceResult:  # type: ignore[no-redef]
+    class InferenceResult:  
         pass
 
-    class AgentInput:  # type: ignore[no-redef]
+    class AgentInput:  
         pass
 
-    class CoalitionInput:  # type: ignore[no-redef]
+    class CoalitionInput:  
         pass
 
-    class ObjectiveInput:  # type: ignore[no-redef]
+    class ObjectiveInput:  
         pass
 
-    class InferenceInput:  # type: ignore[no-redef]
+    class InferenceInput:  
         pass
 
 

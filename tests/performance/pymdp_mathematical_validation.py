@@ -58,7 +58,7 @@ class PyMDPMathematicalValidator:
 
         return agent, A, B
 
-    @pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available")
+    
     def test_probability_matrix_normalization(self):
         """Test that probability matrices are properly normalized."""
         agent, A, B = self.create_simple_agent()
@@ -80,7 +80,7 @@ class PyMDPMathematicalValidator:
 
         print("✅ Probability matrices are correctly normalized")
 
-    @pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available")
+    
     def test_belief_state_normalization(self):
         """Test that belief states are properly normalized."""
         agent, A, B = self.create_simple_agent()
@@ -105,7 +105,7 @@ class PyMDPMathematicalValidator:
 
         print("✅ Belief states are correctly normalized")
 
-    @pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available")
+    
     def test_bayesian_inference_correctness(self):
         """Test that Bayesian inference produces correct results."""
         agent, A, B = self.create_simple_agent()
@@ -133,7 +133,7 @@ class PyMDPMathematicalValidator:
 
         print("✅ Bayesian inference produces correct results")
 
-    @pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available")
+    
     def test_policy_evaluation_correctness(self):
         """Test that policy evaluation produces sensible results."""
         agent, A, B = self.create_simple_agent()
@@ -160,7 +160,7 @@ class PyMDPMathematicalValidator:
 
         print("✅ Policy evaluation produces correct results")
 
-    @pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available")
+    
     def test_action_sampling_correctness(self):
         """Test that action sampling produces valid actions."""
         agent, A, B = self.create_simple_agent()
@@ -189,7 +189,7 @@ class PyMDPMathematicalValidator:
 
         print("✅ Action sampling produces valid actions")
 
-    @pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available")
+    
     def test_performance_benchmark_realism(self):
         """Test that performance benchmarks measure realistic operations."""
         start_time = time.perf_counter()
@@ -225,7 +225,7 @@ class PyMDPMathematicalValidator:
 
         print("✅ Performance benchmarks measure realistic operations")
 
-    @pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available")
+    
     def test_mathematical_consistency(self):
         """Test mathematical consistency across multiple runs."""
         agent, A, B = self.create_simple_agent()

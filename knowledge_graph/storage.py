@@ -234,7 +234,7 @@ class FileStorageBackend(StorageBackend):
         metadata_path = self.base_path / "metadata.json"
         if metadata_path.exists():
             with open(metadata_path, "r") as f:
-                return json.load(f)  # type: ignore[no-any-return]
+                return json.load(f)  
         return {}
 
 
@@ -385,9 +385,9 @@ class DatabaseStorageBackend(StorageBackend):
                 )
 
             # Restore metadata
-            graph.version = metadata.version  # type: ignore[assignment]
-            graph.created_at = metadata.created_at  # type: ignore[assignment]
-            graph.updated_at = metadata.updated_at  # type: ignore[assignment]
+            graph.version = metadata.version  
+            graph.created_at = metadata.created_at  
+            graph.updated_at = metadata.updated_at  
 
             return graph
 
@@ -501,7 +501,7 @@ class PickleStorageBackend(StorageBackend):
             with open(filepath, "rb") as f:
                 return pickle.load(
                     f
-                )  # nosec B301 - Loading trusted graph data # type: ignore[no-any-return]
+                )  # nosec B301 - Loading trusted graph data 
 
         except Exception as e:
             logger.error(f"Failed to unpickle graph: {e}")
@@ -542,7 +542,7 @@ class PickleStorageBackend(StorageBackend):
         metadata_path = self.base_path / "metadata.json"
         if metadata_path.exists():
             with open(metadata_path, "r") as f:
-                return json.load(f)  # type: ignore[no-any-return]
+                return json.load(f)  
         return {}
 
     def _save_metadata(self, metadata: Dict[str, Any]):

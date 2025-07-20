@@ -8,6 +8,8 @@ import pytest
 
 from database.models import Agent
 from database.models import AgentStatus as DBAgentStatus
+from database.models import CoalitionStatus as DBCoalitionStatus
+from sqlalchemy import text
 from tests.fixtures import (
     AgentBuilder,
     AgentFactory,
@@ -20,8 +22,14 @@ from tests.fixtures import (
 )
 from tests.fixtures.fixtures import (
     active_agent,
+    agent_batch,
     coalition_with_agents,
     db_session,
+    explorer_agent,
+    knowledge_graph_fixture,
+    multi_agent_scenario,
+    resource_coalition,
+    resource_collector_agent,
     test_engine,
 )
 from tests.fixtures.schemas import (
@@ -107,14 +115,14 @@ class TestBuildersExample:
 class TestFactoriesExample:
     """Examples of using factories with database persistence."""
 
-    @pytest.mark.skip(reason="SQLAlchemy enum configuration issue")
+    
     def test_agent_factory_create(self, db_session):
         """Create and persist an agent."""
         agent = AgentFactory.create(
             session=db_session,
             name="FactoryAgent",
             template="resource_collector",
-            status=DBAgentStatus.ACTIVE,
+            status=DBAgentStatus.ACTIVE.value,
         )
 
         # Verify persistence
@@ -125,27 +133,28 @@ class TestFactoriesExample:
         assert db_agent is not None
         assert db_agent.template == "resource_collector"
 
-    @pytest.mark.skip(reason="SQLAlchemy enum configuration issue")
+    
     def test_agent_factory_batch(self, db_session):
         """Create multiple agents efficiently."""
         agents = AgentFactory.create_batch(
             session=db_session,
             count=20,
             template="grid_world",
-            status=DBAgentStatus.ACTIVE,
+            status=DBAgentStatus.ACTIVE.value,
             distribute_positions=True,
             position_bounds={"min": [0, 0], "max": [50, 50]},
         )
 
         assert len(agents) == 20
-        assert all(a.status == AgentStatus.ACTIVE for a in agents)
+        # After database persistence, SQLAlchemy returns the enum
+        assert all(a.status == DBAgentStatus.ACTIVE for a in agents)
 
         # Check position distribution
         positions = [a.position for a in agents if a.position]
         assert len(positions) > 0
         assert all(0 <= p[0] <= 50 and 0 <= p[1] <= 50 for p in positions)
 
-    @pytest.mark.skip(reason="SQLAlchemy enum configuration issue")
+    
     def test_coalition_with_agents(self, db_session):
         """Create coalition with member agents."""
         coalition, agents = CoalitionFactory.create_with_agents(
@@ -153,7 +162,7 @@ class TestFactoriesExample:
             num_agents=7,
             agent_template="grid_world",
             name="TestCoalition",
-            status=CoalitionStatus.ACTIVE,
+            status=CoalitionStatus.ACTIVE.value,
         )
 
         assert coalition.name == "TestCoalition"
@@ -162,8 +171,8 @@ class TestFactoriesExample:
 
         # Verify roles are assigned correctly
         agent_roles = db_session.execute(
-            "SELECT role FROM agent_coalition WHERE coalition_id = :cid",
-            {"cid": coalition.id},
+            text("SELECT role FROM agent_coalition WHERE coalition_id = :cid"),
+            {"cid": str(coalition.id)},
         ).fetchall()
 
         roles = [r[0] for r in agent_roles]
@@ -195,13 +204,13 @@ class TestFactoriesExample:
 class TestFixturesExample:
     """Examples of using pytest fixtures."""
 
-    @pytest.mark.skip(reason="SQLAlchemy enum configuration issue")
+    
     def test_agent_fixtures(
         self, active_agent, resource_collector_agent, explorer_agent
     ):
         """Test with various agent fixtures."""
         # Active agent has full configuration
-        assert active_agent.status == AgentStatus.ACTIVE
+        assert active_agent.status == DBAgentStatus.ACTIVE
         assert active_agent.beliefs is not None
         assert active_agent.position is not None
 
@@ -212,14 +221,14 @@ class TestFixturesExample:
         assert explorer_agent.template == "explorer"
         assert explorer_agent.parameters.get("exploration_rate", 0) > 0
 
-    @pytest.mark.skip(reason="SQLAlchemy enum configuration issue")
+    
     def test_coalition_fixtures(
         self, coalition_with_agents, resource_coalition
     ):
         """Test coalition fixtures."""
         # Coalition with agents
         assert len(coalition_with_agents.agents) > 0
-        assert coalition_with_agents.status == CoalitionStatus.ACTIVE
+        assert coalition_with_agents.status == DBCoalitionStatus.ACTIVE
 
         # Specialized coalition
         assert resource_coalition.name == "ResourceOptimizers"
@@ -334,9 +343,14 @@ class TestValidationExample:
             # Invalid template
             AgentBuilder().with_template("invalid_template").build()
 
+        # Test invalid position data
+        # Note: with_position only accepts x, y, and optionally z
+        # We can't test passing too many args as that raises TypeError
+        # Instead, let's test invalid position in a different way
         with pytest.raises(ValueError):
-            # Invalid position dimensions
-            AgentBuilder().with_position(1.0, 2.0, 3.0, 4.0).build()
+            builder = AgentBuilder()
+            builder._data["position"] = [1.0, 2.0, 3.0, 4.0]  # Invalid 4D position
+            builder.build()
 
     def test_probability_normalization(self):
         """Test automatic probability normalization."""

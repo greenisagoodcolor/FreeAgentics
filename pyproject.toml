@@ -406,7 +406,7 @@ branch = true
 
 [tool.coverage.report]
 # Minimum coverage threshold
-fail_under = 15
+fail_under = 80
 precision = 2
 show_missing = true
 skip_covered = false

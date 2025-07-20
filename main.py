@@ -190,41 +190,45 @@ app.add_middleware(
 )
 
 # SECURITY: Add comprehensive rate limiting and DDoS protection
-redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
-config_file = os.path.join(
-    os.path.dirname(__file__), "config", "rate_limiting.yaml"
-)
+# Only enable Redis-based rate limiting if not in test environment
+if os.getenv("TESTING", "false").lower() != "true" and os.getenv("REDIS_ENABLED", "true").lower() == "true":
+    redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+    config_file = os.path.join(
+        os.path.dirname(__file__), "config", "rate_limiting.yaml"
+    )
 
-# Create rate limiter instance
-rate_limiter = create_rate_limiter(
-    redis_url=redis_url, config_file=config_file
-)
-
-
-# Function to extract user ID from request (for authenticated rate limiting)
-async def get_user_id_from_request(request):
-    """Extract user ID from JWT token if present."""
-    try:
-        from auth import auth_manager
-
-        authorization = request.headers.get("Authorization")
-        if authorization and authorization.startswith("Bearer "):
-            token = authorization.split(" ")[1]
-            payload = auth_manager.decode_token(token)
-            if payload and "sub" in payload:
-                return payload["sub"]
-    except Exception as e:
-        # Log authentication errors for debugging but don't expose details
-        logger.debug(f"Failed to extract user ID from request: {e}")
-    return None
+    # Create rate limiter instance
+    rate_limiter = create_rate_limiter(
+        redis_url=redis_url, config_file=config_file
+    )
 
 
-# Add rate limiting middleware
-app.add_middleware(
-    RateLimitMiddleware,
-    rate_limiter=rate_limiter,
-    get_user_id=get_user_id_from_request,
-)
+    # Function to extract user ID from request (for authenticated rate limiting)
+    async def get_user_id_from_request(request):
+        """Extract user ID from JWT token if present."""
+        try:
+            from auth import auth_manager
+
+            authorization = request.headers.get("Authorization")
+            if authorization and authorization.startswith("Bearer "):
+                token = authorization.split(" ")[1]
+                payload = auth_manager.decode_token(token)
+                if payload and "sub" in payload:
+                    return payload["sub"]
+        except Exception as e:
+            # Log authentication errors for debugging but don't expose details
+            logger.debug(f"Failed to extract user ID from request: {e}")
+        return None
+
+
+    # Add rate limiting middleware
+    app.add_middleware(
+        RateLimitMiddleware,
+        rate_limiter=rate_limiter,
+        get_user_id=get_user_id_from_request,
+    )
+else:
+    logger.info("Rate limiting disabled for testing environment")
 
 # Alternative: Use DDoS protection middleware (includes rate limiting)
 # app.add_middleware(DDoSProtectionMiddleware, redis_url=redis_url)

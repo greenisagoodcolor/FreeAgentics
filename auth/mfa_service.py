@@ -218,7 +218,7 @@ class MFAService:
                 # Log security event
                 security_auditor.log_event(
                     event_type=SecurityEventType.MFA_LOCKOUT,
-                    severity=SecurityEventSeverity.HIGH,  # type: ignore[attr-defined]
+                    severity=SecurityEventSeverity.HIGH,  
                     message=f"MFA lockout applied for user {user_id}",
                     user_id=user_id,
                     details={
@@ -283,7 +283,7 @@ class MFAService:
             # Log security event
             security_auditor.log_event(
                 event_type=SecurityEventType.MFA_ENROLLMENT_FAILED,
-                severity=SecurityEventSeverity.MEDIUM,  # type: ignore[attr-defined]
+                severity=SecurityEventSeverity.MEDIUM,  
                 message=f"MFA enrollment failed for user {request.user_id}",
                 user_id=request.user_id,
                 details={"error": str(e), "method": request.method},
@@ -310,7 +310,7 @@ class MFAService:
         )
 
         # Generate QR code
-        qr = qrcode.QRCode(  # type: ignore[attr-defined]
+        qr = qrcode.QRCode(  
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
             box_size=10,
@@ -362,7 +362,7 @@ class MFAService:
         # Log security event
         security_auditor.log_event(
             event_type=SecurityEventType.MFA_ENROLLED,
-            severity=SecurityEventSeverity.INFO,  # type: ignore[attr-defined]
+            severity=SecurityEventSeverity.INFO,  
             message=f"MFA enrollment initiated for user {request.user_id}",
             user_id=request.user_id,
             details={"method": "totp", "enrollment_pending": True},
@@ -441,7 +441,7 @@ class MFAService:
                 # Log security event
                 security_auditor.log_event(
                     event_type=SecurityEventType.MFA_SUCCESS,
-                    severity=SecurityEventSeverity.INFO,  # type: ignore[attr-defined]  # type: ignore[attr-defined]
+                    severity=SecurityEventSeverity.INFO,  
                     message=f"MFA verification successful for user {request.user_id}",
                     user_id=request.user_id,
                     details={"method": request.method},
@@ -457,7 +457,7 @@ class MFAService:
                 # Log security event
                 security_auditor.log_event(
                     event_type=SecurityEventType.MFA_FAILED,
-                    severity=SecurityEventSeverity.MEDIUM,  # type: ignore[attr-defined]
+                    severity=SecurityEventSeverity.MEDIUM,  
                     message=f"MFA verification failed for user {request.user_id}",
                     user_id=request.user_id,
                     details={"method": request.method},
@@ -577,7 +577,7 @@ class MFAService:
             # Log security event
             security_auditor.log_event(
                 event_type=SecurityEventType.MFA_DISABLED,
-                severity=SecurityEventSeverity.MEDIUM,  # type: ignore[attr-defined]
+                severity=SecurityEventSeverity.MEDIUM,  
                 message=f"MFA disabled for user {user_id}",
                 user_id=user_id,
                 details={"disabled_by": "user"},
@@ -680,7 +680,7 @@ class MFAService:
             # Log security event
             security_auditor.log_event(
                 event_type=SecurityEventType.MFA_BACKUP_CODES_REGENERATED,
-                severity=SecurityEventSeverity.INFO,  # type: ignore[attr-defined]
+                severity=SecurityEventSeverity.INFO,  
                 message=f"MFA backup codes regenerated for user {user_id}",
                 user_id=user_id,
                 details={"codes_generated": len(backup_codes)},

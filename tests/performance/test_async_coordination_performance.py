@@ -13,6 +13,8 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict
 
+from tests.performance.performance_utils import replace_sleep, cpu_work
+
 # Setup logging
 logging.basicConfig(level=logging.WARNING)
 
@@ -28,7 +30,7 @@ class MockAgent:
     def mock_step(self, observation: Dict[str, Any]) -> str:
         """Mock agent step with configurable processing time."""
         # Simulate processing delay
-        time.sleep(self.processing_time)
+        replace_sleep(self.processing_time)
 
         self.step_count += 1
         return f"action_{self.step_count}"

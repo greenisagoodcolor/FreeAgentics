@@ -40,7 +40,7 @@ jobs:
       - name: Check for security-sensitive file changes
         id: security_files
         run: |
-          SECURITY_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E '(auth|security|crypto|jwt|session|password|secret|key|cert|ssl|tls)' || true)
+          SECURITY_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E '(auth|security|crypto|jwt|session|password|secret|key|cert|ssl|tls)' )
           if [ -n "$SECURITY_FILES" ]; then
             echo "security_changed=true" >> $GITHUB_OUTPUT
             echo "Security-sensitive files changed:"
@@ -84,14 +84,14 @@ jobs:
             --skip B101,B601,B603 \
             --severity-level medium \
             --confidence-level medium \
-            --exclude .archive,web,tests || true
+            --exclude .archive,web,tests 
 
           # Generate human-readable report
           bandit -r . -f txt -o bandit-report.txt \
             --skip B101,B601,B603 \
             --severity-level medium \
             --confidence-level medium \
-            --exclude .archive,web,tests || true
+            --exclude .archive,web,tests 
 
       - name: Run Semgrep security patterns
         uses: returntocorp/semgrep-action@v1
@@ -139,20 +139,20 @@ jobs:
       - name: Python dependency scan with Safety
         run: |
           pip install safety
-          safety check --json --output safety-report.json || true
-          safety check --full-report || true
+          safety check --json --output safety-report.json 
+          safety check --full-report 
 
       - name: Python dependency scan with pip-audit
         run: |
           pip install pip-audit
-          pip-audit --format json --output pip-audit-report.json || true
-          pip-audit --desc || true
+          pip-audit --format json --output pip-audit-report.json 
+          pip-audit --desc 
 
       - name: Node.js dependency scan
         working-directory: ./web
         run: |
-          npm audit --json > npm-audit-report.json || true
-          npm audit || true
+          npm audit --json > npm-audit-report.json 
+          npm audit 
 
       - name: License compliance check
         run: |
@@ -243,7 +243,7 @@ jobs:
 
           # Scan Kubernetes manifests
           find . -name "*.yaml" -o -name "*.yml" | grep -E "(k8s|kubernetes|deploy)" | while read file; do
-            ./kubesec scan "$file" >> kubesec-results.json || true
+            ./kubesec scan "$file" >> kubesec-results.json 
           done
 
       - name: Docker Compose security scan

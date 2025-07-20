@@ -18,6 +18,7 @@ from typing import Any, Dict, List, Optional
 
 import numpy as np
 import psutil
+from tests.performance.performance_utils import replace_sleep, cpu_work
 
 from agents.base_agent import BasicExplorerAgent
 
@@ -261,7 +262,7 @@ class ComprehensiveSingleAgentBenchmark(EnhancedPerformanceBenchmark):
                 all_times.append(duration)
 
                 # Brief pause to prevent system overload
-                time.sleep(0.001)
+                replace_sleep(0.001)
 
             # Calculate scenario statistics
             scenario_results[f"{scenario['name']}_avg_ms"] = np.mean(times)
@@ -315,7 +316,7 @@ class ComprehensiveSingleAgentBenchmark(EnhancedPerformanceBenchmark):
 
             current_mem = process.memory_info().rss / (1024 * 1024)
             memory_samples.append(current_mem)
-            time.sleep(0.05)  # Allow GC
+            replace_sleep(0.05)  # Allow GC
 
         # Analyze memory growth trend
         if len(memory_samples) > 2:

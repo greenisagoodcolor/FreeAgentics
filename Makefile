@@ -271,7 +271,7 @@ dev: ## 🚀 Start development servers (frontend + backend)
 	fi
 	@# Clear any existing processes on our ports
 	@printf "$(CYAN)🔧 Clearing port conflicts...$(RESET)\n"
-	@lsof -ti:3000 >/dev/null 2>&1 && (printf "  → Stopping process on port 3000\n" && $(MAKE) kill-ports) || true
+	@lsof -ti:3000 >/dev/null 2>&1 && (printf "  → Stopping process on port 3000\n" && $(MAKE) kill-ports) 
 	@printf "\n"
 	@printf "$(CYAN)🔥 Starting Backend (FastAPI on :8000)...$(RESET)\n"
 	@if [ -d "$(VENV_DIR)" ]; then \
@@ -310,8 +310,8 @@ stop: ## 🛑 Stop all development servers and clear ports
 kill-ports: ## 🔧 Clear processes on development ports (3000, 8000)
 	@echo -e "$(YELLOW)🔧 Clearing Port Conflicts$(RESET)"
 	@echo "Stopping processes on ports 3000, 8000..."
-	@lsof -ti:3000 | xargs kill -9 2>/dev/null || true
-	@lsof -ti:8000 | xargs kill -9 2>/dev/null || true
+	@lsof -ti:3000 | xargs kill -9 2>/dev/null 
+	@lsof -ti:8000 | xargs kill -9 2>/dev/null 
 	@echo -e "$(GREEN)✅ Ports cleared$(RESET)"
 
 start: dev ## 🚀 Alias for 'make dev'
@@ -642,7 +642,7 @@ clean: ## 🧹 Remove all test artifacts, caches, and temporary files
 	@echo ""
 	@echo -e "$(CYAN)🗑️  Removing Python cache files...$(RESET)"
 	@find . -name "*.pyc" -delete
-	@find . -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
+	@find . -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null 
 	@echo ""
 	@echo -e "$(CYAN)🗑️  Removing frontend artifacts...$(RESET)"
 	@if [ -d "$(WEB_DIR)" ]; then \

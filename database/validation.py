@@ -281,7 +281,7 @@ def _test_numpy_array_serialization() -> Tuple[bool, List[str]]:
                 numpy_serialization_success = False
                 continue
 
-            if test_array.shape != deserialized.shape:  # type: ignore[attr-defined]
+            if test_array.shape != deserialized.shape:  
                 numpy_errors.append(f"Array {i}: shape mismatch")
                 numpy_serialization_success = False
                 continue

@@ -9,7 +9,7 @@ class TestDatabaseBase:
     def test_import_database_base(self):
         """Test that database.base can be imported."""
         try:
-            from database.base import Base  # noqa: F401
+            from database.base import Base  
 
             # Test that Base exists and is a class
             assert Base is not None

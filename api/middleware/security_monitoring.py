@@ -99,4 +99,4 @@ class SecurityMonitoringMiddleware(BaseHTTPMiddleware):
 
 
 # Import the enhanced SecurityHeadersMiddleware from auth module
-from auth.security_headers import SecurityHeadersMiddleware  # noqa: E402
+from auth.security_headers import SecurityHeadersMiddleware  

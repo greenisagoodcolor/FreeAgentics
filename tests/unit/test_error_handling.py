@@ -116,7 +116,7 @@ class TestActionValidation:
         assert validate_action(10, valid_actions) == "up"  # 10 % 5 = 0
 
 
-@pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available")
+
 class TestAgentErrorHandling:
     """Test error handling in actual agent operations."""
 

@@ -19,6 +19,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 
+from tests.performance.performance_utils import replace_sleep, cpu_work
 from agents.base_agent import ActiveInferenceAgent, BasicExplorerAgent
 from agents.coalition_coordinator import CoalitionCoordinatorAgent
 from agents.resource_collector import ResourceCollectorAgent
@@ -153,7 +154,7 @@ class AgentLifecycleManager:
                     spawn_config.spawn_delay_ms > 0
                     and i < spawn_config.count - 1
                 ):
-                    time.sleep(spawn_config.spawn_delay_ms / 1000.0)
+                    replace_sleep(spawn_config.spawn_delay_ms / 1000.0)
 
             except Exception as e:
                 print(f"Failed to spawn agent {i}: {e}")
@@ -384,7 +385,7 @@ class SimulationEnvironment:
                 tick_duration = time.time() - tick_start
                 sleep_time = max(0, tick_interval - tick_duration)
                 if sleep_time > 0:
-                    time.sleep(sleep_time)
+                    replace_sleep(sleep_time)
 
                 # Update tick duration in result
                 tick_result["tick_duration_ms"] = tick_duration * 1000
@@ -506,7 +507,7 @@ class ScalingTestScenario(LoadTestScenario):
 
             # Clean up for next phase
             self.environment.lifecycle_manager.terminate_all()
-            time.sleep(0.5)  # Brief pause between phases
+            replace_sleep(0.5)  # Brief pause between phases
 
         return results
 

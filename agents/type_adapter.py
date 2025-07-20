@@ -116,10 +116,10 @@ class AgentTypeAdapter:
             Agent position as tuple, list, or dict (or None)
         """
         if hasattr(agent, "position"):
-            return agent.position  # type: ignore[no-any-return]
+            return agent.position  
 
         if isinstance(agent, dict) and "position" in agent:
-            return agent["position"]  # type: ignore[no-any-return]
+            return agent["position"]  
 
         return None
 
@@ -250,7 +250,7 @@ class CoalitionTypeAdapter:
         """
         # In-memory coalition has members dict
         if hasattr(coalition, "members"):
-            return coalition.members  # type: ignore[no-any-return]
+            return coalition.members  
 
         # Database model has agents relationship
         if hasattr(coalition, "agents"):
@@ -271,9 +271,9 @@ class CoalitionTypeAdapter:
         # Dict representation
         if isinstance(coalition, dict):
             if "members" in coalition:
-                return coalition["members"]  # type: ignore[no-any-return]
+                return coalition["members"]  
             if "agents" in coalition:
-                return coalition["agents"]  # type: ignore[no-any-return]
+                return coalition["agents"]  
 
         return {}
 

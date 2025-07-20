@@ -26,3 +26,23 @@ def disable_redis():
     """Disable Redis for all tests."""
     os.environ["REDIS_ENABLED"] = "false"
     yield
+
+
+@pytest.fixture(autouse=True)
+def mock_redis_for_api_tests(request):
+    """Automatically mock Redis for API tests that need it."""
+    # Only apply to API tests that import redis
+    if "test_api" in request.node.name:
+        try:
+            from tests.mocks.mock_redis import patch_redis_imports
+            patch_redis_imports()
+        except ImportError:
+            pass  # Mock not needed
+    yield
+
+
+@pytest.fixture
+def mock_redis_client():
+    """Provide a mock Redis client."""
+    from tests.mocks.mock_redis import create_mock_redis_client
+    return create_mock_redis_client()

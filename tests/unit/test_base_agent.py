@@ -66,6 +66,15 @@ class ConcreteAgent(ActiveInferenceAgent):
         if hasattr(self, "pymdp_agent") and self.pymdp_agent:
             return 0
         return np.random.randint(0, 2)
+    
+    def _initialize_pymdp(self) -> None:
+        """Initialize PyMDP agent (test implementation)."""
+        # Mock implementation for testing
+        self.pymdp_agent = MagicMock()
+    
+    def compute_free_energy(self) -> np.ndarray:
+        """Compute free energy (test implementation)."""
+        return np.array([0.5])
 
     def observe(self, observation: Any) -> None:
         """Record observation in history."""
@@ -326,7 +335,7 @@ class TestActiveInferenceAgent:
         agent.update_beliefs()
 
         # The test implementation just sets test_belief to 0.5
-        assert "test_belie" in agent.beliefs
+        assert "test_belief" in agent.beliefs
         assert agent.beliefs["test_belief"] == 0.5
 
     def test_act(self, agent):

@@ -111,7 +111,7 @@ class TestErrorRecoveryStrategy:
 
     def test_can_retry_within_limit(self):
         """Test can_retry when within retry limit."""
-        strategy = ErrorRecoveryStrategy(name="Test", max_retries=3)
+        strategy = ErrorRecoveryStrategy(name="Test", max_retries=3, cooldown_seconds=0)
 
         assert strategy.can_retry() is True
 

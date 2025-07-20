@@ -93,6 +93,7 @@ class TestActiveInferenceReal:
     def test_belief_update_with_pymdp(self):
         """Test belief updates using PyMDP variational inference."""
         agent = BasicExplorerAgent("test_id", "Test Explorer", grid_size=3)
+        agent.config["debug_mode"] = True  # Enable debug mode to store state_posterior
         agent.start()
 
         # Initial observation
@@ -262,6 +263,8 @@ class TestActiveInferenceReal:
     def test_policy_selection_horizon(self):
         """Test policy selection with planning horizon."""
         agent = BasicExplorerAgent("test_id", "Test Explorer", grid_size=5)
+        agent.performance_mode = "accurate"  # Set accurate mode for policy_len=3
+        agent._initialize_pymdp()  # Re-initialize with new performance mode
 
         # Check policy length is set (PyMDP uses policy_len instead of planning_horizon)
         assert agent.pymdp_agent.policy_len == 3

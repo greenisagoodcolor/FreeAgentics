@@ -78,14 +78,14 @@ class SecurityGatesConfig:
                             "name": "Run Bandit Security Scan",
                             "run": """
                                 pip install bandit
-                                bandit -r . -f json -o bandit-report.json || true
+                                bandit -r . -f json -o bandit-report.json 
                             """,
                         },
                         {
                             "name": "Run Safety Check",
                             "run": """
                                 pip install safety
-                                safety check --json > safety-report.json || true
+                                safety check --json > safety-report.json 
                             """,
                         },
                         {
@@ -265,7 +265,7 @@ pipeline {
                         sh '''
                             . venv/bin/activate
                             bandit -r . -f json -o results/bandit-report.json
-                            pylint **/*.py --output-format=json > results/pylint-report.json || true
+                            pylint **/*.py --output-format=json > results/pylint-report.json 
                         '''
                     }
                 }

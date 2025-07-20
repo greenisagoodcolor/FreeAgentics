@@ -30,7 +30,7 @@ class GMNNodeType(Enum):
     STATE = "state"
     OBSERVATION = "observation"
     ACTION = "action"
-    BELIEF = "belie"
+    BELIEF = "belief"
     PREFERENCE = "preference"
     TRANSITION = "transition"
     LIKELIHOOD = "likelihood"
@@ -281,7 +281,7 @@ class GMNParser:
         """Parse string specification to dictionary."""
         # Try JSON first
         try:
-            return json.loads(spec_str)  # type: ignore[no-any-return]
+            return json.loads(spec_str)  
         except json.JSONDecodeError:
             pass
 

@@ -144,7 +144,7 @@ jobs:
           source venv/bin/activate
           # Copy results to baseline directory
           mkdir -p tests/performance/baseline
-          cp tests/performance/*_results_*.json tests/performance/baseline/ || true
+          cp tests/performance/*_results_*.json tests/performance/baseline/ 
           echo "Performance baseline updated for commit ${{ github.sha }}"
 
       - name: Fail job on severe performance regression
@@ -178,7 +178,7 @@ jobs:
 
       - name: Get baseline results from main
         run: |
-          git checkout origin/main -- tests/performance/baseline/ || true
+          git checkout origin/main -- tests/performance/baseline/ 
 
       - name: Compare with baseline performance
         run: |

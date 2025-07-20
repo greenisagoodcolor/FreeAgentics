@@ -549,13 +549,13 @@ class TestCIIntegration:
 class TestPerformanceBenchmarks:
     """Test the actual performance benchmarks."""
 
-    @pytest.mark.skip(reason="pytest-benchmark not installed")
+    
     def test_agent_spawn_benchmark(self):
         """Test agent spawn benchmark."""
         # This would normally use pytest-benchmark fixture
         pass
 
-    @pytest.mark.skip(reason="pytest-benchmark not installed")
+    
     def test_message_throughput_benchmark(self):
         """Test message throughput benchmark."""
         # This would normally use pytest-benchmark fixture

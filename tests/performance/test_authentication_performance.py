@@ -33,6 +33,7 @@ from auth.security_implementation import (
     UserRole,
     rate_limiter,
 )
+from tests.performance.performance_utils import replace_sleep, cpu_work
 
 
 class PerformanceMetrics:
@@ -176,7 +177,7 @@ class SystemMonitor:
                 cpu_percent = psutil.cpu_percent(interval=0.1)
                 self.metrics.record_cpu_usage(cpu_percent)
 
-                time.sleep(interval)
+                replace_sleep(interval)
 
         self.monitor_thread = threading.Thread(target=monitor, daemon=True)
         self.monitor_thread.start()
@@ -660,7 +661,7 @@ class TestAuthenticationPerformance:
             start_time = time.time()
 
             # Simulate connection acquisition delay
-            time.sleep(0.001)  # 1ms delay
+            replace_sleep(0.001)  # 1ms delay
 
             # Simulate query execution
             user = random.choice(self.test_users)
@@ -801,7 +802,7 @@ class TestAuthenticationPerformance:
                     )
 
                 # Small delay between operations
-                time.sleep(0.01)
+                replace_sleep(0.01)
 
             return worker_results
 

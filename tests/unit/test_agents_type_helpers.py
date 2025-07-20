@@ -265,9 +265,8 @@ class TestAgentsTypeHelpers:
         """Test get_agent_attribute with default value."""
         from agents.type_helpers import get_agent_attribute
 
-        mock_agent = MagicMock()
-        mock_agent.configure_mock(**{})  # Empty mock
-
+        mock_agent = MagicMock(spec=[])  # Empty spec, no attributes
+        
         result = get_agent_attribute(
             mock_agent, "nonexistent", "default_value"
         )
@@ -395,8 +394,7 @@ class TestAgentsTypeHelpers:
         """Test get_coalition_attribute with default value."""
         from agents.type_helpers import get_coalition_attribute
 
-        mock_coalition = MagicMock()
-        mock_coalition.configure_mock(**{})  # Empty mock
+        mock_coalition = MagicMock(spec=[])  # Empty spec, no attributes
 
         result = get_coalition_attribute(
             mock_coalition, "nonexistent", "default_value"

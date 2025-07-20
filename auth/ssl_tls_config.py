@@ -16,8 +16,8 @@ try:
     from cryptography import x509
     from cryptography.x509.ocsp import OCSPRequestBuilder
 except ImportError:
-    x509 = None  # type: ignore[assignment]
-    OCSPRequestBuilder = None  # type: ignore[assignment,misc]
+    x509 = None  
+    OCSPRequestBuilder = None  
 
 logger = logging.getLogger(__name__)
 

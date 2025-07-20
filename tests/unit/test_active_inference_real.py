@@ -153,6 +153,7 @@ class TestActiveInferenceReal:
     def test_belief_update_with_pymdp(self):
         """Test belief updates using PyMDP variational inference."""
         agent = BasicExplorerAgent("test_id", "Test Explorer", grid_size=3)
+        agent.config["debug_mode"] = True  # Enable debug mode to store state_posterior
         agent.start()
 
         # Initial observation

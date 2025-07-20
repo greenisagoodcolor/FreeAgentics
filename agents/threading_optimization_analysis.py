@@ -23,10 +23,10 @@ import psutil
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Project imports must be after sys.path.append
-from agents.optimized_threadpool_manager import (  # noqa: E402
+from agents.optimized_threadpool_manager import (  
     OptimizedThreadPoolManager,
 )
-from agents.threading_profiler import (  # noqa: E402
+from agents.threading_profiler import (  
     InstrumentedLock,
     ThreadingProfiler,
 )

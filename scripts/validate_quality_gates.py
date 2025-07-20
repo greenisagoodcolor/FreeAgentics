@@ -70,7 +70,7 @@ class QualityGateValidator:
         )
 
         # Extract coverage percentage
-        coverage = 0
+        coverage: float = 0.0
         for line in stdout.split('\n'):
             if "TOTAL" in line and "%" in line:
                 try:

@@ -464,12 +464,12 @@ class PrometheusMetricsCollector:
 
             # Get counters
             total_inferences = sum(
-                counter._value.get()  # type: ignore[attr-defined]
+                counter._value.get()  
                 for counter in business_inference_operations_total._metrics.values()
             )
 
             total_belief_updates = sum(
-                counter._value.get()  # type: ignore[attr-defined]
+                counter._value.get()  
                 for counter in belief_state_updates_total._metrics.values()
             )
 

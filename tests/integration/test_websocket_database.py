@@ -24,7 +24,8 @@ from sqlalchemy import (
     create_engine,
     select,
 )
-from sqlalchemy.dialects.postgresql import UUID
+from database.types import GUID
+from database.json_encoder import dumps, loads
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
@@ -46,7 +47,7 @@ class WebSocketConnection(Base):
 
     __tablename__ = "websocket_connections"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
     client_id = Column(String(100), unique=True, nullable=False)
     connected_at = Column(DateTime, default=datetime.utcnow)
     disconnected_at = Column(DateTime, nullable=True)
@@ -67,9 +68,9 @@ class WebSocketSubscription(Base):
 
     __tablename__ = "websocket_subscriptions"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
     connection_id = Column(
-        UUID(as_uuid=True),
+        GUID,
         ForeignKey("websocket_connections.id"),
         nullable=False,
     )
@@ -87,9 +88,9 @@ class WebSocketEvent(Base):
 
     __tablename__ = "websocket_events"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(GUID, primary_key=True, default=uuid.uuid4)
     connection_id = Column(
-        UUID(as_uuid=True),
+        GUID,
         ForeignKey("websocket_connections.id"),
         nullable=False,
     )

@@ -7,7 +7,7 @@ to prevent abuse of real-time communication endpoints.
 import logging
 from typing import Callable, Dict, Optional
 
-import redis.asyncio as aioredis  # type: ignore[import-untyped]
+import redis.asyncio as aioredis  
 from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.websockets import WebSocketState
 

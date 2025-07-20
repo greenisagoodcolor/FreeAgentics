@@ -13,7 +13,6 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from sqlalchemy import (
     JSON,
-    UUID,
     CheckConstraint,
     DateTime,
     Enum,
@@ -27,6 +26,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.base import Base
+from database.types import GUID
 
 if TYPE_CHECKING:
     from database.models import Agent
@@ -59,12 +59,12 @@ class GMNVersionedSpecification(Base):
 
     # Primary key
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+        GUID(), primary_key=True, default=uuid.uuid4
     )
 
     # Foreign keys
     agent_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("agents.id"), nullable=False
+        GUID(), ForeignKey("agents.id"), nullable=False
     )
 
     # Version tracking (core enhancement)
@@ -72,7 +72,7 @@ class GMNVersionedSpecification(Base):
         Integer, nullable=False, default=1
     )
     parent_version_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        UUID(as_uuid=True),
+        GUID(),
         ForeignKey("gmn_versioned_specifications.id"),
         nullable=True,
     )
@@ -254,20 +254,20 @@ class GMNVersionTransition(Base):
 
     # Primary key
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+        GUID(), primary_key=True, default=uuid.uuid4
     )
 
     # Foreign keys
     agent_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("agents.id"), nullable=False
+        GUID(), ForeignKey("agents.id"), nullable=False
     )
     from_version_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        UUID(as_uuid=True),
+        GUID(),
         ForeignKey("gmn_versioned_specifications.id"),
         nullable=True,
     )
     to_version_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        GUID(),
         ForeignKey("gmn_versioned_specifications.id"),
         nullable=False,
     )

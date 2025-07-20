@@ -344,7 +344,12 @@ class CoalitionBuilder(BaseBuilder[CoalitionSchema]):
             priority=priority,
             status=status,
         )
-        self._data["objectives"][objective_id] = objective.dict()
+        # Convert datetime to string for JSON serialization
+        obj_dict = objective.dict()
+        for key, value in obj_dict.items():
+            if isinstance(value, datetime):
+                obj_dict[key] = value.isoformat()
+        self._data["objectives"][objective_id] = obj_dict
         return self
 
     def with_resource_optimization_objective(self) -> "CoalitionBuilder":

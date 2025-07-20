@@ -128,7 +128,14 @@ def active_agent(db_session: Session) -> Agent:
         .build()
     )
 
-    db_agent = Agent(**agent.dict())
+    # Agent data should already be properly serialized by AgentFactory
+    agent_data = agent.dict()
+    
+    # Ensure status is the string value, not the enum
+    if "status" in agent_data and hasattr(agent_data["status"], "value"):
+        agent_data["status"] = agent_data["status"].value
+
+    db_agent = Agent(**agent_data)
     db_session.add(db_agent)
     db_session.commit()
     db_session.refresh(db_agent)
@@ -160,7 +167,12 @@ def resource_collector_agent(db_session: Session) -> Agent:
         .build()
     )
 
-    db_agent = Agent(**agent.dict())
+    agent_data = agent.dict()
+    # Ensure status is the string value, not the enum
+    if "status" in agent_data and hasattr(agent_data["status"], "value"):
+        agent_data["status"] = agent_data["status"].value
+
+    db_agent = Agent(**agent_data)
     db_session.add(db_agent)
     db_session.commit()
     db_session.refresh(db_agent)
@@ -175,7 +187,12 @@ def explorer_agent(db_session: Session) -> Agent:
         AgentBuilder().as_explorer().with_name("Explorer01").active().build()
     )
 
-    db_agent = Agent(**agent.dict())
+    agent_data = agent.dict()
+    # Ensure status is the string value, not the enum
+    if "status" in agent_data and hasattr(agent_data["status"], "value"):
+        agent_data["status"] = agent_data["status"].value
+
+    db_agent = Agent(**agent_data)
     db_session.add(db_agent)
     db_session.commit()
     db_session.refresh(db_agent)
@@ -194,7 +211,12 @@ def coordinator_agent(db_session: Session) -> Agent:
         .build()
     )
 
-    db_agent = Agent(**agent.dict())
+    agent_data = agent.dict()
+    # Ensure status is the string value, not the enum
+    if "status" in agent_data and hasattr(agent_data["status"], "value"):
+        agent_data["status"] = agent_data["status"].value
+
+    db_agent = Agent(**agent_data)
     db_session.add(db_agent)
     db_session.commit()
     db_session.refresh(db_agent)
@@ -241,7 +263,17 @@ def resource_coalition(db_session: Session) -> Coalition:
         .build()
     )
 
-    db_coalition = Coalition(**coalition.dict())
+    # Serialize datetime fields in objectives
+    coalition_data = coalition.dict()
+    if "objectives" in coalition_data:
+        from database.utils import serialize_for_json
+        coalition_data["objectives"] = serialize_for_json(coalition_data["objectives"])
+    if "achieved_objectives" in coalition_data:
+        coalition_data["achieved_objectives"] = serialize_for_json(coalition_data["achieved_objectives"])
+    if "required_capabilities" in coalition_data:
+        coalition_data["required_capabilities"] = serialize_for_json(coalition_data["required_capabilities"])
+
+    db_coalition = Coalition(**coalition_data)
     db_session.add(db_coalition)
     db_session.commit()
     db_session.refresh(db_coalition)
@@ -260,7 +292,17 @@ def exploration_coalition(db_session: Session) -> Coalition:
         .build()
     )
 
-    db_coalition = Coalition(**coalition.dict())
+    # Serialize datetime fields in objectives
+    coalition_data = coalition.dict()
+    if "objectives" in coalition_data:
+        from database.utils import serialize_for_json
+        coalition_data["objectives"] = serialize_for_json(coalition_data["objectives"])
+    if "achieved_objectives" in coalition_data:
+        coalition_data["achieved_objectives"] = serialize_for_json(coalition_data["achieved_objectives"])
+    if "required_capabilities" in coalition_data:
+        coalition_data["required_capabilities"] = serialize_for_json(coalition_data["required_capabilities"])
+
+    db_coalition = Coalition(**coalition_data)
     db_session.add(db_coalition)
     db_session.commit()
     db_session.refresh(db_coalition)

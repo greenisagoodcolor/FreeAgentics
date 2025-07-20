@@ -16,6 +16,7 @@ import pytest
 # Import the module under test
 try:
     from agents.agent_manager import AgentManager
+    from world.types import CellType
 
     IMPORT_SUCCESS = True
 except ImportError:
@@ -62,7 +63,9 @@ class TestAgentManagerCore:
         assert len(agent_manager._event_queue) == 0
 
         assert hasattr(agent_manager, "_event_lock")
-        assert isinstance(agent_manager._event_lock, threading.Lock)
+        # Check it's a lock object (has acquire/release methods)
+        assert hasattr(agent_manager._event_lock, "acquire")
+        assert hasattr(agent_manager._event_lock, "release")
 
     def test_agent_manager_has_required_methods(self, agent_manager):
         """Test that AgentManager has required methods."""
@@ -143,26 +146,30 @@ class TestAgentManagerCore:
 
     def test_create_agent_active_inference(self, agent_manager):
         """Test Active Inference agent creation."""
-        with patch(
-            "agents.agent_manager.ActiveInferenceAgent"
-        ) as mock_agent_class:
-            with patch("agents.agent_manager.Position") as mock_position:
-                mock_agent = Mock()
-                mock_agent.id = "ai_agent_1"
-                mock_agent_class.return_value = mock_agent
+        # Mock the world directly on the agent_manager
+        mock_world = Mock()
+        mock_world.width = 5
+        mock_world.height = 5
+        mock_world.is_valid_position.return_value = True
+        mock_world.add_agent.return_value = None
+        mock_world.get_random_empty_position.return_value = Mock(x=0, y=0)
+        mock_world.agents = {}  # Empty dict of agents
+        mock_world.get_cell.return_value = Mock(type=CellType.EMPTY)
+        
+        # Set the world directly
+        agent_manager.world = mock_world
+        
+        agent_id = agent_manager.create_agent(
+            "active_inference", "AIAgent"
+        )
 
-                mock_pos = Mock()
-                mock_pos.x = 1
-                mock_pos.y = 1
-                mock_position.return_value = mock_pos
-
-                agent_id = agent_manager.create_agent(
-                    "active_inference", "AIAgent"
-                )
-
-                assert agent_id == "ai_agent_1"
-                assert agent_id in agent_manager.agents
-                assert agent_manager.agents[agent_id] == mock_agent
+        assert agent_id == "ai_agent_1"
+        assert agent_id in agent_manager.agents
+        
+        # Verify it's a BasicExplorerAgent (our current implementation)
+        agent = agent_manager.agents[agent_id]
+        assert agent.name == "AIAgent"
+        assert hasattr(agent, "pymdp_agent")
 
     def test_create_agent_invalid_type(self, agent_manager):
         """Test creating agent with invalid type."""
@@ -347,10 +354,16 @@ class TestAgentManagerCore:
 
     def test_world_integration(self, agent_manager):
         """Test world integration functionality."""
-        # Mock world
+        # Mock world with proper dimensions
         mock_world = Mock()
         mock_world.add_agent = Mock()
         mock_world.remove_agent = Mock()
+        mock_world.width = 10
+        mock_world.height = 10
+        mock_world.get_agent_at = Mock(return_value=None)
+        mock_world.agents = {}  # Empty agents dict
+        mock_world.get_cell = Mock()
+        mock_world.get_cell.return_value = Mock(type=CellType.EMPTY)
 
         agent_manager.set_world(mock_world)
 

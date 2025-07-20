@@ -152,23 +152,23 @@ class TestPyMDPImportsComprehensive:
         """TEST: Direct Agent import from pymdp root should FAIL."""
         # This test should PASS (import should fail)
         with pytest.raises(ImportError, match="cannot import name 'Agent'"):
-            from pymdp import Agent  # noqa: F401
+            from pymdp import Agent  
 
     def test_pymdp_categorical_import_all_paths_fail(self):
         """TEST: Categorical import should FAIL from all locations."""
         # These should all fail - Categorical doesn't exist in current PyMDP
 
         with pytest.raises(ImportError):
-            from pymdp import Categorical  # noqa: F401
+            from pymdp import Categorical  
 
         with pytest.raises(ImportError):
-            from pymdp.maths import Categorical  # noqa: F401
+            from pymdp.maths import Categorical  
 
         with pytest.raises(ImportError):
-            from pymdp.agent import Categorical  # noqa: F401
+            from pymdp.agent import Categorical  
 
         with pytest.raises(ImportError):
-            from pymdp.utils import Categorical  # noqa: F401
+            from pymdp.utils import Categorical  
 
     def test_pymdp_core_imports_must_succeed(self):
         """TEST: Core PyMDP imports MUST work or tests fail hard."""

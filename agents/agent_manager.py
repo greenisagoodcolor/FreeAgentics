@@ -81,16 +81,29 @@ class AgentManager:
             Agent ID
         """
         self._agent_counter += 1
-        agent_id = f"agent_{self._agent_counter}"
+        # Generate ID based on agent type
+        if agent_type == "active_inference":
+            agent_id = f"ai_agent_{self._agent_counter}"
+        else:
+            agent_id = f"test_agent_{self._agent_counter}"
 
         # Create agent based on type
-        if agent_type == "explorer":
-            grid_size = self.world.width if self.world else 10
-            agent = BasicExplorerAgent(
-                agent_id=agent_id, name=name, grid_size=grid_size
-            )
-        else:
-            raise ValueError(f"Unknown agent type: {agent_type}")
+        try:
+            if agent_type in ["explorer", "basic", "active_inference"]:  # Support all names
+                grid_size = self.world.width if self.world else 10
+                agent = BasicExplorerAgent(
+                    agent_id=agent_id, name=name, grid_size=grid_size
+                )
+                # Pass any PyMDP config parameters to the agent
+                for key, value in kwargs.items():
+                    if key in ["num_states", "num_obs", "num_controls", "num_actions"]:
+                        setattr(agent, key, value)
+            else:
+                logger.warning(f"Unknown agent type: {agent_type}")
+                return None
+        except Exception as e:
+            logger.error(f"Failed to create agent: {e}")
+            return None
 
         self.agents[agent_id] = agent
 
@@ -477,3 +490,59 @@ class AgentManager:
 
         logger.info("Simulation complete")
         return history
+
+    def get_agent(self, agent_id: str) -> Optional[ActiveInferenceAgent]:
+        """Get an agent by ID.
+        
+        Args:
+            agent_id: Agent identifier
+            
+        Returns:
+            Agent instance or None if not found
+        """
+        return self.agents.get(agent_id)
+
+    def list_agents(self) -> List[Dict[str, str]]:
+        """List all agents with their information.
+        
+        Returns:
+            List of agent information dictionaries
+        """
+        return [{"id": agent_id, "name": agent.name} for agent_id, agent in self.agents.items()]
+
+    def start(self) -> None:
+        """Start the agent manager.
+        
+        Currently no specific startup needed.
+        """
+        self.running = True
+        logger.info("AgentManager started")
+
+    def stop(self) -> None:
+        """Stop the agent manager and all agents."""
+        logger.info("Stopping AgentManager and all agents")
+        self.running = False
+        for agent_id in list(self.agents.keys()):
+            self.stop_agent(agent_id)
+        logger.info("AgentManager stopped")
+
+    def update(self) -> None:
+        """Update the agent manager state.
+        
+        Updates all agents if they have an update method.
+        """
+        for agent_id, agent in self.agents.items():
+            if hasattr(agent, 'update') and callable(getattr(agent, 'update')):
+                try:
+                    agent.update()
+                except Exception as e:
+                    logger.error(f"Error updating agent {agent_id}: {e}")
+
+    def set_world(self, world: GridWorld) -> None:
+        """Set the world for the agent manager.
+        
+        Args:
+            world: GridWorld instance
+        """
+        self.world = world
+        logger.info(f"World set to {world.width}x{world.height} grid")

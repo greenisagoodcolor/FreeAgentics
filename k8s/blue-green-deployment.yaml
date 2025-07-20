@@ -563,7 +563,7 @@ data:
         log "Rolling back rollout: $ROLLOUT_NAME"
 
         # Abort current rollout
-        kubectl argo rollouts abort "$ROLLOUT_NAME" -n "$NAMESPACE" || true
+        kubectl argo rollouts abort "$ROLLOUT_NAME" -n "$NAMESPACE" 
 
         # Rollback to previous version
         kubectl argo rollouts undo "$ROLLOUT_NAME" -n "$NAMESPACE"
