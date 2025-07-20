@@ -1,7 +1,6 @@
 aiofiles==24.1.0
 aiohappyeyeballs==2.6.1
 aiohttp==3.12.14
-aioredis==2.0.1
 aiosignal==1.4.0
 alabaster==1.0.0
 alembic==1.16.2
@@ -15,6 +14,7 @@ asttokens==3.0.0
 async-timeout==5.0.1
 attrs==25.3.0
 Authlib==1.6.0
+bloom-filter2==2.0.0
 autograd==1.8.0
 babel==2.17.0
 bandit==1.8.5
@@ -32,7 +32,7 @@ comm==0.2.2
 commitizen==4.8.3
 contourpy==1.3.2
 coverage==7.9.1
-cryptography==43.0.1
+cryptography==44.0.1
 cycler==0.12.1
 cyclonedx-python-lib==9.1.0
 debugpy==1.8.14
@@ -49,7 +49,7 @@ execnet==2.1.1
 executing==2.2.0
 factory_boy==3.3.3
 Faker==37.4.0
-fastapi==0.109.1
+fastapi==0.115.14
 fastjsonschema==2.21.1
 filelock==3.16.1
 flake8==7.3.0
@@ -58,6 +58,7 @@ flake8-comprehensions==3.16.0
 flake8-docstrings==1.7.0
 flake8_simplify==0.22.0
 fonttools==4.58.4
+# -e git+https://github.com/greenisagoodcolor/FreeAgentics@79efaa7c0ddd3cb03473e3384230cb050f905228#egg=freeagentics  # REMOVED - Non-reproducible build
 frozenlist==1.7.0
 fsspec==2025.5.1
 gherkin-official==29.0.0
@@ -68,6 +69,7 @@ h3==4.3.0
 httpcore==1.0.9
 httptools==0.6.4
 httpx==0.28.1
+hvac==2.3.0
 hypothesis==6.135.24
 identify==2.6.12
 idna==3.10
@@ -100,6 +102,7 @@ matplotlib==3.10.3
 matplotlib-inline==0.1.7
 mccabe==0.7.0
 mdit-py-plugins==0.4.2
+moto==5.1.8
 mdurl==0.1.2
 memory-profiler==0.61.0
 mpmath==1.3.0
@@ -160,7 +163,7 @@ psutil==6.1.1
 psycopg2-binary==2.9.10
 ptyprocess==0.7.0
 pure_eval==0.2.3
-py==1.11.0
+# py==1.11.0  # REMOVED - CVE-2022-42969
 py-serializable==2.0.0
 py-spy==0.4.0
 pycodestyle==2.14.0
@@ -186,12 +189,13 @@ python-dateutil==2.9.0.post0
 python-dotenv==1.1.1
 python-json-logger==3.3.0
 python-multipart==0.0.20
+python-owasp-zap-v2.4==0.1.0
 pytz==2025.2
 PyYAML==6.0.2
 pyzmq==27.0.0
 questionary==2.1.0
 radon==6.0.1
-redis==6.2.0
+redis==5.2.1
 referencing==0.36.2
 regex==2024.11.6
 requests==2.32.4
@@ -222,7 +226,7 @@ sphinxcontrib-qthelp==2.0.0
 sphinxcontrib-serializinghtml==2.0.0
 SQLAlchemy==2.0.41
 stack-data==0.6.3
-starlette==0.35.1
+starlette==0.46.2
 stevedore==5.4.1
 strawberry-graphql==0.275.5
 sympy==1.14.0
@@ -232,7 +236,7 @@ termcolor==3.1.0
 threadpoolctl==3.6.0
 toml==0.10.2
 tomlkit==0.13.3
-torch==2.7.1
+torch==2.7.1  # CVE-2025-3730 - No fix available yet, monitor for security updates
 torch-geometric==2.6.1
 tornado==6.5.1
 tqdm==4.67.1

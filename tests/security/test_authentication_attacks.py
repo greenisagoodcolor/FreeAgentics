@@ -22,7 +22,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import jwt
 import pytest
 from fastapi import HTTPException
-from jose import JWTError
+from jwt.exceptions import InvalidTokenError as JWTError  # Replaces JWTError from jose
 
 from auth.security_headers import SecurityHeadersManager
 from auth.security_implementation import AuthenticationManager, UserRole

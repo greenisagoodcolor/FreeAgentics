@@ -21,7 +21,7 @@ psycopg2-binary==2.9.10
 
 # Authentication (essential only)
 passlib[bcrypt]==1.7.4
-python-jose[cryptography]==3.3.0
+# python-jose[cryptography]==3.3.0  # REMOVED - CVE-2024-33664, CVE-2024-33663 - Use PyJWT instead
 
 # Configuration
 python-dotenv==1.1.1

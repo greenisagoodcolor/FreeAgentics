@@ -154,7 +154,9 @@ class RefreshTokenStore:
             family_id = self._tokens[user_id].get("family_id")
             if family_id:
                 self._invalidate_family(family_id)
-            del self._tokens[user_id]
+            # Only delete if still exists (may have been removed by _invalidate_family)
+            if user_id in self._tokens:
+                del self._tokens[user_id]
 
     def _invalidate_family(self, family_id: str) -> None:
         """Invalidate entire token family (theft detection)."""

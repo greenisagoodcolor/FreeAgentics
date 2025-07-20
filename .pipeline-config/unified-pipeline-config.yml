@@ -1,0 +1,391 @@
+# PIPELINE-ARCHITECT Unified Pipeline Configuration
+# Martin Fowler + Jessica Kerr Principles Implementation
+# Zero-Tolerance Quality Gates • No Bypass Mechanisms
+
+# Pipeline Metadata
+metadata:
+  name: "FreeAgentics Unified CI/CD Pipeline"
+  version: "1.0.0"
+  architect: "PIPELINE-ARCHITECT"
+  methodology: "Martin Fowler + Jessica Kerr"
+  created: "2025-07-20"
+  updated: "2025-07-20"
+
+# Quality Gates Configuration
+quality_gates:
+  # Code Quality Thresholds
+  code_quality:
+    max_complexity: 10
+    max_line_length: 127
+    type_checking: strict
+    security_linting: mandatory
+    pre_commit_hooks: mandatory
+    
+  # Test Coverage Requirements
+  test_coverage:
+    minimum_coverage: 80
+    unit_test_coverage: 85
+    integration_test_coverage: 75
+    fail_under_threshold: true
+    coverage_delta_threshold: -5  # Allow max 5% decrease
+    
+  # Security Requirements
+  security:
+    vulnerability_scan: mandatory
+    secret_scanning: mandatory
+    dependency_scan: mandatory
+    container_scan: mandatory
+    security_score_threshold: 85
+    sast_required: true
+    dast_required: true
+    compliance_checks: ["OWASP_TOP_10", "CWE_TOP_25"]
+    
+  # Performance Requirements
+  performance:
+    benchmark_regression_threshold: 10  # Max 10% regression
+    load_test_required: true
+    memory_usage_threshold: 2048  # MB
+    build_time_threshold: 900  # 15 minutes
+    test_time_threshold: 1200  # 20 minutes
+
+# Stage Configuration
+stages:
+  pre_flight:
+    name: "Pre-flight Checks"
+    description: "Fast feedback - code quality and basic validation"
+    timeout_minutes: 5
+    parallel_execution: true
+    mandatory: true
+    checks:
+      - code_quality_gate
+      - secret_scanning
+      - dependency_security
+    success_criteria:
+      - all_checks_pass: true
+      - no_critical_issues: true
+    
+  build:
+    name: "Build & Package"
+    description: "Artifact creation with multi-arch support"
+    timeout_minutes: 15
+    depends_on: ["pre_flight"]
+    parallel_execution: true
+    artifacts:
+      - backend_image
+      - frontend_image
+      - sbom_reports
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    cache_strategy: "aggressive"
+    
+  test:
+    name: "Comprehensive Test Suite" 
+    description: "Multi-layered testing with parallel execution"
+    timeout_minutes: 20
+    depends_on: ["build"]
+    parallel_execution: true
+    test_types:
+      - unit_tests
+      - integration_tests
+      - contract_tests
+      - component_tests
+    coverage_reporting: true
+    failure_threshold: 0  # Zero tolerance for test failures
+    
+  security:
+    name: "Security Validation"
+    description: "Comprehensive security testing"
+    timeout_minutes: 15
+    depends_on: ["build"]
+    parallel_execution: true
+    scans:
+      - static_analysis
+      - dynamic_analysis
+      - container_security
+      - dependency_vulnerabilities
+      - compliance_validation
+    severity_threshold: "medium"
+    fail_on_high_severity: true
+    
+  performance:
+    name: "Performance Verification"
+    description: "Performance testing with regression detection"
+    timeout_minutes: 25
+    depends_on: ["test"]
+    conditional: "requires_full_test"
+    benchmarks:
+      - agent_spawning
+      - message_throughput
+      - memory_usage
+      - database_performance
+    baseline_comparison: true
+    regression_threshold: 10
+    
+  e2e:
+    name: "End-to-End Validation"
+    description: "Full system integration testing"
+    timeout_minutes: 30
+    depends_on: ["security"]
+    conditional: "requires_full_test"
+    test_environments:
+      - docker_compose
+      - kubernetes_local
+    smoke_tests: true
+    health_checks: true
+    
+  deployment_readiness:
+    name: "Deployment Readiness Check"
+    description: "Final validation before deployment"
+    timeout_minutes: 8
+    depends_on: ["test", "security", "performance", "e2e"]
+    mandatory: true
+    validations:
+      - all_quality_gates_passed
+      - artifacts_signed
+      - security_attestation
+      - performance_baseline_met
+    
+  deploy_staging:
+    name: "Staging Deployment"
+    description: "Deploy to staging environment"
+    timeout_minutes: 15
+    depends_on: ["deployment_readiness"]
+    conditional: "main_or_develop_branch"
+    environment: "staging"
+    deployment_strategy: "rolling"
+    smoke_tests: true
+    rollback_on_failure: true
+    
+  deploy_production:
+    name: "Production Deployment"
+    description: "Deploy to production with blue-green strategy"
+    timeout_minutes: 20
+    depends_on: ["deploy_staging"]
+    conditional: "main_branch_only"
+    environment: "production"
+    deployment_strategy: "blue_green"
+    approval_required: true
+    health_checks: true
+    rollback_capability: true
+
+# Environment Configuration
+environments:
+  staging:
+    url: "https://staging.freeagentics.com"
+    namespace: "freeagentics-staging"
+    auto_deploy: true
+    smoke_tests: true
+    
+  production:
+    url: "https://freeagentics.com"
+    namespace: "freeagentics-prod"
+    approval_required: true
+    blue_green: true
+    health_checks: mandatory
+
+# Observability Configuration
+observability:
+  metrics:
+    enabled: true
+    retention_days: 90
+    health_score_tracking: true
+    performance_trending: true
+    failure_analysis: true
+    
+  logging:
+    level: "INFO"
+    structured: true
+    correlation_ids: true
+    sensitive_data_masking: true
+    
+  tracing:
+    enabled: true
+    sample_rate: 1.0
+    distributed_tracing: true
+    
+  dashboards:
+    pipeline_health: true
+    stage_performance: true
+    failure_trends: true
+    deployment_frequency: true
+    
+  alerts:
+    failure_rate_threshold: 10  # Alert if >10% failures
+    duration_threshold: 1800  # Alert if >30 minutes
+    security_score_threshold: 80  # Alert if <80 security score
+    notification_channels:
+      - slack
+      - email
+
+# Artifact Management
+artifacts:
+  retention:
+    build_artifacts: 30  # days
+    test_reports: 7  # days
+    security_reports: 90  # days
+    deployment_records: 365  # days
+    
+  storage:
+    backend: "github_actions"
+    compression: true
+    encryption: true
+    
+  signing:
+    enabled: true
+    keyless: true
+    transparency_log: true
+
+# Resource Limits
+resources:
+  cpu_limit: "2"
+  memory_limit: "4Gi"
+  disk_limit: "20Gi"
+  timeout_global: 60  # minutes
+  
+  parallel_jobs:
+    max_concurrent: 5
+    matrix_jobs: 10
+
+# Notification Configuration
+notifications:
+  success:
+    enabled: true
+    channels: ["slack"]
+    template: "pipeline_success"
+    
+  failure:
+    enabled: true
+    channels: ["slack", "email"]
+    template: "pipeline_failure"
+    include_logs: true
+    
+  deployment:
+    enabled: true
+    channels: ["slack"]
+    environments: ["staging", "production"]
+    include_artifacts: true
+
+# Integration Configuration
+integrations:
+  github:
+    status_checks: true
+    pr_comments: true
+    deployment_statuses: true
+    
+  slack:
+    webhook_url: "${{ secrets.SLACK_WEBHOOK }}"
+    channel: "#ci-cd"
+    mention_on_failure: true
+    
+  codecov:
+    enabled: true
+    fail_ci_if_error: true
+    target_coverage: 80
+    
+  security_tools:
+    trivy: true
+    semgrep: true
+    bandit: true
+    safety: true
+    snyk: true
+
+# Branch Policies
+branch_policies:
+  main:
+    protection: strict
+    required_status_checks:
+      - "unified-pipeline"
+    required_reviews: 2
+    dismiss_stale_reviews: true
+    require_code_owner_reviews: true
+    full_pipeline_required: true
+    
+  develop:
+    protection: moderate
+    required_status_checks:
+      - "unified-pipeline"
+    required_reviews: 1
+    full_pipeline_required: true
+    
+  feature:
+    protection: basic
+    required_status_checks:
+      - "unified-pipeline"
+    fast_feedback_only: true
+
+# Performance Benchmarks
+benchmarks:
+  agent_spawning:
+    target_time: 50  # milliseconds
+    threshold: 100  # milliseconds
+    regression_threshold: 20  # percent
+    
+  message_throughput:
+    target_rate: 1000  # messages/second
+    threshold: 500  # messages/second
+    regression_threshold: 15  # percent
+    
+  memory_usage:
+    target_mb: 512
+    threshold_mb: 1024
+    regression_threshold: 25  # percent
+    
+  build_time:
+    target_seconds: 600  # 10 minutes
+    threshold_seconds: 900  # 15 minutes
+    regression_threshold: 20  # percent
+
+# Security Configuration
+security:
+  secret_scanning:
+    tools: ["trufflehog", "gitleaks"]
+    verify_only: true
+    fail_on_unverified: true
+    
+  vulnerability_scanning:
+    tools: ["trivy", "grype", "snyk"]
+    severity_threshold: "medium"
+    fail_on_high: true
+    
+  compliance:
+    frameworks: ["OWASP", "CWE", "NIST"]
+    required_score: 85
+    attestation_required: true
+    
+  container_security:
+    base_image_scanning: true
+    runtime_scanning: true
+    policy_enforcement: true
+
+# Migration Configuration
+migration:
+  from_workflows:
+    - "ci.yml"
+    - "security-ci.yml" 
+    - "performance.yml"
+    - "coverage.yml"
+    - "production-deployment.yml"
+  
+  deprecation_date: "2025-08-01"
+  migration_complete: false
+  
+  compatibility_mode: false
+  parallel_execution: false
+
+# Feature Flags
+feature_flags:
+  advanced_caching: true
+  matrix_builds: true
+  dependency_updates: true
+  auto_merge: false
+  predictive_failures: true
+  self_healing: false
+
+# Maintenance
+maintenance:
+  auto_cleanup: true
+  cache_eviction: "7d"
+  log_rotation: "30d"
+  metrics_aggregation: "daily"
+  health_check_frequency: "5m"

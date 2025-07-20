@@ -26,7 +26,7 @@ class TestDependencyVerification:
         "passlib": "1.7.4",
         "pyjwt": "2.8.0",
         "asyncpg": None,  # Will be installed later
-        "python-jose": None,  # Will be installed later
+        # "python-jose": None,  # REMOVED - CVE-2024-33664, CVE-2024-33663 - Use PyJWT instead
         "python-multipart": "0.0.20",
         "uvicorn": "0.35.0",
         "redis": "6.2.0",
@@ -191,25 +191,25 @@ class TestDependencyVerification:
         except ImportError as e:
             pytest.fail(f"asyncpg not installed: {e}")
 
-    def test_python_jose_availability(self):
-        """Test that python-jose is available for JWT operations.
+    def test_pyjwt_availability(self):
+        """Test that PyJWT is available for JWT operations (replaces python-jose).
 
-        This test should fail initially since python-jose is not installed.
+        Using PyJWT instead of python-jose due to CVE vulnerabilities.
         """
         try:
-            from jose import jwt as jose_jwt
+            import jwt
 
             # Test basic JWT functionality
             payload = {"test": "data"}
             secret = "test_secret"
 
-            token = jose_jwt.encode(payload, secret, algorithm="HS256")
-            decoded = jose_jwt.decode(token, secret, algorithms=["HS256"])
+            token = jwt.encode(payload, secret, algorithm="HS256")
+            decoded = jwt.decode(token, secret, algorithms=["HS256"])
 
             assert decoded == payload
 
         except ImportError as e:
-            pytest.fail(f"python-jose not installed: {e}")
+            pytest.fail(f"PyJWT not installed: {e}")
 
     def test_development_vs_production_dependencies(self):
         """Test that we have appropriate dependencies for the environment."""
@@ -274,11 +274,11 @@ class TestDependencyVerification:
         except ImportError:
             missing_commands.append("pip install asyncpg")
 
-        # Check if python-jose is installed
+        # Check if PyJWT is installed (replaces python-jose)
         try:
-            pass
+            import jwt
         except ImportError:
-            missing_commands.append("pip install 'python-jose[cryptography]'")
+            missing_commands.append("pip install PyJWT")
 
         if missing_commands:
             pytest.fail(

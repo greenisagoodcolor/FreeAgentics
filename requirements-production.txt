@@ -8,7 +8,7 @@ pydantic==2.9.2
 
 # Scientific Computing
 numpy==2.3.1
-torch==2.7.1
+torch==2.7.1  # CVE-2025-3730 - No fix available yet, monitor for security updates
 scipy==1.16.0
 
 # Active Inference
@@ -50,4 +50,4 @@ psutil==6.1.1
 redis==6.2.0
 
 # Additional ASGI server options
-gunicorn==24.0.0
+gunicorn==23.0.0

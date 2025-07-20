@@ -107,14 +107,14 @@ class TestDependencyVerification:
         except Exception as e:
             pytest.fail(f"PyJWT functionality test failed: {e}")
 
-    def test_python_jose_cryptography_available(self):
-        """Test python-jose with cryptography backend is available."""
+    def test_pyjwt_cryptography_available(self):
+        """Test PyJWT with cryptography backend is available (replaces python-jose)."""
         try:
-            from jose import jwt as jose_jwt
+            import jwt
 
             # Test that basic JWT functionality works
-            assert hasattr(jose_jwt, "encode")
-            assert hasattr(jose_jwt, "decode")
+            assert hasattr(jwt, "encode")
+            assert hasattr(jwt, "decode")
 
             # Test actual cryptography functionality with RS256
             import cryptography.hazmat.primitives.asymmetric.rsa as rsa
@@ -140,17 +140,17 @@ class TestDependencyVerification:
 
             # Test JWT encode/decode with RS256
             payload = {"test": "data"}
-            token = jose_jwt.encode(payload, private_pem, algorithm="RS256")
-            decoded = jose_jwt.decode(token, public_pem, algorithms=["RS256"])
+            token = jwt.encode(payload, private_pem, algorithm="RS256")
+            decoded = jwt.decode(token, public_pem, algorithms=["RS256"])
             assert decoded["test"] == "data"
 
         except ImportError:
             pytest.fail(
-                "python-jose[cryptography] is not installed - required for JWT RS256"
+                "PyJWT is not installed - required for JWT RS256 (replaces python-jose)"
             )
         except Exception as e:
             pytest.fail(
-                f"python-jose cryptography functionality test failed: {e}"
+                f"PyJWT cryptography functionality test failed: {e}"
             )
 
     def test_uvicorn_available_and_correct_version(self):
@@ -371,11 +371,11 @@ class TestCriticalDependencyImports:
         """Test critical authentication imports work."""
         try:
             import jwt as pyjwt
-            from jose import JWTError, jwt
+            from jwt.exceptions import InvalidTokenError  # Replaces JWTError from jose
             from passlib.context import CryptContext
 
             # These must all succeed
-            assert all([CryptContext, jwt, JWTError, pyjwt])
+            assert all([CryptContext, pyjwt, InvalidTokenError])
         except ImportError as e:
             pytest.fail(f"Critical auth import failed: {e}")
 
